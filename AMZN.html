@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMZN – Aktienanalyse Canvas v2.2</title>
+<style>
+:root {
+  --primary: #FF6900;
+  --primary-dark: #cc5400;
+  --bg: #0f0f12;
+  --bg-card: #1a1a1f;
+  --bg-card2: #22222a;
+  --border: #2e2e38;
+  --text: #e8e8ec;
+  --text-muted: #888898;
+  --text-dim: #555566;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --blue: #3b82f6;
+  --purple: #8b5cf6;
+  --teal: #14b8a6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+.header {
+  background: linear-gradient(135deg, #1a0800 0%, #2a1000 40%, #0f0f12 100%);
+  border-bottom: 1px solid var(--primary);
+  padding: 36px 40px 28px; display: flex; justify-content: space-between;
+  align-items: flex-start; flex-wrap: wrap; gap: 20px;
+}
+.header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+.header-left h1 span { color: var(--primary); }
+.header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+.header-right { text-align: right; }
+.price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+.price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+.price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+.price-change.up { background: rgba(34,197,94,0.15); color: var(--green); }
+.price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+.nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100; }
+.nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+.main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+.kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+.kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.kpi-value.green { color: var(--green); }
+.kpi-value.red { color: var(--red); }
+.kpi-value.orange { color: var(--primary); }
+.section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+.section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+.section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.section-title { font-size: 16px; font-weight: 700; color: white; }
+.section-score { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+.section-note { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+.section-body { padding: 20px 24px; }
+p { margin-bottom: 12px; color: var(--text); }
+p:last-child { margin-bottom: 0; }
+h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+h3:first-child { margin-top: 0; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,105,0,0.04); }
+.beat { color: var(--green); font-weight: 600; }
+.miss { color: var(--red); font-weight: 600; }
+.neutral { color: var(--yellow); font-weight: 600; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+.badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+.badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+.badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+.badge-orange { background: rgba(255,105,0,0.15); color: var(--primary); }
+.event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+.event-item:last-child { border-bottom: none; }
+.event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+.dot-green { background: var(--green); }
+.dot-red { background: var(--red); }
+.dot-yellow { background: var(--yellow); }
+.event-label { font-weight: 600; color: white; }
+.event-text { font-size: 14px; color: var(--text); }
+.risk-item { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+.risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.risk-title { font-weight: 600; color: white; font-size: 14px; }
+.score-bar { display: flex; align-items: center; gap: 10px; }
+.score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #ff9500); }
+.score-num { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+.bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+.bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+.bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+.bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.rating-box { background: linear-gradient(135deg, rgba(255,105,0,0.12), rgba(255,105,0,0.04)); border: 1px solid rgba(255,105,0,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+.rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+.rating-item .val { font-size: 20px; font-weight: 800; color: white; }
+.rating-item .val.buy { color: var(--green); }
+.rating-item .val.hold { color: var(--yellow); }
+.rating-item .val.sell { color: var(--red); }
+.trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+.trigger-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.trigger-card h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.trigger-card.buy h5 { color: var(--green); }
+.trigger-card.sell h5 { color: var(--red); }
+.trigger-list { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+.trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+.trigger-list li::before { content: "→"; position: absolute; left: 0; }
+.investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+@media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+.investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+.investor-no { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+.investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-no h5 { color: var(--red); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+.investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+.investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+.geo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+.geo-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.geo-pct { font-size: 20px; font-weight: 700; color: white; }
+.geo-note { font-size: 12px; color: var(--text-muted); }
+.outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+.outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+.outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+.outlook-card .when-then strong { color: var(--primary); }
+.source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+.source a { color: var(--text-dim); }
+.disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+.alert-box { background: rgba(255,105,0,0.08); border: 1px solid rgba(255,105,0,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.pill { display: inline-block; background: rgba(255,105,0,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+.highlight-box { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 8px; padding: 14px 16px; margin: 12px 0; }
+.highlight-box-orange { background: rgba(255,105,0,0.08); border: 1px solid rgba(255,105,0,0.25); border-radius: 8px; padding: 14px 16px; margin: 12px 0; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Amazon.com <span>AMZN · NASDAQ</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Update · Stand: 29. März 2026 · NASDAQ · Sektor: Tech / E-Commerce / Cloud</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">E-Commerce</span>
+      <span class="badge badge-blue">AWS Cloud</span>
+      <span class="badge badge-green">Advertising</span>
+      <span class="badge badge-yellow">Robotics / AI</span>
+      <span class="badge" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">Zoox / AV</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$199.34</div>
+    <div class="price-meta">Schlusskurs 28.03.2026 · NASDAQ</div>
+    <div class="price-change down">▼ –3.95% (–$8.20)</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $161.38 – $258.60</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <!-- KPI OVERVIEW -->
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Kurs</div>
+      <div class="kpi-value red">$199.34</div>
+      <div class="kpi-sub">USD · 28.03.2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Marktkapitalisierung</div>
+      <div class="kpi-value orange">$2,14T</div>
+      <div class="kpi-sub">Mega-Cap</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">P/E (TTM)</div>
+      <div class="kpi-value">29,0x</div>
+      <div class="kpi-sub">Fwd P/E: ~27x</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">EV/EBITDA</div>
+      <div class="kpi-value">~16x</div>
+      <div class="kpi-sub">Ø 3J: 18,5x</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Revenue FY25</div>
+      <div class="kpi-value green">$716,9B</div>
+      <div class="kpi-sub">+12% YoY</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">AWS Run Rate</div>
+      <div class="kpi-value orange">$142B</div>
+      <div class="kpi-sub">+24% Q4 YoY</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">ROE</div>
+      <div class="kpi-value green">22,3%</div>
+      <div class="kpi-sub">ROIC: 14,2%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Nächste Earnings</div>
+      <div class="kpi-value" style="font-size:15px;">30. Apr 26</div>
+      <div class="kpi-sub">Q1 2026 Ergebnisse</div>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 9 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Kerngeschäft & Revenue-Streams</h3>
+      <p>Amazon ist eines der diversifiziertesten Technologieunternehmen der Welt und operiert über drei Hauptsegmente: North America (E-Commerce + Werbung), International (globaler Handel) und Amazon Web Services (Cloud-Infrastruktur). Der Konzern erzielte im Geschäftsjahr 2025 einen Gesamtumsatz von $716,9 Milliarden – ein Anstieg von 12% gegenüber dem Vorjahr. Die Erlösquellen sind dabei strukturell komplex: Produktverkäufe, Third-Party-Seller-Provisionen (ca. 22–24% des Umsatzes), Abo-Dienste (Prime, AWS-Verträge), Werbeumsätze und Cloud-Infrastrukturlösungen.</p>
+      <p>Das Kerngeschäft North America erzielte 2025 $426,3 Milliarden (+10% YoY) und der internationale Bereich $161,9 Milliarden (+13% YoY). Das strukturell überlegene Segment ist jedoch AWS: $128,7 Milliarden Jahresumsatz 2025, Wachstum von 20% YoY und ein annualisierter Run-Rate von $142 Milliarden nach Q4 2025. AWS trägt mit einer operativen Marge von rund 35% überproportional zum Konzerngewinn bei und ist der mit Abstand profitabelste Unternehmensbereich.</p>
+      <h3>Neue Geschäftsbereiche – die nächste Wachstumswelle</h3>
+      <p>Jenseits des Kerngeschäfts entwickelt Amazon drei eigenständige Optionswerte, die in der aktuellen Bewertung nur marginal reflektiert sind: Erstens das Robotics-Ökosystem mit über 1 Million Robotern in 300+ Fulfillment-Centern sowie einer Beteiligung an Agility Robotics (Humanoid-Roboter „Digit"). Zweitens Zoox, das 2020 für $1,3 Milliarden akquirierte Robotaxi-Unternehmen, das seit September 2025 kommerziell in Las Vegas operiert. Drittens die strategische Partnerschaft mit Anthropic (Gesamtinvestition $8 Milliarden), die AWS als primären Cloud- und Trainingspartner für das führende Safety-fokussierte KI-Modell Claude positioniert.</p>
+      <p>Das Werbegeschäft (Advertising Services) erzielte 2025 ca. $69 Milliarden Jahresumsatz und wächst zweistellig; Q4 2025 allein $21,3 Milliarden (+22% YoY). Amazon ist mittlerweile die drittgrößte digitale Werbeplattform der USA, hinter Google und Meta. Die Kostenstruktur ist bei AWS und Advertising asset-light und hochmarginal, während das Retail-Geschäft kapitalintensiv bleibt – ein struktureller Mix, der die operative Hebelwirkung des Unternehmens im Zeitverlauf verbessert.</p>
+      <div class="source">Quellen: Amazon IR Q4 2025 Earnings Release (05.02.2026); Amazon Annual Report 2025; SEC 8-K Dez. 2025</div>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 9/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Netzwerkeffekte &amp; Ökosystem-Lock-in</h3>
+      <p>Amazons Burggraben ist mehrstöckig aufgebaut und in seiner Kombination nahezu unangreifbar. Das Prime-Ökosystem mit weltweit über 200 Millionen zahlenden Mitgliedern schafft einen selbstverstärkenden Kreislauf: Mehr Prime-Mitglieder locken mehr Verkäufer, mehr Auswahl lockt mehr Mitglieder. Die Switching Costs für Prime-Nutzer sind hoch – Liefergeschwindigkeit, Video-Content, Musik und exklusive Angebote binden die Kunden an das Ökosystem. Für B2B-Kunden auf AWS sind die Wechselkosten sogar noch höher: Migration von Cloud-Infrastruktur ist komplex, zeitaufwendig und riskant.</p>
+      <h3>AWS – Struktureller Technologievorsprung</h3>
+      <p>AWS profitiert von einem massiven Scale Advantage: Mit $128,7 Milliarden Jahresumsatz und dem größten globalen Rechenzentrum-Netzwerk der Welt hat AWS einen Vorlauf von rund 10 Jahren vor dem nächsten Konkurrenten aufgebaut, der schwer einzuholen ist. Amazon hat 2025 erstmals mehr Rechenzentrumskapazität hinzugefügt als jedes andere Unternehmen weltweit. Die Entwicklung proprietärer Chips (Graviton für CPU, Trainium für KI-Training, Inferentia für KI-Inferenz) reduziert die Abhängigkeit von Nvidia und senkt die Stückkosten strukturell. Trainium2 ist bereits ein Multi-Milliarden-Dollar-Umsatzträger mit 150% QoQ-Wachstum in Q3 2025.</p>
+      <h3>Schwachstellen des Burggrabens</h3>
+      <p>Der einzige strukturelle Schwachpunkt ist das AWS-Wachstumsgefälle gegenüber Azure (40% YoY in Q2 2025) und Google Cloud (32–34% YoY). Auf der absoluten Revenue-Basis führt AWS zwar, aber die relative Marktanteil-Erosion ist real und messbar. Zudem besteht bei Zoox ein signifikantes Ausführungsrisiko gegenüber Waymo, das mit 400.000 bezahlten Fahrten pro Woche in sechs Städten klar führt. Im Retailgeschäft bleibt der Druck durch Walmart, Temu und Shein auf preissensitive Segmente strukturell.</p>
+      <div class="source">Quellen: Amazon Q4 2025 Earnings Call; GeekWire Robotics Report (Jul 2025); AWS Insider (Nov 2025); Wolfe Research Anthropic Note (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale (Q1–Q4 2025)</div>
+      <div class="section-score">Beat-Ratio: 3,5/4</div>
+    </div>
+    <div class="section-body">
+      <h3>Quartalsergebnisse im Überblick</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quartal</th>
+              <th>Revenue</th>
+              <th>YoY</th>
+              <th>AWS Revenue</th>
+              <th>AWS YoY</th>
+              <th>Op. Income</th>
+              <th>EPS</th>
+              <th>EPS Konsens</th>
+              <th>Beat/Miss</th>
+              <th>Kursreaktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q1 2025</strong></td>
+              <td>$155,7B</td>
+              <td>+9%</td>
+              <td>$29,3B</td>
+              <td>+17%</td>
+              <td>$18,4B</td>
+              <td>$1,59</td>
+              <td>$1,36</td>
+              <td><span class="beat">BEAT +17%</span></td>
+              <td><span class="miss">–2,2%</span></td>
+            </tr>
+            <tr>
+              <td><strong>Q2 2025</strong></td>
+              <td>$167,7B</td>
+              <td>+13%</td>
+              <td>$30,9B</td>
+              <td>+18%</td>
+              <td>$14,7B</td>
+              <td>$1,41</td>
+              <td>$1,22</td>
+              <td><span class="beat">BEAT +16%</span></td>
+              <td><span class="beat">+4,1%</span></td>
+            </tr>
+            <tr>
+              <td><strong>Q3 2025</strong></td>
+              <td>$180,2B</td>
+              <td>+13%</td>
+              <td>$33,0B</td>
+              <td>+20%</td>
+              <td>$17,4B</td>
+              <td>$1,95</td>
+              <td>$1,58</td>
+              <td><span class="beat">BEAT +23%</span></td>
+              <td><span class="beat">+3,8%</span></td>
+            </tr>
+            <tr>
+              <td><strong>Q4 2025</strong></td>
+              <td>$213,4B</td>
+              <td>+14%</td>
+              <td>$35,6B</td>
+              <td>+24%</td>
+              <td>$25,0B</td>
+              <td>$1,95</td>
+              <td>$1,96</td>
+              <td><span class="miss">MISS –1%</span></td>
+              <td><span class="miss">–6,2%</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Kommentar &amp; Management-Statements</h3>
+      <p>Das Geschäftsjahr 2025 war für Amazon ein Jahr der operativen Profitabilitätswende: Das Gesamtjahres-Operating Income stieg auf $80,0 Milliarden (vs. $68,6B in 2024), getrieben durch Effizienzgewinne im Fulfillment-Netzwerk und die strukturelle Gewichtsverlagerung hin zu hochmarginalem AWS und Advertising. CEO Andy Jassy betonte in jedem Earnings Call die Re-Akzelerierung von AWS: „AWS is growing at a pace we haven't seen since 2022." Die einzige echte Enttäuschung war Q4 2025, wo ein EPS von $1,95 den Konsens von $1,96 um einen Cent verfehlte – der Hauptgrund war der drastische Capex-Anstieg auf $131,8 Milliarden im Gesamtjahr und die Ankündigung von $200 Milliarden Capex für 2026, was den freien Cashflow stark belastet.</p>
+      <p>Besonders relevant für das Investment-Narrativ: AWS-Wachstum re-akzelerierte von 17% in Q1 auf 24% in Q4 2025. Der Rückstand auf Azure (40%) bleibt, aber die Trendrichtung stimmt. Das AWS-Backlog erreichte $244 Milliarden (+40% YoY, +22% QoQ) – ein außergewöhnliches Signal für zukünftige Umsatzvisibilität. Das Werbegeschäft zeigte mit +22% im Q4 ebenfalls Beschleunigung. Nächste Earnings: 30. April 2026 (Q1 2026). Amazon hat für Q1 2026 Revenue von $173,5–178,5 Milliarden und Operating Income von $16,5–21,5 Milliarden guidance gegeben.</p>
+      <div class="source">Quellen: Amazon IR Q1–Q4 2025 Earnings Releases; SEC 8-K (Feb 2026, Nov 2025, Aug 2025, Mai 2025); CNBC Earnings Reports</div>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Geografische Verteilung (FY 2025)</h3>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">North America</div>
+          <div class="geo-pct">$426,3B</div>
+          <div class="geo-note">+10% YoY · 59% des Umsatzes</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">International</div>
+          <div class="geo-pct">$161,9B</div>
+          <div class="geo-note">+13% YoY (+10% const. FX)</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">AWS</div>
+          <div class="geo-pct">$128,7B</div>
+          <div class="geo-note">+20% YoY · Global · 18% des Umsatzes</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Advertising</div>
+          <div class="geo-pct">~$69B</div>
+          <div class="geo-note">+18–22% YoY · wachsend</div>
+        </div>
+      </div>
+      <h3>Segmentwachstum &amp; Profitabilitätsdynamik</h3>
+      <p>Das bemerkenswerteste Merkmal von Amazons Wachstumsqualität ist die strukturelle Verschiebung hin zu hochmarginalen Segmenten. AWS und Advertising zusammen machen nur rund 27% des Konzernumsatzes aus, erwirtschaften aber den überwältigenden Großteil des operativen Gewinns. Amazons Operating Income stieg 2025 auf $80 Milliarden – eine Verdoppelung gegenüber 2023 ($36,9 Milliarden) – obwohl der Konzernumsatz „nur" um 12% gewachsen ist. Diese operative Hebelwirkung ist strukturell, nicht zyklisch.</p>
+      <p>AWS ist dabei klar das Wachstumszentrum: Mit einem annualisierten Run-Rate von $142 Milliarden (nach Q4 2025) und einem Backlog von $244 Milliarden (+40% YoY) ist die Umsatzvisibilität auf 2–3 Jahre außergewöhnlich hoch. Wolfe Research schätzt, dass allein die Anthropic-Partnerschaft den AWS-Umsatz bis 2027 um bis zu $25 Milliarden steigern könnte – ein Faktor, der im aktuellen Marktkonsens nicht vollständig reflektiert ist. Das Werbewachstum (+22% Q4) zeigt, dass Amazon erfolgreich zum dritten globalen Werbepol aufsteigt.</p>
+      <p>Kritisch zu bewerten ist der Rückgang des freien Cashflows: Von $38 Milliarden (2024) auf deutlich niedrigere Werte in 2025/2026, da Amazon $131,8 Milliarden Capex in 2025 und ~$200 Milliarden in 2026 plant. Das Wachstum ist somit real, aber nicht kostenlos – Investoren kaufen heute, was morgen monetarisiert wird. Das Risiko liegt darin, dass die Rendite auf das investierte Kapital (ROIC: 14,2%) deutlich über den Kapitalkosten liegt, solange AWS-Margen stabil bleiben.</p>
+      <div class="source">Quellen: Amazon FY 2025 Annual Results (Feb 2026); Wolfe Research Anthropic Note; SEC 8-K Q4 2025</div>
+    </div>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Aktuelle Bewertungskennzahlen (Stand: 29.03.2026)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Metrik</th><th>Aktuell</th><th>Ø 3-Jahres-Schnitt</th><th>Ø 5-Jahres-Schnitt</th><th>Einschätzung</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>P/E (TTM)</td><td>~29,0x</td><td>38,4x</td><td>28,8x</td><td><span class="beat">Fair / Historisch günstig</span></td></tr>
+            <tr><td>Forward P/E</td><td>~27x</td><td>–</td><td>–</td><td><span class="neutral">Moderat</span></td></tr>
+            <tr><td>EV/EBITDA (TTM)</td><td>~16x</td><td>18,5x</td><td>–</td><td><span class="beat">Unter Ø → Attraktiv</span></td></tr>
+            <tr><td>P/Sales (TTM)</td><td>~3,0x</td><td>~3,5x</td><td>~3,2x</td><td><span class="neutral">Fair</span></td></tr>
+            <tr><td>PEG-Ratio</td><td>1,46</td><td>–</td><td>–</td><td><span class="neutral">Moderat – kein Schnäppchen</span></td></tr>
+            <tr><td>EV/FCF</td><td>~300x</td><td>–</td><td>–</td><td><span class="miss">Hoch – Capex-Effekt</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Bewertungseinschätzung</h3>
+      <p>Amazon ist auf Basis von P/E (TTM ~29x) und EV/EBITDA (~16x) günstiger als der 3-Jahres-Durchschnitt bewertet – relativ zur Wachstumsrate und der operativen Ertragskraft ist die Aktie fair bis leicht attraktiv. Wer AWS als reinen Cloud-Peer betrachtet, würde dem Segment allein ein EV/Sales von 8–10x zurechnen (implizit $1–1,3 Billionen), was das Retail-Geschäft und die neuen Optionswerte (Anthropic, Zoox, Robotics) bei der aktuellen Marktkapitalisierung von $2,14 Billionen günstig erscheinen lässt.</p>
+      <p>Die entscheidende Einschränkung liegt im freien Cashflow: Der EV/FCF von rund 300x signalisiert, dass Amazon kurzfristig sehr wenig freien Cashflow generiert, weil es aggressiv investiert. Der Operating Cash Flow stieg 2025 auf $139,5 Milliarden (+20% YoY), aber der Capex-Plan von ~$200 Milliarden für 2026 komprimiert den FCF drastisch. Investoren müssen glauben, dass diese Investitionen in 3–5 Jahren hohe Renditen bringen – was auf Basis der AWS-Backlog-Dynamik plausibel, aber nicht sicher ist. Alpha Spread schätzt den fairen Wert bei ~$178, wenn man die EV/EBITDA-Rückkehr zum 3-Jahres-Schnitt modelliert; Morningstar sieht den 5-Star-Preis (ultrabullisch) bei $486.</p>
+      <div class="source">Quellen: StockAnalysis.com AMZN Statistics (29.03.2026); MacroTrends P/E Ratio; Alpha Spread Relative Valuation; Morningstar AMZN Quote (29.03.2026)</div>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Margenentwicklung FY 2025</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Metrik</th><th>FY 2024</th><th>FY 2025</th><th>Trend</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Gesamtumsatz</td><td>$638,0B</td><td>$716,9B</td><td><span class="beat">+12%</span></td></tr>
+            <tr><td>Operating Income</td><td>$68,6B</td><td>$80,0B</td><td><span class="beat">+17%</span></td></tr>
+            <tr><td>Op. Marge Gesamt</td><td>10,8%</td><td>11,2%</td><td><span class="beat">↑ +40 bps</span></td></tr>
+            <tr><td>AWS Op. Marge</td><td>~37%</td><td>~35%</td><td><span class="neutral">↓ Capex-Druck</span></td></tr>
+            <tr><td>Net Income</td><td>$59,2B</td><td>$77,7B</td><td><span class="beat">+31%</span></td></tr>
+            <tr><td>EPS (diluted)</td><td>$5,53</td><td>$7,17</td><td><span class="beat">+30%</span></td></tr>
+            <tr><td>Op. Cashflow</td><td>$115,9B</td><td>$139,5B</td><td><span class="beat">+20%</span></td></tr>
+            <tr><td>Capex</td><td>$83,0B</td><td>$131,8B</td><td><span class="miss">+59% – stark ansteigend</span></td></tr>
+            <tr><td>FCF (approx.)</td><td>$38,2B</td><td>~$8–15B</td><td><span class="miss">↓ Stark gesunken</span></td></tr>
+            <tr><td>ROE</td><td>~22%</td><td>22,3%</td><td><span class="beat">Stabil</span></td></tr>
+            <tr><td>ROIC</td><td>~13%</td><td>14,2%</td><td><span class="beat">Verbessernd</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Qualitätsbewertung der Earnings</h3>
+      <p>Amazons Gewinne sind von hoher Qualität: Der Operating Cash Flow von $139,5 Milliarden liegt weit über dem ausgewiesenen GAAP-Nettoergebnis, und die Konversionsrate (OCF / Net Income) liegt bei über 1,8x – ein Zeichen, dass die Earnings realitätsnahe sind und durch echte Cash-Generierung unterlegt werden. Der deutliche Rückgang des Free Cashflows auf annährend null bis leicht negativ ist ausschließlich capex-induziert und reflektiert Amazons bewusste Entscheidung, in Zukunftswachstum zu investieren.</p>
+      <p>Besorgniserregend ist die AWS-Margenkompression von ~37% (2024) auf ~35% (2025). Amazon selbst betonte, dass Margen im Laufe der Zeit schwanken werden, da die Investitionen in KI-Infrastruktur, Satelliten (Project Kuiper) und Zoox anlaufen. Für 2026 dürfte die Capex-Belastung mit ~$200 Milliarden den FCF weiterhin stark unter Druck halten – eine geduldige Einstellung ist für Investoren daher unbedingt erforderlich. Die Verschuldung ist mit einem Debt/Equity von 0,43 moderat, und die Zinsdeckung ist komfortabel.</p>
+      <div class="source">Quellen: Amazon FY 2025 Annual Results (Feb 2026); SEC 8-K Q4 2025; StockAnalysis.com AMZN Statistics</div>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Quantitativer Peer-Vergleich</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Unternehmen</th>
+              <th>Cloud-Rev. (Q4/letztes Q)</th>
+              <th>Cloud-Wachstum</th>
+              <th>Gesamt-Rev.</th>
+              <th>Op. Marge</th>
+              <th>P/E</th>
+              <th>Market Cap</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Amazon (AWS)</strong></td>
+              <td>$35,6B (Q4 2025)</td>
+              <td><span class="beat">+24% YoY</span></td>
+              <td>$716,9B (FY25)</td>
+              <td>11,2%</td>
+              <td>~29x</td>
+              <td>$2,14T</td>
+            </tr>
+            <tr>
+              <td><strong>Microsoft (Azure)</strong></td>
+              <td>$30,9B Intelligent Cloud (Q1 FY26)</td>
+              <td><span class="beat">Azure +40% YoY</span></td>
+              <td>$77,7B/Q</td>
+              <td>49%</td>
+              <td>~35x</td>
+              <td>~$3,0T</td>
+            </tr>
+            <tr>
+              <td><strong>Google (GCP)</strong></td>
+              <td>~$15,7B (Q letztes)</td>
+              <td><span class="beat">+32–34% YoY</span></td>
+              <td>~$88B/Q</td>
+              <td>~32%</td>
+              <td>~25x</td>
+              <td>~$2,0T</td>
+            </tr>
+            <tr>
+              <td><strong>Oracle</strong></td>
+              <td>$7,2B Cloud Rev. (Q)</td>
+              <td><span class="neutral">+28% YoY</span></td>
+              <td>~$58B (FY)</td>
+              <td>~30%</td>
+              <td>~40x</td>
+              <td>~$500B</td>
+            </tr>
+            <tr>
+              <td><strong>CoreWeave</strong></td>
+              <td>$1,2B (Q2 2025)</td>
+              <td><span class="beat">+207% YoY</span></td>
+              <td>$5,1B (FY25E)</td>
+              <td>Adj. EBITDA 62%</td>
+              <td>n/m (Net Loss)</td>
+              <td>~$40–50B</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Qualitative Differenzierung</h3>
+      <p>Microsoft Azure (+40% YoY) und Google Cloud (+32%) wachsen auf einer noch deutlich kleineren Basis prozentual schneller als AWS. Das ist die unbequeme Wahrheit: Amazon hat den Cloud-Markt erfunden, aber verliert relative Wachstumsgeschwindigkeit, weil Azure massiv von der OpenAI-Integration profitiert und Google Gemini tief in GCP integriert. Amazons Antwort darauf ist die $8-Milliarden-Investition in Anthropic – eine strukturell ähnliche Strategie, aber mit einer lagging Adoption im Vergleich zu Microsoft.</p>
+      <p>Oracle ist der überraschendste Performer: Mit einem Remaining Performance Obligation (RPO) von $455 Milliarden (+359% YoY) und massiven KI-Infrastrukturverträgen ist Oracle in einer Nische hochprofitabler Enterprise-KI-Workloads gewachsen. CoreWeave hingegen ist kein direkter Peer, sondern ein AWS-Kunde – die 207% Wachstumsrate ist eindrucksvoll, aber bei einer 62%-Kundenkonzentration auf Microsoft und einem hohen Schuldenberg ist das Risikoprofil komplett anders. CoreWeave zeigt, dass es Nachfrage nach spezialisierter KI-Infrastruktur gibt – eine Bestätigung für Amazons Investitionsstrategie.</p>
+      <div class="source">Quellen: Microsoft 8-K Q1 FY26; CoreWeave 8-K Q2 2025; Oracle Q2 Earnings; AWS Q4 2025 Release; Cloud Wars Analysis (Sep 2025); Revolvey Cloud Comparison (Aug 2025)</div>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events (≤ 3 Monate)</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Feb 2026 – Q4 2025 Earnings: Revenue-Beat, EPS leicht verfehlt</div>
+          <div class="event-text">AWS +24% auf $35,6B (beste Rate seit 13 Quartalen), Gesamtumsatz $213,4B (+14%) über Konsens $211,5B. EPS $1,95 vs. $1,96 erwartet – minimale Verfehlung. Capex-Guidance von ~$200B für 2026 überraschte negativ. Quelle: Amazon IR, 05.02.2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Jan/Feb 2026 – AWS Backlog auf $244B (+40% YoY)</div>
+          <div class="event-text">Der AWS-Auftragsbestand von $244 Milliarden signalisiert außergewöhnliche Umsatzvisibilität für 2026/27. Trainium2 voll ausgebucht, Trainium3 bereits für 2026 vollständig committed. Quelle: Amazon Q4 2025 Earnings Call</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">März 2026 – Zoox: Expansion nach Austin, Miami, Phoenix</div>
+          <div class="event-text">Zoox bringt seine Robotaxis zu Austin und Miami (Anfang 2026 geplant) und hat Phoenix (März 2026) für Testing-Start angekündigt. 350.000 Rider bisher, 500.000 Warteliste. NHTSA-Antrag für 2.500 kommerzielle Fahrzeuge läuft. Quelle: CNBC, TechCrunch (24.03.2026)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">März 2026 – Zoox-Uber-Partnership angekündigt</div>
+          <div class="event-text">Zoox und Uber arbeiten zusammen, um Zoox-Robotaxis über die Uber-App in Las Vegas verfügbar zu machen – ein wichtiger Vertriebskanal-Beweis. Quelle: TechCrunch (24.03.2026)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Feb 2026 – $200B Capex-Guidance 2026 drückt auf FCF</div>
+          <div class="event-text">Amazon plant ~$200 Milliarden Investitionen 2026 (+52% vs. 2025) für KI-Infrastruktur, Datenzentren, Trainium-Chips, Kuiper-Satelliten und Robotics. Aktie fiel nach Q4-Report >6%. Quelle: Amazon Q4 2025 Earnings Call; Pepperstone Analysis</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Jan 2026 – AWS größter Datenzentrum-Bauherr 2025 weltweit</div>
+          <div class="event-text">AWS hat 2025 mehr Rechenzentrumskapazität hinzugefügt als jedes andere Unternehmen der Welt. Bedrock (Claude-Integration) erreichte Multi-Milliarden-Dollar Run-Rate mit 60% QoQ-Wachstum. Quelle: Amazon Q4 2025 Earnings Call</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2025/26 – Azure +40% vs. AWS +24%: Wachstumsgefälle bleibt</div>
+          <div class="event-text">Microsoft Azure wächst konstant schneller als AWS, befeuert durch OpenAI-Integration in Azure. Amazon kontert mit Anthropic-Claude auf Bedrock. Das Wachstumsgefälle ist real, aber AWS-Basis ist 20% größer. Quelle: Cloud Wars Analysis; Revolgy Cloud Report (Aug 2025)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Okt 2025 – Anthropic-Bewertung auf $183B; $9,5B Mark-to-Market-Gewinn für Amazon</div>
+          <div class="event-text">Anthropic schloss eine $13B-Finanzierungsrunde ab, was die Bewertung auf $183 Milliarden hob. Amazon musste seine $8B-Investment-Position zu Marktpreisen neu bewerten – $9,5 Mrd. Pre-Tax-Gewinn in Q3 2025. Quelle: GeekWire (Okt 2025)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Juli 2025 – Amazon Robotics: 1 Million Roboter-Meilenstein</div>
+          <div class="event-text">Amazon hat über 1 Million Roboter in 300+ Fulfillment-Centern weltweit deployed. Neues DeepFleet-KI-Modell optimiert Roboter-Traffic (+10% Effizienz). Quelle: GeekWire, Jul 2025</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">März 2026 – US-Markt unter Druck: Handelsrisiken, Inflation, geopolitische Spannungen</div>
+          <div class="event-text">Der S&P 500 verzeichnete seinen längsten wöchentlichen Verluststreak seit 4 Jahren. Tarif-Risiken durch Handelspolitik belasten Amazon-Retail (chinesische Marketplace-Seller). Makrorisiko: Consumer-Spending unter Druck. Quelle: WSJ, CNN Markets (28.03.2026)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – KI-Ausgaben unter Investoren-Scrutiny (Circular Deals)</div>
+          <div class="event-text">Wall Street-Analysten hinterfragen "circular deals" im KI-Sektor: Infrastruktur-Anbieter (AWS, Nvidia) investieren in Kunden (Anthropic, CoreWeave), die dann zurückkaufen. Blasen-Debatte um KI-Infrastruktur-Spending. Quelle: Yahoo Finance (29.03.2026)</div>
+        </div>
+      </div>
+      <div class="source">Quellen: Amazon IR; CNBC; TechCrunch; GeekWire; Yahoo Finance; WSJ (alle Stand ≤ 29.03.2026)</div>
+    </div>
+  </div>
+
+  <!-- SECTION 9 -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 4/10</div>
+    </div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom:16px;">
+        <div class="kpi-card">
+          <div class="kpi-label">Kurs</div>
+          <div class="kpi-value red">$199.34</div>
+          <div class="kpi-sub">28.03.2026</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 20</div>
+          <div class="kpi-value red">$210.85</div>
+          <div class="kpi-sub">Kurs darunter ↓</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 50</div>
+          <div class="kpi-value red">$220.87</div>
+          <div class="kpi-sub">Kurs darunter ↓</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 200</div>
+          <div class="kpi-value red">$224.81</div>
+          <div class="kpi-sub">Death Cross aktiv</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">RSI (14)</div>
+          <div class="kpi-value yellow">40,6</div>
+          <div class="kpi-sub">Neutral / leicht überverkauft</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">52W-High</div>
+          <div class="kpi-value">$258.60</div>
+          <div class="kpi-sub">Nov 2025 · ATH</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">MACD</div>
+          <div class="kpi-value red">–2,29</div>
+          <div class="kpi-sub">Bearish Signal</div>
+        </div>
+      </div>
+      <h3>Trendeinordnung</h3>
+      <p>Amazons technisches Bild ist im März 2026 klar bärisch: Die Aktie notiert unterhalb aller relevanten gleitenden Durchschnitte (SMA 20, 50, 200) und hat im Januar/Februar 2026 einen „Death Cross" (SMA 50 fiel unter SMA 200) gebildet. Zuletzt war dieselbe Kombination – Death Cross plus MACD Bearish Cross – im Jahr 2022 zu beobachten, dem Beginn des damaligen Bear-Zyklus. Die aktuelle Marktsituation (geopolitische Spannungen, Tarife, allgemeiner Tech-Sell-off) verstärkt den technischen Druck.</p>
+      <p>Der RSI von 40,6 zeigt einen neutral-überverkauften Bereich an – kein extremes Signal, aber auch kein bullisches. Technisch existiert ein wichtiger Support-Level bei ~$195–200 (psychologische Marke, 52W-Low bei $161,38 als ultimativer Boden). Der Widerstand liegt bei $210–215 (SMA 20) und dann bei $220–225 (SMA 50/200). Für eine technische Trendwende wäre ein klarer Schlusskurs über $225 erforderlich. Für langfristig orientierte Investoren bietet der aktuelle Kurs ($199) ~23% Upside bis zum 52W-Hoch ($258,60) – was bei einem technischen Ausbruch zügig durchlaufen werden könnte.</p>
+      <div class="source">Quellen: TipRanks AMZN Technical Analysis; Investing.com AMZN Technical; Financhill AMZN Technical (alle 29.03.2026); Robinhood AMZN Quote</div>
+    </div>
+  </div>
+
+  <!-- SECTION 10 -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <h3>9a) Strukturelle &amp; zyklische Risiken</h3>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Capex-Falle: $200B Investitionen 2026 ohne garantierte Rendite</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Sehr hoch</span></div>
+        </div>
+        <div class="event-text">Amazon plant $200 Milliarden Capex in 2026 – eine Summe, die den freien Cashflow auf nahezu null komprimiert. Falls die AWS-Nachfrage sich nicht in gleichem Maß beschleunigt (Erwartung: 25–30% Wachstum 2026/27), droht eine Kapitalallokations-Katastrophe. Wahrscheinlichkeit eines Teilverfehlens: 35%.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ AWS-Marktanteil-Erosion durch Azure &amp; Google Cloud</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Azure wächst mit 40% fast doppelt so schnell wie AWS (24%). Falls dieser Trend anhält, verliert AWS strukturell Marktanteile – was langfristig Multiples komprimiert. Amazon kontert mit Anthropic, eigenen Chips und Preisoffensiven. Wahrscheinlichkeit der Marktanteil-Erosion: 50% kurzfristig, 30% langfristig.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Zoox: Regulatorische &amp; Ausführungsrisiken</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Zoox ist mit ~50 Fahrzeugen (Stand Jan 2026) weit hinter Waymo (400k+ Fahrten/Woche in 6 Städten) und selbst Tesla (beginnend in Austin). NHTSA-Genehmigung für 2.500 Fahrzeuge ausstehend. Bei Verzögerungen droht weiterer Investitionsbedarf ohne Revenue-Beitrag. Wahrscheinlichkeit signifikanter Verzögerung: 40%.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Regulierung: EU, Kartellrecht, Datenschutz</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-red">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Amazon verlor gerade eine $854 Millionen EU-Datenschutzstrafe vor luxemburgischen Gerichten (positiv). Kartellrechtliche Verfahren in den USA (FTC vs. Amazon Marketplace) laufen jedoch noch und könnten Geschäftsmodell-Anpassungen erzwingen.</div>
+      </div>
+
+      <h3>9b) AI-Risiko &amp; Disruption (Chancen-Perspektive)</h3>
+      <div class="highlight-box-orange">
+        <p style="margin:0; font-size:13px;"><strong style="color:var(--primary);">Anthropic-Synergie-Potenzial:</strong> Wolfe Research schätzt, dass Anthropic bis 2027 bis zu $25 Milliarden AWS-Umsatz generieren könnte, gegenüber $3,9 Milliarden 2025. Das entspricht 4% zusätzlichem AWS-Revenue im Bull-Case. Amazon Bedrock (Claude auf AWS) wächst bereits mit 60% QoQ – ein Signal echter Monetarisierung.</p>
+      </div>
+
+      <h3>9c) Chancen</h3>
+      <div class="risk-item" style="border-color: rgba(34,197,94,0.3);">
+        <div class="risk-header">
+          <div class="risk-title" style="color:var(--green);">✅ Anthropic als strategischer KI-Moat-Multiplikator</div>
+        </div>
+        <div class="event-text">$8B Investment positioniert Amazon als bevorzugte KI-Plattform für Safety-fokussierte Enterprises. Claude-Integration in Alexa und Prime Video schafft Consumer-AI-Differenzierung gegenüber Google (Gemini) und Microsoft (Copilot).</div>
+      </div>
+      <div class="risk-item" style="border-color: rgba(34,197,94,0.3);">
+        <div class="risk-header">
+          <div class="risk-title" style="color:var(--green);">✅ Zoox als eigenständige Mobility-Plattform</div>
+        </div>
+        <div class="event-text">Der globale Robotaxi-Markt ist ein Billionen-Dollar-Potenzial. Bei erfolgreicher Skalierung auf 10.000 Fahrzeuge/Jahr ist Zoox eine der wertvollsten Töchter – noch außerhalb des Amazon-Kurses. Uber-Partnership ist erster Beweis kommerzieller Traktionsstrategie.</div>
+      </div>
+      <div class="risk-item" style="border-color: rgba(34,197,94,0.3);">
+        <div class="risk-header">
+          <div class="risk-title" style="color:var(--green);">✅ Robotics-as-a-Service: Verborgenesne Option</div>
+        </div>
+        <div class="event-text">1 Million Roboter, proprietäre Systeme (Sparrow, Vulcan, Proteus, DeepFleet), Beteiligung an Agility Robotics – Amazon hat das weltgrößte Labor für industrielle Automation. Eine externe Vermarktung würde einen völlig neuen Revenue-Stream öffnen.</div>
+      </div>
+
+      <h3>9d) Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> FCF-Kompressionsdauer durch $200B Capex; AWS-Wachstumsrückstand vs. Azure/Google; Zoox-Sicherheitsvorfälle (118 NHTSA-dokumentierte Unfälle in autonomer Mode bis Feb 2026). <strong>Dealbreaker (nicht sichtbar):</strong> Keine existenzbedrohenden Risiken erkennbar. Die Bilanz ist solide, der Burggraben intakt.</p>
+      <div class="source">Quellen: Amazon Q4 2025 Earnings; Zoox Wikipedia (Mar 2026); Reuters Luxembourg Court (29.03.2026); FTC v. Amazon Dockets; Wolfe Research Anthropic Note</div>
+    </div>
+  </div>
+
+  <!-- SECTION 11 – SCORING -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring &amp; User-spezifische Analyse</div>
+      <div class="section-score">Ø 7,1/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Gesamt-Scoring-Tabelle</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kategorie</th><th>Score</th><th>Visualisierung</th><th>Begründung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Geschäftsmodell</strong></td>
+              <td>9/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+              <td>Einzigartiger Triathlon aus E-Commerce, Cloud, Advertising. Neue Optionswerte (Anthropic, Zoox, Robotics) noch nicht vollständig eingepreist.</td>
+            </tr>
+            <tr>
+              <td><strong>Burggraben</strong></td>
+              <td>9/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+              <td>Prime-Ökosystem mit 200M+ Mitgliedern, AWS Lock-in, proprietäre Chips (Graviton/Trainium). Anthropic-Partnerschaft vertieft KI-Moat weiter.</td>
+            </tr>
+            <tr>
+              <td><strong>Operative Entwicklung (4Q)</strong></td>
+              <td>8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>3,5/4 Quartale Beat. AWS Re-Akzelerierung auf 24% Q4. Einziger Makel: EPS Q4 um $0,01 verfehlt, Q1 2026 Guidance konservativ.</td>
+            </tr>
+            <tr>
+              <td><strong>Wachstum</strong></td>
+              <td>8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>+12% Gesamtumsatz, AWS +20% FY25, Advertising +22% Q4. Backlog $244B. Wachstum ist organisch und qualitativ hochwertig.</td>
+            </tr>
+            <tr>
+              <td><strong>Bewertung</strong></td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>P/E ~29x historisch fair, EV/EBITDA ~16x unter Ø. Aber EV/FCF ~300x wegen Capex-Explosion belastet die kurzfristige Attraktivität.</td>
+            </tr>
+            <tr>
+              <td><strong>Cashflow</strong></td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>OCF $139,5B (+20%) exzellent. FCF durch $131,8B Capex stark komprimiert. Bewusste Investitionsstrategie, kein strukturelles Problem.</td>
+            </tr>
+            <tr>
+              <td><strong>Peers</strong></td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>AWS führt absolut, aber Azure +40% vs. AWS +24% zeigt Wachstumsgefälle. Amazon günstiger bewertet als Microsoft (P/E 35x). CoreWeave bestätigt AI-Infra-Nachfrage.</td>
+            </tr>
+            <tr>
+              <td><strong>Technische Analyse</strong></td>
+              <td>4/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td>
+              <td>Death Cross (SMA 50 unter SMA 200), Kurs unterhalb aller MAs, MACD bearish (-2,29). RSI 40 – kein extremes Überverkauft, Timing ist schwierig.</td>
+            </tr>
+            <tr>
+              <td><strong>Risiken (invertiert)</strong></td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Hauptrisiken: Capex-Rendite, AWS vs. Azure-Gefälle, Zoox-Regulierung. Keine Dealbreaker. Keine existenzbedrohenden Risiken erkennbar.</td>
+            </tr>
+            <tr style="background:rgba(255,105,0,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>7,1/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track">
+                    <div class="score-bar-fill" style="width:71%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
+                  </div>
+                  <span class="score-num" style="color:var(--primary);">7,1</span>
+                </div>
+              </td>
+              <td>Solide Fundamentalqualität. Technisch angeschlagen, aber fundamental unterbewertete Optionswerte (Anthropic, Zoox, Robotics) bieten asymmetrisches Upside-Potenzial.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Spezial-Analyse: Anthropic, Zoox &amp; Robotics als eigenständige Wachstumsbereiche</h3>
+
+      <div class="highlight-box-orange" style="margin-bottom:12px;">
+        <p style="margin:0 0 8px; font-weight:700; color:var(--primary);">🤝 Anthropic-Partnerschaft: Der unterschätzte KI-Multiplikator</p>
+        <p style="margin:0; font-size:13px;">Amazon hat insgesamt $8 Milliarden in Anthropic investiert – in zwei Tranchen ($4B Sep 2023, $4B Nov 2024). AWS ist offiziell primärer Cloud- UND Trainingspartner. Anthropic trainiert seine Claude-Modelle auf über 1 Million Amazon Trainium2-Chips (Project Rainier, $11B Datenzentrum). Diese Beziehung ist strukturell tiefer als Microsofts OpenAI-Partnerschaft, da sie sich bis auf die Chip-Ebene erstreckt. Wolfe Research schätzt, dass Anthropics Beitrag zum AWS-Revenue von $3,9B (2025) auf $25B (2027) skalieren könnte – ein 4%-Umsatz-Uplift im Bull-Case. Gleichzeitig ist die Bewertung von Anthropic auf $183B (Sep 2025 Funding) bereits $9,5B Mark-to-Market-Gewinn für Amazon in Q3 2025 bedeutet. Amazons Gesamtstrategie: Claude in Alexa (nächste Generation), Prime Video (Recommendations), Amazon Business (B2B-KI-Assistent) und AWS Bedrock (Enterprise-Plattform) zu verankern – und damit einen proprietären KI-Vertriebskanal zu bauen, den weder Google noch Microsoft in dieser Form replizieren können.</p>
+      </div>
+
+      <div class="highlight-box" style="margin-bottom:12px;">
+        <p style="margin:0 0 8px; font-weight:700; color:var(--blue);">🚗 Zoox: Vom Experiment zur Realität – aber Geduld erforderlich</p>
+        <p style="margin:0; font-size:13px;">Zoox wurde 2020 für $1,3 Milliarden akquiriert und war lange ein ruhiges Forschungsprojekt. Seit September 2025 operiert Zoox driverless in Las Vegas; seit November 2025 in San Francisco. Bis März 2026 kommen Austin, Miami und Phoenix (Testing) hinzu. Die Uber-Partnership signalisiert einen vertrieblichen Reifungsprozess. Das NHTSA-Verfahren für 2.500 kommerzielle Fahrzeuge läuft – die entscheidende regulatorische Hürde. Zoox besitzt eine Manufacturing-Facility für 10.000 Fahrzeuge/Jahr und baut eine Flotte, die durch Amazons AWS-Infrastruktur, Logistik-Know-how und Prime-Ökosystem differenziert wird. CEO-Statement: „Revenue wird erst in einigen Jahren wirklich relevant werden." – Das ist ehrlich, bedeutet aber, dass der Aktionär derzeit für ein Optionsrecht zahlt, das sich in 5–7 Jahren entfalten könnte. Waymo bleibt mit 400.000 Fahrten/Woche weit voraus. Zoox ist ein binärer Optionswert: Bei regulatorischer Freigabe + Skalierung = Milliarden-Dollar-Asset; bei Scheitern = strategischer Verlusttitel mit begrenztem Schadenpotenzial für den Gesamtkonzern.</p>
+      </div>
+
+      <div class="highlight-box" style="background:rgba(20,184,166,0.06); border-color:rgba(20,184,166,0.2);">
+        <p style="margin:0 0 8px; font-weight:700; color:var(--teal);">🤖 Robotics: Das weltgrößte Labor ohne Revenue-Anspruch (noch)</p>
+        <p style="margin:0; font-size:13px;">Amazon betreibt über 1 Million Roboter in 300+ Fulfillment-Centern – das größte industrielle Roboter-Deployment der Welt. Systeme wie Sparrow (verarbeitet 65% aller Produkte), Proteus (vollautonomer Mobile Robot), Vulcan (Tastsinn-Roboter), Cardinal und Robin bilden ein proprietäres Ökosystem. Dazu kommt DeepFleet, ein generatives KI-Modell für Flottenkoordination (+10% Effizienz). Amazon generiert derzeit keinen externen Robotics-Umsatz – das ist die fundamentale Schwachstelle dieser These. Allerdings: Agility Robotics (Digit-Humanoid), an dem Amazon beteiligt ist, verkauft bereits ~100 Einheiten zu ~$250.000/Stück an externe Kunden. Der Humanoid-Roboter-Markt wird laut MarketsandMarkets von $2,9B (2025) auf $15,3B (2030) wachsen (+39% CAGR). Wenn Amazon seine Robotics-Kompetenz externalisiert – sei es durch Lizenzierung, als Robotics-as-a-Service oder durch einen Spin-off – wäre das ein mehrstelliger Milliarden-Dollar-Wert. Aktuell bleibt dies ein Compound-Optionswert ohne konkreten Zeithorizont.</p>
+      </div>
+
+      <p><strong>Fazit zur User-spezifischen Analyse:</strong> Die drei Sonderthemen (Anthropic, Zoox, Robotics) erhöhen die Qualität des Investment-Cases signifikant. Anthropic ist der unmittelbarste und am besten monetarisierbare Hebel – hier ist die Verbindung zu AWS-Revenue direkt und messbar (Bedrock 60% QoQ). Zoox folgt in 3–5 Jahren, Robotics in 5–10 Jahren. Diese drei Optionen sind in der aktuellen Marktkapitalisierung von $2,14 Billionen nicht vollständig eingepreist und bilden den überzeugendsten asymmetrischen Teil des Investment-Cases. Score bleibt bei 7,1/10 – mit dem Hinweis, dass die wahre Chance jenseits der Zahlen liegt.</p>
+
+      <div class="source">Quellen: Anthropic/Amazon Partnership Releases (2023–2025); TechFundingNews Anthropic Analysis; Fortune Zoox Interview (Dez 2025); GeekWire Robotics (Jul 2025); Robotics.press Amazon Profile (Feb 2026); Wolfe Research Anthropic Note (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SECTION 12 -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-note">Vollsynthese</div>
+    </div>
+    <div class="section-body">
+      <h3>Bullisches vs. Bärisches Narrativ</h3>
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p>Das bullische Narrativ ruht auf drei belastbaren Säulen. Erstens: Die AWS-Profitabilitätsmaschinerie ist strukturell intakt – $45,6 Milliarden operativer Gewinn in FY25 bei 35% Marge, ein $244-Milliarden-Backlog (+40% YoY) und die Re-Akzelerierung auf 24% im Q4 2025 beweisen, dass die Nachfrage real und langfristig ist. Zweitens ist die Bewertung trotz allem günstig: P/E ~29x liegt auf dem 5-Jahres-Durchschnitt, EV/EBITDA ~16x liegt unter dem 3-Jahres-Schnitt von 18,5x – und wer AWS allein mit 8x EV/Sales bewertet, erhält Retail, Advertising, Zoox, Anthropic und Robotics nahezu gratis.</p>
+          <p>Drittens sind die drei Optionswerte (Anthropic, Zoox, Robotics) in der aktuellen Bewertung kaum reflektiert – und alle drei haben 2025/26 konkrete Fortschritte erzielt: Anthropic erreichte eine $183-Milliarden-Bewertung (Amazon-Stake nun mehrfach wertvoller als der ursprüngliche Investment), Zoox operiert öffentlich und bewirbt Uber-Integration, und Amazons Robotics-Ökosystem läuft 1 Million Einheiten. Sollte nur eine dieser drei Optionen kommerziell Fahrt aufnehmen, ist der heutige Kurs von $199 eine deutliche Unterbewertung.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p>Das bärische Narrativ ist weniger eine existenzielle These als eine Bewertungs- und Timing-Warnung. Das Kernproblem ist der freie Cashflow: Amazon plant $200 Milliarden Capex in 2026 – bei $139,5 Milliarden Operating Cash Flow bedeutet das praktisch null freier Cashflow für Aktionäre. Diese Investitionen zahlen sich erst in 3–5 Jahren aus, wenn überhaupt. Wer falsch liegt über die AWS-Wachstumsrate, die Anthropic-Monetarisierung oder die Zoox-Kommerzialisierung, sitzt auf einem Unternehmen, das massiv Kapital verbrennt, ohne kurz- bis mittelfristig Rendite zu liefern.</p>
+          <p>Dazu kommt das strukturelle Wachstumsgefälle bei AWS: Azure wächst mit 40% nahezu doppelt so schnell. Falls dieser Trend 2026/27 anhält, verliert AWS Marktanteile, und das Premium-Multiple auf AWS erodiert. Technisch sind alle Signale negativ: Death Cross, Kurs unter allen SMAs, MACD bearish – das kurzfristige Timing ist klar nachteilig. Das Makroumfeld (geopolitische Spannungen, Tarife, Consumer-Spending-Druck) belastet zusätzlich das Retail-Segment, das rund 75% des Umsatzes ausmacht. PEG von 1,46 ist kein Schnäppchen für einen Value-Investor.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Das bullische Narrativ ist überzeugender – mit einem wichtigen Vorbehalt: Die These erfordert Geduld (3–5 Jahre), eine Toleranz für FCF-Kompression und den Glauben, dass mindestens ein der drei Optionswerte (Anthropic, Zoox, Robotics) über bloßen Hype hinaus kommerziell skaliert. Diese Bedingungen sind realistisch, aber nicht sicher. Das bärische Narrativ enthält valide Kurzfrist-Argumente (technischer Druck, Capex-Belastung, AWS vs. Azure), ist aber kein struktureller Case gegen das Unternehmen.</p>
+      <p>Das Risk/Reward bei $199 ist langfristig attraktiv: Support bei ~$175–180 (–10 bis –12% Downside), Zielkurs-Mitte bei $250–275 (+25 bis +38% in 18 Monaten), im Bull-Case mit Anthropic-Monetarisierung und AWS-Re-Akzelerierung auf $300+ in 3 Jahren (+50%). Das asymmetrische Profil von 1:3 bis 1:4 (Downside zu Upside) ist für einen Quality-Growth-Investor überzeugend. Ich könnte falsch liegen, weil: Die $200B Capex-Planung könnte übertrieben sein und das Management revidieren muss; Azure gewinnt weiter dramatisch Marktanteile; oder Zoox scheitert an Sicherheitsproblemen.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Zeithorizont</th><th>Einschätzung</th><th>Katalysatoren</th><th>Risiken</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>0–6 Monate</strong></td>
+              <td><span class="badge badge-yellow">Neutral / Vorsicht</span></td>
+              <td>Q1 2026 Earnings (30. Apr), NHTSA Zoox-Entscheid, AWS Q1-Wachstumsrate</td>
+              <td>Technisch bearish, Macro-Gegenwind, $200B Capex-Skepsis</td>
+            </tr>
+            <tr>
+              <td><strong>6–24 Monate</strong></td>
+              <td><span class="badge badge-orange">Tranchiert kaufen</span></td>
+              <td>Zoox bezahlte Rides, Anthropic-Bedrock-Scaling, AWS-Wachstum 25%+</td>
+              <td>FCF bleibt unter Druck, AWS-Marktanteil-Erosion</td>
+            </tr>
+            <tr>
+              <td><strong>2–5 Jahre</strong></td>
+              <td><span class="badge badge-green">Kaufen &amp; Halten</span></td>
+              <td>Anthropic $20B+ AWS-Beitrag, Zoox kommerziell, Robotics-Monetarisierung</td>
+              <td>Fehlinvestition im Capex; regulatorische Eingriffe</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>Amazon ist heute ein Dreifach-Bet: auf AWS als dominante Cloud-Infrastruktur mit Anthropic-KI-Differenzierung, auf Zoox als den ersten echten Amazon-Standalone-Mobility-Business und auf Robotics als das weltgrößte industrielle Automatisierungsökosystem. Bei einem Kurs von $199 – 23% unter dem 52W-Hoch – kauft man diese drei Optionen mit einem deutlichen Abschlag zu einem Unternehmen, das strukturell $80 Milliarden Operating Income pro Jahr generiert. Das ist kein Schnäppchen für kurze Horizonte, aber eines der attraktivsten langfristigen Qualitätsinvestments im Technologiesektor.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$240–275</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–5 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–12%</div></div>
+        <div class="rating-item"><label>Upside (18M)</label><div class="val" style="color:var(--green);">+25–38%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val buy">1:3</div></div>
+      </div>
+
+      <h3>Was falsifiziert die These?</h3>
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>AWS-Wachstum fällt in Q2 2026 unter 18% → Marktanteil-These bricht zusammen → Position halbieren</li>
+            <li>Anthropic-Bedrock-Revenue wächst 2026 unter 50% → Synergie-Case verfehlt → Reduzieren</li>
+            <li>Kurs fällt unter $165 (52W-Low-Bereich) ohne Fundamental-Verbesserung → Stop-Loss</li>
+            <li>Zoox schwerwiegender Sicherheitsvorfall mit NHTSA-Betriebsstopp → Optionswert eliminiert</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>AWS Q1 2026 Wachstum über 26% → Re-Akzelerierung bestätigt → Voll einsteigen</li>
+            <li>NHTSA genehmigt Zoox 2.500 Fahrzeuge → Paid-Ride-Launch → Position aufbauen</li>
+            <li>Anthropic-Bedrock Run-Rate über $5B annualisiert → Synergie sichtbar → Nachkaufen</li>
+            <li>Kurs technischer Ausbruch über $225 (SMA-50/200-Cluster) → Momentum-Kaufsignal</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Welcher Anlegertyp passt?</h3>
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Quality Growth Investoren (2–5 Jahre Horizont)</li>
+            <li>Tech-Megacap-Portfolios mit AWS-Überzeugung</li>
+            <li>Contrarian-Investoren (technisch überverkauft)</li>
+            <li>KI-Infrastruktur-Thesen-Investoren</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Value Investoren (P/E ~29x, EV/FCF ~300x)</li>
+            <li>Income Investoren (keine Dividende)</li>
+            <li>Kurzfristige Trader (technisch bearish)</li>
+            <li>FCF-orientierte Anleger (Capex-Explosion 2026)</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / Tranchiert</span></td><td>Abwarten auf Q1 2026 Earnings (30. Apr) + Klarheit zur AWS-Wachstumsrate. Einstieg bei technischem Ausbruch über $225.</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">50% jetzt, 50% nach Q1</span></td><td>50% Position bei $195–200 aufbauen, Rest nach Q1 2026 Bestätigung. Stop-Loss bei $170.</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Risk/Reward 1:3 bei $199. Technisch schwach, aber fundamental solide. Volle Position, Stop bei $165.</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>Anthropic + Zoox + Robotics sind 3–7-Jahres-Themen. Heute günstiger Einstieg für den nächsten Superzyklus.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Eigene Analyse auf Basis aller genannten Quellen Sektionen 1–11; Alpha Spread Fair Value; Wolfe Research Anthropic Note; AWS Q4 2025 Earnings Call</div>
+    </div>
+  </div>
+
+  <!-- SECTION 13 -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Die 3 entscheidenden Events</div>
+      <div class="section-note">Wenn / Dann</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q1 2026 Earnings – AWS-Wachstumsrate als Richtungsentscheid · 30. April 2026</h4>
+        <p>Dies ist das wichtigste kurzfristige Ereignis. Amazon guidance war $173,5–178,5 Milliarden Revenue und $16,5–21,5 Milliarden Operating Income für Q1 2026. Der Markt wartet primär auf die AWS-Wachstumsrate: Hält die Re-Akzelerierung auf 24% (Q4 2025) an, oder fällt sie zurück unter 20%? Zudem ist das Trainium2/3-Volumen und die Bedrock-Wachstumsrate entscheidend für die Anthropic-Monetarisierungsthese.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> AWS-Wachstum im Q1 2026 bei 25% oder höher und Bedrock-Run-Rate über $3 Milliarden annualisiert gemeldet wird → Re-Akzelerierungsthese bestätigt; Aktie sollte $220–240 ansteuern. Nachkaufen bei technischem Ausbruch über $225 nach Earnings.<br><br>
+          <strong>Wenn:</strong> AWS-Wachstum unter 20% zurückfällt und die Q2-Guidance erneut konservativ/enttäuschend ist → AWS-Marktanteilsverlust an Azure/Google wird real; Position auf 50% reduzieren und auf Q2-Daten warten, bevor neu bewertet wird.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>🚗 Event 2: NHTSA-Entscheid zu Zoox-Kommerzialisierung (2.500 Fahrzeuge) · Q2–Q3 2026</h4>
+        <p>Die NHTSA-30-Tage-Kommentarphase zu Zoox' Antrag für 2.500 autonome Fahrzeuge für kommerziellen Betrieb startete im März 2026. Dieser Entscheid ist der eigentliche Startschuss für Zoox' Monetarisierung. Ohne diese Genehmigung bleibt Zoox operativ auf free-ride-Basis – kein Umsatz, weiterhin reiner Cash-Verbrauch. Die Uber-Partnership in Las Vegas macht den Business-Case konkreter. Zoox hat bisher ~2 Millionen autonome Meilen absolviert und 350.000 Rider befördert.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> NHTSA-Genehmigung für 2.500 Fahrzeuge erteilt wird und Zoox innerhalb von 60 Tagen bezahlte Fahrten in Las Vegas startet → Zoox wechselt von Optionswert zu nachweisbarer Revenue-Quelle; Uber-Partnership beschleunigt Adoption; Amazon-Aktie gewinnt einen neuen Bewertungsanker für die AV-Division. Erhöhung der Position wäre gerechtfertigt.<br><br>
+          <strong>Wenn:</strong> NHTSA verlangt zusätzliche Sicherheitsstudien oder verzögert die Entscheidung um mehr als 6 Monate → Zoox-Kommerzialisierung verschiebt sich auf 2027; Narrativ-Schaden für Amazon-Optionswert-Story; kein Grund zur Panik, aber Investment-Case verliert einen kurzfristigen Katalysator.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>🤖 Event 3: Anthropic Bedrock Revenue-Disclosure + Claude 4 Launch · H2 2026</h4>
+        <p>Anthropic soll 2025 ca. $2,2 Milliarden Umsatz erzielt haben (vs. $1 Milliarden 2024). Wolfe Research modelliert $25 Milliarden bis 2027. Amazon Bedrock – die AWS-Plattform für Claude-Deployment – wuchs in Q4 2025 mit 60% QoQ. Eine explizite Disclosure des Bedrock-Revenue oder AWS-KI-Umsatz-Anteils durch Amazon Management würde den Markt neu kalibrieren. Zudem: Ein signifikanter Claude 4 Launch (erwartet 2026) auf Trainium3-Chips würde den technologischen Vorsprung von Anthropic gegenüber OpenAI demonstrieren.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Amazon in einem Earnings Call oder Investorentag erstmals einen annualisierten AWS-KI-Umsatz über $10 Milliarden disclosed (oder Bedrock-Wachstum über 100% YoY bestätigt) → Markt revidiert AWS-Bewertung nach oben; Analyst-Konsensus hebt Zielkurse massiv an; Zielkurs $300+ plausibel. Vollständige Position halten, eventuell aufstocken.<br><br>
+          <strong>Wenn:</strong> Anthropic-Revenue 2026 signifikant unter Erwartungen bleibt (unter $3 Milliarden) und Bedrock-Wachstum auf unter 30% QoQ abbremst → Synergie-Case verfehlt seine kurzfristigen Meilensteine; Bewertungs-Premium für Anthropic-Stake schrumpft; Position auf Kerngewichtung reduzieren und Azure/Google als alternativen KI-Cloud-Play evaluieren.
+        </div>
+      </div>
+
+      <div class="source">Quellen: Amazon Q4 2025 Earnings Call (Feb 2026); Fortune Zoox Interview (Dez 2025); TechCrunch Zoox Expansion (24.03.2026); Wolfe Research Anthropic Analysis (Feb 2026); NHTSA Zoox Docket (Mär 2026); Investing.com Anthropic Engine Report</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken und stellt keine Anlageberatung, Kaufempfehlung oder Aufforderung zum Kauf oder Verkauf von Wertpapieren dar. Alle Angaben basieren auf öffentlich verfügbaren Quellen zum Stand 29. März 2026. Investitionen in Aktien sind mit Risiken verbunden, einschließlich des vollständigen Kapitalverlusts. Die Analyse spiegelt eine subjektive Einschätzung wider – eigene Due Diligence und ggf. Beratung durch einen zugelassenen Finanzberater sind unbedingt empfohlen. Historische Wertentwicklungen sind kein Indikator für zukünftige Ergebnisse.
+  </div>
+
+</div>
+</body>
+</html>
