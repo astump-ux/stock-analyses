@@ -1,11 +1,11 @@
-name: Update JSONBin after Deploy
+name: Update index.json after Deploy
 
 on:
   push:
     branches: [main]
 
 jobs:
-  update-jsonbin:
+  update-index:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -13,10 +13,7 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Update JSONBin for changed tickers
-        env:
-          JSONBIN_KEY: ${{ secrets.JSONBIN_KEY }}
-          JSONBIN_ID: ${{ secrets.JSONBIN_ID }}
+      - name: Update index.json for changed tickers
         run: |
           CHANGED=$(git diff --name-only HEAD~1 HEAD | grep '\.html$' || true)
           echo "Changed HTML files: $CHANGED"
@@ -24,43 +21,20 @@ jobs:
 
           for FILE in $CHANGED; do
             TICKER=$(basename "$FILE" .html)
-            VERCEL_URL="https://v0-stock-analyses.vercel.app/${TICKER}"
             JSON_FILE="${TICKER}.json"
             echo "→ Processing $TICKER"
 
-            # GET current JSONBin
-            HTTP_CODE=$(curl -s -o /tmp/current.json -w "%{http_code}" \
-              -H "X-Master-Key: ${JSONBIN_KEY}" \
-              -H "X-Bin-Meta: false" \
-              "https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest")
-            echo "GET status: $HTTP_CODE"
-            if [ "$HTTP_CODE" != "200" ]; then
-              echo "❌ GET fehlgeschlagen: $HTTP_CODE"
-              cat /tmp/current.json
-              exit 1
-            fi
+            python3 .github/scripts/update_index.py \
+              "$TICKER" "$JSON_FILE" index.json > /tmp/index_updated.json
 
-            # Patch via Python
-            python3 .github/scripts/update_jsonbin.py \
-              "$TICKER" "$VERCEL_URL" /tmp/current.json "$JSON_FILE" \
-              > /tmp/updated.json
-
-            echo "Patch OK, pushing to JSONBin..."
-
-            # PUT back
-            HTTP_CODE=$(curl -s -o /tmp/response.json -w "%{http_code}" \
-              -X PUT \
-              -H "Content-Type: application/json" \
-              -H "X-Master-Key: ${JSONBIN_KEY}" \
-              "https://api.jsonbin.io/v3/b/${JSONBIN_ID}" \
-              -d @/tmp/updated.json)
-            echo "PUT status: $HTTP_CODE"
-            cat /tmp/response.json | head -c 200
-
-            if [ "$HTTP_CODE" != "200" ]; then
-              echo "❌ PUT fehlgeschlagen: $HTTP_CODE"
-              exit 1
-            fi
-
-            echo "✅ JSONBin updated für $TICKER"
+            cp /tmp/index_updated.json index.json
+            echo "✅ index.json updated für $TICKER"
           done
+
+          # Commit updated index.json back
+          git config user.email "github-actions@github.com"
+          git config user.name "GitHub Actions"
+          git add index.json
+          git diff --cached --quiet && echo "No changes to commit" || \
+            git commit -m "Auto-update index.json [skip ci]"
+          git push origin main
