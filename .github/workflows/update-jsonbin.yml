@@ -17,56 +17,28 @@ jobs:
         env:
           JSONBIN_KEY: ${{ secrets.JSONBIN_KEY }}
           JSONBIN_ID: ${{ secrets.JSONBIN_ID }}
-          VERCEL_BASE: "https://v0-stock-analyses.vercel.app"
         run: |
           CHANGED=$(git diff --name-only HEAD~1 HEAD | grep '\.html$' || true)
-          echo "Changed HTML files: $CHANGED"
-
-          if [ -z "$CHANGED" ]; then
-            echo "No HTML files changed, skipping."
-            exit 0
-          fi
+          echo "Changed: $CHANGED"
+          if [ -z "$CHANGED" ]; then echo "No HTML changed."; exit 0; fi
 
           for FILE in $CHANGED; do
             TICKER=$(basename "$FILE" .html)
-            VERCEL_URL="${VERCEL_BASE}/${TICKER}"
-            echo "→ Updating $TICKER → $VERCEL_URL"
+            URL="https://v0-stock-analyses.vercel.app/${TICKER}"
+            echo "Updating $TICKER -> $URL"
 
-            # GET current JSONBin
             CURRENT=$(curl -sf \
               -H "X-Master-Key: ${JSONBIN_KEY}" \
               -H "X-Bin-Meta: false" \
               "https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest")
 
-            echo "Current data fetched: $(echo $CURRENT | cut -c1-100)..."
+            UPDATED=$(python3 .github/scripts/update_jsonbin.py "$TICKER" "$URL" "$CURRENT")
 
-            # Update via Python script (no variable interpolation issues)
-            UPDATED=$(python3 << PYEOF
-import json, sys
-data = json.loads('''${CURRENT}''')
-ticker = "${TICKER}"
-url = "${VERCEL_URL}"
-companies = data.get("companies", [])
-found = False
-for c in companies:
-    if c.get("ticker") == ticker:
-        c["analyseUrl"] = url
-        found = True
-        break
-if not found:
-    companies.append({"ticker": ticker, "analyseUrl": url})
-data["companies"] = companies
-print(json.dumps(data))
-PYEOF
-)
-
-            # PUT back to JSONBin
-            RESPONSE=$(curl -sf -X PUT \
+            curl -sf -X PUT \
               -H "Content-Type: application/json" \
               -H "X-Master-Key: ${JSONBIN_KEY}" \
               "https://api.jsonbin.io/v3/b/${JSONBIN_ID}" \
-              -d "${UPDATED}")
+              -d "$UPDATED"
 
-            echo "✅ JSONBin updated for ${TICKER}"
-            echo "Response: $(echo $RESPONSE | cut -c1-100)..."
+            echo "Done: $TICKER"
           done
