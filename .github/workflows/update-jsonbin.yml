@@ -14,47 +14,59 @@ jobs:
           fetch-depth: 2
 
       - name: Find changed HTML files and update JSONBin
+        env:
+          JSONBIN_KEY: ${{ secrets.JSONBIN_KEY }}
+          JSONBIN_ID: ${{ secrets.JSONBIN_ID }}
+          VERCEL_BASE: "https://v0-stock-analyses.vercel.app"
         run: |
-          # Get list of changed HTML files
           CHANGED=$(git diff --name-only HEAD~1 HEAD | grep '\.html$' || true)
           echo "Changed HTML files: $CHANGED"
 
+          if [ -z "$CHANGED" ]; then
+            echo "No HTML files changed, skipping."
+            exit 0
+          fi
+
           for FILE in $CHANGED; do
-            # Extract ticker from filename (e.g. AMZN.html -> AMZN)
             TICKER=$(basename "$FILE" .html)
-            VERCEL_URL="https://v0-stock-analyses.vercel.app/${TICKER}"
-            echo "Updating JSONBin for $TICKER -> $VERCEL_URL"
+            VERCEL_URL="${VERCEL_BASE}/${TICKER}"
+            echo "→ Updating $TICKER → $VERCEL_URL"
 
-            # GET current JSONBin data
-            CURRENT=$(curl -s \
-              -H "X-Master-Key: ${{ secrets.JSONBIN_KEY }}" \
+            # GET current JSONBin
+            CURRENT=$(curl -sf \
+              -H "X-Master-Key: ${JSONBIN_KEY}" \
               -H "X-Bin-Meta: false" \
-              "https://api.jsonbin.io/v3/b/${{ secrets.JSONBIN_ID }}/latest")
+              "https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest")
 
-            # Update analyseUrl for this ticker using Python
-            UPDATED=$(echo "$CURRENT" | python3 -c "
-import sys, json
-data = json.load(sys.stdin)
-ticker = '${TICKER}'
-url = '${VERCEL_URL}'
-companies = data.get('companies', [])
+            echo "Current data fetched: $(echo $CURRENT | cut -c1-100)..."
+
+            # Update via Python script (no variable interpolation issues)
+            UPDATED=$(python3 << PYEOF
+import json, sys
+data = json.loads('''${CURRENT}''')
+ticker = "${TICKER}"
+url = "${VERCEL_URL}"
+companies = data.get("companies", [])
 found = False
 for c in companies:
-    if c.get('ticker') == ticker:
-        c['analyseUrl'] = url
+    if c.get("ticker") == ticker:
+        c["analyseUrl"] = url
         found = True
+        break
 if not found:
-    companies.append({'ticker': ticker, 'analyseUrl': url})
-data['companies'] = companies
+    companies.append({"ticker": ticker, "analyseUrl": url})
+data["companies"] = companies
 print(json.dumps(data))
-")
+PYEOF
+)
 
-            # PUT updated data back to JSONBin
-            curl -s -X PUT \
+            # PUT back to JSONBin
+            RESPONSE=$(curl -sf -X PUT \
               -H "Content-Type: application/json" \
-              -H "X-Master-Key: ${{ secrets.JSONBIN_KEY }}" \
-              "https://api.jsonbin.io/v3/b/${{ secrets.JSONBIN_ID }}" \
-              -d "$UPDATED"
+              -H "X-Master-Key: ${JSONBIN_KEY}" \
+              "https://api.jsonbin.io/v3/b/${JSONBIN_ID}" \
+              -d "${UPDATED}")
 
-            echo "✅ JSONBin updated for $TICKER"
+            echo "✅ JSONBin updated for ${TICKER}"
+            echo "Response: $(echo $RESPONSE | cut -c1-100)..."
           done
