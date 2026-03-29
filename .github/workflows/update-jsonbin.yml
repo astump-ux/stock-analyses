@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
@@ -19,26 +19,48 @@ jobs:
           JSONBIN_ID: ${{ secrets.JSONBIN_ID }}
         run: |
           CHANGED=$(git diff --name-only HEAD~1 HEAD | grep '\.html$' || true)
-          echo "Changed: $CHANGED"
-          if [ -z "$CHANGED" ]; then echo "No HTML changed."; exit 0; fi
+          echo "Changed HTML files: $CHANGED"
+          if [ -z "$CHANGED" ]; then echo "No HTML changed, skipping."; exit 0; fi
 
           for FILE in $CHANGED; do
             TICKER=$(basename "$FILE" .html)
             URL="https://v0-stock-analyses.vercel.app/${TICKER}"
-            echo "Updating $TICKER -> $URL"
+            echo "→ Updating $TICKER → $URL"
 
-            CURRENT=$(curl -sf \
+            # GET current JSONBin (verbose for debugging)
+            HTTP_CODE=$(curl -s -o /tmp/jsonbin_current.json -w "%{http_code}" \
               -H "X-Master-Key: ${JSONBIN_KEY}" \
               -H "X-Bin-Meta: false" \
               "https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest")
+            echo "GET status: $HTTP_CODE"
+            cat /tmp/jsonbin_current.json | head -c 200
 
-            UPDATED=$(python3 .github/scripts/update_jsonbin.py "$TICKER" "$URL" "$CURRENT")
+            if [ "$HTTP_CODE" != "200" ]; then
+              echo "❌ JSONBin GET fehlgeschlagen: $HTTP_CODE"
+              exit 1
+            fi
 
-            curl -sf -X PUT \
+            # Update via Python script
+            python3 .github/scripts/update_jsonbin.py \
+              "$TICKER" "$URL" /tmp/jsonbin_current.json > /tmp/jsonbin_updated.json
+
+            echo "Updated JSON (first 200 chars):"
+            cat /tmp/jsonbin_updated.json | head -c 200
+
+            # PUT back
+            HTTP_CODE=$(curl -s -o /tmp/jsonbin_response.json -w "%{http_code}" \
+              -X PUT \
               -H "Content-Type: application/json" \
               -H "X-Master-Key: ${JSONBIN_KEY}" \
               "https://api.jsonbin.io/v3/b/${JSONBIN_ID}" \
-              -d "$UPDATED"
+              -d @/tmp/jsonbin_updated.json)
+            echo "PUT status: $HTTP_CODE"
+            cat /tmp/jsonbin_response.json | head -c 200
 
-            echo "Done: $TICKER"
+            if [ "$HTTP_CODE" != "200" ]; then
+              echo "❌ JSONBin PUT fehlgeschlagen: $HTTP_CODE"
+              exit 1
+            fi
+
+            echo "✅ JSONBin updated für $TICKER"
           done

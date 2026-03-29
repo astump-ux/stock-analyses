@@ -2,7 +2,10 @@ import json, sys
 
 ticker = sys.argv[1]
 url = sys.argv[2]
-data = json.loads(sys.argv[3])
+filepath = sys.argv[3]
+
+with open(filepath, 'r') as f:
+    data = json.load(f)
 
 companies = data.get("companies", [])
 found = False
