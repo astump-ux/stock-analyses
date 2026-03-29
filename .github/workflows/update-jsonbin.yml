@@ -13,7 +13,7 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Find changed HTML files and update JSONBin
+      - name: Update JSONBin for changed tickers
         env:
           JSONBIN_KEY: ${{ secrets.JSONBIN_KEY }}
           JSONBIN_ID: ${{ secrets.JSONBIN_ID }}
@@ -24,41 +24,41 @@ jobs:
 
           for FILE in $CHANGED; do
             TICKER=$(basename "$FILE" .html)
-            URL="https://v0-stock-analyses.vercel.app/${TICKER}"
-            echo "→ Updating $TICKER → $URL"
+            VERCEL_URL="https://v0-stock-analyses.vercel.app/${TICKER}"
+            JSON_FILE="${TICKER}.json"
+            echo "→ Processing $TICKER"
 
-            # GET current JSONBin (verbose for debugging)
-            HTTP_CODE=$(curl -s -o /tmp/jsonbin_current.json -w "%{http_code}" \
+            # GET current JSONBin
+            HTTP_CODE=$(curl -s -o /tmp/current.json -w "%{http_code}" \
               -H "X-Master-Key: ${JSONBIN_KEY}" \
               -H "X-Bin-Meta: false" \
               "https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest")
             echo "GET status: $HTTP_CODE"
-            cat /tmp/jsonbin_current.json | head -c 200
-
             if [ "$HTTP_CODE" != "200" ]; then
-              echo "❌ JSONBin GET fehlgeschlagen: $HTTP_CODE"
+              echo "❌ GET fehlgeschlagen: $HTTP_CODE"
+              cat /tmp/current.json
               exit 1
             fi
 
-            # Update via Python script
+            # Patch via Python
             python3 .github/scripts/update_jsonbin.py \
-              "$TICKER" "$URL" /tmp/jsonbin_current.json > /tmp/jsonbin_updated.json
+              "$TICKER" "$VERCEL_URL" /tmp/current.json "$JSON_FILE" \
+              > /tmp/updated.json
 
-            echo "Updated JSON (first 200 chars):"
-            cat /tmp/jsonbin_updated.json | head -c 200
+            echo "Patch OK, pushing to JSONBin..."
 
             # PUT back
-            HTTP_CODE=$(curl -s -o /tmp/jsonbin_response.json -w "%{http_code}" \
+            HTTP_CODE=$(curl -s -o /tmp/response.json -w "%{http_code}" \
               -X PUT \
               -H "Content-Type: application/json" \
               -H "X-Master-Key: ${JSONBIN_KEY}" \
               "https://api.jsonbin.io/v3/b/${JSONBIN_ID}" \
-              -d @/tmp/jsonbin_updated.json)
+              -d @/tmp/updated.json)
             echo "PUT status: $HTTP_CODE"
-            cat /tmp/jsonbin_response.json | head -c 200
+            cat /tmp/response.json | head -c 200
 
             if [ "$HTTP_CODE" != "200" ]; then
-              echo "❌ JSONBin PUT fehlgeschlagen: $HTTP_CODE"
+              echo "❌ PUT fehlgeschlagen: $HTTP_CODE"
               exit 1
             fi
 
