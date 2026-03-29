@@ -1,0 +1,60 @@
+name: Update JSONBin after Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  update-jsonbin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Find changed HTML files and update JSONBin
+        run: |
+          # Get list of changed HTML files
+          CHANGED=$(git diff --name-only HEAD~1 HEAD | grep '\.html$' || true)
+          echo "Changed HTML files: $CHANGED"
+
+          for FILE in $CHANGED; do
+            # Extract ticker from filename (e.g. AMZN.html -> AMZN)
+            TICKER=$(basename "$FILE" .html)
+            VERCEL_URL="https://v0-stock-analyses.vercel.app/${TICKER}"
+            echo "Updating JSONBin for $TICKER -> $VERCEL_URL"
+
+            # GET current JSONBin data
+            CURRENT=$(curl -s \
+              -H "X-Master-Key: ${{ secrets.JSONBIN_KEY }}" \
+              -H "X-Bin-Meta: false" \
+              "https://api.jsonbin.io/v3/b/${{ secrets.JSONBIN_ID }}/latest")
+
+            # Update analyseUrl for this ticker using Python
+            UPDATED=$(echo "$CURRENT" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+ticker = '${TICKER}'
+url = '${VERCEL_URL}'
+companies = data.get('companies', [])
+found = False
+for c in companies:
+    if c.get('ticker') == ticker:
+        c['analyseUrl'] = url
+        found = True
+if not found:
+    companies.append({'ticker': ticker, 'analyseUrl': url})
+data['companies'] = companies
+print(json.dumps(data))
+")
+
+            # PUT updated data back to JSONBin
+            curl -s -X PUT \
+              -H "Content-Type: application/json" \
+              -H "X-Master-Key: ${{ secrets.JSONBIN_KEY }}" \
+              "https://api.jsonbin.io/v3/b/${{ secrets.JSONBIN_ID }}" \
+              -d "$UPDATED"
+
+            echo "✅ JSONBin updated for $TICKER"
+          done
