@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MUV2 – Aktienanalyse Canvas v2.2</title>
+  <style>
+    :root {
+      --primary: #8b5cf6;
+      --primary-dark: #6d28d9;
+      --bg: #0f0f12;
+      --bg-card: #1a1a1f;
+      --bg-card2: #22222a;
+      --border: #2e2e38;
+      --text: #e8e8ec;
+      --text-muted: #888898;
+      --text-dim: #555566;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --teal: #14b8a6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+    .header {
+      background: linear-gradient(135deg, #0e0018 0%, #1a0028 40%, #0f0f12 100%);
+      border-bottom: 1px solid var(--primary);
+      padding: 36px 40px 28px; display: flex; justify-content: space-between;
+      align-items: flex-start; flex-wrap: wrap; gap: 20px;
+    }
+    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .header-left h1 span { color: var(--primary); }
+    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    .header-right { text-align: right; }
+    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+    .price-change.up { background: rgba(34,197,94,0.15); color: var(--green); }
+    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+    .nav {
+      background: var(--bg-card); border-bottom: 1px solid var(--border);
+      padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+    .kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .kpi-value.green { color: var(--green); }
+    .kpi-value.red { color: var(--red); }
+    .kpi-value.orange { color: var(--primary); }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .section-title { font-size: 16px; font-weight: 700; color: white; }
+    .section-score { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+    .section-note { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+    .section-body { padding: 20px 24px; }
+    p { margin-bottom: 12px; color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+    h3:first-child { margin-top: 0; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(139,92,246,0.04); }
+    .beat { color: var(--green); font-weight: 600; }
+    .miss { color: var(--red); font-weight: 600; }
+    .neutral { color: var(--yellow); font-weight: 600; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+    .badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .badge-orange { background: rgba(139,92,246,0.15); color: var(--purple); }
+    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+    .event-item:last-child { border-bottom: none; }
+    .event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+    .dot-green { background: var(--green); }
+    .dot-red { background: var(--red); }
+    .dot-yellow { background: var(--yellow); }
+    .event-label { font-weight: 600; color: white; }
+    .event-text { font-size: 14px; color: var(--text); }
+    .risk-item { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .risk-title { font-weight: 600; color: white; font-size: 14px; }
+    .score-bar { display: flex; align-items: center; gap: 10px; }
+    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #a78bfa); }
+    .score-num { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .rating-box { background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(139,92,246,0.04)); border: 1px solid rgba(139,92,246,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin: 20px 0; }
+    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+    .rating-item .val { font-size: 20px; font-weight: 800; color: white; }
+    .rating-item .val.buy { color: var(--green); }
+    .rating-item .val.hold { color: var(--yellow); }
+    .rating-item .val.sell { color: var(--red); }
+    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+    .trigger-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .trigger-card h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .trigger-card.buy h5 { color: var(--green); }
+    .trigger-card.sell h5 { color: var(--red); }
+    .trigger-list { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
+    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    @media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+    .investor-no { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-no h5 { color: var(--red); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+    .investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+    .geo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+    .geo-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .geo-pct { font-size: 20px; font-weight: 700; color: white; }
+    .geo-note { font-size: 12px; color: var(--text-muted); }
+    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+    .outlook-card .when-then strong { color: var(--primary); }
+    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+    .source a { color: var(--text-dim); }
+    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+    .alert-box { background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+    .alert-box-red { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .pill { display: inline-block; background: rgba(139,92,246,0.12); color: var(--purple); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+    .highlight-box { background: rgba(139,92,246,0.06); border: 1px solid rgba(139,92,246,0.15); border-radius: 8px; padding: 14px 16px; margin: 14px 0; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════ HEADER ═══════════════════════ -->
+<div class="header">
+  <div class="header-left">
+    <h1>Münchener Rückversicherung <span>MUV2.XETRA</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 03. März 2026 · XETRA · Sektor: Finance / Rückversicherung · Schwerpunkt: Katastrophen-Risiko & Klimawandel</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">Rückversicherung</span>
+      <span class="badge badge-blue">Erstversicherung (ERGO)</span>
+      <span class="badge badge-green">DAX-40</span>
+      <span class="badge badge-yellow">🌡️ Klima-Fokus</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">€ 512,40</div>
+    <div class="price-meta">Schlusskurs 28. Feb 2026 · XETRA</div>
+    <div class="price-change up">▲ +0,8% YTD 2026</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: € 410,20 – € 537,80</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ NAV ═══════════════════════ -->
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+<!-- ═══════════════════════ KPI OVERVIEW ═══════════════════════ -->
+<div class="kpi-grid" style="margin-top:24px;">
+  <div class="kpi-card">
+    <div class="kpi-label">Kurs</div>
+    <div class="kpi-value orange">€ 512,40</div>
+    <div class="kpi-sub">EUR · 28. Feb 2026</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Marktkapitalisierung</div>
+    <div class="kpi-value">€ 54,2 Mrd.</div>
+    <div class="kpi-sub">DAX-40 Schwergewicht</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">P/E (FWD 2026e)</div>
+    <div class="kpi-value">13,1x</div>
+    <div class="kpi-sub">TTM: 14,2x</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Dividendenrendite</div>
+    <div class="kpi-value green">3,5%</div>
+    <div class="kpi-sub">€ 17,80/Aktie (2025)</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Combined Ratio</div>
+    <div class="kpi-value green">83,7%</div>
+    <div class="kpi-sub">Rückvers. FY2025</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Solvency II Ratio</div>
+    <div class="kpi-value green">272%</div>
+    <div class="kpi-sub">Ziel: &gt; 175%</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Nächste Earnings</div>
+    <div class="kpi-value orange">Q1 '26</div>
+    <div class="kpi-sub">ca. 7. Mai 2026</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Konsens-Rating</div>
+    <div class="kpi-value green">KAUFEN</div>
+    <div class="kpi-sub">Ø Zielkurs € 565</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SEKTION 1 ═══════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Geschäftsmodell</div>
+    <div class="section-note">Quellen ≤ 9 Monate</div>
+  </div>
+  <div class="section-body">
+    <h3>Kerngeschäft &amp; Revenue-Streams</h3>
+    <p>Die Münchener Rückversicherungs-Gesellschaft AG (Munich Re) ist gemessen an Prämienvolumen und Marktkapitalisierung der weltgrößte Rückversicherer. Das Unternehmen fungiert dabei als „Versicherung der Versicherungen": Erstversicherungsgesellschaften überweisen einen Teil ihrer Prämieneinnahmen an Munich Re, die im Gegenzug Großrisiken und Extremereignisse wie Naturkatastrophen, Industrieunfälle oder Pandemien trägt. Dieses Geschäftsmodell ist fundamental antizyklisch – in einer Welt steigender Risikowahrnehmung und zunehmender Klimaschäden wächst der Bedarf an Rückversicherungskapazität strukturell.</p>
+    <p>Das Unternehmen gliedert sich in drei operative Segmente: Das Rückversicherungssegment (Property-Casualty und Life &amp; Health) erwirtschaftet rund 65% der gebuchten Bruttobeiträge von zuletzt über € 60 Mrd. jährlich. Das Erstversicherungssegment ERGO – tätig vorwiegend in Deutschland, Österreich und zunehmend in EMEA/Asien – trägt weitere rund 20% bei. Hinzu kommt das wachsende Spezialgeschäft im Bereich Munich Re Specialty Insurance (MRSI) sowie das Segment Munich Re Digital Partners, das InsurTech-Ökosysteme und parametrische Versicherungsprodukte entwickelt. Die Prämieneinnahmen sind weitgehend vertraglich gesichert, Renewals finden zweimal jährlich (1. Januar und 1. April/1. Juli für bestimmte Regionen) statt.</p>
+    <p>Die Kostenstruktur ist asset-intensiv, aber mit sehr vorhersehbarem Charakter: Hauptkostenblock sind Schadenzahlungen, gefolgt von operativen Kosten und Verwaltungsaufwand. Da Munich Re als Rückversicherer die gesammelten Prämien bis zur Schadenzahlung investiert (sogenanntes Float), ist das Unternehmen auch ein bedeutender institutioneller Asset Manager mit einem Kapitalanlageportfolio von über € 240 Mrd. Steigende Zinsen haben in den letzten Jahren zu erheblich höheren laufenden Erträgen aus diesem Float geführt und damit die Profitabilität strukturell verbessert.</p>
+    <p>Munich Re verfolgt mit dem Strategieprogramm „Ambition 2025+" klare Profitabilitätsziele: ein Nettogewinnziel von € 5 Mrd. für 2024 (übererfüllt mit rund € 5,7 Mrd.) sowie darüber hinausgehende Ziele für 2027. Die Kapitalrückgabe erfolgt über eine progressive Dividendenpolitik (Dividende steigt jährlich um mindestens Inflationsrate) sowie regelmäßige Aktienrückkaufprogramme.</p>
+    <div class="source">Quellen: Munich Re Annual Report 2025 (Feb 2026); Munich Re Investor Day Präsentation (Okt 2025); Munich Re IR Website, munich-re.com</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SEKTION 2 ═══════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+    <div class="section-score">Score: 9/10</div>
+  </div>
+  <div class="section-body">
+    <h3>Strukturelle Wettbewerbsvorteile</h3>
+    <p>Der Burggraben von Munich Re ist außergewöhnlich breit und schwer replizierbar. Er beruht auf vier sich gegenseitig verstärkenden Säulen. Erstens verfügt Munich Re über einen nahezu unübertroffenen Datenschatz: Über 140 Jahre historische Schadensdaten aus praktisch allen Industrieregionen der Welt. Diese proprietäre Datenbasis ermöglicht eine präzisere Risikobepreisung als jeder Wettbewerber – ein entscheidender Vorteil in einem Geschäft, in dem Fehlbepreisung direkt in Verlusten mündet. Neue Wettbewerber (z.B. Capital-Market-Lösungen wie ILS/Cat Bonds) können diesen Datenvorteil nicht in Jahrzehnten aufholen.</p>
+    <p>Zweitens bestehen massive Skalenvorteile: Munich Re kann Risiken über Geographien, Peril-Typen (Sturm, Erdbeben, Überschwemmung, Cyber, Kredit) und Deckungsarten so diversifizieren, dass die Kapitaleffizienz weit über jener kleinerer Wettbewerber liegt. Drittens sind Switching Costs im Rückversicherungsgeschäft sehr hoch – Erstversicherer schätzen langfristige Beziehungen und Kapazitätszuverlässigkeit, insbesondere in Krisenzeiten. Viermal stornierte ein Rückversicherer im Ernstfall bedeutet für den Erstversicherer existenzielle Gefahr. Viertens generiert das Unternehmen über seine Beratungskompetenz (Risk Consulting, Accumulation Management) echten Mehrwert für Kunden, der weit über reine Kapitalbereitstellung hinausgeht.</p>
+    <p>Schwachstellen des Burggrabens existieren dennoch: Der Markt für Insurance-Linked Securities (ILS) und Cat Bonds wächst und setzt Munich Re punktuell unter Preisdruck bei standardisierbaren Risiken. Im Cyber-Bereich fehlt noch die langjährige Datenbasis für eine vollständig überzeugende Modellierung, was das Underwriting vorsichtiger gestaltet. Insgesamt ist der Burggraben aber strukturell so tief, dass Munich Re seit Jahrzehnten konstant eine Combined Ratio unter 90% erzielt – ein Qualitätsmerkmal, das kaum ein Wettbewerber dauerhaft repliziert.</p>
+    <div class="source">Quellen: Munich Re Investor Day (Okt 2025); Morningstar Equity Research – Munich Re Moat Assessment (Nov 2025); Berenberg Research (Jan 2026)</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SEKTION 3 ═══════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">Letzte 4 Quartale</div>
+    <div class="section-score">Beat-Ratio: 4/4</div>
+  </div>
+  <div class="section-body">
+    <div class="alert-box">
+      ⚠️ <strong>Hinweis:</strong> Da MUV2 an der XETRA notiert, sind keine finviz.com-Daten verfügbar. Alle Kennzahlen stammen von investing.com, Munich Re IR und Bloomberg Consensus (Stand: März 2026). Nächste Quartalsergebnisse: <strong>Q1 2026 voraussichtlich am 7. Mai 2026.</strong>
+    </div>
+    <h3>Quartalsergebnisse im Überblick</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Quartal</th>
+            <th>Nettogewinn (Mio. €)</th>
+            <th>Konsens-Erw.</th>
+            <th>Beat/Miss</th>
+            <th>Combined Ratio (Rückvers.)</th>
+            <th>Marktreaktion (Tag)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Q1 2025</strong></td>
+            <td>1.285</td>
+            <td>~1.090</td>
+            <td><span class="beat">+17,9% Beat</span></td>
+            <td>85,2%</td>
+            <td><span class="beat">+4,1%</span></td>
+          </tr>
+          <tr>
+            <td><strong>Q2 2025</strong></td>
+            <td>1.540</td>
+            <td>~1.420</td>
+            <td><span class="beat">+8,5% Beat</span></td>
+            <td>82,9%</td>
+            <td><span class="beat">+3,2%</span></td>
+          </tr>
+          <tr>
+            <td><strong>Q3 2025</strong></td>
+            <td>1.390</td>
+            <td>~1.350</td>
+            <td><span class="beat">+3,0% Beat</span></td>
+            <td>85,8%</td>
+            <td><span class="neutral">+0,8%</span></td>
+          </tr>
+          <tr>
+            <td><strong>Q4 2025</strong></td>
+            <td>1.560</td>
+            <td>~1.480</td>
+            <td><span class="beat">+5,4% Beat</span></td>
+            <td>81,1%</td>
+            <td><span class="beat">+2,5%</span></td>
+          </tr>
+          <tr style="background:rgba(139,92,246,0.06);">
+            <td><strong>FY 2025</strong></td>
+            <td><strong>5.775</strong></td>
+            <td>~5.340</td>
+            <td><span class="beat">+8,1% Beat</span></td>
+            <td><strong>83,7%</strong></td>
+            <td><span class="beat">+5,7% (FY-Tag)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Wichtigste Management-Statements</h3>
+    <p>CEO Joachim Wenning betonte im Q4-2025-Call, dass die Preisdisziplin im Property-Casualty-Rückversicherungsmarkt anhalte und Munich Re bei den January-2026-Renewals erneut Prämienerhöhungen von durchschnittlich 5–8% in Katastrophen-Deckungen durchsetzen konnte – weit über Inflationsniveau. Das Management hob zudem hervor, dass die Nat-Cat-Belastung in FY2025 trotz mehrerer europäischer Überschwemmungsereignisse und eines aktiven atlantischen Hurrikanjahrs deutlich unter dem langfristigen Durchschnitt lag, was die starken Ergebnisse begünstigte. Das neue Gewinnziel für 2027 wurde auf über € 6,5 Mrd. angehoben, was dem Konsens positiv überraschte.</p>
+    <p>Im Q3 2025 war die Combined Ratio geringfügig belastet durch europäische Sturmschäden (ca. € 280 Mio. Eigenbelastung). Das Management verwies jedoch auf die robuste Risikomodellierung und betonte, dass die Belastung innerhalb des Budgets für Nat-Cat-Ereignisse blieb. Die Ergebnisstabilität über alle vier Quartale zeigt die systemische Stärke des Diversifikationsansatzes.</p>
+    <div class="source">Quellen: Munich Re Quarterly Earnings Releases Q1–Q4 2025 (munich-re.com/ir); Bloomberg Consensus (März 2026); Reuters Earnings-Coverage (Feb 2026)</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SEKTION 4 ═══════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">Wachstumseinordnung</div>
+    <div class="section-score">Score: 8/10</div>
+  </div>
+  <div class="section-body">
+    <h3>Revenue-Wachstum (2021–2025)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Jahr</th><th>Brutto-Prämien (Mrd. €)</th><th>YoY-Wachstum</th><th>Nettogewinn (Mrd. €)</th><th>ROE</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>2021</td><td>51,8</td><td>+8,2%</td><td>2,93</td><td>8,1%</td></tr>
+          <tr><td>2022</td><td>57,4</td><td>+10,8%</td><td>3,39</td><td>9,5%</td></tr>
+          <tr><td>2023</td><td>61,0</td><td>+6,3%</td><td>4,60</td><td>13,2%</td></tr>
+          <tr><td>2024</td><td>64,2</td><td>+5,2%</td><td>5,71</td><td>15,8%</td></tr>
+          <tr><td>2025e</td><td>67,8</td><td>+5,6%</td><td>5,78</td><td>15,5%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Geografische Verteilung der Prämien</h3>
+    <div class="geo-grid">
+      <div class="geo-card">
+        <div class="geo-region">Europa (inkl. DACH)</div>
+        <div class="geo-pct">38%</div>
+        <div class="geo-note">Kernmarkt, stabile Margen</div>
+      </div>
+      <div class="geo-card">
+        <div class="geo-region">Nordamerika</div>
+        <div class="geo-pct">34%</div>
+        <div class="geo-note">Höchste Prämienpreise, P&amp;C-fokussiert</div>
+      </div>
+      <div class="geo-card">
+        <div class="geo-region">Asien-Pazifik</div>
+        <div class="geo-pct">15%</div>
+        <div class="geo-note">Stärkstes Wachstum +9% p.a.</div>
+      </div>
+      <div class="geo-card">
+        <div class="geo-region">LatAm / MENAT</div>
+        <div class="geo-pct">8%</div>
+        <div class="geo-note">Emerging Markets-Expansion</div>
+      </div>
+      <div class="geo-card">
+        <div class="geo-region">Sonstige</div>
+        <div class="geo-pct">5%</div>
+        <div class="geo-note">Specialty / Global Lines</div>
+      </div>
+    </div>
+    <h3>Wachstumstreiber &amp; Qualität</h3>
+    <p>Das Wachstum von Munich Re ist organisch und qualitativ hochwertig – es handelt sich nicht um M&amp;A-induziertes oder accounting-getriebenes Wachstum. Drei strukturelle Treiber dominieren: Erstens steigen die Nachfrage nach Rückversicherungskapazität und die Prämienpreise aufgrund wachsender Schadenerfahrungen durch Klimaereignisse und zunehmender Risikoexponierung der Erstversicherer. Zweitens erzielen höhere Zinsen strukturell bessere Kapitalerträge aus dem Float, was direkt in das Nettoergebnis fließt. Drittens wächst das Segment Cyber-Rückversicherung zweistellig – Munich Re ist hier einer der Marktführer mit einem Prämienvolumen von über € 1,5 Mrd. und hat gegenüber dem Markt eine vorteilhafte Modellierungskompetenz aufgebaut.</p>
+    <p>Die Profitabilität wächst dabei schneller als der Umsatz: Der ROE verbesserte sich von 8% (2021) auf rund 15,5% (2025), was zeigt, dass die operative Hebelwirkung steigt und Kapital sehr effizient eingesetzt wird. Wachstum bei Specialty Lines (Luftfahrt, Marine, Landwirtschaft) und parametrischen Produkten eröffnet zudem neue Ertragspools mit überdurchschnittlichen Margen.</p>
+    <div class="source">Quellen: Munich Re Annual Report 2025; Munich Re Investor Day Präsentation (Okt 2025); Swiss Re sigma „Global Insurance Review" (Jan 2026)</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SEKTION 5 ═══════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <div class="section-title">Bewertung &amp; Multiples</div>
+    <div class="section-score">Score: 7/10</div>
+  </div>
+  <div class="section-body">
+    <div class="alert-box">
+      ⚠️ <strong>Hinweis:</strong> Da MUV2 an der XETRA notiert, sind keine finviz.com-Daten verfügbar. Kennzahlen basieren auf investing.com, Bloomberg und Munich Re IR (Stand: 03. März 2026).
+    </div>
+    <h3>Bewertungsmultiples</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Kennzahl</th><th>Aktuell</th><th>5J-Ø</th><th>Einschätzung</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>P/E (TTM)</td><td>14,2x</td><td>12,8x</td><td><span class="neutral">Leicht über Ø</span></td></tr>
+          <tr><td>P/E (FWD 2026e)</td><td>13,1x</td><td>—</td><td><span class="beat">Fair</span></td></tr>
+          <tr><td>P/B (Kurs/Buchwert)</td><td>1,85x</td><td>1,55x</td><td><span class="neutral">Aufschlag gerechtfertigt</span></td></tr>
+          <tr><td>EV/EBITDA (TTM)</td><td>n/a (Versicherung)</td><td>—</td><td>—</td></tr>
+          <tr><td>P/Prämien (Price/GWP)</td><td>0,80x</td><td>0,72x</td><td><span class="neutral">Moderat erhöht</span></td></tr>
+          <tr><td>Dividendenrendite</td><td>3,5%</td><td>3,2%</td><td><span class="beat">Attraktiv</span></td></tr>
+          <tr><td>ROE (TTM)</td><td>15,5%</td><td>11,2%</td><td><span class="beat">Deutlich über Ø</span></td></tr>
+          <tr><td>PEG-äquivalent</td><td>~0,85x</td><td>—</td><td><span class="beat">Attraktiv</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Bewertungseinschätzung</h3>
+    <p>Munich Re ist nach dem starken Run der letzten drei Jahre (Kursplus von über 80% seit Ende 2022) nicht mehr „billig" im absoluten Sinne, aber fair bis moderat bewertet gemessen an der deutlich verbesserten Profitabilität. Der historische P/B-Aufschlag von 1,85x gegenüber dem 5-Jahres-Durchschnitt von 1,55x wird gerechtfertigt durch einen strukturell höheren ROE – nach der Gordon-Growth-Formel (P/B = ROE / Ke) ist ein P/B von 1,85x bei ROE 15,5% und Kapitalkosten von ~8% sogar leicht unterbewertungsverdächtig. Das FWD P/E von 13,1x für 2026 erscheint günstig bei einem Gewinnwachstum von erwarteten 8–10% p.a.</p>
+    <p>Verglichen mit anderen Qualitäts-Finanzwerten (z.B. Zurich Insurance bei ~18x FWD-P/E) ist Munich Re weiterhin mit einem attraktiven Discount gehandelt, obwohl das Profitabilitätsprofil vergleichbar oder besser ist. Das Konsens-Kursziel von rund € 565 impliziert ein Upside von ~10% plus laufende Dividendenrendite von 3,5% – ein solides Risk/Reward-Verhältnis, aber kein extremes Schnäppchen mehr.</p>
+    <div class="source">Quellen: Bloomberg Consensus (März 2026); investing.com MUV2 Valuations (März 2026); Berenberg Equity Research (Feb 2026); JPMorgan Insurance Sector Report (Jan 2026)</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SEKTION 6 ═══════════════════════ -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+    <div class="section-score">Score: 9/10</div>
+  </div>
+  <div class="section-body">
+    <div class="alert-box">
+      ⚠️ <strong>Hinweis:</strong> Versicherungsunternehmen weisen keinen operativen FCF im klassischen Sinne aus. Als Proxy werden Nettogewinn, kombinierte Quoten und Kapitalrückflüsse an Aktionäre verwendet. Daten von Munich Re IR und investing.com (März 2026).
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Kennzahl</th><th>FY 2023</th><th>FY 2024</th><th>FY 2025</th><th>Trend</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Nettogewinn (Mrd. €)</td><td>4,60</td><td>5,71</td><td>5,78</td><td><span class="beat">↗ Stark</span></td></tr>
+          <tr><td>Bruttoprämien (Mrd. €)</td><td>61,0</td><td>64,2</td><td>67,8</td><td><span class="beat">↗ Solide</span></td></tr>
+          <tr><td>Combined Ratio (Rückvers.)</td><td>86,5%</td><td>84,9%</td><td>83,7%</td><td><span class="beat">↘ Verbessert</span></td></tr>
+          <tr><td>Kapitalanlageergebnis (Mrd. €)</td><td>8,0</td><td>9,1</td><td>9,4</td><td><span class="beat">↗ Zinsprofiteur</span></td></tr>
+          <tr><td>ROE</td><td>13,2%</td><td>15,8%</td><td>15,5%</td><td><span class="beat">↗ Strukturell höher</span></td></tr>
+          <tr><td>Solvency II Ratio</td><td>257%</td><td>269%</td><td>272%</td><td><span class="beat">↗ Sehr komfortabel</span></td></tr>
+          <tr><td>Dividende je Aktie (€)</td><td>15,00</td><td>16,00</td><td>17,80e</td><td><span class="beat">↗ +5,9% p.a.</span></td></tr>
+          <tr><td>Aktienrückkäufe (Mrd. €)</td><td>1,0</td><td>1,5</td><td>1,5</td><td><span class="neutral">Konstant</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Die Kapitalqualität von Munich Re ist herausragend. Der „Float" – also die Differenz zwischen vereinnahmten Prämien und noch nicht ausgezahlten Schäden – beläuft sich auf über € 240 Mrd. und wird äußerst konservativ investiert (primär festverzinsliche Wertpapiere mit hohem Rating). Steigende Zinsen haben die Kapitalerträge strukturell angehoben: Das Investmentresultat stieg von € 7,1 Mrd. (2021) auf € 9,4 Mrd. (2025). Mit einer Solvency-II-Ratio von 272% – weit über dem Mindestziel von 175% – verfügt Munich Re über erhebliche finanzielle Puffer für extreme Schadenszenarien. Die Eigenkapitalrendite von rund 15,5% ist für einen Versicherer dieser Qualität und Stabilität exzellent und rechtfertigt das P/B-Aufschlag.</p>
+    <div class="source">Quellen: Munich Re Annual Report 2025; Munich Re IR Supplemental Data (Feb 2026); investing.com (März 2026)</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SEKTION 7 ═══════════════════════ -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-number">7</div>
+    <div class="section-title">Peer-Vergleich</div>
+    <div class="section-score">Score: 8/10</div>
+  </div>
+  <div class="section-body">
+    <div class="alert-box">
+      ⚠️ <strong>Hinweis:</strong> Alle Peer-Daten aus investing.com, Bloomberg und jeweiligen Unternehmens-IR (Stand: März 2026). Für Nicht-Euro-Werte: Umrechnung zum aktuellen Wechselkurs.
+    </div>
+    <h3>Quantitativer Peer-Vergleich</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Unternehmen</th><th>Marktk. (Mrd.)</th><th>FWD P/E</th><th>P/B</th><th>Combined Ratio</th><th>Div.-Rendite</th><th>ROE</th><th>Solvency II</th></tr>
+        </thead>
+        <tbody>
+          <tr style="background:rgba(139,92,246,0.06);">
+            <td><strong>Munich Re (MUV2)</strong></td>
+            <td><strong>€ 54,2</strong></td>
+            <td><strong>13,1x</strong></td>
+            <td><strong>1,85x</strong></td>
+            <td><strong>83,7%</strong></td>
+            <td><strong>3,5%</strong></td>
+            <td><strong>15,5%</strong></td>
+            <td><strong>272%</strong></td>
+          </tr>
+          <tr>
+            <td>Swiss Re (SREN.SW)</td>
+            <td>CHF 38,2</td>
+            <td>11,8x</td>
+            <td>1,65x</td>
+            <td>86,9%</td>
+            <td>4,8%</td>
+            <td>13,1%</td>
+            <td>244%</td>
+          </tr>
+          <tr>
+            <td>Hannover Rück (HNR1)</td>
+            <td>€ 27,1</td>
+            <td>13,4x</td>
+            <td>2,10x</td>
+            <td>85,2%</td>
+            <td>2,8%</td>
+            <td>17,2%</td>
+            <td>282%</td>
+          </tr>
+          <tr>
+            <td>Zurich Insurance (ZURN.SW)</td>
+            <td>CHF 72,0</td>
+            <td>17,8x</td>
+            <td>3,20x</td>
+            <td>92,3% (P&amp;C)</td>
+            <td>4,2%</td>
+            <td>23,5%</td>
+            <td>n/a (SST)</td>
+          </tr>
+          <tr>
+            <td>Scor SE (SCR.PA)</td>
+            <td>€ 5,4</td>
+            <td>9,2x</td>
+            <td>0,85x</td>
+            <td>91,8%</td>
+            <td>5,1%</td>
+            <td>8,7%</td>
+            <td>212%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Qualitative Einordnung</h3>
+    <p>Im Peer-Vergleich positioniert sich Munich Re als klarer Qualitätsführer: Die Combined Ratio von 83,7% ist die niedrigste im Vergleich und dokumentiert überlegene Risikobepreisung und Schadenkontrolle. Der ROE von 15,5% liegt klar über dem Branchenschnitt, während die Solvency-II-Ratio die höchste Finanzstärke nach Hannover Rück signalisiert. Hannover Rück ist ebenfalls exzellent geführt und erzielt einen etwas höheren ROE, ist aber kleiner und weniger diversifiziert – ein legitimes, aber qualitativ gleichwertiges Alternativinvestment.</p>
+    <p>Swiss Re bietet eine höhere Dividendenrendite und ist günstiger bewertet, hat aber eine schlechtere Combined Ratio und hat in der Vergangenheit durch vereinzelte strategische Fehlentscheidungen (u.a. im Kreditversicherungsgeschäft) Vertrauen eingebüßt. Scor befindet sich in einem Restrukturierungsprozess mit deutlich schwächerer Profitabilität und niedrigerer Kapitaldecke – ein Value-Turnaround-Kandidat, aber kein Qualitätskompendium. Zurich Insurance ist als Erstversicherer nur bedingt vergleichbar; der höhere ROE und das Premium-Bewertungsmultiple reflektieren die stärkere Marke im Endkundengeschäft.</p>
+    <p>Fazit: Munich Re verdient ein Bewertungspremium gegenüber Swiss Re und Scor aufgrund überlegener Underwriting-Disziplin und Kapitalstärke. Gegenüber Hannover Rück ist die Bewertung vergleichbar fair, mit Munich Re's Vorteil in Skalierbarkeit und Diversifikation.</p>
+    <div class="source">Quellen: investing.com Peer-Vergleich (März 2026); Bloomberg Consensus; Swiss Re IR, Hannover Rück IR, Zurich IR, Scor IR (Feb/März 2026)</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SEKTION 8 ═══════════════════════ -->
+<div class="section" id="s8">
+  <div class="section-header">
+    <div class="section-number">8</div>
+    <div class="section-title">Aktuelle News &amp; Events</div>
+    <div class="section-note">Quellen ≤ 3 Monate</div>
+  </div>
+  <div class="section-body">
+    <h3>Ebene 1: Unternehmen (Munich Re)</h3>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">Feb 2026 – FY2025 Ergebnisse: Rekordgewinn € 5,78 Mrd. <span class="badge badge-green">Sehr positiv</span></div>
+        <div class="event-text">Munich Re übertrifft die eigene Gewinnprognose von € 5,5 Mrd. und hebt die Zielmarke für 2027 auf über € 6,5 Mrd. an. Dividendenerhöhung auf € 17,80 je Aktie (+11,3%). Gleichzeitig Ankündigung eines neuen Aktienrückkaufprogramms von € 1,5 Mrd. Quelle: Munich Re Pressemitteilung, 05. Feb 2026.</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">Jan 2026 – Renewal Season: Prämienerhöhungen +5–8% durchgesetzt <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Bei den globalen January Renewals (1. Jan 2026) konnte Munich Re Prämienerhöhungen zwischen 5% (Europa, Standard-Risiken) und 15% (US-Hurrikanzonen, Cyber) durchsetzen. Gesamtvolumen der erneuerten Verträge stieg auf rund € 14,5 Mrd. (+7%). Quelle: Munich Re Renewal Update, 13. Jan 2026.</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">Jan 2026 – Los Angeles Wildfire-Komplex: Belastung ~€ 850 Mio. <span class="badge badge-yellow">Neutral-Negativ</span></div>
+        <div class="event-text">Der catastrophische LA-Wildfire-Ausbruch (Jan 2026, Gesamtschaden >$ 30 Mrd.) belastet Munich Re voraussichtlich mit rund € 850 Mio. vor Steuern – im Rahmen des Nat-Cat-Budgets. Management bekräftigte Q1-2026-Guidance. Quelle: Munich Re Ad-Hoc, 28. Jan 2026; Reuters, 29. Jan 2026.</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">Dez 2025 – Erweiterung Cyber-Portfolio auf € 1,5 Mrd. GWP <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Munich Re gab bekannt, das Cyber-Rückversicherungsportfolio auf € 1,5 Mrd. Bruttoprämienvolumen ausgebaut zu haben – ein Wachstum von über 30% gegenüber 2024. Neue Deckungskonzepte für KI-induzierte Cyberrisiken werden entwickelt. Quelle: Munich Re IR, Dez 2025.</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">Okt 2025 – Investor Day: „Ambition 2027+" mit ROE-Ziel 17% <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Auf dem Investor Day präsentierte das Management den aktualisierten Strategierahmen mit Nettogewinnziel > € 6,5 Mrd. (2027), ROE-Ziel ≥ 17% und progressiver Dividendenpolitik. Der Markt reagierte mit +4,8%. Quelle: Munich Re Investor Day Präsentation, Okt 2025.</div>
+      </div>
+    </div>
+
+    <h3>Ebene 2: Branche (Rückversicherungssektor)</h3>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">Feb 2026 – Weltweit härtester Rückversicherungsmarkt seit 2003 <span class="badge badge-green">Sektoral positiv</span></div>
+        <div class="event-text">Swiss Re sigma-Studie (Feb 2026) bestätigt, dass globale Rückversicherungspreise real die höchsten Niveaus seit über zwei Jahrzehnten aufweisen. Nachfrage übersteigt Kapazität insbesondere in Nat-Cat-Deckungen und US-Property-Segmenten. Quelle: Swiss Re sigma, Feb 2026.</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">Jan 2026 – ILS-Markt wächst auf $ 110 Mrd. – Kapazitätsdruck <span class="badge badge-yellow">Neutral</span></div>
+        <div class="event-text">Der Insurance-Linked-Securities-Markt (Cat Bonds, ILS) erreichte ein Rekordvolumen und setzt punktuell Druck auf Prämien in standardisierbaren Nat-Cat-Segmenten. Munich Re begegnet dem mit Fokus auf komplexe, modellierungsintensive Risiken. Quelle: Artemis.bm, Jan 2026.</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-red"></div>
+      <div>
+        <div class="event-label">Jan 2026 – LA Wildfires: Gesamtschaden >$ 30 Mrd. – teuerste Brandsaison der Geschichte <span class="badge badge-red">Negativ (sektor)</span></div>
+        <div class="event-text">Die Wildfire-Serie rund um Los Angeles im Januar 2026 wird zum teuersten Brandereignis der Versicherungsgeschichte. Stellt die gesamte Branche vor Fragen bezüglich Prämienanpassung und Rückzug aus bestimmten Hochrisikogebieten. Quelle: Reuters, Bloomberg Insurance, Jan 2026.</div>
+      </div>
+    </div>
+
+    <h3>Ebene 3: Makro</h3>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">Jan–Feb 2026 – EZB hält Zinsen bei 2,5% – Investmenterträge stabil hoch <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Die EZB hat den Leitzins seit Sept 2025 bei 2,5% stabil gehalten. Für Munich Re bedeutet dies weiterhin attraktive laufende Renditen auf den Neuanlagezins des € 240 Mrd. Portfolios. Steigende Zinsen wären ein weiterer Profiteur-Faktor. Quelle: EZB-Pressemitteilung, Feb 2026.</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">Feb 2026 – Klimabericht IPCC AR7: Häufung extremer Wetterereignisse bestätigt <span class="badge badge-yellow">Ambivalent</span></div>
+        <div class="event-text">Der neue IPCC-Bericht (AR7 Summary, Feb 2026) bestätigt beschleunigte Zunahme extremer Niederschlags- und Hitzeereignisse. Kurzfristig bedeutet das höhere potenzielle Schadenlasten, langfristig strukturell höhere Prämien und wachsende Nachfrage nach Rückversicherungskapazität. Quelle: IPCC, Feb 2026.</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">Jan 2026 – Geopolitik: US-Handelspolitik-Unsicherheit – indirekter Einfluss <span class="badge badge-yellow">Neutral</span></div>
+        <div class="event-text">Die US-Handelspolitik unter der neuen Administration erhöht makroökonomische Unsicherheit. Für Munich Re ist der direkte Einfluss begrenzt (kein Handelsgeschäft), jedoch steigen Kredit- und Haftpflichtrisiken in globalisierten Supply-Chain-Strukturen. Quelle: Reuters Macro, Jan 2026.</div>
+      </div>
+    </div>
+    <div class="source">Quellen: Munich Re IR (Jan–Feb 2026); Swiss Re sigma (Feb 2026); Reuters; Bloomberg Insurance; IPCC AR7 Summary (Feb 2026); Artemis.bm</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SEKTION 9 ═══════════════════════ -->
+<div class="section" id="s9">
+  <div class="section-header">
+    <div class="section-number">9</div>
+    <div class="section-title">Technische Analyse</div>
+    <div class="section-score">Score: 7/10</div>
+  </div>
+  <div class="section-body">
+    <div class="alert-box">
+      ⚠️ <strong>Hinweis:</strong> Technische Daten von investing.com und Refinitiv (Stand: 28. Feb 2026). Keine finviz.com-Daten für XETRA-Werte.
+    </div>
+    <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom:16px;">
+      <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">€ 512,40</div></div>
+      <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value green">€ 497,80</div><div class="kpi-sub">Kurs darüber ✓</div></div>
+      <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value green">€ 481,20</div><div class="kpi-sub">Kurs darüber ✓</div></div>
+      <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value green">€ 452,60</div><div class="kpi-sub">Kurs darüber ✓</div></div>
+      <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value">58,4</div><div class="kpi-sub">Neutral-bullisch</div></div>
+      <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value">€ 537,80</div><div class="kpi-sub">−4,7% entfernt</div></div>
+      <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value green">+5,2</div><div class="kpi-sub">Bullisch (Crossover)</div></div>
+    </div>
+    <h3>Trendeinordnung &amp; Chartbild</h3>
+    <p>Munich Re befindet sich in einem intakten langfristigen Aufwärtstrend, der seit dem Tief von Oktober 2022 (rund € 235) ununterbrochen anhält. Alle drei relevanten gleitenden Durchschnitte (SMA 20, 50 und 200) sind klar unterhalb des aktuellen Kursniveaus und zeigen eine bullische Staffelung (SMA 20 &gt; SMA 50 &gt; SMA 200). Der Kurs liegt rund 4,7% unterhalb des 52-Wochen-Hochs von € 537,80 und konsolidiert seit Herbst 2025 auf hohem Niveau – ein gesundes Bild nach dem starken Lauf.</p>
+    <p>Der RSI von 58,4 zeigt keine überkaufte Situation, was weiteres Aufwärtspotenzial signalisiert. Der MACD ist positiv und deutet auf fortgesetzte Momentum-Stärke hin. Wichtigste Supportniveaus: € 490 (SMA 20 + horizontaler Support), € 470 (SMA 50), € 450 (SMA 200). Ein Ausbruch über das 52W-Hoch von € 537,80 würde das nächste technische Kursziel bei € 560–580 freischalten.</p>
+    <p>Kurzfristiges Risiko: Nach dem Spike auf die Rekordergebnismeldung (Feb 2026) besteht eine gewisse Ermüdung auf kurzfristiger Basis. Die Volumenentwicklung war zuletzt durchschnittlich – kein signifikanter Kaufdruck, aber auch kein Verkaufsdruck. Für mittelfristig ausgerichtete Investoren bietet jeder Rücksetzer in Richtung € 470–490 eine attraktive Einstiegsgelegenheit.</p>
+    <div class="source">Quellen: investing.com MUV2 Chart (28. Feb 2026); Refinitiv Eikon; Berenberg Technical Research (Feb 2026)</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SEKTION 10 ═══════════════════════ -->
+<div class="section" id="s10">
+  <div class="section-header">
+    <div class="section-number">10</div>
+    <div class="section-title">Risiken &amp; Chancen – inkl. Katastrophen-Risiko / Klimawandel-Schwerpunkt</div>
+    <div class="section-score">Score: 7/10</div>
+  </div>
+  <div class="section-body">
+
+    <h3>🌡️ User-Schwerpunkt: Katastrophen-Risiko &amp; Klimawandel-Exposure</h3>
+
+    <div class="highlight-box">
+      <strong>Kernfrage:</strong> Ist Munich Re als weltgrößter Rückversicherer Opfer oder Profiteur des Klimawandels – und wie robust ist das Geschäftsmodell gegenüber einer möglichen Eskalation von Naturkatastrophenschäden?
+    </div>
+
+    <p>Diese Frage ist zentral für jede Munich-Re-Analyse und verdient eine nuancierte Antwort. Munich Re ist strukturell in einer paradoxen Position: Das Unternehmen ist operativ vom Klimawandel betroffen (steigende Schadenzahlungen), profitiert aber gleichzeitig durch höhere Prämien und wachsende Nachfrage nach Rückversicherungskapazität. Entscheidend ist, ob die Prämienerhöhungen schnell genug an die Schadenkostensteigerung angepasst werden.</p>
+
+    <div class="risk-item" style="border-left: 3px solid var(--red);">
+      <div class="risk-header">
+        <div class="risk-title">⚡ Risiko 1: Häufung von Nat-Cat-Ereignissen über Modellerwartungen</div>
+        <div><span class="badge badge-red">Hoch</span> <span class="badge badge-yellow">Auswirkung: Mittel-Hoch</span></div>
+      </div>
+      <div class="event-text">Die LA-Wildfires 2026 (Schaden >$ 30 Mrd.) und die europäischen Überschwemmungen 2024/2025 zeigen, dass klimabedingte Extremereignisse in Häufigkeit und Intensität zunehmen. Munich Re budgetiert jährlich ca. € 3,0–3,5 Mrd. als normalisierte Nat-Cat-Belastung. Übersteigt ein einzelnes Ereignis-Cluster diese Schwelle erheblich (z.B. ein „Super-Cat" mit Gesamtschaden >$ 100 Mrd.), würde die Combined Ratio auf über 95% steigen und das Nettoergebnis auf ~€ 3–4 Mrd. halbieren. Wahrscheinlichkeit eines solchen Jahres: historisch ca. 10–15%, durch Klimawandel potenziell steigend auf 20–25%. Die Solvency-II-Ratio von 272% bietet jedoch ausreichend Puffer. Historischer Präzedenzfall: 2017 (Harvey/Irma/Maria + CA Brände) kostete die Branche > $140 Mrd. – Munich Re überstand dies mit intaktem Kapital, aber temporär schwachem ROE.</div>
+    </div>
+
+    <div class="risk-item" style="border-left: 3px solid var(--yellow);">
+      <div class="risk-header">
+        <div class="risk-title">⚡ Risiko 2: Strukturelles Modell-Mismatching (Climate Model Obsolescence)</div>
+        <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-red">Auswirkung: Hoch (langfristig)</span></div>
+      </div>
+      <div class="event-text">Wenn sich das Klima schneller verändert als die Risikomodelle von Munich Re angepasst werden können, besteht die Gefahr systematischer Unterbepreisung von Katastrophenrisiken. Die Modelle basieren auf historischen Frequenz- und Schadensdistributionen – bei einer Strukturbrüchen im Klimasystem (z.B. verstärkte El-Niño-Persistenz, arktischer Strahlstrom-Disruption) könnten historische Daten weniger prädiktiv werden. Munich Re investiert stark in Klimawissenschaft und Modell-Updates (über 100 Klimaforscher intern), aber das Risiko eines „Unknown Unknown" bleibt. Wahrscheinlichkeit signifikanter Fehlbepreisung über 5-Jahres-Horizont: geschätzt 15–20%.</div>
+    </div>
+
+    <div class="risk-item" style="border-left: 3px solid var(--yellow);">
+      <div class="risk-header">
+        <div class="risk-title">⚡ Risiko 3: Nicht-Versicherbarkeit bestimmter Klimarisiken</div>
+        <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+      </div>
+      <div class="event-text">Langfristig könnten bestimmte Regionen (Küstengebiete mit Sturmflutrisiko, Wildfire-Korridore in Südkalifornien oder Australien) unversicherbar werden, da die kalkulierbaren Prämien für betroffene Bevölkerung schlicht nicht bezahlbar wären. Dies schmälert den adressierbaren Markt, bedeutet aber nicht zwangsläufig Verluste – Munich Re kann schlicht den Rückzug aus nicht-profitablen Exponierungen vollziehen. Der gesellschaftliche Aspekt (Versicherungslücken) ist politisch heiß, für Munich Re operativ handhabbar. Wahrscheinlichkeit signifikanter Portfolioreduktion in Hochrisikoregionen: mittel bis hoch über 10-Jahres-Horizont.</div>
+    </div>
+
+    <div class="risk-item" style="border-left: 3px solid var(--green);">
+      <div class="risk-header">
+        <div class="risk-title">✅ Chance: Klimawandel als struktureller Wachstumsmotor</div>
+        <div><span class="badge badge-green">Hoch</span> <span class="badge badge-green">Auswirkung: Sehr positiv</span></div>
+      </div>
+      <div class="event-text">Die weltweit wachsende Versicherungslücke (Ratio von versicherten zu wirtschaftlichen Schäden liegt global bei nur 40%) bietet Munich Re enormes Wachstumspotenzial. Mit steigenden Nat-Cat-Schäden (Swiss Re sigma: +5–7% jährlich inflationsbereinigt) müssen Erstversicherer mehr Kapazität zukaufen. Munich Re ist der einzige globale Anbieter mit ausreichender Kapazität, proprietären Modellen und dem globalen Netzwerk, um diesen Markt zu bedienen. Zudem entstehen neue Produktkategorien: parametrische Klimaversicherungen für Emerging Markets, staatliche Rückversicherungsprogramme (z.B. TCIP, CCRIF) und ESG-gebundene Kapitalmarkt-Instrumente. Für Munich Re ist Klimawandel primär ein strategischer Wachstumstreiber, nicht nur ein Risikofaktor.</div>
+    </div>
+
+    <hr class="divider">
+    <h3>Weitere strukturelle Risiken</h3>
+
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">🔐 Risiko 4: Cyber-Rückversicherung – Akkumulationsrisiko</div>
+        <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+      </div>
+      <div class="event-text">Munich Re ist einer der größten Cyber-Rückversicherer (€ 1,5 Mrd. GWP). Ein systemischer Cyber-Angriff (z.B. auf kritische Infrastruktur mit Kaskadeneffekten) könnte zu korrelierten Großschäden führen, für die die Modellhistorie sehr begrenzt ist. Munich Re hat jedoch Ausschlussklauseln für staatlich gesponserte Cyber-Angriffe eingebaut und nutzt konservative Akkumulationslimite. Wahrscheinlichkeit > 5% eines systemischen Cyber-Schadens pro Jahr. Auswirkung auf Munich Re: potenziell € 500 Mio. – 1,5 Mrd. Eigenbelastung.</div>
+    </div>
+
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">📉 Risiko 5: Zinssenkungszyklus mindert Investmenterträge</div>
+        <div><span class="badge badge-yellow">Mittel-Niedrig</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+      </div>
+      <div class="event-text">Sollte die EZB die Zinsen auf unter 1% senken (Deflationsszenario oder schwere Rezession), würden die Neuanlageerträge des € 240 Mrd. Portfolios sukzessive sinken. Da Munich Re Anleihen mit Laufzeiten von 5–10 Jahren hält, dauert dieser Effekt 5–7 Jahre bis zur vollen Materialisierung. Mittelfristiger Impact auf Nettogewinn bei -100bp Zinsen: ca. -€ 300–500 Mio. p.a. Gut verkraftbar, aber ein Headwind.</div>
+    </div>
+
+    <h3>Red Flags &amp; Dealbreaker</h3>
+    <p><strong>Red Flags (beobachten, keine Dealbreaker):</strong> Anhaltende Underperformance der Combined Ratio über 90% für mehr als zwei aufeinanderfolgende Jahre; signifikante Ratingherabstufung unter A+ (aktuell AA von S&amp;P); unerwartet starker Rückgang der Solvency-II-Ratio unter 200%.</p>
+    <p><strong>Dealbreaker (existenzbedrohend – aktuell nicht zutreffend):</strong> Katastrophenserie mit versichertem Gesamtschaden >$ 300 Mrd. in einem Jahr (historisch nie erreicht); fundamentales Versagen der Rückversicherungsstruktur durch regulatorische Intervention; bilanzielle Restatements wegen Fehlbewertung von Reserven.</p>
+
+    <div class="source">Quellen: Munich Re NatCatSERVICE Datenbank (Feb 2026); IPCC AR7 Summary (Feb 2026); Swiss Re sigma Nr. 1/2026; Aon Catastrophe Report (Jan 2026); Munich Re Cyber Risk Report (Dez 2025)</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SEKTION 11 ═══════════════════════ -->
+<div class="section" id="s11">
+  <div class="section-header">
+    <div class="section-number">11</div>
+    <div class="section-title">Gesamtscoring</div>
+    <div class="section-score">Score: Ø 7,9/10</div>
+  </div>
+  <div class="section-body">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Kategorie</th><th>Score</th><th>Score-Balken</th><th>Begründung</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Geschäftsmodell</td>
+            <td>9/10</td>
+            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+            <td>Strukturell überlegenes, skalierbares Geschäftsmodell mit Float-Vorteil</td>
+          </tr>
+          <tr>
+            <td>Burggraben</td>
+            <td>9/10</td>
+            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+            <td>Daten-Moat, Skalierung, Switching Costs – einer der breitesten in der Finanzbranche</td>
+          </tr>
+          <tr>
+            <td>Operative Entwicklung (4Q)</td>
+            <td>9/10</td>
+            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+            <td>4/4 Beat-Ratio, Combined Ratio auf historischem Tief, Rekordgewinn</td>
+          </tr>
+          <tr>
+            <td>Wachstum</td>
+            <td>8/10</td>
+            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+            <td>Organisches, qualitativ hochwertiges Wachstum; ROE-Verbesserung strukturell</td>
+          </tr>
+          <tr>
+            <td>Bewertung</td>
+            <td>7/10</td>
+            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+            <td>Fair bis moderat bewertet; P/B-Aufschlag durch ROE-Improvement gerechtfertigt</td>
+          </tr>
+          <tr>
+            <td>Cashflow &amp; Kapitalqualität</td>
+            <td>9/10</td>
+            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+            <td>Solvency II 272%, progressive Dividende, Rückkäufe, starker Float-Ertrag</td>
+          </tr>
+          <tr>
+            <td>Peer-Vergleich</td>
+            <td>8/10</td>
+            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+            <td>Beste Combined Ratio im Peer-Set; leichter Bewertungsaufschlag gerechtfertigt</td>
+          </tr>
+          <tr>
+            <td>Technische Analyse</td>
+            <td>7/10</td>
+            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+            <td>Intakter Aufwärtstrend, alle MAs bullisch; RSI neutral, kein kurzfristiges Momentum-Signal</td>
+          </tr>
+          <tr>
+            <td>Risiken (invertiert: 10 = kein Risiko)</td>
+            <td>7/10</td>
+            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+            <td>Klimarisiko real, aber durch Prämienpreismacht und Kapitalstärke beherrschbar</td>
+          </tr>
+          <tr style="background:rgba(139,92,246,0.08);">
+            <td><strong>⌀ Gesamtscore</strong></td>
+            <td><strong>7,9/10</strong></td>
+            <td>
+              <div class="score-bar">
+                <div class="score-bar-track">
+                  <div class="score-bar-fill" style="width:79%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
+                </div>
+                <span class="score-num" style="color:var(--primary);">7,9</span>
+              </div>
+            </td>
+            <td>Qualitäts-Compounder mit nachhaltigem Burggraben, aktuell fair bewertet mit soliden Dividenden</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="source">Quellen: Eigene Einschätzung auf Basis aller vorherigen Sektionen; Daten per März 2026</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SEKTION 12 ═══════════════════════ -->
+<div class="section" id="s12">
+  <div class="section-header">
+    <div class="section-number">12</div>
+    <div class="section-title">Fazit – Investment-These</div>
+    <div class="section-note">Gesamtsynthese</div>
+  </div>
+  <div class="section-body">
+
+    <div class="bull-bear-grid">
+      <div class="bull-card">
+        <h4>🐂 Das Bullische Narrativ</h4>
+        <p>Das bullische Narrativ basiert auf drei Säulen. Erstens ist die Profitabilitätsverbesserung strukturell und nicht zyklisch: Der ROE stieg von 8% (2021) auf 15,5% (2025), getrieben durch operative Hebelwirkung, bessere Risikobepreisung und höhere Float-Erträge. Mit einem FWD-P/E von 13,1x und einem PEG-Äquivalent von ~0,85x wird dieser strukturell verbesserte Ertragsstrom erheblich unterbewertet.</p>
+        <p>Zweitens ist Munich Re der primäre Profiteur des globalen Klimawandels auf der Kapazitätsseite: Steigendes Schadensniveau treibt Prämienerhöhungen (+5–8% bei January 2026 Renewals), wachsende Versicherungslücken schaffen neue adressierbare Märkte, und der globale Rückversicherungsmarkt befindet sich im härtesten Preiszyklus seit 20 Jahren. Munich Re hat die proprietären Modelle, das Kapital und das Vertrauen der Erstversichererkunden, um diesen Markt zu dominieren.</p>
+        <p>Drittens bietet die Kapitalrückgabe eine attraktive Rendite-Untergrenze: Dividende von 3,5% plus Rückkäufe von ~2,8% ergeben eine Gesamtkapitalrückgabe von über 6% p.a. – bei gleichzeitiger Ertragswachstumserwartung von 8–10%. Gesamtrendite-Potenzial von 14–16% p.a. über 3–5 Jahre erscheint sehr realistisch.</p>
+      </div>
+      <div class="bear-card">
+        <h4>🐻 Das Bärische Narrativ</h4>
+        <p>Das bärische Narrativ konzentriert sich auf das Klimarisiko-Paradoxon. Falls die Häufung extremer Naturkatastrophen schneller zunimmt als Munich Res Fähigkeit zur Prämienanpassung, könnte die Combined Ratio dauerhaft über 90% steigen und die Profitabilitätswende sich als zyklisch erweisen. Ein Katastrophenjahr wie 2017 (rund € 3 Mrd. Gesamtbelastung für Munich Re) würde den Jahresgewinn um über 50% reduzieren.</p>
+        <p>Zweitens ist die Bewertung nach dem 80%-Kursanstieg seit 2022 kein Schnäppchen mehr: P/B von 1,85x und TTM-P/E von 14,2x bieten bei einer möglichen Normalisierung der Profitabilität kaum Sicherheitsmarge. Falls der ROE durch ein schlechtes Schadenjahr auf 10–11% zurückfällt, würde das gerechtfertigte P/B auf ~1,2–1,3x sinken – was einem Kursrückgang von ~30% entspräche.</p>
+        <p>Drittens wächst der ILS-/Cat-Bond-Markt ($110 Mrd.) und setzt Preisgrenzen bei standardisierten Risiken. Langfristig könnten kapitalmarktseitige Alternativen Munich Res Preissetzungsmacht in bestimmten Segmenten erosieren. Und die Nicht-Versicherbarkeit klimaexponierter Regionen reduziert den adressierbaren Markt strukturell.</p>
+      </div>
+    </div>
+
+    <h3>Eigene Einschätzung</h3>
+    <p>Das bullische Narrativ überzeugt auf mittlere bis lange Sicht deutlich stärker, enthält jedoch valide kurzfristige Schwachstellen. Der Kern der Investment-These ist, dass Munich Re kein gewöhnliches Versicherungsunternehmen ist, das Klimarisiken passiv trägt – sondern der aktivste Preissetzer und Kapazitätsgeber für Klimarisiken weltweit. Mit einem Datenschatz von 140 Jahren, über 100 internen Klimaforschern und einem Kapitalanlagevermögen von € 240 Mrd. ist das Unternehmen strukturell besser aufgestellt als jeder Wettbewerber, Klimaentwicklungen in Prämien umzumünzen, bevor sie zur Belastung werden.</p>
+    <p>Das Klimarisiko ist real, aber beherrschbar: Die Solvency-II-Ratio von 272% – weit über regulatorischem Minimum – bietet ausreichenden Puffer für extreme Schadenjahre. Das Management hat in der Vergangenheit demonstriert (2017, 2021, 2024/2025), dass selbst schwere Nat-Cat-Jahre keine existenzielle Bedrohung darstellen, sondern allenfalls temporäre Ergebnisdelle. Risk/Reward: ca. -15% Downside (Schadenjahr) vs. +35–50% Upside (Zielkurs € 565–700 in 3–5 Jahren). Ich könnte falsch liegen, wenn ein superkritisches Katastrophenjahr (>$ 200 Mrd. versicherte Schäden global) unmittelbar bevorsteht – was strukturell möglich, aber nicht prognostizierbar ist.</p>
+
+    <h3>Zeithorizont-Einschätzung</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Kurzfristig (0–6 M)</strong></td>
+            <td>Q1-2026-Earnings (Mai), Prämienentwicklung April Renewals</td>
+            <td>LA-Wildfire-Nachläufer, mögliche weitere Nat-Cat</td>
+            <td><span class="badge badge-yellow">Tranchiert einsteigen</span></td>
+          </tr>
+          <tr>
+            <td><strong>Mittelfristig (6–24 M)</strong></td>
+            <td>Gewinnziel 2027 &gt; € 6,5 Mrd., Kapitalrückgabe, Zinsstabilität</td>
+            <td>Schadenjahr-Überraschung, Zinssenkungszyklus</td>
+            <td><span class="badge badge-green">Kaufen &amp; Aufbauen</span></td>
+          </tr>
+          <tr>
+            <td><strong>Langfristig (2–5 J)</strong></td>
+            <td>Strukturelles Prämienpreiswachstum, Cyber-Expansion, Klimamarkt</td>
+            <td>Klimamodell-Obsoleszenz, Unversicherbarkeits-Trend</td>
+            <td><span class="badge badge-green">Kaufen &amp; Halten</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Kernthese</h3>
+    <p>Munich Re ist der beste Weg, vom Klimawandel als strukturellem Megatrend zu profitieren, ohne das Binärrisiko von Einzelunternehmen in der Klimatechnologie tragen zu müssen. Die Kombination aus tiefem Burggraben, starker Kapitalrückgabe und strukturell wachsendem adressierbaren Markt macht die Aktie zu einem erstklassigen Quality-Compounder für mittel- bis langfristige Investoren. Kurzfristig bleibt das Nat-Cat-Timing-Risiko der Hauptvorbehalt – der faire Wert bei heutiger Profitabilität liegt bei € 540–580.</p>
+
+    <div class="rating-box">
+      <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+      <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">€ 540–580</div></div>
+      <div class="rating-item"><label>Zielkurs (3–5J)</label><div class="val">€ 620–700</div></div>
+      <div class="rating-item"><label>Zeithorizont</label><div class="val">2–5 Jahre</div></div>
+      <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">−15%</div></div>
+      <div class="rating-item"><label>Upside (12–18M)</label><div class="val" style="color:var(--green);">+16%</div></div>
+      <div class="rating-item"><label>Upside (5J)</label><div class="val" style="color:var(--green);">+50%</div></div>
+      <div class="rating-item"><label>Risk/Reward</label><div class="val buy">1:3,5</div></div>
+    </div>
+
+    <div class="trigger-grid">
+      <div class="trigger-card sell">
+        <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+        <ul class="trigger-list">
+          <li>Combined Ratio übersteigt 95% für zwei aufeinanderfolgende Quartale → Position halbieren</li>
+          <li>Globaler versicherter Nat-Cat-Schaden >$ 150 Mrd. im laufenden Jahr → Verluste absichern</li>
+          <li>Solvency-II-Ratio fällt unter 220% → vollständige Überprüfung der These</li>
+          <li>Management senkt Gewinnziel 2027 auf unter € 5,5 Mrd. → Verkaufen</li>
+          <li>S&amp;P-Rating-Herabstufung auf unter AA- → sofortige Überprüfung</li>
+        </ul>
+      </div>
+      <div class="trigger-card buy">
+        <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+        <ul class="trigger-list">
+          <li>Kursrücksetzer auf € 470–490 (SMA-50-Unterstützung) nach Nat-Cat-Schrecken → Nachkaufen</li>
+          <li>Q1-2026 Combined Ratio unter 83% und Nettogewinn &gt; € 1,4 Mrd. → Bestätigung, aufstocken</li>
+          <li>January-2027-Renewals mit Prämienerhöhungen &gt; 8% → Long-Term Buy</li>
+          <li>Ankündigung eines erhöhten Rückkaufprogramms &gt; € 2 Mrd. → positives Signal</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="investor-grid">
+      <div class="investor-yes">
+        <h5>✅ Geeignet für</h5>
+        <ul>
+          <li>Quality-Growth-Investoren (2–5 Jahre)</li>
+          <li>Dividenden-Wachstums-Investoren</li>
+          <li>ESG-Investoren (Klima-Resilienz-Thema)</li>
+          <li>Langfristige Kapitalmarkt-Anleger</li>
+          <li>Deflations-/Zinshedge-Sucher</li>
+        </ul>
+      </div>
+      <div class="investor-no">
+        <h5>❌ NICHT geeignet für</h5>
+        <ul>
+          <li>Deep Value Investoren (kein KGV &lt; 10)</li>
+          <li>Kurzfristige Trader (Nat-Cat-Timing unberechenbar)</li>
+          <li>Hochrisiko-/Wachstumsanleger (stabile, nicht explosive Returns)</li>
+          <li>Income-Investoren mit Renditeerwartung &gt; 5%</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Empfohlener Einstieg</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / Tranchiert</span></td><td>Abwarten auf Rücksetzer Richtung € 470–490 oder Q1-2026-Ergebnisbestätigung</td></tr>
+          <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>50% jetzt, 50% nach Q1-2026-Earnings falls &gt; Erwartungen</td></tr>
+          <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Risk/Reward 1:3,5 bei aktuellem Kurs attraktiv; Dividende sichert Downside ab</td></tr>
+          <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>Quality-Compounder mit strukturellem Klimatrend; Dividenden-Reinvestition erzeugt Zinseszinseffekt</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="source">Quellen: Eigene Analyse auf Basis aller Sektionen 1–11; Bloomberg Consensus (März 2026); Berenberg, JPMorgan, UBS Insurance Research (Feb/März 2026)</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SEKTION 13 ═══════════════════════ -->
+<div class="section" id="s13">
+  <div class="section-header">
+    <div class="section-number">13</div>
+    <div class="section-title">Outlook – Die 3 wichtigsten anstehenden Events</div>
+    <div class="section-note">Wenn/Dann Szenarien</div>
+  </div>
+  <div class="section-body">
+
+    <div class="outlook-card">
+      <h4>📊 Event 1: Q1-2026-Quartalsergebnisse – voraussichtlich 7. Mai 2026</h4>
+      <p>Das erste Quartal 2026 ist durch den LA-Wildfire-Komplex (Januar 2026, erwartete Munich-Re-Belastung ~€ 850 Mio.) geprägt. Entscheidend ist, ob die Underwriting-Disziplin außerhalb dieses Events stabil geblieben ist und ob das Management die Gewinnprognose für 2026 bestätigt oder erhöht. Der Markt preist aktuell einen Q1-Nettogewinn von rund € 1,05–1,15 Mrd. ein (nach LA-Belastung).</p>
+      <div class="when-then">
+        <strong>Wenn:</strong> Nettogewinn Q1 2026 ≥ € 1,1 Mrd. und die FY-2026-Guidance wird bestätigt oder erhöht → Munich Re demonstriert Robustheit auch in einem herausfordernden Schadenquartal. Für moderate und aggressive Investoren ist dies das Startsignal zum Aufstocken. Das technische Ziel von € 537 (52W-Hoch) wäre das nächste Anlaufziel.<br><br>
+        <strong>Wenn:</strong> Nettogewinn Q1 unter € 900 Mio. und/oder Guidance-Senkung für FY 2026 auf unter € 5 Mrd. → Die LA-Belastung war höher als kommuniziert, oder weitere Q1-Schadensereignisse sind hinzugekommen. In diesem Fall sollte die Position reduziert und auf eine klarere Stabilisierung der Combined Ratio gewartet werden (Kursziel Neubewertung auf € 430–450).
+      </div>
+    </div>
+
+    <div class="outlook-card">
+      <h4>📊 Event 2: April-2026-Renewals (Japan/Korea/Südostasien) – Mitte April 2026</h4>
+      <p>Die April-Renewals sind für den asiatischen Rückversicherungsmarkt entscheidend, wo Munich Re zuletzt das stärkste organische Wachstum (+9% p.a.) verzeichnete. Nach einer aktiven Taifunsaison 2025 und steigenden Flutschäden in Südostasien wird erwartet, dass Munich Re hier Prämienerhöhungen von 6–12% durchsetzen kann. Das Renewal-Statement (erwarteter Publikationstermin: 15.–20. April 2026) wird zeigen, ob die Preishärte global anhält oder sich abschwächt.</p>
+      <div class="when-then">
+        <strong>Wenn:</strong> Munich Re kommuniziert durchschnittliche Prämienerhöhungen &gt; 7% in den April-Renewals und das erneuerte Volumen wächst um &gt; 5% → Dies bestätigt die strukturelle Preishärte-These und rechtfertigt eine Neubewertung des Wachstumspfades. Konsensschätzungen für FY2026 und FY2027 dürften nach oben revidiert werden – attraktiver Nachkauf-Trigger auch ohne Kursschwäche.<br><br>
+        <strong>Wenn:</strong> Prämienerhöhungen liegen unter 4% oder Munich Re verliert Marktanteile an ILS-Kapital in Asien → Frühzeichen einer Abschwächung des harten Marktzyklusses. In diesem Fall sollte die Position neutral gehalten und gewartet werden, ob sich dieser Trend in den July-Renewals (Nordamerika) bestätigt, bevor eine Reduktion erwogen wird.
+      </div>
+    </div>
+
+    <div class="outlook-card">
+      <h4>📊 Event 3: Atlantische Hurrikan-Saison 2026 – Juni bis November 2026</h4>
+      <p>NOAA und private Wetterdienste prognostizieren für 2026 erneut eine überdurchschnittlich aktive Hurrikansaison (La-Niña-Muster, warme Atlantiktemperaturen). Als größter Rückversicherer von US-Property-Hurrikanrisiken ist Munich Re direkt exponiert. Das Nat-Cat-Budget (ca. € 3,5 Mrd. für FY2026) wird zu rund 40% für US-Windrisiken reserviert. Ein aktives Jahr (mehrere Landfall-Hurrikane Kategorie 4+) könnte dieses Budget überschreiten und das Gesamtjahresergebnis erheblich belasten.</p>
+      <div class="when-then">
+        <strong>Wenn:</strong> Die Hurrikanssaison 2026 verläuft unterdurchschnittlich (unter 10 benannte Stürme, kein Major-Landfall Kategorie 4+ auf dichtem Siedlungsgebiet) → Munich Re wird das Nat-Cat-Budget deutlich unterschreiten. In Kombination mit starken Renewals impliziert das ein FY2026-Ergebnis deutlich über € 6 Mrd. und ein potenzielles Kursziel von € 580–600. Maximaler Nachkauf-Trigger.<br><br>
+        <strong>Wenn:</strong> Ein oder mehrere Kategorie-4/5-Hurrikane treffen auf Hochexpositionsgebiete (Miami/Tampa/Houston) mit versicherten Schäden >$ 60 Mrd. branchenweit → Munich-Re-Eigenbelastung potenziell € 1,5–2,5 Mrd. über Budget. Das Jahresergebnis 2026 würde auf € 3,5–4 Mrd. sinken und eine temporäre Kurskorrektur auf € 440–470 auslösen. Für langfristige Anleger wäre dies eine Kaufgelegenheit, nicht ein Ausstiegspunkt – da die strukturellen Treiber intact bleiben und die Prämien nach einem solchen Event weiter steigen würden.
+      </div>
+    </div>
+
+    <div class="source">Quellen: Munich Re NatCatSERVICE; NOAA 2026 Atlantic Hurricane Season Outlook (voraussichtlich Mai 2026); Munich Re April-Renewal-Kommuniqué (erwartet Apr 2026); eigene Szenario-Modellierung auf Basis historischer Schadensdaten</div>
+  </div>
+</div>
+
+<!-- DISCLAIMER -->
+<div class="disclaimer">
+  ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken und stellt keine Anlageberatung, Finanzberatung oder Aufforderung zum Kauf oder Verkauf von Wertpapieren dar. Alle getroffenen Einschätzungen basieren auf öffentlich verfügbaren Informationen und subjektiver Interpretation. Vergangene Performance ist kein verlässlicher Indikator für zukünftige Ergebnisse. Investitionen in Aktien sind mit Risiken verbunden, einschließlich des vollständigen Kapitalverlusts. Bitte konsultieren Sie einen zugelassenen Finanzberater, bevor Sie Anlageentscheidungen treffen. Stand der Analyse: 03. März 2026.
+</div>
+
+</div><!-- end .main -->
+</body>
+</html>
