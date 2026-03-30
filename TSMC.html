@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSM – TSMC Aktienanalyse Canvas v2.2</title>
+<style>
+:root {
+  --primary: #FF6900;
+  --primary-dark: #cc5400;
+  --bg: #0f0f12;
+  --bg-card: #1a1a1f;
+  --bg-card2: #22222a;
+  --border: #2e2e38;
+  --text: #e8e8ec;
+  --text-muted: #888898;
+  --text-dim: #555566;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --blue: #3b82f6;
+  --purple: #8b5cf6;
+  --teal: #14b8a6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+.header {
+  background: linear-gradient(135deg, #1a0800 0%, #2a1000 40%, #0f0f12 100%);
+  border-bottom: 2px solid var(--primary);
+  padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;
+}
+.header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+.header-left h1 span { color: var(--primary); }
+.header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+.header-right { text-align: right; }
+.price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+.price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+.price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+.price-change.up { background: rgba(34,197,94,0.15); color: var(--green); }
+.price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+.nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100; }
+.nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+.main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+.kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+.kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.kpi-value.green { color: var(--green); }
+.kpi-value.red { color: var(--red); }
+.kpi-value.orange { color: var(--primary); }
+.section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+.section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+.section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.section-title { font-size: 16px; font-weight: 700; color: white; }
+.section-score { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+.section-note { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+.section-body { padding: 20px 24px; }
+p { margin-bottom: 12px; color: var(--text); }
+p:last-child { margin-bottom: 0; }
+h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+h3:first-child { margin-top: 0; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,105,0,0.04); }
+.beat { color: var(--green); font-weight: 600; }
+.miss { color: var(--red); font-weight: 600; }
+.neutral { color: var(--yellow); font-weight: 600; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+.badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+.badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+.badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+.badge-orange { background: rgba(255,105,0,0.15); color: var(--primary); }
+.event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+.event-item:last-child { border-bottom: none; }
+.event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+.dot-green { background: var(--green); }
+.dot-red { background: var(--red); }
+.dot-yellow { background: var(--yellow); }
+.event-label { font-weight: 600; color: white; }
+.event-text { font-size: 14px; color: var(--text); }
+.risk-item { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+.risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px; }
+.risk-title { font-weight: 600; color: white; font-size: 14px; }
+.score-bar { display: flex; align-items: center; gap: 10px; }
+.score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #ff9500); }
+.score-num { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+.bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+.bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+.bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+.bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.rating-box { background: linear-gradient(135deg, rgba(255,105,0,0.12), rgba(255,105,0,0.04)); border: 1px solid rgba(255,105,0,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+.rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+.rating-item .val { font-size: 20px; font-weight: 800; color: white; }
+.rating-item .val.buy { color: var(--green); }
+.rating-item .val.hold { color: var(--yellow); }
+.rating-item .val.sell { color: var(--red); }
+.trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+.trigger-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.trigger-card h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.trigger-card.buy h5 { color: var(--green); }
+.trigger-card.sell h5 { color: var(--red); }
+.trigger-list { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+.trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+.trigger-list li::before { content: "→"; position: absolute; left: 0; }
+.investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+@media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+.investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+.investor-no { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+.investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-no h5 { color: var(--red); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+.investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+.investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+.geo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+.geo-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.geo-pct { font-size: 20px; font-weight: 700; color: white; }
+.geo-note { font-size: 12px; color: var(--text-muted); }
+.outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+.outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+.outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+.outlook-card .when-then strong { color: var(--primary); }
+.source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+.disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+.alert-box { background: rgba(255,105,0,0.08); border: 1px solid rgba(255,105,0,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.pill { display: inline-block; background: rgba(255,105,0,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+.geo-risk-card { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+.geo-risk-card h4 { color: var(--red); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Taiwan Semiconductor Manufacturing <span>TSM · NYSE</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 03. März 2026 · NYSE (ADR) / TWSE: 2330 · Sektor: Halbleiter / Foundry</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">Pure-Play Foundry</span>
+      <span class="badge badge-blue">High-Performance Computing</span>
+      <span class="badge badge-green">AI-Infrastruktur</span>
+      <span class="badge badge-yellow">⚠ Geopolitisches Risiko: Hoch</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">USD 371.50</div>
+    <div class="price-meta">Schlusskurs 28. Feb 2026 · NYSE</div>
+    <div class="price-change up">▲ +0.39% (+1.46)</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: ~USD 193 – USD 390</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <!-- KPI OVERVIEW -->
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Kurs (ADR)</div>
+      <div class="kpi-value orange">$371.50</div>
+      <div class="kpi-sub">USD · 28. Feb 2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Marktkapitalisierung</div>
+      <div class="kpi-value">$1,91T</div>
+      <div class="kpi-sub">USD · #6 weltweit</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Fwd. P/E (2026E)</div>
+      <div class="kpi-value orange">26,2x</div>
+      <div class="kpi-sub">EPS 2026E ~$12.61</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">EV/EBITDA (TTM)</div>
+      <div class="kpi-value">19,0x</div>
+      <div class="kpi-sub">EBITDA-Marge ~68%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Bruttomarge</div>
+      <div class="kpi-value green">62,3%</div>
+      <div class="kpi-sub">Q4 2025 (Rekord)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">ROE</div>
+      <div class="kpi-value green">35,2%</div>
+      <div class="kpi-sub">Langfristiges Ziel: 27%+</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Nächste Earnings</div>
+      <div class="kpi-value orange">16. Apr</div>
+      <div class="kpi-sub">Q1 2026 Ergebnisse</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Konsens-Rating</div>
+      <div class="kpi-value green">Kaufen</div>
+      <div class="kpi-sub">Ø Zielkurs $401–418</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 1 -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 9 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Pure-Play Foundry: Das Prinzip des "Trusted Partner"</h3>
+      <p>Taiwan Semiconductor Manufacturing Company (TSMC) wurde 1987 von Morris Chang in Hsinchu, Taiwan, gegründet und hat seither das globale Halbleiter-Ökosystem fundamental verändert. Das Geschäftsmodell basiert auf einem simplen, aber revolutionären Prinzip: TSMC entwickelt keine eigenen Chips und tritt nie in Konkurrenz zu seinen Kunden. Stattdessen fertigt das Unternehmen Halbleiter ausschließlich im Auftrag von Fabless-Unternehmen (Chipdesignfirmen ohne eigene Produktion) sowie integrierten Geräteherstellern (IDMs). Diese bewusste Positionierung als neutraler Fertigungspartner schafft ein einzigartiges Vertrauensverhältnis: Firmen wie Apple, Nvidia, AMD, Broadcom und Qualcomm können TSMC ihre sensibelsten Chipdesigns anvertrauen, ohne einen Wettbewerber zu füttern.</p>
+
+      <h3>Revenue-Streams & Kundensegmente</h3>
+      <p>Der Umsatz von TSMC ist nach Endmarktanwendungen diversifiziert, wird aber zunehmend von zwei Megathemen dominiert: High Performance Computing (HPC, inkl. KI-Beschleuniger) und Smartphones. Im Geschäftsjahr 2025 entfiel auf HPC bereits 58% des Wafer-Umsatzes und auf Smartphones 28%. Die restlichen 14% verteilen sich auf IoT (6%), Automotive (4%) und Consumer Electronics (4%). Die Einnahmen entstehen durch Wafer-Fertigungsgebühren (Wafer-Service-Revenue), die je nach Prozessknoten stark variieren – ein 3-nm-Wafer kostet ein Vielfaches eines 28-nm-Wafers, was TSMCs starkes Preissetzungsvermögen beim Übergang zu immer kleineren Knoten illustriert.</p>
+
+      <h3>Kostenstruktur & Unit Economics</h3>
+      <p>TSMC ist ein extrem kapitalintensives Geschäftsmodell (Capex-intensiv). Das Unternehmen investierte 2025 rund 40,9 Mrd. USD in Sachanlagen und plant für 2026 sogar 52–56 Mrd. USD. Die hohen Fixkosten amortisieren sich jedoch über Skaleneffekte und die außergewöhnliche Effizienz der Fertigungsanlagen in Taiwan – TSMC produziert mehr als 12.000 verschiedene Produkte für über 500 Kunden. Die Bruttomarge von 62,3% im Q4 2025 – ein Rekordwert – belegt die außergewöhnlichen Unit Economics: Mit steigender Auslastung und verbessertem Cost Engineering verbessern sich die Margen kontinuierlich. CFO Wendell Huang hat als langfristiges Ziel eine Bruttomarge von mindestens 56% "through the cycle" und einen ROE von 27%+ definiert – in Q4 2025 übertraf TSMC dies mit einem ROE von 38,8% erheblich.</p>
+      <div class="source">Quellen: TSMC Q4 2025 Earnings Transcript (15. Jan 2026); TSMC IR Investor Presentation (Jan 2026); Quartr.com; Stockanalysis.com (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 2 -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben & Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 9/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Technologischer Vorsprung: Ein Jahrzehnte-Moat</h3>
+      <p>TSMCs Burggraben ist einer der tiefsten und breitesten im gesamten Technologiesektor. Der Kern ist technologische Exzellenz: Das Unternehmen ist der einzige Anbieter neben Samsung, der Chips auf 3nm-Niveau (N3) fertigt, und hat mit N2 (2nm) bereits die nächste Generation angelaufen. TSMC produziert heute über 90% aller weltweiten Advanced Chips (≤7nm) – ein Marktanteil, der einer De-facto-Monopolstellung gleichkommt. Dieser Vorsprung ist nicht durch kurzfristige Investitionen einholbar: Die Expertise, Prozessrezepte und das "Tribal Knowledge" über Jahrzehnte angesammelter Fertigungserfahrung sind nahezu nicht replizierbar. Selbst Intel mit seinem 18A-Node und Milliarden an Staatshilfen kämpft noch darum, externe Kunden zu gewinnen.</p>
+
+      <h3>Switching Costs: Der stärkste Hebel</h3>
+      <p>Die Wechselkosten für TSMC-Kunden sind außerordentlich hoch. Ein Chip, der für TSMCs N3-Prozess entworfen wurde, kann nicht ohne umfangreiche Neudesigns (Design Re-spins) auf einer Konkurrenzplattform gefertigt werden. Die Designphasen dauern typischerweise 2–3 Jahre, und der Lead-Time-Engagement mit Kunden liegt nach Angaben des Managements inzwischen mindestens 2–3 Jahre im Voraus. Nvidias Blackwell-GPUs, Apples A-Series-Chips, AMDs EPYC-Server-CPUs – sie alle sind tief in TSMCs spezifische Prozessarchitektur eingebettet. Ein Wechsel wäre mit mehrjährigen Verzögerungen und enormen Risiken verbunden, die sich kein Techkonzern leisten kann.</p>
+
+      <h3>Skalenvorteile & "One-Hour Ecosystem"</h3>
+      <p>TSMCs Konzentration in Taiwan schafft einen einzigartigen Skalenvorteil, den SVP Dr. Cliff Hou als "One-Hour Semiconductor Ecosystem" beschreibt: Alle kritischen Zulieferer, Ingenieure und Partnerunternehmen sind innerhalb einer Stunde erreichbar. Dieser Ökosystem-Vorteil ist in den USA oder Europa nicht replizierbar – TSMC selbst räumt ein, dass die Arizona-Fabs strukturell höhere Kosten haben. Die schwache Stelle im Burggraben ist die geografische Konzentration: 90%+ der führenden Produktionskapazitäten liegen in Taiwan, was ein klares geopolitisches Klumpenrisiko darstellt (wird in Sektion 10 vertieft). Dennoch: Der technologische Moat allein rechtfertigt eine Bewertung von 9/10.</p>
+      <div class="source">Quellen: TSMC Annual Report 2024 (März 2025); SemiAnalysis "TSMC Overseas Fabs – A Success?" (Dez 2025); TrendForce Q3 2025 Foundry Market Share (Dez 2025)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 3 -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Beat-Ratio: 4/4 ✓</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Da TSM primär an der TWSE (2330.TW) notiert und als ADR an der NYSE gehandelt wird, sind finviz.com-Daten begrenzt. Alle Kennzahlen stammen von TSMC IR, investing.com, Stockanalysis.com und Yahoo Finance (Stand: 03. März 2026). Nächste Quartalsergebnisse: <strong>16. April 2026 (Q1 2026)</strong> – vor US-Marktöffnung.</div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quartal</th>
+              <th>Umsatz (USD)</th>
+              <th>YoY-Wachstum</th>
+              <th>Bruttomarge</th>
+              <th>Op. Marge</th>
+              <th>EPS (TWD)</th>
+              <th>vs. Konsens</th>
+              <th>Marktreaktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q4 2025</strong></td>
+              <td>$33,7 Mrd.</td>
+              <td class="beat">+35% YoY</td>
+              <td class="beat">62,3%</td>
+              <td class="beat">54,0%</td>
+              <td>TWD 19,5</td>
+              <td><span class="badge badge-green">Beat</span></td>
+              <td class="beat">+3,5% (Tag danach)</td>
+            </tr>
+            <tr>
+              <td><strong>Q3 2025</strong></td>
+              <td>~$33,0 Mrd.</td>
+              <td class="beat">+36% YoY</td>
+              <td class="neutral">59,5%</td>
+              <td>50,6%</td>
+              <td>TWD 18,0</td>
+              <td><span class="badge badge-green">Beat</span></td>
+              <td class="beat">+2,8%</td>
+            </tr>
+            <tr>
+              <td><strong>Q2 2025</strong></td>
+              <td>~$29,0 Mrd.</td>
+              <td class="beat">+37% YoY</td>
+              <td class="neutral">58,1%</td>
+              <td>49,2%</td>
+              <td>TWD 15,8</td>
+              <td><span class="badge badge-green">Beat</span></td>
+              <td class="beat">+1,5%</td>
+            </tr>
+            <tr>
+              <td><strong>Q1 2025</strong></td>
+              <td>~$25,0 Mrd.</td>
+              <td class="beat">+35% YoY</td>
+              <td class="neutral">57,0%</td>
+              <td>47,5%</td>
+              <td>TWD 13,9</td>
+              <td><span class="badge badge-green">Beat</span></td>
+              <td class="neutral">~+0,5%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Wichtigste Management-Statements (Q4 2025 Call)</h3>
+      <p>CEO C.C. Wei bestätigte auf dem Q4-Earnings-Call (15. Januar 2026) eine "starke und strukturelle KI-Nachfrage" und hob die Auslastung auf höchstem Niveau bei gleichzeitig verbessertem Cost Engineering hervor. Besonders bemerkenswert: Das Management hob die 2026-Umsatzwachstumsguidance auf "nahezu 30% in USD-Termen" an – deutlich über den vorherigen Konsensschätzungen von ~20%. Für Q1 2026 erwartet TSMC 34,6–35,8 Mrd. USD Umsatz (+38% YoY) bei einer Bruttomarge von 63–65%, was zum Zeitpunkt der Veröffentlichung Erwartungen erneut übertraf. Die Dividende wurde für 2026 auf mindestens TWD 23 pro Aktie angehoben (+28% YoY).</p>
+      <div class="source">Quellen: TSMC Q4 2025 Earnings Transcript (15. Jan 2026); Stockinvest.us Earnings Analysis; Alpha-Sense Earnings Summary; Quartr.com (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 4 -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 9/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Revenue-Wachstum: KI als struktureller Treiber</h3>
+      <p>TSMCs Wachstumstrajektorie ist bemerkenswert. Nach einem Rückgang 2023 infolge des globalen Chip-Abschwungs beschleunigte sich das Wachstum erheblich: 2024 wuchs der Umsatz um rund 30% auf ~88 Mrd. USD, gefolgt von einem noch stärkeren Wachstum von ~36% in 2025 auf rund 121 Mrd. USD. Dies liegt deutlich über dem Wachstum der Foundry-2.0-Industrie insgesamt (+16% in 2025) und unterstreicht TSMCs Marktanteilsgewinne. Für 2026 erwartet das Management ~30% Umsatzwachstum in USD-Termen – bei einem so großen Unternehmen eine außergewöhnliche Wachstumsrate. Der entscheidende Treiber ist die KI-Infrastrukturausgabe: TSMC antizipiert, dass AI-Accelerator-Umsätze von 2024–2029 mit einem CAGR von über 35% wachsen werden.</p>
+
+      <h3>Segmentwachstum: HPC dominiert</h3>
+      <p>Der Anteil des HPC-Segments (High Performance Computing, inkl. KI-GPUs, Custom AI-Chips) am Wafer-Umsatz stieg von unter 40% in 2022 auf 58% im Gesamtjahr 2025. Dies ist kein Zufall: Nvidia, AMD, Broadcom und Apple sind TSMCs wichtigste Kunden und alle in rasantem Wachstum bei Advanced-Node-Chips. Apple allein macht schätzungsweise ~20% des Umsatzes aus; Nvidia als zweitwichtigster Kunde produziert seine Blackwell-GPUs (GB200) exklusiv bei TSMC auf N3/N4-Knoten. Das Profitabilitätswachstum übertrifft das Umsatzwachstum: Die operative Marge stieg 2025 auf 50,8% (gegenüber 42,5% in 2024), was auf ausgeprägte operative Hebelwirkung hindeutet.</p>
+
+      <h3>Geografische Verteilung des Umsatzes</h3>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">Nordamerika</div>
+          <div class="geo-pct">~69%</div>
+          <div class="geo-note">Apple, Nvidia, AMD, Qualcomm; größtes Wachstumssegment dank KI</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Asien (ex-Japan)</div>
+          <div class="geo-pct">~12%</div>
+          <div class="geo-note">China: ~10%; Rückgang durch Exportbeschränkungen</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">EMEA</div>
+          <div class="geo-pct">~7%</div>
+          <div class="geo-note">Europa; stabil, Automotive-Fokus</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Japan</div>
+          <div class="geo-pct">~6%</div>
+          <div class="geo-note">Wachstum durch Kumamoto-Fab; Sony, Denso</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Taiwan</div>
+          <div class="geo-pct">~6%</div>
+          <div class="geo-note">Mediatek, Realtek; stabil</div>
+        </div>
+      </div>
+
+      <p>Die geografische Verschiebung hin zu Nordamerika ist ein strategischer Vorteil: Die USA repräsentieren sowohl den wichtigsten Nachfragemarkt als auch die politisch bevorzugte Region für Kapitalallokation (CHIPS Act). Gleichzeitig birgt der China-Anteil von ~10% Risiken durch US-Exportbeschränkungen, die TSMC bereits zu operativen Anpassungen zwingen (Abschaltung der VEU-Lizenz für die Nanjing-Fab Ende 2025). Die Diversifizierung weg von China ist damit sowohl Risikominderung als auch politische Notwendigkeit.</p>
+      <div class="source">Quellen: TSMC Annual Report 2024; TSMC Q4 2025 Earnings Presentation; Stimson Center "Taiwan's Silicon Shield" (Nov 2025); 24/7 Wall Street (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 5 -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung & Multiples</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Datenhinweis:</strong> TSM ist als ADR an der NYSE notiert. Bewertungskennzahlen von Stockanalysis.com, Yahoo Finance und Morgan Stanley Research (Stand: März 2026).</div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Kennzahl</th>
+              <th>Aktuell (TTM)</th>
+              <th>Forward 2026E</th>
+              <th>5J-Ø (est.)</th>
+              <th>Einordnung</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>P/E</td>
+              <td>~35x</td>
+              <td>26,2x</td>
+              <td>~25x</td>
+              <td><span class="badge badge-yellow">Leicht erhöht</span></td>
+            </tr>
+            <tr>
+              <td>EV/EBITDA</td>
+              <td>19,0x</td>
+              <td>~14x</td>
+              <td>~16x</td>
+              <td><span class="badge badge-green">Fair</span></td>
+            </tr>
+            <tr>
+              <td>P/Sales (TTM)</td>
+              <td>~15,8x</td>
+              <td>~12x</td>
+              <td>~10x</td>
+              <td><span class="badge badge-yellow">Premium</span></td>
+            </tr>
+            <tr>
+              <td>P/FCF (TTM)</td>
+              <td>~49,8x</td>
+              <td>~28x</td>
+              <td>~30x</td>
+              <td><span class="badge badge-yellow">Erhöht (CapEx-Zyklus)</span></td>
+            </tr>
+            <tr>
+              <td>PEG (2026E)</td>
+              <td>–</td>
+              <td>~0,87x</td>
+              <td>–</td>
+              <td><span class="badge badge-green">Attraktiv (&lt;1x)</span></td>
+            </tr>
+            <tr>
+              <td>Debt/EBITDA</td>
+              <td>~0,2x</td>
+              <td>–</td>
+              <td>–</td>
+              <td><span class="badge badge-green">Sehr niedrig</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Bewertungseinordnung</h3>
+      <p>Auf den ersten Blick wirkt TSMCs Bewertung mit einem Forward-P/E von ~26x nicht günstig für ein Fertigungsunternehmen. Der entscheidende Kontext ist jedoch das Wachstum: Bei einer Umsatzwachstumserwartung von 30% in 2026 und einem PEG-Ratio von ~0,87 ist TSMCs Bewertung relativ zu seinem Wachstumspotenzial fair bis attraktiv. Morgan Stanley sieht das Unternehmen als "attraktiv bei 16x/13x unserer 2026/2027-EPS-Schätzungen". Das EV/EBITDA von 19x auf TTM-Basis erscheint erhöht, normalisiert sich aber auf ~14x auf Forward-Basis – was für ein Unternehmen mit diesen Wachstumsraten und Margen im historischen Kontext moderat ist.</p>
+      <p>Das hohe P/FCF-Ratio von ~50x TTM ist kein echtes Warnsignal, sondern Folge des historisch hohen CapEx-Zyklus (40,9 Mrd. USD in 2025; 52–56 Mrd. USD in 2026). Der freie Cashflow wird sich normalisieren, wenn die Investitionsphase abflacht. Auf Forward-Basis (2027E) dürfte das P/FCF auf ~18–20x sinken. Die Geopolitik-Risikoprämie, die in den letzten Jahren den Kurs zeitweise massiv belastet hat, ist bereits in der Bewertung teilweise eingepreist – der Kurs schloss das Jahr 2025 mit +92% und erreichte neue 52-Wochen-Hochs von ~$390.</p>
+      <div class="source">Quellen: Stockanalysis.com Statistics (Feb 2026); Morgan Stanley Research via Finviz News; Yahoo Finance Key Statistics (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 6 -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen & Kapitalqualität</div>
+      <div class="section-score">Score: 9/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Kennzahl</th>
+              <th>2024</th>
+              <th>2025 (FY)</th>
+              <th>Q4 2025</th>
+              <th>Trend</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Bruttomarge</td>
+              <td>53,5%</td>
+              <td>59,9%</td>
+              <td class="beat">62,3%</td>
+              <td class="beat">↑ Beschleunigt</td>
+            </tr>
+            <tr>
+              <td>Operating Margin</td>
+              <td>42,5%</td>
+              <td>50,8%</td>
+              <td class="beat">54,0%</td>
+              <td class="beat">↑ Stark</td>
+            </tr>
+            <tr>
+              <td>Net Margin</td>
+              <td>38,9%</td>
+              <td>45,1%</td>
+              <td>~46%</td>
+              <td class="beat">↑ Rekordniveau</td>
+            </tr>
+            <tr>
+              <td>FCF (FY)</td>
+              <td>~TWD 870 Mrd.</td>
+              <td>TWD 1.003 Mrd. (~$31B)</td>
+              <td>–</td>
+              <td class="beat">+15,2% YoY</td>
+            </tr>
+            <tr>
+              <td>CapEx</td>
+              <td>$32,5 Mrd.</td>
+              <td>$40,9 Mrd.</td>
+              <td>–</td>
+              <td class="neutral">↑ Planmäßig erhöht</td>
+            </tr>
+            <tr>
+              <td>ROE</td>
+              <td>30,3%</td>
+              <td>35,4%</td>
+              <td class="beat">38,8%</td>
+              <td class="beat">↑ Exzellent</td>
+            </tr>
+            <tr>
+              <td>Debt/Equity</td>
+              <td>0,22x</td>
+              <td>0,18x</td>
+              <td>–</td>
+              <td class="beat">↓ Sehr niedrig</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Qualitätseinschätzung</h3>
+      <p>TSMCs Kapitalqualität ist außergewöhnlich. Die Kombination aus einem Piotroski F-Score von 8/9 und einem Altman Z-Score von 9,86 signalisiert höchste Bilanzqualität und geringstes Insolvenzrisiko. Die Earnings sind "echt": Das Unternehmen erwirtschaftet echten freien Cashflow (+$31 Mrd. in 2025), weist kaum Schulden auf (Debt/Equity 0,18x) und steigert kontinuierlich Margen durch operative Effizienz. Der hohe CapEx belastet zwar den freien Cashflow, ist aber strategisch notwendig und durch die Nachfragesituation vollständig begründet. Share Buybacks sind bei TSMC traditionell gering – das Kapital fließt primär in Wachstum und Dividenden (Dividendenwachstum 2026: +28% auf TWD 23/Aktie). Seeking-Alpha-äquivalent: Profitability Grade "A".</p>
+      <div class="source">Quellen: TSMC Q4 2025 Earnings Transcript; Quartr IR Summary; Stockanalysis.com Financials (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 7 -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich: Samsung, Intel Foundry, Broadcom</div>
+      <div class="section-score">Score: 9/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Unternehmen</th>
+              <th>Rolle</th>
+              <th>Marktanteil Foundry</th>
+              <th>Umsatz (TTM)</th>
+              <th>Bruttomarge</th>
+              <th>Fwd. P/E</th>
+              <th>Marktkapital.</th>
+              <th>Einschätzung</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>TSMC (TSM)</strong></td>
+              <td>Pure-Play Foundry</td>
+              <td class="beat"><strong>71%</strong></td>
+              <td>$121 Mrd.</td>
+              <td class="beat">62,3%</td>
+              <td>26,2x</td>
+              <td>$1,91 Bio.</td>
+              <td><span class="badge badge-green">Dominierend</span></td>
+            </tr>
+            <tr>
+              <td><strong>Samsung Foundry</strong></td>
+              <td>IDM + Foundry</td>
+              <td class="miss">6,8%</td>
+              <td>~$13 Mrd. (Foundry)</td>
+              <td class="miss">~25%*</td>
+              <td>~18x (ges.)</td>
+              <td>~$260 Mrd.</td>
+              <td><span class="badge badge-yellow">Verliert Marktanteile</span></td>
+            </tr>
+            <tr>
+              <td><strong>Intel Foundry (IFS)</strong></td>
+              <td>IDM + Foundry-Pivot</td>
+              <td class="miss">~3%</td>
+              <td>–(Verlust)</td>
+              <td class="miss">Negativ</td>
+              <td>~40x (ges.)</td>
+              <td>~$90 Mrd.</td>
+              <td><span class="badge badge-red">Noch keine ext. Kunden</span></td>
+            </tr>
+            <tr>
+              <td><strong>Broadcom (AVGO)</strong></td>
+              <td>Fabless Chip + Software</td>
+              <td>–(Kunde)</td>
+              <td>~$60 Mrd.</td>
+              <td>~67%</td>
+              <td>~35x</td>
+              <td>~$1,60 Bio.</td>
+              <td><span class="badge badge-orange">TSMC-Hauptkunde; KI-ASIC</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text-muted);">* Samsung Foundry-Marge geschätzt; Samsung gesamt deutlich positiv durch Memory-Geschäft.</p>
+
+      <h3>Qualitative Unterschiede</h3>
+      <p>Im direkten Foundry-Vergleich ist TSMCs Überlegenheit gegenüber Samsung und Intel Foundry eklatant. Samsung Foundry verlor in Q3 2025 weiter Marktanteile (6,8% vs. TSMCs 71%) und kämpft mit Yield-Problemen bei seinem 3nm-GAA-Prozess. Große Kunden wie Qualcomm, die Samsung kurzzeitig als Alternative nutzten, kehren zunehmend zu TSMC zurück. Intel Foundry verbrannte 2024 rund 13,4 Mrd. USD und hat – trotz massiver US-Staatsunterstützung via CHIPS Act und Investitionen von Nvidia und SoftBank – bislang keine bedeutenden externen Fertigungsaufträge gewonnen. Das 18A-Node soll 2026 in die Massenproduktion gehen, aber Kundenskepsis bleibt hoch.</p>
+      <p>Broadcom ist kein direkter Konkurrent, sondern TSMCs wichtigster Wachstumspartner im Custom-AI-Chip-Segment. Broabcoms XPUs (Custom AI Accelerators für Google TPUs, Meta etc.) werden auf TSMC-Nodes gefertigt. Das Unternehmen profitiert wie TSMC vom KI-Kapex-Boom und ist mit einer Marktkapitalisierung von ~1,6 Bio. USD auf Augenhöhe. Für TSMC ist Broaadcom sowohl wichtiger Umsatzbringer als auch Indikator für AI-ASIC-Nachfrage. Eine anhaltend starke Broadcom-Guidance ist daher auch ein Positivsignal für TSMC.</p>
+      <div class="source">Quellen: TrendForce Q3 2025 Foundry Market Share (Dez 2025); FinancialContent Intel Foundry Analysis (Nov 2025); AlphaSense Semiconductor Rankings 2026; PatentPC "TSMC Samsung Intel Race" (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 8 -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News & Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen (TSMC-spezifische Events)</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">15. Jan 2026 – Q4 2025 Earnings Beat <span class="badge badge-green">Sehr Positiv</span></div>
+          <div class="event-text">Umsatz $33,7 Mrd. (+35% YoY), Bruttomarge 62,3% (+280 Bp. QoQ), EPS TWD 19,5 – alle Metrics über Konsens. 2026-Guidance auf ~30% Umsatzwachstum angehoben. Quelle: TSMC IR, 15. Jan 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Feb 2026 – Januar-Umsatzzahlen: Rekordmonat <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Konsolidierter Umsatz Januar 2026: TWD 401,3 Mrd. (+36,8% YoY, +19,8% MoM) – stärkster Januar aller Zeiten. Kurs erreichte neues 52W-Hoch bei ~$379–390. Quelle: TSMC Monthly Revenue Report, Feb 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Jan/Feb 2026 – Analysten-Upgrades: Barclays, Needham, Morningstar <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Barclays hob Kursziel auf $450 (Overweight) an; Needham auf $410 (Buy); Morningstar auf $428 (Fair Value). Konsens-Zielkurs: ~$418. Quelle: TipRanks / 24-7WallSt, Feb 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Dez 2025 – Taiwan erwägt N-2 Exportregel für Chip-Technologie <span class="badge badge-yellow">Gemischt</span></div>
+          <div class="event-text">Taiwan diskutiert Verschärfung der Exportregel: Nur noch Technologien zwei Generationen hinter dem Leading Edge dürften offshore produziert werden (bisher N-1). Würde Arizona-Fab-21-Phase-2 (3nm) ab 2027 potenziell beeinflussen. Quelle: Tom's Hardware, Dez 2025.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">31. Dez 2025 – VEU-Lizenz für Nanjing-Fab widerrufen <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">US-Regierung widerrief TSMCs Verified End User (VEU) Status für die Nanjing-Fab in China; keine Kapazitätserweiterungen oder Technologie-Upgrades mehr möglich. China-Umsatz (~10%) mittelfristig unter Druck. Quelle: FinancialContent, Nov/Dez 2025.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Q4 2025 – N2 (2nm) Chip-Produktion angelaufen <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">TSMC begann Ende Q4 2025 ruhig mit der Auslieferung von N2-Prozessoren. Kapazität soll bis Ende 2026 auf ~125.000 Wafer/Monat hochgefahren werden. Quelle: TrendForce, Dez 2025; BALD Engineering, Sep 2025.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche (Halbleiter / Foundry-spezifisch)</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Feb 2026 – Broadcom erwartet "sehr starke Nachfrage" nach KI-Custom-Chips <span class="badge badge-green">Positiv für TSMC</span></div>
+          <div class="event-text">Broadcom CEO Hock Tan bestätigte anhaltend hohes Auftragsvolumen für Custom AI Accelerators (XPUs) – gefertigt auf TSMC-Nodes. Dies stützt TSMCs HPC-Umsatz. Quelle: CNBC, 26. Feb 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Jan 2026 – Intel Foundry erhält $5 Mrd. Nvidia-Investition; 18A-Node 2026 <span class="badge badge-yellow">Langfristig zu beobachten</span></div>
+          <div class="event-text">Intel Foundry erhält strategische Investitionen von Nvidia und SoftBank; 18A-Node soll 2026 in Volumenproduktion gehen. Aktuell noch kein ernsthafter TSMC-Konkurrent, aber mittelfristiger Risikofaktor. Quelle: FinancialContent, Nov 2025.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Dez 2025 – China verstärkt Halbleiter-Eigenproduktion; SMIC gewinnt Marktanteile <span class="badge badge-yellow">Langfristiges Risiko</span></div>
+          <div class="event-text">Chinesische Foundries (SMIC, HuaHong) bauen Legacy-Kapazitäten aggressiv aus, gefördert durch staatliche Subventionen. Keine Bedrohung für Advanced Nodes, aber Preisdruck im Mature-Node-Segment. Quelle: TrendForce, Dez 2025.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro (Zinsen, Geopolitik, Regulierung)</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Feb 2026 – US-Handelspolitik: Chip-Zölle im Fokus der Trump-Administration <span class="badge badge-yellow">Gemischt/Risiko</span></div>
+          <div class="event-text">Trump-Administration hält Chip-Importzölle in der Diskussion; TSMC warnte US-Regierung, dass Zölle auf Chips die eigenen Arizona-Investitionen gefährden könnten. $165 Mrd. US-Investmentzusage als implizite Zoll-Versicherung. Quelle: Various, Feb 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">2026 – Fed: Zinssenkungszyklus stützt Growth-Aktien <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Moderates Zinsniveau 2026 stützt technologielastige Wachstumstitel wie TSMC. Niedrigerer Diskontierungszinssatz begünstigt hohe Bewertungsmultiples bei starkem Wachstum. Makro-Umfeld bleibt konstruktiv für KI-Infrastruktur-Investitionen.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Laufend – Taiwan-Strait-Spannungen: Militärübungen, Kommentare <span class="badge badge-red">Strukturelles Risiko</span></div>
+          <div class="event-text">China bezeichnet Taiwan-Wiedervereinigung als "unaufhaltsam" bei Militärübungen (Nov 2025). Ein US-Geheimdienstbericht warnt vor globalem BIP-Schaden von $10 Bio. bei Taiwan-Konflikt. Stärkste Reddit-Diskussion zu TSM-Aktie dreht sich um dieses Thema. Quelle: CNBC, expose-news.com, Mär 2026.</div>
+        </div>
+      </div>
+
+      <div class="source">Quellen: TSMC IR (Jan-Feb 2026); Tom's Hardware (Dez 2025); 24/7 Wall St. (Feb 2026); CNBC (Feb-Mär 2026); TrendForce (Dez 2025); FinancialContent (Nov 2025)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 9 -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <!-- Mini KPI Grid für Technische Daten -->
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); margin-bottom:16px;">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$371.50</div><div class="kpi-sub">28. Feb 2026</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value green">$359.55</div><div class="kpi-sub">Kurs darüber ↑</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value orange">$375.50</div><div class="kpi-sub">Kurs leicht drunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value green">$353.32</div><div class="kpi-sub">Kurs darüber ↑</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value orange">~66</div><div class="kpi-sub">Neutral/Bullish</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value">$390.20</div><div class="kpi-sub">Feb 2026</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value green">Bullish</div><div class="kpi-sub">Linie > Signal</div></div>
+      </div>
+
+      <h3>Trendanalyse & Struktur</h3>
+      <p>TSM befindet sich seit dem Tief im August 2024 (~$125) in einem starken Aufwärtstrend. Der Kurs hat sich im Verlauf von 12 Monaten nahezu verdoppelt (+92% YoY) und erreichte im Februar 2026 ein neues 52-Wochen-Hoch von ~$390. Aktuell befindet sich die Aktie in einer kurzen Konsolidierungsphase knapp unterhalb des 50-Tage-Gleitenden Durchschnitts ($375,50), was nach dem starken Januar-Rally technisch gesund ist. Das generelle Trendgefüge ist intakt: Alle wichtigen Gleitenden Durchschnitte (SMA20, SMA50, SMA200) verlaufen aufwärts, und der Kurs notiert deutlich über dem SMA200 ($353,32).</p>
+
+      <h3>Support & Resistance / Momentum</h3>
+      <p>Der primäre Support liegt bei $353–360 (SMA200 / SMA20-Zone), der sekundäre bei $333 (SMA50 vor Januar-Rally). Eine Rückkehr unter $333 würde das kurzfristige bullische Bild eintrüben. Wichtige Widerstandsniveaus liegen bei $390 (bisheriges ATH) und psychologisch bei $400. Das MACD-Signal ist positiv (Linie über Signal, positives Histogramm). Der RSI von ~66 zeigt aufbauendes Momentum ohne überkaufte Bedingungen (Schwelle: 70) – dies lässt Luft nach oben. Investing.com-Signal (daily): "Strong Buy" (8 MAs Buy, 4 Sell; 7 Technische Indikatoren Buy, 0 Sell).</p>
+      <p>Das Hauptrisiko auf der technischen Seite: Ein Makro-Schock (z.B. Taiwan-Eskalation oder enttäuschende Q1-Zahlen) könnte die Konsolidierung zu einem stärkeren Rücksetzer ausweiten. Die Bollinger Bands (Upper: ~$395, Lower: ~$323) zeigen moderate Volatilität. Seeking-Alpha-äquivalent: Momentum Grade "B+".</p>
+      <div class="source">Quellen: Investing.com Technical Analysis TSM (Mär 2026); HistoricalOptionData.com Trading Analysis (27. Feb 2026); Altindex.com TSM Technical (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 10 -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken & Chancen (Geopolitik-Fokus)</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <h3>🌏 Hauptthema dieser Analyse: Geopolitisches Risikocluster TSMC</h3>
+
+      <div class="geo-risk-card">
+        <h4>⚡ Risiko 1: Taiwan-Konflikt / Militärische Eskalation</h4>
+        <div class="risk-header">
+          <div class="risk-title" style="font-size:13px; color:var(--text-muted);">Wahrscheinlichkeit: niedrig-mittel (5–15% in 5 Jahren) · Auswirkung: KATASTROPHAL</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Existenziell</span></div>
+        </div>
+        <div class="event-text">Ein militärischer Konflikt zwischen China und Taiwan würde de facto die gesamte TSMC-Produktionskapazität (90%+ der Leading-Edge-Kapazität liegt in Taiwan) schlagartig unterbrechen. Analysten schätzen den globalen BIP-Schaden auf 10 Billionen USD jährlich – mehr als die COVID-Pandemie. Dies ist das systemische Tail-Risk für jedes TSMC-Investment. Wahrscheinlichkeit bleibt aktuell relativ niedrig (China tätigt erhebliche Wirtschafts-Investments, die bei Konflikt verloren wären), aber die Rhetorik eskaliert periodisch. Die "Silicon Shield"-These – Taiwan ist zu wertvoll, um es zu zerstören – ist eine echte, aber nicht garantierte Abschreckung.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Risiko 2: US-Chip-Zölle / Handelspolitik</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Die Trump-Administration erwägt Zölle auf importierte Halbleiter. Falls diese auf TSMC-ADRs oder taiwanische Chipexporte angewendet werden, könnten Chippreise steigen, US-Kundenbestellungen sinken und TSMCs US-Marktanteil unter Druck geraten. TSMC begegnet dem durch seine $165 Mrd.-Investitionszusage in Arizona – diese fungiert als implizite "Zoll-Versicherung". Wahrscheinlichkeit echter starker Zölle auf TSMC: mittel (Admininstration hat Ausnahmen für strategische Investoren signalisiert). Finanziell: ~5–10% Umsatzdruck im Worst-Case.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Risiko 3: Taiwan N-2 Export-Regel / Technologie-Beschränkungen</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Taiwans Regierung erwägt, TSMC nur noch die Fertigung von Technologien zu gestatten, die zwei Generationen hinter dem Leading Edge liegen (N-2 statt bisher N-1). Dies würde bedeuten, dass Arizona-Fab-21-Phase-2 (3nm) ab 2027 möglicherweise nicht konform wäre, wenn TSMC zu N2 voranschreitet. Eine solche Regelung würde die globale Diversifizierungsstrategie von TSMC erheblich erschweren und die strategische Abhängigkeit von Taiwan vertiefen. Der Markt hat dieses Risiko noch nicht vollständig eingepreist.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Risiko 4: China-Nanjing-Fab (VEU-Widerruf) & China-Umsatzerosion</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Niedrig-Mittel</span></div>
+        </div>
+        <div class="event-text">Mit Ablauf der VEU-Lizenz Ende 2025 kann die Nanjing-Fab keine Kapazitätserweiterungen mehr vornehmen. Der China-Umsatz (~10% des Gesamtumsatzes) dürfte mittelfristig stagnieren oder leicht schrumpfen. Da chinesische Fabless-Unternehmen auf heimische Foundries (SMIC) ausweichen, ist mittelfristig Umsatzrückgang von ~3–4% auf Gesamtunternehmensebene möglich. Wird durch globales AI-Wachstum mehr als kompensiert.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Risiko 5: CapEx-Überinvestition / Auslastungsrisiko</div>
+          <div><span class="badge badge-yellow">Niedrig-Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">TSMC plant $52–56 Mrd. CapEx in 2026 – 25–37% mehr als 2025. Ein Abschwung in der KI-Nachfrage oder eine Überinvestition der Hyperscaler könnte zu sinkenden Auslastungsraten führen. Laut Futurum-Analyse: Ein 1%-Rückgang der Kapazitätsauslastung reduziert die Bruttomarge um 40 Basispunkte. Bei einer Rezession könnte die Bruttomarge von 62–65% auf 56–58% sinken.</div>
+      </div>
+
+      <h3>9b) Chancen</h3>
+      <p>Die Chancen sind strukturell stark: Die KI-Infrastruktur-Investitionswelle (Hyperscaler capex steigt 2026 um >30%) kommt direkt bei TSMC an. Die Einführung von N2 (2nm) in 2026 eröffnet einen neuen Preissetzungszyklus – TSMC hat seine durchschnittlichen Waferpreise seit 2019 um über 15% jährlich gesteigert. Das CoWoS-Packaging (für Nvidias HBM-Integration) skaliert auf 125.000 Wafer/Monat bis Ende 2026 (+67% vs. aktuell 75.000). Langfristig: Der Automotive-Sektor (E-Fahrzeuge, ADAS) und der Edge-AI-Markt sind strukturell wachsende Segmente, die TSMCs Mature-Node-Kapazitäten mittelfristig komplett auslasten werden.</p>
+
+      <div class="source">Quellen: Tom's Hardware (Dez 2025); FinancialContent Arizona Odyssey (Nov 2025); Stimson Center (Nov 2025); Expose-news.com Confidential Report (Mär 2026); Futurum Q4 FY2025 Analysis (Jan 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 11 -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring-Übersicht</div>
+      <div class="section-note">Geopolitik-Fokus integriert</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Kategorie</th>
+              <th>Score</th>
+              <th style="min-width:200px;">Visualisierung</th>
+              <th>Begründung</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Geschäftsmodell</td>
+              <td>9/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+              <td>Pure-Play Foundry, neutrales Modell, skalierbar, einzigartig</td>
+            </tr>
+            <tr>
+              <td>Burggraben</td>
+              <td>9/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+              <td>Technologieführerschaft, hohe Switching Costs, 71% Marktanteil</td>
+            </tr>
+            <tr>
+              <td>Operative Entwicklung (4Q)</td>
+              <td>9/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+              <td>4/4 Beats, Margensteigerung, Guidance-Erhöhung</td>
+            </tr>
+            <tr>
+              <td>Wachstum</td>
+              <td>9/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+              <td>36% in 2025, ~30% in 2026 guided; KI-CAGR 35%+</td>
+            </tr>
+            <tr>
+              <td>Bewertung</td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>PEG 0,87x attraktiv; Fwd P/E 26x fair, nicht günstig</td>
+            </tr>
+            <tr>
+              <td>Cashflow & Margen</td>
+              <td>9/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+              <td>Bruttomarge Rekord 62,3%; ROE 35%; Debt/Equity 0,18x</td>
+            </tr>
+            <tr>
+              <td>Peer-Vergleich</td>
+              <td>9/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+              <td>Dominante Position; Samsung verliert Anteile; Intel noch unprofitabel</td>
+            </tr>
+            <tr>
+              <td>Technische Analyse</td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Starker Trend; kurzfristige Konsolidierung unter SMA50; RSI 66</td>
+            </tr>
+            <tr>
+              <td>Risiken (invertiert)</td>
+              <td>5/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td>
+              <td>Geopolitik Taiwan/US ist erheblich; N-2 Regel; China-Druck</td>
+            </tr>
+            <tr style="background:rgba(255,105,0,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>8,1/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track">
+                    <div class="score-bar-fill" style="width:81%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
+                  </div>
+                  <span class="score-num" style="color:var(--primary);">8,1</span>
+                </div>
+              </td>
+              <td>Exzellente Fundamentals & Marktposition; geopolitisches Risiko bleibt der einzige wesentliche Abzug</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px; color:var(--text-muted); margin-top:12px;">Hinweis zur Sektion 11 (User-spezifische These – Geopolitisches Risiko): Das Geopolitik-Risiko ist der einzige Bereich, der TSMCs fundamentale Exzellenz ernsthaft in Frage stellt. Es wurde vollständig in den Risiko-Score (5/10) eingearbeitet und prägt das bärische Narrativ in Sektion 12. Eine Aufwärtsanpassung des Risiko-Scores auf 7/10 wäre gerechtfertigt, wenn TSMC bis 2028 >25% seiner Leading-Edge-Kapazität außerhalb Taiwans aufgebaut hat – derzeit ist dies nicht der Fall.</p>
+    </div>
+  </div>
+
+  <!-- SEKTION 12 -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-note">Gesamtsynthese</div>
+    </div>
+    <div class="section-body">
+
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1: KI-Strukturwachstum ohne vergleichbare Alternative.</strong> TSMC ist das unverzichtbare Rückgrat des globalen KI-Booms. Nvidia, Apple, AMD und Broadcom – die Gewinner der KI-Revolution – sind nicht nur Kunden, sondern strategische Partner, die ihre gesamten Chip-Roadmaps 2–3 Jahre im Voraus auf TSMC-Prozessknoten committen. Mit 58% HPC-Anteil am Umsatz in 2025 und einem erwarteten AI-Accelerator-CAGR von 35%+ bis 2029 ist TSMC der einzige öffentlich handelbare "reine" Profiteur dieser Nachfrage. Der Umsatz wuchs 2025 um 36% auf $121 Mrd. bei gleichzeitiger Margenexpansion – Operating Leverage ist hier kein Schlagwort, sondern messbare Realität (+800 Bp. Bruttomarge in 2 Jahren).</p>
+          <p><strong>Säule 2: Technologischer Moat mit zwanzigjährigem Vorsprung.</strong> TSMCs 71% Foundry-Marktanteil ist kein kurzfristiger Vorteil, sondern das Ergebnis jahrzehntelanger Investitionen in Prozessexzellenz, Kundenvertrauen und ein einzigartiges Ökosystem in Taiwan. Samsung verliert trotz aggressiver Investitionen weiterhin Anteile (6,8% vs. 71%); Intel Foundry verbrennt Milliarden ohne externe Kundenbasis. N2 (2nm) ist 2025 angelaufen und wird TSMC bis 2027 erneut eine technologische Alleinstellung verschaffen – der nächste Preissetzungszyklus ist eröffnet.</p>
+          <p><strong>Säule 3: Bewertung fair bei exzeptionellem Wachstum (PEG 0,87x).</strong> Bei einem Forward-P/E von 26x und einem Umsatzwachstum von ~30% in 2026 liegt das PEG-Ratio unter 1 – klassisch "attraktiv". Morgan Stanley sieht die Aktie bei 16x/13x 2026/2027 EPS als attraktiv; Barclays bei $450 (Overweight). Der $165 Mrd. US-Investitionsplan verringert die Geopolitik-Risikoprämie substanziell und könnte zu einer Re-Rating-Expansion führen.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1: Der "Silicon Shield" ist keine Versicherung.</strong> TSMCs gesamte Leading-Edge-Kapazität (90%+) liegt in einem geografisch kleinen Gebiet in Taiwan. Ein chinesischer Blockade-Versuch, eine Invasion oder auch nur eine substanzielle militärische Eskalation würde den Kurs kurzfristig um 50–70% einbrechen lassen – unabhängig von Fundamentals. Die theoretische "Silicon Shield"-These (Taiwan zu wertvoll zum Zerstören) ist eine politische Hoffnung, keine juristische Garantie. Eine solche Eskalation würde nicht nur TSMC, sondern die gesamte globale Wirtschaft treffen – aber TSMC wäre der Epizentrum.</p>
+          <p><strong>Risiko 2: Regulatorischer Zangengriff von beiden Seiten.</strong> TSMC sitzt zwischen Washington und Taipei: Die USA erhöhen den Druck (Chip-Zölle, VEU-Widerruf, Arizona-Investitionspflicht), während Taiwan die N-2 Exportregel erwägt, die TSMCs globale Diversifizierungsstrategie de facto unterbindet. Im Worst-Case könnte Arizona niemals technologisch mit Taiwan mithalten (Kostenprämie ~30%), und gleichzeitig würden Zölle US-Kunden zu Alternativen treiben. Diese "regulatorische Zwickmühle" zwischen zwei Großmächten ist strukturell ohne gute Lösung.</p>
+          <p><strong>Risiko 3: CapEx-Überinvestition und Margendilution.</strong> TSMC investiert 2026 $52–56 Mrd. – historisch beispiellos. Overseas-Fabs (Arizona, Japan, Deutschland) haben strukturell höhere Kosten und verwässern die Marge um geschätzte 2–4 Prozentpunkte langfristig. Falls die KI-Nachfrage 2027 abflacht (Hyperscaler-CapEx-Pause, DeepSeek-Effizienzgewinne reduzieren Chip-Bedarf), könnten steigende Abschreibungen auf riesige neue Fabs und sinkende Auslastungsraten die Bruttomarge von 62%+ auf ~56% drücken – was bei der aktuellen Bewertung einen signifikanten Kursrückgang bedeuten würde.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Das bullische Narrativ ist überzeugender – aber das bärische enthält ein valides, schwerwiegendes Risiko, das nicht rationalisierbar ist: das geopolitische Tail-Risk. Die Profitabilitätswende ist strukturell (Operating Margin von 42% auf 54% in zwei Jahren, getrieben durch AI-Mix und Prozessexzellenz), die Technologieführerschaft real und der Moat außergewöhnlich tief. Für Investoren, die den Taiwan-Konflikt als "low probability, high impact"-Risiko einpreisen können, ist TSMCs Risk/Reward auf aktuellem Niveau attraktiv: ca. -25% Downside bei Bewertungskorrektur vs. +30–45% Upside bei Erreichung der 2026/2027-Guidance.</p>
+      <p>Wer jedoch das geopolitische Risiko als wesentliches Portfolio-Risiko betrachtet, sollte bedenken: TSMC ist kein Absicherungsfall – im Worst-Case-Szenario wäre keine Diversifikation im Portfolio ausreichend, da ein Taiwan-Konflikt die globalen Lieferketten paralysieren würde. Insofern ist das geopolitische Risiko ein systemisches, kein idiosynkratisches. Ich könnte falsch liegen, weil: Das N-2-Exportregel-Risiko könnte die Arizona-Diversifizierungsstrategie fundamental aushöhlen, oder ein überraschender Rückgang der KI-CapEx-Ausgaben (z.B. durch Effizienzsprünge wie DeepSeek) könnte die 30%-Wachstumsguidance gefährden.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Zeithorizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Kurzfristig (0–6M)</strong></td>
+              <td>Q1-Earnings (16. Apr), Januar-Rekordumsatz, N2-Ramp-up</td>
+              <td>Kursschwäche durch Geopolitik-Noise, kurzfr. Konsolidierung unter SMA50</td>
+              <td><span class="badge badge-orange">Tranchiert / Halten</span></td>
+            </tr>
+            <tr>
+              <td><strong>Mittelfristig (6–24M)</strong></td>
+              <td>N2-Volumenproduktion, CoWoS-Kapazität x1.67, Arizona Phase 2 (3nm)</td>
+              <td>Taiwan-N-2 Exportregel-Verabschiedung, Chip-Zölle</td>
+              <td><span class="badge badge-green">Kaufen</span></td>
+            </tr>
+            <tr>
+              <td><strong>Langfristig (2–5J)</strong></td>
+              <td>A16 (1.6nm) 2026, KI-CAGR 35%+, Automotive/Edge AI</td>
+              <td>Geopolitisches Tail-Risk bleibt strukturell; CapEx-Zyklus muss sich amortisieren</td>
+              <td><span class="badge badge-green">Kaufen & Halten</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese (Zusammenfassung)</h3>
+      <p>TSMC ist das unverzichtbare Fundament der digitalen Wirtschaft des 21. Jahrhunderts. Wer KI, 5G und autonomes Fahren profitiert, produziert bei TSMC. Das Unternehmen kombiniert eine dominante Marktstellung (71%), technologische Exzellenz (N2 läuft, A16 in 2026) und außergewöhnliche Kapitalqualität (Bruttomarge 62%+, ROE 35%, Debt/Equity 0,18x) mit einem realen Wachstum von ~30% in 2026. Dem gegenüber steht ein geopolitisches Risikocluster von erheblicher – wenn auch niedrig-probabilistischer – Wucht. Für langfristig orientierte Investoren mit einem Zeithorizont von 3–5 Jahren und Toleranz für geopolitische Volatilität ist TSMC ein klares Kaufen.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">USD 420–480</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">3–5 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–20–25%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+30–45%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:1,8</div></div>
+      </div>
+
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Taiwan-Strait-Eskalation (Blockade/Invasion) → sofort verkaufen</li>
+            <li>Bruttomarge fällt unter 56% für zwei aufeinanderfolgende Quartale → Position um 50% reduzieren</li>
+            <li>KI-CapEx-Ausgaben der Hyperscaler fallen um &gt;20% (z.B. Q2 2026 Guidance miss) → Risikoreduktion</li>
+            <li>N-2 Exportregel offiziell verabschiedet → Arizona-Investment-These bricht weg; Bewertung überdenken</li>
+            <li>Kurs dauerhaft unter SMA200 ($353) auf hohem Volumen → Momentum-Ausstieg</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Q1 2026 Earnings (16. Apr) bestätigt 38% YoY-Wachstum und Bruttomarge &gt;63% → nachkaufen</li>
+            <li>N2-Kapazität überschreitet 100.000 Wafer/Monat früher als erwartet → Aufstockung</li>
+            <li>Geopolitische Entspannung (US-China-Gipfel, Taiwan-Waffenstillstand) → substanzielle Position aufbauen</li>
+            <li>Kursschwäche auf &lt;$340 durch Makro-Schock ohne fundamentale Änderung → aggressives Nachkaufen</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Quality Growth Investoren (3–5J Horizont)</li>
+            <li>Tech-Themen-Investoren (KI, HPC)</li>
+            <li>Dividenden-Wachstums-Investoren (+28% Div-Wachstum)</li>
+            <li>Langfristige Vermögensaufbauer mit geopoilt. Risikotoleranz</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Risikoaverse Investoren (Taiwan-Tail-Risk)</li>
+            <li>Value Investoren (kein klassisches Value-Multiple)</li>
+            <li>Kurzfristige Trader (hohe Geopolitik-Volatilität)</li>
+            <li>Income-Investoren (Dividendenrendite ~0,9%)</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / 1. Tranche</span></td><td>25% Position jetzt; Rest nach Q1-Earnings (16. Apr) bei Bestätigung</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>50% jetzt bei ~$370; 50% bei Rücksetzer auf $340–350 oder nach Earnings</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Vollposition bei Risk/Reward 1:1,8; Stopp-Loss bei $330 (unter SMA50-Zone)</td></tr>
+            <tr><td><strong>Langfristig / DCA</strong></td><td><span class="badge badge-green">Kaufen & Halten</span></td><td>Regelmäßige Zukäufe; TSMC als "Core Holding" im Tech-Portfolio; 5J-Horizont</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="source">Quellen: Gesamtsynthese aus Sektionen 1–10; Morgan Stanley Research (Jan 2026); Barclays / Needham Analyst Notes (Feb 2026); TSMC Q4 2025 Transcript (Jan 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 13 -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Die 3 entscheidenden Events</div>
+      <div class="section-note">Wenn/Dann-Szenarien</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q1 2026 Quartalsergebnisse – voraussichtlich 16. April 2026</h4>
+        <p>TSMCs Q1-Earnings sind der kurzfristig wichtigste Katalysator. Das Management hat $34,6–35,8 Mrd. Umsatz (+38% YoY) und eine Bruttomarge von 63–65% in Aussicht gestellt. Gleichzeitig beginnt die N2-Rampe sichtbar zu werden – die HPC-Umsatzentwicklung (aktuell 58% des Mix) wird signalisieren, ob die KI-Nachfrage anhält oder erste Sättigung zeigt.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Q1 Umsatz ≥ $35 Mrd. (Midpoint der Guidance) AND Bruttomarge ≥ 63% AND HPC-Anteil bleibt ≥ 55% → die 2026-Wachstumsthese ist vollständig bestätigt. Kurzfristig nachkaufen; Kurspotenzial in Richtung $400–420 ist kurzfristig realistisch.<br><br>
+          <strong>Wenn:</strong> Umsatz verfehlt Guidance um &gt;3% (unter ~$33,6 Mrd.) ODER Bruttomarge fällt unter 62% → Warnsignal für beginnende Nachfrageabschwächung oder Kostendruck durch N2-Ramp / Overseas-Fabs. Position auf 50% reduzieren und Q2-Zahlen abwarten.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📋 Event 2: Taiwans N-2 Exportregel – Gesetzgebungsentscheidung, voraussichtlich H2 2026</h4>
+        <p>Taiwans Regierung prüft eine Verschärfung der Technologie-Exportregel (von N-1 auf N-2): TSMC dürfte demnach offshore nur Prozessknoten betreiben, die zwei Generationen hinter dem Leading Edge liegen. Dies würde direkt TSMCs Arizona-Expansion und die US-Investitionsthese treffen – Arizona Fab 21 Phase 2 (3nm) wäre ab Erreichen der N2-Technologie in Taiwan potenziell nicht konform. Dieses Risiko ist im Markt bisher kaum eingepreist.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Taiwans Regierung verabschiedet die N-2 Regel formal → TSMCs US-Diversifizierungsstrategie (und damit ein Kernargument gegen die Geopolitik-Prämie) ist substanziell gefährdet. Zielkurs auf $380–420 reduzieren; Position auf 50% kürzen bis Klarheit über Ausnahmen herrscht.<br><br>
+          <strong>Wenn:</strong> Die N-2 Regel scheitert, wird verwässert oder enthält großzügige Ausnahmeregelungen für bestehende Arizona-Kapazitäten → starkes Positivsignal; die Geopolitik-Risikoprämie sinkt; Zielkurs kann auf $450–500 revidiert werden. Position voll aufbauen.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>🌏 Event 3: Geopolitische Taiwan-Dynamik und US-China-Verhältnis – fortlaufend, kritisch in 2026/2027</h4>
+        <p>Die Taiwan-Frage ist das übergeordnete Makro-Risiko für jedes TSMC-Investment. Regelmäßige Eskalationssignale (Militärübungen, diplomatische Krisen, US-Waffenlieferungen) vs. Entspannungssignale (US-China-Gipfel, wirtschaftliche Kooperation) definieren die Geopolitik-Risikoprämie, die dauerhaft im Kurs eingepreist ist. Ein weiterer Faktor: Der Fortschritt von TSMCs Arizona-Fab (Produktionsstart Phase 2 in 2026/2027 mit 3nm) ist ein konkreter, messbarer Meilenstein in der Diversifizierungsstrategie.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Arizona Fab Phase 2 beginnt planmäßig die 3nm-Massenproduktion (H2 2026/H1 2027) AND die USA signalisieren explizite strategische Unterstützung für TSMC ohne neue Zölle → die Geopolitik-Prämie sinkt strukturell. TSMC könnte in Richtung $450–500 re-raten. Aggressives Nachkaufen gerechtfertigt.<br><br>
+          <strong>Wenn:</strong> Chinesische Militärübungen rund um Taiwan eskalieren signifikant (Blockade-ähnliche Szenarien) ODER die USA verhängen substantielle Chip-Zölle auf taiwanische Importe → kurzfristiger Crash möglich (-30 bis -50%). Sofortige Risikoreduzierung; Position auf Minimum kürzen bis zur Lageklarheit.
+        </div>
+      </div>
+
+      <div class="source">Quellen: TSMC Q4 2025 Earnings Call (Jan 2026); Tom's Hardware N-2 Rule (Dez 2025); CNBC Global Markets (Mär 2026); Stimson Center Taiwan Analysis (Nov 2025); Digitimes Arizona Expansion (Jan 2026)</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse wurde am 03. März 2026 auf Basis öffentlich verfügbarer Informationen erstellt und dient ausschließlich zu Informationszwecken. Sie stellt keine Anlageberatung, Aufforderung zum Kauf oder Verkauf von Wertpapieren dar. Investitionen in Aktien sind mit erheblichen Risiken verbunden. Vergangene Performance ist kein verlässlicher Indikator für zukünftige Ergebnisse. Bitte konsultieren Sie einen zugelassenen Finanzberater vor Anlageentscheidungen. Der Autor übernimmt keine Haftung für Verluste, die auf Basis dieser Analyse entstehen.</div>
+</div>
+
+</body>
+</html>
