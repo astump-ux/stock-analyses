@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WISE.L – Aktienanalyse Canvas v2.2</title>
+<style>
+:root {
+  --primary: #8b5cf6;
+  --primary-dark: #7c3aed;
+  --bg: #0f0f12;
+  --bg-card: #1a1a1f;
+  --bg-card2: #22222a;
+  --border: #2e2e38;
+  --text: #e8e8ec;
+  --text-muted: #888898;
+  --text-dim: #555566;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --blue: #3b82f6;
+  --purple: #8b5cf6;
+  --teal: #14b8a6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+.header {
+  background: linear-gradient(135deg, #0e0018 0%, #1a0028 40%, #0f0f12 100%);
+  border-bottom: 1px solid var(--primary);
+  padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;
+}
+.header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+.header-left h1 span { color: var(--primary); }
+.header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+.header-right { text-align: right; }
+.price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+.price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+.price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+.price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+.price-change.up { background: rgba(34,197,94,0.15); color: var(--green); }
+.nav {
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
+  position: sticky; top: 0; z-index: 100;
+}
+.nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+.main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+.kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+.kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.kpi-value.green { color: var(--green); }
+.kpi-value.red { color: var(--red); }
+.kpi-value.orange { color: var(--primary); }
+.section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+.section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+.section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.section-title { font-size: 16px; font-weight: 700; color: white; }
+.section-score { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+.section-note { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+.section-body { padding: 20px 24px; }
+p { margin-bottom: 12px; color: var(--text); }
+p:last-child { margin-bottom: 0; }
+h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+h3:first-child { margin-top: 0; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(139,92,246,0.04); }
+.beat { color: var(--green); font-weight: 600; }
+.miss { color: var(--red); font-weight: 600; }
+.neutral { color: var(--yellow); font-weight: 600; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+.badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+.badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+.badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+.badge-orange { background: rgba(139,92,246,0.15); color: var(--primary); }
+.event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+.event-item:last-child { border-bottom: none; }
+.event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+.dot-green { background: var(--green); }
+.dot-red { background: var(--red); }
+.dot-yellow { background: var(--yellow); }
+.event-label { font-weight: 600; color: white; }
+.event-text { font-size: 14px; color: var(--text); }
+.risk-item { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+.risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.risk-title { font-weight: 600; color: white; font-size: 14px; }
+.score-bar { display: flex; align-items: center; gap: 10px; }
+.score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #c084fc); }
+.score-num { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+.bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media(max-width:700px){ .bull-bear-grid { grid-template-columns: 1fr; } }
+.bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+.bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+.bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.rating-box { background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(139,92,246,0.04)); border: 1px solid rgba(139,92,246,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+.rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+.rating-item .val { font-size: 20px; font-weight: 800; color: white; }
+.rating-item .val.buy { color: var(--green); }
+.rating-item .val.hold { color: var(--yellow); }
+.rating-item .val.sell { color: var(--red); }
+.trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media(max-width:700px){ .trigger-grid { grid-template-columns: 1fr; } }
+.trigger-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.trigger-card h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.trigger-card.buy h5 { color: var(--green); }
+.trigger-card.sell h5 { color: var(--red); }
+.trigger-list { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+.trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+.trigger-list li::before { content: "→"; position: absolute; left: 0; }
+.investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+@media(max-width:600px){ .investor-grid { grid-template-columns: 1fr; } }
+.investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+.investor-no { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+.investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-no h5 { color: var(--red); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+.investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+.investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+.geo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+.geo-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.geo-pct { font-size: 20px; font-weight: 700; color: white; }
+.geo-note { font-size: 12px; color: var(--text-muted); }
+.outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+.outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+.outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+.outlook-card .when-then strong { color: var(--primary); }
+.source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+.source a { color: var(--text-dim); }
+.disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+.alert-box { background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.pill { display: inline-block; background: rgba(139,92,246,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+.highlight-box { background: rgba(139,92,246,0.06); border: 1px solid rgba(139,92,246,0.15); border-radius: 8px; padding: 14px 16px; margin: 12px 0; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Wise plc <span>WISE.L</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 03. März 2026 · London Stock Exchange · Sektor: Fintech / Payments</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">Cross-Border Payments</span>
+      <span class="badge badge-blue">Wise Platform (B2B)</span>
+      <span class="badge badge-green">Wise Business</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">860p</div>
+    <div class="price-meta">Schlusskurs 27. Feb 2026 · LSE (GBX)</div>
+    <div class="price-change down">▼ –29.8% vom 52W-Hoch</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: 793p – 1.225p</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <!-- KPI OVERVIEW -->
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Kurs</div>
+      <div class="kpi-value orange">860p</div>
+      <div class="kpi-sub">GBX · 27.02.2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Marktkapitalisierung</div>
+      <div class="kpi-value">£8,63 Mrd.</div>
+      <div class="kpi-sub">~1,03 Mrd. Aktien</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">P/E (TTM)</div>
+      <div class="kpi-value">23,2x</div>
+      <div class="kpi-sub">EPS: 37,5p (TTM)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">EV/EBITDA</div>
+      <div class="kpi-value">~16x</div>
+      <div class="kpi-sub">EBITDA TTM: £524 Mio.</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Bruttomarge</div>
+      <div class="kpi-value green">79,2%</div>
+      <div class="kpi-sub">TTM Underlying</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">ROE (TTM)</div>
+      <div class="kpi-value green">29,7%</div>
+      <div class="kpi-sub">Net Margin: 22,5%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Nächste Earnings</div>
+      <div class="kpi-value orange" style="font-size:16px;">30. Jun 26</div>
+      <div class="kpi-sub">FY2026 Jahresergebnis</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Analysten-Konsens</div>
+      <div class="kpi-value green" style="font-size:16px;">BUY</div>
+      <div class="kpi-sub">14 Buy / 3 Sell · Ø 1.170p</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 1 -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 9 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Kernmission & Produkte</h3>
+      <p>Wise plc (gegründet 2011, börsennotiert seit Juli 2021 auf der LSE) versteht sich als globales Technologieunternehmen mit der Mission, Geld ohne Grenzen zu bewegen. Das Unternehmen hat eine eigene Zahlungsinfrastruktur aufgebaut, die traditionelle Korrespondenzbankennetzwerke umgeht und stattdessen auf direkte Integrationen in lokale Zahlungssysteme setzt. Im Geschäftsjahr 2025 (Stichtag 31. März 2025) wurden über £145 Milliarden Volumen für mehr als 15,6 Millionen Kunden abgewickelt – mehr als doppelt so viel wie bei der Börsennotierung vor vier Jahren.</p>
+      <p>Das Produktportfolio gliedert sich in drei klar abgegrenzte Segmente: <strong>Wise Personal</strong> richtet sich an Privatpersonen mit internationaler Lebensweise – Expats, Vielreisende, Studierende im Ausland. Das Kernangebot ist die transparente Überweisung zum Mittelkurs ohne versteckte FX-Aufschläge, ergänzt durch ein Multi-Währungskonto (Wise Account) mit über 40 unterstützten Währungen, einer physischen und virtuellen Debitkarte sowie einer Zinsfunktion (Wise Assets). <strong>Wise Business</strong> adressiert KMUs, Freiberufler und internationale Unternehmen mit Massenzahlungen, API-Integration, Rechnungsstellung und geschäftlichen Debitkarten. Im H1 FY2026 wuchs das Geschäftsvolumen um 35% auf £24 Milliarden. <strong>Wise Platform</strong> ist das B2B-White-Label-Segment, über das Banken, Fintechs und Unternehmen (z.B. Standard Chartered, Morgan Stanley, Upwork, MBSB Bank) die Wise-Infrastruktur in ihre eigenen Produkte integrieren; es macht rund 5% des Gesamtvolumens aus, wächst jedoch mit ~80% p.a. am schnellsten.</p>
+      <h3>Revenue Streams & Kostenstruktur</h3>
+      <p>Wise monetarisiert über drei Quellen: (1) <strong>Cross-Border-Einnahmen</strong> (Transaktionsgebühren, ~60% des Revenues) basieren auf einer Take Rate – im Q3 FY2026 bei 52 Basispunkten, kontinuierlich sinkend von 67 bps in 2024, da Skalenvorteile konsequent an Kunden weitergegeben werden. (2) <strong>Card & andere Einnahmen</strong> (~33%) wachsen mit +26-30% p.a. am stärksten und umfassen Interchange-Einnahmen bei Kartenzahlungen, Premium-Features und Währungskonversion im Tagesgeschäft. (3) <strong>Zinseinkommen</strong> auf Kundeneinlagen (~7% underlying, signifikant höher reported) – Wise investiert Kundenguthaben in sichere, liquide Assets und gibt den ersten Prozentpunkt Rendite als "underlying"-Einnahme, alles darüber als separaten reported-Posten aus. Dieses Modell ist asset-light mit sehr niedrigen physischen Infrastrukturkosten, einer Gross Margin von ~75-79% und hohem operativem Leverage.</p>
+      <div class="source">Quellen: Wise plc FY2025 Annual Report (5. Jun 2025); Wise H1 FY2026 Interim Results (6. Nov 2025); Wise Q3 FY2026 Trading Update (20. Jan 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 2 -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben & Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Proprietäre Zahlungsinfrastruktur (Stärkster Moat)</h3>
+      <p>Wise hat über 14 Jahre hinweg ein proprietäres Netzwerk aus direkten Beteiligungen an lokalen Zahlungssystemen aufgebaut. Aktuell ist Wise direkter Teilnehmer in 8 Inlandszahlungssystemen weltweit, darunter PIX (Brasilien, live), SEPA (Europa), FPS (UK), ACH (USA), UPI (Indien) und demnächst Zengin (Japan). Diese direkte Anbindung – statt der teureren Korrespondenzbankroute – ermöglicht, dass 74% aller Überweisungen im Q3 FY2026 in Echtzeit ankamen (YoY +9 Prozentpunkte). Der Aufbau dieser Infrastruktur kostet Millionen und dauert Jahre; ein Neueintritt müsste denselben jahrelangen regulatorischen und technologischen Weg gehen.</p>
+      <h3>Regulatorischer Moat & Lizenz-Netzwerk</h3>
+      <p>Wise hält über 50 Finanzdienstleistungslizenzen in mehr als 20 Regulierungsjurisdiktionen, darunter E-Geld-Lizenzen in der EU, UK, USA, Singapur, Australien, Kanada, Japan und zuletzt die UAE-Lizenz der Zentralbank. Jede Lizenz erfordert jahrelange Compliance-Arbeit, kapitalintensive Safeguarding-Anforderungen und tiefes Verhältnis zu Regulatoren – ein erheblicher Markteintrittsbarrier, den selbst gut finanzierte Stablecoin-Startups erst aufbauen müssen. Wise verarbeitet täglich über 7 Millionen Sicherheitschecks (AML, KYC, Fraud) – diese Compliance-Tiefe ist ein immaterieller Wettbewerbsvorteil, der in einem regulatorisch zunehmend anspruchsvollen Umfeld an Wert gewinnt.</p>
+      <h3>Netzwerkeffekte, Brand & Switching Costs</h3>
+      <p>Netzwerkeffekte bei Wise sind moderat: Mehr Nutzer verbessern die internen Netting-Möglichkeiten (Matching von EUR→GBP-Sender mit GBP→EUR-Empfänger ohne externen FX-Handel), senken die Kosten und erlauben weitere Preisreduktionen. Das Brand-Moat basiert auf dem Net Promoter Score und darauf, dass über 65% aller Neukunden organisch über Mundpropaganda kommen – ein enormer CAC-Vorteil. Der Marketing-Spend betrug in FY2025 nur £54 Mio. (4,5% vom Revenue) – verglichen mit Revoluts £463 Mio. (15% vom Revenue) ein dramatischer Effizienzunterschied. Switching Costs sind hingegen moderat: Kunden können jederzeit wechseln. Das Halten hoher Guthaben im Wise Account (£27,5 Mrd. Customer Holdings, +34% YoY) erhöht die Stickiness jedoch deutlich.</p>
+      <h3>Kritische Einschränkungen des Moats</h3>
+      <p>Trotz starker Fundamentaldaten weist der Moat Risse auf, die in Sektion 10 ausführlich behandelt werden: Die sinkende Take Rate (von 67 bps 2024 auf 52 bps aktuell) zeigt, dass Wettbewerb – ob durch Revolut, neobanken oder zunehmend Stablecoin-Infrastrukturen – Preispressen erzwingt. Die Frage, ob Wise Infrastruktur oder Verbrauchermarke ist, ist für die Stablecoin-Frage zentral: Als Infrastrukturanbieter könnte Wise mit Stablecoins koexistieren; als Verbrauchermarke ist er direkter disruptionsgefährdet. Score 7/10 (zuvor 8/10, angepasst um Stablecoin-/Neobank-Disruptionsrisiko).</p>
+      <div class="source">Quellen: Wise FY2025 Annual Report; Seeking Alpha Wise Coverage Jan 2025; Next Gen Investors Substack, Apr 2025; Money Flow Investing Substack, Aug 2024</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 3 -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Beat-Ratio: 3/4</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Da Wise.L an der London Stock Exchange notiert ist, sind keine finviz.com-Daten verfügbar. Alle Kennzahlen stammen von investing.com, den offiziellen Wise Investor Relations-Berichten sowie Bloomberg/TipRanks-Konsensschätzungen (Stand: 03. März 2026). Nächste Quartalsmeldung: FY2026-Jahresergebnis voraussichtlich 30. Juni 2026.
+      </div>
+      <h3>Quarterly Performance (FY2026 Geschäftsjahr, Stichtag 31. März)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quartal</th>
+              <th>Underlying Income</th>
+              <th>YoY</th>
+              <th>Cross-Border Vol.</th>
+              <th>Aktive Kunden</th>
+              <th>Take Rate</th>
+              <th>Beat/Meet</th>
+              <th>Aktienreaktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q4 FY2025</strong><br><small style="color:var(--text-muted)">Jan–Mrz 2025</small></td>
+              <td>£350,4 Mio.</td>
+              <td>+7% YoY</td>
+              <td>£39,1 Mrd.</td>
+              <td>9,29 Mio.</td>
+              <td>53 bps</td>
+              <td><span class="badge badge-green">FY-Guidance erfüllt</span></td>
+              <td><span class="neutral">Neutral</span></td>
+            </tr>
+            <tr>
+              <td><strong>Q1 FY2026</strong><br><small style="color:var(--text-muted)">Apr–Jun 2025</small></td>
+              <td>£362,0 Mio.</td>
+              <td>+11% YoY</td>
+              <td>£41,2 Mrd.</td>
+              <td>9,79 Mio.</td>
+              <td>52 bps</td>
+              <td><span class="badge badge-yellow">Im Rahmen</span></td>
+              <td><span class="miss">–5%</span></td>
+            </tr>
+            <tr>
+              <td><strong>Q2 FY2026</strong><br><small style="color:var(--text-muted)">Jul–Sep 2025</small></td>
+              <td>£387,5 Mio.</td>
+              <td>+15% YoY</td>
+              <td>£43,7 Mrd.</td>
+              <td>10,44 Mio.</td>
+              <td>52 bps</td>
+              <td><span class="badge badge-yellow">Im Rahmen</span></td>
+              <td><span class="miss">–8%</span> (PBT –17% YoY)</td>
+            </tr>
+            <tr>
+              <td><strong>Q3 FY2026</strong><br><small style="color:var(--text-muted)">Okt–Dez 2025</small></td>
+              <td>£424,4 Mio.</td>
+              <td><span class="beat">+21% YoY</span></td>
+              <td>£47,4 Mrd.</td>
+              <td>10,9 Mio.</td>
+              <td>52 bps</td>
+              <td><span class="badge badge-green">BEAT (Kons. £412 Mio.)</span></td>
+              <td><span class="beat">+12,6%</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Kommentar</h3>
+      <p>Die operative Entwicklung zeigt eine klare Beschleunigung im Wachstum: Das Underlying Income stieg von +7% in Q4 FY2025 auf +21% in Q3 FY2026. Besonders stark ist der Cross-Border-Volumenzuwachs (+26% in Q3 FY2026 auf £47,4 Mrd.) sowie das Kartensegment (+30% YoY), das die Kundenbindung über reine Überweisungen hinaus vertieft. Der Belastungspunkt des H1 FY2026 war der Rückgang des Underlying Profit Before Tax um 17% auf £122 Mio. – nicht wegen operativer Schwäche, sondern wegen bewusster Investitionserhöhung (+27% Admin-Kosten auf £466 Mio.) in Infrastruktur, Lizenzen und dem US-Dual-Listing. CEO Kristo Käärmann kommunizierte klar: Für FY2026 wird die PBT-Marge am oberen Ende des Zielkorridors von 13–16% erwartet – trotz der ~£35 Mio. Dual-Listing-Kosten. Die Aktienreaktion auf Q3 FY2026 (+12,6%) zeigt, dass der Markt die Wachstumsbeschleunigung honoriert, nachdem er die Margeninvestitionsphase in H1 zu pessimistisch bewertet hatte.</p>
+      <div class="source">Quellen: Wise H1 FY2026 Interim Results (6. Nov 2025, wise.com/ir); Wise Q3 FY2026 Trading Update (20. Jan 2026); Bloomberg Konsensschätzungen; TipRanks (20. Jan 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 4 -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Revenue & Volumen-Wachstum (FY2022–FY2026e)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Geschäftsjahr</th><th>Revenue</th><th>Wachstum</th><th>Underlying Income</th><th>Cross-Border Vol.</th><th>Aktive Kunden</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>FY2022</td><td>~£422 Mio.</td><td>—</td><td>~£522 Mio.</td><td>~£68 Mrd.</td><td>~10 Mio.</td></tr>
+            <tr><td>FY2023</td><td>~£718 Mio.</td><td><span class="beat">+70%</span></td><td>~£846 Mio.</td><td>~£105 Mrd.</td><td>~12 Mio.</td></tr>
+            <tr><td>FY2024</td><td>£1.054 Mio.</td><td><span class="beat">+47%</span></td><td>~£1.175 Mio.</td><td>£118,5 Mrd.</td><td>12,8 Mio.</td></tr>
+            <tr><td>FY2025</td><td>£1.205 Mio.</td><td><span class="beat">+14%</span></td><td>£1.359 Mio.</td><td>£145,2 Mrd.</td><td>15,6 Mio.</td></tr>
+            <tr><td>FY2026e</td><td>~£1.400 Mio.</td><td><span class="beat">~+16%</span></td><td>~£1.580 Mio.</td><td>~£175 Mrd.</td><td>~18 Mio.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Geografische Verteilung (geschätzt, FY2025)</h3>
+      <p>Wise gibt keine exakte geografische Umsatzaufschlüsselung aus, die Kundenherkunft und Korridore geben jedoch Hinweise. Europa (inklusive UK) ist historisch die Kernregion (~55% des Volumens), Asien-Pazifik gewinnt an Gewicht, und die USA sind der strategisch wichtigste Wachstumsmarkt. Das geplante US-Dual-Listing (H1 2026) und die Bewerbung um eine nationale Trust-Bank-Charta beim OCC unterstreichen die Priorität dieser Region.</p>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">UK & Europa</div>
+          <div class="geo-pct">~55%</div>
+          <div class="geo-note">Kernmarkt, stabil</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Asien-Pazifik</div>
+          <div class="geo-pct">~25%</div>
+          <div class="geo-note">Indien, Singapur, JP, PH</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Nord-Amerika</div>
+          <div class="geo-pct">~14%</div>
+          <div class="geo-note">Stärkstes Wachstum</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">LatAm / Afrika</div>
+          <div class="geo-pct">~6%</div>
+          <div class="geo-note">Mexiko, Brasilien neu</div>
+        </div>
+      </div>
+      <h3>Qualität des Wachstums</h3>
+      <p>Das Wachstum ist strukturell und nicht durch M&A oder Bilanzierungseffekte inflationiert. Besonders wertvoll ist die Kombination aus steigendem Volumen pro Kunden (Personal VPC Q4 FY2025: £3.200, +7% YoY) und der Diversifizierung hin zum höhermargigen Kartensegment (+26-30% YoY). Wise Business wächst mit +35% deutlich schneller als Personal (+20%), was langfristig das Unit-Economics-Profil verbessert, da B2B-Kunden höhere Volumen und niedrigere Servicekosten aufweisen. Der Reifegrad ist als "Growth-at-Scale" einzustufen: Das Kernkorridore-Wachstum verlangsamt sich (take rate compression), wird aber durch geografische und Produktexpansion kompensiert.</p>
+      <div class="source">Quellen: Wise FY2025 Annual Report (Jun 2025); Wise H1 FY2026 Results; Wise Q3 FY2026 Trading Update (Jan 2026); CNBC Finanzdaten (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 5 -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung & Multiples</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Da Wise an der LSE notiert ist, sind keine finviz.com-Daten verfügbar. Alle Multiples basieren auf investing.com, CNBC-Finanzdaten und Analystenkonsens (Stand: 27. Feb 2026).</div>
+      <h3>Aktuelle Bewertungskennzahlen</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>Aktuell</th><th>Historisch (Ø 3J.)</th><th>Sektormedian FinTech</th><th>Einschätzung</th></tr></thead>
+          <tbody>
+            <tr><td>P/E (TTM)</td><td>23,2x</td><td>~60x (2022–2023)</td><td>~25x</td><td><span class="badge badge-green">Fair / Günstig vs. Hist.</span></td></tr>
+            <tr><td>P/E (FWD, FY2027e)</td><td>~18–20x</td><td>—</td><td>~22x</td><td><span class="badge badge-green">Attraktiv</span></td></tr>
+            <tr><td>EV/EBITDA</td><td>~16x</td><td>~40x (2023)</td><td>~18x</td><td><span class="badge badge-green">Fair</span></td></tr>
+            <tr><td>EV/Revenue (TTM)</td><td>~5x</td><td>~15x (2022)</td><td>~6x</td><td><span class="badge badge-green">Fair</span></td></tr>
+            <tr><td>PEG-Ratio</td><td>~1,1x</td><td>—</td><td>~1,5x</td><td><span class="badge badge-green">Attraktiv</span></td></tr>
+            <tr><td>P/FCF</td><td>~22x</td><td>—</td><td>~25x</td><td><span class="badge badge-green">Fair</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Bewertungseinschätzung</h3>
+      <p>Wise hat seit seinem IPO-Hype (2021: Bewertung £11 Mrd. zum Börsengang, danach kurzzeitig £17 Mrd.) eine massive Bewertungsnormalisierung erfahren. Mit einem P/E von 23x bei einem erwarteten Wachstum von 15–20% p.a. und einem PEG von ~1,1x erscheint die Bewertung fair bis leicht attraktiv – insbesondere im Vergleich zur eigenen Geschichte. Analysten sehen ein Kursziel von durchschnittlich £11,70 bis £13,00 gegenüber aktuell £8,60, was ein Aufwärtspotenzial von 36–51% impliziert. Eine Minderheit (Alpha Spread DCF-Modell) sieht den fairen Wert bei ~527p und damit das Papier als überbewertet – dies setzt jedoch deutlich niedrigere Wachstumsannahmen voraus.</p>
+      <p>Die größte Unsicherheit bei der Bewertung liegt im reported vs. underlying Profil: Der reported PBT von £565 Mio. in FY2025 enthält £444 Mio. Zinseinkommen über dem 1%-Schwellenwert, das mit sinkenden Zinsen automatisch abnimmt. Bereinigt man um diesen Sondereffekt, liegt das underlying PBT bei nur £282 Mio. – was eine deutlich höhere Bewertungslast impliziert. Score 6/10: Bewertung ist fair bei Wachstumsmaterialisierung, aber nicht günstig bei Zinsrückenwind-Wegfall.</p>
+      <div class="source">Quellen: Investing.com WISE.L Finanzseite (Feb 2026); CNBC Finanzdaten (Feb 2026); TipRanks Analyst Targets (Jan 2026); Alpha Spread Intrinsic Valuation (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 6 -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen & Kapitalqualität</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Margenstruktur (FY2025 / TTM)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Metrik</th><th>FY2024</th><th>FY2025</th><th>H1 FY2026</th><th>Trend</th></tr></thead>
+          <tbody>
+            <tr><td>Underlying Gross Margin</td><td>73%</td><td>75%</td><td>76,2%</td><td><span class="beat">↑ Stabil</span></td></tr>
+            <tr><td>Reported Gross Margin (TTM)</td><td>—</td><td>—</td><td>79,2%</td><td><span class="beat">Stark</span></td></tr>
+            <tr><td>Underlying PBT Margin</td><td>17,7%</td><td>21%</td><td>16,3%</td><td><span class="miss">↓ (Investitionen)</span></td></tr>
+            <tr><td>Net Margin (TTM)</td><td>—</td><td>~24%</td><td>22,5%</td><td><span class="neutral">Stabil</span></td></tr>
+            <tr><td>ROE (TTM)</td><td>—</td><td>~32%</td><td>29,7%</td><td><span class="neutral">Hoch</span></td></tr>
+            <tr><td>Admin-Kosten / Revenue</td><td>58%</td><td>51%</td><td>71% (H1)</td><td><span class="miss">↑ Investitionsphase</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Cashflow & Kapitalallokation</h3>
+      <p>Wise generiert starken operativen Cashflow, der primär aus dem Kernbetrieb stammt. Das Unternehmen zahlt keine Dividende und kauft keine Aktien zurück; stattdessen werden Überschüsse vollständig in Infrastruktur, Lizenzerwerb und Marktexpansion reinvestiert. Die Schuldenquote (Debt/Equity: 21%) ist niedrig und besteht größtenteils aus Leasingverpflichtungen, nicht aus Finanzverbindlichkeiten. Wise hält keine signifikanten Nettoverschuldungen und verfügt über ein solides Liquiditätspolster für weitere Investitionen (geplant: Verdopplung des jährlichen Investitionsprogramms mittelfristig).</p>
+      <p>Ein strukturelles Risiko im Cashflow-Profil ist das Zinseinkommen: Das Zinseinkommen über dem 1%-Schwellenwert (£444 Mio. in FY2025, nach £381 Mio. in FY2024) ist ein bedeutsamer Bestandteil des reported Profits und wird bei sinkenden Zinsen abnehmen – in H1 FY2026 war dieser Posten bereits um 11% auf £206 Mio. rückläufig. Das Underlying-Geschäft ist davon weitgehend abgekoppelt und weist gesunde Wachstumsraten auf. Score 8/10: Exzellentes Margenprofil und Kapitalqualität, leichter Abzug wegen Zinssensitivität und temporär erhöhter Investitionskosten.</p>
+      <div class="source">Quellen: Wise H1 FY2026 Interim Results (Nov 2025); Wise FY2025 Annual Report; CNBC/Investing.com Finanzdaten (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 7 -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Quantitativer Vergleich</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Unternehmen</th><th>Revenue (letztes GJ)</th><th>Wachstum</th><th>Net Margin</th><th>Marktkapitalisierung</th><th>Cross-Border-Fokus</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Wise (WISE.L)</strong></td>
+              <td>£1,72 Mrd. (TTM)</td>
+              <td><span class="beat">+15–21%</span></td>
+              <td><span class="beat">22,5%</span></td>
+              <td>£8,6 Mrd.</td>
+              <td><span class="badge badge-green">100% Kern</span></td>
+            </tr>
+            <tr>
+              <td><strong>Revolut (privat)</strong></td>
+              <td>£3,1 Mrd. (FY2024)</td>
+              <td><span class="beat">+72%</span></td>
+              <td><span class="beat">25,5%</span></td>
+              <td>$75 Mrd. (2025 privat)</td>
+              <td><span class="badge badge-yellow">42% Cross-Border</span></td>
+            </tr>
+            <tr>
+              <td><strong>Block/Square (XYZ)</strong></td>
+              <td>$24,1 Mrd. (2024)</td>
+              <td><span class="neutral">+10%</span></td>
+              <td><span class="miss">~3% GAAP</span></td>
+              <td>~$40 Mrd.</td>
+              <td><span class="badge badge-red">Minimal</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Qualitative Einordnung</h3>
+      <p><strong>Revolut vs. Wise:</strong> Revolut ist mit £3,1 Mrd. Revenue und 52,5 Mio. Kunden auf dem Papier größer und wächst schneller. Allerdings ist Revolut eine breite "Super-App" mit Banking, Investments, Krypto und Versicherungen – Cross-Border macht nur 42% des Transaktionsrevenues aus. Wise ist das reinste "Pure Play" in der Kategorie, mit überlegener Produkttiefe bei internationalen Überweisungen. Revolut trägt seit August 2024 eine britische Bankenlizenz und expandiert aggressiv in Bankdienstleistungen – was die direkte Konkurrenz mit Wise im Kernbereich verschärft. Die Bewertungslücke ist bemerkenswert: Revolut wird privat mit ~$75 Mrd. bewertet (Dez 2025), Wise öffentlich mit £8,6 Mrd. – ein Faktor von ~10x trotz ähnlichem Revenue-Niveau, was entweder Revoluts Super-App-Premium oder eine Überbewertung des privaten Marktes widerspiegelt.</p>
+      <p><strong>Block/Square vs. Wise:</strong> Block ist kein direkter Wettbewerber im Cross-Border-Kernmarkt. Cash App ist US-zentriert, Square fokussiert auf US-Einzelhändler. Block hat ein erhebliches Bitcoin/Krypto-Exposure (Tochter TBD arbeitet an Bitcoin-Zahlungsinfrastruktur), das theoretisch stablecoin-ähnliche Transfers antizipiert. Block's finanzielle Performance ist schwächer: Revenue wächst nur ~10%, GAAP-Nettomarge ist minimal, und das Unternehmen verpasste im Q4 2024 die EPS-Schätzungen deutlich. Für Wise ist Block eher ein Indikator der Stablecoin-/Krypto-Konkurrenz als ein direkter Payments-Wettbewerber. Score 7/10: Wise ist Klassenbester in seiner Nische, aber Revoluts Größen- und Kapitalvorteil sowie sein Banking-Ausbau verdienen Respekt.</p>
+      <div class="source">Quellen: Revolut Annual Report 2024 (Apr 2025); Revolut Secondary Share Sale Nov 2025 ($75 Mrd. Bewertung); Block Q4 2024 Earnings (CNBC, Feb 2025); Sacra Revolut Research (Nov 2025)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 8 -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News & Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">20. Jan 2026 – Q3 FY2026 Trading Update <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Underlying Income +21% YoY auf £424,4 Mio. (Beat vs. Konsens £412 Mio.). Cross-Border-Volumen +26% auf £47,4 Mrd. Aktie stieg +12,6% am selben Tag – stärkste Eintagesperformance seit über 7 Monaten. Management bestätigt: PBT-Marge FY2026 "am oberen Ende" des 13–16%-Zielkorridors. Quelle: Bloomberg, TipRanks (20. Jan 2026).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Jan 2026 – US-Dual-Listing bestätigt für H1 2026 <span class="badge badge-green">Strategisch Positiv</span></div>
+          <div class="event-text">Wise bestätigt, das US-Dual-Listing (NYSE oder Nasdaq) im ersten Halbjahr 2026 abzuschließen. 91% der Class-A-Aktionäre hatten im Juli 2025 für den Schritt gestimmt. Wise ist derzeit Kandidat für die nationale Trust-Bank-Charta beim OCC (Office of the Comptroller), um 4.000+ US-Banken als Platform-Partner zu erschließen. Quelle: PYMNTS.com, Fintech Singapore (Jan 2026).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">02. Mrz 2026 – Board-Stärkung mit Fintech-Veteran Scott Hill <span class="badge badge-blue">Neutral/Positiv</span></div>
+          <div class="event-text">Wise ernennt Scott Hill – erfahrener Fintech-Executive – als neues Board-Mitglied. Dies stärkt die Corporate Governance und ist relevant im Kontext des bevorstehenden US-Listings. Quelle: TipRanks (02. Mrz 2026).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Jul 2025 – Co-Gründer Taavet Hinrikus opponiert Dual-Listing <span class="badge badge-yellow">Governance-Risiko</span></div>
+          <div class="event-text">Co-Gründer und früherer Chairman Taavet Hinrikus (~5,1% Stake) kritisierte, dass die Verlängerung der Super-Voting-Rechte (Class B) für weitere 10 Jahre in der Dual-Listing-Abstimmung "vergraben" war. Trotz seines Widerspruchs stimmten 91% der Class-A-Aktionäre für den Plan. Das Governance-Risiko durch die Dual-Class-Struktur bleibt ein Diskussionspunkt. Quelle: Payment Expert (Jul 2025).</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Nov 2025 – Revolut erreicht $75 Mrd. Bewertung in Sekundärtransaktion <span class="badge badge-red">Wettbewerbs-Druck</span></div>
+          <div class="event-text">Revolut stieg auf $75 Mrd. Bewertung (von $45 Mrd. im Aug 2024) nach der Sekundärtransaktion. Das Unternehmen kündigte an, $13 Mrd. bis zum Jahrzehntende zu investieren (£4 Mrd. UK, $1,2 Mrd. Westeuropa, $500 Mio. USA). Die UK-Bankenlizenz ist seit Oktober 2025 in "Mobilisierung" – Revolut kann UK-Einlagen bis £50.000 aufnehmen. Quelle: Sacra Research, Revolut Press Release (Nov 2025).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Jun 2025 – Stripe erwirbt Stablecoin-Infrastruktur-Startup für $1,1 Mrd. <span class="badge badge-red">Disruptions-Signal</span></div>
+          <div class="event-text">Stripe's Akquisition und die Aussage des Stripe-CEOs, dass Stablecoins "grenzüberschreitenden Handel beschleunigen" werden, sind ein klares Signal für die Payments-Industrie. Amazon und Walmart prüfen eigene Stablecoin-Pläne. Stablecoin-Startup-Finanzierungen explodierten von ~$1 Mrd. (2024) auf ~$12,3 Mrd. (2025) – ein 10x-Anstieg. Quelle: Compound with René Substack (Jun 2025).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Okt 2025 – Wise neue Partnerschaften: Upwork, MBSB Bank, Lunar <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Wise Platform gewinnt drei neue Partner in Q2 FY2026, darunter Upwork (Freelancer-Plattform), MBSB Bank (Malaysia) und Lunar (skandinavische Neobank). Das Platform-Segment macht ~5% des Gesamtvolumens aus, wächst aber mit ~80% p.a. und adressiert potenziell einen erheblichen Teil des $43-Billionen-Marktes. Quelle: Wise H1 FY2026 Results (Nov 2025).</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Jul 2025 – GENIUS Act in den USA unterzeichnet <span class="badge badge-yellow">Ambivalent</span></div>
+          <div class="event-text">Der US GENIUS Act (Guiding and Establishing National Innovation for U.S. Stablecoins) wurde in Kraft gesetzt und schafft erstmals einen klaren regulatorischen Rahmen für US-Stablecoins mit 1:1-Reserve-Pflicht und AML/KYC-Anforderungen. Einerseits senkt dies die Einstiegshürde für Stablecoin-Zahlungen in Wise's Kernmarkt; andererseits gibt die Regulierung großen Playern wie Wise selbst die Möglichkeit, Stablecoin-Rails in ihre Infrastruktur zu integrieren. Quelle: Goldman Sachs Global Institute (Jan 2026); CGDev (Okt 2025).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">2025 – J.P. Morgan: Cross-Border-Markt wächst von $194,6 Bio. (2024) auf $320 Bio. (2032) <span class="badge badge-green">Struktureller Rückenwind</span></div>
+          <div class="event-text">Das gesamte Marktvolumen für grenzüberschreitende Zahlungen wächst strukturell: von $194,6 Billionen in 2024 auf prognostizierte $320 Billionen bis 2032 (+64%). Wise adressiert mit £145 Mrd. abgewickeltem Volumen (FY2025) weniger als 0,1% dieses Marktes – das Runway-Potenzial ist enorm. Quelle: J.P. Morgan Cross-Border Payments Trends 2025.</div>
+        </div>
+      </div>
+      <div class="source">Quellen: Bloomberg, TipRanks, Fintech Futures, PYMNTS, Goldman Sachs, J.P. Morgan, Sacra Research – alle Jan/Feb 2026</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 9 -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 4/10</div>
+    </div>
+    <div class="section-body">
+      <div class="kpi-grid" style="margin-bottom:16px;">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">860p</div><div class="kpi-sub">27.02.2026</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value red">~870p</div><div class="kpi-sub">Kurs darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value red">~910p</div><div class="kpi-sub">Kurs darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value red">~1.010p</div><div class="kpi-sub">Kurs darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14T)</div><div class="kpi-value orange">~38</div><div class="kpi-sub">Überverkauft/Neutral</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value">1.225p</div><div class="kpi-sub">–30% darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value red">Negativ</div><div class="kpi-sub">Bearish Signal</div></div>
+      </div>
+      <h3>Trend- & Chartanalyse</h3>
+      <p>Wise befindet sich in einem klaren mittel- bis langfristigen Abwärtstrend. Der Kurs liegt unterhalb aller relevanten gleitenden Durchschnitte (SMA 20, 50, 200), was einem technischen "Dreifach-Sell-Signal" entspricht. Das 52-Wochen-Tief liegt bei 793p (16. Jan 2026) – der Kurs hat sich nur leicht erholt und ist noch immer nahe diesem Tief. Von seinem 52-Wochen-Hoch von 1.225p (erzielt im Sommer 2025 nach der Bekanntgabe des US-Listings) ist Wise um knapp 30% gefallen.</p>
+      <p>Der RSI-Wert von ~38 liegt im überverkauften bis neutralen Bereich und deutet darauf hin, dass der Verkaufsdruck nachlässt, ohne jedoch eine klare Umkehr zu signalisieren. Der MACD befindet sich im negativen Bereich, wenngleich eine mögliche Annäherung der MACD-Linie an die Signallinie einen potenziellen Trendwechsel im Quartal anzeigen könnte. Kurzfristig ist 793p der entscheidende Support – ein Unterschreiten dieses Niveaus würde weiteres Abwärtspotenzial in Richtung 750p freisetzen. Auf der Oberseite liegt Widerstand zunächst bei 880–900p (SMA 20/50-Cluster) und dann bei 1.000p (SMA 200). Ein nachhaltiger Ausbruch über 1.000p würde ein technisches Kaufsignal generieren und ist wahrscheinlich an die Vollziehung des US-Dual-Listings geknüpft. Score 4/10: Klar bärisches Chart, aber RSI-Wert und fundamentaler Katalysator (Dual Listing) bieten Umkehrpotenzial.</p>
+      <div class="source">Quellen: Investing.com WISE.L (27. Feb 2026); TradingView WISE-Analyse (Feb 2026); Stockinvest.us (Jan 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 10 – RISIKEN -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken & Chancen</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <h3>10a) Strukturelle Risiken</h3>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Stablecoin-Disruption (Fokusthema)</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-yellow">Auswirkung: Mittel–Hoch</span></div>
+        </div>
+        <div class="event-text">Das akuteste strategische Risiko für Wise. Stablecoin-Transaktionsvolumen wuchs 2025 um 90%+ auf nominell $11,4 Billionen (davon ~$390 Mrd. echte Zahlungen, ~3,5x 2024). Der US GENIUS Act (Juli 2025) schuf regulatorische Klarheit; Stablecoin-Startups erhielten 2025 ~$12,3 Mrd. Risikokapital (+900% gegenüber 2024). Remittance-Gebühren via Stablecoin liegen bei unter 1% vs. Wise's ~52 bps (0,52%) – ein noch kleiner, aber konvergierender Abstand. <strong>Wahrscheinlichkeit bis 2028</strong>: Für Retail-Nische (Low-tech, Krypto-affin): hoch. Für Wise's Kernkundschaft (Vertrauen, UX, Compliance): mittel. <strong>Abschätzung</strong>: Wenn Stablecoins 10% von Wise's Kernvolumen (£14,5 Mrd.) übernehmen, sinkt der Revenue um ~£75 Mio. (~6% vom Umsatz). Szenario-abhängig, da Wise auch Stablecoin-Rails integrieren könnte.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Revolut als Voll-Bank & Wachstumsmaschine</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Revolut hält seit August 2024 eine britische Bankenlizenz, ist in der Mobilisierungsphase und wächst mit 72% p.a. auf £3,1 Mrd. Revenue (2024). Mit 52,5 Mio. Kunden, einem Banking-App-Ökosystem und einer aggressiven $13-Mrd.-Investitionspipeline bedroht Revolut Wise's Kundenstamm direkt: Beide teilen sich die "digital-affine, international lebende" Kernzielgruppe. Revoluts FX-Kurse sind zwar nicht so günstig wie die von Wise, aber gut genug für die meisten Nutzer – und Revolut bietet mehr Produkte (Investing, Crypto, Versicherungen). Wahrscheinlichkeit: Hoch. Auswirkung: Marktanteilsdruck besonders bei neuen Kundenakquisitionen, weniger bei bestehenden Wise-Nutzern mit hohem Guthaben.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Take-Rate-Kompression</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Die durchschnittliche Take Rate sank von 67 bps (FY2024) auf 52 bps (Q3 FY2026) – ein Rückgang von 22% in 18 Monaten. Wise tut dies freiwillig (Strategie: niedrigere Preise = höhere Volumen = mehr Skalenvorteile), aber wenn Wettbewerb (Revolut, Stablecoins) diesen Trend erzwingt, wird die Marge künftig strukturell belastet. Wenn die Take Rate auf 40 bps sinkt bei stabilem Volumen, würde der Revenue um ~23% fallen, was den PBT erheblich belasten würde.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Zinssensitivität des Profits</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Das "above-1%-yield"-Zinseinkommen auf Kundeneinlagen (£444 Mio. in FY2025) ist zinsabhängig und rückläufig: In H1 FY2026 sank es bereits um 11% auf £206 Mio. Bei Fortsetzung der Zinssenkungen (EZB, BoE) könnte dieser Posten auf £350 Mio. in FY2027 sinken – ein reported-PBT-Druck von ~£90–100 Mio.</div>
+      </div>
+
+      <h3>10b) Disruptions-Analyse: Stablecoins vs. Wise (User-Fokusthema)</h3>
+      <div class="highlight-box">
+        <p style="margin-bottom:8px;"><strong style="color:var(--primary);">Bullischer Case (Stablecoin-Koexistenz):</strong> Trotz der 10x-Investitionszunahme in Stablecoins bleibt der Anteil echter Stablecoin-Zahlungen am globalen Zahlungsverkehr minimal (~0,02%). Das entscheidende Hindernis ist nicht die Technologie, sondern die On/Off-Ramp-Infrastruktur: Stablecoins müssen an jedem Ende in Fiat konvertiert werden – und genau diese Konversions- und Compliance-Infrastruktur ist Wise's Stärke. Weise könnte selbst Stablecoin-Rails integrieren (ähnlich wie Visa mit USDC-Settlement): Die regulatorische Infrastruktur und das Compliance-Framework sind bereits vorhanden. Zudem bevorzugen Wise's Kernkunden (Expats, KMUs, Banken via Platform) Vertrauen, Regulierung und eine einfache UX – nicht maximale Dezentralisierung. Die Regulierung selbst (GENIUS Act, MiCA) könnte Stablecoins näher an Wise's regulierten Kernbereich heranführen, anstatt ihn zu destabilisieren.</p>
+        <p><strong style="color:var(--red);">Bärischer Case (Strukturelle Disruption):</strong> Die 10x-Zunahme in Stablecoin-Startup-Finanzierung (2025: $12,3 Mrd.) zeigt, dass ernsthaftes Kapital dieses Problem lösen will. Für spezifische Korridore (z.B. USA→Mexiko, wo Remittancen bei ~$60 Mrd. p.a. liegen) sind Stablecoin-Lösungen bereits kompetitiv. Stripe's $1,1-Mrd.-Akquisition und Amazon/Walmart's Überlegungen zur eigenen Stablecoin-Emission zeigen, dass die mächtigsten Plattformen der Welt in diesen Markt eintreten. Block's TBD-Division arbeitet explizit an Bitcoin-basierter Zahlungsinfrastruktur. Das strukturelle Risiko: Wenn Wise's Kernwertversprechen ("günstigste internationale Überweisung") in 5 Jahren durch On-Chain-Direktzahlungen zu sub-10-Basispunkt-Kosten repliziert werden kann, verliert Wise seinen Preisvorteil – und damit den wichtigsten Wachstumstreiber für Neukundengewinnung.</p>
+      </div>
+
+      <h3>10c) Chancen</h3>
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">🚀 US-Marktpenetration & Dual-Listing</div><div><span class="badge badge-green">Hoch</span></div></div>
+        <div class="event-text">Die USA sind der weltweit größte Einzelmarkt für Cross-Border-Payments. Mit Dual-Listing (geplant Q2 2026) und OCC-Trust-Bank-Charta adressiert Wise 4.000+ US-Banken als Platform-Partner. Wise beschäftigt bereits 750+ Mitarbeiter in den USA (davon 450+ in Austin). Erfolgreiche US-Penetration könnte die Platform-Segment-Revenues um ein Vielfaches steigern.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">🚀 Wise Platform – B2B-Skalierung</div><div><span class="badge badge-green">Hoch</span></div></div>
+        <div class="event-text">Das Platform-Segment wächst mit ~80% p.a. und macht bereits 5% des Gesamtvolumens aus. Seeking Alpha-Analysten sehen Potenzial auf 50% des Revenues langfristig. Partner wie Standard Chartered, Morgan Stanley, HSBC (nach Einstellung des eigenen FX-Transfers) und neu Upwork zeigen, dass das Segment skaliert. Ein Anstieg des Platform-Anteils von 5% auf 15% des Revenues würde signifikante Marge-Expansion bedeuten (B2B-Kunden = höheres Volumen, niedrigere Kundenservicekosten).</div>
+      </div>
+
+      <h3>10d) Red Flags & Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten, kein Dealbreaker):</strong> Dual-Class-Aktienstruktur mit verlängerter Laufzeit um 10 Jahre (Governance-Risiko); sinkende Underlying PBT-Marge von 21% auf 16% (Investitionsphase vs. Strukturproblem unklar); CEO Kristo Käärmann hatte 2021 in Geldwäsche-Ermittlungen Schlagzeilen gemacht (wurde nicht verurteilt, aber Reputationsrisiko bleibt). <strong>Dealbreaker (nicht erkennbar):</strong> Keine existenzielle Bedrohung identifiziert; Lizenzwiderruf in einer Kernregion wäre ein schwarzer Schwan.</p>
+      <div class="source">Quellen: Payments Association (Feb 2026); Compound with René Substack (Jun 2025); CGDev, Goldman Sachs (Jan 2026); Third Bridge (Jan 2026); Revolut Annual Report 2024</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 11 – SCORING -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring & Bewertungstabelle</div>
+      <div class="section-note">Inkl. Stablecoin-Disruptions-Adjustment</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kategorie</th><th>Score</th><th>Bewertung</th><th>Begründung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Geschäftsmodell</strong></td>
+              <td>9/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+              <td>Klare Mission, 3 skalierbare Segmente, starke Unit Economics, hohes Margenprofil</td>
+            </tr>
+            <tr>
+              <td><strong>Burggraben</strong></td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Starke Infrastruktur- & Lizenzmoat; angepasst von 8/10 wegen Stablecoin-/Revolut-Disruption</td>
+            </tr>
+            <tr>
+              <td><strong>Operative Entwicklung (4Q)</strong></td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Volumenwachstum +21–26%, aber Underlying PBT –17% YoY in H1 wegen Investitionen. 3/4 Beats.</td>
+            </tr>
+            <tr>
+              <td><strong>Wachstum</strong></td>
+              <td>8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>Konsistentes 15–20% Umsatz-, 24–26% Volumenwachstum über 4 Jahre; Diversifizierung in Cards</td>
+            </tr>
+            <tr>
+              <td><strong>Bewertung</strong></td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>P/E 23x, PEG 1,1x fair; Risiko: reported PBT hängt stark an Zinseinkommen</td>
+            </tr>
+            <tr>
+              <td><strong>Cashflow & Kapitalqualität</strong></td>
+              <td>8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>79% Bruttomarge, 30% ROE, schuldenarm; Zinsabhängigkeit als Einschränkung</td>
+            </tr>
+            <tr>
+              <td><strong>Risiken (invertiert)</strong></td>
+              <td>5/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td>
+              <td>Stablecoin-Disruption (real aber nicht unmittelbar), Revolut-Konkurrenz, Take-Rate-Druck</td>
+            </tr>
+            <tr>
+              <td><strong>Technische Analyse</strong></td>
+              <td>4/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td>
+              <td>Unterhalb aller MAs, –30% vom 52W-Hoch, Bearish-Momentum; RSI 38 signalisiert Überverkauf</td>
+            </tr>
+            <tr style="background:rgba(139,92,246,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>6,8/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track">
+                    <div class="score-bar-fill" style="width:68%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
+                  </div>
+                  <span class="score-num" style="color:var(--primary);">6,8</span>
+                </div>
+              </td>
+              <td>Starkes Geschäftsmodell mit realem Disruptionsrisiko; Kaufen für Growth-Investoren, Warten für Konservative</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:12px;"><strong>Anpassungshinweis:</strong> Der Burggraben-Score wurde im Rahmen der user-spezifischen Analyse von ursprünglich 8/10 auf 7/10 reduziert, um das reale und wachsende Disruptionsrisiko durch Stablecoins und Revoluts Banking-Ausbau widerzuspiegeln. Die übrigen Scores bleiben unverändert. Ein bärischeres Szenario (schnelle Stablecoin-Adoption) würde Burggraben auf 5/10 und Risiken auf 3/10 senken – Gesamtscore dann ~5,9/10.</p>
+    </div>
+  </div>
+
+  <!-- SEKTION 12 – FAZIT -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-note">Vollsynthese</div>
+    </div>
+    <div class="section-body">
+
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1: Unaufhaltsames Volumenwachstum mit strukturellem Rückenwind.</strong> Wise verarbeitete in Q3 FY2026 £47,4 Mrd. (+26% YoY) und beschleunigt damit das Wachstum aus dem H1 (24% YoY). Die Underlying Income wuchs auf +21% YoY – ein klares Beat gegenüber dem Konsens. Der globale Cross-Border-Markt wächst von $194,6 Bio. (2024) auf $320 Bio. bis 2032; Wise hat weniger als 0,1% Marktanteil – der Runway ist generationenlang. Die 15.600.000 aktiven Kunden (FY2025) sind nur ein Bruchteil der adressierbaren Basis.</p>
+          <p><strong>Säule 2: Infrastruktur-Moat verteidigt sich selbst gegen Stablecoins.</strong> Wise ist direkt an 8 Inlandszahlungssystemen angeschlossen und verarbeitet 74% aller Zahlungen in Echtzeit – Werte, die stablecoin-basierten Alternativen (noch) fehlen. Das Compliance-Framework (50+ Lizenzen, 7 Mio. tägliche Sicherheitschecks) ist ein nicht-replizierbarer Moat. Entscheidend: Wise kann Stablecoin-Rails integrieren, ohne sein Geschäftsmodell aufzugeben. Die eigentliche Frage ist nicht "Stablecoins oder Wise?" – sondern "Stablecoins durch Wise?" Die Platform-Strategie (Partner: Standard Chartered, Morgan Stanley, Upwork) zeigt, dass Wise Infrastructure-as-a-Service wird, unabhängig vom Zahlungsrail.</p>
+          <p><strong>Säule 3: Bewertung und US-Listing als Doppel-Katalysator.</strong> Wise handelt bei P/E 23x mit PEG ~1,1x – deutlich günstiger als der eigene historische Durchschnitt von 50–150x und preiswert für 15–20% Wachstum. Das US-Dual-Listing (Q2 2026) ist der konkreteste Kurstreiber: Es öffnet den Zugang zum weltweit tiefsten Kapitalmarkt, erhöht die Aktionärsliquidität und steigert die Visibilität bei US-institutionellen Investoren, die WISE.L bisher aus operativen Gründen nicht kaufen können. Bei einem Relisting zu US-Fintech-Multiples (25–35x P/E) ergibt sich ein Zielkurs von 1.050–1.300p.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1: Stablecoin-Disruption mit exponentiellem Kapitalzufluss.</strong> Stablecoin-Startups erhielten 2025 ~$12,3 Mrd. Risikokapital – ein 10x-Anstieg gegenüber 2024. Stripe ($1,1 Mrd. Akquisition), Amazon, Walmart, Visa und Mastercard bauen alle Stablecoin-Infrastruktur auf. Das GENIUS Act schafft regulatorische Klarheit und entfernt die wichtigste Adoptionshürde in den USA. Falls Stablecoin-Transfers für gängige Korridore (US–Mexiko, UK–Indien) auf <20 bps Kosten sinken, verliert Wise's wichtigstes Alleinstellungsmerkmal. Die Take-Rate-Kompression von 67 bps auf 52 bps in 18 Monaten ist ein Vorbote dieses Drucks.</p>
+          <p><strong>Risiko 2: Revolut – der besser finanzierte und schneller wachsende Super-App-Konkurrent.</strong> Revolut wächst mit 72% p.a. auf bereits 2,6x Wises Revenue, hält eine britische Bankenlizenz und plant $13 Mrd. Investitionen bis 2030. Mit 52,5 Mio. Kunden (vs. Wise's 15,6 Mio. aktive Kunden) und einem eingebetteten Banking-Ökosystem hat Revolut eine stärkere Lock-in-Funktion. Falls Revolut die FX-Preise weiter annähert und das Wechseln zur "Revolut als Hauptkonto" normalisiert wird, droht Wise ein struktureller Marktanteilsverlust bei Neukundengewinnung.</p>
+          <p><strong>Risiko 3: Margensensitivität und Bewertungsillusion.</strong> Der reported PBT von £565 Mio. (FY2025) beinhaltet £444 Mio. zinsabhängiges Einkommen – rückläufig in H1 FY2026 (–11%). Das underlying PBT ist mit £282 Mio. nur die Hälfte des reported Wertes und impliziert ein bereinigtes P/underlying-E von ~46x. Das technische Bild (–30% vom 52W-Hoch, unterhalb aller gleitenden Durchschnitte) signalisiert, dass der Markt diese Risiken einpreist. Ein Scheitern des US-Listings oder ein Regulierungsrückschlag beim OCC-Verfahren könnte weiteres Abwärtspotenzial freisetzen.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Das bullische Narrativ ist überzeugender – aber nur für Investoren mit einem 2–5-Jahres-Horizont und Risikobereitschaft für das Stablecoin-Szenario. Die Profitabilitätswende in H1 FY2026 ist nicht strukturell negativ, sondern eine bewusste Reinvestitionsphase: Der Anstieg der Admin-Kosten (+27%) entspricht dem Aufbau von Infrastruktur (8 direkte Zahlungssystem-Integrationen), neuen Marktlizenzen (UAE, Südafrika, Japan) und dem US-Dual-Listing-Prozess – allesamt einmalige oder wachstumsanlassende Ausgaben. Das Kerngeschäft (Underlying Income +21% in Q3) ist strukturell gesund und beschleunigt.</p>
+      <p>Das Stablecoin-Risiko ist real, aber zeitlich nicht unmittelbar. Der Sprung von $390 Mrd. realer Stablecoin-Zahlung auf eine Bedrohung für Wise's £145-Mrd.-Volumen erfordert Jahre der On/Off-Ramp-Reife, regulatorischer Harmonisierung und Verbrauchervertrauen – Zeit, in der Wise selbst Stablecoin-Infrastruktur integrieren kann. Die entscheidende Frage lautet: Ist Wise ein Kanal oder eine Route? Als Kanal (Marke + UX + Compliance) kann Wise auf neuen Rails laufen; als pure Route ist Wise angreifbar. Die Platform-Strategie und die OCC-Trust-Bank-Bewerbung deuten auf ersteres hin. Ich könnte falsch liegen, wenn die Stablecoin-Adoption deutlich schneller skaliert als erwartet oder wenn Revolut die FX-Preise aggressiv auf Wise-Niveau senkt.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Kurzfristig (0–6M)</strong></td>
+              <td>US-Dual-Listing (Q2 2026), Q4 FY2026-Trading-Update</td>
+              <td>Makro-Unsicherheit, technisches Bearish-Umfeld</td>
+              <td><span class="badge badge-yellow">Tranchiert einsteigen</span></td>
+            </tr>
+            <tr>
+              <td><strong>Mittelfristig (6–24M)</strong></td>
+              <td>US-Marktexpansion, Platform-Skalierung, OCC-Lizenz</td>
+              <td>Revolut-Banking-Angriff, Stablecoin-Adoption</td>
+              <td><span class="badge badge-green">Kaufen & Halten</span></td>
+            </tr>
+            <tr>
+              <td><strong>Langfristig (2–5J)</strong></td>
+              <td>Trillionen-Netzwerk-Vision, Asien/LatAm-Penetration</td>
+              <td>Strukturelle Stablecoin-Disruption (kritischer Monitor)</td>
+              <td><span class="badge badge-green">Kaufen – mit Monitor</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>Wise ist das reinste und profitabelste Pure-Play-Investment in der strukturellen Digitalisierung des globalen Cross-Border-Zahlungsverkehrs – einem Markt mit £32 Billionen Jahresvolumen und klar zuwachsenden Anteilen. Die Kombination aus proprietärer Infrastruktur, 50+ regulatorischen Lizenzen, einer Word-of-Mouth-Wachstumsmaschine (65% der Neukunden organisch) und dem US-Dual-Listing als konkretem Near-Term-Katalysator macht Wise zu einem attraktiven Investment bei der aktuellen Bewertung (P/E 23x). Das Stablecoin-Risiko ist der mit Abstand wichtigste strategische Monitor – nicht weil es heute brennt, sondern weil es in 3–5 Jahren strukturell werden könnte, wenn die On/Off-Ramp-Infrastruktur reift.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">1.050–1.200p</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–4 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–8% (793p)</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+22–40%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:3,5</div></div>
+      </div>
+
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Take Rate fällt unter 40 bps (Preis-Wettbewerb eskaliert) → Position halbieren</li>
+            <li>Wise Platform wächst unter 20% p.a. für 2 Quartale → Thesis-Review</li>
+            <li>Stablecoin-Direktzahlungen (non-custodial, peer-to-peer) übernehmen >5% Marktanteil in UK–USA-Korridor bis Ende 2027 → Burggraben-Revision</li>
+            <li>Revolut senkt FX-Gebühren auf Wise-Niveau in 3+ Kernmärkten → sofort reduzieren</li>
+            <li>OCC-Trust-Bank-Antrag scheitert endgültig → Upsidekorrektur, Halten</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>US-Dual-Listing vollzogen (Q2 2026) → Tranche nachkaufen bei Kurs unter 900p</li>
+            <li>Wise Platform wächst auf >10% des Gesamtvolumens → Platform-Story valide</li>
+            <li>Wise integriert Stablecoin-Rails in eigene Infrastruktur → Disruptions-Risiko neutralisiert</li>
+            <li>OCC-Charta genehmigt → US-Bank-Partnerschaften skalieren, Nachkaufen</li>
+            <li>Kurs unter 793p (52W-Tief) bei unveränderter Fundamentale → Einstiegsgelegenheit</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Quality Growth Investors (2–5J Horizont)</li>
+            <li>Fintech / Payments Sektor-Investoren</li>
+            <li>Contrarian (–30% vom Hoch, Bewertung normalisiert)</li>
+            <li>ESG-orientierte Investoren (Financial Inclusion)</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Value Investors (kein niedriges absolutes KGV)</li>
+            <li>Income Investors (keine Dividende)</li>
+            <li>Kurzfristige Trader (bearishes Chart, hohe Volatilität)</li>
+            <li>Risikoscheue Anleger (Stablecoin-Disruptions-Risiko)</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten auf US-Listing</span></td><td>Warten auf Dual-Listing-Vollzug (Q2 2026) als Bestätigung des strukturellen Katalysators</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>50% jetzt bei ~860p, 50% bei US-Listing-Vollzug oder Kursrückgang unter 810p</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Risk/Reward 1:3,5 bei Support 793p vs. Ziel 1.050–1.200p; Dual-Listing als naher Katalysator</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen & Halten</span></td><td>Strukturelle Wachstumsstory Cross-Border Payments; Stablecoin-Monitor essenziell</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEKTION 13 – OUTLOOK -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Anstehende Events & Wenn/Dann</div>
+      <div class="section-note">3 kritische Events</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: US-Dual-Listing (primäres NYSE/Nasdaq-Listing) – voraussichtlich Q2 2026</h4>
+        <p>Der mit Abstand wichtigste nahe Katalysator. 91% der Aktionäre stimmten für den Schritt; Wise hat die OCC-Trust-Bank-Bewerbung eingereicht und beschäftigt bereits 750+ US-Mitarbeiter. Das Management hat den Vollzug für H1 2026 bestätigt. Das US-Listing soll neben der LSE-Notierung bestehen bleiben (Dual-Listing), was für UK-Investoren keine Verwässerung bedeutet. Der Schritt öffnet Wise für den weltweit tiefsten Kapitalmarkt und institutionelle US-Investoren, die die LSE-Notierung aus regulatorischen oder operativen Gründen meiden.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Das US-Dual-Listing wird vollzogen und der Kurs handelt zu US-Fintech-Multiples (P/E 28–35x) → Zielkurs 1.100–1.300p impliziert; nachkaufen bei Kurs unter 950p nach Listing. Erwartete US-Investorennachfrage könnte den Kurs nachhaltig über die SMA-200 (1.000p) heben und das technische Bild fundamental verbessern.<br><br>
+          <strong>Wenn:</strong> Das Listing verzögert sich auf H2 2026 oder scheitert (z.B. wegen OCC-Ablehnung) → kurzfristiger Enttäuschungsfall; Kurs könnte wieder in Richtung 793p fallen. In diesem Szenario: Halten und auf FY2026-Jahresergebnis warten; fundamentale Thesis bleibt intakt, nur zeitlich verschoben.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 2: FY2026 Jahresergebnis (Stichtag 31. März 2026) – erwartet 30. Juni 2026</h4>
+        <p>Das vollständige FY2026-Ergebnis wird die entscheidende Frage beantworten: Liegt die Underlying PBT-Marge tatsächlich am oberen Ende des 13–16%-Korridors (Managementguidance)? Und wie stark ist das Underlying Income gewachsen – Management erwartet "Mitte der 15–20%-Range" also ~17–18% Underlying Income-Wachstum. Gleichzeitig wird die Entwicklung der Take Rate (aktuell 52 bps) und des Platform-Segments (aktuell 5% des Volumens) als Indikatoren für die langfristige Wettbewerbsposition gegen Stablecoins bewertet.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Underlying Income wächst ≥17% YoY, Platform-Anteil steigt auf >6% des Volumens, und die Take Rate bleibt stabil bei 50–53 bps → Bullische Bestätigung; die Wachstumsbeschleunigung aus Q3 FY2026 setzt sich fort. Rating aufrechterhalten, ggf. Zielkurs auf 1.200–1.400p erhöhen.<br><br>
+          <strong>Wenn:</strong> Underlying Income wächst <13% YoY oder Take Rate fällt unter 47 bps → Enttäuschung; struktureller Preisdruck eskaliert möglicherweise. In diesem Fall: Positions-Review; Reduce auf 50% der ursprünglichen Position, bis nächstes Quartal weitere Klarheit bringt.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 3: Stablecoin-Adoptions-Inflexionspunkt – Laufende Beobachtung, kritisch bis Ende 2027</h4>
+        <p>Die Stablecoin-Frage ist kein binäres Event, sondern ein langsamer Wandel. Der entscheidende Monitor ist: Wie schnell skalieren On/Off-Ramp-Infrastrukturen auf Retail-Niveau, und verliert Wise messbar Volumen in Schlüsselkorridoren? Konkret zu beobachten: (1) Wächst Wise's Cross-Border-Volumenwachstum unter 15% YoY für 2+ Quartale? (2) Steigen Stablecoin-echte-Zahlungen über $1 Billion p.a. (aktuell $390 Mrd.)? (3) Kündigen Großpartner (z.B. Standard Chartered, HSBC) Stablecoin-basierte Alternativinfrastruktur an, die Wise Platform konkurriert?</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Wise's Cross-Border-Volumenwachstum bleibt ≥20% YoY für 4 Quartale in Folge trotz Stablecoin-Boom → Koexistenz-These bestätigt; Wise's Infrastruktur-Moat ist resilienter als gedacht. Stablecoin-Disruptionsrisiko deutlich reduzieren; Burggraben-Score auf 8/10 anheben. Langfristig nachkaufen.<br><br>
+          <strong>Wenn:</strong> Cross-Border-Volumenwachstum fällt in 2 aufeinanderfolgenden Quartalen unter 10% YoY UND gleichzeitig ein Gross-Stablecoin-Zahlungsvolumen von >$2 Billionen p.a. (real) erreicht wird → strukturelle Disruption beginnt materiell zu werden. Position auf 25–50% reduzieren und abwarten, ob Wise Stablecoin-Integration ankündigt.
+        </div>
+      </div>
+      <div class="source">Quellen: Wise Q3 FY2026 Trading Update (Jan 2026); Wise Management Guidance (Nov/Jan 2026); Payments Association Feb 2026; Goldman Sachs Stablecoin Report Jan 2026</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung, Kauf- oder Verkaufsempfehlung dar. Investitionen in Wertpapiere sind mit Risiken verbunden; vergangene Wertentwicklungen sind kein verlässlicher Indikator für zukünftige Ergebnisse. Die verwendeten Daten basieren auf öffentlich verfügbaren Quellen (Stand März 2026) und erheben keinen Anspruch auf Vollständigkeit oder Richtigkeit. Bitte konsultieren Sie vor Anlageentscheidungen einen qualifizierten Finanzberater. Der Autor hält möglicherweise eine Position in der analysierten Aktie.
+  </div>
+
+</div>
+</body>
+</html>
