@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MSFT – Aktienanalyse Canvas v2.2</title>
+  <style>
+    :root {
+      --primary: #0078D4;
+      --primary-dark: #005a9e;
+      --bg: #0f0f12;
+      --bg-card: #1a1a1f;
+      --bg-card2: #22222a;
+      --border: #2e2e38;
+      --text: #e8e8ec;
+      --text-muted: #888898;
+      --text-dim: #555566;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --teal: #14b8a6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7;
+    }
+    .header {
+      background: linear-gradient(135deg, #00081a 0%, #001028 40%, #0f0f12 100%);
+      border-bottom: 1px solid var(--primary);
+      padding: 36px 40px 28px; display: flex; justify-content: space-between;
+      align-items: flex-start; flex-wrap: wrap; gap: 20px;
+    }
+    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .header-left h1 span { color: var(--primary); }
+    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    .header-right { text-align: right; }
+    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+    .price-change.up   { background: rgba(34,197,94,0.15); color: var(--green); }
+    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+    .nav {
+      background: var(--bg-card); border-bottom: 1px solid var(--border);
+      padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+    .kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .kpi-value.green  { color: var(--green); }
+    .kpi-value.red    { color: var(--red); }
+    .kpi-value.orange { color: var(--primary); }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .section-title  { font-size: 16px; font-weight: 700; color: white; }
+    .section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+    .section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+    .section-body   { padding: 20px 24px; }
+    p { margin-bottom: 12px; color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+    h3:first-child { margin-top: 0; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(0,120,212,0.04); }
+    .beat    { color: var(--green);  font-weight: 600; }
+    .miss    { color: var(--red);    font-weight: 600; }
+    .neutral { color: var(--yellow); font-weight: 600; }
+    .badge        { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
+    .badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .badge-blue   { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .badge-orange { background: rgba(0,120,212,0.15);  color: var(--primary); }
+    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+    .event-item:last-child { border-bottom: none; }
+    .event-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+    .dot-green  { background: var(--green); }
+    .dot-red    { background: var(--red); }
+    .dot-yellow { background: var(--yellow); }
+    .event-label { font-weight: 600; color: white; }
+    .event-text  { font-size: 14px; color: var(--text); }
+    .risk-item   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .risk-title  { font-weight: 600; color: white; font-size: 14px; }
+    .score-bar       { display: flex; align-items: center; gap: 10px; }
+    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .score-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #00b7ff); }
+    .score-num       { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bear-card h4 { color: var(--red);   margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .rating-box { background: linear-gradient(135deg, rgba(0,120,212,0.12), rgba(0,120,212,0.04)); border: 1px solid rgba(0,120,212,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+    .rating-item .val  { font-size: 20px; font-weight: 800; color: white; }
+    .rating-item .val.buy  { color: var(--green); }
+    .rating-item .val.hold { color: var(--yellow); }
+    .rating-item .val.sell { color: var(--red); }
+    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+    .trigger-card      { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .trigger-card h5   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .trigger-card.buy  h5 { color: var(--green); }
+    .trigger-card.sell h5 { color: var(--red); }
+    .trigger-list    { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
+    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    @media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+    .investor-no  { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-no  h5 { color: var(--red);   font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+    .investor-no  li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+    .geo-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+    .geo-card   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .geo-pct    { font-size: 20px; font-weight: 700; color: white; }
+    .geo-note   { font-size: 12px; color: var(--text-muted); }
+    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+    .outlook-card .when-then strong { color: var(--primary); }
+    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+    .source a { color: var(--text-dim); }
+    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+    .alert-box { background: rgba(0,120,212,0.08); border: 1px solid rgba(0,120,212,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+    .divider   { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .pill      { display: inline-block; background: rgba(0,120,212,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+    .ai-focus-box { background: linear-gradient(135deg, rgba(0,120,212,0.1), rgba(139,92,246,0.08)); border: 1px solid rgba(0,120,212,0.25); border-radius: 10px; padding: 16px 20px; margin: 16px 0; }
+    .ai-focus-box h4 { color: var(--primary); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .kpi-grid-mini { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin: 12px 0; }
+  </style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══════════════════════════════════════════════════════════ -->
+<div class="header">
+  <div class="header-left">
+    <h1>Microsoft <span>MSFT · NASDAQ</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 27. März 2026 · NASDAQ · Sektor: Technology / Cloud &amp; AI</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">Cloud / Azure</span>
+      <span class="badge badge-blue">AI / Copilot</span>
+      <span class="badge badge-orange">Enterprise Software</span>
+      <span class="badge" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">M365 Ecosystem</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$400</div>
+    <div class="price-meta">Analysekurs · 27.02.2026 · NASDAQ</div>
+    <div class="price-change down">▼ –18% in 4 Wochen</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $381 – $468</div>
+  </div>
+</div>
+
+<!-- ═══ NAV ═══════════════════════════════════════════════════════════════ -->
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<!-- ═══ MAIN ══════════════════════════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- KPI OVERVIEW -->
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Kurs</div>
+      <div class="kpi-value red">$400</div>
+      <div class="kpi-sub">USD · 27.02.2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Market Cap</div>
+      <div class="kpi-value">$2,99 Bio.</div>
+      <div class="kpi-sub">USD</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">P/E (TTM)</div>
+      <div class="kpi-value orange">24,5x</div>
+      <div class="kpi-sub">Fwd: 22,4x</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">EV/EBITDA</div>
+      <div class="kpi-value">16,8x</div>
+      <div class="kpi-sub">TTM</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Op. Marge</div>
+      <div class="kpi-value green">47,0%</div>
+      <div class="kpi-sub">Q2 FY2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">ROE</div>
+      <div class="kpi-value green">34,4%</div>
+      <div class="kpi-sub">TTM</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Nächste Earnings</div>
+      <div class="kpi-value orange">29. Apr</div>
+      <div class="kpi-sub">Q3 FY2026 est.</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Konsens</div>
+      <div class="kpi-value green">$596</div>
+      <div class="kpi-sub">Ø Kursziel · 57/58 Buy</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ S1: GESCHÄFTSMODELL ═══════════════════════════════════════════ -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 9 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Unternehmensüberblick</h3>
+      <p>Microsoft Corporation (gegr. 1975, CEO Satya Nadella seit 2014) hat sich zum führenden Cloud- und KI-Konzern der Welt entwickelt. Das Unternehmen gliedert sich in drei operative Segmente: <strong>Productivity and Business Processes</strong> (Microsoft 365, LinkedIn, Dynamics 365), <strong>Intelligent Cloud</strong> (Azure, SQL Server, GitHub) sowie <strong>More Personal Computing</strong> (Windows, Xbox, Surface, Bing). Im zweiten Quartal des Geschäftsjahres 2026 erzielte das Intelligent-Cloud-Segment $32,9 Mrd. Umsatz, Productivity and Business Processes $34,1 Mrd.</p>
+
+      <h3>Revenue-Streams &amp; Kostenstruktur</h3>
+      <p>Das Geschäftsmodell ist stark auf wiederkehrende Einnahmen ausgerichtet: Über 70 % des Gesamtumsatzes stammen aus Subscription- und nutzungsbasierten Quellen (Microsoft 365, Azure, Dynamics). Azure operiert als Consumption-basiertes Modell – Kunden zahlen für tatsächlich genutzte Rechen-, Speicher- und KI-Kapazitäten. Copilot-Lizenzen (M365 Copilot Add-On: $30/Nutzer/Monat) ergänzen das Geschäftsmodell als Premium-Aufpreisschicht. Mit über 450 Mio. bezahlten M365 Commercial Seats und aktuell 15 Mio. Copilot-Seats eröffnet sich eine enorme ARPU-Ausweitung.</p>
+      <p>Auf der Kostenseite ist Microsoft zunehmend Capex-intensiv: Das Unternehmen investierte allein in H1 FY2026 $72,4 Mrd. in Rechenzentren, GPUs und CPUs – auf Kurs zu ~$80+ Mrd. für das Gesamtjahr. Diese Kosten komprimieren den Free Cashflow kurzfristig, stellen aber laut Management notwendige Investitionen in „Planet-Scale"-KI-Kapazität dar, da die Nachfrage das Angebot weiterhin übersteigt.</p>
+
+      <h3>Unit Economics / AI-Monetarisierung</h3>
+      <p>Die Unit Economics des KI-Geschäfts werden zunehmend sichtbar: Microsoft Fabric (Daten- und Analytics-Plattform) erreichte eine annualisierte Umsatzrate von $2+ Mrd. mit 60 % YoY-Wachstum. Azure AI-Services steuern ~16 Prozentpunkte zum 39%igen Azure-Wachstum bei – ein erheblicher Teil des Zuwachses kommt direkt aus monetisierten KI-Workloads. Das Unternehmen verfügt über eine der stärksten Plattform-Ökonomien der Technologiebranche.</p>
+
+      <div class="source">Quellen: Microsoft FY26 Q1 &amp; Q2 Press Releases (microsoft.com/investor, 29.10.2025 &amp; 28.01.2026); Futurum Research (futurumgroup.com, 31.10.2025 &amp; 29.01.2026); Microsoft Annual Report 2025</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ S2: BURGGRABEN ════════════════════════════════════════════════ -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 9/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Netzwerkeffekte</h3>
+      <p>Stark ausgeprägt. Microsoft 365 wird wertvoller, je mehr Nutzer es innerhalb eines Unternehmens verwenden – Kollaborationstools (Teams, SharePoint), gemeinsam bearbeitete Dokumente und Copilot-Agents profitieren direkt von der Nutzerdichte. GitHub (26 Mio. Copilot-Nutzer, 100 Mio. Entwickler weltweit) erzeugt seinerseits starke Netzwerkeffekte innerhalb der Entwickler-Community.</p>
+
+      <h3>Switching Costs</h3>
+      <p>Sehr hoch. Die Migrationskosten für Unternehmen (Umschulung, Produktivitätsverluste, Sicherheitskonfiguration, Systemintegration) übersteigen potenzielle Lizenzeinsparungen durch Wettbewerber bei weitem. Dieser Effekt wird durch Microsofts Bundle-Strategie verstärkt: Wer Azure, M365, Defender und Dynamics 365 gemeinsam nutzt, ist tief in das Microsoft-Ökosystem eingebettet. Die FTC untersucht genau diese Bundling-Praktiken – was die Stärke der Marktposition unterstreicht.</p>
+
+      <h3>Brand Power &amp; Scale Advantages</h3>
+      <p>Microsoft ist eine der stärksten Enterprise-Marken der Welt. Das Unternehmen kündigte in Q2 FY2026 Preiserhöhungen für kommerzielle Office-Abonnements an – ein Schritt, den nur wenige Anbieter mit einem so großen Kundenstamm wagen können. Über 90 % der Fortune-500-Unternehmen nutzen M365 Copilot. Microsoft betreibt über 400 Rechenzentren in 70 Regionen weltweit – mehr als jeder andere Cloud-Anbieter. Die Größe erlaubt Einkaufsvorteile bei Hardware, effizienteren Energieeinsatz (Liquid-Cooling, eigene Chips: Maia 200, Cobalt 200) und Investitionen in proprietäre KI-Infrastruktur.</p>
+
+      <h3>Technologischer Vorsprung (OpenAI-Exklusivität)</h3>
+      <p>Die strategische Partnerschaft mit OpenAI sichert Microsoft Exklusivrechte auf Modell-Vermarktung bis mindestens 2030 und Modell-Designs bis 2032. Azure ist die einzige Plattform, auf der OpenAI-Modelle extern über API bezogen werden können. Darüber hinaus entwickelt Microsoft eigene Modelle (Phi, Orca) sowie eigene KI-Chips. GitHub Copilot ist der mit Abstand marktführende KI-Coding-Assistent. <strong>Schwachstelle:</strong> Die Abhängigkeit von OpenAI stellt ein Konzentrationsrisiko dar – jede Instabilität bei OpenAI könnte die KI-Roadmap stören.</p>
+
+      <div class="source">Quellen: SAMexpert FTC Report (samexpert.com, 22.09.2025); Microsoft Annual Report 2025; Futurum Research (29.01.2026)</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ S3: QUARTALE ══════════════════════════════════════════════════ -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Beat-Ratio: 4/4</div>
+    </div>
+    <div class="section-body">
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quartal</th>
+              <th>Revenue</th>
+              <th>YoY</th>
+              <th>Non-GAAP EPS</th>
+              <th>Beat/Miss</th>
+              <th>Azure-Wachstum</th>
+              <th>Kursreaktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q3 FY2025</strong><br><small>Jan–Mrz 2025</small></td>
+              <td>~$70,1 Mrd.</td>
+              <td>+15%</td>
+              <td>~$3,46</td>
+              <td><span class="beat">✓ Beat</span></td>
+              <td>+35% cc</td>
+              <td class="beat">+~2%</td>
+            </tr>
+            <tr>
+              <td><strong>Q4 FY2025</strong><br><small>Apr–Jun 2025</small></td>
+              <td>$76,44 Mrd.</td>
+              <td>+18%</td>
+              <td>$3,65</td>
+              <td><span class="beat">✓ Beat +$0,27</span></td>
+              <td>+39%</td>
+              <td class="beat">+~3%</td>
+            </tr>
+            <tr>
+              <td><strong>Q1 FY2026</strong><br><small>Jul–Sep 2025</small></td>
+              <td>$77,7 Mrd.</td>
+              <td>+18%</td>
+              <td>$4,13</td>
+              <td><span class="beat">✓ Beat +2,8%</span></td>
+              <td>+40% (cc +39%)</td>
+              <td class="beat">+~4%</td>
+            </tr>
+            <tr>
+              <td><strong>Q2 FY2026</strong><br><small>Okt–Dez 2025</small></td>
+              <td>$81,3 Mrd.</td>
+              <td>+17%</td>
+              <td>$4,14</td>
+              <td><span class="beat">✓ Beat +$1B Rev.</span></td>
+              <td>+39% (cc +38%)</td>
+              <td class="miss">–7% (AH)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Die Beat-Ratio von <strong>4/4 Quartalen</strong> ist ein starkes Signal für operative Verlässlichkeit. Besonders bemerkenswert: trotz rekordhoher Capex-Ausgaben ($37,5 Mrd. in Q2 FY2026, +66 % YoY) übertrifft Microsoft konsistent die Erwartungen. Die negative Kursreaktion nach Q2 FY2026 (-7 % nachbörslich) reflektierte nicht das operative Ergebnis, sondern die Sorge der Investoren um den schwindenden Free Cashflow und die leichte Margenguidance für Q3.</p>
+      <p>CEO Satya Nadella: <em>"We are only at the beginning phases of AI diffusion and already Microsoft has built an AI business that is larger than some of our biggest franchises."</em> CFO Amy Hood wies auf persistente Kapazitätsengpässe hin – Nachfrage übersteigt weiterhin Angebot. Der nächste Quartalsbericht (<strong>Q3 FY2026</strong>) wird voraussichtlich am <strong>29. April 2026</strong> veröffentlicht.</p>
+
+      <div class="source">Quellen: Microsoft FY26 Q1 Press Release (29.10.2025); Microsoft FY26 Q2 Press Release (28.01.2026); CNBC (28.01.2026); Futurum Research (31.10.2025 &amp; 29.01.2026)</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ S4: WACHSTUM ══════════════════════════════════════════════════ -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Umsatzentwicklung (FY, per 30. Juni)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Geschäftsjahr</th><th>Umsatz</th><th>YoY</th><th>Operating Income</th><th>Op. Marge</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>FY2021</td><td>$168,1 Mrd.</td><td>+17,5%</td><td>~$70 Mrd.</td><td>~42%</td></tr>
+            <tr><td>FY2022</td><td>$198,3 Mrd.</td><td>+18,0%</td><td>$83,4 Mrd.</td><td>42,1%</td></tr>
+            <tr><td>FY2023</td><td>$211,9 Mrd.</td><td>+6,9%</td><td>$88,5 Mrd.</td><td>41,8%</td></tr>
+            <tr><td>FY2024</td><td>$245,1 Mrd.</td><td>+15,7%</td><td>$109,4 Mrd.</td><td>44,6%</td></tr>
+            <tr><td>FY2025</td><td>$281,7 Mrd.</td><td>+14,9%</td><td>$128,5 Mrd.</td><td>45,6%</td></tr>
+            <tr><td><strong>TTM (Dez 25)</strong></td><td><strong>$305,5 Mrd.</strong></td><td><strong>+16,7%</strong></td><td>~$142 Mrd.</td><td>~46,5%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Das Wachstum ist strukturell getragen und nicht durch M&amp;A oder Accounting inflationiert. Ausnahme: FY2023 (+6,9 %) reflektiert den Post-COVID-Normalisierungseffekt und Aktivision-Blizzard-Integrationskosten ($75 Mrd. Akquisition). Seit FY2024 hat sich das Wachstum auf einem nachhaltigen 15–18 %-Niveau re-etabliert.</p>
+
+      <h3>Segmentsplit Q2 FY2026</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Segment</th><th>Q2 FY26 Umsatz</th><th>YoY</th><th>Wachstumstreiber</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Productivity &amp; Business Processes</strong></td><td>$34,1 Mrd.</td><td class="beat">+16%</td><td>M365 Copilot, E5-Upgrades, LinkedIn +11%</td></tr>
+            <tr><td><strong>Intelligent Cloud</strong></td><td>$32,9 Mrd.</td><td class="beat">+29%</td><td>Azure +39%, AI Services +~16 pp</td></tr>
+            <tr><td><strong>More Personal Computing</strong></td><td>$14,3 Mrd.</td><td class="miss">–3%</td><td>Schwache Gaming-Ergebnisse (–9,5%)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Geografische Verteilung</h3>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">USA</div>
+          <div class="geo-pct">~52%</div>
+          <div class="geo-note">Kernmarkt, stable</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">EMEA</div>
+          <div class="geo-pct">~27%</div>
+          <div class="geo-note">EU AI Act Compliance</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">APAC</div>
+          <div class="geo-pct">~13%</div>
+          <div class="geo-note">Wachstumspotenzial</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">LatAm &amp; Sonstige</div>
+          <div class="geo-pct">~8%</div>
+          <div class="geo-note">Emerging Markets</div>
+        </div>
+      </div>
+      <p>Geografisch generiert Microsoft knapp 50 % des Umsatzes außerhalb der USA. Das Unternehmen betreibt Rechenzentren auf allen sechs Kontinenten und hat in Q2 FY2026 neue Kapazitätsankündigungen in sieben Ländern gemacht. Dies reduziert die Abhängigkeit vom US-Markt und bietet natürliche Absicherung gegen regionale Wirtschaftszyklen. <strong>Reifegrad:</strong> Growth-at-Scale – Azure/AI im Hyper-Growth, Kerngeschäft stabil expansiv.</p>
+
+      <div class="source">Quellen: Yahoo Finance Income Statement (27.02.2026); WallStreetZen (27.02.2026); Microsoft Investor Relations</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ S5: BEWERTUNG ═════════════════════════════════════════════════ -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Metrik</th><th>Aktuell (27.02.26)</th><th>5-Jahres-Ø</th><th>Einordnung</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>P/E (TTM)</strong></td><td>24,5x</td><td>~33x</td><td><span class="beat">✓ 26% unter hist. Schnitt</span></td></tr>
+            <tr><td><strong>Forward P/E (FY26)</strong></td><td>22,4x</td><td>~30x</td><td><span class="beat">✓ Attraktiv für Wachstumsrate</span></td></tr>
+            <tr><td><strong>PEG-Ratio</strong></td><td>1,57</td><td>~1,5–2,0</td><td><span class="neutral">➡ Fair</span></td></tr>
+            <tr><td><strong>EV/EBITDA (TTM)</strong></td><td>16,8x</td><td>~22x</td><td><span class="beat">✓ Günstig</span></td></tr>
+            <tr><td><strong>P/FCF</strong></td><td>38,7x</td><td>~42x</td><td><span class="neutral">➡ Leicht unter Ø (Capex-Druck)</span></td></tr>
+            <tr><td><strong>P/S (TTM)</strong></td><td>~9,8x</td><td>~12x</td><td><span class="beat">✓ Unter hist. Schnitt</span></td></tr>
+            <tr><td><strong>Dividendenrendite</strong></td><td>~0,82%</td><td>~0,85%</td><td><span class="neutral">➡ Stabil</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Die aktuelle Bewertung von Microsoft ist historisch günstig: Das P/E-Ratio (TTM) von ~24,5x liegt rund 26 % unter dem 5-Jahres-Durchschnitt (~33x) und 22 % unter dem 10-Jahres-Schnitt (~31x). In absoluten Zahlen ist ein P/E von 24x für ein Unternehmen, das mit 17–18 % Umsatz wächst, eine bemerkenswert günstige Ausgangsbasis. Das Forward P/E von ~22,4x für ein Unternehmen mit 24 % EPS-Wachstum (FY2026 Konsens: $16,97/Aktie) ist ebenfalls attraktiv.</p>
+      <p>Der PEG von 1,57 signalisiert ein faires Chance-Risiko-Verhältnis. Analysten-Konsens: 57 von 58 Analysten tragen ein Buy- oder Strong-Buy-Rating mit einem Kursziel von durchschnittlich ~$596 (+49 % Aufwärtspotenzial). Goldman Sachs initiierte im Januar 2026 mit einem Buy-Rating und $655 Kursziel.</p>
+
+      <div class="source">Quellen: Finviz.com (27.02.2026); fullratio.com (27.02.2026); stockanalysis.com/statistics; gurufocus.com; 247wallst.com (24.02.2026)</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ S6: CASHFLOW ══════════════════════════════════════════════════ -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Metrik</th><th>FY2023</th><th>FY2024</th><th>FY2025</th><th>TTM (Dez 25)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Operating Cash Flow</strong></td><td>$87,6 Mrd.</td><td>$118,5 Mrd.</td><td>$136,2 Mrd.</td><td>~$160 Mrd.</td></tr>
+            <tr><td><strong>Capex</strong></td><td>$28,1 Mrd.</td><td>$44,5 Mrd.</td><td>$64,6 Mrd.</td><td>~$83 Mrd.</td></tr>
+            <tr><td><strong>Free Cash Flow</strong></td><td>$59,5 Mrd.</td><td>$74,1 Mrd.</td><td>$71,6 Mrd.</td><td>~$77 Mrd.*</td></tr>
+            <tr><td><strong>FCF-Marge</strong></td><td>~28%</td><td>~30%</td><td>~25%</td><td>~25%</td></tr>
+            <tr><td><strong>Gross Margin</strong></td><td>68,9%</td><td>69,8%</td><td>68,9%</td><td>~68,6%</td></tr>
+            <tr><td><strong>Operating Margin</strong></td><td>41,8%</td><td>44,6%</td><td>45,6%</td><td>~46,5%</td></tr>
+            <tr><td><strong>Net Margin</strong></td><td>~34,1%</td><td>~35,0%</td><td>~36,2%</td><td>~39,0%</td></tr>
+            <tr><td><strong>ROE / ROIC</strong></td><td>–</td><td>–</td><td>–</td><td>34,4% / 28,8%</td></tr>
+            <tr><td><strong>Debt/Equity</strong></td><td>–</td><td>–</td><td>–</td><td>0,32</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);">*Annualisiert; kurzfristig durch Capex-Peak komprimiert</p>
+
+      <p>Der Operating Cash Flow stieg auf ~$160 Mrd. TTM (+17 % YoY), wurde aber durch massiven Capex-Anstieg (~$83 Mrd. TTM, +29 % YoY) überkompensiert. Der FCF in Q2 FY2026 fiel im Jahresvergleich um 9,3 % auf $5,88 Mrd. – ein Warnsignal auf Quartalsbasis. Langfristig wichtig: ~2/3 der Capex-Ausgaben fließen in kurzlebige Assets (GPUs/CPUs, 2–3 Jahre Abschreibung), sodass die FCF-Kompression strukturell begrenzt ist.</p>
+      <p>Microsoft zahlt seit Jahren steigende Dividenden ($0,83/Aktie/Quartal, ~0,82 % Rendite) und kaufte in Q2 FY2026 insgesamt $12,7 Mrd. eigene Aktien zurück (+32 % YoY). Die Verschuldung ist mit Debt/Equity 0,32 sehr moderat. ROE (34,4 %) und ROIC (28,8 %) signalisieren exzellente Kapitalallokationseffizienz.</p>
+
+      <div class="source">Quellen: Yahoo Finance Cash Flow (27.02.2026); macrotrends.net; stockanalysis.com/statistics; 247wallst.com (24.02.2026)</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ S7: PEERS ══════════════════════════════════════════════════════ -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kennzahl</th><th>Microsoft (MSFT)</th><th>Alphabet (GOOGL)</th><th>Amazon (AMZN)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Market Cap</strong></td><td>~$2,99 Bio.</td><td>~$2,1 Bio.</td><td>~$2,4 Bio.</td></tr>
+            <tr><td><strong>Umsatz (TTM)</strong></td><td>$305,5 Mrd.</td><td>~$400 Mrd.</td><td>~$620 Mrd.</td></tr>
+            <tr><td><strong>Rev.-Wachstum YoY</strong></td><td class="beat">~17%</td><td class="beat">~18%</td><td class="neutral">~11%</td></tr>
+            <tr><td><strong>Op. Marge</strong></td><td class="beat">~46,5%</td><td class="neutral">~32%</td><td class="miss">~10% (konsolidiert)</td></tr>
+            <tr><td><strong>Cloud-Wachstum (letztes Q)</strong></td><td>Azure +39%</td><td class="beat">Google Cloud +48%</td><td class="neutral">AWS +24%</td></tr>
+            <tr><td><strong>Cloud-Marktanteil</strong></td><td>21%</td><td>14%</td><td class="beat">28%</td></tr>
+            <tr><td><strong>P/E (TTM)</strong></td><td>24,5x</td><td>~24–27x</td><td>~40x</td></tr>
+            <tr><td><strong>FCF-Marge</strong></td><td>~25%</td><td class="beat">~37%</td><td class="miss">~4%</td></tr>
+            <tr><td><strong>Capex 2026E</strong></td><td>~$80 Mrd.</td><td>$175–185 Mrd.</td><td>~$200 Mrd.</td></tr>
+            <tr><td><strong>Regulierungsrisiko</strong></td><td><span class="badge badge-red">Hoch (FTC aktiv)</span></td><td><span class="badge badge-red">Hoch (antitrust)</span></td><td><span class="badge badge-yellow">Mittel</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Microsoft schlägt Alphabet beim Operating Leverage (46,5 % vs. 32 %) und bei der Enterprise-Einbettung (Switching Costs, M365 Suite). Alphabet gewinnt beim Google Cloud-Wachstum (Q4 2025: +48 %, höchste Rate der Big Three) und beim FCF (~37 % Marge vs. ~25 %). Amazon (AWS) ist der größte Cloud-Anbieter (28 % Marktanteil), wächst aber langsamer (24 %). Microsofts komparativer Vorteil liegt in der vollständigen KI-Stack-Integration: Von der Infrastruktur (Azure) über Modelle (OpenAI-Partnerschaft) bis zur Endnutzeranwendung (Copilot in M365, GitHub).</p>
+      <p>Alphabet hat im Q4 2025 mit Google Cloud +48 % die Messlatte erhöht und investiert $175–185 Mrd. Capex in 2026. Amazon investiert ~$200 Mrd. Capex. Microsoft liegt bei ~$80 Mrd. – deutlich weniger als die Konkurrenz, was operative Effizienz oder temporäre Kapazitätslücken signalisiert. Management betont: Nachfrage übersteigt weiterhin Angebot.</p>
+
+      <div class="source">Quellen: Zacks (sg.finance.yahoo.com, 27.02.2026); Motley Fool (12.02.2026); S&amp;P Global Market Intelligence (25.02.2026); Synergy Research Group</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ S8: NEWS & EVENTS ══════════════════════════════════════════════ -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+
+      <h3>Ebene 1: Unternehmen (Company-spezifische Events)</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">28.01.2026 – Q2 FY2026 Earnings <span class="badge badge-yellow">Gemischt</span></div>
+          <div class="event-text">Revenue $81,3 Mrd. (+17%), EPS $4,14 – beides Beat; Aktie -7% AH wegen Capex/Margin-Guidance. Azure +39%, M365 Copilot 15 Mio. Seats. Quelle: CNBC, 28.01.2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Jan 2026 – Copilot Adoption: 15 Mio. bezahlte Seats (+160% YoY) <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">DAU +10x YoY, Copilot App DAU +3x YoY. 90% Fortune-500 nutzen M365 Copilot. Quelle: Futurum Research, 29.01.2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Jan 2026 – OpenAI / Anthropic Deals: $625 Mrd. Commercial RPO <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">OpenAI macht ~45% des RPO aus. Anthropic kauft $30 Mrd. Azure-Kapazität (1 GW dediziert). Quelle: Microsoft IR, 28.01.2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">H1 FY2026 – Capex $72,4 Mrd. (+66% YoY), FCF Q2 –9,3% YoY <span class="badge badge-red">Negativ kurzfristig</span></div>
+          <div class="event-text">Auf Kurs zu ~$80–100 Mrd. Capex p.a. FCF-Kompression belastet Kurs. Quelle: Microsoft Press Release, 28.01.2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Jan 2026 – Goldman Sachs Initiation: Buy, Kursziel $655 <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">+37% Upside-Potenzial zum Analysekurs. Katalysatoren: Azure-KI, Copilot Monetarisierung. Quelle: TheFly, 11.01.2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Jan 2026 – Preiserhöhung kommerzielle Office-Abonnements <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Zeigt Preissetzungsmacht. ARPU-Steigerung strukturell verankert. Quelle: Microsoft IR, Jan 2026</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche (Sector-spezifische Events)</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Feb 2026 – Google Cloud Q4 2025: +48% YoY <span class="badge badge-red">Negativ (Konkurrenz)</span></div>
+          <div class="event-text">Schnellstes Wachstum der Big Three. Gemini 3 als Treiber. Alphabet plant $175–185 Mrd. Capex 2026. Quelle: Motley Fool, 12.02.2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Feb 2026 – AWS Q4 2025: +24% (schnellstes Wachstum seit 13 Quartalen) <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Amazon plant ~$200 Mrd. Capex 2026. AWS bleibt Marktführer (28%). Quelle: S&amp;P Global MI, 25.02.2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Jan 2026 – DeepSeek-Disruption: Effizienz-Modell aus China <span class="badge badge-red">Risiko</span></div>
+          <div class="event-text">Open-Source-Modell hinterfragt Notwendigkeit massiver Infrastruktur-Investments. Kursdruck auf alle AI-Infrastructure-Aktien. Quelle: Various, Jan 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Okt 2025 – Windows 10 End-of-Life: AI-PC-Refresh-Zyklus startet <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">1+ Mrd. Windows 10 Geräte refresh-pflichtig. Windows 11 + NPU-PCs als Upsell-Chance. Quelle: Neowin, 29.01.2026</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Feb 2026 – FTC-Antitrust-Untersuchung beschleunigt <span class="badge badge-red">Risiko</span></div>
+          <div class="event-text">Broad Probe zu AI, Cloud, Copilot, Teams, Bundling. Formale Klage in Trump-Ära unwahrscheinlich, aber nicht ausgeschlossen. Quelle: Bloomberg, 13.02.2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">2025/26 – Trump-Administration: Pro-AI-Schutzpolitik <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">DOJ angewiesen, staatliche AI-Regulierung zu bekämpfen. Günstig für US-Hyperscaler. Quelle: Reuters, 2025</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Feb 2026 – MSFT Aktie –18% in 4 Wochen (vs. S&amp;P 500 –1%) <span class="badge badge-red">Negativ kurzfristig</span></div>
+          <div class="event-text">Software-Sektor unter Druck. Technische Schwäche dominiert kurzfristiges Sentiment. Quelle: Zacks, 24.02.2026</div>
+        </div>
+      </div>
+
+      <div class="source">Quellen: CNBC (28.01.2026); Futurum Research (29.01.2026); Bloomberg (13.02.2026); Zacks (24.02.2026); Neowin (29.01.2026); Computerworld (14.01.2026)</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ S9: TECHNISCHE ANALYSE ════════════════════════════════════════ -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 3/10</div>
+    </div>
+    <div class="section-body">
+
+      <div class="kpi-grid-mini">
+        <div class="kpi-card">
+          <div class="kpi-label">Kurs</div>
+          <div class="kpi-value red">$400</div>
+          <div class="kpi-sub">27.02.2026</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 20</div>
+          <div class="kpi-value red">~$405</div>
+          <div class="kpi-sub">🔴 darunter</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 50</div>
+          <div class="kpi-value red">~$450</div>
+          <div class="kpi-sub">🔴 deutlich darunter</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 200</div>
+          <div class="kpi-value red">~$487</div>
+          <div class="kpi-sub">🔴 deutlich darunter</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">RSI (14)</div>
+          <div class="kpi-value green">~27–32</div>
+          <div class="kpi-sub">⚠️ überverkauft</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">52W High</div>
+          <div class="kpi-value">$468</div>
+          <div class="kpi-sub">–15% darunter</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">MACD</div>
+          <div class="kpi-value red">~–15,4</div>
+          <div class="kpi-sub">🔴 Bearish</div>
+        </div>
+      </div>
+
+      <h3>Trendeinordnung</h3>
+      <p>Die technische Situation ist klar bärisch: Microsoft befindet sich in einem etablierten Abwärtstrend und notiert deutlich unterhalb aller relevanten gleitenden Durchschnitte (SMA 20, 50 und 200). Das "Death Cross" (SMA 50 unter SMA 200) hat sich formiert und signalisiert anhaltenden Verkaufsdruck. Der RSI liegt mit ~27–32 im überverkauften Bereich – was technische Erholungsrallyes begünstigen kann, aber allein kein Kaufsignal darstellt.</p>
+
+      <h3>Support / Resistance &amp; Outlook</h3>
+      <p>Die kritische Unterstützungszone liegt bei ~$380–382 (30-Tages-Tief). Ein nachhaltiger Bruch würde den Weg in Richtung $350–360 öffnen. Auf der Oberseite limitiert zunächst der SMA 20 (~$405) weiteren Aufwärtsdrang. Für eine technische Trendwende wäre ein nachhaltiger Schlusskurs über dem SMA 50 (~$450) notwendig. Die Options-Daten (72 % Call-Volume) zeigen bullisches institutionelles Positioning – ein Contrarian-Signal gegen die rein technische Bärenperspektive. Für langfristige Investoren entspricht die aktuelle Preiszone (~$380–420) dem Jahresanfang 2024 – historisch attraktive Einstiegszone bei einer Qualitäts-Franchise.</p>
+
+      <div class="source">Quellen: Altindex.com (05.02.2026); Investing.com (27.02.2026); historicaloptiondata.com (26.02.2026); trendlyne.com (24.02.2026)</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ S10: RISIKEN & CHANCEN ════════════════════════════════════════ -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+
+      <h3>9a) Strukturelle &amp; Zyklische Risiken</h3>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Capex-ROI-Risiko: $80+ Mrd./Jahr ohne garantierte Rendite</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-yellow">Wahrsch.: Mittel</span></div>
+        </div>
+        <div class="event-text">FCF-Kompression kurzfristig. Falls KI-Infrastruktur durch Effizienzgewinne (DeepSeek) überkapazitiert wird, drohen Abschreibungen. Auswirkung: –5 pp Op. Marge möglich.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚖️ FTC-Antitrust-Untersuchung (Bundling / Cloud / AI)</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Wahrsch.: Mittel</span></div>
+        </div>
+        <div class="event-text">Aktive Untersuchung zu Cloud, AI, Teams-Bundling. Mögliche Kosten $1–5 Mrd.; Pricing-Beschränkungen bei Bundling-Strategie.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🥊 Wettbewerb: Google Cloud +48%, AWS re-acceleriert</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-red">Wahrsch.: Hoch</span></div>
+        </div>
+        <div class="event-text">Azure-Wachstum könnte auf 30–35 % verlangsamen. Google Cloud gewinnt Enterprise-Kunden mit Gemini-Integration und proprietären TPUs.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🔗 OpenAI-Abhängigkeit / Stabilität</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-green">Wahrsch.: Niedrig</span></div>
+        </div>
+        <div class="event-text">Instabilität bei OpenAI (wie Nov 2023 Führungskrise) könnte AI-Roadmap disruption und Reputationsschaden verursachen.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🤖 AI-Kannibalisierung (DeepSeek-Effekt)</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Wahrsch.: Mittel</span></div>
+        </div>
+        <div class="event-text">Effiziente Open-Source-Modelle könnten Preisdruck bei AI-Services auslösen und die Notwendigkeit teurer proprietärer Infrastruktur reduzieren.</div>
+      </div>
+
+      <h3>9b) AI-Risiko &amp; Technologische Disruption (Fokus-Analyse)</h3>
+      <div class="ai-focus-box">
+        <h4>🤖 Bullishes KI-Szenario</h4>
+        <p>Microsoft ist als einziger Hyperscaler vollständig in den KI-Stack vertikal integriert – von Hardware (eigene Maia/Cobalt-Chips) über Infrastruktur (Azure) bis zur Modell-Ebene (OpenAI-Exklusivität) und Anwendungsschicht (Copilot in M365, GitHub, Dynamics). Mit 15 Mio. M365 Copilot Seats bei 450 Mio. Commercial Seats liegt die Penetration erst bei 3,3 % – das Upsell-Potenzial ist enorm. Eine Durchdringung auf 20 % würde ~$32 Mrd. zusätzliche ARR bedeuten.</p>
+      </div>
+      <div class="risk-item" style="border-color:rgba(239,68,68,0.3);">
+        <div class="risk-header">
+          <div class="risk-title" style="color:var(--red);">🐻 Bärisches KI-Szenario</div>
+        </div>
+        <div class="event-text">DeepSeek und ähnliche Open-Source-Modelle reduzieren den Kapitalbedarf für KI-Infrastruktur fundamental. Falls Copilot-Adoption im Mittelstand schleppend verläuft (nur 39 % der Unternehmen berichten laut McKinsey messbarem ROI) und eine günstigere "Copilot Lite"-Version nötig wird, leidet die ARPU-Steigerungsthese.</div>
+      </div>
+
+      <h3>9c) Chancen</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Chance</th><th>Potenzial</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Copilot-Skalierung:</strong> 3,3% → 20% Penetration bei 450 Mio. Seats = $32 Mrd. ARR-Upside</td><td><span class="badge badge-green">Sehr Hoch</span></td></tr>
+            <tr><td><strong>AI-PC-Superzyklus:</strong> Windows 11 + NPU-PCs ersetzen 1+ Mrd. Windows 10 Geräte</td><td><span class="badge badge-green">Hoch</span></td></tr>
+            <tr><td><strong>Anthropic Azure-Deal:</strong> $30 Mrd. Cloud-Commitments; 1 GW dedizierte Kapazität</td><td><span class="badge badge-green">Hoch</span></td></tr>
+            <tr><td><strong>Azure-Marktanteilsgewinn:</strong> Von 21% auf 25%+ durch KI-Differenzierung</td><td><span class="badge badge-orange">Mittel-Hoch</span></td></tr>
+            <tr><td><strong>Agentische AI / Copilot Studio:</strong> Neue Revenue-Layer durch autonome Agents</td><td><span class="badge badge-green">Sehr Hoch (langfristig)</span></td></tr>
+            <tr><td><strong>Security-Segment:</strong> $20 Mrd. Revenue-Run-Rate; schnell wachsend durch KI-Integration</td><td><span class="badge badge-green">Hoch</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>9d) Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> FCF unter weiterem Capex-Druck; Azure-Wachstum unter 30 % für zwei aufeinanderfolgende Quartale; Copilot-Penetration stagniert unter 5 % Commercial Seats; FTC-Untersuchung eskaliert zu formaler Klage.</p>
+      <p><strong>Dealbreaker (existenzbedrohend):</strong> Keine bekannten existenzbedrohenden Risiken. Microsoft ist mit $24 Mrd. Cash, ~$160 Mrd. Operating Cash Flow und Debt/Equity 0,32 finanziell kerngesund.</p>
+
+      <div class="source">Quellen: Computerworld (14.01.2026); Bloomberg (13.02.2026); Mott Capital Management Q4 2025 Letter; AInvest (22.12.2025)</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ S11: SCORING ═══════════════════════════════════════════════════ -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring-Übersicht</div>
+      <div class="section-score">Ø 7,0/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kategorie</th><th>Score</th><th>Score-Bar</th><th>Begründung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Geschäftsmodell</strong></td>
+              <td>9/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+              <td>Starkes Subscription/Cloud-Modell; vollständige KI-Stack-Integration</td>
+            </tr>
+            <tr>
+              <td><strong>Burggraben</strong></td>
+              <td>9/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+              <td>Höchste Switching Costs der Enterprise-Software; OpenAI-Exklusivität bis 2030/32</td>
+            </tr>
+            <tr>
+              <td><strong>Operative Entwicklung (4Q)</strong></td>
+              <td>8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>4/4 Beats; starkes Azure/Copilot-Momentum; Capex-Sorgen limitieren</td>
+            </tr>
+            <tr>
+              <td><strong>Wachstum</strong></td>
+              <td>8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>Nachhaltiges 15–18 % Umsatzwachstum; KI-Monetarisierung skaliert</td>
+            </tr>
+            <tr>
+              <td><strong>Bewertung</strong></td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>P/E 24,5x historisch 26 % günstiger; attraktiv für Qualitätswachstum</td>
+            </tr>
+            <tr>
+              <td><strong>Cashflow &amp; Margen</strong></td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>FCF durch Capex-Offensive komprimiert; Op. Marge 47 % hervorragend</td>
+            </tr>
+            <tr>
+              <td><strong>Peer-Vergleich</strong></td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Führend bei Op. Leverage; Google Cloud wächst aktuell schneller</td>
+            </tr>
+            <tr>
+              <td><strong>Risiken (invertiert)</strong></td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>FTC, DeepSeek, Capex-ROI – moderat, kein Existenzrisiko</td>
+            </tr>
+            <tr>
+              <td><strong>Technische Analyse</strong></td>
+              <td>3/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:30%"></div></div><span class="score-num">3</span></div></td>
+              <td>Bearish: unter SMA 20/50/200; RSI überverkauft; Death Cross formiert</td>
+            </tr>
+            <tr style="background:rgba(0,120,212,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>7,0/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track">
+                    <div class="score-bar-fill" style="width:70%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
+                  </div>
+                  <span class="score-num" style="color:var(--primary);">7,0</span>
+                </div>
+              </td>
+              <td>Starkes Fundamental-/Strategie-Profil; technisch schwach – fundamentale Chance für langfristige Investoren</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ S12: FAZIT ════════════════════════════════════════════════════ -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+    </div>
+    <div class="section-body">
+
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 – KI-Monetarisierung messbar:</strong> Azure AI Services steuern ~16 der 39 Prozentpunkte zum Azure-Wachstum bei (~$20+ Mrd. annualisiert). M365 Copilot mit 15 Mio. Paid Seats (+160 % YoY) und DAU +10x zeigt Gewohnheitsbildung im Enterprise-Segment – Fundament für ein milliardenschweres Recurring-Revenue-Layer.</p>
+          <p><strong>Säule 2 – Historisch günstige Bewertung:</strong> P/E 24,5x bei 24 % EPS-Wachstum (FY2026). 5-Jahres-Ø: 33x. Die Bewertungslücke reflektiert temporäre Capex-Angst, nicht strukturelle Verschlechterung. Commercial RPO $625 Mrd. (+110 % YoY) sichert Revenue-Boden.</p>
+          <p><strong>Säule 3 – Vollständigster KI-Stack:</strong> Hardware (Maia/Cobalt) → Infrastruktur (Azure) → Modell-Exklusivität (OpenAI bis 2032) → Application Layer (Copilot). Flywheel: mehr Azure → bessere Modelle → besseres Copilot → mehr Commitments. PEG 1,57 zeigt faires Risk/Reward.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 – Capex-ROI ungelöst:</strong> $72,4 Mrd. in H1 FY2026 investiert. FCF Q2 –9,3 % YoY. Falls DeepSeek-ähnliche Effizienzgewinne GPU-Capex schneller wertlos machen als erwartet, drohen Überkapazitäten und Abschreibungen.</p>
+          <p><strong>Risiko 2 – Google Cloud beschleunigt:</strong> +48 % in Q4 2025 ist das schnellste Wachstum der Big Three. Alphabet investiert $175–185 Mrd. Capex 2026 mit proprietären TPUs (4x besser als NVIDIA lt. Alphabet). Azure-Wachstum könnte auf 30–35 % verlangsamen.</p>
+          <p><strong>Risiko 3 – Technisch &amp; Timing:</strong> –18 % in 4 Wochen, unter allen wichtigen MAs, Death Cross formiert. FTC-Klage möglich. P/E 24,5x ist nicht billig, falls Wachstum auf &lt;15 % fällt.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Das bullische Narrativ überzeugt strukturell mehr. Die KI-Monetarisierung ist messbar und skaliert – 160 % Wachstum bei M365 Copilot Seats ist kein Zufall. Die historisch günstige Bewertung (P/E 24,5x bei 24 % EPS-Wachstum) schafft eine Sicherheitsmarge, die selbst bei Azure-Verlangsamung den Downside begrenzt. Der Burggraben (Switching Costs in 450 Mio. M365 Seats) ist einer der robustesten aller Technologieunternehmen.</p>
+      <p>Gleichwohl enthält das bärische Narrativ valide Punkte: Capex-ROI-Timing unbekannt, Google Cloud beschleunigt sich, technische Schwäche erzeugt Drawdown-Risiko. Ich könnte falsch liegen, weil: (a) DeepSeek-ähnliche Effizienzgewinne den GPU-Capex schneller wertlos machen; (b) Copilot-Adoption im Mittelstand schleppend verläuft; (c) FTC-Klage zu Pricing-Einschränkungen führt. <strong>Risk/Reward: –15 % Downside</strong> (Test $340–350) vs. <strong>+49 % Upside</strong> (Konsens $596) in 12–24 Monaten.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Empfehlung</th><th>Katalysatoren</th><th>Risiken</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Kurzfristig (0–6 M)</strong></td>
+              <td><span class="badge badge-yellow">Neutral / selektiv</span></td>
+              <td>Q3 FY26 Earnings April 26; Copilot-Signal; FTC-Klärung</td>
+              <td>Technische Schwäche; Capex-Schock; Makro Risk-Off</td>
+            </tr>
+            <tr>
+              <td><strong>Mittelfristig (6–24 M)</strong></td>
+              <td><span class="badge badge-green">Kaufen</span></td>
+              <td>Capex-Peak überschritten → FCF-Normalisierung; Copilot 30 Mio.+ Seats</td>
+              <td>Google Cloud Marktanteilsgewinne; FTC-Klage</td>
+            </tr>
+            <tr>
+              <td><strong>Langfristig (2–5 J)</strong></td>
+              <td><span class="badge badge-green">Kaufen (Kernposition)</span></td>
+              <td>Agentische AI als $100 Mrd.-Markt; AI-PC-Superzyklus; ARPU-Ausweitung</td>
+              <td>Technologischer Umbruch; OpenAI-Zerwürfnis</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>Microsoft ist ein strukturell starkes Unternehmen (Burggraben 9/10, konsistente Beats, vollständigster KI-Stack) zu einer historisch günstigen Bewertung (P/E 24,5x vs. 5J-Ø 33x). Die kurzfristige Capex- und Technische-Schwäche stellt für langfristige Quality-Growth-Investoren eine seltene Kaufgelegenheit dar. Das Commercial RPO von $625 Mrd. (+110 % YoY) bietet ausnahmsweise Revenue-Visibilität. Die KI-Monetarisierung ist keine Hype-Geschichte mehr: 15 Mio. Copilot Seats bei 3,3 % Penetration = strukturelles Upside-Fundament.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–24M)</label><div class="val">$520–596</div></div>
+        <div class="rating-item"><label>Langfristig (3–5 J)</label><div class="val">$680–800</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–5 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–15%</div></div>
+        <div class="rating-item"><label>Upside (12–24M)</label><div class="val" style="color:var(--green);">+49%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:3,3</div></div>
+      </div>
+
+      <h3>Was falsifiziert die These?</h3>
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Azure-Wachstum fällt unter 25 % für zwei aufeinanderfolgende Quartale → Reduzieren / Verkaufen</li>
+            <li>M365 Copilot Seat-Adds wachsen unter 50 % YoY (Q3/Q4 FY26) → Reduzieren</li>
+            <li>FTC reicht formale Klage ein → Risikomanagement: Reduzieren</li>
+            <li>FCF-Marge fällt unter 15 % für zwei Quartale → Stop Loss / Verkaufen</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Kurs fällt auf $355–370 (–10% Drawdown) → Tranche nachkaufen</li>
+            <li>Q3 FY26: Copilot Seats &gt;20 Mio. (+35%+ QoQ) bei Azure &gt;35% → Aufstocken</li>
+            <li>Capex-Guidance für FY2027 reduziert sich merklich → Aufstocken</li>
+            <li>FTC-Untersuchung eingestellt → Positiv: halten / ausbauen</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Welcher Anlegertyp passt?</h3>
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Quality Growth Investors</li>
+            <li>Value-orientierte Langfristanleger</li>
+            <li>Contrarian Investors</li>
+            <li>Tech-Thema-Investoren (AI, Cloud)</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Momentum Trader (kurzfristig)</li>
+            <li>Income Investors (Dividende &lt;1%)</li>
+            <li>Konservative ohne Drawdown-Toleranz</li>
+            <li>Short-Term &lt;6 Monate Horizont</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Konservativ</strong></td>
+              <td><span class="badge badge-yellow">Warten / Tranchiert</span></td>
+              <td>Erst technische Stabilisierung abwarten (~$380–390, SMA 20-Kreuzung)</td>
+            </tr>
+            <tr>
+              <td><strong>Moderat</strong></td>
+              <td><span class="badge badge-orange">Tranchiert einsteigen</span></td>
+              <td>50% jetzt bei ~$400, 50% nach Q3 FY26 Earnings-Bestätigung (April 2026)</td>
+            </tr>
+            <tr>
+              <td><strong>Aggressiv</strong></td>
+              <td><span class="badge badge-green">Jetzt kaufen</span></td>
+              <td>Risk/Reward 1:3,3 bei aktuellem Kurs; RSI überverkauft als Einstiegssignal</td>
+            </tr>
+            <tr>
+              <td><strong>Langfristig (3–5 J)</strong></td>
+              <td><span class="badge badge-green">Kaufen &amp; Halten</span></td>
+              <td>AI-Wertschöpfungskette + Copilot-Skalierung = strukturelles Wachstumsthema</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="source">Quellen: Goldman Sachs Initiation (TheFly, 11.01.2026); Zacks (23.02.2026); 247wallst.com (24.02.2026); Futurum Research (29.01.2026)</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ S13: OUTLOOK ══════════════════════════════════════════════════ -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Die 3 entscheidenden Events</div>
+      <div class="section-note">Konkrete Wenn/Dann-Szenarien</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q3 FY2026 Quartalsergebnisse – voraussichtlich 29. April 2026</h4>
+        <p>Der mit Abstand wichtigste Kurzfrist-Katalysator. Kernfragen: Wächst Azure weiterhin mit 37–40 %? Überschreitet M365 Copilot 20 Mio. bezahlte Seats? Reduziert Microsoft die Capex-Guidance für H2 FY26? Die Antworten auf diese Fragen werden die Richtung für die nächsten 6–12 Monate bestimmen.</p>
+        <div class="when-then">
+          <strong>Wenn</strong> Azure ≥37 % wächst UND M365 Copilot Seats ≥18–20 Mio. UND Capex-Guidance für Q4 FY26 sequenziell fällt: Das Capex-ROI-Narrativ entspannt sich, FCF-Normalisierung wird sichtbar → <strong>deutlich aufstocken</strong>; Kurs dürfte in Richtung $440–480 laufen.<br><br>
+          <strong>Wenn</strong> Azure unter 33 % fällt ODER Copilot Seat-Wachstum unter 30 % QoQ ODER Capex-Guidance erneut erhöht wird: Wachstumsverlangsamerungs- und Capex-Angst-Story bestätigt sich → <strong>stark reduzieren</strong>; Kurs könnte auf $330–360 fallen.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>⚖️ Event 2: FTC-Antitrust-Untersuchung – Eskalation oder Einstellung (Q2–Q3 2026)</h4>
+        <p>Die FTC hat laut Bloomberg (13.02.2026) die Untersuchung von Microsofts Cloud, AI und Bundling-Praktiken beschleunigt. In einem Trump-freundlichen Regulierungsumfeld ist eine formale Klage unwahrscheinlich, aber nicht ausgeschlossen. Das Ergebnis beeinflusst die Pricing-Freiheit bei der Bundling-Strategie strukturell.</p>
+        <div class="when-then">
+          <strong>Wenn</strong> die FTC die Untersuchung einstellt ODER keine formale Klage einreicht bis Ende Q2 2026: Regulierungs-Unsicherheitsprämie entfällt → 5–8 % Multiple-Expansion (P/E von 24,5x auf 27–28x) möglich. <strong>Bestehende Positionen halten; keine spezifische Aktion nötig.</strong><br><br>
+          <strong>Wenn</strong> die FTC eine formale Klage wegen Bundling/AI-Monopolisierung einreicht: Kurzfristige Kursreaktion –8 bis –15 % möglich. Langfristig begrenzte Folgen (kein Existenzrisiko), aber Unsicherheitsphase 2–3 Jahre → <strong>Risiko-Tranche 10–20 % reduzieren</strong>; Rest halten.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>🤖 Event 3: Copilot ROI-Evidenz – Adoption im Mittelstand (Q2–Q3 2026)</h4>
+        <p>Die McKinsey-Studie zeigt: erst 39 % der Unternehmen berichten messbarem ROI aus KI. Die Copilot-Story ist im Fortune-500-Segment klar. Die entscheidende Frage für das mittelfristige Wachstum: Skaliert es auch im Mittelstand (SMB, Frontline Worker)? 20 % Penetration der 450 Mio. Seats bei $30/User/Monat = ~$32 Mrd. zusätzliche ARR – ein Kurskatalysator in Richtung $700+.</p>
+        <div class="when-then">
+          <strong>Wenn</strong> Microsoft in Q3 FY2026 Copilot-Seat-Adds von ≥3 Mio. QoQ meldet UND explizit auf SMB-Adoption hinweist: Copilot-Durchdringung expandiert systemisch → <strong>Kernposition ausbauen</strong>; Kursziel $596 (Konsens) mittelfristig erreichbar.<br><br>
+          <strong>Wenn</strong> das Seat-Wachstum auf unter 100 % YoY fällt ODER Preissenkungen notwendig werden ("Copilot Lite" für $15/User): ARPU-Steigerungsthese leidet → <strong>Wachstums-Score auf 6/10 senken</strong>; Kursziel auf $480–520 reduzieren.
+        </div>
+      </div>
+
+      <div class="source">Quellen: Microsoft Investor Relations; Bloomberg (13.02.2026); McKinsey AI Survey (2025); Futurum Research (29.01.2026)</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ DISCLAIMER ════════════════════════════════════════════════════ -->
+  <div class="disclaimer">
+    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung, Kaufempfehlung oder Aufforderung zum Handel mit Wertpapieren dar. Alle Angaben ohne Gewähr. Investitionen in Aktien sind mit Risiken verbunden – vergangene Wertentwicklungen sind kein verlässlicher Indikator für zukünftige Ergebnisse. Der Autor übernimmt keine Haftung für Investitionsentscheidungen auf Basis dieser Analyse. Kurs- und Finanzdaten beziehen sich auf den Stand 27. Februar 2026. Bitte konsultieren Sie einen zugelassenen Finanzberater vor Anlageentscheidungen.
+  </div>
+
+</div><!-- /main -->
+</body>
+</html>
