@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GOOGL – Aktienanalyse Canvas v2.2</title>
+  <style>
+    :root {
+      --primary: #FF6900;
+      --primary-dark: #cc5400;
+      --bg: #0f0f12;
+      --bg-card: #1a1a1f;
+      --bg-card2: #22222a;
+      --border: #2e2e38;
+      --text: #e8e8ec;
+      --text-muted: #888898;
+      --text-dim: #555566;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --teal: #14b8a6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7;
+    }
+    .header {
+      background: linear-gradient(135deg, #1a0800 0%, #2a1000 40%, #0f0f12 100%);
+      border-bottom: 1px solid var(--primary);
+      padding: 36px 40px 28px; display: flex; justify-content: space-between;
+      align-items: flex-start; flex-wrap: wrap; gap: 20px;
+    }
+    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .header-left h1 span { color: var(--primary); }
+    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    .header-right { text-align: right; }
+    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+    .price-change.up   { background: rgba(34,197,94,0.15); color: var(--green); }
+    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+    .nav {
+      background: var(--bg-card); border-bottom: 1px solid var(--border);
+      padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+    .kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .kpi-value.green  { color: var(--green); }
+    .kpi-value.red    { color: var(--red); }
+    .kpi-value.orange { color: var(--primary); }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .section-title  { font-size: 16px; font-weight: 700; color: white; }
+    .section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+    .section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+    .section-body   { padding: 20px 24px; }
+    p { margin-bottom: 12px; color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+    h3:first-child { margin-top: 0; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,105,0,0.04); }
+    .beat    { color: var(--green);  font-weight: 600; }
+    .miss    { color: var(--red);    font-weight: 600; }
+    .neutral { color: var(--yellow); font-weight: 600; }
+    .badge        { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
+    .badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .badge-blue   { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .badge-orange { background: rgba(255,105,0,0.15);  color: var(--primary); }
+    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+    .event-item:last-child { border-bottom: none; }
+    .event-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+    .dot-green  { background: var(--green); }
+    .dot-red    { background: var(--red); }
+    .dot-yellow { background: var(--yellow); }
+    .event-label { font-weight: 600; color: white; }
+    .event-text  { font-size: 14px; color: var(--text); }
+    .risk-item   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px; }
+    .risk-title  { font-weight: 600; color: white; font-size: 14px; }
+    .score-bar       { display: flex; align-items: center; gap: 10px; }
+    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .score-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #ff9500); }
+    .score-num       { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bear-card h4 { color: var(--red);   margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .rating-box { background: linear-gradient(135deg, rgba(255,105,0,0.12), rgba(255,105,0,0.04)); border: 1px solid rgba(255,105,0,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+    .rating-item .val  { font-size: 20px; font-weight: 800; color: white; }
+    .rating-item .val.buy  { color: var(--green); }
+    .rating-item .val.hold { color: var(--yellow); }
+    .rating-item .val.sell { color: var(--red); }
+    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+    .trigger-card      { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .trigger-card h5   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .trigger-card.buy  h5 { color: var(--green); }
+    .trigger-card.sell h5 { color: var(--red); }
+    .trigger-list    { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
+    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    @media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+    .investor-no  { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-no  h5 { color: var(--red);   font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+    .investor-no  li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+    .geo-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+    .geo-card   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .geo-pct    { font-size: 20px; font-weight: 700; color: white; }
+    .geo-note   { font-size: 12px; color: var(--text-muted); }
+    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+    .outlook-card .when-then strong { color: var(--primary); }
+    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+    .source a { color: var(--text-dim); }
+    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+    .alert-box { background: rgba(255,105,0,0.08); border: 1px solid rgba(255,105,0,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+    .divider   { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .pill      { display: inline-block; background: rgba(255,105,0,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+    .user-focus-box { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.25); border-left: 3px solid var(--blue); border-radius: 0 8px 8px 0; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; }
+    .user-focus-box strong { color: var(--blue); }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════ HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>Alphabet Inc. <span>GOOGL · NASDAQ</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 27. Februar 2026 · NASDAQ · Sektor: Tech / Consumer Internet</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">Digital Advertising</span>
+      <span class="badge badge-blue">Google Cloud</span>
+      <span class="badge badge-green">AI / Gemini</span>
+      <span class="badge badge-yellow">Autonomous Driving (Waymo)</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$311,76</div>
+    <div class="price-meta">Schlusskurs 27.02.2026 · NASDAQ</div>
+    <div class="price-change up">▲ +80% (1 Jahr)</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $140,53 – $349,00</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ NAV -->
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <!-- ═══════════════════════════════════════════════════════ KPI OVERVIEW -->
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Kurs</div>
+      <div class="kpi-value orange">$311,76</div>
+      <div class="kpi-sub">USD · 27.02.2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Marktkapitalisierung</div>
+      <div class="kpi-value">$3,73 Bln.</div>
+      <div class="kpi-sub">USD</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">P/E (TTM)</div>
+      <div class="kpi-value">28,8x</div>
+      <div class="kpi-sub">5J-Ø ~24,5x</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">EV/EBITDA</div>
+      <div class="kpi-value">~24,7x</div>
+      <div class="kpi-sub">Sektor: ~28x</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Umsatz GJ2025</div>
+      <div class="kpi-value green">$402,8 Mrd.</div>
+      <div class="kpi-sub">+15% YoY</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Op. Marge Q4</div>
+      <div class="kpi-value green">31,6%</div>
+      <div class="kpi-sub">vs. 27,9% GJ2024</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Nächste Earnings</div>
+      <div class="kpi-value" style="font-size:16px;">~28. Apr. 2026</div>
+      <div class="kpi-sub">Q1 2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Konsens Rating</div>
+      <div class="kpi-value green">KAUFEN</div>
+      <div class="kpi-sub">58 Analysten · Ø $376</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ S1: GESCHÄFTSMODELL -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Umsatzsegmente & Revenue-Streams</h3>
+      <p>Alphabet Inc. operiert in drei Hauptsegmenten: <strong>Google Services</strong>, <strong>Google Cloud</strong> und <strong>Other Bets</strong>. Der dominante Umsatzträger ist Google Services ($340+ Mrd. in GJ2025), der Suche, YouTube, Android, Chrome, Gmail, Maps sowie Hardware-Devices umfasst. Das Kerngeschäft basiert auf einem zweiseitigen Marktplatz: Milliarden kostenloser Nutzer auf der einen Seite, Werbetreibende mit transaktions- und impressionsbasierten Buchungen auf der anderen. Rund 75% des Konzernumsatzes stammen aus dieser Werbeinfrastruktur – ein Klumpenrisiko, das jedoch durch wachsende Diversifikation sukzessive sinkt.</p>
+      <p>Im Geschäftsjahr 2025 erzielte Alphabet erstmals über 400 Milliarden USD Jahresumsatz (402,8 Mrd. USD, +15% YoY) – bemerkenswert für ein Unternehmen dieser Größe. Das Advertising-Modell ist zweigeteilt: Cost-per-Click (Search Ads) und Impressions-basiert (Display/YouTube Ads). KI-gestützte Auktionsmechanismen erhöhen dabei sowohl die Relevanzbewertung als auch die Preissetzungsfähigkeit.</p>
+      <p><strong>Google Cloud</strong> ist das strategische Wachstumsmotor: Q4 2025 erzielte das Segment $17,7 Mrd. Umsatz (+48% YoY) bei einer Operating Margin von 30,1% – ein Sprung von 17,5% im Vorjahr. Der Cloud-Backlog belief sich auf $240 Mrd. (mehr als verdoppelt YoY), was robuste Enterprise-Nachfrage signalisiert. Das Portfolio umfasst GCP-Infrastruktur, KI-/ML-Plattformen und Enterprise-Lösungen auf Basis von Gemini.</p>
+      <p><strong>Other Bets</strong> bündelt Moonshot-Projekte wie Waymo (autonomes Fahren, zuletzt mit $16 Mrd. finanziert bei $126 Mrd. Bewertung) und Verily (Life Sciences). Die Kostenstruktur ist kapitalintensiv: Für 2026 plant Alphabet Capex von $175–185 Mrd. – fast doppelt so viel wie 2025 ($91,4 Mrd.) – getrieben durch massiven KI-Infrastrukturaufbau.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Segment</th><th>GJ2025 Rev. (est.)</th><th>Anteil</th><th>Wachstum YoY</th><th>Kernprodukte</th></tr></thead>
+          <tbody>
+            <tr><td>Google Search</td><td>~$236 Mrd.</td><td>~59%</td><td class="beat">+~14%</td><td>Search Ads, AI Overviews</td></tr>
+            <tr><td>YouTube Ads</td><td>~$35 Mrd.</td><td>~9%</td><td class="beat">+~12%</td><td>Shorts, Connected TV</td></tr>
+            <tr><td>Google Network</td><td>~$30 Mrd.</td><td>~7%</td><td class="miss">–2%</td><td>Display Ads, AdSense</td></tr>
+            <tr><td>Subscriptions & HW</td><td>~$44 Mrd.</td><td>~11%</td><td class="beat">+~20%</td><td>YouTube Premium, Pixel, Workspace</td></tr>
+            <tr><td>Google Cloud</td><td>~$43 Mrd.</td><td>~11%</td><td class="beat">+~38%</td><td>GCP, Gemini API, BigQuery</td></tr>
+            <tr><td>Other Bets</td><td>~$1,3 Mrd.</td><td>&lt;1%</td><td class="neutral">variabel</td><td>Waymo, Verily</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Alphabet Q4 2025 Earnings Release (SEC, 04.02.2026); Alphabet Investor Relations abc.xyz; CNBC Earnings Coverage (04.02.2026)</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ S2: BURGGRABEN -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben & Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Netzwerkeffekte & Switching Costs</h3>
+      <p>Alphabets Burggraben gehört zu den breitesten im globalen Technologiesektor. Netzwerkeffekte spielen eine zentrale Rolle: Google Search verbessert sich mit jeder Suchanfrage durch Feedback-Schleifen; YouTube wird attraktiver je mehr Creator und Zuschauer die Plattform nutzen; Google Ads profitiert von einem Marktplatz-Effekt (mehr Werbetreibende → niedrigere CPCs → mehr Nutzer). Diese Netzwerkeffekte sind tief verwurzelt und in Jahrzehnten aufgebaut.</p>
+      <p>Switching Costs für Nutzer sind subtil aber real: Wer Gmail, Drive, Photos, YouTube-Playlists und Chrome-Verlauf über Jahre aufgebaut hat, wechselt nicht leichtfertig. Für Enterprise-Kunden in Google Workspace oder Cloud sind die Wechselkosten durch Datenintegration, API-Abhängigkeiten und Schulungsaufwand erheblich höher. Googles Search-Marktanteil liegt trotz wachsender KI-Konkurrenz noch bei ~80% global.</p>
+      <h3>Scale Advantage & Technologischer Vorsprung</h3>
+      <p>Alphabets Scale Advantage ist unübertroffen: Proprietary-Daten aus Milliarden täglicher Suchen, Gmail-Accounts, YouTube-Views und Android-Geräten ermöglichen eine Werbe-Targeting-Präzision, die kein Konkurrent replizieren kann. Die TPU-Entwicklung (Tensor Processing Units) verschafft technologische Kostenvorteile bei KI-Inferenz: Gemini-Serving-Kosten sanken 2025 um 78% – ein Beweis für skalierbare Effizienzgewinne.</p>
+      <p><strong>Schwachstellen (kritisch):</strong> Der Burggraben bei Search steht erstmals seit 20 Jahren unter realem Druck. ChatGPT hat ~17–18% globaler Query-Marktanteile erreicht, insbesondere bei informationellen Suchanfragen. Googles „Innovator's Dilemma" ist real: Jede KI-generierte Antwort in AI Overviews reduziert potenziell Klicks auf Suchanzeigen. Der DOJ-Antitrust-Fall gefährdet zudem den Apple-Suchvertrag (~$15–20 Mrd./Jahr), der als struktureller Moat wirkt.</p>
+      <div class="source">Quellen: Alphabet Q4 2025 Earnings Call (04.02.2026); First Page Sage Market Share Report (Dez. 2025); AlixPartners Search Disruption Report (Feb. 2025); Similarweb AI Chatbot Data (Jan. 2026)</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ S3: QUARTALE -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Beat-Ratio: 4/4</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> GOOGL ist an der NASDAQ gelistet. Alle Key Metrics wurden von Investing.com, Yahoo Finance und der Alphabet Investor Relations IR (abc.xyz) recherchiert. Nächste Quartalsergebnisse: Q1 2026 voraussichtlich am <strong>28. April 2026</strong>.</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Quartal</th><th>Revenue</th><th>YoY</th><th>EPS</th><th>vs. Konsens</th><th>Marktreaktion</th><th>Kernaussage</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Q1 2025</strong></td><td>$90,2 Mrd.</td><td class="beat">+12%</td>
+              <td>$2,81*</td><td class="beat">Beat (~+5%)</td><td class="beat">+2,3%</td>
+              <td>Starkes Search, Cloud +28%</td>
+            </tr>
+            <tr>
+              <td><strong>Q2 2025</strong></td><td>$96,4 Mrd.</td><td class="beat">+14%</td>
+              <td>$2,31</td><td class="beat">Beat (+5,7%)</td><td class="beat">+4,1%</td>
+              <td>Cloud +32%, Ad-Revenue +10%</td>
+            </tr>
+            <tr>
+              <td><strong>Q3 2025</strong></td><td>$102,3 Mrd.</td><td class="beat">+16%</td>
+              <td>$2,87*</td><td class="beat">Beat (+26%)*</td><td class="beat">+6,1%</td>
+              <td>Erstes $100-Mrd.-Quartal, Cloud +34%</td>
+            </tr>
+            <tr>
+              <td><strong>Q4 2025</strong></td><td>$113,8 Mrd.</td><td class="beat">+18%</td>
+              <td>$2,82</td><td class="beat">Beat (+8%)</td><td class="neutral">–3% (Capex)</td>
+              <td>Cloud +48%, Capex-Guidance enttäuscht</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>* EPS in Q1 und Q3 enthielten erhebliche Gewinne aus Wertpapierveräußerungen (Q1: +$0,62/Aktie; Q3: +$0,68/Aktie). Bereinigt liegt die operative EPS-Wachstumsrate bei ~20–25% YoY, was die Geschäftsdynamik besser widerspiegelt.</p>
+      <p>Alphabet übertraf in allen vier Quartalen sowohl Umsatz- als auch EPS-Schätzungen – ein klares Zeichen für Management-Konsistenz. Besonders bemerkenswert ist die Wachstumsbeschleunigung von +12% (Q1) auf +18% (Q4), getrieben durch Google Cloud (von +28% auf +48%) und anhaltende Search-Stärke trotz KI-Konkurrenz. Google Search Revenue stieg in Q4 2025 auf $63,1 Mrd. (+17%) und übertraf die Konsensschätzung von $61,3 Mrd. – kurzfristig widerlegt dies die These einer unmittelbaren Search-Erosion.</p>
+      <div class="source">Quellen: Alphabet SEC Filings Q1–Q4 2025; Investing.com Earnings Transcript Q4 2025 (04.02.2026); Yahoo Finance Q2 2025 (23.07.2025); CNBC Q4 Coverage (04.02.2026)</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ S4: WACHSTUM -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <p>Alphabets Wachstumsprofil hat sich deutlich verbessert: Von $182,5 Mrd. Umsatz vor fünf Jahren auf $402,8 Mrd. in GJ2025 entspricht einem CAGR von ~17% – bemerkenswert für ein Unternehmen dieser Größe. Noch wichtiger: Das Wachstum <em>beschleunigt sich</em> trotz massiver Basis. Google Cloud wächst nicht nur umsatzseitig, sondern weitet auch die Profitabilität massiv aus (Operating Margin von 17,5% auf 30,1% im Q4 YoY) – ein Zeichen echter operativer Skalierung, nicht Revenue-Inflation.</p>
+
+      <h3>Geografische Umsatzverteilung</h3>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">USA</div>
+          <div class="geo-pct">~46%</div>
+          <div class="geo-note">+~16% YoY · Kernmarkt</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">EMEA</div>
+          <div class="geo-pct">~29%</div>
+          <div class="geo-note">+~14% YoY · EU-Regulierung</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">APAC</div>
+          <div class="geo-pct">~16%</div>
+          <div class="geo-note">+~18% YoY · YouTube stark</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Sonstige</div>
+          <div class="geo-pct">~9%</div>
+          <div class="geo-note">+~15% YoY · LatAm etc.</div>
+        </div>
+      </div>
+
+      <h3>Segment-Wachstum im Überblick</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Segment</th><th>GJ2025 Rev.</th><th>Wachstum</th><th>Treiber</th><th>Ausblick</th></tr></thead>
+          <tbody>
+            <tr><td>Google Search</td><td>~$236 Mrd.</td><td class="beat">+~14%</td><td>AI Overviews, höhere CPCs</td><td>Stabil, leicht verlangsam</td></tr>
+            <tr><td>YouTube Ads</td><td>~$35 Mrd.</td><td class="beat">+~12%</td><td>Shorts, Connected TV</td><td>Wachstum, aber Wettbewerb</td></tr>
+            <tr><td>Google Cloud</td><td>~$43 Mrd.</td><td class="beat">+~38%</td><td>Enterprise AI, Gemini</td><td>Stärkster Motor</td></tr>
+            <tr><td>Subscriptions/HW</td><td>~$44 Mrd.</td><td class="beat">+~20%</td><td>YouTube Premium, Pixel</td><td>Robust</td></tr>
+            <tr><td>Other Bets</td><td>~$1,3 Mrd.</td><td class="neutral">variabel</td><td>Waymo, Verily</td><td>Langfristiger Optionswert</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Das Wachstum ist strukturell und nicht durch M&A oder Accounting-Manöver inflationiert. Risiko: ~75% des Umsatzes stammen weiterhin aus Werbung – Klumpenrisiko, das durch Cloud sukzessive sinkt. Der Reifegrad von Google Services ist „Growth-at-Scale", während Cloud sich in der „Hyper-Growth"-Phase befindet.</p>
+      <div class="source">Quellen: Alphabet Annual Report 2025; Alphabet Q4 2025 Earnings Release; Futurum Group Q3 2025 Analysis (31.10.2025)</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ S5: BEWERTUNG -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung & Multiples</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Wichtige Bewertungsverzerrung 2026:</strong> Der FCF wird laut Pivotal Research durch die Capex-Verdopplung auf $175–185 Mrd. um ~88% auf ca. $8 Mrd. einbrechen. Das EV/FCF-Multiple explodiert damit temporär auf 400x+, was die Bewertungsdiskussion dominiert.</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Metrik</th><th>Aktuell</th><th>5-J. Ø</th><th>Sektor Ø</th><th>Einschätzung</th></tr></thead>
+          <tbody>
+            <tr><td>P/E (TTM)</td><td>28,8x</td><td>~24,5x</td><td>~35x</td><td class="neutral">Leicht erhöht vs. Historisch</td></tr>
+            <tr><td>P/E (Forward)</td><td>~27,0x</td><td>–</td><td>~28x</td><td class="beat">In-line mit Sektor</td></tr>
+            <tr><td>PEG Ratio</td><td>1,74x</td><td>–</td><td>~2,0–2,5x</td><td class="beat">Moderat attraktiv</td></tr>
+            <tr><td>EV/EBITDA (TTM)</td><td>~24,7x</td><td>–</td><td>~28x</td><td class="beat">Günstiger als Peers</td></tr>
+            <tr><td>P/Sales (TTM)</td><td>~9,5x</td><td>–</td><td>~12x</td><td class="beat">Günstig vs. MegaCap Tech</td></tr>
+            <tr><td>P/Book</td><td>~9,1x</td><td>–</td><td>–</td><td class="neutral">Hoch, durch ROE gerechtfertigt</td></tr>
+            <tr><td>ROE</td><td>35,7%</td><td>–</td><td>~22%</td><td class="beat">Best-in-Class</td></tr>
+            <tr><td>ROIC</td><td>31,2%</td><td>–</td><td>~18%</td><td class="beat">Exzellent</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Die Bewertung ist im Peer-Vergleich relativ attraktiv: Forward P/E von ~27x und PEG von 1,74x bei 15–18% Umsatzwachstum auf $400-Mrd.-Basis ist fair bis leicht günstig. GOOGL ist günstiger bewertet als Microsoft (~30x P/E). Das EV/EBITDA von ~24,7x liegt unter dem Sektordurchschnitt. Der temporäre FCF-Einbruch 2026 durch Capex-Verdopplung ist das größte kurzfristige Bewertungsrisiko – ähnlich wie Amazons Cloud-Aufbau 2015–2020, der sich langfristig als strategisch richtig erwies.</p>
+      <div class="source">Quellen: StockAnalysis.com GOOGL Statistics (Feb. 2026); FullRatio.com P/E Analyse (19.02.2026); Investing.com GOOGL (28.02.2026); Pivotal Research FCF Forecast (Feb. 2026)</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ S6: CASHFLOW -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen & Kapitalqualität</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Metrik</th><th>GJ2025</th><th>GJ2024</th><th>Trend</th></tr></thead>
+          <tbody>
+            <tr><td>Gross Margin</td><td>~59,7%</td><td>~57,7%</td><td class="beat">↑ Aufwärts</td></tr>
+            <tr><td>Operating Margin</td><td>31,6% (Q4)</td><td>27,9% GJ</td><td class="beat">↑ Verbessernd</td></tr>
+            <tr><td>Net Margin</td><td>~28,5%</td><td>~24%</td><td class="beat">↑ Verbessernd</td></tr>
+            <tr><td>FCF (TTM)</td><td>$73,3 Mrd.</td><td>$72,8 Mrd.</td><td class="neutral">→ Stabil (2026 stark fallend)</td></tr>
+            <tr><td>Operativer Cashflow</td><td>$160,5 Mrd.</td><td>–</td><td class="beat">↑ Rekord</td></tr>
+            <tr><td>Capex (GJ2025)</td><td>$91,4 Mrd.</td><td>$52,5 Mrd.</td><td class="miss">↑↑ Stark steigend</td></tr>
+            <tr><td>Capex (GJ2026E)</td><td>$175–185 Mrd.</td><td>–</td><td class="miss">⚠️ Fast Verdopplung</td></tr>
+            <tr><td>Debt/Equity</td><td>0,16x</td><td>~0,06x</td><td class="neutral">→ Moderat steigend</td></tr>
+            <tr><td>Dividende (Quartal)</td><td>$0,21/Aktie</td><td>Neu 2024</td><td class="neutral">→ Klein + Buybacks</td></tr>
+            <tr><td>Share Buybacks Q4</td><td>$5,5 Mrd.</td><td>Laufend</td><td class="beat">↑ Aktiv</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Alphabets langfristige Kapitalqualität ist hervorragend: ROE 35,7% und ROIC 31,2% gehören zur weltweiten Best-in-Class. Die Gross Margin von ~60% ist für ein $400-Mrd.-Unternehmen außergewöhnlich. Der FCF-Einbruch 2026 (auf ~$8 Mrd. laut Pivotal Research) ist keine strukturelle Schwäche, sondern eine bewusste Investitionsphase. Alphabet nutzt auch Fremdkapital: $24,8 Mrd. Anleiheemission im November 2025, Long-term Debt stieg von ~$12 Mrd. auf $46,5 Mrd. – zielgerichtet eingesetzt für KI-Infrastruktur ohne exzessive Equity-Verwässerung.</p>
+      <div class="source">Quellen: Alphabet Q4 2025 Earnings Release SEC (04.02.2026); TipRanks GOOGL Earnings (Feb. 2026); CNBC Tech AI Spending Article (06.02.2026)</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ S7: PEERS -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Unternehmen</th><th>Rev. Growth</th><th>Op. Margin</th><th>P/E FWD</th><th>Market Cap</th><th>KI-Position</th><th>Ad-Exposure</th></tr></thead>
+          <tbody>
+            <tr style="background:rgba(255,105,0,0.05);">
+              <td><strong>Alphabet (GOOGL)</strong></td><td class="beat">+15% (GJ2025)</td><td class="beat">31,6%</td><td>~27x</td><td>~$3,73 Bln.</td><td>Gemini, Cloud, Search</td><td class="miss">~75%</td>
+            </tr>
+            <tr>
+              <td>Microsoft (MSFT)</td><td class="beat">+14–17%</td><td class="beat">~45%</td><td>~30x</td><td>~$3,0 Bln.</td><td>Azure, Copilot, OpenAI</td><td class="beat">&lt;5%</td>
+            </tr>
+            <tr>
+              <td>Meta (META)</td><td class="beat">+~21%</td><td class="beat">~45%</td><td>~25x</td><td>~$1,7 Bln.</td><td>Llama, Ray-Ban, Ads-KI</td><td class="miss">~98%</td>
+            </tr>
+            <tr>
+              <td>Amazon (AMZN)</td><td class="neutral">+~11%</td><td class="neutral">~11%*</td><td>~29x</td><td>~$2,4 Bln.</td><td>AWS, Bedrock, Nova</td><td class="beat">&lt;20%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>*Amazons Operating Margin auf Konzernebene; AWS-Margin liegt bei ~35%.</p>
+      <p>Im Vergleich positioniert sich Alphabet attraktiv: Die Kombination aus soliden Wachstumsraten, starker Operating Margin und günstigerer Bewertung (P/E ~27x vs. MSFT ~30x) macht GOOGL interessant. Meta überzeugt durch dynamischeres Umsatzwachstum (+21%), ist aber zu fast 100% auf Advertising angewiesen – was das KI-Disruptions-Risiko für beide Unternehmen erhöht. Alphabets strategischer Vorteil: Als einziges Unternehmen besitzt Alphabet gleichzeitig ein führendes KI-Modell (Gemini), den weltgrößten Werbe-Marktplatz (Search + YouTube), eine schnell wachsende Cloud-Plattform und ein integriertes Consumer-Ökosystem (Android/Chrome).</p>
+      <div class="source">Quellen: S&P Global Big Tech Preview (Feb. 2026); TipRanks MSFT/AMZN Vergleich (Dez. 2025); StockAnalysis.com (Feb. 2026)</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ S8: NEWS -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News & Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">04.02.2026 – Q4 2025 Earnings <span class="badge badge-yellow">Gemischt</span></div>
+          <div class="event-text">Revenue $113,8 Mrd. (+18%), EPS $2,82 – deutlicher Beat. Cloud +48%, Gemini 3 Launch. Capex-Guidance $175–185 Mrd. für 2026 belastet FCF-Erwartungen. Aktie –3% initial (Capex-Schock), dann Erholung. Quelle: Alphabet SEC, CNBC, 04.02.2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Feb. 2026 – Waymo-Finanzierungsrunde $16 Mrd. <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">$16 Mrd. Investment, Großteil von Alphabet. Bewertung: $126 Mrd. Führte zu $2,1 Mrd. Mitarbeitervergütungsaufwand in Q4. Langfristiger Optionswert steigt erheblich. Quelle: Reuters, Feb. 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Dez. 2025 – Gemini 3 Launch <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Neues Frontier-Modell, lt. CEO Pichai „leaderboard-führend". Gemini App überstieg 750 Mio. MAU. 10 Mrd. Tokens/Minute via API. Technologische Wettbewerbsposition spürbar gestärkt. Quelle: Alphabet Earnings Call, 04.02.2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Dez. 2025 – Apple-Cloud-Partnerschaft <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Alphabet wurde bevorzugter Cloud-Partner von Apple – wichtiger strategischer Coup für Google Cloud im Enterprise-Segment. Quelle: Bloomberg, Dez. 2025.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Nov. 2025 – Anleiheemission $24,8 Mrd. <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Senior unsecured notes für allgemeine Unternehmenszwecke (v.a. Capex-Finanzierung). Long-term Debt von ~$12 Mrd. auf $46,5 Mrd. gestiegen. Zielgerichteter Schuldeneinsatz ohne Equity-Verwässerung. Quelle: SEC Filing, Nov. 2025.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Laufend – DOJ-Antitrust <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">US-Justizministerium verfolgt Klage gegen Googles Suchmonopol. Abhilfemaßnahmen könnten den Apple-Suchvertrag (~$15–20 Mrd./Jahr) gefährden. Urteil erwartet 2026. Quelle: Reuters, Feb. 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Q3 2025 – EU-Kartellstrafe $3,5 Mrd. <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">EC-Wettbewerbsrechtsverstoß. Absorbierbarer Einmalaufwand, aber signalisiert dauerhaften regulatorischen Gegenwind in Europa. Quelle: European Commission, 2025.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Laufend – ChatGPT Search-Wachstum <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">OpenAI erreichte 17–18% globaler Query-Marktanteil (vs. Google ~80%). Session Duration 13+ Min. vs. Google 6 Min. Besonders informationelle Suchanfragen wandern ab. Quelle: Similarweb, Jan. 2026; Fortune, Feb. 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2025/26 – AI Advertising-Transformation <span class="badge badge-yellow">Ambivalent</span></div>
+          <div class="event-text">Google Ads in AI Overviews und AI Mode sind live. Ads in KI-Antworten könnten Umsatz pro Query mittelfristig erhöhen, kurzfristig aber CTR-Rückgänge verursachen. Quelle: Search Engine Land, Feb. 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">H2 2025 – OpenAI-Advertising-Ambitionen <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">OpenAI evaluiert Werbung in ChatGPT (Partnerschaften mit Walmart, Target, Instacart seit H2 2025). Direkter Wettbewerber um Search-Ad-Budgets in Entstehung. Quelle: Digiday, 07.01.2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Laufend – Meta Advantage+ AI Ads <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Meta investiert massiv in KI-gestütztes Ad-Targeting und zieht Budgets von Google Network ab. Google Network Revenue fiel –2% YoY in Q3/Q4 2025. Quelle: Meta Earnings, Nov. 2025.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – Zinsen / Fed <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Fed hält Zinsen stabil auf erhöhtem Niveau. Belastet Wachstumsaktien über Diskontierungseffekte, kein direktes Risiko für operatives Geschäft. Quelle: Fed Statement, Feb. 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – EU AI Act <span class="badge badge-yellow">Leicht Negativ</span></div>
+          <div class="event-text">Regulatorische Anforderungen für High-Impact KI-Modelle könnten Gemini-Deployment in Europa verlangsamen. Compliance-Kosten und mögliche Einschränkungen bei Datennutzung. Quelle: EU Commission, 2025.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – Geopolitik / Taiwan-Risiko <span class="badge badge-yellow">Mittel</span></div>
+          <div class="event-text">US-Exportkontrollen auf KI-Hardware (NVIDIA-Chips) betreffen TSMC-Abhängigkeit für Alphabets TPU-Entwicklung. Für Alphabet weniger direkt als für reine Halbleiterunternehmen. Quelle: US Commerce Dept., Feb. 2026.</div>
+        </div>
+      </div>
+      <div class="source">Quellen: CNBC (04.02.2026); Reuters (Feb. 2026); Digiday (07.01.2026); Search Engine Land (Feb. 2026); Similarweb (Jan. 2026); EU Commission; Alphabet Earnings Call</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ S9: TECHNISCH -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom:16px;">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$311,76</div><div class="kpi-sub">27.02.2026</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value">~$305</div><div class="kpi-sub">Kurs drüber</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value">~$315</div><div class="kpi-sub">Kurs darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value">~$270</div><div class="kpi-sub">Kurs deutl. drüber</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value neutral">43,66</div><div class="kpi-sub">Neutral</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value">$349,00</div><div class="kpi-sub">–11% darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value red">Negativ</div><div class="kpi-sub">Kurze Schwäche</div></div>
+      </div>
+
+      <p>Die Aktie befindet sich in einem mittel- bis langfristigen Aufwärtstrend (+80% in 12 Monaten), hat aber nach dem Q4 Earnings-Report (Capex-Schock) kurzfristig Momentum verloren. Der Kurs liegt ~11% unter dem 52-Wochen-Hoch von $349. Die Konsolidierung zwischen $290 und $345 ist technisch gesund nach dem starken Jahres-Run.</p>
+      <p>Der RSI bei ~43,66 ist technisch neutral bis leicht überverkauft – kein Extrembereich, bietet aber für geduldige Investoren potenzielle Einstiegsgelegenheiten. MACD zeigt kurzfristige Schwäche, ohne Ausbruch aus dem übergeordneten Aufwärtstrend. Der Beta von 1,09 signalisiert marktähnliche Volatilität – konservativ für einen MegaCap-Titel.</p>
+      <p><strong>Support:</strong> $290–300 (vorheriges Q3-Hoch, psychologische Marke) und $270 (SMA 200). <strong>Resistance:</strong> $340–349 (52W-Hoch / vorheriges All-Time-High). Ein nachhaltiger Ausbruch über $350 würde neues ATH-Terrain eröffnen. Technisches Gesamtbild: Seitwärts/leicht bullisch auf mittlere Sicht, kein starkes kurzfristiges Momentum.</p>
+      <div class="source">Quellen: Investing.com GOOGL Daten (28.02.2026); StockAnalysis.com GOOGL Statistics; Yahoo Finance GOOGL</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ S10: RISIKEN -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken & Chancen</div>
+      <div class="section-score">Score: 4/10</div>
+    </div>
+    <div class="section-body">
+
+      <h3>10a) Strukturelle & zyklische Risiken</h3>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚖️ DOJ-Antitrust & Regulierung</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Das DOJ-Verfahren wegen Googles Suchmonopol ist das größte kurzfristige Risiko. Ein erzwungenes Ende des Apple-Suchvertrages (~$15–20 Mrd./Jahr) würde den Umsatz um ~4–5% reduzieren und die EBITDA-Marge um 2–3 Prozentpunkte drücken. EU-Regulierung (AI Act, DMA) fügt Compliance-Kosten hinzu. Wahrscheinlichkeit regulatorischer Eingriffe: hoch; Ausmaß: ungewiss.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🤖 KI-Disruption Search & Advertising</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-red">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">ChatGPT hat ~17–18% globaler Query-Marktanteile erzielt. Zero-Click Searches machen ~60% der mobilen Google-Anfragen aus. Beschleunigungsszenario: +5pp Migration zu ChatGPT/Perplexity → Search-Ad-Umsatz um $8–12 Mrd./Jahr gefährdet. Bei dauerhafter Erosion: EBITDA-Marge könnte von 32% auf 22–24% fallen. Wahrscheinlichkeit moderates Szenario: mittel; Worst-Case: niedrig. (<em>Detailanalyse in Sektion 11</em>)</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">💸 Capex-ROI-Unsicherheit</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Nahezu Verdopplung des Capex auf $175–185 Mrd. 2026. FCF bricht um ~88% auf ~$8 Mrd. ein. Falls KI-Monetarisierung länger dauert als erwartet → erhebliche Depreciation-Kosten ohne adäquaten Return. Wahrscheinlichkeit des FCF-Einbruchs: sicher; Frage ist, ob sich ROI ab 2027/28 materialisiert.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">☁️ Cloud-Wettbewerbsdruck (AWS, Azure)</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">AWS und Azure führen den Cloud-Markt weiterhin an. Commoditisierung von GPU-Compute und Open-Source-Modelle (Metas Llama) könnten Preisdruck auf Cloud-KI-Dienste ausüben. Auswirkung: würde Margenexpansion verlangsamen, aber nicht stoppen.</div>
+      </div>
+
+      <h3>10b) AI-Disruption im Werbegeschäft (User-Fokus)</h3>
+      <div class="user-focus-box">
+        <strong>📌 Kernthese:</strong> Ist Alphabets Werbegeschäft durch KI-native Wettbewerber strukturell gefährdet? → Detailanalyse in Sektion 11.
+      </div>
+      <p><strong>Bullishes KI-Szenario:</strong> Google navigiert die Transition durch vertikale Integration. AI Overviews generieren bereits Werbeumsatz (1% des Search-Ad-Rev. 2025, projiziert 3% 2026, 6–7% 2027 lt. New Street Research). Mehr Umsatz pro Suchanfrage, selbst wenn absolute Query-Zahl stagniert oder leicht sinkt. Google ist selbst ein KI-nativer Wettbewerber (Gemini 750 Mio. MAU).</p>
+      <p><strong>Bärisches KI-Szenario:</strong> Innovator's Dilemma spielt sich vollständig aus. Nutzer migrieren massiv zu ChatGPT/Perplexity. Zero-Click-Raten steigen weiter. OpenAI tritt in den Ad-Markt ein. Im Extremfall könnte Search-Ad-Umsatz um 15–20% fallen (~$35–47 Mrd. weniger Revenue), was EBITDA-Margen von 32% auf 22–24% drücken würde.</p>
+
+      <h3>10c) Chancen</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Chance</th><th>Potenzial</th><th>Zeithorizont</th></tr></thead>
+          <tbody>
+            <tr><td>Google Cloud als zweites Standbein</td><td>$240 Mrd. Backlog, 30%+ Margin</td><td>Mittel-/Langfristig</td></tr>
+            <tr><td>Gemini-Monetarisierung (750 Mio. MAU)</td><td>Subscriptions, Enterprise, Ad-Formate</td><td>Mittel- bis Langfristig</td></tr>
+            <tr><td>Waymo-Optionalität</td><td>$126 Mrd. Bewertung, noch nicht voll eingepreist</td><td>Langfristig</td></tr>
+            <tr><td>YouTube als Ad-Substitute</td><td>Combined Ads+Subs: ~$60 Mrd. (2025)</td><td>Kurzfristig</td></tr>
+            <tr><td>AI-gestützte Werbeoptimierung</td><td>Höhere CPMs, besserer ROAS für Werbetreibende</td><td>Mittel- bis Langfristig</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>10d) Red Flags & Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> DOJ-Urteil gegen Standard-Suchverträge; stärkerer-als-erwarteter Search-Marktanteilsverlust in Q1/Q2 2026; Verlangsamung des Cloud-Wachstums unter 30%; weiterer FCF-Einbruch durch Capex-Überraschungen.</p>
+      <p><strong>Dealbreaker (existenzielle Risiken):</strong> <span class="badge badge-green">Derzeit keine</span> – Alphabets Balance Sheet ($115+ Mrd. Cash, AA+ Rating, $402 Mrd. Revenue-Basis) bietet ausreichend Puffer, um auch ungünstige Szenarien zu absorbieren.</p>
+      <div class="source">Quellen: AlixPartners Search Disruption (Feb. 2025); New Street Research AI Overviews Projection (2025); Search Engine Land (Feb. 2026); CNBC AI Spending (06.02.2026)</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ S11: SCORING -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">User-spezifische Analyse + Scoring</div>
+      <div class="section-note">Fokus: KI-Disruption Werbegeschäft</div>
+    </div>
+    <div class="section-body">
+
+      <h3>Überprüfung der User-These</h3>
+      <div class="user-focus-box">
+        <strong>📌 User-These:</strong> „Alphabets Werbegeschäft ist durch KI-native Wettbewerber strukturell gefährdet."
+      </div>
+      <p><strong>Bestätigung der These:</strong> ChatGPT hat in 2025 ~17–18% globaler Query-Marktanteile erzielt – historisch ohne Präzedenz. Zero-Click Searches machen ~60% der mobilen Google-Suchanfragen aus. Google Network Revenue (Display Ads) fiel bereits –2% YoY in Q3/Q4 2025. Das Innovator's Dilemma ist strukturell plausibel: Jede AI Overview, die eine Frage direkt beantwortet, reduziert potenziell Klicks auf Suchanzeigen. OpenAI bereitet aktiv den Eintritt in den Advertising-Markt vor.</p>
+      <p><strong>Qualifikation der These:</strong> Google Search Revenue wuchs trotzdem +17% in Q4 2025 auf $63,1 Mrd. und übertraf Konsensschätzungen – kein Zeichen unmittelbarer Erosion. Die Marktanteilsverluste konzentrieren sich auf <em>informationelle</em> Suchanfragen, während <em>transaktionale</em> Queries (Kaufabsicht, lokal) – die kommerziell wertvollsten – stark bei Google verbleiben. Analyse von 16.000+ Queries (Jan. 2025 – Jan. 2026): Paid Ads im SERP gewannen +7–13 Prozentpunkte Klickanteil – Google monetarisiert Nutzer effektiver, selbst wenn es organischen Traffic verliert. Gemini App KI-Chatbot-Marktanteil stieg von 5,4% auf 18,2% – Google ist selbst ein KI-nativer Wettbewerber.</p>
+      <p><strong>Score-Adjustierung:</strong> Der Burggraben-Score sinkt von 8 auf <span class="pill">7/10</span> (KI-Disruption ist realer als kurzfristig eingepreist). Der Risiko-Score sinkt von 5 auf <span class="pill">4/10</span> (strukturelles Disruptions-Risiko ist erheblicher als ein Standard-Check erfassen würde). Aktualisierter Ø-Gesamtscore: <span class="pill">6,9/10</span>.</p>
+
+      <hr class="divider">
+      <h3>Scoring-Tabelle (alle Kategorien)</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th style="min-width:200px;">Score-Bar</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Geschäftsmodell</td>
+              <td><strong>8/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>Starkes duales Modell (Ads + Cloud), aber Klumpenrisiko Advertising</td>
+            </tr>
+            <tr>
+              <td>Burggraben</td>
+              <td><strong>7/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Breiter Moat, aber erstmals unter realem KI-Druck ↓ adj.</td>
+            </tr>
+            <tr>
+              <td>Operative Entwicklung (4Q)</td>
+              <td><strong>9/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+              <td>4/4 Beats, Wachstumsbeschleunigung, Cloud-Profitabilitätssprung</td>
+            </tr>
+            <tr>
+              <td>Wachstum</td>
+              <td><strong>8/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>15% CAGR auf massiver Basis; Cloud als neuer Motor</td>
+            </tr>
+            <tr>
+              <td>Bewertung</td>
+              <td><strong>6/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Moderat attraktiv vs. Peers; FCF-Kollaps 2026 belastet</td>
+            </tr>
+            <tr>
+              <td>Cashflow & Margen</td>
+              <td><strong>7/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Exzellente Margen; FCF temporär stark belastet durch Capex</td>
+            </tr>
+            <tr>
+              <td>Risiken (invertiert)</td>
+              <td><strong>4/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td>
+              <td>DOJ + KI-Disruption sind reale strukturelle Bedrohungen ↓ adj.</td>
+            </tr>
+            <tr>
+              <td>Technische Analyse</td>
+              <td><strong>5/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td>
+              <td>Konsolidierung; RSI neutral (~44); kein klares Signal</td>
+            </tr>
+            <tr style="background:rgba(255,105,0,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>6,9/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track"><div class="score-bar-fill" style="width:69%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div>
+                  <span class="score-num" style="color:var(--primary);">6,9</span>
+                </div>
+              </td>
+              <td>Solider Qualitätswert mit realen, aber kalkulierbaren Disruptions-Risiken</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Platinum AM Q3 2025 Investor Letter (Insider Monkey, Okt. 2025); ALM Corp SERP Remonetization Analysis (Feb. 2026); Similarweb AI Chatbot Data (Jan. 2026)</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ S12: FAZIT -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-note">Vollständige Synthese</div>
+    </div>
+    <div class="section-body">
+
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 – Search-Resilienz trotz KI:</strong> Search-Revenue wuchs +17% auf $63,1 Mrd. in Q4 2025, obwohl ChatGPT gleichzeitig ~18% Query-Marktanteil hielt. Transaktionale Suchanfragen – die kommerziell wertvollsten – verbleiben überwältigend bei Google. SERP-Remonetarisierung: Paid Ads gewannen +7–13 Prozentpunkte Klickanteil in KI-Ära.</p>
+          <p><strong>Säule 2 – Cloud als Wachstumsmotor:</strong> Google Cloud +48% in Q4, $240 Mrd. Backlog (+55% sequenziell, >verdoppelt YoY), Operating Margin von 17,5% auf 30,1% gesprungen. 14 Produktlinien mit $1+ Mrd. Jahresumsatz. Annualisierter Run-Rate: $70+ Mrd.</p>
+          <p><strong>Säule 3 – Attraktive Bewertung + Optionalität:</strong> Forward P/E ~27x und PEG 1,74x bei 15–18% Wachstum auf $400-Mrd.-Basis. Waymo bei $126 Mrd. Bewertung, Gemini App mit 750 Mio. MAU – beides noch nicht voll eingepreist. Operating Income +54% von 2024 auf 2025.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 – Strukturelle Advertising-Erosion:</strong> 75% Umsatz aus Advertising – gefährdet durch Zero-Click-Raten (~60% mobil), Query-Migration zu KI-Plattformen und Amazon Advertising ($70+ Mrd. Run-Rate zieht transaktionale Suchen ab. Worst Case: Search-Ad –15–20% = –$35–47 Mrd. Revenue, EBITDA-Marge fällt von 32% auf 22–24%.</p>
+          <p><strong>Risiko 2 – Capex-FCF-Kollaps 2026:</strong> FCF bricht von $73 Mrd. auf ~$8 Mrd. ein (–88%). EV/FCF explodiert auf 400x+. Falls KI-Infrastruktur-Nachfrage verlangsamt oder ROI-Zeiträume sich verlängern, drohen Leerkosten. DOJ-Urteil könnte $15–20 Mrd./Jahr Apple-Vertrag gefährden.</p>
+          <p><strong>Risiko 3 – OpenAI-Advertising-Eintritt:</strong> OpenAI hat Partnerschaften mit Walmart, Target, Instacart etabliert – klassisches Amazon-Playbook: erst Commerce, dann Advertising. P/E 28x ist nicht billig, falls Wachstum auf &lt;12% verlangsamt und Disruption sich beschleunigt.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Das bullische Narrativ überzeugt mehr – aber das bärische enthält substanzielle valide Punkte. Die Profitabilitätswende ist strukturell und real: Alphabets Operating Income verdoppelte sich von 2023 auf 2025, getrieben durch Cloud-Skalierung und Search-Monetarisierung. Das Disruptions-Risiko im Advertising ist real, aber eher mittel- bis langfristig als unmittelbar – die Quartalszahlen zeigen noch keine akute Erosion.</p>
+      <p>Die größten Risikofaktoren – DOJ-Urteil, strukturelle Query-Migration und Capex-ROI-Ungewissheit – sind kalkulierbar. Alphabets Balance Sheet ($115+ Mrd. Cash, AA+ Rating) bietet Puffer, um auch ungünstige Szenarien zu absorbieren. <strong>Risk/Reward: –20% Downside</strong> (Support ~$250, bei DOJ-Worst-Case + Cloud-Enttäuschung) <strong>vs. +40–70% Upside</strong> (Zielkurs $420–530, bei erfolgreicher AI-Monetarisierung und Cloud-Rerating).</p>
+      <p><em>Ich könnte falsch liegen, weil:</em> Die Geschwindigkeit der KI-Adoption schwer vorherzusagen ist; ein DOJ-Urteil schneller kommen könnte als erwartet; und weil der Capex-Zyklus länger ohne messbare Returns bleiben könnte als das Modell annimmt.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kurzfristig (0–6M)</strong></td><td>Q1 2026 Earnings (April); Cloud-Trend</td><td>DOJ-Entwicklungen; Capex-Marktreaktion</td><td class="neutral">Vorsichtig / tranchenweise</td></tr>
+            <tr><td><strong>Mittelfristig (6–24M)</strong></td><td>Cloud-Profitabilität; AI Overviews Ads messbar</td><td>Query-Migration beschleunigt sich</td><td class="beat">Kernposition bei $290–310</td></tr>
+            <tr><td><strong>Langfristig (2–5J)</strong></td><td>Cloud Nr. 2; Waymo-Skalierung; Gemini-Platform</td><td>Struktureller Ad-Rückgang bei ChatGPT-Dominanz</td><td class="beat">Kaufen & Halten</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>Alphabet ist kein sterbendes Unternehmen – es ist ein exzellentes Unternehmen im Übergang. Die KI-Disruptions-These im Werbegeschäft ist real, aber in ihrer Unmittelbarkeit überschätzt: Search-Ads wachsen noch zweistellig, transaktionale Queries verbleiben bei Google, und die Monetarisierung von AI Overviews beginnt gerade erst. Google Cloud ist ein zweiter starker Motor mit Blockbuster-Wachstum und steigender Profitabilität. Die Bewertung ist fair bis leicht attraktiv.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$380 – $440</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–4 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–20%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+40–70%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:2,5–3,5</div></div>
+      </div>
+
+      <h3>Was falsifiziert die These?</h3>
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Search Revenue fällt für 2 Quartale consecutiv unter +5% YoY → echte Query-Erosion bestätigt</li>
+            <li>DOJ ordnet erzwungene Trennung oder Ende Apple-Vertrag an → sofort reduzieren</li>
+            <li>Cloud-Wachstum unter 25% bei gleichzeitig fallenden Margen → Wachstumsstory bricht</li>
+            <li>OpenAI launcht erfolgreiches Ad-Produkt mit signifikanten Google-Budget-Abzügen</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Q1 2026: Search >+12% UND Cloud >+40% → KI-Disruptions-These verliert Gewicht</li>
+            <li>Management kommuniziert AI Overview Ad-Revenue >3% Search-Anteil → Monetarisierung beweisbar</li>
+            <li>DOJ-Einigung glimpflicher als erwartet (nur Verhaltensauflagen) → Erleichterungs-Rally</li>
+            <li>Kursrückgang auf $270–280 ohne fundamental negative News → attraktiver Einstieg</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Welcher Anlegertyp passt?</h3>
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Quality Growth Investors</li>
+            <li>Contrarian (Cloud-Story unterschätzt)</li>
+            <li>Tech-Sektor-Investoren</li>
+            <li>Langfristige Halter (2–5 Jahre)</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Value Investors (P/E 28x, FCF-Kollaps 2026)</li>
+            <li>Income Investors (&lt;0,3% Dividendenrendite)</li>
+            <li>Kurzfristige Trader (kein technisches Momentum)</li>
+            <li>Risikoaverse Investoren (DOJ-Unsicherheit)</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / Tranchiert</span></td><td>DOJ-Urteil und Q1 2026 Earnings abwarten; Einstieg unter $295</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>50% jetzt bei $305–315, 50% nach Q1 Earnings-Bestätigung</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Risk/Reward 1:2,5–3,5 bei aktuellem Kurs, Cloud-Story voll spielen</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen & Halten</span></td><td>KI-Plattform + Cloud + Waymo = strukturelles 3–5-Jahres-Thema</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Synthese aus Sektionen 1–11; ALM Corp SERP Analysis (Feb. 2026); Platinum AM Q3 2025; New Street Research AI Overviews; Alphabet Investor Relations</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ S13: OUTLOOK -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Die 3 wichtigsten anstehenden Events</div>
+      <div class="section-note">Wenn / Dann – konkret</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q1 2026 Earnings – voraussichtlich 28. April 2026</h4>
+        <p>Das Q1 2026 Earnings-Report ist das wichtigste kurzfristige Entscheidungsevent für die Investment-These. Es zeigt, ob Search-Umsatzwachstum trotz steigender KI-Konkurrenz stabil bleibt und ob Google Cloud die Wachstumsdynamik aufrechterhalten kann. Besonderes Augenmerk: Äußert das Management erstmals messbare AI Overview Ad-Revenue-Metriken?</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Search Revenue YoY >+10% UND Cloud >+38% UND Management kommuniziert erste AI Overview Ad-Revenue-Metriken (>3% Search-Anteil) → KI-Disruptions-Risiko im Werbegeschäft verliert erheblich an Gewicht; kurzfristig nachkaufen; Zielkurs kurzfristig $340–360.<br><br>
+          <strong>Wenn:</strong> Search Revenue enttäuscht (&lt;+8% YoY) ODER Cloud verlangsamt unter +30% UND keine konkreten AI-Monetarisierungs-Metriken → Strukturelle Erosion gewinnt an Wahrscheinlichkeit; Positionen auf Halte-Niveau reduzieren bis weitere Klarheit entsteht.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>⚖️ Event 2: DOJ-Antitrust-Urteil – erwartet H1/H2 2026</h4>
+        <p>Der US-Richter wird 2026 über Abhilfemaßnahmen entscheiden. Der Apple-Suchvertrag (~$15–20 Mrd./Jahr) und Googles Stellung als Standard-Suchmaschine auf Android sind die kritischen Punkte. Dies ist das einzige Event, das den strukturellen Moat von Alphabet unmittelbar und dauerhaft schwächen könnte – kein anderes Risiko hat eine vergleichbare binäre Konsequenz.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> DOJ-Urteil beschränkt sich auf Verhaltensauflagen (mehr Wahlmöglichkeiten für Nutzer, keine erzwungene Trennung von Assets) → Erhebliche Erleichterung; Aktie sollte auf $335–355 steigen; Investment-These voll intakt; nachkaufen.<br><br>
+          <strong>Wenn:</strong> DOJ ordnet Auflösung des Apple-Suchvertrags oder erzwungene Trennung von Google Search von anderen Google-Produkten an → Erheblicher Umsatzschock ($15–20 Mrd./Jahr gefährdet); Positionsreduzierung auf 40–50% der ursprünglichen Größe; Rating-Downgrade auf HALTEN prüfen.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>🚀 Event 3: Google I/O 2026 & AI Advertising-Ankündigungen – Mai/Juni 2026</h4>
+        <p>Googles jährliche Entwicklerkonferenz wird zeigen, wie weit die Monetarisierung von Gemini, AI Overviews und neuen KI-Werbeformaten fortgeschritten ist. Dies ist der entscheidende Test für das Bullische Narrativ: Kann Alphabet die Brücke zwischen KI-Nutzung und Advertising-Monetarisierung glaubwürdig bauen? Konkrete Revenue-Metriken und neue Gemini-Ad-Produkte sind der Maßstab.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Google kündigt konkrete Revenue-Zahlen aus AI Overviews Advertising an (>$3 Mrd. annualisiert, >3% Search-Ad-Anteil) UND zeigt neue KI-Ad-Formate für Gemini App mit nachgewiesenem ROI für Werbetreibende → Monetarisierungsbrücke zur KI-Ära überzeugend; langfristig Übergewichten; Zielkurs $420+; KI-Disruptions-Risiko strukturell reduziert.<br><br>
+          <strong>Wenn:</strong> Google I/O bietet keine konkreten Ad-Revenue-Zahlen und zeigt nur Feature-Demos ohne klaren Monetarisierungspfad → Wachsende Sorge, dass das Innovator's Dilemma sich bestätigt; Investment-These kritisch überprüfen; Einstiegsgröße auf 50% des ursprünglichen Plans begrenzen.
+        </div>
+      </div>
+
+      <div class="source">Quellen: Alphabets Investor Relations (abc.xyz); Reuters DOJ Coverage (Feb. 2026); New Street Research AI Overviews Forecast; Google I/O Ankündigung</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ DISCLAIMER -->
+  <div class="disclaimer">
+    ⚠️ <strong>Disclaimer:</strong> Diese Analyse wurde am 27. Februar 2026 erstellt und dient ausschließlich zu Informations- und Bildungszwecken. Sie stellt keine Anlageberatung dar und ist kein Angebot oder Aufforderung zum Kauf oder Verkauf von Wertpapieren. Investitionsentscheidungen sollten auf Basis individueller Risikobereitschaft, persönlicher finanzieller Situation und unabhängiger professioneller Beratung getroffen werden. Alle genannten Kurse, Kennzahlen und Prognosen sind Schätzungen und können von tatsächlichen Entwicklungen abweichen. Der Autor übernimmt keine Haftung für Verluste, die aus der Nutzung dieser Analyse entstehen. Vergangene Wertentwicklungen sind kein verlässlicher Indikator für zukünftige Ergebnisse.
+  </div>
+
+</div><!-- /main -->
+</body>
+</html>
