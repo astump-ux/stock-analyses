@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDOG – Aktienanalyse Canvas v2.2</title>
+  <style>
+    :root {
+      --primary: #FF6900;
+      --primary-dark: #cc5400;
+      --bg: #0f0f12;
+      --bg-card: #1a1a1f;
+      --bg-card2: #22222a;
+      --border: #2e2e38;
+      --text: #e8e8ec;
+      --text-muted: #888898;
+      --text-dim: #555566;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --teal: #14b8a6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7;
+    }
+    .header {
+      background: linear-gradient(135deg, #1a0800 0%, #2a1000 40%, #0f0f12 100%);
+      border-bottom: 1px solid var(--primary);
+      padding: 36px 40px 28px; display: flex; justify-content: space-between;
+      align-items: flex-start; flex-wrap: wrap; gap: 20px;
+    }
+    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .header-left h1 span { color: var(--primary); }
+    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    .header-right { text-align: right; }
+    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+    .price-change.up   { background: rgba(34,197,94,0.15); color: var(--green); }
+    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+    .nav {
+      background: var(--bg-card); border-bottom: 1px solid var(--border);
+      padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+    .kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .kpi-value.green  { color: var(--green); }
+    .kpi-value.red    { color: var(--red); }
+    .kpi-value.orange { color: var(--primary); }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .section-title  { font-size: 16px; font-weight: 700; color: white; }
+    .section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+    .section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+    .section-body   { padding: 20px 24px; }
+    p { margin-bottom: 12px; color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+    h3:first-child { margin-top: 0; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,105,0,0.04); }
+    .beat    { color: var(--green);  font-weight: 600; }
+    .miss    { color: var(--red);    font-weight: 600; }
+    .neutral { color: var(--yellow); font-weight: 600; }
+    .badge        { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
+    .badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .badge-blue   { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .badge-orange { background: rgba(255,105,0,0.15);  color: var(--primary); }
+    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+    .event-item:last-child { border-bottom: none; }
+    .event-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+    .dot-green  { background: var(--green); }
+    .dot-red    { background: var(--red); }
+    .dot-yellow { background: var(--yellow); }
+    .event-label { font-weight: 600; color: white; }
+    .event-text  { font-size: 14px; color: var(--text); }
+    .risk-item   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .risk-title  { font-weight: 600; color: white; font-size: 14px; }
+    .score-bar       { display: flex; align-items: center; gap: 10px; }
+    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .score-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #ff9500); }
+    .score-num       { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bear-card h4 { color: var(--red);   margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .rating-box { background: linear-gradient(135deg, rgba(255,105,0,0.12), rgba(255,105,0,0.04)); border: 1px solid rgba(255,105,0,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+    .rating-item .val  { font-size: 20px; font-weight: 800; color: white; }
+    .rating-item .val.buy  { color: var(--green); }
+    .rating-item .val.hold { color: var(--yellow); }
+    .rating-item .val.sell { color: var(--red); }
+    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+    .trigger-card      { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .trigger-card h5   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .trigger-card.buy  h5 { color: var(--green); }
+    .trigger-card.sell h5 { color: var(--red); }
+    .trigger-list    { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
+    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    @media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+    .investor-no  { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-no  h5 { color: var(--red);   font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+    .investor-no  li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+    .geo-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+    .geo-card   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .geo-pct    { font-size: 20px; font-weight: 700; color: white; }
+    .geo-note   { font-size: 12px; color: var(--text-muted); }
+    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+    .outlook-card .when-then strong { color: var(--primary); }
+    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+    .source a { color: var(--text-dim); }
+    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+    .alert-box { background: rgba(255,105,0,0.08); border: 1px solid rgba(255,105,0,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+    .divider   { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .pill      { display: inline-block; background: rgba(255,105,0,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>Datadog, Inc. <span>DDOG</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 27. Februar 2026 · NASDAQ · Sektor: Cloud / Observability / Security</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">Observability</span>
+      <span class="badge badge-blue">Cloud Security</span>
+      <span class="badge badge-blue">AI Monitoring</span>
+      <span class="badge badge-orange">Usage-based SaaS</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">~$102</div>
+    <div class="price-meta">Schlusskurs 27.02.2026 · NASDAQ</div>
+    <div class="price-change down">▼ –11.6% heute (Tariff Sell-Off)</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $81.63 – $201.69</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <!-- KPI GRID -->
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Kurs</div>
+      <div class="kpi-value red">~$102</div>
+      <div class="kpi-sub">USD · 27.02.2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Marktkapitalisierung</div>
+      <div class="kpi-value">~$36 Mrd.</div>
+      <div class="kpi-sub">USD</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Non-GAAP FWD P/E</div>
+      <div class="kpi-value orange">~53x</div>
+      <div class="kpi-sub">FY2026E</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">EV / Revenue</div>
+      <div class="kpi-value orange">~11.9x</div>
+      <div class="kpi-sub">TTM · hist. Ø 17–22x</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">FCF-Marge</div>
+      <div class="kpi-value green">~32%</div>
+      <div class="kpi-sub">FY2025</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">NRR</div>
+      <div class="kpi-value green">120%</div>
+      <div class="kpi-sub">Q4 2025</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Nächste Earnings</div>
+      <div class="kpi-value">30. Apr.</div>
+      <div class="kpi-sub">Q1 2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Konsens Rating</div>
+      <div class="kpi-value green">BUY</div>
+      <div class="kpi-sub">36 Buy · 4 Hold · 2 Sell</div>
+    </div>
+  </div>
+
+
+  <!-- S1: GESCHÄFTSMODELL -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6 Monate</div>
+    </div>
+    <div class="section-body">
+      <p>Datadog ist eine cloudnative SaaS-Plattform, die Unternehmen eine einheitliche Observability- und Security-Lösung für ihre gesamte IT-Infrastruktur bietet. Das Unternehmen wurde 2010 von Olivier Pomel und Alexis Lê-Quôc in New York gegründet und ist seit 2019 an der NASDAQ gelistet. Der Kern des Geschäftsmodells ist die Echtzeit-Überwachung von Cloud-Systemen – von Infrastruktur über Anwendungsperformance bis hin zu Logs, Security und Nutzerverhalten – alles in einem einzigen integrierten Dashboard.</p>
+
+      <p>Die Erlöse werden primär usage-basiert generiert: Kunden zahlen nach dem Volumen der Daten, die sie an die Plattform senden (Metriken, Logs, Traces). Diese Struktur führt zu einem attraktiven natürlichen Umsatzwachstum, da die Datenmengen bei Kunden mit wachsender Infrastruktur und zunehmender KI-Workload organisch zunehmen. Als sekundäre Preisschicht existieren produktbasierte Abonnements für spezifische Module wie Application Performance Monitoring (APM), Real User Monitoring (RUM), Security Monitoring oder das neue Bits AI SRE Agent.</p>
+
+      <p>Das Produktportfolio umfasst aktuell über 20 Module in sechs Kernkategorien: Infrastructure Monitoring, APM/Distributed Tracing, Log Management, Digital Experience Monitoring (RUM/Synthetics), Cloud Security sowie AI Observability. Das Cross-Selling dieser Module ist ein zentraler Wachstumstreiber: 84% der Kunden nutzen 2+ Produkte, 54% nutzen 4+, und 9% bereits 10+ Produkte. 48% der Fortune 500 zählen zu den Kunden.</p>
+
+      <p>Die Kostenstruktur ist primär Asset-Light: Hohe F&E-Aufwendungen (~30% des Umsatzes), moderates Capex (~4–5%), und eine Bruttomarge von ~80% belegen die Skalierbarkeit des SaaS-Modells. Kundensegmente sind B2B-Enterprise und technologieaffine Scale-Ups, mit klarer Tendenz zu Großkunden: Kunden mit &gt;$100K ARR machen ~90% des Gesamtumsatzes aus, Kunden mit &gt;$1M ARR wuchsen YoY von 462 auf 603 (+30%).</p>
+
+      <div class="source">Quellen: Datadog Q4 2025 Earnings Call &amp; Release (10. Feb. 2026), investors.datadoghq.com; Datadog 10-K FY2025; Stockanalysis.com (Feb. 2026)</div>
+    </div>
+  </div>
+
+
+  <!-- S2: BURGGRABEN -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Stärken des Burggrabens</h3>
+      <p>Datadogs stärkster Vorteil ist die Plattform-Netzwerkdynamik: Je mehr Module ein Kunde nutzt, desto teurer und riskanter wird ein Wechsel. Ein Unternehmen, das APM, Log Management, RUM, Security und AI Observability über Datadog betreibt, müsste beim Wechsel fünf spezialisierte Tools gleichzeitig ersetzen, integrieren und schulen. Die Net Revenue Retention von 120% belegt diese hohen Switching Costs empirisch.</p>
+
+      <p>Die über 700 nativen Integrationen (AWS, GCP, Azure, Kubernetes, OpenAI, Slack u.v.m.) stellen einen erheblichen Technologiemoat dar. Dieser Integration-Layer ist über Jahre aufgebaut worden und für Neueinsteiger kaum schnell replizierbar. Datadog hat zudem TOTO – ein Open-Source-Zeitreihen-Prognosemodell, trainiert auf 2 Billionen Datenpunkten – als technologische Differenzierung veröffentlicht, was die Führungsrolle in AI-nativer Observability unterstreicht.</p>
+
+      <h3>Schwachstellen</h3>
+      <p>Erstens sind die Kosten ein reales Problem – Datadog gilt bei wachsenden Unternehmen als teuer, was der Hauptangriffspunkt aller Challenger ist. Zweitens ist der proprietary Data Lock-in zwar ein Vorteil, aber auch eine Schwäche: OpenTelemetry-native Alternativplattformen (Honeycomb, Dash0) gewinnen an Attraktivität, da sie Vendor Lock-in aktiv vermeiden. Drittens bleibt das Risiko, dass Hyperscaler (AWS CloudWatch, Azure Monitor) ihre nativen Observability-Tools weiter ausbauen.</p>
+
+      <div class="score-bar" style="margin-top:16px;">
+        <span style="font-size:13px; color:var(--text-muted); min-width:200px;">Burggraben-Score</span>
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div>
+        <span class="score-num">7</span>
+      </div>
+
+      <div class="source">Quellen: Datadog Q3/Q4 2025 Earnings Calls; TomTunguz.com (Nov. 2025); VentureBeat (Dez. 2025)</div>
+    </div>
+  </div>
+
+
+  <!-- S3: LETZTE 4 QUARTALE -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale (Q1–Q4 FY2025)</div>
+      <div class="section-score">Beat-Ratio: 4/4</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quartal</th>
+              <th>Revenue</th>
+              <th>YoY</th>
+              <th>Non-GAAP EPS</th>
+              <th>Revenue Beat/Miss</th>
+              <th>EPS Beat/Miss</th>
+              <th>Kursreaktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q1 2025</strong> (Jan–Mrz)</td>
+              <td>$761.6 Mio.</td>
+              <td>+24.6%</td>
+              <td>$0.42</td>
+              <td class="beat">✓ Beat</td>
+              <td class="beat">✓ Beat</td>
+              <td class="neutral">n.v.</td>
+            </tr>
+            <tr>
+              <td><strong>Q2 2025</strong> (Apr–Jun)</td>
+              <td>$826.8 Mio.</td>
+              <td>+28.1%</td>
+              <td>$0.43</td>
+              <td class="beat">✓ Beat +3.9%</td>
+              <td class="beat">✓ Beat</td>
+              <td class="beat">+5%</td>
+            </tr>
+            <tr>
+              <td><strong>Q3 2025</strong> (Jul–Sep)</td>
+              <td>$885.7 Mio.</td>
+              <td>+28.4%</td>
+              <td>$0.55</td>
+              <td class="beat">✓ Beat +3.9%</td>
+              <td class="beat">✓ Beat +19.6%</td>
+              <td class="beat">+23.1%</td>
+            </tr>
+            <tr>
+              <td><strong>Q4 2025</strong> (Okt–Dez)</td>
+              <td>$953.2 Mio.</td>
+              <td>+29.2%</td>
+              <td>$0.59</td>
+              <td class="beat">✓ Beat +4.1%</td>
+              <td class="beat">✓ Beat +7.3%</td>
+              <td class="beat">+13.2%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Datadog hat in allen vier betrachteten Quartalen sowohl Revenue als auch EPS übertroffen. Besonders Q4 2025 war herausragend: Mit $953 Mio. Umsatz (+29% YoY) übertraf das Unternehmen den oberen Rand der eigenen Guidance von $916 Mio. deutlich und erzielte Record-Bookings von $1,63 Mrd. (+37% YoY). 18 Deals über $10 Mio. TCV wurden abgeschlossen, zwei davon über $100 Mio. – ein starkes Signal für Enterprise-Momentum.</p>
+
+      <p>CEO Olivier Pomel betonte, dass die Wachstumsbeschleunigung primär vom Nicht-KI-Kundensegment getrieben wurde – das sogenannte „Core Business" wuchs von 20% auf 23% – während AI-native Kunden weiterhin signifikant schneller wachsen. Die NRR von 120% (stabil vs. Vorquartal) bestätigt die Güte des Expansion-Mechanismus.</p>
+
+      <p><strong>Nächste Quartalsergebnisse:</strong> Q1 2026 ist für den <strong>30. April 2026</strong> angekündigt. Guidance: Revenue $951–961 Mio. (+25–26% YoY), Non-GAAP EPS $0.49–0.51.</p>
+
+      <div class="source">Quellen: Datadog Q4 2025 Earnings Release &amp; Call (10. Feb. 2026), investors.datadoghq.com; Q3 2025 Earnings Release (6. Nov. 2025); Stockanalysis.com; Fintool.com (Feb. 2026)</div>
+    </div>
+  </div>
+
+
+  <!-- S4: WACHSTUM -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <p>Datadog befindet sich in der Phase „Growth-at-Scale": Das Unternehmen wächst konsistent mit ~25–29% YoY bei einem Umsatzniveau von über $3 Mrd. – das ist für diese Größenklasse bemerkenswert. Die letzten fünf Jahre zeigen ein Revenue-CAGR von über 50%.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Zeitraum</th><th>Revenue</th><th>YoY Wachstum</th><th>Bemerkung</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>FY 2021</td><td>~$1.03 Mrd.</td><td>+63%</td><td>Hyper-Growth</td></tr>
+            <tr><td>FY 2022</td><td>~$1.68 Mrd.</td><td>+63%</td><td>Hyper-Growth</td></tr>
+            <tr><td>FY 2023</td><td>~$2.13 Mrd.</td><td>+27%</td><td>Normalisierung</td></tr>
+            <tr><td>FY 2024</td><td>~$2.68 Mrd.</td><td>+26%</td><td>Stabile Wachstumsphase</td></tr>
+            <tr><td>FY 2025</td><td>~$3.43 Mrd.</td><td>+27.7%</td><td><span class="badge badge-green">Re-Acceleration</span></td></tr>
+            <tr><td>FY 2026E</td><td>$4.06–4.10 Mrd.</td><td>+18–20%</td><td><span class="badge badge-yellow">Guidance (konservativ)</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Geografische Verteilung</h3>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">Nordamerika</div>
+          <div class="geo-pct">~65–70%</div>
+          <div class="geo-note">USA / Kanada · Kernmarkt</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">EMEA</div>
+          <div class="geo-pct">~20–25%</div>
+          <div class="geo-note">Wachsend – größter Telko-Deal in Q3 2025</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">APAC</div>
+          <div class="geo-pct">~8–10%</div>
+          <div class="geo-note">Sakana AI JP-Partnerschaft Feb. 2026</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Rest der Welt</div>
+          <div class="geo-pct">~3–5%</div>
+          <div class="geo-note">Kleinerer Anteil</div>
+        </div>
+      </div>
+
+      <h3>Segmentwachstum</h3>
+      <p>Das Security-ARR wuchs in Q3 2025 um ~+55% YoY – eine Beschleunigung gegenüber den Mid-40s im Q2. Security entwickelt sich zum zweiten großen Wachstumstreiber neben der Core-Observability. AI-Observability-Umsatz ist strukturell wichtig: AI-native Kunden repräsentierten ~12% des Revenue in Q3 (Q3'24: ~6%) und wachsen signifikant schneller als das Gesamtgeschäft.</p>
+
+      <div class="source">Quellen: Datadog Q3/Q4 2025 Earnings Calls; TomTunguz.com (Nov. 2025); Datadog Annual Report FY2025 (Feb. 2026)</div>
+    </div>
+  </div>
+
+
+  <!-- S5: BEWERTUNG -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> GAAP P/E ist aufgrund hoher SBC-Aufwendungen (~$900 Mio. FY2025) nicht aussagekräftig. Für sinnvolle Bewertung sind Non-GAAP-Metriken und EV/Revenue maßgeblich.</div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kennzahl</th><th>Aktuell (~$102)</th><th>Historisch (5J-Ø)</th><th>Peer-Median Software</th><th>Einordnung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>GAAP P/E (TTM)</td>
+              <td>~313–376x</td>
+              <td>n.a. (war negativ)</td>
+              <td>~30x</td>
+              <td class="miss">⚠ Nicht aussagekräftig</td>
+            </tr>
+            <tr>
+              <td>Non-GAAP FWD P/E</td>
+              <td>~53x</td>
+              <td>~75–90x</td>
+              <td>~25x</td>
+              <td class="neutral">↓ Verbessert, aber noch premium</td>
+            </tr>
+            <tr>
+              <td>EV/Revenue (TTM)</td>
+              <td>~11.9x</td>
+              <td>~17–22x</td>
+              <td>~4–5x</td>
+              <td class="beat">↓ Signifikant unter Ø</td>
+            </tr>
+            <tr>
+              <td>EV/EBITDA (Non-GAAP)</td>
+              <td>~47.7x</td>
+              <td>n.a.</td>
+              <td>~20–25x</td>
+              <td class="neutral">Premium, teils gerechtfertigt</td>
+            </tr>
+            <tr>
+              <td>P/S</td>
+              <td>~11.9x</td>
+              <td>~18–25x</td>
+              <td>~4–5x</td>
+              <td class="beat">↓ 25–35% unter 3J-Ø</td>
+            </tr>
+            <tr>
+              <td>PEG Ratio</td>
+              <td>~1.01x</td>
+              <td>~2.5–3.5x</td>
+              <td>~1.5x</td>
+              <td class="beat">✅ Attraktiv</td>
+            </tr>
+            <tr>
+              <td>EV/FCF</td>
+              <td>~35.7x</td>
+              <td>~50–70x</td>
+              <td>~30x</td>
+              <td class="beat">✅ Fair</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Die Bewertung hat sich erheblich komprimiert: Datadog handelt aktuell auf dem niedrigsten EV/Revenue-Niveau seit dem IPO-Hoch 2021. Das PEG-Ratio von ~1.01x ist die attraktivste Kennzahl – bei einem Wachstum von ~25% YoY und FY2026 Non-GAAP EPS-Guidance von $2.08–2.16 liegt der Forward-Multiple bei ~47–49x. Die Analyst-Konsensus-Kursziele liegen bei $175–184 (36 Buy-Ratings) – was ~70% Upside zum aktuellen Kurs impliziert.</p>
+
+      <div class="source">Quellen: Stockanalysis.com / multiples.vc (Feb. 2026); GuruFocus (Feb. 2026); MacroTrends (Feb. 2026); Barclays/Mizuho Analyst Reports (Feb. 2026)</div>
+    </div>
+  </div>
+
+
+  <!-- S6: CASHFLOW -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 7.5/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kennzahl</th><th>Q4 2025 (zuletzt)</th><th>FY2025</th><th>FY2024 (Vgl.)</th><th>Trend</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Bruttomarge</td><td>~80%</td><td>~79.9%</td><td>~80%</td><td class="neutral">→ Stabil</td></tr>
+            <tr><td>Non-GAAP Op. Marge</td><td>~22–23%</td><td>~22%</td><td>~20%</td><td class="beat">↑ Verbessernd</td></tr>
+            <tr><td>GAAP Op. Marge</td><td>~-1.3%</td><td>negativ</td><td>negativ</td><td class="miss">→ Stabil negativ (SBC)</td></tr>
+            <tr><td>FCF ($)</td><td>$291 Mio.</td><td>~$1.1 Mrd.</td><td>~$700 Mio.</td><td class="beat">↑ Stark</td></tr>
+            <tr><td>FCF-Marge</td><td>~31%</td><td>~32%</td><td>~26%</td><td class="beat">↑ Signifikante Verbesserung</td></tr>
+            <tr><td>Cash &amp; Securities</td><td>n.a.</td><td>~$4.0 Mrd.</td><td>~$3.2 Mrd.</td><td class="beat">↑ Solide Liquidität</td></tr>
+            <tr><td>Debt/Equity</td><td>~0.26–0.34</td><td>n.a.</td><td>n.a.</td><td class="beat">✅ Gering verschuldet</td></tr>
+            <tr><td>ROE (GAAP)</td><td>~3.3–4.1%</td><td>n.a.</td><td>n.a.</td><td class="neutral">⚠ Niedrig (SBC-Effekt)</td></tr>
+            <tr><td>Capex / Revenue</td><td>~4–5%</td><td>~4%</td><td>~4%</td><td class="beat">✅ Asset-Light</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Die Kapitalqualität von Datadog ist stark. Die FCF-Marge von ~31–32% ist bemerkenswert für ein Unternehmen mit diesem Wachstumstempo. GAAP-Verluste werden vollständig durch SBC erklärt: Im FY2025 lagen SBC-Aufwendungen bei ~$900 Mio. – die Non-GAAP Operating Income von ~$840–880 Mio. für FY2026 (Guidance, ~21% Marge) zeigt eine klare Trajectory in Richtung nachhaltiger Profitabilität.</p>
+
+      <p>Keine Dividenden, keine Aktienrückkäufe. Das Kapital wird vollständig in Wachstum (F&amp;E, Go-to-Market) reinvestiert. Beobachtenswert: CTO Alexis Lê-Quôc verkaufte am 11. Feb. 2026 rund 43.000 Aktien (~$5,5 Mio.) – üblicher Diversifikations-Trade, aber keine Insider-Käufe in den letzten 3 Monaten.</p>
+
+      <div class="source">Quellen: Datadog Q4 2025 Earnings Release (10. Feb. 2026); Yahoo Finance Key Statistics (Feb. 2026); Stockanalysis.com; SEC-Filing 10-K FY2025</div>
+    </div>
+  </div>
+
+
+  <!-- S7: PEERS -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Unternehmen</th><th>Ticker</th><th>Umsatz (TTM)</th><th>Rev. Growth</th><th>Gross Marge</th><th>FCF Marge</th><th>EV/Revenue</th><th>NRR</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Datadog</strong></td>
+              <td><span class="badge badge-orange">DDOG</span></td>
+              <td>$3.43 Mrd.</td>
+              <td class="beat">+28%</td>
+              <td>~80%</td>
+              <td class="beat">~32%</td>
+              <td>~11.9x</td>
+              <td class="beat">120%</td>
+            </tr>
+            <tr>
+              <td>Dynatrace</td>
+              <td><span class="badge badge-blue">DT</span></td>
+              <td>$1.93 Mrd.</td>
+              <td class="neutral">+18%</td>
+              <td>~82%</td>
+              <td>~32%</td>
+              <td>~7x</td>
+              <td class="neutral">111%</td>
+            </tr>
+            <tr>
+              <td>Coralogix</td>
+              <td><span class="badge badge-yellow">Privat</span></td>
+              <td>n.v.</td>
+              <td class="beat">&gt;7x seit '22</td>
+              <td>n.v.</td>
+              <td>negativ</td>
+              <td>Unicorn &gt;$1 Mrd.</td>
+              <td>n.v.</td>
+            </tr>
+            <tr>
+              <td>Honeycomb</td>
+              <td><span class="badge badge-yellow">Privat</span></td>
+              <td>n.v.</td>
+              <td>hoch</td>
+              <td>n.v.</td>
+              <td>negativ</td>
+              <td>n.v.</td>
+              <td>n.v.</td>
+            </tr>
+            <tr>
+              <td>Grafana Labs</td>
+              <td><span class="badge badge-yellow">Privat</span></td>
+              <td>n.v.</td>
+              <td>hoch</td>
+              <td>n.v.</td>
+              <td>n.v.</td>
+              <td>n.v.</td>
+              <td>n.v.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Dynatrace (DT) – Der nächste relevante Public Peer</h3>
+      <p>Dynatrace ist mit ~$15 Mrd. Marktkapitalisierung der direkteste öffentliche Wettbewerber. Das Unternehmen wächst langsamer (+18% YoY vs. +28% bei Datadog), ist aber GAAP-profitabler und führt aktive Aktienrückkäufe durch ($1 Mrd. neues Buyback-Programm, Feb. 2026). Die Davis AI Engine (deterministische KI) ist Dynatraces technologisches Alleinstellungsmerkmal im Enterprise-Segment. NRR von 111% liegt deutlich unter Datadogs 120%. Dynatrace handelt bei ~7x EV/Revenue – 40% Discount zu Datadog.</p>
+
+      <h3>AI-native Observability Scale-Ups</h3>
+      <p>Chronosphere wurde im November 2025 für $3,35 Mrd. von Palo Alto Networks (PANW) akquiriert – ein klares Signal, dass etablierte Security-Anbieter Observability als strategisch wichtig betrachten. Coralogix erzielte im Juni 2025 eine Series-E-Runde von $115 Mio. bei &gt;$1 Mrd. Bewertung und sieht Datadog explizit als Hauptwettbewerber. Mit 7x Umsatzwachstum seit 2022 und KI-Agenten-Lösung (Olly) ist Coralogix die wohl aggressivste private Bedrohung für Datadogs SMB- und Mid-Market-Segment. Honeycomb und Dash0 bedienen Developer-Nischen und sind primär Preisdruck-Challengers.</p>
+
+      <div class="source">Quellen: Dynatrace Q3 FY2026 Earnings (9. Feb. 2026), ir.dynatrace.com; TechCrunch (Coralogix Series E, Jun. 2025); Tracxn.com (Chronosphere, Feb. 2026); VentureBeat (Dez. 2025)</div>
+    </div>
+  </div>
+
+
+  <!-- S8: NEWS -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">10. Feb. 2026 – Q4 2025 Earnings Beat <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Revenue $953 Mio. (+29%), EPS $0.59 – beide über Konsensus. Record Bookings $1.63 Mrd. (+37%). RPO $3.46 Mrd. (+52%). Kurs +13.2% am Earnings-Tag. Quelle: investors.datadoghq.com, 10. Feb. 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">12. Feb. 2026 – Investor Day &amp; AI-Roadmap <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Management präsentierte KI-Roadmap (Bits AI SRE Agent GA, autonomous observability, GPU Monitoring). Mehrere Analysten bekräftigten Buy-Ratings nach der Präsentation. Quelle: datadoghq.com, 12. Feb. 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">25. Feb. 2026 – Sakana AI Partnership Japan <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Strategische Partnerschaft mit Sakana AI zur Beschleunigung von Enterprise AI in Japan – fokussiert auf große japanische Unternehmen. Quelle: Globe Newswire, 25. Feb. 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Feb. 2026 – Insider-Verkäufe ohne Käufe <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">CTO Lê-Quôc verkaufte am 11. Feb. ~43K Aktien (~$5,5 Mio.); Director Shah verkaufte im Jan. ~8K Aktien. Keine Insider-Käufe in den letzten 3 Monaten. Quelle: SEC Form 4 Filings, Feb. 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Q3/Q4 2025 – AI-Kundenkonzentration ~12% <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Ein einzelner AI-Kunde machte in Q3 ~11–12% des Revenue aus. CFO betonte "sehr konservative Annahmen" für FY2026-Guidance bei diesem Kunden. Beobachten. Quelle: Datadog Q4 2025 Earnings Call, Feb. 2026</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Nov. 2025 – Chronosphere-Akquisition durch Palo Alto ($3.35 Mrd.) <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">PANW positioniert sich als integrierte Observability+Security-Plattform. Direkte Konkurrenz zu Datadogs Security-Produkt. Eliminiert Chronosphere als eigenständigen Challenger. Quelle: Tracxn.com, Nov. 2025</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Jan.–Feb. 2026 – AI-Panic-Sell-Off im Software-Sektor <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Agentic AI-Tools (Cursor, Devin) schüren Angst vor SaaS-Disruption. DDOG trotz guter Fundamentals -24% YTD und -49% vom 52-Wochen-Hoch. Quelle: VentureBeat, Jan. 2026; Yahoo Finance, Feb. 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">2025/2026 – Hyperscaler AI Capex-Boom <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Microsoft, Google, AWS, Meta planen zusammen &gt;$350 Mrd. AI-Infrastruktur-Investitionen in 2026 – direkte Tailwinds für Cloud-Observability-Bedarf. Quelle: Reuters/Bloomberg, Feb. 2026</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">23. Feb. 2026 – Trump-Zölle (globale 15%-Ankündigung) <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Ankündigung globaler 15%-Zölle via Truth Social. Marktweiter Tech-Sell-Off, DDOG heute -11.6%. Direkte Auswirkung auf DDOG begrenzt (Software = nicht physisch handelbar), aber sentiment-getrieben erheblich. Quelle: Reuters/Bloomberg, 23. Feb. 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Feb. 2026 – Fed: Zinsen stabil <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Fed hält Zinsen stabil. Längerer "Higher-for-Longer"-Zyklus drückt weiterhin auf Growth-Multiplikatoren. Quelle: Fed Statement, Feb. 2026</div>
+        </div>
+      </div>
+
+      <div class="source">Quellen: investors.datadoghq.com; Globe Newswire (25. Feb. 2026); Yahoo Finance News (Feb. 2026); Benzinga (26. Feb. 2026); Tracxn.com; Reuters/Bloomberg (Feb. 2026)</div>
+    </div>
+  </div>
+
+
+  <!-- S9: TECHNISCH -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 3.5/10</div>
+    </div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom:16px;">
+        <div class="kpi-card">
+          <div class="kpi-label">Kurs</div>
+          <div class="kpi-value red">~$102</div>
+          <div class="kpi-sub">27.02.2026</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 20</div>
+          <div class="kpi-value red">~$110</div>
+          <div class="kpi-sub">Kurs darunter ↓</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 50</div>
+          <div class="kpi-value red">~$119</div>
+          <div class="kpi-sub">Kurs darunter ↓</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 200</div>
+          <div class="kpi-value red">~$131</div>
+          <div class="kpi-sub">Death Cross aktiv ↓</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">RSI (14T)</div>
+          <div class="kpi-value orange">~41–45</div>
+          <div class="kpi-sub">Neutral/leicht überv.</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">52W High</div>
+          <div class="kpi-value">$201.69</div>
+          <div class="kpi-sub">–49% davon</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">MACD</div>
+          <div class="kpi-value red">Bearish</div>
+          <div class="kpi-sub">Unter Signallinie</div>
+        </div>
+      </div>
+
+      <p>Die technische Situation von Datadog ist angeschlagen. Der Kurs notiert bei ~$102 – das entspricht einem Rückgang von -49% vom 52-Wochen-Hoch bei $201.69 (November 2025). Alle drei wichtigen Moving Averages (SMA 20, 50, 200) stehen auf Sell. Der aktive Death Cross (SMA 50 unter SMA 200) ist ein klassisches Warnsignal für anhaltende Schwäche. Der RSI bei ~41–45 ist noch nicht tief überverkauft (Grenze: 30), was weitere Kursrückgänge bis zum 52W-Tief bei $81.63 zulässt.</p>
+
+      <p>Kurzfristiges Bild: Der heutige Sell-Off (-11.6% auf ~$102) liegt nahe an der psychologischen $100-Marke. Sollte $95–100 als Unterstützung halten, könnte sich ein kurzfristiger technischer Rebound ergeben. Für mittelfristig ist Konsolidierung im Bereich $100–130 wahrscheinlich, bis Makro-Klarheit eintritt. Widerstand liegt bei SMA 50 (~$119) und SMA 200 (~$131).</p>
+
+      <div class="source">Quellen: MacroTrends DDOG Historical Prices (Feb. 2026); Benzinga Technical Analysis (26. Feb. 2026); TradingView DDOG Chart (27. Feb. 2026); Stockinvest.us (Feb. 2026)</div>
+    </div>
+  </div>
+
+
+  <!-- S10: RISIKEN -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 5.5/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Strukturelle &amp; zyklische Risiken</h3>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Kundenkonzentration – größter AI-Kunde ~12% Umsatz</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Bei Verlust oder starker Reduktion dieses Kunden: -5 bis -10% Revenue. CFO äußerte sich "konservativ" zu diesem Kunden in FY2026-Guidance. Wahrscheinlichkeit: 20–30% (signifikante Reduktion).</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ AI-native Newcomer – Coralogix, Honeycomb, Dash0</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Günstiger, OTel-nativ, kein Vendor Lock-in. Attackieren primär SMB/Mid-Market. Preisdruck -2 bis -5pp Marge möglich. Wahrscheinlichkeit für signifikante Marktanteilsverluste in 2–3 Jahren: 25–35%.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Hyperscaler-Konkurrenz (AWS CloudWatch, Azure Monitor)</div>
+          <div><span class="badge badge-yellow">Mittel-Hoch</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Native Observability wird besser und ist für Cloud-Kunden "Good Enough" im SMB-Segment. Enterprise bevorzugt weiterhin neutralen Multi-Cloud-Anbieter. Langfristiges Risiko (3–5 Jahre).</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ OpenTelemetry-Shift / Vendor Lock-in als Schwäche</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">OTel-native Plattformen vermeiden Lock-in. Datadog ist zwar OTel-Contributor, aber die proprietären Data Stores bleiben ein Risikofaktor. Langfristig -5 bis -10% Revenue Impact möglich.</div>
+      </div>
+
+      <h3>AI-Disruptions-Risiko (Kern-Fragestellung)</h3>
+      <p>Das bullische AI-Szenario: Mehr AI-Applikationen bedeuten mehr Infrastruktur, mehr Telemetriedaten und damit mehr Observability-Bedarf. LLM-Stacks produzieren eigene Metriken (Token-Kosten, Latenz, Halluzinations-Rates). Datadogs 5.500+ AI-Integrations-Kunden und das TOTO-Modell (2 Bio. Datenpunkte) sind echte Defensivvorteile.</p>
+      <p>Das bärische AI-Szenario: Agentic AI-Tools könnten manuelle Dashboard-Nutzung obsolet machen. Wenn KI-Agenten Incidents autonom erkennen und lösen, sinkt der "Seat"-basierte Mehrwert. Der größte strukturelle Threat: Hyperscaler bauen native Observability aus und bieten "Good Enough"-Lösung für viele Kunden kostenlos an.</p>
+
+      <h3>Chancen</h3>
+      <p>GPU Observability: Bei Hyperscaler-Capex von &gt;$350 Mrd. in 2026 ein massiver TAM-Erweiter (potenziell $200–400 Mio. ARR bis 2027/28). Security ARR: +55% YoY – könnte bis 2027 ein $800 Mio. ARR-Business werden. Fortune 500: 48% sind Kunden, medianer ARR &lt;$500K – 50%+ Expansionspotenzial in bestehenden Accounts. M&amp;A-Upside: $4+ Mrd. Cash ermöglicht gezielte AI-Security-Akquisitionen.</p>
+
+      <h3>Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> Insider-Verkäufe ohne Käufe; AI-Kundenkonzentration (~12% Revenue); NRR-Stagnation bei 120% (kein Wachstum mehr wie 2022/23 mit 130%+); SBC-Aufwand bleibt hoch (~$900 Mio. FY2025 – dilutiv).</p>
+      <p><strong>Dealbreaker (aktuell nicht vorhanden):</strong> Kein Bilanzproblem, keine regulatorischen Existenzbedrohungen. Das einzige theoretische Dealbreaker-Szenario: Verlust des größten AI-Kunden UND gleichzeitiger Einbruch in der Breitenwachstumskurve – derzeit nicht der Konsensfall.</p>
+
+      <div class="source">Quellen: Datadog Q3/Q4 2025 Earnings Calls; TomTunguz.com (Nov. 2025); VentureBeat (Dez. 2025); Yahoo Finance (Feb. 2026)</div>
+    </div>
+  </div>
+
+
+  <!-- S11: SCORING -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring-Übersicht inkl. User-spezifische Analyse</div>
+      <div class="section-note">AI-Moat &amp; Monetarisierung</div>
+    </div>
+    <div class="section-body">
+
+      <h3>User-spezifische Analyse: AI-Monetarisierung &amp; Moat-Verteidigbarkeit</h3>
+      <p>Die Kernfrage – ob Datadogs Geschäftsmodell durch AI disruptiert oder gestärkt wird – lässt sich auf Basis aktueller Daten beantworten. AI-native Kunden repräsentierten in Q3 2025 ~12% des Gesamtumsatzes (vs. 6% ein Jahr davor) – eine Verdoppelung in 12 Monaten. Der Bits AI SRE Agent erreichte innerhalb von Wochen nach GA &gt;2.000 Nutzer. MCP-Server-Tool-Calls stiegen 11x von Q3 auf Q4 – Datadog positioniert sich als "AI Agent-Ready"-Infrastruktur, nicht als Opfer.</p>
+
+      <p>Das größte 8-stellige Neukunden-Logo in Q4 2025 war ein "großes AI Financial Model Company", das 5+ Observability-Tools auf Datadog konsolidierte. Dies belegt: Selbst AI-Firmen wollen die Komplexität der Observability nicht selbst bauen. CEO Pomel: "Observability wird in Domains vordringen, die es bisher nicht abdeckte." Der Moat ist verteidigbar durch Plattformbreite, 700+ Integrationen, und den Analyse-Layer – nicht durch Datenformate.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Competitor</th><th>Bedrohungsgrad</th><th>Begründung</th><th>Zeithorizont</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Coralogix</td>
+              <td><span class="badge badge-yellow">Mittel</span></td>
+              <td>Explizit gegen Datadog; AI-Agent "Olly"; günstigere Architektur. Kein vollst. Platform, kein Security.</td>
+              <td>2–3 Jahre</td>
+            </tr>
+            <tr>
+              <td>Honeycomb</td>
+              <td><span class="badge badge-blue">Niedrig-Mittel</span></td>
+              <td>Konzeptuell stark bei Distributed Tracing. Keine Infra-Monitoring, kein Security, kein RUM.</td>
+              <td>2–4 Jahre</td>
+            </tr>
+            <tr>
+              <td>Chronosphere (jetzt PANW)</td>
+              <td><span class="badge badge-green">Niedrig</span></td>
+              <td>Akquiriert – eliminiert als eigenständiger Challenger. PANW fokussiert auf Security+Obs.-Integration.</td>
+              <td>Absorbiert</td>
+            </tr>
+            <tr>
+              <td>Grafana Labs</td>
+              <td><span class="badge badge-yellow">Mittel</span></td>
+              <td>OSS-Standard für Visualisierung. Primär Visualisierungs-Schicht, kein End-to-End-Platform-Replacement.</td>
+              <td>3–5 Jahre</td>
+            </tr>
+            <tr>
+              <td>Hyperscaler (AWS/Azure/GCP)</td>
+              <td><span class="badge badge-red">Mittel-Hoch (langfristig)</span></td>
+              <td>Native Obs. wird besser. Hauptbedrohung im SMB-Segment. Enterprise bevorzugt neutralen Anbieter.</td>
+              <td>3–5 Jahre</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <hr class="divider">
+      <h3>Gesamtscoring</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kategorie</th><th>Score</th><th style="width:55%">Score-Balken</th><th>Begründung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Geschäftsmodell</td>
+              <td>8.5</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:85%"></div></div></div></td>
+              <td>Skalierbar, usage-based, multi-product, starker NRR</td>
+            </tr>
+            <tr>
+              <td>Burggraben</td>
+              <td>7</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div></div></td>
+              <td>Plattform-Stickiness + 700 Integrationen; Preisrisiko</td>
+            </tr>
+            <tr>
+              <td>Operative Entw. (4Q)</td>
+              <td>8.5</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:85%"></div></div></div></td>
+              <td>4/4 Beats, Re-Acceleration, Record Bookings</td>
+            </tr>
+            <tr>
+              <td>Wachstum</td>
+              <td>8</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div></div></td>
+              <td>+28% bei $3 Mrd. Basis; AI + Security als Treiber</td>
+            </tr>
+            <tr>
+              <td>Bewertung</td>
+              <td>6</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div></div></td>
+              <td>EV/Rev. &amp; PEG attraktiv; Non-GAAP noch premium</td>
+            </tr>
+            <tr>
+              <td>Cashflow / Margen</td>
+              <td>7.5</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:75%"></div></div></div></td>
+              <td>FCF-Marge &gt;31%, $4 Mrd. Cash; SBC belastet GAAP</td>
+            </tr>
+            <tr>
+              <td>Peer-Vergleich</td>
+              <td>7</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div></div></td>
+              <td>Klare Führung vs. Public Peers; Private Challenger</td>
+            </tr>
+            <tr>
+              <td>Risiken (invertiert)</td>
+              <td>5.5</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:55%"></div></div></div></td>
+              <td>AI-Disruption strukturell zu beobachten; kein Dealbreaker</td>
+            </tr>
+            <tr>
+              <td>Technische Analyse</td>
+              <td>3.5</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:35%"></div></div></div></td>
+              <td>Death Cross, alle MAs Sell, -49% vom Hoch</td>
+            </tr>
+            <tr style="background:rgba(255,105,0,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>6.8/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track">
+                    <div class="score-bar-fill" style="width:68%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
+                  </div>
+                  <span class="score-num" style="color:var(--primary);">6.8</span>
+                </div>
+              </td>
+              <td>Starke Fundamentals vs. schlechte technische Lage</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="source">Quellen: Eigene Berechnung basierend auf Sektionen 1–10 dieser Analyse; Datadog Q4 2025 Earnings; TechCrunch; VentureBeat</div>
+    </div>
+  </div>
+
+
+  <!-- S12: FAZIT -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit &amp; Investment-These</div>
+      <div class="section-note">Gesamtsynthese</div>
+    </div>
+    <div class="section-body">
+
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 – Operative Exzellenz:</strong> In Q4 2025 wuchs der Umsatz auf $953 Mio. (+29% YoY). Bookings von $1,63 Mrd. (+37%) und ein RPO von $3,46 Mrd. (+52%) signalisieren mehrjährige Enterprise-Commitments. 18 Deals über $10 Mio. TCV in einem einzigen Quartal belegen Enterprise-Momentum, das mit einem "softening environment" kaum vereinbar ist.</p>
+          <p><strong>Säule 2 – AI-Monetarisierung ist real:</strong> AI-native Kunden wuchsen von 6% auf 12% des Umsatzes in 12 Monaten. Bits AI SRE Agent: &gt;2.000 Nutzer in Wochen nach GA. MCP-Calls 11x QoQ. Datadog wird zur "AI Agent-Ready"-Infrastruktur – nicht als Opfer von AI, sondern als Enabling Layer.</p>
+          <p><strong>Säule 3 – Bewertung auf historischem Tief:</strong> EV/Revenue ~11.9x (historisch 17–22x), PEG ~1.0x. Konsensus-Kursziel ~$175–184, impliziert ~70% Upside. FCF-Yield ~2.8% bei 25%+ Wachstum ist eine strukturelle Kaufgelegenheit für Quality-Growth-Investoren.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 – AI-Disruption des Geschäftsmodells:</strong> Wenn Agentic AI-Systeme autonom Infrastruktur überwachen, verliert die Plattform als "Human Decision Support"-Tool an Relevanz. Coralogix, Honeycomb und Dash0 argumentieren, Datadogs proprietary Architecture sei technologische Debt. Worst Case: NRR fällt unter 110%, Revenue-Wachstum verlangsamt auf &lt;15%.</p>
+          <p><strong>Risiko 2 – Kundenkonzentration:</strong> Ein einzelner AI-Kunde ~12% Revenue. Falls dieser Kunde (vermutlich AI-Model-Company) eigene Observability-Infrastruktur aufbaut, könnte ein $200+ Mio. Revenue-Loch entstehen. Die konservative FY2026-Guidance (+18–20%) spiegelt diese Unsicherheit wider.</p>
+          <p><strong>Risiko 3 – Technische Schwäche:</strong> Death Cross aktiv, alle MAs auf Sell, -49% vom Hoch. GAAP P/E ~313–376x ist für Value-Investoren ein psychologischer Blocker. SBC ~$900 Mio./Jahr (25%+ Revenue) verzögert GAAP-Profitabilität um weitere Jahre.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Das bullische Narrativ überzeugt mehr – aber nicht ohne valide Risikopunkte. Die Profitabilitätswende ist real und strukturell: Non-GAAP Operating Income ~21% Guidance FY2026, FCF-Marge &gt;30%, NRR 120%. Die AI-Monetarisierung ist keine Spekulation, sondern bereits sichtbar – 12% Revenue von AI-nativen Kunden ist ein struktureller Treiber, der noch in den frühen Phasen der Skalierung steckt. Der von Investoren gefürchtete AI-Disruptions-Fall ist im 2–3 Jahres-Horizont unwahrscheinlich.</p>
+      <p>Der aktuelle Kurs von ~$102 erscheint bei einem 24–36-Monats-Horizont als attraktive Einstiegsgelegenheit. Das Risk/Reward ist asymmetrisch positiv: <strong>Downside: -20 bis -25%</strong> (Unterstützung bei $75–82); <strong>Upside: +70–80%</strong> bei normalisierten Multiples auf FY2026/27-Zahlen ($170–185). Risk/Reward ca. 1:3.</p>
+      <p>Ich könnte falsch liegen, weil: (a) Das AI-Disruptions-Narrativ schneller als erwartet Marktanteile erodiert; (b) Der größte Einzelkunde churnt; (c) Das Makro-Umfeld (Zölle, Rezession) die Cloud-Migration bremst; (d) Die technische Schwäche in eine längere Unterbewertungsphase mündet.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Zeithorizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kurzfristig (0–6M)</strong></td><td>Q1 2026 Earnings (30. Apr.), AI-Revenue-Daten, technischer Rebound</td><td>Tariff-Sentiment, AI-Panic, technischer Downtrend</td><td><span class="badge badge-yellow">Vorsichtig / Tranchiert</span></td></tr>
+            <tr><td><strong>Mittelfristig (6–24M)</strong></td><td>AI-Revenue &gt;20% Umsatz, GPU Obs. Launch, Security $800M ARR</td><td>Kundenkonzentration, NRR-Rückgang, Makro</td><td><span class="badge badge-green">Kaufen (sukzessiv)</span></td></tr>
+            <tr><td><strong>Langfristig (2–5J)</strong></td><td>AI-as-Infrastructure, Fortune 500-Penetration, M&amp;A-Optionen</td><td>Strukturelle AI-Disruption, Hyperscaler-Ausbau</td><td><span class="badge badge-green">Halten (Quality Growth)</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese &amp; Rating</h3>
+      <p>Datadog ist ein qualitativ hochwertiges Growth-Asset, das temporär vom Markt falsch bewertet wird. Die Fundamentals (FCF &gt;$1 Mrd., NRR 120%, +29% Wachstum, Record Bookings) stehen im starken Kontrast zur aktuellen Bewertung auf Mehrjahrestiefs. Das AI-Disruptions-Risiko ist real, aber im 2–3 Jahres-Horizont nicht existenzbedrohend. Der aktuelle Preis bietet ein attraktives Risk/Reward für langfristig orientierte Investoren.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">☑ KAUFEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$165 – $185</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–3 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–20 bis –25%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+70–80%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1 : 3</div></div>
+      </div>
+
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Größter AI-Kunde reduziert Spend &gt;50% in Q1/Q2 2026 → sofort Hälfte verkaufen</li>
+            <li>NRR fällt unter 110% für 2 aufeinanderfolgende Quartale → Position reduzieren</li>
+            <li>FY2026-Revenue-Guidance um &gt;5% nach unten revidiert → verkaufen</li>
+            <li>Kurs bricht $81–85 (52W-Tief) mit erhöhtem Volumen → Stop-Loss aktivieren</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>AI-Revenue &gt;15% des Gesamtumsatzes bei Q1 2026 Earnings → nachkaufen</li>
+            <li>Kurs durchbricht SMA 200 (~$131) auf Wochenbasis → aggressiv nachkaufen</li>
+            <li>GPU Observability Revenue erstmals wesentlich (&gt;$50 Mio. annualisiert) → aufstocken</li>
+            <li>Bits AI &gt;500 zahlende Kunden bei Q2 Earnings → Position aufbauen</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Quality Growth Investoren</li>
+            <li>Tech-Themen-Investoren (AI-Infrastruktur)</li>
+            <li>Contrarian Investoren (nach -49% Drawdown)</li>
+            <li>Langfristige Wachstumsanleger (&gt;2J Horizont)</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Value-Investoren (Non-GAAP Premium)</li>
+            <li>Income-Investoren (keine Dividende)</li>
+            <li>Kurzfristige Trader (Death Cross aktiv)</li>
+            <li>GAAP-Profitabilitätsfokussierte Anleger</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten auf techn. Aufwärtstrend</span></td><td>Kurs muss SMA 200 (~$131) nachhaltig überwinden; Makro-Klarheit abwarten</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen (3–4 Tranchen)</span></td><td>1. Tranche ~$102, weitere bei $90–95 und $120+; Stop-Loss ~$75</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt Startposition aufbauen</span></td><td>Risk/Reward 1:3, PEG 1.0x – attraktivster Einstiegspunkt seit IPO-Hoch</td></tr>
+            <tr><td><strong>Langfristig (5+ Jahre)</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>Führender AI-Observability-Player; Plattform-Moat langfristig verteidigbar</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="source">Quellen: Eigene Einschätzung basierend auf Sektionen 1–11; Analystenkonsensus Barclays/Mizuho (Feb. 2026); Fintool.com (Feb. 2026)</div>
+    </div>
+  </div>
+
+
+  <!-- S13: OUTLOOK -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Die 3 entscheidenden Events</div>
+      <div class="section-note">Wenn/Dann-Logik</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q1 2026 Quartalsergebnisse – ca. 30. April 2026</h4>
+        <p>Das wichtigste kurzfristige Event. Entscheidend ist nicht nur das Revenue-Wachstum, sondern der AI-Revenue-Anteil und die Guidance-Qualität für Q2/FY2026. Der Markt wird genau beobachten, ob das AI-Wachstum von 12% auf &gt;15% des Umsatzes gestiegen ist und ob das Core Business (Non-AI) die Wachstumsbeschleunigung bestätigt.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> AI-Revenue &gt;14–15% des Gesamtumsatzes UND Gesamtumsatz über Guidance-Midpoint ($956 Mio.) UND Q2-Guidance solide → AI-Monetarisierung strukturell bestätigt, Disruptions-Risiko deutlich reduziert. Empfehlung: <strong>Mittlere Tranche nachkaufen.</strong><br><br>
+          <strong>Wenn:</strong> AI-Revenue stagniert bei &lt;11% ODER Gesamtumsatz verfehlt Guidance-Midpoint → Kundenkonzentrationsrisiko materialisiert sich. Empfehlung: <strong>Bestehende Position halten, keine neuen Käufe, Stop-Loss bei ~$80 setzen.</strong>
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 2: Bits AI SRE Agent – Kommerzielle Skalierung (Q2–Q3 2026)</h4>
+        <p>Der Bits AI SRE Agent ist Datadogs wichtigstes neues Produkt. Mit &gt;2.000 Trial-/Zahlungskunden nach wenigen Wochen GA ist der Product-Market-Fit erkennbar. Die entscheidende Frage ist, ob dieser Agent zum bezahlten ARR-Produkt im dreistelligen Millionenbereich skaliert und den Moat gegenüber AI-nativen Newcomern wie Coralogix (Olly) verteidigt.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Datadog berichtet bei Q2/Q3 2026 &gt;500 zahlende Bits AI-Kunden mit ARR &gt;$10K (entspricht &gt;$5 Mio. ARR minimum) UND klares Upsell-Momentum in bestehenden Accounts → AI-Agent-Layer wird Teil des Moats. Empfehlung: <strong>Bullisch – Position nachlegen, Ziel $165–185.</strong><br><br>
+          <strong>Wenn:</strong> Bits AI trotz Marketing kaum zahlende Kunden findet (Adoption stagniert bei kostenlosem Tier) → Moat-Erweiterung durch AI-Agenten scheitert, Newcomer wie Coralogix gewinnen Narrative. Empfehlung: <strong>Stoppt Nachkäufe, wartet weitere Quartale ab.</strong>
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 3: Technischer Trendwechsel &amp; Makro-Stabilisierung (Q2 2026)</h4>
+        <p>Der aktuelle -49%-Drawdown ist zu &gt;50% auf makroökonomische Faktoren (Zinsen, Tariffs, AI-Panic-Sentiment) zurückzuführen – nicht auf operative Schwäche. Ein Sentiment-Shift und technischer Trendwechsel könnten einen schnellen Rerating-Prozess auslösen. Der kritische technische Level: SMA 200 bei ~$131 als Trendwechsel-Indikator.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> DDOG durchbricht SMA 200 (~$131) auf Wochenschlusskursbasis mit erhöhtem Volumen (Zeithorizont Q2 2026) → Technischer Aufwärtstrend bestätigt, Death Cross aufgelöst. Empfehlung: <strong>Aggressiv nachkaufen, Ziel $165–185 in 12–18 Monaten.</strong><br><br>
+          <strong>Wenn:</strong> DDOG bricht $81–85 (52W-Tief 2025) mit erhöhtem Volumen → Neue technische Tiefs, Makro verschlechtert sich stark. Empfehlung: <strong>Stop-Loss aktivieren, Position auf 50% reduzieren. Re-Entry-Prüfung bei $65–70.</strong>
+        </div>
+      </div>
+
+      <div class="source">Quellen: Datadog Q4 2025 Earnings Call (10. Feb. 2026); Analystenkonsensus (Feb. 2026); TradingView technische Levels (Feb. 2026)</div>
+    </div>
+  </div>
+
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung, Anlageempfehlung oder Aufforderung zum Kauf oder Verkauf von Wertpapieren dar. Die enthaltenen Informationen basieren auf öffentlich verfügbaren Quellen und eigener Einschätzung zum Stand 27. Februar 2026. Investitionen in Aktien sind mit erheblichen Risiken verbunden, einschließlich des vollständigen Kapitalverlustes. Bitte führen Sie stets eine eigene Due Diligence durch und konsultieren Sie gegebenenfalls einen lizenzierten Finanzberater.</div>
+
+</div>
+</body>
+</html>
