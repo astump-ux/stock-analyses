@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OKTA – Aktienanalyse Canvas v2.2</title>
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #1d4ed8;
+      --bg: #0f0f12;
+      --bg-card: #1a1a1f;
+      --bg-card2: #22222a;
+      --border: #2e2e38;
+      --text: #e8e8ec;
+      --text-muted: #888898;
+      --text-dim: #555566;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --teal: #14b8a6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+    .header {
+      background: linear-gradient(135deg, #00081a 0%, #001028 40%, #0f0f12 100%);
+      border-bottom: 1px solid var(--primary);
+      padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;
+    }
+    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .header-left h1 span { color: var(--primary); }
+    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    .header-right { text-align: right; }
+    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+    .price-change.up   { background: rgba(34,197,94,0.15);  color: var(--green); }
+    .nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100; }
+    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+    .kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .kpi-value.green  { color: var(--green); }
+    .kpi-value.red    { color: var(--red); }
+    .kpi-value.blue   { color: var(--blue); }
+    .kpi-value.yellow { color: var(--yellow); }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .section-title  { font-size: 16px; font-weight: 700; color: white; }
+    .section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+    .section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+    .section-body   { padding: 20px 24px; }
+    p { margin-bottom: 12px; color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+    h3:first-child { margin-top: 0; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(59,130,246,0.04); }
+    .beat    { color: var(--green);  font-weight: 600; }
+    .miss    { color: var(--red);    font-weight: 600; }
+    .neutral { color: var(--yellow); font-weight: 600; }
+    .badge        { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
+    .badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .badge-blue   { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .badge-orange { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+    .event-item:last-child { border-bottom: none; }
+    .event-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+    .dot-green  { background: var(--green); }
+    .dot-red    { background: var(--red); }
+    .dot-yellow { background: var(--yellow); }
+    .dot-blue   { background: var(--blue); }
+    .event-label { font-weight: 600; color: white; }
+    .event-text  { font-size: 14px; color: var(--text); }
+    .risk-item   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px; }
+    .risk-title  { font-weight: 600; color: white; font-size: 14px; }
+    .score-bar       { display: flex; align-items: center; gap: 10px; }
+    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .score-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #60a5fa); }
+    .score-num       { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media(max-width:700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bear-card h4 { color: var(--red);   margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bull-card p, .bear-card p { font-size: 14px; }
+    .rating-box { background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(59,130,246,0.04)); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+    .rating-item .val  { font-size: 20px; font-weight: 800; color: white; }
+    .rating-item .val.buy  { color: var(--green); }
+    .rating-item .val.hold { color: var(--yellow); }
+    .rating-item .val.sell { color: var(--red); }
+    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media(max-width:700px) { .trigger-grid { grid-template-columns: 1fr; } }
+    .trigger-card      { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .trigger-card h5   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .trigger-card.buy  h5 { color: var(--green); }
+    .trigger-card.sell h5 { color: var(--red); }
+    .trigger-list    { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
+    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    @media(max-width:600px) { .investor-grid { grid-template-columns: 1fr; } }
+    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+    .investor-no  { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-no  h5 { color: var(--red);   font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+    .investor-no  li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+    .geo-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+    .geo-card   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .geo-pct    { font-size: 20px; font-weight: 700; color: white; }
+    .geo-note   { font-size: 12px; color: var(--text-muted); }
+    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+    .outlook-card .when-then strong { color: var(--primary); }
+    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+    .alert-box { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+    .divider   { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .pill      { display: inline-block; background: rgba(59,130,246,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+    .ai-focus-box { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.25); border-left: 4px solid var(--red); border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 16px 0; }
+    .ai-focus-box h4 { color: var(--red); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .own-view-box { background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.25); border-left: 4px solid var(--blue); border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 16px 0; }
+    .own-view-box h4 { color: var(--blue); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>Okta, Inc. <span>OKTA · NASDAQ</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 27. Februar 2026 · Sektor: Cybersecurity / IAM · Spezialfokus: AI-Disruption &amp; Moat</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-blue">Identity &amp; Access Mgmt.</span>
+      <span class="badge badge-blue">Auth0 / CIAM</span>
+      <span class="badge badge-yellow">Growth-at-Scale</span>
+      <span class="badge badge-red">AI-Disruption Watch</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$75–80</div>
+    <div class="price-meta">Schlusskurs 27. Feb. 2026 · NASDAQ</div>
+    <div class="price-change down">▼ –20% YTD 2026</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $71 – $115</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <!-- KPI OVERVIEW -->
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Kurs</div>
+      <div class="kpi-value red">~$77</div>
+      <div class="kpi-sub">USD · 27. Feb. 2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Marktkapitalisierung</div>
+      <div class="kpi-value">~$13–15 Mrd.</div>
+      <div class="kpi-sub">USD</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Fwd P/E (non-GAAP)</div>
+      <div class="kpi-value green">~21–25x</div>
+      <div class="kpi-sub">Günstig vs. Peers</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">EV / FCF</div>
+      <div class="kpi-value green">~12x</div>
+      <div class="kpi-sub">Sehr attraktiv</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">FCF-Marge</div>
+      <div class="kpi-value green">28%</div>
+      <div class="kpi-sub">FY2025 · $730 Mio. FCF</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Rev.-Wachstum</div>
+      <div class="kpi-value yellow">+9–10%</div>
+      <div class="kpi-sub">FY2026 Guidance</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">NRR</div>
+      <div class="kpi-value yellow">106%</div>
+      <div class="kpi-sub">Q3 FY2026 (↓ vs. 120%+)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Nächste Earnings</div>
+      <div class="kpi-value blue">4. März</div>
+      <div class="kpi-sub">Q4 FY2026 · After Close</div>
+    </div>
+  </div>
+
+  <!-- S1: GESCHÄFTSMODELL -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 9 Monate</div>
+    </div>
+    <div class="section-body">
+      <p>Okta, Inc. wurde 2009 von Todd McKinnon und Frederic Kerrest gegründet und ist heute der weltweit führende <strong>unabhängige Anbieter von Identity and Access Management (IAM)</strong>. Das Unternehmen positioniert sich als neutraler Identity Partner für Unternehmen aller Größen – eine bewusste Abgrenzung zur Ecosystem-gebundenen Konkurrenz wie Microsoft. Der Kern des Geschäftsmodells ist eine Cloud-native SaaS-Plattform, die Mitarbeitern, Kunden und zunehmend auch KI-Agenten sicheren Zugang zu digitalen Ressourcen ermöglicht.</p>
+
+      <p>Okta operiert mit zwei strategisch getrennten Plattformen: der <strong>Okta Workforce Identity Cloud</strong> für den Enterprise-Bereich (primär CIOs und CISOs) und der <strong>Auth0 Customer Identity Cloud</strong> für Entwickler (CIAM). Erstere umfasst Kernprodukte wie Single Sign-On (SSO), Adaptive Multi-Factor Authentication (MFA), Universal Directory, Lifecycle Management, Okta Identity Governance (OIG) und Privileged Access Management (PAM). Diese Go-to-Market-Spezialisierung wurde in FY2026 neu implementiert und zeigt messbare Wirkung.</p>
+
+      <p>Das Umsatzmodell ist primär <strong>abonnementbasiert</strong> – über 97% des Gesamtumsatzes entfallen auf wiederkehrende Subscription-Einnahmen ($2,556 Mrd. von $2,610 Mrd. Gesamtumsatz in FY2025). Die Kostenstruktur ist Asset-Light: Okta hält keine physische Infrastruktur, sondern bezieht Cloud-Kapazitäten von AWS, Azure und GCP. Dies ermöglicht hohe Bruttomargen (~77%) und einen FCF von $730 Mio. (28% FCF-Marge) in FY2025. Die Preisgestaltung erfolgt per User / per Monat mit steigenden Preisen für Enterprise-Pakete.</p>
+
+      <p>Mit über <strong>19.000 Unternehmenskunden</strong> und <strong>7.000+ vorgefertigten App-Integrationen</strong> (Okta Integration Network, OIN) hat Okta ein dichtes Ökosystem aufgebaut. Über 5.000 Kunden haben einen Annual Contract Value (ACV) von mehr als $100.000 – eine wichtige Enterprise-Reifekennzahl. Der Reifegrad hat sich verändert: von Hyper-Growth zu <em>Growth-at-Scale</em> mit wachsendem Profitabilitätsfokus.</p>
+
+      <div class="source">Quellen: Okta 10-K FY2025; Q3 FY2026 Earnings Call (Dez. 2025); Okta Investor Relations; Simply Wall St. (Feb. 2026)</div>
+    </div>
+  </div>
+
+  <!-- S2: BURGGRABEN -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Neutralitäts-Moat</h3>
+      <p>Das wichtigste Alleinstellungsmerkmal ist Oktas <strong>Neutralität als unabhängiger Identity Provider</strong>. In Multi-Cloud-Umgebungen – heute Standard in Enterprise-IT – bevorzugen CISOs einen Vendor ohne Präferenz für AWS, Azure oder GCP. Microsoft Entra ID bietet zwar Kostenvorteil für M365-Kunden, schafft aber Vendor-Lock-in. Okta verbindet nahtlos über 7.000 Apps und wird von Gartner regelmäßig als <strong>Leader im Magic Quadrant für Access Management</strong> geführt. Diese Neutralitäts-Positionierung ist in heterogenen IT-Umgebungen kaum reproduzierbar.</p>
+
+      <h3>Switching Costs &amp; Kundenbindung</h3>
+      <p>Ein Wechsel des Identity Providers erfordert die Rekonfiguration aller verbundenen Applikationen, eine tiefe Integration in HR-Systeme und Directory-Services sowie Mitarbeiterschulungen – hohe operative Kosten für den Kunden. Dies spiegelt sich in einer <strong>Net Revenue Retention Rate (NRR) von 106%</strong> (Q3 FY2026) wider. Die NRR ist zwar rückläufig (historisch 120%+), aber immer noch positiv – bestehende Kunden kaufen netto mehr.</p>
+
+      <h3>Technologie &amp; Ökosystem</h3>
+      <p>Okta besitzt tiefes Fachwissen in Identity Security, aufgebaut in über 15 Jahren Cloud-nativer Entwicklung. Die neue Strategie der <strong>„Identity Security Fabric"</strong> – eine Architektur für menschliche, maschinelle und KI-Agenten-Identitäten in einem Framework – ist ein ambitionierter Schritt ins AI-Zeitalter. Mit Auth0 for AI Agents und dem PAM-Modul adressiert Okta eine wachsende Governance-Lücke: 91% der Unternehmen nutzen bereits KI-Agenten, aber nur 10% haben eine Governance-Strategie.</p>
+
+      <h3>Schwachstellen</h3>
+      <p>Die wesentliche Schwachstelle ist der <strong>Microsoft-Komplex</strong>: Entra ID wird für viele M365-Kunden kostenlos mitgeliefert. In homogenen Microsoft-Umgebungen ist Okta schwer zu rechtfertigen. Zudem hat ein schwerwiegender Sicherheitsvorfall aus 2023 (Lapsus$-Gruppe) Oktas Reputation temporär beschädigt. Die Aufarbeitung war professionell, aber das Vertrauen muss weiter bestätigt werden.</p>
+
+      <p>Score-Begründung: Neutralitäts-Moat und hohe Switching Costs sind solid. Rückläufige NRR, Microsoft-Druck und ungeklärtes AI-Disruptions-Risiko begrenzen den Score auf 6/10.</p>
+      <div class="source">Quellen: Gartner Magic Quadrant IAM 2024; Okta Q3 FY2026 Earnings Call; Okta Newsroom Sep. 2025 (Identity Security Fabric); Computer Weekly Nov. 2025</div>
+    </div>
+  </div>
+
+  <!-- S3: QUARTALE -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Beat-Ratio: 4/4</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Oktas Geschäftsjahr endet am 31. Januar. Finviz.com war zum Analysezeitpunkt nicht direkt abrufbar. Alle Kennzahlen stammen von Stockanalysis.com, Yahoo Finance und der Okta IR (Stand: 27. Feb. 2026). Nächste Quartalsergebnisse: <strong>Q4 FY2026 am 4. März 2026</strong> (nach US-Börsenschluss).</div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Kennzahl</th>
+              <th>Q4 FY2025 (Jan '25)</th>
+              <th>Q1 FY2026 (Apr '25)</th>
+              <th>Q2 FY2026 (Jul '25)</th>
+              <th>Q3 FY2026 (Okt '25)</th>
+              <th>Trend</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Revenue (Mio. $)</strong></td><td>682</td><td>688</td><td>728</td><td>742</td><td class="beat">↗ Steigend</td></tr>
+            <tr><td><strong>YoY Wachstum</strong></td><td>+13%</td><td>+12%</td><td>+12.7%</td><td>+11.6%</td><td class="neutral">↘ Leicht sinkend</td></tr>
+            <tr><td><strong>non-GAAP EPS ($)</strong></td><td>0.78</td><td>~0.75</td><td>~0.72</td><td>0.82</td><td class="beat">↗ Beat-Trend</td></tr>
+            <tr><td><strong>GAAP EPS ($)</strong></td><td>0.13</td><td>~0.25</td><td>0.37</td><td>~0.40+</td><td class="beat">↗ Profitabel</td></tr>
+            <tr><td><strong>cRPO Wachstum</strong></td><td>+15%</td><td>+14%</td><td>~+12%</td><td>+13%</td><td>→ Stabil 12–15%</td></tr>
+            <tr><td><strong>non-GAAP Op.Marge</strong></td><td>25%</td><td>25%</td><td>~22%</td><td>24%</td><td class="beat">↗ Expansion</td></tr>
+            <tr><td><strong>Beat / Miss Konsens</strong></td><td><span class="badge badge-green">BEAT +5.4%</span></td><td><span class="badge badge-green">BEAT</span></td><td><span class="badge badge-green">BEAT</span></td><td><span class="badge badge-green">BEAT</span></td><td class="beat">4/4 Beats</td></tr>
+            <tr><td><strong>Kurs am Earnings-Tag</strong></td><td class="beat">+5–8%</td><td class="beat">+positiv</td><td class="beat">+positiv</td><td class="beat">+5.5% folgetag</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Das Management guided konservativ und übertrifft konsistent. CEO Todd McKinnon betonte in jedem Quartal die Stärke des Identity-Markts und Oktas AI-Relevanz. In Q2 FY2026 entfernte CFO Brett Tighe explizit makroökonomische Risikopuffer aus der Guidance – ein positives Signal. Die jüngste Kurskorrektur im Februar 2026 (–9.2% am 20. Feb., –6.4% am 23. Feb.) wurde durch Anthropics Claude Security Tool-Ankündigung ausgelöst, <em>nicht durch operative Fundamentaldaten</em>.</p>
+
+      <div class="source">Quellen: Okta IR News Releases Q4 FY2025 (März 2025), Q1–Q3 FY2026 (Juni–Dez. 2025); Barchart (Feb. 2026); Stockanalysis.com</div>
+    </div>
+  </div>
+
+  <!-- S4: WACHSTUM -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Revenue-Entwicklung: Von Hyper-Growth zu Growth-at-Scale</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Geschäftsjahr</th><th>Umsatz (Mrd. $)</th><th>YoY Wachstum</th><th>non-GAAP Op.Marge</th><th>FCF-Marge</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>FY2023</td><td>$1,858</td><td>~37%</td><td>~5–8%</td><td>~10–12%</td></tr>
+            <tr><td>FY2024</td><td>$2,263</td><td>+22%</td><td>~14%</td><td>~23%</td></tr>
+            <tr><td>FY2025</td><td>$2,610</td><td>+15%</td><td>22%</td><td>28%</td></tr>
+            <tr style="background:rgba(59,130,246,0.06)"><td><strong>FY2026 (Guidance)</strong></td><td><strong>~$2,85–2,86</strong></td><td class="neutral"><strong>+9–10%</strong></td><td class="beat"><strong>~25%</strong></td><td class="beat"><strong>~28%+</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Der Wachstumsrückgang von 37% (FY2023) auf 9–10% (FY2026 Guidance) ist der zentrale Diskussionspunkt. Er erklärt sich aus drei Faktoren: Erstens, organischer Reifungsprozess nach der Hyper-Growth-Phase. Zweitens, Nachfragerückgang nach der COVID-Remote-Work-Welle. Drittens, GTM-Reorganisation in FY2026, die kurzfristig Vertriebsproduktivität kostet. Das positive Gegenstück: die <strong>Non-GAAP Operating Margin stieg von ~8% auf 22%</strong> – ein massiver Effizienzgewinn. Der operative Hebel (Grossmargen ~77% bei steigenden Umsätzen) ist real und strukturell.</p>
+
+      <h3>Geografische Verteilung</h3>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">Nordamerika</div>
+          <div class="geo-pct">~65–70%</div>
+          <div class="geo-note">Stärkster Markt, US Federal als Top-Segment</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">EMEA</div>
+          <div class="geo-pct">~20–25%</div>
+          <div class="geo-note">Unterentwickelter IAM-Markt – Wachstumspotenzial</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">APAC</div>
+          <div class="geo-pct">~5–10%</div>
+          <div class="geo-note">Früh, aber strukturelles Wachstumssegment</div>
+        </div>
+      </div>
+
+      <h3>Neues Wachstumssegment: Non-Human Identity (NHI)</h3>
+      <p>Das potenziell bedeutendste neue Segment ist die <strong>Non-Human Identity (NHI) Governance</strong> – Absicherung von KI-Agenten und Service Accounts. Okta hat mit Auth0 for AI Agents eine frühe Positionierung vorgenommen. Dieser Markt ist heute noch klein, könnte bis 2027–2028 aber ein Material-Revenue-Segment werden. Score-Begründung: Zweistelliges Revenue-Wachstum, aber strukturelle Verlangsamung. Profitabilitätssprung positiv. NHI als Wachstumsoption noch nicht in Zahlen.</p>
+
+      <div class="source">Quellen: Okta 10-K FY2025; Q4 FY2025 &amp; Q1–Q3 FY2026 Earnings Reports; Okta Newsroom Sep. 2025</div>
+    </div>
+  </div>
+
+  <!-- S5: BEWERTUNG -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Da Okta primär über NASDAQ gehandelt wird, aber Finviz.com zum Analysezeitpunkt nicht direkt abrufbar war, stammen alle Kennzahlen von Stockanalysis.com, Yahoo Finance, Chartmill und Alpha Spread (Stand: 19.–27. Feb. 2026).</div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kennzahl</th><th>Aktuell (Feb. 2026)</th><th>5J-Histor. Avg.</th><th>Peers Median</th><th>Einschätzung</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>P/E (TTM, GAAP)</strong></td><td>~70–80x</td><td>~486x (Verlustphase)</td><td>50–80x</td><td class="beat">Deutlich günstiger als Historie</td></tr>
+            <tr><td><strong>P/E (Fwd, non-GAAP)</strong></td><td>~21–25x</td><td>N/A (früher Verlust)</td><td>~60–80x</td><td class="beat">Sehr attraktiv vs. Peers</td></tr>
+            <tr><td><strong>EV / EBITDA</strong></td><td>~53x</td><td>N/A</td><td>60–100x</td><td class="beat">Günstiger als Peers</td></tr>
+            <tr><td><strong>EV / FCF</strong></td><td>~12x</td><td>N/A</td><td>25–50x</td><td class="beat">Sehr attraktiv</td></tr>
+            <tr><td><strong>P/S (TTM)</strong></td><td>~4.7–5x</td><td>~12–15x (Spitze)</td><td>8–15x</td><td class="beat">Historisch günstig</td></tr>
+            <tr><td><strong>PEG-Ratio</strong></td><td>~1.2x</td><td>N/A</td><td>2–4x</td><td class="beat">Fair bis günstig</td></tr>
+            <tr><td><strong>Marktkapitalisierung</strong></td><td>~$13–15 Mrd.</td><td>Spitze >$40 Mrd.</td><td>–</td><td class="beat">Stark komprimiert</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Die Bewertung ist das überzeugendste Argument für Okta. Ein Forward P/E von 21–25x für ein Unternehmen mit 26% FCF-Marge und GAAP-Profitabilität ist günstig – insbesondere verglichen mit CrowdStrike (Fwd P/E 80x+) oder Palo Alto (Fwd P/E 50–60x). Das EV/FCF von ~12x ist für ein schuldenfreies, Asset-Light SaaS-Unternehmen außerordentlich attraktiv. Alpha Spread berechnet den intrinsischen Wert (Base Case) auf <strong>$89/Aktie</strong> – was gegenüber ~$75–77 ein Upside von ca. 16% impliziert, ohne AI-Optionalität. Das einzige Bewertungsrisiko: Wenn Revenue-Wachstum unter 8% fällt, ist P/E 21–25x nicht mehr billig.</p>
+
+      <div class="source">Quellen: Stockanalysis.com (Feb. 2026); Chartmill FA-Rating (Feb. 2026); Alpha Spread OKTA (Feb. 2026); Multiples.vc (19. Feb. 2026); Yahoo Finance Key Statistics</div>
+    </div>
+  </div>
+
+  <!-- S6: CASHFLOW -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kennzahl</th><th>FY2025 (Jan '25)</th><th>FY2024 (Jan '24)</th><th>Trend</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Free Cash Flow (Mio. $)</strong></td><td class="beat">$730</td><td>~$520</td><td class="beat">↗ +40% YoY</td></tr>
+            <tr><td><strong>FCF-Marge</strong></td><td class="beat">28%</td><td>~23%</td><td class="beat">↗ +5 pp</td></tr>
+            <tr><td><strong>Gross Margin</strong></td><td>~76–77%</td><td>~76%</td><td>→ Stabil</td></tr>
+            <tr><td><strong>non-GAAP Op.Marge</strong></td><td class="beat">22%</td><td>14%</td><td class="beat">↗ +8 pp</td></tr>
+            <tr><td><strong>GAAP Net Income</strong></td><td class="beat">$28 Mio.</td><td>–$355 Mio.</td><td class="beat">↗ Wendepunkt!</td></tr>
+            <tr><td><strong>Cash &amp; Investments</strong></td><td class="beat">$2,52 Mrd.</td><td>~$2,3 Mrd.</td><td class="beat">↗ Stark</td></tr>
+            <tr><td><strong>Verschuldung (Net)</strong></td><td class="beat">Praktisch null</td><td>Schuldenfrei</td><td class="beat">→ Exzellent</td></tr>
+            <tr><td><strong>ROE (GAAP)</strong></td><td>~2.96%</td><td>negativ</td><td class="beat">↗ Verbessert</td></tr>
+            <tr><td><strong>Altman Z-Score</strong></td><td class="beat">4.02 (gesund)</td><td>N/A</td><td class="beat">Kein Bankrott-Risiko</td></tr>
+            <tr><td><strong>Aktienrückkauf</strong></td><td class="beat">$1 Mrd. autorisiert (Jan. 2026)</td><td>–</td><td class="beat">~7% der Mkt Cap</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Die FCF-Konversionsrate (FCF / Non-GAAP Net Income) liegt über 100% – die Cashflows übersteigen die ausgewiesenen Non-GAAP-Gewinne. Das ist ein starkes Zeichen für Earnings-Qualität. Das Unternehmen ist praktisch schuldenfrei und sitzt auf über $2,5 Mrd. liquiden Mitteln. Der genehmigte $1-Mrd.-Rückkauf (~7% der Market Cap) ist ein klares Vertrauenssignal des Vorstands. Einziger Schwachpunkt: die hohe Stock-Based Compensation (SBC), die den GAAP-Gewinn von Non-GAAP deutlich trennt. Die Aktienanzahl stieg um 8.46% YoY – die Rückkaufprogramm-Rationale ist daher dringend.</p>
+
+      <div class="source">Quellen: Okta 10-K FY2025; DCFmodeling.com (Nov. 2025); Stockanalysis.com Statistics; Financial Content (Jan. 2026 – Buyback News)</div>
+    </div>
+  </div>
+
+  <!-- S7: PEER-VERGLEICH -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Unternehmen</th><th>Mkt Cap</th><th>Rev.-Wachstum</th><th>Gross Marge</th><th>Fwd P/E</th><th>FCF-Marge</th><th>Stärke</th></tr>
+          </thead>
+          <tbody>
+            <tr style="background:rgba(59,130,246,0.06)">
+              <td><strong>Okta (OKTA)</strong></td><td>~$13–15 Mrd.</td>
+              <td class="neutral">~12% YoY</td><td>~77%</td>
+              <td class="beat">~21–25x</td><td class="beat">~26%</td>
+              <td>Günstigste Bewertung</td>
+            </tr>
+            <tr>
+              <td>CrowdStrike (CRWD)</td><td>~$117 Mrd.</td>
+              <td class="beat">~21% YoY</td><td>~78%</td>
+              <td class="miss">~80x+</td><td class="beat">~30–33%</td>
+              <td>Stärkstes Wachstum</td>
+            </tr>
+            <tr>
+              <td>Palo Alto (PANW)</td><td>~$135 Mrd.</td>
+              <td>~14–15% YoY</td><td>~76%</td>
+              <td class="miss">~50–60x</td><td class="beat">~35%</td>
+              <td>Platformization-Strategie</td>
+            </tr>
+            <tr>
+              <td>Zscaler (ZS)</td><td>~$25–30 Mrd.</td>
+              <td class="beat">~23% YoY</td><td>~77%</td>
+              <td class="miss">~60–70x</td><td>~25%</td>
+              <td>Zero-Trust-Leader</td>
+            </tr>
+            <tr>
+              <td>Microsoft Entra (MSFT)</td><td>~$3 Bio. (gesamt)</td>
+              <td>Bundled / N/A</td><td>N/A</td><td>N/A</td><td>N/A</td>
+              <td>Größte Distributionsmacht</td>
+            </tr>
+            <tr>
+              <td>SailPoint (SAIL)</td><td>~$12 Mrd.</td>
+              <td class="beat">~20% YoY</td><td>~75%</td>
+              <td class="miss">~60x</td><td>~15%</td>
+              <td>IGA-Spezialist (direkter Konkurrent)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>Qualitative Einordnung:</strong> CrowdStrike ist fundamental stärker positioniert mit ~21% Wachstum und massivem ARR-Wachstum ($3,8 Mrd., +32% YoY) – aber 5–8x teurer bewertet. Palo Alto ist der direkteste Plattform-Wettbewerber: Die Cortex-Plattform bietet zunehmend IAM-ähnliche Funktionen; CISOs könnten Identitätslösungen im Bundle kaufen. Oktas Vorteil: Die IAM-Tiefe und Neutralität wird von PANW noch nicht erreicht. Microsoft Entra ID ist die gefährlichste strukturelle Bedrohung – kostenlos für M365-Kunden. SailPoint ist der direkteste Konkurrent im Identity Governance (IGA)-Segment mit ~20% YoY-Wachstum – ein reales Marktanteilsrisiko in dieser Nische.</p>
+
+      <p>Fazit: Okta ist günstiger bewertet als alle Peers, wächst aber am langsamsten. Der Neutralitäts-Moat ist echter Vorteil gegenüber PANW und MSFT. Die niedrigste Marktkapitalisierung im Vergleich (ex. SailPoint) spiegelt die Bewertungskorrektur und Wachstumsskepsis wider.</p>
+
+      <div class="source">Quellen: BankofAmerica Research (Dez. 2025); AskTraders Peer Comparison (Mai 2025); Tickeron OKTA vs. PANW (Feb. 2026); Koalagains ZS Analysis (Okt. 2025)</div>
+    </div>
+  </div>
+
+  <!-- S8: NEWS -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Dez. 2025 – Q3 FY2026 Earnings Beat <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Revenue $742 Mio. (+11.6% YoY), non-GAAP EPS $0.82 (beat $0.75), cRPO +13%, erstmals >5.000 Kunden mit $100k+ ACV. Kurs +5.5% am Folgetag. Quelle: Okta IR, Dez. 2025.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Jan. 2026 – $1 Mrd. Aktienrückkauf autorisiert <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Board genehmigt erstes großes Rückkaufprogramm (~7% der Market Cap). Starkes Signal des Managements über wahrgenommene Unterbewertung. Quelle: Financial Content, Jan. 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Sep. 2025 – Identity Security Fabric &amp; Auth0 for AI Agents <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Launch neuer Agentic-AI-Funktionalität auf Oktane 2025 in Las Vegas. Positionierung als Governance-Layer für KI-Agenten. Quelle: Okta Newsroom, Sep. 2025.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Jan. 2025 – AWS Strategic Collaboration Agreement <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">$1 Mrd. Aggregat-Umsatz über AWS Marketplace über 4 Jahre vereinbart. 25+ Produkt-Integrationen. Quelle: Okta IR, Jan. 2025.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Feb. 2026 – AI-Panik-Sell-off <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">–9.2% am 20. Feb. und –6.4% am 23. Feb. nach Anthropics Claude Security Tool-Ankündigung. Kurs –20% YTD 2026. Bank of America: Überreaktion des Markts. Quelle: Barchart, Feb. 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Laufend – NRR-Rückgang <span class="badge badge-yellow">Neutral / Watch</span></div>
+          <div class="event-text">Dollar-Based NRR auf 106% gesunken (historisch 120%+). Immer noch positiv (Net Expansion), aber der Trend ist kritisch zu beobachten. Quelle: Okta Q3 FY2026 Earnings.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Sep. 2025 – Cybersecurity-Budgets wachsen massiv <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Morgan Stanley CISO-Umfrage: Cybersecurity-Ausgaben sollen 50% schneller wachsen als Gesamt-IT-Ausgaben. IAM ist eine der Top-Kategorien. Quelle: Morgan Stanley, Sep. 2025.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">2025–2026 – Agentic AI treibt Identity-Nachfrage <span class="badge badge-green">Positiv (strukturell)</span></div>
+          <div class="event-text">91% der Unternehmen setzen bereits KI-Agenten ein, aber nur 10% haben eine Governance-Strategie. Strukturelles Marktproblem, für das Okta eine Lösung anbietet. Quelle: Okta / diverse Marktstudien.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Laufend – Microsoft Entra ID-Expansion <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Microsoft baut Entra kontinuierlich aus mit Entra Permissions Management und Identity Governance. Preissensitive M365-Kunden könnten wechseln. Quelle: Computer Weekly, Nov. 2025.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">2025–2026 – Regulierung verschärft sich <span class="badge badge-green">Positiv für IAM</span></div>
+          <div class="event-text">SEC-Offenlegungspflichten für Breaches (4 Werktage) und EU AI Act treiben IAM-Compliance-Budgets. Quelle: SEC Rule (2023 wirksam); EU AI Act (Mitte 2025).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Feb. 2026 – US-Fed-Zinspolitik <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Fed bei ~4.25–4.5%. Kein direktes Risiko für Oktas Geschäftsmodell, aber ein Faktor für Growth-Multiple-Bewertung. Zinssenkungserwartungen stützen Bewertungen. Quelle: Fed, Feb. 2026.</div>
+        </div>
+      </div>
+
+      <div class="source">Quellen: Barchart (Feb. 2026); Financial Content (Jan. 2026); Okta Newsroom (Sep. 2025); Computer Weekly (Nov. 2025); Morgan Stanley CISO Survey (Sep. 2025)</div>
+    </div>
+  </div>
+
+  <!-- S9: TECHNISCH -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 4/10</div>
+    </div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); margin-bottom:16px;">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">~$77</div><div class="kpi-sub">27. Feb. 2026</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value red">Darunter</div><div class="kpi-sub">Bearish</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value red">~$90–95</div><div class="kpi-sub">Kurs weit drunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value red">~$100–105</div><div class="kpi-sub">Kurs weit drunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI</div><div class="kpi-value yellow">~30–40</div><div class="kpi-sub">Überverkauft</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W High</div><div class="kpi-value">$115</div><div class="kpi-sub">–33% vom High</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W Low</div><div class="kpi-value red">~$71</div><div class="kpi-sub">Kurs nahe Tief!</div></div>
+      </div>
+
+      <p>Die technische Situation für OKTA ist zum Analysezeitpunkt (27. Feb. 2026) <strong>klar angeschlagen</strong>. Die Aktie befindet sich in einem Abwärtstrend und liegt unterhalb aller relevanten Moving Averages. Der Sell-off durch den Anthropic-Claude-Security-Tool-News ist technisch schwer zu reparieren: –9.2% (20. Feb.) und –6.4% (23. Feb.) in kurzer Folge hinterlassen technische Narben. Die Aktie nähert sich dem 52-Wochen-Tief (~$71) – ein kritischer Support.</p>
+
+      <p><strong>Support-Level:</strong> $70–75 (52W-Tief-Bereich). Unterschreitet die Aktie $70 nachhaltig, könnten Stop-Loss-Verkäufe weiteren Druck erzeugen. <strong>Resistance:</strong> SMA 50 bei ~$90–95 ist das erste technische Ziel einer Erholung; SMA 200 bei ~$100–105 ist das mittelfristige Erholungsziel. <strong>Beta von 0.77</strong> signalisiert geringere Volatilität als der Gesamtmarkt. Short Interest bei ~4.3% (7.6 Mio. Aktien) ist moderat – kein klassisches Short-Squeeze-Setup, aber auch kein übermäßiges Leerverkäufer-Druck. Das RSI nahe überverkauft-Territory deutet auf eine mögliche technische Bouncing-Bewegung hin – für Langfrist-Investoren eine potenzielle Einstiegsgelegenheit.</p>
+
+      <div class="source">Quellen: Stockanalysis.com Statistics (Feb. 2026); Barchart News (Feb. 2026); CoinCodex Technical Analysis (Dez. 2025); Chartmill (Feb. 2026)</div>
+    </div>
+  </div>
+
+  <!-- S10: RISIKEN -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Strukturelle Risiken</h3>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Microsoft-Wettbewerb (Entra ID)</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-yellow">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Microsoft Entra ID ist für M365-Kunden kostenlos oder sehr günstig. Microsoft investiert massiv in Entra-Erweiterungen. Wenn Okta 10% seiner Enterprise-Kunden verliert → ~$130 Mio. Umsatzverlust (~5%). Wahrscheinlichkeit: mittel (vor allem bei homogenen Microsoft-Stacks).</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Wachstumsverlangsamung unter 8%</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Revenue-Wachstum von 37% (FY2023) auf 9–10% (FY2026) ist dramatisch. Bei weiterer Verlangsamung unter 7–8% wird aktuelle Bewertung (Fwd P/E 21–25x) problematisch. Wahrscheinlichkeit: 20–30% – GTM-Reorganisation und AI-Katalysatoren wirken gegenläufig.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ NRR-Erosion unter 100%</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-red">Auswirkung: Sehr hoch</span></div>
+        </div>
+        <div class="event-text">NRR von 106% (historisch 120%+) ist rückläufig. Bei Net Churn (&lt;100%) wird die Investment-These fundamental beschädigt. Wahrscheinlichkeit: niedrig aktuell, aber zu beobachten.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Erneuter Sicherheitsvorfall</div>
+          <div><span class="badge badge-yellow">Niedrig</span> <span class="badge badge-red">Auswirkung: Existenziell für Vertrauen</span></div>
+        </div>
+        <div class="event-text">Nach dem Breach von 2023 (Lapsus$) ist Okta technisch verbessert. Ein erneuter schwerwiegender Vorfall würde das Vertrauen in ein Unternehmen, das Sicherheit als Kernprodukt verkauft, nachhaltig erschüttern. Wahrscheinlichkeit: niedrig, aber Auswirkung: sehr hoch.</div>
+      </div>
+
+      <h3>AI-Disruptions-Risiko &amp; Chance (Spezialfokus)</h3>
+      <div class="ai-focus-box">
+        <h4>🤖 AI-Disruptions-Analyse (User-Spezialfokus)</h4>
+        <p><strong>Bärisches AI-Szenario:</strong> KI könnte Identity-Management-Workflows automatisieren und zu einem Commodity-Produkt machen. Wenn Microsoft oder CrowdStrike AI-native IAM-Lösungen bauen, könnten Kunden zu Konsolidierungslösungen wechseln. Bank of America Analysten (Feb. 2026) betonen jedoch: KI fehlt die End-to-End-Visibility, Compliance-Tiefe und Reliability für umfassende IAM-Use-Cases.</p>
+        <p><strong>Bullisches AI-Szenario:</strong> Agentic AI ist für Okta kein Risiko, sondern ein Treiber. Jeder KI-Agent braucht eine digitale Identität, Zugriffsrechte und Audit-Trails. Auth0 for AI Agents und Non-Human Identity positionieren Okta als unverzichtbaren Layer in AI-Enterprise-Deployments. 91% der Unternehmen nutzen KI-Agenten, nur 10% haben Governance – das ist der adressierbare Markt von morgen.</p>
+        <p><strong>Eigene Einschätzung:</strong> Das AI-Disruptions-Risiko für Oktas Kerngeschäft ist GERING bis MITTEL auf 3–5-Jahres-Horizont. Identität erfordert Compliance, Audit-Trails, regulatorische Anforderungen und Tausende App-Integrationen. Die Marktreaktion im Feb. 2026 war <em>übertrieben</em>.</p>
+      </div>
+
+      <h3>Chancen</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div><div class="event-label">Agentic AI / Non-Human Identity</div>
+        <div class="event-text">Potenziell $2–5 Mrd. neuer TAM bis 2028. Okta mit Auth0 for AI Agents als erster Identity Layer für autonome KI-Systeme früh positioniert.</div></div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div><div class="event-label">Privileged Access Management (PAM)</div>
+        <div class="event-text">$3+ Mrd. Markt mit doppelstelligem Wachstum. Oktas PAM-Angebot mit dem Enterprise-Vertrieb gut zu skalieren.</div></div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div><div class="event-label">Identity Governance (OIG)</div>
+        <div class="event-text">Direkte SailPoint-Alternative innerhalb der Okta-Plattform. Cross-Selling zu 19.000+ bestehenden Kunden möglich.</div></div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div><div class="event-label">US Federal / Public Sector</div>
+        <div class="event-text">Top-10-Deals enthalten regelmäßig US-Behörden inkl. DoD. Friend-Shoring und US-Regulierung treiben IAM-Budgets überproportional.</div></div>
+      </div>
+
+      <h3>Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> NRR unter 100% (Net Churn); Revenue-Wachstum unter 7%; weiterer erheblicher Sicherheitsvorfall.</p>
+      <p><strong>Dealbreaker (derzeit nicht vorhanden):</strong> Keine existenzbedrohenden Risiken identifiziert. Kein unkontrollierbarer Schuldenberg, keine Regulierungsklage mit Existenz-Bedrohung.</p>
+
+      <div class="source">Quellen: Bank of America Research (Feb. 2026); Barchart (Feb. 2026); Financial Content (Jan. 2026); Computer Weekly (Nov. 2025); Okta Newsroom (Sep. 2025)</div>
+    </div>
+  </div>
+
+  <!-- S11: SCORING -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring &amp; User-Spezifische Analyse</div>
+      <div class="section-note">Stand: 27. Feb. 2026</div>
+    </div>
+    <div class="section-body">
+      <h3>Gesamtscoring Canvas v2.2</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kategorie</th><th style="width:160px">Score</th><th>Begründung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Geschäftsmodell</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Asset-light SaaS, klare Revenue-Streams, starke Bindung über 7.000+ Integrationen. Wachstumsverlangsamung drückt Score leicht.</td>
+            </tr>
+            <tr>
+              <td>Burggraben</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Neutralitäts-Moat und Switching Costs solid. AI-Disruptions-Risiko und Microsoft-Druck begrenzen Score.</td>
+            </tr>
+            <tr>
+              <td>Operative Entw. (4Q)</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>4/4 Quartale Beat. GAAP-Profitabilität erreicht. Leichte Revenue-Verlangsamung; cRPO stabil 12–15%.</td>
+            </tr>
+            <tr>
+              <td>Wachstum</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Vergangenheit stark (15% FY2025), Prognose FY2026 nur 9–10%. NHI als Option, aber noch nicht sichtbar.</td>
+            </tr>
+            <tr>
+              <td>Bewertung</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Fwd P/E ~21–25x und EV/FCF ~12x deutlich günstiger als alle Peers. Sell-off-Einstiegschance.</td>
+            </tr>
+            <tr>
+              <td>Cashflow &amp; Margen</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>FCF $730 Mio. (28%), schuldenfrei, $2,5 Mrd. Cash, GAAP-Profitabilität. Hohe SBC drückt Score leicht.</td>
+            </tr>
+            <tr>
+              <td>Risiken (invertiert)</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%; background:linear-gradient(90deg,var(--yellow),#fb923c)"></div></div><span class="score-num" style="color:var(--yellow)">5</span></div></td>
+              <td>Microsoft-Wettbewerb hoch, NRR rückläufig, AI-Verunsicherung. Keine Dealbreaker. Mittleres Risikoprofil.</td>
+            </tr>
+            <tr>
+              <td>Technische Analyse</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%; background:linear-gradient(90deg,var(--red),#f97316)"></div></div><span class="score-num" style="color:var(--red)">4</span></div></td>
+              <td>Kurs –20% YTD, unter allen MAs, nahe 52W-Low. RSI überverkauft als einziger positiver Faktor.</td>
+            </tr>
+            <tr style="background:rgba(59,130,246,0.08)">
+              <td><strong>Ø Gesamtscore</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track">
+                    <div class="score-bar-fill" style="width:61%; background:linear-gradient(90deg,var(--primary),#fbbf24);"></div>
+                  </div>
+                  <span class="score-num" style="color:var(--primary)">6.1</span>
+                </div>
+              </td>
+              <td>Solide Fundamentalgeschichte mit erhöhtem Risikoprofil. Attraktive Bewertung nach Sell-off. Qualität vorhanden, Gegenwind real.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>User-Spezifische Analyse: AI-Disruption &amp; Moat</h3>
+      <p>Die Kernfrage des Users lautet: Wie real ist das AI-Disruptions-Risiko, und wie stark ist der Moat? Die operative Analyse zeigt: Die Bewertungskorrektur (–20% YTD) ist primär sentiment-getrieben, nicht fundamental begründet. Vier konsekutive Earnings-Beats und die Profitabilitätswende widersprechen der AI-Apokalypse-These.</p>
+
+      <div class="own-view-box">
+        <h4>🔬 Konsistenz-Check &amp; Score-Adjustierung</h4>
+        <p>Das OIN (7.000+ Integrationen) ist ein echter struktureller Burggraben – nicht schnell replizierbar. Die hohen Switching Costs erklären NRR von 106% trotz Verlangsamung. KI verstärkt den Okta-Moat eher als ihn zu untergraben: Mehr KI-Agenten = mehr Identitäten = mehr Okta-Bedarf. Nach tiefgehender Analyse: Burggraben-Score bleibt bei <strong>6/10</strong> (kein Upgrade, da Microsoft-Risiko real). Bewertungs-Score bei <strong>7/10</strong> (Sell-off schafft attraktiven Einstieg). Keine Anpassung der Kernthese notwendig.</p>
+      </div>
+
+      <div class="source">Quellen: Bank of America Analyst Note (Feb. 2026); Barchart AI Analysis (Feb. 2026); Okta Newsroom / Oktane 2025; Computer Weekly CEO Interview (Nov. 2025)</div>
+    </div>
+  </div>
+
+  <!-- S12: FAZIT -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-note">Gesamtsynthese</div>
+    </div>
+    <div class="section-body">
+
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 – Strukturelle Profitabilitätswende:</strong> FCF stieg auf $730 Mio. (28% FCF-Marge), GAAP-Profitabilität erstmals erreicht ($28 Mio. Net Income FY2025), Non-GAAP Op.Marge +8 pp auf 22% in einem Jahr. Dieser Hebel ist strukturell, nicht zyklisch. Operativer Cashflow von $750 Mio. (29% Marge) übersteigt Non-GAAP-Gewinn – das Zeichen echter Earnings-Qualität.</p>
+          <p><strong>Säule 2 – Bewertung nach Sell-off außergewöhnlich attraktiv:</strong> Forward P/E von 21–25x und EV/FCF von ~12x für ein schuldenfreies, GAAP-profitables SaaS-Unternehmen mit 26% FCF-Marge. Das sind 5–8x günstigere Multiples als bei direkten Peers. $1 Mrd. Rückkaufprogramm (~7% der Mkt Cap) signalisiert Überzeugung des Managements.</p>
+          <p><strong>Säule 3 – AI ist Chance, keine Bedrohung:</strong> Jeder KI-Agent braucht eine digitale Identität und Governance. 91% Nutzung, nur 10% Governance – das ist Oktas adressierbarer Markt. Auth0 for AI Agents und NHI-Strategie sind frühe, strukturell richtige Positionierungen. Bank of America: KI kann IAM-Plattformen nicht ersetzen.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 – Dramatische Wachstumsverlangsamung:</strong> Von 37% (FY2023) auf 9–10% (FY2026 Guidance). NRR sinkend von 120%+ auf 106%. Falls NRR unter 100% fällt → Net Churn → Investmentthese fundamental beschädigt. Falls Wachstum unter 7–8% fällt → Aktuelle Bewertung nicht mehr gerechtfertigt.</p>
+          <p><strong>Risiko 2 – Microsoft-Strukturbedrohung:</strong> Entra ID kostenlos für M365-Kunden. Microsoft investiert aggressiv in genau die Premium-IAM-Segmente, in denen Okta wächst. Wenn Okta 10% Enterprise-Kunden verliert → ~$130 Mio. Umsatz weniger, signifikante Margenauswirkungen. SailPoint wächst schneller (~20%) im IGA-Nischensegment.</p>
+          <p><strong>Risiko 3 – Technische Schwäche und Timing:</strong> Kurs –20% YTD, unter allen MAs, nahe 52W-Low. Wenn Q4 FY2026 enttäuscht oder Guidance für FY2027 schwach ausfällt, könnte Kurs auf $65–70 fallen (-10–15% weiteres Downside). Momentum-Signal klar negativ.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <div class="own-view-box">
+        <h4>⚖️ Abwägung &amp; persönliches Urteil</h4>
+        <p>Das bullische Narrativ ist überzeugender, aber der Abstand ist kleiner als die attraktive Bewertung suggeriert. Die Profitabilitätswende ist strukturell (nicht zyklisch), die Bewertung nach dem Sell-off ist attraktiv (Fwd P/E 21–25x, EV/FCF 12x) und das AI-Disruptions-Narrativ ist fundamental falsch – KI erhöht den IAM-Bedarf, ersetzt ihn nicht. Ich könnte falsch liegen, falls: (a) Microsoft Entra aggressiver in der Pricing-Strategie wird und Kunden massenhaft wechseln, (b) das Revenue-Wachstum strukturell unter 7% fällt, oder (c) ein weiterer schwerwiegender Sicherheitsvorfall das Vertrauen erschüttert.</p>
+        <p>Risk/Reward: <strong>–15–20% Downside</strong> (technische Unterstützung $65–70, falls Q4 enttäuscht) vs. <strong>+70–120% Upside</strong> (Zielkurs $130–170 in 3–5 Jahren). Geeignet für Quality Growth Investoren mit 2–5 Jahres-Horizont und Toleranz für Volatilität.</p>
+      </div>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Einschätzung</th><th>Katalysatoren</th><th>Risiken</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kurzfristig (0–6M)</strong></td><td><span class="badge badge-yellow">Neutral / Vorsichtig</span></td><td>Q4 FY2026 Earnings (4. März), möglicher Beat</td><td>Schwache Guidance FY2027; weiterer Sell-off</td></tr>
+            <tr><td><strong>Mittelfristig (6–24M)</strong></td><td><span class="badge badge-green">Positiv</span></td><td>AI-Segment sichtbar im Revenue, GTM-Wirkung, NRR-Stabilisierung</td><td>Microsoft-Expansion, NRR &lt;100%</td></tr>
+            <tr><td><strong>Langfristig (2–5 Jahre)</strong></td><td><span class="badge badge-green">Bullisch</span></td><td>NHI/Agentic AI als Material-Revenue-Segment, Marktführer IAM</td><td>Strukturelle Disruption (aktuell unwahrscheinlich)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>Okta ist ein fundamental gesundes, profitables SaaS-Unternehmen, das nach einer Wachstumsverlangsamung und einem AI-Panik-Sell-off zu einem für den Sektor attraktiven Preis gehandelt wird. Die AI-Disruptions-Angst ist übertrieben – Identität ist kein Legacy-Segment, sondern die Grundlage aller digitalen Interaktionen, die im AI-Zeitalter komplexer, nicht einfacher werden. Der Moat ist real (Neutralität, 7.000+ Integrationen, hohe Switching Costs), auch wenn Microsoft herausfordert. Das Unternehmen hat Profitabilität unter Beweis gestellt und kauft eigene Aktien zurück.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$100–115</div></div>
+        <div class="rating-item"><label>Zielkurs (3–5 Jahre)</label><div class="val">$130–170</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–5 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red)">–15–20%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green)">+70–120%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:4–6</div></div>
+      </div>
+
+      <h3>Was falsifiziert die These?</h3>
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Reduzieren / Verkaufen</h5>
+          <ul class="trigger-list">
+            <li>Q4 FY2026 Miss UND FY2027 Guidance &lt;8% Wachstum → Position 50% reduzieren</li>
+            <li>NRR fällt unter 100% (Net Churn) → Fundamental-These beschädigt → Verkaufen</li>
+            <li>Weiterer schwerwiegender Sicherheitsvorfall → Sofort überprüfen, wahrscheinlich Verkaufen</li>
+            <li>Revenue-Wachstum strukturell unter 7% für 2+ Quartale</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Q4 FY2026 Beat + FY2027 Guidance >12% Wachstum → Vollposition aufbauen</li>
+            <li>NHI/AI-Revenue erstmals als Material-Segment erwähnt (&gt;$50 Mio.) → Nachkaufen</li>
+            <li>NRR stabilisiert oder steigt auf &gt;108–110% → Expansion bestätigt</li>
+            <li>Kurs unter $70 bei unveränderter Fundamentallage → Nachkaufen</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Welcher Anlegertyp passt?</h3>
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Quality Growth Investoren</li>
+            <li>Tech-affine Langfrist-Investoren</li>
+            <li>Contrarian (nach Sell-off)</li>
+            <li>Horizont 2–5 Jahre</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Income Investoren (keine Dividende)</li>
+            <li>Kurzfristige Trader (negatives Momentum)</li>
+            <li>Konservative Investoren</li>
+            <li>Value-Investoren (GAAP P/E &gt;70x)</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / Tranchiert</span></td><td>Q4 FY2026 (4. März) abwarten. Bei Beat + guter Guidance: 1/3 Position. Ziel: Wachstumsstabilisierung bestätigen.</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-blue">Tranchiert einsteigen</span></td><td>1/3 jetzt bei ~$77, 1/3 nach Q4-Earnings, 1/3 nach NRR-Stabilisierung.</td></tr>
+            <tr><td><strong>Aggressiv / Growth</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Post-AI-Panik-Sell-off attraktiv. EV/FCF 12x bei 26% FCF-Marge. Risk/Reward 1:4–6 akzeptabel.</td></tr>
+            <tr><td><strong>Langfristig (3–5 Jahre)</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>Identität ist Pflicht-Infrastruktur im AI-Zeitalter. Neutraler IAM-Standard mit 19.000+ Kunden.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Gesamtsynthese Sektionen 1–11 · Analysedatum: 27. Februar 2026</div>
+    </div>
+  </div>
+
+  <!-- S13: OUTLOOK -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Wenn/Dann-Analyse</div>
+      <div class="section-note">3 entscheidende Events</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q4 FY2026 Earnings – 4. März 2026 (unmittelbar bevorstehend!)</h4>
+        <p>Das mit Abstand wichtigste kurzfristige Event. Analysten erwarten Revenue ~$678–695 Mio. (Guidance: $678–680 Mio.), non-GAAP EPS ~$0.76–0.77. Die kritische Variable ist die <strong>FY2027-Revenue-Guidance</strong> – hier entscheidet sich, ob die Wachstumsverlangsamung transitional oder strukturell ist.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Q4 Revenue Beat (&gt;$685 Mio.) UND FY2027-Guidance &gt;12% Wachstum → Sofort Vollposition aufbauen. GTM-Reorganisation greift, AI-Rückenwind messbar, Wachstum re-akzeleriert. Kursziel 3–6 Monate: $100–115. AI-Disruptions-These weitgehend widerlegt.<br><br>
+          <strong>Wenn:</strong> Q4 Beat + FY2027-Guidance 9–11% → Kurs +5–10% kurzfristig, danach range-bound $80–95. Keine Erhöhung, kein Abbau der Position – weitere Datenpunkte abwarten.<br><br>
+          <strong>Wenn:</strong> Q4 Miss ODER FY2027-Guidance &lt;8% → Sofort Positions-Reduktion um 50%. Verlangsamung strukturell, aktuelle Bewertung nicht mehr gerechtfertigt. Neues Kursziel unter $65.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 2: Sichtbarkeit AI/NHI Revenue – Q1–Q2 FY2027 (Mai–Sep. 2026)</h4>
+        <p>Okta bewirbt Agentic AI und Non-Human Identity seit Mitte 2025 aktiv. Da AI-Agent-Funktionalitäten bereits ausgerollt werden, sollten bis Q1–Q2 FY2027 erste messbare Beiträge erkennbar sein. Dies ist der entscheidende Test, ob das AI-Narrativ Substanz hat oder Marketing bleibt.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> AI-bezogene Umsätze oder NHI-Expansion erstmals als Material-Revenue-Stream erwähnt werden (&gt;$20–30 Mio. Segment oder &gt;20% YoY Auth0 mit AI-Attribution) → Bullisches Signal für langfristigen Wachstumstreiber. Re-Rating Richtung $120–140 wahrscheinlich. Vollposition aufstocken.<br><br>
+          <strong>Wenn:</strong> Nach 4 Quartalen AI-Positionierung kein materieller Beitrag aus NHI/Agentic AI → AI-Narrativ ist Marketing, kein Revenue. Bewertungs-Risiko steigt. Positions-Reduktion evaluieren, falls gleichzeitig Gesamtwachstum unter 8%.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 3: NRR-Stabilisierung oder weiterer Rückgang – laufend (Q4 FY2026, Q1 FY2027)</h4>
+        <p>Die Net Revenue Retention Rate (NRR) von 106% (historisch 120%+) ist ein kritischer Gesundheitsindikator für das Subscription-Geschäft. Die Richtung entscheidet, ob Cross-Selling und GTM-Reorganisation greifen oder ob strukturelle Kundenerosion stattfindet.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> NRR in Q4 FY2026 oder Q1 FY2027 bei 106–108% stabilisiert oder auf 110%+ steigt → GTM-Spezialisierung funktioniert, Expansion-Revenue beschleunigt. Positives Signal für den Investmentcase. Kein Handlungsbedarf, aber Bestätigung für Langfrist-Halten. Mittelfristiges Kursziel $100–115 intakt.<br><br>
+          <strong>Wenn:</strong> NRR weiter sinkt auf &lt;103% oder unter 100% (Net Churn) → Fundamental-These gefährdet. Kunden expandieren nicht mehr, Abwanderung übersteigt Expansion. Position sofort um 75% reduzieren und neu bewerten. Bei Net Churn: sofortiger vollständiger Exit. Zielkurs-Revision auf &lt;$60.
+        </div>
+      </div>
+
+      <div class="source">Quellen: Okta Q3 FY2026 Earnings (Dez. 2025); Barchart AI Analysis (Feb. 2026); Mizuho, Truist, KeyBanc Analyst Ratings (Feb. 2026); Okta IR | Nächstes Update nach Q4 FY2026 Earnings, 4. März 2026</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung dar. Alle Angaben ohne Gewähr. Investitionen in Wertpapiere sind mit Risiken verbunden, die bis zum Totalverlust führen können. Bitte konsultieren Sie vor Anlageentscheidungen einen qualifizierten Finanzberater. Analysedatum: 27. Februar 2026 · Aktienanalyse Canvas v2.2 · Okta, Inc. (OKTA · NASDAQ)
+  </div>
+
+</div>
+</body>
+</html>
