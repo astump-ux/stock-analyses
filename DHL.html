@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DHL – Aktienanalyse Canvas v2.2</title>
+  <style>
+    :root {
+      --primary: #14b8a6;
+      --primary-dark: #0d9488;
+      --bg: #0f0f12;
+      --bg-card: #1a1a1f;
+      --bg-card2: #22222a;
+      --border: #2e2e38;
+      --text: #e8e8ec;
+      --text-muted: #888898;
+      --text-dim: #555566;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --teal: #14b8a6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+    .header {
+      background: linear-gradient(135deg, #001a18 0%, #002820 40%, #0f0f12 100%);
+      border-bottom: 1px solid var(--primary);
+      padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;
+    }
+    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .header-left h1 span { color: var(--primary); }
+    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    .header-right { text-align: right; }
+    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+    .price-change.up { background: rgba(34,197,94,0.15); color: var(--green); }
+    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+    .nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100; }
+    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+    .kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .kpi-value.green { color: var(--green); }
+    .kpi-value.red { color: var(--red); }
+    .kpi-value.orange { color: var(--primary); }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .section-title { font-size: 16px; font-weight: 700; color: white; }
+    .section-score { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+    .section-note { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+    .section-body { padding: 20px 24px; }
+    p { margin-bottom: 12px; color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+    h3:first-child { margin-top: 0; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(20,184,166,0.04); }
+    .beat { color: var(--green); font-weight: 600; }
+    .miss { color: var(--red); font-weight: 600; }
+    .neutral { color: var(--yellow); font-weight: 600; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+    .badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .badge-orange { background: rgba(20,184,166,0.15); color: var(--primary); }
+    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+    .event-item:last-child { border-bottom: none; }
+    .event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+    .dot-green { background: var(--green); }
+    .dot-red { background: var(--red); }
+    .dot-yellow { background: var(--yellow); }
+    .event-label { font-weight: 600; color: white; }
+    .event-text { font-size: 14px; color: var(--text); }
+    .risk-item { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .risk-title { font-weight: 600; color: white; font-size: 14px; }
+    .score-bar { display: flex; align-items: center; gap: 10px; }
+    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #38f9d7); }
+    .score-num { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .rating-box { background: linear-gradient(135deg, rgba(20,184,166,0.12), rgba(20,184,166,0.04)); border: 1px solid rgba(20,184,166,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+    .rating-item .val { font-size: 20px; font-weight: 800; color: white; }
+    .rating-item .val.buy { color: var(--green); }
+    .rating-item .val.hold { color: var(--yellow); }
+    .rating-item .val.sell { color: var(--red); }
+    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+    .trigger-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .trigger-card h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .trigger-card.buy h5 { color: var(--green); }
+    .trigger-card.sell h5 { color: var(--red); }
+    .trigger-list { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
+    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    @media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+    .investor-no { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-no h5 { color: var(--red); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+    .investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+    .geo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+    .geo-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .geo-pct { font-size: 20px; font-weight: 700; color: white; }
+    .geo-note { font-size: 12px; color: var(--text-muted); }
+    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+    .outlook-card .when-then strong { color: var(--primary); }
+    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+    .source a { color: var(--text-dim); }
+    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+    .alert-box { background: rgba(20,184,166,0.08); border: 1px solid rgba(20,184,166,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .pill { display: inline-block; background: rgba(20,184,166,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Deutsche Post AG <span>DHL.DE · XETRA</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 03. März 2026 · XETRA Frankfurt · Sektor: Industrie / Logistik</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">Express</span>
+      <span class="badge badge-blue">Global Forwarding</span>
+      <span class="badge badge-green">Supply Chain</span>
+      <span class="badge badge-yellow">Post &amp; Parcel Germany</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">€ 49,18</div>
+    <div class="price-meta">Schlusskurs 28. Feb. 2026 · XETRA</div>
+    <div class="price-change up">▲ +51,8% ggü. 52W-Tief</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: €32,38 – €51,48</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Kurs</div>
+      <div class="kpi-value orange">€49,18</div>
+      <div class="kpi-sub">EUR · 28. Feb. 2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Marktkapitalisierung</div>
+      <div class="kpi-value">€55,1 Mrd.</div>
+      <div class="kpi-sub">~1,12 Mrd. Aktien</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">P/E (TTM)</div>
+      <div class="kpi-value">14,8x</div>
+      <div class="kpi-sub">FWD P/E: 14,1x</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">EV/EBITDA</div>
+      <div class="kpi-value">6,5x</div>
+      <div class="kpi-sub">Unter Sektor-Median</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Dividendenrendite</div>
+      <div class="kpi-value green">3,76%</div>
+      <div class="kpi-sub">€1,85/Aktie 2024</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">EBIT-Marge</div>
+      <div class="kpi-value">7,3%</div>
+      <div class="kpi-sub">Q3 2025 (steigend)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Nächste Earnings</div>
+      <div class="kpi-value orange">05. Mär.</div>
+      <div class="kpi-sub">Q4/FY 2025</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Konsens</div>
+      <div class="kpi-value">HALTEN</div>
+      <div class="kpi-sub">Ø Ziel: €43,43</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 1 -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 9 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Unternehmensstruktur &amp; Revenue-Streams</h3>
+      <p>Die Deutsche Post AG, operativ als DHL Group bekannt, ist das weltweit führende Logistikunternehmen mit rund 583.000 Mitarbeitern in über 220 Ländern und Territorien. Das Geschäftsmodell umfasst fünf Segmente: <strong>Express</strong> (~29% des Umsatzes) bietet zeitkritische internationale Kurierdienste an; <strong>Global Forwarding &amp; Freight</strong> (~23%) übernimmt internationale Luft- und Seefracht; <strong>Supply Chain</strong> (~21%) liefert maßgeschneiderte Kontraktlogistik; <strong>eCommerce</strong> (~6%) adressiert B2C-Paketlieferung; und <strong>Post &amp; Parcel Germany</strong> (~21%) betreibt das traditionsreiche Briefgeschäft sowie den schnell wachsenden deutschen Paketmarkt.</p>
+      <p>Der Umsatzmix ist bewusst diversifiziert: Während Express und Global Forwarding primär B2B-Kunden bedienen (Industrie, Pharma, Automotive), adressiert eCommerce den strukturellen Wandel im Einzelhandel. Der Revenue-Mix ist transaktionsbasiert, wobei Langzeit-Kontraktlogistik im Supply-Chain-Segment regelmäßige Einnahmen mit höheren Margen sichert. Rund 74% des Konzernumsatzes werden international erwirtschaftet, was DHL gegenüber nationalen Konkurrenten einen strukturellen Diversifikationsvorteil verschafft.</p>
+      <p>Die Kostenstruktur ist kapitalintensiv: DHL betreibt über 300 Flugzeuge, tausende Fahrzeuge und ein weltweites Netzwerk aus Hubs und Sortierzentren. Gleichzeitig investiert der Konzern massiv in Digitalisierung und Automatisierung – im Supply-Chain-Segment sind bereits 7.600 Roboter in 90% der globalen Standorte im Einsatz. Das Programm "Fit for Growth" (Laufzeit bis 2027) zielt auf strukturelle Kosteneinsparungen von mehr als 1 Milliarde Euro ab und beinhaltet den Abbau von rund 8.000 Stellen bei Post &amp; Parcel Germany.</p>
+      <div class="source">Quellen: DHL Group Investor Relations (group.dhl.com); Q3 2025 Quartalsbericht (06.11.2025); FY2024 Jahresbericht (06.03.2025)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 2 -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Netzwerkeffekte &amp; Scale Advantages</h3>
+      <p>DHL besitzt einen der stärksten Netzwerkgräben in der globalen Logistik. Das Express-Netzwerk in 220+ Ländern ist praktisch unmöglich zu replizieren – selbst Amazon Logistics mit einer Investition von Hunderten Milliarden Dollar hat nur ein überwiegend US-amerikanisches Netzwerk aufgebaut. Die Skalierbarkeit des Netzwerks bedeutet, dass jede zusätzliche Sendung überproportional profitabel ist, da die Fixkosten (Hubs, Flugzeuge, IT-Infrastruktur) weitgehend konstant bleiben. Dieser "Network Moat" ist besonders stark im internationalen Express-Segment, wo DHL zu den drei dominanten Anbietern neben UPS und FedEx zählt.</p>
+      <p>Die <strong>Switching Costs</strong> sind im Supply-Chain- und eCommerce-Segment erheblich: Kunden, die ihre gesamte Kontraktlogistik an DHL ausgelagert haben, stehen bei einem Wechsel vor signifikanten Reintegrations- und Implementierungskosten. Im Jahr 2025 hat DHL Supply Chain neue Verträge mit einem Volumen von rund €3,1 Milliarden abgeschlossen, was eine starke Kundenbindung und Wachstum durch Renewals belegt. Die Vertragslaufzeiten betragen typischerweise 3–7 Jahre, was Planungssicherheit gibt.</p>
+      <p>Als <strong>Schwachstellen</strong> sind zu nennen: Im Standardpaketsegment in Deutschland sind die Switching Costs niedrig – Hermes/Evri, DPD und GLS kämpfen aggressiv um Marktanteile. Im Bereich Global Forwarding ist DHL stark substituierbar durch Kühne+Nagel und DSV, die als reines Asset-Light-Modell schneller auf Marktveränderungen reagieren können. Zudem ist DHL im US-Paketmarkt deutlich schwächer als UPS und FedEx, was die Diversifikationsthese bei gleichzeitig hoher Abhängigkeit vom US-Markt als Zielmarkt für Express-Sendungen einschränkt.</p>
+      <div class="source">Quellen: Morningstar DHL Group Analysis (Feb. 2026); DHL Strategy 2030 Presentation (Sept. 2024); Q3 2025 Investor Presentation (06.11.2025)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 3 -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Beat-Ratio: 4/4</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Da DHL an der XETRA (Frankfurt) notiert ist, sind keine finviz.com-Daten verfügbar. Alle Kennzahlen stammen von DHL Group Investor Relations, investing.com und Yahoo Finance (Stand: März 2026). Q4/FY2025-Ergebnisse werden am <strong>05. März 2026</strong> veröffentlicht und sind noch nicht verfügbar.</div>
+
+      <h3>Quartalsergebnisse (Q4 2024 – Q3 2025)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quartal</th>
+              <th>Umsatz</th>
+              <th>YoY</th>
+              <th>EBIT</th>
+              <th>EBIT-Marge</th>
+              <th>EPS (basic)</th>
+              <th>EPS vs. Konsens</th>
+              <th>Marktreaktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q4 2024</strong></td>
+              <td>€22,7 Mrd.</td>
+              <td class="beat">+6,4%</td>
+              <td>€1,851 Mrd.</td>
+              <td>8,2%</td>
+              <td>~€0,67</td>
+              <td class="beat">Beat</td>
+              <td class="beat">Positiv</td>
+            </tr>
+            <tr>
+              <td><strong>Q1 2025</strong></td>
+              <td>€20,8 Mrd.</td>
+              <td class="beat">+2,8%</td>
+              <td>€1,370 Mrd.</td>
+              <td>6,6%</td>
+              <td>€0,68</td>
+              <td class="beat">Beat</td>
+              <td class="beat">+3,1%</td>
+            </tr>
+            <tr>
+              <td><strong>Q2 2025</strong></td>
+              <td>€19,8 Mrd.</td>
+              <td class="miss">–3,9%</td>
+              <td>€1,429 Mrd.</td>
+              <td>7,2%</td>
+              <td>€0,72</td>
+              <td class="beat">Beat</td>
+              <td class="beat">+5,3%</td>
+            </tr>
+            <tr>
+              <td><strong>Q3 2025</strong></td>
+              <td>€20,1 Mrd.</td>
+              <td class="miss">–2,3%</td>
+              <td>€1,477 Mrd.</td>
+              <td>7,3%</td>
+              <td>€0,75</td>
+              <td class="beat">+21% Beat</td>
+              <td class="beat">+5,25%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Management-Statements &amp; Besonderheiten</h3>
+      <p>Das Schlüsselnarrative der letzten vier Quartale: DHL schaffte es konsequent, trotz rückläufiger Umsätze (verursacht durch Wechselkurseffekte und schwache Handelsvolumina) die Profitabilität zu steigern. CEO Tobias Meyer betonte wiederholt: "Wir haben unsere Ergebnisse vier Quartale in Folge verbessert." Die EBIT-Marge verbesserte sich von 6,5% (Q2 2024) auf 7,3% (Q3 2025) – ein deutlicher Beweis für die Wirksamkeit des "Fit for Growth"-Kostenprogramms.</p>
+      <p>Besonders bedeutsam war die Aussage zu De-minimis-Auswirkungen: Die Abschaffung der US-De-minimis-Regelung ab dem 29. August 2025 führte zu einem Rückgang des US-gebundenen Express-TDI-Volumens um 32% YoY in Q3 – allerdings hatte dies nur "begrenzte Auswirkungen auf die Ergebnisse", da DHL Express durch Kapazitätsumsteuerung und Yield-Management kompensierte. CFO Melanie Kreis betonte, der B2B-Bereich zeige deutlich mehr Resilienz als der B2C-Bereich.</p>
+      <div class="source">Quellen: DHL Group Press Releases Q3 2025 (06.11.2025), Q2 2025 (05.08.2025), Q1 2025 (15.05.2025), FY2024 (06.03.2025); investing.com Earnings Transcripts</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 4 -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Umsatzentwicklung (2021–2025)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Jahr</th><th>Umsatz</th><th>YoY</th><th>EBIT</th><th>EBIT-Marge</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>2021</td><td>€81,7 Mrd.</td><td class="beat">+22%</td><td>€8,5 Mrd.</td><td>10,4%</td></tr>
+            <tr><td>2022</td><td>€94,4 Mrd.</td><td class="beat">+15%</td><td>€8,4 Mrd.</td><td>8,9%</td></tr>
+            <tr><td>2023</td><td>€81,8 Mrd.</td><td class="miss">–13%</td><td>€6,3 Mrd.</td><td>7,7%</td></tr>
+            <tr><td>2024</td><td>€84,2 Mrd.</td><td class="beat">+3%</td><td>€5,9 Mrd.</td><td>7,0%</td></tr>
+            <tr><td>2025e</td><td>~€84–86 Mrd.</td><td class="neutral">~0–2%</td><td>≥€6,0 Mrd.</td><td>≥7,0%</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Geografische Verteilung (Umsatz 2024)</h3>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">Deutschland</div>
+          <div class="geo-pct">~25%</div>
+          <div class="geo-note">Post &amp; Parcel; Strukturwandel</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Übriges Europa</div>
+          <div class="geo-pct">~25%</div>
+          <div class="geo-note">Schwaches Industrieumfeld</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Amerikas</div>
+          <div class="geo-pct">~20%</div>
+          <div class="geo-note">USA: 14% als Zieldestination</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Asien-Pazifik</div>
+          <div class="geo-pct">~18%</div>
+          <div class="geo-note">China: 9%; stärkstes Wachstum</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">MEA &amp; Sonstige</div>
+          <div class="geo-pct">~12%</div>
+          <div class="geo-note">Indien: Wachstumsmarkt +€1 Mrd.</div>
+        </div>
+      </div>
+
+      <h3>Wachstumstreiber &amp; Nachhaltigkeit</h3>
+      <p>Das Wachstum von DHL ist strukturell durch drei Trends getragen: Erstens, der globale E-Commerce-Boom – DHL eCommerce verzeichnete 2024 ein Volumenwachstum in fast allen Märkten und einen Umsatzanstieg von 10,2%. Zweitens expandiert DHL gezielt in Healthcare-Logistik (Cold Chain, Pharma), einem Segment mit überdurchschnittlichen Margen und Wachstumsraten von 8–12% p.a. Drittens investiert DHL rund €1 Milliarde bis 2030 in Indien, einem der am schnellsten wachsenden Handelsmärkte der Welt.</p>
+      <p>Kritisch zu hinterfragen ist, ob das Wachstum "echt" oder durch externe Faktoren verzerrt ist: Die Umsatzeinbrüche 2023 und 2025 sind überwiegend auf Wechselkurseffekte und normalisierte Post-COVID-Frachtraten zurückzuführen, nicht auf strukturellen Nachfragerückgang. Die EBIT-Margensteigerung von 6,5% (Q2 2024) auf 7,3% (Q3 2025) ist organischer Natur durch "Fit for Growth", was bullisch zu werten ist. Das mittelfristige EBIT-Ziel von mehr als €7 Mrd. (2030) setzt einen nachhaltigen Wachstumspfad von ca. 5–7% p.a. voraus.</p>
+      <div class="source">Quellen: DHL Group Annual Report 2024 (06.03.2025); DHL Strategy 2030 (Sept. 2024); DHL Trade Atlas 2025 (März 2025); DHL India Investment Announcement (Investing.com, Nov. 2025)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 5 -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Da DHL an der XETRA notiert ist, sind keine finviz.com-Daten verfügbar. Kennzahlen Stand März 2026 von stockanalysis.com, GuruFocus, Yahoo Finance und Stockopedia.</div>
+
+      <h3>Aktuelle Bewertungskennzahlen</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Metrik</th><th>Aktuell</th><th>5J-Median</th><th>Sektor-Median</th><th>Einschätzung</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>P/E (TTM)</td><td>14,8x</td><td>~18x</td><td>~20x</td><td class="beat">Günstig</td></tr>
+            <tr><td>P/E (FWD 2026)</td><td>14,1x</td><td>–</td><td>–</td><td class="beat">Attraktiv</td></tr>
+            <tr><td>EV/EBITDA (TTM)</td><td>6,5–7,1x</td><td>~5,7x (Median)</td><td>~8,7x</td><td class="beat">Günstiger als Sektor</td></tr>
+            <tr><td>P/Sales</td><td>0,65x</td><td>~0,8x</td><td>–</td><td class="beat">Niedrig</td></tr>
+            <tr><td>PEG Ratio</td><td>1,53</td><td>–</td><td>–</td><td class="neutral">Fair</td></tr>
+            <tr><td>Dividendenrendite</td><td>3,76%</td><td>~3,5%</td><td>–</td><td class="beat">Über Historik</td></tr>
+            <tr><td>Debt/Equity</td><td>1,20</td><td>–</td><td>–</td><td class="neutral">Moderat</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Bewertungseinschätzung</h3>
+      <p>Die Bewertung von DHL erscheint auf dem aktuellen Kursniveau von ~€49 historisch attraktiv. Das P/E TTM von 14,8x liegt rund 20% unter dem historischen 5-Jahres-Median, und das EV/EBITDA von 6,5x ist deutlich günstiger als der Sektordurchschnitt von 8,7x. Angesichts der stabilen Dividendenrendite von 3,76%, des aktiven Aktienrückkaufprogramms (bis 2026 €6 Milliarden), und des mittelfristigen EBIT-Ziels von >€7 Mrd. rechtfertigt DHL durchaus eine Prämie gegenüber früheren Tiefbewertungen.</p>
+      <p>Zu beachten ist, dass der Analystenkonsens einen Zielkurs von durchschnittlich ~€43,43 ausgibt – also unter dem aktuellen Kurs. Dies spiegelt teils Unsicherheit über das Makroumfeld (Zölle, FX-Risiken) wider. Einzelne Analysten (Jefferies: Kaufen; JP Morgan: Kaufen) sehen Zielkurse bis €60. Der Morningstar-Intrinsic-Value-Ansatz deutet auf eine signifikante Überbewertung hin, was jedoch auf ein konservativeres Modell hinweist. Insgesamt: Fair bewertet bis leicht günstig bei Annahme normalisierter Handelsverhältnisse.</p>
+      <div class="source">Quellen: stockanalysis.com ETR:DHL (Stand März 2026); GuruFocus EV/EBITDA (01.01.2026); Stockopedia ETR:DHL (Feb. 2026); investing.com Analyst Consensus (Feb. 2026); TipRanks Analyst Ratings (Feb./März 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 6 -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Cashflow &amp; Margenprofil</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Metrik</th><th>FY 2023</th><th>FY 2024</th><th>9M 2025</th><th>Trend</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Umsatz</td><td>€81,8 Mrd.</td><td>€84,2 Mrd.</td><td>€60,7 Mrd.</td><td class="beat">Stabil</td></tr>
+            <tr><td>EBIT-Marge</td><td>7,7%</td><td>7,0%</td><td>7,0–7,3%</td><td class="beat">↑ Steigend</td></tr>
+            <tr><td>EBITDA-Marge</td><td>~12%</td><td>~11%</td><td>~11%</td><td class="neutral">Stabil</td></tr>
+            <tr><td>Nettogewinn</td><td>€3,7 Mrd.</td><td>€3,3 Mrd.</td><td>~€2,6 Mrd.</td><td class="neutral">Leicht rückläufig</td></tr>
+            <tr><td>FCF (ex M&amp;A)</td><td>€3,3 Mrd.</td><td>€3,0 Mrd.</td><td>€1,97 Mrd. (9M)</td><td class="beat">Guidance €3 Mrd.</td></tr>
+            <tr><td>ROE</td><td>~21%</td><td>16,8%</td><td>~17%</td><td class="neutral">Normalisierung</td></tr>
+            <tr><td>Net Debt</td><td>–</td><td>€19,0 Mrd.</td><td>€21,3 Mrd.</td><td class="miss">↑ Angestiegen</td></tr>
+            <tr><td>Dividende/Aktie</td><td>€1,85</td><td>€1,85</td><td>Stabil geplant</td><td class="beat">Kontinuität</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kapitalqualität &amp; Aktionärsrenditen</h3>
+      <p>Die Kapitalqualität von DHL ist solide, jedoch nicht makellos. Positiv ist die starke Free-Cashflow-Generierung: Die 2025er-Guidance von ~€3 Mrd. FCF (exkl. M&amp;A) wird durch den Q3-FCF von €1,2 Mrd. (+81% YoY) gestützt – ein deutliches Signal für operative Verbesserung. Die FCF-Konversionsrate (FCF/EBITDA) liegt bei rund 27%, was für eine kapitalintensive Branche respektabel ist. Das Aktienrückkaufprogramm von bis zu €6 Mrd. (2022–2026) hat bereits €4,4 Mrd. zurückgeführt und die Aktienzahl um ~3,7% p.a. reduziert.</p>
+      <p>Als Schwäche ist der Anstieg der Nettoverschuldung auf €21,3 Mrd. (Q3 2025) zu nennen, hauptsächlich verursacht durch die Anleiheemission von €2,25 Mrd. (März 2025) und M&amp;A-Aktivitäten. Das Debt/Equity-Verhältnis von 1,20 und ein EV/FCF von 10,9x sind vertretbar, mahnen aber zur Vorsicht bei weiteren Übernahmen. Der Capex (exkl. Leasingverbindlichkeiten) lag in Q3 2025 bei €632 Mio., deutlich unter dem Vorjahresniveau – ein Zeichen für disziplinierte Investitionsstrategie.</p>
+      <div class="source">Quellen: DHL Group FY2024 Annual Report (06.03.2025); Q3 2025 Quarterly Statement; stockanalysis.com Statistiken ETR:DHL (März 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 7 -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Quantitativer Peer-Vergleich (Stand: März 2026)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Unternehmen</th><th>Umsatz (TTM)</th><th>EBIT-Marge</th><th>P/E (FWD)</th><th>EV/EBITDA</th><th>Div.-Rendite</th><th>Marktkapitalisierung</th></tr>
+          </thead>
+          <tbody>
+            <tr style="background:rgba(20,184,166,0.06);">
+              <td><strong>DHL Group (ETR:DHL)</strong></td>
+              <td>~€84 Mrd.</td>
+              <td class="beat">7,3%</td>
+              <td class="beat">14,1x</td>
+              <td class="beat">6,5x</td>
+              <td class="beat">3,76%</td>
+              <td>~€55 Mrd.</td>
+            </tr>
+            <tr>
+              <td>UPS (NYSE:UPS)</td>
+              <td>~$85 Mrd.</td>
+              <td class="neutral">9,5%</td>
+              <td class="miss">19x</td>
+              <td class="neutral">9x</td>
+              <td class="beat">5,2%</td>
+              <td>~$85 Mrd.</td>
+            </tr>
+            <tr>
+              <td>FedEx (NYSE:FDX)</td>
+              <td>~$88 Mrd.</td>
+              <td class="neutral">8,5%</td>
+              <td class="beat">13x</td>
+              <td class="neutral">8x</td>
+              <td class="neutral">2,1%</td>
+              <td>~$60 Mrd.</td>
+            </tr>
+            <tr>
+              <td>Kühne+Nagel (SWX:KNIN)</td>
+              <td>~CHF 35 Mrd.</td>
+              <td class="beat">8,5%</td>
+              <td class="miss">22x</td>
+              <td class="miss">13x</td>
+              <td class="beat">4,8%</td>
+              <td>~CHF 24 Mrd.</td>
+            </tr>
+            <tr>
+              <td>XPO Logistics (NYSE:XPO)</td>
+              <td>~$9 Mrd.</td>
+              <td class="neutral">7,8%</td>
+              <td class="miss">25x</td>
+              <td class="miss">11x</td>
+              <td>keine</td>
+              <td>~$14 Mrd.</td>
+            </tr>
+            <tr>
+              <td>Amazon Logistics (intern)</td>
+              <td>~$130 Mrd.</td>
+              <td>n/v</td>
+              <td>n/v</td>
+              <td>n/v</td>
+              <td>keine</td>
+              <td>Integriert in Amazon</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Qualitative Differenzierung</h3>
+      <p>Im Vergleich zu UPS und FedEx hat DHL den entscheidenden Vorteil eines echten globalen Netzwerks außerhalb der USA. Während UPS und FedEx überwiegend US-centric sind und unter Amazon Logistics' Expansion leiden, ist DHL im internationalen Express-Bereich kaum zu ersetzen. Allerdings sind die EBIT-Margen von UPS (~9,5%) und Kühne+Nagel (~8,5%) höher als DHLs ~7,3%, was das Optimierungspotenzial bei DHL verdeutlicht.</p>
+      <p>Kühne+Nagel ist als reines Asset-Light-Forwarding-Unternehmen besser positioniert, um Zyklen zu überstehen, leidet jedoch stärker unter sinkenden Frachtvolumina. XPO Logistics ist trotz Premium-Bewertung deutlich kleiner und auf Nord-Amerika fokussiert. Amazon Logistics ist die wildcardste Variable: Mit 6,3 Milliarden Paketen in den USA 2024 bedroht Amazon zwar den E-Commerce-Sektor, ist jedoch kein direkter Konkurrent im B2B-Express oder internationalen Forwarding. DHL erscheint auf Basis des EV/EBITDA von 6,5x im Peer-Vergleich als attraktiv bewertet.</p>
+      <div class="source">Quellen: Company financial reports Q4 2024 / Q3 2025; Pitney Bowes Parcel Shipping Index 2024 (Juli 2025); ShipMatrix US Parcel Market Report 2024 (April 2025); stockanalysis.com (März 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 8 -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen (Company-spezifische Events)</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">06.11.2025 – Q3 2025 Ergebnisse: 5. Quartal in Folge mit EBIT-Wachstum <span class="badge badge-green">Sehr Positiv</span></div>
+          <div class="event-text">EBIT stieg um 7,6% auf €1,477 Mrd. trotz Umsatzrückgang (-2,3%). EPS: €0,75 vs. Konsens €0,62 – ein 21%-Beat. FCF (ex-M&A) wuchs um 81% YoY auf €1,203 Mrd. Aktie stieg am Earnings-Tag um 5,25%. Quelle: DHL Group IR, 06.11.2025</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Sep. 2025 – UK eCommerce Exit / Evri-Merger abgeschlossen <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">DHL eCommerce UK wurde mit Evri fusioniert (Ende Sept. 2025). DHL erhielt eine Barbarzahlung von €343 Mio. und buchte einen Dekonsolidierungsgewinn von €183 Mio. Strategische Fokussierung auf profitablere Märkte. Quelle: DHL Group Q3 2025 Report</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Nov. 2025 – €1 Mrd. Indien-Investition angekündigt <span class="badge badge-green">Positiv (langfristig)</span></div>
+          <div class="event-text">DHL Group kündigt Investitionen von ~€1 Mrd. in Indien bis 2030 an. Indien ist laut DHL Trade Atlas 2025 einer der wachstumsstärksten Handelsmärkte weltweit. Strategisch wichtig für die "Strategy 2030"-Expansion in Wachstumsmärkte. Quelle: Investing.com, Nov. 2025</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Jan. 2026 – Jefferies bestätigt Kaufempfehlung <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Jefferies bestätigt Buy-Rating auf DHL Group mit Zielkurs €55+. JP Morgan hält ebenfalls Buy-Empfehlung aufrecht. Berstein downgrade auf Hold bleibt der bärische Gegenakzent unter den Analysten. Quelle: TipRanks, Jan./Feb. 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">05. Mär. 2026 – Q4/FY2025 Ergebnisse (MORGEN) <span class="badge badge-yellow">Pending</span></div>
+          <div class="event-text">Ergebnisse werden am heutigen Folgetag, dem 05. März 2026, vor Marktöffnung veröffentlicht. Guidance war EBIT ≥€6,0 Mrd. und FCF ~€3 Mrd. Zudem wird 2026-Ausblick und Capital Markets Day (Anfang April) kommuniziert. Konsens: EPS €3,09 für FY2025.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche (Sektor-spezifische Events)</h3>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Aug. 2025 – US-De-minimis-Regelung abgeschafft (29.08.2025) <span class="badge badge-red">Negativ (kurzfristig)</span></div>
+          <div class="event-text">Abschaffung der $800-Grenze für zollfreie Importe in die USA. DHL Express: US-TDI-Volumen -32% YoY in Q3, allerdings mit nur begrenztem EBIT-Einfluss durch Kapazitätsumlenkung. B2C-Bereich stärker betroffen als B2B. DHL Parcel Germany hatte temporär Lieferstopp (25.08.–23.09.2025). Quelle: DHL Group PR, CNBC, Supply Chain Dive, Aug./Nov. 2025</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Feb. 2026 – US Supreme Court erklärt IEEPA-Zölle für rechtswidrig <span class="badge badge-green">Positiv (bedingt)</span></div>
+          <div class="event-text">Der US Supreme Court erklärte am 20. Februar 2026 die auf IEEPA basierenden Zölle für rechtswidrig. Ab 24. Februar gelten keine IEEPA-basierten Zölle mehr. DHL hat daraufhin Rückerstattungshinweise für Kunden veröffentlicht. CEO Meyer: "Weitere Rechtsmittel durch den Präsidenten sind möglich." Andere Zölle (Section 301 etc.) bleiben bestehen. Quelle: DHL US Tariffs Statement, Feb. 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2025 – Amazon Logistics wächst auf 6,3 Mrd. Pakete <span class="badge badge-yellow">Strukturell negativ</span></div>
+          <div class="event-text">Amazon Logistics verarbeitete 2024 6,3 Mrd. Pakete (+7,3% YoY) in den USA und hat einen Marktanteil von ~15% am US-Umsatz erreicht. UPS und FedEx verlieren jeweils ~1% Marktanteil. DHL ist im US-Paketmarkt schwächer positioniert und profitiert weniger, ist aber auch weniger exponiert. Quelle: Pitney Bowes Parcel Index 2024 (Juli 2025)</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro (Gesamtwirtschaft &amp; Politik)</h3>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2025/2026 – US-Handelspolitik: Anhaltende Zollturbulenzen <span class="badge badge-yellow">Neutral bis Negativ</span></div>
+          <div class="event-text">Trotz des IEEPA-Urteils bleiben Section 301-Zölle auf China (eff. ~51% auf chinesische Güter), Section 232-Zölle auf Stahl/Aluminium sowie neue De-minimis-Regelungen bestehen. US-China-Direkthandel sank von 3,5% auf 2,6% des Welthandels. DHL profitiert von Handelsverlagerungen: Mehr Verkehr über Vietnam, Indien, Mexiko. Quelle: Morgan Lewis Global Trade Report (Jan. 2026)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Okt. 2025 – DHL Global Connectedness Tracker: Globalisierung hält stand <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">DHL und NYU Stern bestätigen: Trotz US-Zöllen auf Rekordhöhen seit den 1930ern wächst der Welthandel weiter. Prognose: +2,5% p.a. bis 2029. Durchschnittliche Transportdistanz auf Rekordniveau (~5.000 km). DHL als globaler Netzwerkbetreiber profitiert von langen Handelswegen. Quelle: DHL Global Connectedness Tracker Special Update, 14.10.2025</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">2025/2026 – Schwächelnde europäische Industrie als Belastung <span class="badge badge-red">Negativ (zyklisch)</span></div>
+          <div class="event-text">Deutschland in technischer Rezession, europäische Industrieproduktion schwach. Morningstar erwartet gedämpfte B2B-Paketvolumina in Europa und USA in H1 2026, insbesondere aufgrund der Zoll-Folgeeffekte. DHL Global Forwarding, Freight besonders exponiert: Road Freight in Deutschland/Europa strukturell schwach. Quelle: Morningstar DHL Analyse (Feb. 2026)</div>
+        </div>
+      </div>
+      <div class="source">Quellen: DHL Group Pressemitteilungen Nov. 2025; TipRanks Analyst Ratings Jan./Feb. 2026; Supply Chain Dive (Nov. 2025); DHL Global Connectedness Tracker (Okt. 2025); Morgan Lewis Trade Report (Jan. 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 9 -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom:20px;">
+        <div class="kpi-card">
+          <div class="kpi-label">Kurs aktuell</div>
+          <div class="kpi-value orange">€49,18</div>
+          <div class="kpi-sub">28.02.2026</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 20</div>
+          <div class="kpi-value green">~€48,5</div>
+          <div class="kpi-sub">Kurs darüber</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 50</div>
+          <div class="kpi-value green">~€46,0</div>
+          <div class="kpi-sub">Kurs darüber</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 200</div>
+          <div class="kpi-value green">~€41,7</div>
+          <div class="kpi-sub">+18% darüber</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">RSI (14)</div>
+          <div class="kpi-value yellow">~62</div>
+          <div class="kpi-sub">Neutral-bullisch</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">52W-High</div>
+          <div class="kpi-value">€51,48</div>
+          <div class="kpi-sub">02.02.2026</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">MACD</div>
+          <div class="kpi-value green">Positiv</div>
+          <div class="kpi-sub">Aufwärtstrend</div>
+        </div>
+      </div>
+
+      <h3>Chartbild &amp; Trendeinschätzung</h3>
+      <p>DHL befindet sich in einem klaren Aufwärtstrend. Die Aktie hat sich seit ihrem 52-Wochen-Tief von €32,38 (April 2025) um rund 52% erholt und notiert aktuell nur knapp unter dem frischen 52-Wochen-Hoch von €51,48 (02. Februar 2026). Alle relevanten gleitenden Durchschnitte (SMA 20, 50, 200) zeigen aufwärts und der Kurs liegt über ihnen, was eine bullische Marktstruktur bestätigt. Der Kurs liegt ca. 18% über der 200-Tage-Linie – ein Zeichen starker Outperformance gegenüber dem Markt (+5% gegenüber FTSE Global All Cap im letzten halben Jahr).</p>
+      <p>Der RSI von ca. 62 zeigt noch keine Überkauft-Signale (unter 70), lässt also weiteres Aufwärtspotenzial zu. Der MACD ist positiv und bestätigt den Aufwärtstrend. Das technische Bild mahnt jedoch zu Vorsicht: Die Aktie nähert sich dem oberen Widerstandsbereich von €51–52 und könnte kurzfristig eine Konsolidierung erfahren, bevor der Earnings-Report vom 05. März 2026 neue Impulse setzt.</p>
+      <p>Als <strong>Support-Level</strong> sind zu beachten: €46–47 (SMA 50 / vorherige Widerstandszone), €41–42 (SMA 200). Als <strong>Resistance</strong>: €51,48 (52W-Hoch), €54–55 (längerfristiger Widerstand). Investing.com gibt ein "Strong Buy"-Signal auf Basis technischer Indikatoren aus.</p>
+      <div class="source">Quellen: Stockopedia ETR:DHL Technische Analyse (Feb. 2026); Investing.com DHLn Technical Analysis (Stand März 2026); CNBC DHL-FF Quotes; TradingView XETR:DHL</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 10 -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <h3>10a) Strukturelle &amp; Zyklische Risiken – Schwerpunkt Geopolitik &amp; Zölle</h3>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🌍 Geopolitische Handelsunsicherheit &amp; US-Zollpolitik</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-yellow">Auswirkung: Mittel-Hoch</span></div>
+        </div>
+        <div class="event-text">US-China-Direkthandel sank auf 2,6% des Welthandels (von 3,5% in 2016). Verbleibende Section 301-Zölle (~51% auf chinesische Güter) und neue De-minimis-Regelung belasten B2C-Express-Volumina nachhaltig. Q3 2025: US-gebundenes TDI-Volumen -32% YoY. Wahrscheinlichkeit weiterer Eskalation: ~40%. Mögliche EBIT-Auswirkung bei worst case: -€400–600 Mio. p.a. (ca. 7–10% des Gesamt-EBIT).</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">💱 Wechselkursrisiko (EUR/USD, Emerging Markets)</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">In Q2 und Q3 2025 belasteten negative Währungseffekte den Umsatz um €495 Mio. bzw. €495 Mio. Ein starker Euro gegenüber USD/CNY und EM-Währungen reduziert den berichteten Umsatz erheblich (74% international). Bei einem EUR/USD von >1,15 drohen weitere Umsatzeinbußen von €1–2 Mrd. für das Gesamtjahr.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">📦 Amazon Logistics als struktureller Disruptor</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-red">Auswirkung: Langfristig Hoch</span></div>
+        </div>
+        <div class="event-text">Amazon verarbeitet 6,3 Mrd. Pakete in den USA (2024) mit einem Umsatzmarktanteil von 15,3%. Wachstum um 7,3% YoY. Während Amazon für DHL derzeit kein direkter Kunde-/Routenkonkurrent im internationalen Express ist, droht langfristig ein Ausweiten auf internationale Märkte. DHL eCommerce (nur ~6% des Umsatzes) ist besonders exponiert. Wahrscheinlichkeit: 60% bis 2030.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🏭 Konjunkturabschwung in Europa</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Deutschland und Kerneuropa befinden sich in einer industriellen Schwächephase. DHL Global Forwarding, Freight und Post &amp; Parcel Germany sind direkt betroffen: Road-Freight-Volumina in Europa stagnieren. Morningstar erwartet Dämpfung der B2B-Paketvolumina in H1 2026, insbesondere aufgrund von Zoll-Folgeeffekten. Wahrscheinlichkeit anhaltender Schwäche: 50%.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">📉 Regulatorisches Risiko (Post &amp; Parcel Germany)</div>
+          <div><span class="badge badge-green">Niedrig-Mittel</span> <span class="badge badge-green">Auswirkung: Begrenzt</span></div>
+        </div>
+        <div class="event-text">Das Legacy-Briefgeschäft (~12% des Umsatzes) ist stark reguliert und unterliegt sinkenden Volumina (struktureller Rückgang). Regulatorische Änderungen könnten Preiserhöhungen begrenzen. Allerdings gleicht das wachsende Paketgeschäft diesen Rückgang mehr als aus. Risiko begrenzt, da P&amp;P Germany EBIT 2025 voraussichtlich ~€1 Mrd. erreicht.</div>
+      </div>
+
+      <h3>10b) Chancen</h3>
+      <p>Die größten Aufwärtspotenziale liegen in drei Bereichen: Erstens, die <strong>Handelsverlagerung als Wachstumstreiber</strong> – während US-China-Handel schrumpft, wächst der Handel über Indien, Vietnam, Mexiko explosiv. DHL ist als einziger globaler Carrier in allen diesen Märkten präsent und profitiert von Routenverlagerungen. Zweitens, das <strong>Healthcare-Logistik-Segment</strong> wächst mit 8–12% p.a. und hat überdurchschnittliche Margen – DHLs SDS Rx-Akquisition (Oktober 2025) zeigt die strategische Priorität. Drittens, das <strong>"Fit for Growth"-Programm</strong> (€1 Mrd. Kosteneinsparung bis 2027) hat erst rund 30–40% seiner Wirkung entfaltet – die volle EBIT-Marge-Expansion steht noch bevor und dürfte die Margen in Richtung 8–9% treiben.</p>
+
+      <h3>10c) Red Flags &amp; Dealbreaker</h3>
+      <p>Dealbreaker-Risiken sind nicht erkennbar: DHL hat keine existenzbedrohenden Finanzierungsrisiken, keine regulatorischen Abwicklungsbedrohungen und keinen signifikanten Kundenverlust. Red Flags zum Beobachten: (1) Anhaltende Verlangsamung im Express-Segment trotz Gegenmaßnahmen; (2) Weiterer Anstieg der Nettoverschuldung über €25 Mrd.; (3) Übernahmen zu überhöhten Preisen im Healthcare-Bereich.</p>
+      <div class="source">Quellen: DHL Global Connectedness Tracker (Okt. 2025); Supply Chain Dive De-minimis Artikel (Nov. 2025); Morningstar DHL Analysis (Feb. 2026); Global Trade Magazine 2026 Outlook (Dez. 2025)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 11 -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring-Übersicht</div>
+      <div class="section-note">Gesamtbewertung</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kategorie</th><th>Score</th><th>Bewertungsbalken</th><th>Begründung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Geschäftsmodell</strong></td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Diversifiziertes, globales Modell; kapitalintensiv; struktureller E-Commerce-Rückenwind</td>
+            </tr>
+            <tr>
+              <td><strong>Burggraben</strong></td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Starkes Express-Netzwerk; hohe Switching Costs in Supply Chain; Schwäche im Standard-Paket</td>
+            </tr>
+            <tr>
+              <td><strong>Operative Entwicklung (4Q)</strong></td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>4/4 Beat-Ratio; EBIT-Marge steigt trotz Umsatzrückgängen – starke Umsetzungsdisziplin</td>
+            </tr>
+            <tr>
+              <td><strong>Wachstum</strong></td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Strukturell positiv (E-Com, Healthcare), aber kurzfristig durch Zölle/FX gedämpft</td>
+            </tr>
+            <tr>
+              <td><strong>Bewertung</strong></td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>P/E 14,8x und EV/EBITDA 6,5x unter historischen Werten und Sektor-Median – attraktiv</td>
+            </tr>
+            <tr>
+              <td><strong>Cashflow</strong></td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>FCF-Guidance €3 Mrd. on track; starkes Buyback-Programm; moderates Schulden-Level</td>
+            </tr>
+            <tr>
+              <td><strong>Risiken (invertiert)</strong></td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Geopolitik/Zölle als Hauptrisiko, aber kein Dealbreaker; DHL beweist operative Resilienz</td>
+            </tr>
+            <tr>
+              <td><strong>Technische Analyse</strong></td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Klarer Aufwärtstrend; über allen MAs; nahe 52W-Hoch; Strong-Buy-Signal (Investing.com)</td>
+            </tr>
+            <tr style="background:rgba(20,184,166,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>6,9/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track">
+                    <div class="score-bar-fill" style="width:69%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
+                  </div>
+                  <span class="score-num" style="color:var(--primary);">6,9</span>
+                </div>
+              </td>
+              <td>Solides Gesamtbild – attraktive Bewertung, operative Resilienz, aber Geopolitik bleibt erhöhtes Risiko</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEKTION 12 -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-note">Kernthese: Geopolitik vs. Resilienz</div>
+    </div>
+    <div class="section-body">
+
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 – Bewiesene Resilienz trotz Geopolitik:</strong> DHL hat in 5 aufeinanderfolgenden Quartalen EBIT-Wachstum erzielt, obwohl US-Zölle auf dem höchsten Stand seit den 1930ern lagen, die De-minimis-Regelung abgeschafft wurde und der US-China-Direkthandel einbrach. Das EBIT stieg in Q3 2025 um +7,6% bei gleichzeitig -2,3% Umsatz – der Beweis, dass der operative Hebel über das Zollrisiko triumphiert. Fit for Growth wird bis 2027 €1+ Mrd. Kosteneinsparungen liefern, was die EBIT-Marge in Richtung 8–9% treiben sollte.</p>
+          <p><strong>Säule 2 – Handelsverlagerung als Wachstumstreiber:</strong> Die Globalisierung ist nicht tot – sie verlagert sich. Welthandel wächst weiter mit +2,5% p.a. bis 2029 (DHL/NYU Tracker). Während US-China-Routen schrumpfen, boomen Handelswege über Indien (+€1 Mrd. Investition), Vietnam, Mexiko und MENA. DHL ist als einziger echter global vernetzter Carrier in allen diesen Märkten präsent und profitiert strukturell von längeren Handelswegen (Rekorddistanz von ~5.000 km).</p>
+          <p><strong>Säule 3 – Attraktive Bewertung mit Dividende:</strong> P/E 14,8x und EV/EBITDA 6,5x liegen ~20% unter historischen Medianwerten. Die Dividendenrendite von 3,76% plus Aktienrückkäufe (€6 Mrd.-Programm bis 2026) ergeben eine Shareholder-Gesamtrendite von schätzungsweise 8–10% p.a. Das Risiko/Chancen-Profil erscheint attraktiv bei einem nachhaltigen Zielkurs von €58–65 in 18–24 Monaten (EBIT-Normalisierung + multiple Re-Rating).</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 – Geopolitik ist dauerhaft, nicht temporär:</strong> Das IEEPA-Urteil des Supreme Court (20. Feb. 2026) hat nur einen Teil der Zölle beseitigt. Section 301-Zölle auf China (~51%), neue De-minimis-Regelung und potenzielle neue Handelskonflikte bleiben. CEO Meyer selbst warnte: "Weitere Rechtsgrundlagen für Zölle stehen dem Präsidenten zur Verfügung." Falls der US-China-Handelskrieg eskaliert oder auf neue Länder ausgedehnt wird, könnte das EBIT um €400–600 Mio. belastet werden – was die 2025-Guidance von €6 Mrd. in Frage stellt.</p>
+          <p><strong>Risiko 2 – Wachstumsverlangsamung und Margendruck:</strong> Die Umsätze sinken in 2025 auf vergleichbarer Basis. Der Analystenkonsens zeigt einen Zielkurs von ~€43 – also unter dem aktuellen Kurs von €49. Falls das mittelfristige EBIT-Ziel von >€7 Mrd. (2030) nicht erreicht wird, ist die aktuelle Bewertung weniger attraktiv. Die Nettoverschuldung von €21,3 Mrd. (3,8x EBITDA) begrenzt die Flexibilität für transformative M&amp;A.</p>
+          <p><strong>Risiko 3 – Amazon als langfristige strukturelle Bedrohung:</strong> Amazon Logistics wächst mit 60% CAGR seit 2016 und könnte bis 2028 die USPS als größten US-Paketcarrier überholen. Obwohl DHL im internationalen Express kaum exponiert ist, droht Amazon mittelfristig eine Ausweitung auf internationale Märkte. P/E 14,8x erscheint nicht billig, wenn das strukturelle Wachstum im eCommerce-Segment durch Amazon begrenzt wird.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Das bullische Narrativ ist überzeugender, insbesondere aufgrund der bewiesenen operativen Resilienz. Die entscheidende Erkenntnis ist, dass DHL's Management in den letzten 5 Quartalen unter realen Krisenbedingungen – US-Zölle, De-minimis-Abschaffung, EUR/USD-Belastung, schwaches Industrie-Umfeld – bewiesen hat, dass Profitabilität steigerbar ist. Das ist keine Theorie, sondern empirisch belegbar. Das Kostenprogramm "Fit for Growth" hat erst ~30–40% seiner strukturellen Wirkung entfaltet.</p>
+      <p>Das bärische Narrativ enthält valide Punkte: Die geopolitische Unsicherheit wird nicht verschwinden, und der Analystenkonsens ist mit einem Zielkurs unter dem Marktpreis auffällig skeptisch. Allerdings scheinen diese Konsensschätzungen vor dem IEEPA-Urteil (Februar 2026) und dem starken Kursanstieg (+51% seit 52W-Tief) zu sein – ein Re-Rating erscheint plausibel, wenn die Q4 2025-Zahlen am 05. März die Guidance bestätigen. Risk/Reward: ca. -12% Downside (Support €43 / Konsensziel) vs. +25–35% Upside (Zielkurs €61–66 in 18 Monaten).</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Kurzfristig (0–6M)</strong></td>
+              <td>Q4/FY2025 Ergebnisse (05.03.), Capital Markets Day (April), 2026-Guidance</td>
+              <td>Earnings-Enttäuschung; neue US-Zolleskalation; EUR-Stärke</td>
+              <td><span class="badge badge-yellow">Abwarten / Tranchiert</span></td>
+            </tr>
+            <tr>
+              <td><strong>Mittelfristig (6–24M)</strong></td>
+              <td>Fit-for-Growth volle Wirkung, Healthcare-Expansion, Geopolitik-Normalisierung</td>
+              <td>Anhaltende Handelsunsicherheit, Rezession in Europa</td>
+              <td><span class="badge badge-green">Akkumulieren</span></td>
+            </tr>
+            <tr>
+              <td><strong>Langfristig (2–5J)</strong></td>
+              <td>EBIT >€7 Mrd. (2030-Ziel), E-Commerce-Wachstum, Emerging Markets</td>
+              <td>Amazon-Expansion international; Technologiedisruption</td>
+              <td><span class="badge badge-green">Kaufen &amp; Halten</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>DHL Group ist der einzige echte globale Logistiker, der von der Verlagerung des Welthandels – weg von US-China, hin zu neuen Handelswegen – strukturell profitiert. Das "Fit for Growth"-Programm transformiert das Unternehmen von einem trägen Konzern zu einem profitablerem, kapitaleffizienteren Marktführer. Bei einer fairen Bewertung von P/E 16–17x (2026e EPS ~€3,10–3,40) ergibt sich ein Kursziel von €50–58, bei Normalisierung und EBIT-Erholung auf €7 Mrd. ein langfristiges Potenzial von €60–70.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">€ 58–65</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–3 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–12%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+18–32%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val buy">1:2,2</div></div>
+      </div>
+
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>FY2025 EBIT unter €5,8 Mrd. → sofort reduzieren (Guidance verfehlt)</li>
+            <li>Neue US-Zölle auf EU-Güter >25% angekündigt → Position halbieren</li>
+            <li>Nettoverschuldung übersteigt €25 Mrd. ohne strategischen Plan → Warnsignal</li>
+            <li>Kurs fällt unter €43 (Analystenkonsens) → Stoploss aktivieren</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Q4/FY2025 bestätigt EBIT ≥€6,0 Mrd. und 2026-Guidance >€6,5 Mrd. → nachkaufen</li>
+            <li>EBIT-Marge übersteigt 8% in einem Quartal → Wachstumsphase bestätigt</li>
+            <li>US-Zolleskalation wird dauerhaft beigelegt → strukturelles Re-Rating</li>
+            <li>Kurs fällt auf €44–46 (ohne fundamentale Verschlechterung) → Kaufchance</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Dividenden-Investoren (3,76% + Buybacks)</li>
+            <li>Quality-Growth-Investoren (2–5 Jahre)</li>
+            <li>Value-Investoren mit Geduld</li>
+            <li>Contrarians (Geopolitik überbewertet?)</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Kurzfristige Trader (Zoll-Volatilität)</li>
+            <li>High-Growth-Investoren (&lt;10% Wachstum p.a.)</li>
+            <li>Konservative Anleger (Schulden, Zyklizität)</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Konservativ</strong></td>
+              <td><span class="badge badge-yellow">Warten auf Q4-Zahlen</span></td>
+              <td>Abwarten Q4/FY2025 (05.03.) und 2026-Guidance vor Einstieg</td>
+            </tr>
+            <tr>
+              <td><strong>Moderat</strong></td>
+              <td><span class="badge badge-orange">Tranchiert einsteigen</span></td>
+              <td>50% jetzt, 50% nach Bestätigung der Guidance am 05.03.2026</td>
+            </tr>
+            <tr>
+              <td><strong>Aggressiv</strong></td>
+              <td><span class="badge badge-green">Jetzt kaufen</span></td>
+              <td>Risk/Reward 1:2,2 bei €49; IEEPA-Erleichterung noch nicht eingepreist</td>
+            </tr>
+            <tr>
+              <td><strong>Langfristig</strong></td>
+              <td><span class="badge badge-green">Kaufen &amp; Halten</span></td>
+              <td>EBIT-Weg zu €7+ Mrd. (2030), E-Commerce &amp; Healthcare-Expansion</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEKTION 13 -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – 3 entscheidende Events</div>
+      <div class="section-note">Wenn/Dann-Logik</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q4/FY2025 Ergebnisse &amp; 2026-Guidance – 05. März 2026 (morgen)</h4>
+        <p>Das wichtigste kurzfristige Event: DHL veröffentlicht am 05. März 2026 die Volljahreszahlen 2025 und die Guidance für 2026. Dabei stehen drei Schlüsselzahlen im Fokus: FY2025 EBIT (Guidance: ≥€6,0 Mrd.), FCF (Guidance: ~€3 Mrd.) sowie die erstmals kommunizierte 2026-Guidance und der Ausblick auf den Capital Markets Day (Anfang April 2026). Dies ist der unmittelbarste Kurstreiber und hat das Potenzial für eine Bewegung von ±8–12%.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> FY2025 EBIT ≥€6,0 Mrd. bestätigt und 2026-Guidance ≥€6,5 Mrd. kommuniziert wird → sofort tranchiert nachkaufen. Bullisches Signal für das Erreichen des mittelfristigen €7+ Mrd.-Ziels. Kurspotenzial auf €54–58 kurzfristig.<br><br>
+          <strong>Wenn:</strong> EBIT unter €5,8 Mrd. oder 2026-Guidance &lt;€6,0 Mrd. → Position umgehend reduzieren auf max. 50%, da das Margenwachstumsziel unter Druck gerät. Downside-Risiko auf €42–45.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 2: Capital Markets Day &amp; Strategy 2030 Update – April 2026</h4>
+        <p>DHL hat einen Capital Markets Day für Anfang April 2026 angekündigt. Hier werden CEO Tobias Meyer und CFO Melanie Kreis die Mittelfristziele konkretisieren: das mittelfristige EBIT-Ziel von >€7 Mrd., die "Fit for Growth"-Fortschritte und die strategischen Investitionsschwerpunkte (Healthcare, Emerging Markets, Automation). Dieses Event ist besonders bedeutsam, da DHL bisher keine konkreten 2026er-Jahresziele kommuniziert hat und der Markt auf Klarheit wartet.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> DHL ein konkretes 2026-EBIT-Ziel von ≥€6,5 Mrd. kommuniziert und den Weg zum >€7 Mrd.-Ziel mit glaubwürdigen Meilensteinen untermauert → mittelfristiges Kurspotenzial auf €58–65 deutlich realistischer. Entspricht einem Re-Rating von P/E 14x auf 16–18x bei steigendem EPS.<br><br>
+          <strong>Wenn:</strong> Capital Markets Day enttäuscht (kein konkretes Ziel >€6,5 Mrd. für 2026, Verweis auf "anhaltende Unsicherheiten") → Skepsis des Markts bleibt bestehen. Position halten, aber keine Zukäufe bis zur nächsten Klarheit.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 3: US-Handelspolitik-Entwicklung (Zölle, De-minimis, WTO) – Q2–Q3 2026</h4>
+        <p>Die geopolitische Handelspolitik bleibt der wichtigste externe Einflussfaktor für DHL. Drei Szenarien sind relevant: (1) Weitere Zoll-Eskalation der USA gegen Europa; (2) Einlenken / Handelsabkommen; (3) Status quo. DHL Express TDI-Volumen Richtung USA fiel um 32% YoY in Q3 2025 – eine Normalisierung würde das Express-Wachstum signifikant verbessern. Gleichzeitig könnten neue EU-Gegenmaßnahmen auf US-Güter das globale Handelssystem weiter fragmentieren.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> US-EU-Handelsabkommen oder signifikante Zoll-Entspannung in H1 2026 → Express-Volumina erholen sich um 15–25%, was das EBIT um €200–400 Mio. entlasten und die Marge über 8% treiben würde. Aktie hätte in diesem Szenario Potenzial bis €65–70 (2–3 Jahre).<br><br>
+          <strong>Wenn:</strong> Neue US-Zölle auf EU-Güter (z.B. Section 232 auf Autos, Chemie oder Pharma) von >25% eingeführt werden → Express- und Forwarding-Segmente unter erhöhtem Druck. EBIT-Guidance für 2026 wäre gefährdet. In diesem Szenario Position auf max. 50% reduzieren und Reinvestition auf €42–44 warten.
+        </div>
+      </div>
+
+      <div class="source">Quellen: DHL Group Q3 2025 Press Release (06.11.2025); DHL US Tariffs Statement (Feb. 2026); DHL Supply Chain Dive De-minimis Update (Nov. 2025); Global Trade Magazine 2026 Outlook (Dez. 2025); Morgan Lewis US Trade Report (Jan. 2026)</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung, Kauf- oder Verkaufsempfehlung dar. Alle Angaben wurden sorgfältig recherchiert, sind jedoch ohne Gewähr. Investitionen in Wertpapiere sind mit Risiken verbunden, einschließlich des möglichen Totalverlusts. Die Analyse reflektiert den Informationsstand vom 03. März 2026. Vergangene Wertentwicklungen sind kein zuverlässiger Indikator für die zukünftige Wertentwicklung. Bitte konsultieren Sie einen qualifizierten Finanzberater, bevor Sie Anlageentscheidungen treffen. Der Autor dieser Analyse hält möglicherweise Positionen in den analysierten Wertpapieren.</div>
+</div>
+
+</body>
+</html>
