@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEM – Aktienanalyse Canvas v2.2</title>
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #1d4ed8;
+      --bg: #0f0f12;
+      --bg-card: #1a1a1f;
+      --bg-card2: #22222a;
+      --border: #2e2e38;
+      --text: #e8e8ec;
+      --text-muted: #888898;
+      --text-dim: #555566;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --teal: #14b8a6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+    .header {
+      background: linear-gradient(135deg, #00081a 0%, #001028 40%, #0f0f12 100%);
+      border-bottom: 1px solid var(--primary);
+      padding: 36px 40px 28px; display: flex; justify-content: space-between;
+      align-items: flex-start; flex-wrap: wrap; gap: 20px;
+    }
+    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .header-left h1 span { color: var(--primary); }
+    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    .header-right { text-align: right; }
+    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+    .price-change.up { background: rgba(34,197,94,0.15); color: var(--green); }
+    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+    .nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100; }
+    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+    .kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .kpi-value.green { color: var(--green); }
+    .kpi-value.red { color: var(--red); }
+    .kpi-value.orange { color: var(--primary); }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .section-title { font-size: 16px; font-weight: 700; color: white; }
+    .section-score { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+    .section-note { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+    .section-body { padding: 20px 24px; }
+    p { margin-bottom: 12px; color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+    h3:first-child { margin-top: 0; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(59,130,246,0.04); }
+    .beat { color: var(--green); font-weight: 600; }
+    .miss { color: var(--red); font-weight: 600; }
+    .neutral { color: var(--yellow); font-weight: 600; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+    .badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .badge-orange { background: rgba(255,105,0,0.15); color: #ff6900; }
+    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+    .event-item:last-child { border-bottom: none; }
+    .event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+    .dot-green { background: var(--green); }
+    .dot-red { background: var(--red); }
+    .dot-yellow { background: var(--yellow); }
+    .event-label { font-weight: 600; color: white; }
+    .event-text { font-size: 14px; color: var(--text); }
+    .risk-item { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px; }
+    .risk-title { font-weight: 600; color: white; font-size: 14px; }
+    .score-bar { display: flex; align-items: center; gap: 10px; }
+    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #60a5fa); }
+    .score-num { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .rating-box { background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(59,130,246,0.04)); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+    .rating-item .val { font-size: 20px; font-weight: 800; color: white; }
+    .rating-item .val.buy { color: var(--green); }
+    .rating-item .val.hold { color: var(--yellow); }
+    .rating-item .val.sell { color: var(--red); }
+    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+    .trigger-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .trigger-card h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .trigger-card.buy h5 { color: var(--green); }
+    .trigger-card.sell h5 { color: var(--red); }
+    .trigger-list { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
+    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    @media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+    .investor-no { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-no h5 { color: var(--red); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+    .investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+    .geo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+    .geo-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .geo-pct { font-size: 20px; font-weight: 700; color: white; }
+    .geo-note { font-size: 12px; color: var(--text-muted); }
+    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+    .outlook-card .when-then strong { color: var(--primary); }
+    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+    .source a { color: var(--text-dim); }
+    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+    .alert-box { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .pill { display: inline-block; background: rgba(59,130,246,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Tempus AI <span>TEM · NASDAQ</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 05. März 2026 · NASDAQ · Sektor: Healthcare AI / Precision Medicine</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-blue">Healthcare AI</span>
+      <span class="badge badge-blue">Oncology Genomics</span>
+      <span class="badge badge-blue">Data Platform</span>
+      <span class="badge badge-yellow">Precision Medicine</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$53.31</div>
+    <div class="price-meta">Schlusskurs 02.03.2026 · NASDAQ</div>
+    <div class="price-change down">▼ –49% vom 52W-High</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $36.22 – $104.32</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <!-- KPI OVERVIEW -->
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Kurs</div>
+      <div class="kpi-value red">$53.31</div>
+      <div class="kpi-sub">USD · 02.03.2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Marktkapitalisierung</div>
+      <div class="kpi-value">$9.5B</div>
+      <div class="kpi-sub">~178M Aktien</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Umsatz 2025</div>
+      <div class="kpi-value green">$1.27B</div>
+      <div class="kpi-sub">+83.4% YoY</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Umsatz-Guide 2026</div>
+      <div class="kpi-value orange">$1.59B</div>
+      <div class="kpi-sub">+25% YoY (Mgmt.)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">P/S (Fwd. 2026)</div>
+      <div class="kpi-value red">~6.0x</div>
+      <div class="kpi-sub">EV/Sales ~6.5x</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Adj. EBITDA 2026E</div>
+      <div class="kpi-value">$65M</div>
+      <div class="kpi-sub">Guide Mgmt.</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Bruttomargen</div>
+      <div class="kpi-value green">63.6%</div>
+      <div class="kpi-sub">Non-GAAP Q3 2025</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Nächste Earnings</div>
+      <div class="kpi-value" style="font-size:16px;">04.05.2026</div>
+      <div class="kpi-sub">Q1 2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Ø Analysten-Ziel</div>
+      <div class="kpi-value green">$80</div>
+      <div class="kpi-sub">+50% Upside · Buy</div>
+    </div>
+  </div>
+
+  <!-- S1: GESCHÄFTSMODELL -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Unternehmensübersicht</h3>
+      <p>Tempus AI, Inc. (NASDAQ: TEM) wurde 2015 in Chicago von Eric Lefkofsky gegründet und positioniert sich als führendes Healthcare-Technologieunternehmen an der Schnittstelle von klinischer Genomik und künstlicher Intelligenz. Das Unternehmen verfolgt eine klare Mission: die Einführung von KI in der Präzisionsmedizin zu beschleunigen und damit jeden Patienten von den Erfahrungen aller vorhergehenden Patienten profitieren zu lassen. Tempus agiert als ein "Full-Stack"-Anbieter – von der Probenentnahme über die genomische Analyse bis hin zur KI-gestützten klinischen Entscheidungsunterstützung.</p>
+      <p>Das Geschäftsmodell basiert auf zwei Hauptsegmenten, die sich gegenseitig verstärken. Das Diagnostiksegment (Genomics) umfasst eine breite Palette genomischer Tests für Onkologie und Erbkrankheiten, darunter der Multi-Gen-Panel-Test xT für solide Tumoren, die Liquid-Biopsy xF, den RNA-Transkriptomtest xR und den personalisierten MRD-Test (Minimal Residual Disease) xM. Durch die Akquisition von Ambry Genetics (2024, ~$600M) wurde das Portfolio um Erbkrankheitstests deutlich erweitert. Das Diagnostiksegment bedient dabei vorwiegend Onkologen, Pathologen und klinische Labore in über 5.000 Gesundheitseinrichtungen.</p>
+      <p>Das zweite Segment, Data & Services, ist das strategisch hochwertigere und margenstärkere Standbein. Hier lizenziert Tempus über die Plattform "Insights" de-identifizierte multimodale Datenbibliotheken an Pharmaunternehmen, Biotech-Firmen und Forscher. Die Plattform "Lens" ermöglicht es Life-Sciences-Partnern, auf strukturierte Genomik-, Klinik- und Bildgebungsdaten zuzugreifen, um KI-Modelle zu trainieren. Ergänzend dazu bietet Tempus klinische Studienabgleiche (Trials), die CRO-Tochter Compass, KI-Algorithmen für Diagnosen (Algos) sowie generative KI-Assistenten für Kliniker (David). Mit 19 der Top-20-Pharmaunternehmen als Partner und einem Datensatz von über 45 Millionen Patientenakten und 450 Petabyte multimodaler Daten ist Tempus einzigartig positioniert.</p>
+      <p>Das Kostenmodell ist relativ kapitalintensiv: Die genomischen Labors erfordern erhebliche Betriebskosten, während der Aufbau der Datenplattform hohe initiale Investitionen in IT-Infrastruktur und KI-Compute erfordert. Langfristig ist das Modell jedoch auf Operating Leverage ausgelegt: Mit wachsenden Volumina sinken die Grenzkosten pro Test, während der Datenwert der Plattform überproportional steigt. Die Umsatzstruktur kombiniert transaktionale Test-Einnahmen (pro Probe) mit wiederkehrenden Einnahmen aus mehrjährigen Datenlizenzverträgen – ein Mix, der zunehmend in Richtung der hochmargigen Datenseite verschoben wird.</p>
+      <div class="source">Quellen: Tempus AI Investor Relations (investors.tempus.com, Feb. 2026); Tempus Q4 2025 Earnings Call (24.02.2026); Q3 2025 Corporate Deck (04.11.2025); Yahoo Finance (02.03.2026).</div>
+    </div>
+  </div>
+
+  <!-- S2: BURGGRABEN -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben & Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Data Moat – Der Kern des Wettbewerbsvorteils</h3>
+      <p>Tempus verfügt über einen der stärksten Daten-Burggräben in der gesamten Healthcare-AI-Industrie. Die Kombination aus 45+ Millionen Patientenakten, 450 Petabyte multimodaler klinischer Daten (Genomik, Imaging, EHR-Daten, Pathologie-Slides) und dem direkten Zugang zu über 5.000 Gesundheitseinrichtungen schafft eine nahezu uneinholbare Datenbasis. CEO Eric Lefkofsky hat es treffend formuliert: "Wenn jemand unser Datenbusiness replizieren wollte, müsste er all diese Echtzeit-Daten von Grund auf neu aufbauen – das ist außerordentlich schwer." Jeder durchgeführte genomische Test fügt dem Datensatz neue, strukturierte klinische Information hinzu, was den Wert des gesamten Datenbankbestandes erhöht – ein klassischer Flywheel-Effekt.</p>
+      <h3>Netzwerkeffekte & Switching Costs</h3>
+      <p>Der Netzwerkeffekt bei Tempus ist mehrseitig und strukturell tief verankert. Je mehr Ärzte die Plattform nutzen, desto mehr Daten werden gesammelt, was die KI-Algorithmen verbessert und in der Folge mehr Ärzte anzieht. Die Switching Costs sind erheblich: Kliniken, die Tempus in ihre EHR-Infrastruktur und Behandlungsworkflows integriert haben (wie Northwestern Medicine mit dem KI-Kliniker "David"), würden durch einen Wechsel erhebliche operationale Disruption riskieren. Auf Pharmaseite binden mehrjährige Datenlizenzverträge (Net Revenue Retention von beeindruckenden 126% belegt die Stickyness) die Partner langfristig.</p>
+      <h3>Technologischer Vorsprung</h3>
+      <p>Durch gezielte Akquisitionen hat Tempus seinen technologischen Vorsprung systematisch ausgebaut. Die Übernahme von Paige.AI (2025) für digitale Pathologie und KI-basierte Slide-Analyse stärkte die Bildgebungskomponente der Datenbasis erheblich. Die Akquisition von Deep 6 AI für klinischen Trial-Matching und Ambry Genetics für Erbkrankheitstests schufen ein umfassendes Ökosystem, das Konkurrenten nur schwer replizieren können. Der xT CDx-Test ist FDA-zugelassen und als ADLT (Advanced Diagnostic Laboratory Test) klassifiziert, was eine deutlich höhere Erstattung ($4.500 vs. $1.600 Standard) ermöglicht – ein regulatorischer Graben, der aufgebaut werden musste.</p>
+      <h3>Schwachstellen des Burggrabens</h3>
+      <p>Trotz der strukturellen Stärken bestehen reale Schwachstellen. Der direkte Wettbewerber Guardant Health verfügt über ein fokussierteres, bereits weiter kommerzialisiertes Liquid-Biopsy-Portfolio und eine tendenziell tiefere klinische Evidenz bei bestimmten Tests. Natera ist bei MRD-Tests bereits deutlich weiter in der Kommerzialisierung. Die sehr breite Produktpalette von Tempus (Oncology, Hereditary, Cardiology, Psychiatry, Radiology) birgt das Risiko der Verzettelung und verlangsamter Tiefe in einzelnen Bereichen. Zudem ist der Datenburggraben nur wertvoll, wenn die KI-Modelle tatsächlich klinisch bessere Entscheidungen ermöglichen – ein Nachweis, der für einige Produktbereiche noch aussteht.</p>
+      <div class="source">Quellen: BeyondSPX.com (01.12.2025); Tempus Q3 2025 Investor Presentation (04.11.2025); Seeking Alpha (19.12.2025); ETF Trends (17.09.2025); TIKR.com (28.02.2026).</div>
+    </div>
+  </div>
+
+  <!-- S3: LETZTE 4 QUARTALE -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Beat-Ratio: 3/4 (Revenue) · 2/4 (EPS)</div>
+    </div>
+    <div class="section-body">
+      <p>Tempus AI befindet sich in einer Phase aggressiven Wachstums, das maßgeblich durch die Integration von Ambry Genetics (Hereditary) und Paige.AI (Digital Pathology) geprägt ist. Die Umsätze übertrafen in allen 4 Quartalen die Konsensschätzungen, während beim Non-GAAP EPS ein gemischtes Bild überwiegt. Nächste Quartalsergebnisse: <strong>04. Mai 2026 (Q1 2026)</strong>.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quartal</th>
+              <th>Umsatz Ist</th>
+              <th>Umsatz YoY</th>
+              <th>Revenue vs. Konsens</th>
+              <th>Non-GAAP EPS Ist</th>
+              <th>EPS vs. Konsens</th>
+              <th>Adj. EBITDA</th>
+              <th>Kursreaktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q4 2025</strong> (Dez. '25)</td>
+              <td>$367.2M</td>
+              <td class="beat">+83.0%</td>
+              <td><span class="badge badge-green">Beat +0.1%</span></td>
+              <td>–$0.04</td>
+              <td><span class="badge badge-red">Miss –66.7%</span></td>
+              <td>+$12.9M</td>
+              <td class="miss">–3.7% AH</td>
+            </tr>
+            <tr>
+              <td><strong>Q3 2025</strong> (Sep. '25)</td>
+              <td>$334.2M</td>
+              <td class="beat">+84.7%</td>
+              <td><span class="badge badge-green">Beat +2.4%</span></td>
+              <td>–$0.11</td>
+              <td><span class="badge badge-green">Beat +31.3%</span></td>
+              <td>+$1.5M ✓</td>
+              <td class="miss">–2.6% AH</td>
+            </tr>
+            <tr>
+              <td><strong>Q2 2025</strong> (Jun. '25)</td>
+              <td>$314.6M</td>
+              <td class="beat">+89.6%</td>
+              <td><span class="badge badge-green">Beat</span></td>
+              <td>–$0.16</td>
+              <td><span class="badge badge-yellow">In Line</span></td>
+              <td>–$12M</td>
+              <td class="neutral">~Flat</td>
+            </tr>
+            <tr>
+              <td><strong>Q1 2025</strong> (Mär. '25)</td>
+              <td>$255.2M</td>
+              <td class="beat">+74.8%</td>
+              <td><span class="badge badge-green">Beat</span></td>
+              <td>–$0.30</td>
+              <td><span class="badge badge-red">Miss</span></td>
+              <td>–$19M</td>
+              <td class="beat">+8% nach Results</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Wichtigste Management-Statements (Q4 2025)</h3>
+      <p>CEO Eric Lefkofsky: "2025 war ein außergewöhnliches Jahr für Tempus – die Stärke beider Produktlinien übertraf unsere ursprünglichen Erwartungen. Wir treten ins Jahr 2026 in einer außergewöhnlich starken Position ein, mit beiden Hauptgeschäftsbereichen, die in ihrem Wachstum beschleunigen." Das Insights-Segment (Datenlizenzierung) wuchs im Q4 2025 um ~68% YoY (bereinigt um den AstraZeneca-Warrant-Effekt aus Q4 2024). Der Total Remaining Contract Value (TCV-Backlog) überstieg am Jahresende $1,1 Milliarden – ein starkes Indiz für künftige Umsatzvisibilität.</p>
+      <p>Die Q4-Reaktion war trotz des Umsatz-Beats negativ, da die Adj. EBITDA-Marge für das Gesamtjahr 2025 (–$7.4M) leicht unter dem Management-Ziel "slightly positive" blieb und die konservative 2026-Guidance von nur ~25% Wachstum (nach 83% in 2025) für Enttäuschung sorgte. Der Markt hatte kurzfristig höhere Adj.-EBITDA-Margen erwartet.</p>
+      <div class="source">Quellen: Tempus AI Q4 2025 Earnings Release (24.02.2026); Benzinga (24.02.2026); Nasdaq.com (25.02.2026); Zacks Investment Research (25.02.2026); Tempus IR (investors.tempus.com).</div>
+    </div>
+  </div>
+
+  <!-- S4: WACHSTUM -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Umsatzwachstum – Historisch & Prognose</h3>
+      <p>Tempus AI befindet sich eindeutig in der "Hyper-Growth"-Phase. Nach organischem Wachstum von ~30% in 2024 ($693M) beschleunigte sich das Umsatzwachstum 2025 auf außergewöhnliche 83.4% auf $1.27 Milliarden – ein Sprung, der maßgeblich durch die vollständige Integration der Ambry-Akquisition (Hereditary Testing) getrieben wurde. Das organische Oncology-Volumenwachstum lag bei starken 27% YoY in Q3 2025, mit dem Hereditary-Segment bei 37% pro forma. Management bestätigt ein Ziel von ~25% jährlichem Wachstum über die nächsten 3 Jahre – deutlich bescheidener als die 83% in 2025, aber reflektiert den höheren Basiseffekt post-Akquisition.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Jahr</th><th>Umsatz</th><th>Wachstum YoY</th><th>Genomics</th><th>Data & Services</th><th>Adj. EBITDA</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>2023</strong></td><td>~$532M</td><td class="beat">~30%</td><td>~$345M</td><td>~$187M</td><td>–$60M</td></tr>
+            <tr><td><strong>2024</strong></td><td>$693M</td><td class="beat">+30.2%</td><td>$451M (65%)</td><td>$242M (35%)</td><td>–$65M</td></tr>
+            <tr><td><strong>2025</strong></td><td>$1.27B</td><td class="beat">+83.4%</td><td>~$910M (~72%)</td><td>~$360M (~28%)</td><td>–$7.4M</td></tr>
+            <tr><td><strong>2026E</strong></td><td>$1.59B</td><td class="beat">~+25%</td><td>~$1.1B</td><td>~$490M</td><td>+$65M</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Geografische Verteilung</h3>
+      <p>Tempus ist derzeit nahezu vollständig auf den US-amerikanischen Markt konzentriert. Das Unternehmen arbeitet aktiv an einer internationalen Expansion, die jedoch noch in den Anfängen steckt. Die internationale Diversifikation stellt mittelfristig eine signifikante Wachstumschance dar, ist aber zum jetzigen Zeitpunkt noch kein wesentlicher Umsatztreiber.</p>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">USA</div>
+          <div class="geo-pct">&gt;95%</div>
+          <div class="geo-note">Kernmarkt, 5.000+ Institutionen</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">International</div>
+          <div class="geo-pct">&lt;5%</div>
+          <div class="geo-note">Wachstumsphase, Pixel EU-Expansion</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">TAM Oncology</div>
+          <div class="geo-pct">$60B+</div>
+          <div class="geo-note">Adressierbarer Markt Testing</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">TAM Hereditary</div>
+          <div class="geo-pct">$150B+</div>
+          <div class="geo-note">10-20x größer als Oncology-Testing</div>
+        </div>
+      </div>
+      <h3>Profitabilitätswachstum & Einschätzung</h3>
+      <p>Das Non-GAAP Genomics-Bruttomargentrend ist bemerkenswert: Verbesserung von 48% in Q3 2024 auf 61.7% in Q3 2025, getrieben durch ASP-Verbesserungen (ADLT-Migration), Laboreffizienz und Ambry-Synergien. Das Data & Services-Segment operiert bereits mit Non-GAAP-Bruttomargen von ~70%. Diese Profitabilitätsdynamik schafft erheblichen operativen Hebel. Kritisch anzumerken ist, dass das 83%-Wachstum 2025 zu etwa 40-50 Prozentpunkten durch akquisitionsbedingte Volumeneffekte (Ambry) erklärt wird – das organische Wachstum ist also substanziell, aber deutlich kleiner als die Headline-Zahl suggeriert. Die Nachhaltigkeit des ~25%-Wachstums über 3 Jahre erscheint bei erfolgreicher ADLT-Migration und internationaler Expansion realistisch erreichbar.</p>
+      <div class="source">Quellen: Tempus AI Q4 2025 Earnings (24.02.2026); Tempus Q3 2025 Overview (04.11.2025); ETF Trends (17.09.2025); Yahoo Finance (05.12.2025).</div>
+    </div>
+  </div>
+
+  <!-- S5: BEWERTUNG -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung & Multiples</div>
+      <div class="section-score">Score: 4/10</div>
+    </div>
+    <div class="section-body">
+      <p>Die Bewertung von Tempus AI ist das zentrale Investment-Dilemma. Die Aktie ist auf Basis klassischer Value-Metriken teuer – es gibt kein KGV (GAAP-Verluste), und der P/S ist premium. Gleichzeitig erscheint der Forward P/S von ~6x für ein Healthcare-AI-Unternehmen mit 25% Wachstum, starkem Datenburggraben und klarer Profitabilitätstrajektorie bei näherer Betrachtung nicht exzessiv – verglichen mit Peers.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Metrik</th><th>Wert (aktuell)</th><th>Interpretation</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Kurs (02.03.2026)</td><td>$53.31</td><td>–49% vom 52W-High ($104.32)</td></tr>
+            <tr><td>Marktkapitalisierung</td><td>$9.5B</td><td>–</td></tr>
+            <tr><td>Enterprise Value</td><td>~$10.3B</td><td>Nettoverschuldung ~$576M</td></tr>
+            <tr><td>P/S (TTM, ~$1.27B Umsatz)</td><td>~7.5x</td><td class="miss">Deutliches Premium</td></tr>
+            <tr><td>P/S (Fwd. 2026, $1.59B Guide)</td><td>~6.0x</td><td class="neutral">Hohes, aber vertretbares Premium</td></tr>
+            <tr><td>EV/Sales (2026)</td><td>~6.5x</td><td class="neutral">Im Peer-Mittelfeld</td></tr>
+            <tr><td>P/E (GAAP)</td><td>n.m.</td><td class="miss">GAAP-Verlust (~–$245M in 2025)</td></tr>
+            <tr><td>EV/EBITDA (Adj. 2026E)</td><td>~158x</td><td class="miss">Extrem hoch, aber EBITDA noch sehr klein</td></tr>
+            <tr><td>Net Revenue Retention</td><td>126%</td><td class="beat">Starke Kundenerweiterung</td></tr>
+            <tr><td>Konsens-Zielkurs (Ø)</td><td>$78–$83</td><td class="beat">+47–56% Upside</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Bewertungseinschätzung</h3>
+      <p>Bei einem Forward P/S von ~6x für ein Unternehmen, das 25% Wachstum auf einem $150B+ adressierbaren Markt anstrebt und erstmals positives Adj. EBITDA erzielt, ist die Bewertung kein Schnäppchen, aber für spezialisierte Healthcare-AI-Investoren vertretbar. Das Problem liegt im Vergleich mit der historischen Peer-Bewertung: Guardant Health handelt bei ~13x EV/Sales (höheres GAAP-Defizit, aber fokussierteres Liquid-Biopsy-Portfolio), Natera bei ~15x. Tempus handelt zu einem überraschenden Abschlag trotz schnellerem Wachstum – dies spiegelt die Marktskepsis rund um den komplexen Akquisitionsintegrations-Track und den noch ausstehenden Nachweis des "Plattformprämiums" wider. Ein Bewertungsaufholpotenzial existiert, wenn die Adj. EBITDA-Guidance für 2026 ($65M) übertroffen wird.</p>
+      <p>Kritisch ist festzuhalten: Bei einem Wachstumsrückgang auf unter 15% – z.B. durch Rückschläge bei der ADLT-Erstattungsexpansion – würde ein Forward P/S von 6x auf einmal erheblich weniger attraktiv wirken und eine scharfe Neubewertung nach unten provozieren.</p>
+      <div class="source">Quellen: StockAnalysis.com/tem/statistics (03.03.2026); BeyondSPX.com (01.12.2025); Nasdaq.com/Zacks (05.12.2025); TickerNerd.com (02.03.2026).</div>
+    </div>
+  </div>
+
+  <!-- S6: CASHFLOW -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen & Kapitalqualität</div>
+      <div class="section-score">Score: 4/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Margenentwicklung</h3>
+      <p>Die Bruttomarge von Tempus entwickelt sich positiv und nähert sich Software-ähnlichen Niveaus. Das Non-GAAP Bruttomargen-Niveau von 63.6% in Q3 2025 (400 Basispunkte bessert als Q3 2024) zeugt von echtem strukturellen Fortschritt. Das Data & Services Segment erreicht bereits ~70% Bruttomarge, während das Genomics-Segment von 48% auf 61.7% geklettert ist. Die GAAP-Betriebsmarge bleibt mit ca. –19% aber deutlich negativ, belastet durch Abschreibungen auf Goodwill aus den Akquisitionen, Stock-Based Compensation (~$175M annualisiert) und Integrationskosten.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Metrik</th><th>Q3 2024</th><th>Q3 2025</th><th>Trend</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Non-GAAP Bruttomarge gesamt</td><td>59.6%</td><td class="beat">63.6%</td><td class="beat">↑ +400 bps</td></tr>
+            <tr><td>Non-GAAP Genomics-Marge</td><td>48.0%</td><td class="beat">61.7%</td><td class="beat">↑ +1.370 bps</td></tr>
+            <tr><td>Non-GAAP Data & Services-Marge</td><td>~65%</td><td class="beat">69.7%</td><td class="beat">↑ Positiv</td></tr>
+            <tr><td>GAAP Betriebsmarge</td><td>~–30%</td><td class="miss">~–19%</td><td class="neutral">↑ Verbesserung</td></tr>
+            <tr><td>Adj. EBITDA-Marge</td><td>neg.</td><td class="beat">+0.4% (Q3)</td><td class="beat">Erste Profitabilität</td></tr>
+            <tr><td>GAAP Net Loss (Q3)</td><td>–$56M</td><td class="miss">–$80M</td><td class="miss">↑ Gestiegen durch Paige/Akquis.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Bilanz & Verschuldung</h3>
+      <p>Die Bilanz hat durch die Juli 2025 emittierten Convertible Senior Notes ($750M, Coupon 0.75%) eine substanzielle Verschuldung aufgebaut. Nach Tilgung bestehender Schulden und Transaktionskosten verfügt Tempus über $604.8M Cash + $155M Wertpapiere = ~$759.7M Liquidität. Die Gesamtverschuldung beläuft sich auf ~$1.34B (überwiegend die Wandelanleihe), was ein Net Debt-to-EBITDA-Verhältnis von ~neg. ergibt (da EBITDA noch sehr klein). Der Debt/Equity-Ratio von 2.63 signalisiert signifikante finanzielle Hebelwirkung. Die Liquidität ist für die nächsten 2–3 Jahre ausreichend, um ohne weitere Kapitalerhöhung zu operieren – ein wichtiger Schutzwall für bestehende Aktionäre. ROE liegt bei –72.6%, ROIC bei –12.5% – typisch für ein hochinvestierendes Wachstumsunternehmen, das seine Kapitalstruktur noch aufbaut. Eine Dividende wird nicht gezahlt.</p>
+      <div class="source">Quellen: Tempus AI Q4 2025 Earnings (24.02.2026); StockAnalysis.com/tem/statistics (03.03.2026); Tempus Q3 2025 Overview (04.11.2025); Finimize.com (29.12.2025).</div>
+    </div>
+  </div>
+
+  <!-- S7: PEER-VERGLEICH -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Unternehmen</th>
+              <th>Ticker</th>
+              <th>Market Cap</th>
+              <th>Umsatz (TTM)</th>
+              <th>Rev. Growth</th>
+              <th>Bruttomarge</th>
+              <th>Betriebsmarge</th>
+              <th>P/S (Fwd.)</th>
+              <th>GAAP Profit?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:rgba(59,130,246,0.06);">
+              <td><strong>Tempus AI</strong></td>
+              <td><strong>TEM</strong></td>
+              <td>$9.5B</td>
+              <td>$1.27B</td>
+              <td class="beat"><strong>+83%</strong></td>
+              <td>63.6% (nGAAP)</td>
+              <td class="miss">–19%</td>
+              <td class="miss">~6.0x</td>
+              <td class="miss">Nein</td>
+            </tr>
+            <tr>
+              <td>Guardant Health</td>
+              <td>GH</td>
+              <td>$13.1B</td>
+              <td>$982M</td>
+              <td class="beat">+33%</td>
+              <td>~66% (nGAAP)</td>
+              <td class="miss">–37%</td>
+              <td class="miss">~13x</td>
+              <td class="miss">Nein</td>
+            </tr>
+            <tr>
+              <td>Veeva Systems</td>
+              <td>VEEV</td>
+              <td>$30B</td>
+              <td>$3.2B</td>
+              <td class="neutral">+16%</td>
+              <td>~74%</td>
+              <td class="beat">+29%</td>
+              <td class="beat">~8x</td>
+              <td class="beat">Ja, profitabel</td>
+            </tr>
+            <tr>
+              <td>Recursion Pharma.</td>
+              <td>RXRX</td>
+              <td>~$2.5B</td>
+              <td>~$55M</td>
+              <td class="neutral">~+25%</td>
+              <td>~70%</td>
+              <td class="miss">–500%+</td>
+              <td class="miss">~45x</td>
+              <td class="miss">Nein</td>
+            </tr>
+            <tr>
+              <td>Roper Tech./Flatiron</td>
+              <td>ROP (ROPR)</td>
+              <td>$60B</td>
+              <td>~$7.0B</td>
+              <td class="neutral">+13%</td>
+              <td>~60%</td>
+              <td class="beat">~24%</td>
+              <td class="beat">~4x</td>
+              <td class="beat">Ja, profitable</td>
+            </tr>
+            <tr>
+              <td>Microsoft (Health.AI)</td>
+              <td>MSFT</td>
+              <td>$3.0T</td>
+              <td>$261B</td>
+              <td class="neutral">+16%</td>
+              <td>~70%</td>
+              <td class="beat">~45%</td>
+              <td class="beat">~10x</td>
+              <td class="beat">Ja, hochprofitabel</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Qualitative Einordnung</h3>
+      <p>Im direkten Vergleich mit Guardant Health – dem nächsten Wettbewerber in der Onkologie-Diagnostik – überrascht Tempus: Trotz deutlich höherem Umsatz und deutlich schnellerem Wachstum handelt Tempus bei einem Abschlag von ca. 50% zum EV/Sales von Guardant (6.5x vs. 13x). Dies erklärt sich durch Guardants fokussierteren, klinisch tiefer validierten Liquid-Biopsy-Ansatz (Shield-Test) und Tempus' höherer Integrationsrisiken aus den Akquisitionen. Veeva Systems als profitabler Life-Sciences-Cloud-Anbieter illustriert, wohin Tempus langfristig tendieren will: hohe Margen, wiederkehrende Umsätze, tiefe Kundenbindung. Recursion Pharmaceuticals zeigt dagegen die Gefahren eines zu breiten KI-Pharma-Ansatzes ohne kurzfristige Kommerzialisierung. Microsoft (Azure Health) und Google/DeepMind sind als Hyperscaler keine direkten Konkurrenten, könnten aber über Plattformangebote mittelfristig in das Daten-Lizenzierungsgeschäft eintreten – ein reales Risiko.</p>
+      <div class="source">Quellen: StockAnalysis.com (03.03.2026); BeyondSPX.com (01.12.2025); StockAnalysis VEEV (03.03.2026); StockTitan GH (02.03.2026); eigene Berechnungen.</div>
+    </div>
+  </div>
+
+  <!-- S8: NEWS & EVENTS -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News & Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen (Company-spezifische Events)</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">03.03.2026 – Strategische Kollaboration mit Merck <span class="badge badge-green">Sehr Positiv</span></div>
+          <div class="event-text">Tempus und Merck unterzeichneten eine mehrjährige Zusammenarbeit zur Beschleunigung KI-gestützter Präzisionsmedizin in der Onkologie. Merck erhält Zugang zu Tempus' de-identifiziertem multimodalem Datensatz, der Lens-Plattform und GPU-Infrastruktur für AI/ML-Modelltraining. Quellen: Tempus IR (03.03.2026); Benzinga (03.03.2026).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">24.02.2026 – Q4 & FY2025 Ergebnisse: Revenue Beat, EBITDA Miss <span class="badge badge-yellow">Gemischt</span></div>
+          <div class="event-text">Umsatz $367.2M (+83% YoY) schlug Konsens, Full-Year-Adj.-EBITDA mit –$7.4M verfehlte "slightly positive"-Ziel; 2026-Guidance ($1.59B, +25%) enttäuschte relative zur Buy-Side-Erwartung von stärkerem Leverage. Aktie –3.7% im Nachbörslichen Handel. Quellen: Tempus IR (24.02.2026).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">18.02.2026 – Launch HRD-RNA-Algorithmus <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Tempus lancierte seinen neuen HRD-RNA-Algorithmus für Homologous Recombination Deficiency – ein Next-Generation-Modell, das die BRCA-unabhängige Identifikation therapierelevanter Mutationen verbessert und Tempus' Algorithmus-Portfolio stärkt. Quelle: Tempus Pressemitteilung (18.02.2026).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">21.01.2026 – Launch Paige Predict (Digital Pathology AI) <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Nach der Paige.AI-Akquisition 2025 launcht Tempus "Paige Predict" – eine Suite KI-gestützter biomarkerprediktiver Lösungen für Digital Pathology, die Physicians bei der Therapiewahl unterstützen. Quelle: Tempus Pressemitteilung (21.01.2026).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">12.02.2026 – Kollaboration Median Technologies (Lung Cancer AI) <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Integration der FDA-zugelassenen eyonis® LCS KI-Lösung für Lungenkrebs-Screening in die Tempus Pixel-Plattform. Medicare New Tech APC-Erstattung von $601–$700 pro Untersuchung für 2026. Erste US-Sites operational ab Q3 2026. Quelle: Tempus/Median Pressemitteilung (12.02.2026).</div>
+        </div>
+      </div>
+      <h3>Ebene 2: Branche (Sector-spezifische Events)</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Feb. 2026 – Guardant Health $282M Q4 Revenue (+39% YoY) <span class="badge badge-blue">Branchenindikator</span></div>
+          <div class="event-text">Guardant Health's starke Q4-Zahlen (+39% YoY auf $982M FY2025) und 2026-Guidance (+27-30%) bestätigen den strukturellen Wachstumstrend in der Liquid-Biopsy- und Onkologie-Diagnostik als robusten Sektor-Tailwind. Guardant's Shield-Screening-Erfolge (87k Tests 2025) zeigen, dass der Screening-Markt real wächst. Quelle: Guardant Health Earnings (19.02.2026).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Q1 2026 – Veeva Systems Agentic AI Launch <span class="badge badge-blue">Branchentrend</span></div>
+          <div class="event-text">Veeva Systems' erfolgreiche Integration von Agentic AI in alle Life-Sciences-Kernanwendungen (Vault CRM Bot, Voice Control) validiert den Branchentrend hin zu KI-gestützten klinischen und forschungsorientierten Workflows – direkt relevant für Tempus' David-KI-Kliniker und die Datenlizenzierung. Quelle: Veeva Q4 FY2026 (04.03.2026).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – CMS ADLT-Erstattungsregeln unter Druck <span class="badge badge-yellow">Branchenrisiko</span></div>
+          <div class="event-text">Änderungen in der CMS-Erstattungspolitik für Advanced Diagnostic Laboratory Tests (ADLT) durch den jüngst amtierenden Trump-Administrator könnten die Erstattungsexpansion für genomische Tests verzögern oder reduzieren – eine zentrale Variable für Tempus' ASP-Verbesserungsstrategie. Quelle: Healthcare-Fachpresse, Jan. 2026.</div>
+        </div>
+      </div>
+      <h3>Ebene 3: Makro (Gesamtwirtschaft & Politik)</h3>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – Zinspolitik der Fed: Risiko-Off-Stimmung bei Growth-Titeln <span class="badge badge-yellow">Neutral/Negativ</span></div>
+          <div class="event-text">Das anhaltende Zinsumfeld (Fed Funds Rate ~4.25-4.50% per Q1 2026) belastet hochbewertete, nicht-profitable Growth-Aktien strukturell. TEM, das bei einem Kurs-Umsatz-Verhältnis von ~6x keine GAAP-Gewinne zeigt, reagiert überdurchschnittlich sensitiv auf makroökonomische "Risk-Off"-Phasen. Der aktuelle Markt-Drawdown des Nasdaq (~–5% im Feb/März 2026) beeinträchtigt die Aktie zusätzlich. Quelle: Bloomberg/Reuters (März 2026).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – AI-Regulierung: Executive Order & FDA Digital Health Policy <span class="badge badge-yellow">Beobachten</span></div>
+          <div class="event-text">Die US-Administration hat begonnen, KI in der Medizintechnik stärker zu regulieren. Die FDA verschärft Leitlinien für KI-basierte Software als medizinisches Gerät (SaMD) – für Tempus' Algos- und Pixel-Produkte relevant, kann aber auch als Burggraben wirken (regulatorische Hürden für Wettbewerber). Quelle: FDA Digital Health Center, Jan. 2026.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S9: TECHNISCHE ANALYSE -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 4/10</div>
+    </div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom: 16px;">
+        <div class="kpi-card">
+          <div class="kpi-label">Kurs</div>
+          <div class="kpi-value" style="font-size:18px; color:var(--red);">$53.31</div>
+          <div class="kpi-sub">02.03.2026</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 20</div>
+          <div class="kpi-value" style="font-size:18px;">~$56</div>
+          <div class="kpi-sub">Kurs darunter</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 50</div>
+          <div class="kpi-value" style="font-size:18px;">~$68</div>
+          <div class="kpi-sub">Kurs deutl. darunter</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 200</div>
+          <div class="kpi-value" style="font-size:18px;">~$68</div>
+          <div class="kpi-sub">Kurs deutl. darunter</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">RSI (14)</div>
+          <div class="kpi-value" style="font-size:18px; color:var(--yellow);">~44</div>
+          <div class="kpi-sub">Neutral/leicht bärisch</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">52W-High</div>
+          <div class="kpi-value" style="font-size:18px;">$104.32</div>
+          <div class="kpi-sub">–49% vom High</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">MACD</div>
+          <div class="kpi-value" style="font-size:18px; color:var(--red);">Bearish</div>
+          <div class="kpi-sub">Signal unter 0-Linie</div>
+        </div>
+      </div>
+      <h3>Chartbild & Einschätzung</h3>
+      <p>TEM befindet sich in einem kurzfristigen bis mittelfristigen Abwärtstrend. Die Aktie handelt deutlich unterhalb ihrer SMA 50 und SMA 200 (beide konvergieren bei ca. $68), was einen klassischen "Death Cross"-Bereich darstellt. Der RSI bei ~44 signalisiert keine Überverkauft-Situation und lässt Raum für weiteren Rückgang. Das MACD ist unter der Signallinie – technisch bearisch. Die Aktie hat Support bei ca. $36 (52W-Tief) und widerstand bei ~$55–$60 (ehemalige Supportzone).</p>
+      <p>Positiv zu vermerken: Ein Pivot-Kaufsignal wurde am 12. Februar 2026 ausgelöst, und die Aktie hat sich seitdem ca. 5% erholt. Volumen steigt mit dem Preis – ein technisch positives Zeichen für kurzfristige Stabilisierung. Der breitere Abwärtstrend vom Jahreshoch ($104) ist jedoch intakt. Für einen echten Trendwechsel ist ein nachhaltiger Ausbruch über die $60–$65-Zone notwendig. Das charttechnische Bild ist für kurzfristig orientierte Anleger unattraktiv; für langfristig orientierte Investoren signalisiert die fundamentale Divergenz (starke Fundamentaldaten vs. schwacher Chart) eine potenzielle antizyklische Kaufgelegenheit.</p>
+      <div class="source">Quellen: Investing.com/TEM Technical (03.03.2026); StockInvest.us (02.03.2026); Benzinga Technicals (03.03.2026); Investtech.com (03.03.2026).</div>
+    </div>
+  </div>
+
+  <!-- S10: RISIKEN & CHANCEN -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken & Chancen</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Strukturelle & zyklische Risiken</h3>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Erstattungs- & Regulierungsrisiko (ADLT/CMS)</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-yellow">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Das gesamte Geschäftsmodell basiert auf der Annahme steigender Erstattungsraten durch die Migration zu FDA-zugelassenen ADLT-Tests ($4.500/Test vs. $1.600 Standard). Änderungen der CMS-Richtlinien oder Verzögerungen bei FDA-Zulassungen (xF noch ausstehend) könnten die ASP-Verbesserungsstrategie erheblich verlangsamen. Wahrscheinlichkeit: 30%. Finanzielle Auswirkung: –15% bis –25% Umsatzpotenzial 2026/2027.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ GAAP-Profitabilitätsverzögerung & Kapitalstruktur</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Trotz des non-GAAP EBITDA-Fortschritts bleibt der GAAP-Nettoverlust erheblich (–$245M in 2025), getrieben durch Stock-Based Compensation (~$175M p.a.) und Akquisitionsamortisierung. Die Convertible Notes ($750M, Wandlung ab ~$70) könnten bei Rückzahlung oder Wandlung erhebliche Verwässerung für Aktionäre bedeuten. Wahrscheinlichkeit Verwässerung: 40% bis 2027.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Abhängigkeit von Großkunden & Konzentration</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Der AstraZeneca-Deal (2024, multi-hundert-Millionen-Rahmenvertrag) hat eine signifikante Umsatzkomponente geliefert. Die Nicht-Verlängerung oder Kündigung solcher Großverträge könnte das Data-Segment empfindlich treffen. Der "Insights"-Umsatz Q4 2024 beinhaltete einen nicht-wiederkehrenden Warrant-Effekt, der die Q4 2025 YoY-Vergleichbarkeit verzerrt. Wahrscheinlichkeit: 20%. Auswirkung: –5–10% Umsatz pro verlorenen Großvertrag.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Wettbewerb: Guardant, Natera & Big Tech</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Guardant Health und Natera sind in spezifischen Teilmärkten (Liquid Biopsy, MRD) bereits weiter kommerzialisiert. Microsoft und Google können als Hyperscaler mit eigenen Healthcare-AI-Plattformen die Datenlizenzierungsmargen komprimieren. Die breite Produktpalette von Tempus schützt teilweise durch Diversifikation, birgt aber gleichzeitig Risiken der Fokussierung der Ressourcen. Wahrscheinlichkeit signifikanter Marktanteilsverlust: 25%.</div>
+      </div>
+      <h3>AI-Risiko & Technologische Disruption (User-Frage)</h3>
+      <p>Als primär KI-getriebenes Unternehmen ist Tempus selbst sowohl Gewinner als auch potenzielles Opfer von KI-Disruption. Das Bullische Szenario: Generalistische KI-Modelle (GPT-ähnlich) können ohne Tempus' proprietäre klinische Daten keine klinisch validen Diagnosen treffen – der Datenburggraben bleibt unüberwindlich. Das Bärische Szenario: Falls OpenAI, Google oder Microsoft für spezifische Healthcare-Anwendungen proprietäre Datenzugangsvereinbarungen mit Krankenhausnetzwerken direkt aufbauen (ohne Tempus), könnte das Datenlizenzierungsgeschäft unter Preisdruck geraten. Kurz- bis mittelfristig ist das Risiko gering (diese Datenbasis ist nicht über Nacht zu replizieren); langfristig (5+ Jahre) ist es ein reales strategisches Risiko, das Aufmerksamkeit erfordert.</p>
+      <h3>Chancen</h3>
+      <p>Die Wachstumschancen sind substanziell und real: Die vollständige ADLT-Migration des xT CDx-Tests (30% aktuell → "vast majority" bis Ende 2026) könnte die durchschnittliche Erstattung je Onkologie-Test von ~$1.600 auf ~$3.500–$4.500 anheben und damit die Genomics-Marge weiter auf 70%+ treiben. Die MRD-Erstattung (xM-Test) durch Medicare könnte einen Milliarden-Dollar-Markt erschließen. Die Expansion des Hereditary-Screening (Ambry, TAM >$150B) und die Internationalisierung (Pixel EU-Expansion, Lung Cancer AI mit Median) bieten erhebliches mittelfristiges Potenzial.</p>
+      <h3>Red Flags & Dealbreaker</h3>
+      <p>Red Flags: (1) Adj. EBITDA FY2025 verfehlte das eigene Ziel trotz Umsatz-Beat – das ist ein Warnsignal für die Margenprognosefähigkeit des Managements. (2) Insider-Verkäufe in nennenswerter Höhe. (3) Die Aktie ist –49% vom 52W-Hoch – der Markt bewertet das Unternehmen neu. Dealbreaker: Eine dauerhafte CMS-Kürzung der ADLT-Erstattungsraten oder das Scheitern der FDA-Zulassung für xF würde das Kernnarrativ der ASP-Expansion fundamental in Frage stellen.</p>
+      <div class="source">Quellen: Seeking Alpha TEM Analysis (19.12.2025); Zacks/Nasdaq.com (05.12.2025); ETF Trends (17.09.2025); StockInvest.us (02.03.2026).</div>
+    </div>
+  </div>
+
+  <!-- S11: SCORING -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring – User-spezifische Analyse & Gesamtübersicht</div>
+      <div class="section-note">Integriert: Disruption Healthcare-AI & Bewertungsfrage</div>
+    </div>
+    <div class="section-body">
+      <h3>User-Spezifische Fragestellung 1: Disruption im Healthcare-AI-Markt</h3>
+      <p>Die Frage, ob Tempus ein Disruptor oder ein zu-Disruption-Anfälliger ist, lässt sich klar beantworten: Tempus ist strukturell als Disruptor positioniert, aber kein klassisches "Software eats the world"-Disruptions-Play. Das Unternehmen disrupted den traditionellen Diagnose-Labormarkt (NeoGenomics, Quest Diagnostics), der auf standardisierter, datenblinder Genomik basiert. Durch die Integration von KI-Algorithmen, die aus einem proprietären Datensatz lernen, verschiebt Tempus die Wertschöpfung von der reinen Probenanalytik zur klinischen Entscheidungsunterstützung – genau dort, wo deutlich höhere Margen entstehen. Die Disruption ist real, läuft aber langsamer als reine Software-Disruptions, weil FDA-Zulassungen und Erstattungszyklen 3–5 Jahre dauern.</p>
+      <h3>User-Spezifische Fragestellung 2: Ist TEM fair bewertet?</h3>
+      <p>Nach dem Rückgang von $104 auf $53 stellt sich die Bewertungsfrage mit neuer Dringlichkeit. Bei einem Forward P/S 2026 von ~6x und einem Management-Wachstumsziel von 25% p.a. über 3 Jahre ergibt sich folgende Analyse: Wenn Tempus bis 2028 tatsächlich ~$2.5B Umsatz bei ~15% Adj. EBITDA-Marge erreicht (~$375M Adj. EBITDA), rechtfertigt ein 25x EV/EBITDA-Multiple eine Marktkapitalisierung von ~$9.4B – ungefähr dem heutigen Niveau. Umgekehrt: Bei einem aggressiveren 30x Multiple und einem tatsächlichen GAAP-EPS Break-Even 2027 wäre ein Kurs von $70–$90 in 18–24 Monaten plausibel. Die Aktie ist heute fair bis leicht attraktiv bewertet für langfristige Anleger, jedoch nicht günstig für kurzfristige. Das Risiko liegt in einer weiteren Neubewertung bei Guidance-Verfehlungen.</p>
+      <h3>Score-Übersicht</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kategorie</th><th>Score</th><th>Score-Bar</th><th>Begründung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Geschäftsmodell</td>
+              <td>8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>Einzigartiger Full-Stack-Ansatz; Monetarisierungsproof noch ausstehend</td>
+            </tr>
+            <tr>
+              <td>Burggraben</td>
+              <td>8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>Datenburggraben sehr stark; Schwäche bei einigen spezifischen Test-Indikationen vs. Peers</td>
+            </tr>
+            <tr>
+              <td>Operative Entwicklung (4Q)</td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Konsistente Revenue-Beats; EPS-Prognosequalität verbesserungswürdig</td>
+            </tr>
+            <tr>
+              <td>Wachstum</td>
+              <td>8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>Exzellente Wachstumsraten; organisch vs. M&A-getrieben zu differenzieren</td>
+            </tr>
+            <tr>
+              <td>Bewertung</td>
+              <td>4/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td>
+              <td>P/S ~6x für Verlustunternehmen ist Premium; rechtfertigt sich nur bei Execution</td>
+            </tr>
+            <tr>
+              <td>Cashflow & Margen</td>
+              <td>4/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td>
+              <td>Positives GAAP FCF noch entfernt; hohe SBC; starke Margenverbesserungs-Dynamik positiv</td>
+            </tr>
+            <tr>
+              <td>Peer-Vergleich</td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Schneller als die meisten direkten Peers; Abschlag zu Guardant/Natera bei EV/Sales interessant</td>
+            </tr>
+            <tr>
+              <td>Technische Analyse</td>
+              <td>4/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td>
+              <td>Unterhalb SMA 50/200; fallender Trend; RSI neutral; keine technische Aufwärtsdynamik</td>
+            </tr>
+            <tr>
+              <td>Risiken (invertiert)</td>
+              <td>5/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td>
+              <td>Erhebliche Erstattungsrisiken und Verwässerungsrisiken; keine existenziellen Risiken</td>
+            </tr>
+            <tr style="background:rgba(59,130,246,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>6.1/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track">
+                    <div class="score-bar-fill" style="width:61%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
+                  </div>
+                  <span class="score-num" style="color:var(--primary);">6.1</span>
+                </div>
+              </td>
+              <td>Überdurchschnittlich starkes Geschäftsmodell; hohe Bewertungsrisiken; nicht für alle Anlegertypen</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Alle vorangegangenen Sektionen; eigene Berechnung Gesamtscore als Durchschnitt aller Einzelscores.</div>
+    </div>
+  </div>
+
+  <!-- S12: FAZIT -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-note">Vollständige Synthese</div>
+    </div>
+    <div class="section-body">
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1: Uneinholbarer Datenburggraben.</strong> Mit 45+ Millionen Patientenakten, 450 Petabyte multimodaler klinischer Daten und 19 der Top-20-Pharmaunternehmen als Datenkunden besitzt Tempus einen Wettbewerbsvorteil, der schlicht nicht replizierbar ist. Der CEO hat recht: "Diesen Datensatz neu aufzubauen ist außerordentlich schwer." Jeder neue Test stärkt den Datenvorteil – klassische Flywheel-Logik, die langfristig zu Winner-Take-Most-Dynamiken führt.</p>
+          <p><strong>Säule 2: ADLT-Preisupgrade – ein struktureller Margenhebel.</strong> Die Migration von Standard-xT ($1.600) zu xT CDx ADLT ($4.500) – aktuell erst bei 30% des Volumens – ist kein kurzfristiger Trick, sondern ein fundamentaler ASP-Shift. Bei vollständiger Migration ("vast majority" bis Ende 2026) würde sich der oncology ASP um bis zu 181% verbessern. Die Genomics-Bruttomarge könnte von 61.7% auf 70%+ steigen und damit Software-Niveaus annähern.</p>
+          <p><strong>Säule 3: Bewertung attraktiv nach –49%-Correction.</strong> Bei Forward P/S 2026 von ~6x und einem Datenbankwert, der schwer zu beziffern ist aber vielfach den aktuellen Marktpreis übersteigt, erscheint das aktuelle Kursniveau als attraktiver Einstieg für geduldige Langfrist-Investoren. Der Konsens-Zielkurs von $80 impliziert +50% Upside. Die Merck-Kollaboration vom 03.03.2026 zeigt, dass die Pharmaindustrie bereit ist, langfristig für Tempus' Daten zu zahlen.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1: ADLT-Erstattungsrisiko ist fundamental.</strong> Das gesamte Bewertungsupside baut auf der Annahme auf, dass die FDA-Zulassung für xF/xR und die CMS-Erstattungsexpansion reibungslos verlaufen. Ein CMS-Beschluss, der ADLT-Erstattungsraten kappt oder verzögert, würde den ASP-Verbesserungs-Narrative fundamental zerstören – der Kurs könnte auf Niveaus unter dem 52W-Tief ($36) fallen.</p>
+          <p><strong>Risiko 2: 2025-Wachstum war zu 40-50% akquisitionsgetrieben.</strong> Das "83% Growth"-Headline verbirgt, dass Ambry Genetics die Genomics-Revenue künstlich aufgeblasen hat. Das organische Wachstum von ~25-30% ist respektabel, aber nicht spektakulär für ein Unternehmen mit einem P/S von 6x. Bei einer Wachstumsabkühlung auf 15-18% – z.B. durch Integrationsreibungen oder Marktanteilsverluste bei Hereditary Testing – würde selbst ein P/S von 4x nur noch ~$7B Marktkapitalisierung rechtfertigen (–25% vom aktuellen Niveau).</p>
+          <p><strong>Risiko 3: GAAP-Verluste & Verwässerungsdruck bis mindestens 2027.</strong> GAAP-Nettoverlust von –$245M in 2025, SBC von ~$175M p.a. und $750M Wandelanleihen (Wandlung ~$70 Aktienkurs) bedeuten erheblichen Verwässerungsdruck. Die Aktionärsbasis hat sich in 12 Monaten um 82% durch neue Aktien erweitert – das GAAP EPS wird noch Jahre negativ bleiben. Für Value-Investoren und jene, die Cash Earnings bevorzugen, ist TEM ungeeignet.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Das Bullische Narrativ überzeugt strukturell mehr – aber das Bärische enthält zu valide Risikopunkte, um ignoriert zu werden. Tempus' Datenburggraben und der ADLT-Upgrade-Pfad sind real und strukturell verteidigbar. Die Frage ist nicht "Ob", sondern "Wann" diese Wertschöpfung für Aktionäre sichtbar wird. Das Management hat mit dem Verfehlen des Adj.-EBITDA-Ziels in FY2025 Vertrauen verloren – und der Markt bestraft dies zu Recht mit einem Bewertungsabschlag. Die Bewertungskorrektur von $104 auf $53 hat die Aktie jedoch wieder in den Bereich "fair bewertet für mutigen Langfrist-Investor" gebracht.</p>
+      <p>Das Risk/Reward für einen 18-24 Monatshorizont erscheint asymmetrisch positiv: –25% Downside (bei Erstattungs-Setback oder deutlicher Wachstumsverlangsamung) vs. +50-70% Upside (bei Execution gemäß Management-Guidance und erfolgreichem ADLT-Rollout). Für kurzfristig orientierte Investoren ist das technische Bild (Abwärtstrend, unterhalb SMA 50/200) klar unattraktiv. Langfristig bleibt TEM eines der interessantesten Healthcare-AI-Vehikel für risikobereite Wachstumsinvestoren – aber eben kein defensiver Buy.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Kurzfristig (0–6M)</strong></td>
+              <td>Q1 2026 Earnings (04.05.), Merck-Deal-Details, MRD Erstattung</td>
+              <td>Technischer Abwärtstrend, makro Risk-Off, Adj. EBITDA-Guidance-Risiko</td>
+              <td><span class="badge badge-yellow">Warten / Tranchiert</span></td>
+            </tr>
+            <tr>
+              <td><strong>Mittelfristig (6–24M)</strong></td>
+              <td>ADLT-Migration-Fortschritt, xF FDA-Zulassung, 2026 Adj. EBITDA Delivery</td>
+              <td>Erstattungsregulierung, Verwässerung bei Wandelanleihen-Fälligkeit</td>
+              <td><span class="badge badge-green">Kaufen / Aufbauen</span></td>
+            </tr>
+            <tr>
+              <td><strong>Langfristig (2–5J)</strong></td>
+              <td>GAAP Profitabilität 2027, International-Expansion, Plattformeffekte</td>
+              <td>Big Tech Datenwettbewerb, Regulatory-Risiko AI-Medizinprodukte</td>
+              <td><span class="badge badge-green">Kaufen & Halten</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>Tempus AI ist das ambitionierteste Healthcare-AI-Unternehmen der USA mit einem Datenburggraben, der strukturell nicht replizierbar ist. Das Unternehmen steht vor einem entscheidenden 18-Monats-Fenster: Wenn die ADLT-Migration, xF FDA-Zulassung und die $65M Adj. EBITDA-Guidance für 2026 geliefert werden, ist der Weg zu $70–$90 gut gebahnt. Das aktuelle Kursniveau ($53) bietet nach dem –49%-Rückgang vom Hoch ein attraktives Risk/Reward für Growth-Investoren mit 2–3 Jahres-Horizont.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN / AUFBAUEN</div></div>
+        <div class="rating-item"><label>Zielkurs (18–24M)</label><div class="val">$70–$90</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–3 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–25% (~$40)</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+50–70% (~$80–90)</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:2.0–2.8</div></div>
+      </div>
+
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>CMS kürzt ADLT-Erstattungsraten für genomische Tests → Position sofort um 50% reduzieren</li>
+            <li>Q1 2026 Umsatz unter $330M (unter Guide-Pfad) → auf Beobachtung setzen, Stopp $42</li>
+            <li>Adj. EBITDA FY2026 unter $40M (Guidance $65M um >35% verfehlt) → Verkaufen</li>
+            <li>Ankündigung einer weiteren signifikanten Share-Dilution (&gt;10% neue Aktien) → Reduzieren</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>FDA-Zulassung für xF Liquid Biopsy CDx → Nachkaufen (signifikanter ASP-Uplift)</li>
+            <li>Q1 2026 Umsatz >$380M + Adj. EBITDA positiv → Tranche aufstocken</li>
+            <li>Announcements von Datenlizenz-Deals >$100M (weitere Pharma-Megalerträge) → Kaufen</li>
+            <li>Kursrückgang unter $40 ohne Fundamentalverschlechterung → Größere Position aufbauen</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Growth Investors (2–5 Jahres-Horizont)</li>
+            <li>Healthcare AI / Thematic Investors</li>
+            <li>Risikobereit (Volatilität 50%+ möglich)</li>
+            <li>Contrarian (nach –49% vom High)</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Value Investors (keine GAAP-Gewinne)</li>
+            <li>Income Investors (keine Dividende)</li>
+            <li>Kurzfristige Trader (bärischer Chart)</li>
+            <li>Konservative / Kapitalerhaltung</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten auf Q1 2026</span></td><td>Abwarten auf Bestätigung der EBITDA-Delivery und technischen Trendwechsel über $60</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-blue">50% jetzt, 50% bei Earnings</span></td><td>Erste Hälfte der Position bei ~$53, zweite Hälfte nach Q1 2026-Ergebnissen (04.05.)</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt einsteigen</span></td><td>Risk/Reward 1:2.5 bei aktuellem Kurs; Datenburggraben + Merck-Deal als Aufwärtskatalysator</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Tranchiert aufbauen</span></td><td>Healthcare-AI-Plattform mit Netzwerkeffekten; 2–5 Jahre Wachstumsthema</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Synthese aus allen Sektionen 1–10; TIKR.com (28.02.2026); Seeking Alpha (19.12.2025); Insider Monkey (Jan. 2026).</div>
+    </div>
+  </div>
+
+  <!-- S13: OUTLOOK -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Die 3 entscheidenden Events</div>
+      <div class="section-note">Konkrete Wenn/Dann-Szenarien</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q1 2026 Earnings & EBITDA-Delivery – Voraussichtlich 04. Mai 2026</h4>
+        <p>Das erste Quartal 2026 ist der erste Realitätstest für die Guidance von $1.59B Jahresumsatz (+25% YoY) und $65M Adj. EBITDA. Der Markt ist skeptisch nach dem FY2025-EBITDA-Verfehlen. Wenn der Quarterly Run-Rate-Umsatz >$380M zeigt (entspricht ~$1.52B annualisiert) UND das Adj. EBITDA erstmals klar positiv ist (>$15–20M), würde dies das Vertrauen in das Management substantiell wiederherstellen.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Q1 2026 Umsatz ≥ $375M (+25% YoY) UND Adj. EBITDA ≥ $15M → Das Management-Narrativ einer nachhaltigen Profitabilitätstrajektorie wird bestätigt. Aktie sollte Richtung $65–$75 steigen. Moderate Position jetzt tranchiert aufstocken.<br><br>
+          <strong>Wenn:</strong> Q1 2026 Umsatz unter $340M oder Adj. EBITDA negativ → Die Verlangsamung nach der 83%-Wachstums-Phase ist stärker als erwartet. Risiko eines weiteren Re-Ratings auf P/S 4–5x. Position auf 50% reduzieren und Q2 2026 abwarten.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 2: FDA-Zulassung xF Liquid Biopsy CDx – Erwartet Mitte bis Ende 2026</h4>
+        <p>Die FDA-Einreichung für den xF Liquid Biopsy-Test (PMA-Antrag) war für Ende 2025 angekündigt. Die Zulassung als CDx würde Tempus erlauben, den xF-Test auf ADLT-Erstattungsniveau ($4.500+) zu migrieren und eine nationale Medicare-Deckung gemäß NCD 90.2 zu beantragen. Liquid Biopsy ist der am stärksten wachsende Onkologie-Diagnostik-Bereich (Guardant wächst dort 40%+ YoY). Eine xF-Zulassung würde Tempus direkt in diesen Premium-Markt katapultieren.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> FDA erteilt xF CDx-Zulassung bis Q3 2026 → Unmittelbarer Katalysator für ASP-Verbesserung, sofort Zulassungsansatz für nationale NCD-Coverage. Umsatz und Margen-Upside-Revisionen durch Sell-Side zu erwarten. Aktie dürfte Richtung $80–$100 ziehen. Position aggressiv aufbauen.<br><br>
+          <strong>Wenn:</strong> FDA gibt Complete Response Letter (CRL) heraus oder Zulassung verzögert sich auf 2027 → Das gesamte ADLT-ASP-Narrativ für den Liquid-Biopsy-Bereich verschiebt sich. 2026-Margen-Guidance könnte gefährdet sein. Position neutral halten, weitere Fundamentaldaten abwarten.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 3: MRD (xM)-Erstattung durch Medicare & weiteres Pharma-Datenlizenzierungswachstum – Q2–Q4 2026</h4>
+        <p>Die Minimal Residual Disease (MRD)-Diagnostik ist der nächste große Wachstumstreiber im Onkologie-Monitoring-Markt. Tempus' xM-Test ist verfügbar, aber Medicare-Erstattung ist noch ausstehend. Gleichzeitig zeigt das Insights-Segment ($150M Q3 2025 Bookings, 69% Wachstum im Q4) eine vielversprechende Eigendynamik: Weitere Mega-Deals à la Merck (03.03.2026) oder AstraZeneca (2024) könnten den Datenumsatz überproportional nach oben treiben.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> CMS erteilt Medicare-Coverage für MRD-Tests (xM) bis Ende Q3 2026 UND ein weiterer Pharma-Datenvertrag >$150M wird bekannt → Der $60B-Onkologie-Monitoring-Markt öffnet sich für Tempus vollständig, Insights-Wachstum könnte von 38% auf 50%+ beschleunigen. Dies wäre ein fundamentaler Bull-Case-Katalysator. Aggressiv nachkaufen.<br><br>
+          <strong>Wenn:</strong> MRD-Erstattung verzögert sich auf 2027 und neue Pharma-Deals bleiben aus → Das Datensegment-Wachstum normalisiert sich auf 20–25% statt 38–68%. Kein Kurzfristiger Katalysator für Bewertungsexpansion. Abwarten und Position bei Schwestern-Earnings Q2 2026 neu bewerten.
+        </div>
+      </div>
+      <div class="source">Quellen: Tempus AI Q3 2025 Overview; Tempus Q4 2025 Earnings Call (24.02.2026); ETF Trends (17.09.2025); Benzinga (03.03.2026); eigene Analyse.</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung oder Aufforderung zum Kauf oder Verkauf von Wertpapieren dar. Alle Angaben ohne Gewähr. Investitionen in Aktien sind mit Risiken verbunden, einschließlich des vollständigen Kapitalverlustes. Der Autor kann Positionen in den genannten Wertpapieren halten. Vor jeder Anlageentscheidung sollte ein professioneller Finanzberater konsultiert werden. Stand: 05. März 2026.
+  </div>
+
+</div>
+</body>
+</html>
