@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>META – Aktienanalyse Canvas v2.2</title>
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --bg: #0f0f12;
+      --bg-card: #1a1a1f;
+      --bg-card2: #22222a;
+      --border: #2e2e38;
+      --text: #e8e8ec;
+      --text-muted: #888898;
+      --text-dim: #555566;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --teal: #14b8a6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7;
+    }
+    .header {
+      background: linear-gradient(135deg, #00081a 0%, #001028 40%, #0f0f12 100%);
+      border-bottom: 1px solid var(--primary);
+      padding: 36px 40px 28px; display: flex; justify-content: space-between;
+      align-items: flex-start; flex-wrap: wrap; gap: 20px;
+    }
+    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .header-left h1 span { color: var(--primary); }
+    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    .header-right { text-align: right; }
+    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+    .price-change.up   { background: rgba(34,197,94,0.15); color: var(--green); }
+    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+    .nav {
+      background: var(--bg-card); border-bottom: 1px solid var(--border);
+      padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+    .kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .kpi-value.green  { color: var(--green); }
+    .kpi-value.red    { color: var(--red); }
+    .kpi-value.orange { color: var(--primary); }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .section-title  { font-size: 16px; font-weight: 700; color: white; }
+    .section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+    .section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+    .section-body   { padding: 20px 24px; }
+    p { margin-bottom: 12px; color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+    h3:first-child { margin-top: 0; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(59,130,246,0.04); }
+    .beat    { color: var(--green);  font-weight: 600; }
+    .miss    { color: var(--red);    font-weight: 600; }
+    .neutral { color: var(--yellow); font-weight: 600; }
+    .badge        { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
+    .badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .badge-blue   { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .badge-orange { background: rgba(59,130,246,0.15); color: var(--primary); }
+    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+    .event-item:last-child { border-bottom: none; }
+    .event-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+    .dot-green  { background: var(--green); }
+    .dot-red    { background: var(--red); }
+    .dot-yellow { background: var(--yellow); }
+    .event-label { font-weight: 600; color: white; }
+    .event-text  { font-size: 14px; color: var(--text); }
+    .risk-item   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px; }
+    .risk-title  { font-weight: 600; color: white; font-size: 14px; }
+    .score-bar       { display: flex; align-items: center; gap: 10px; }
+    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .score-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #93c5fd); }
+    .score-num       { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bear-card h4 { color: var(--red);   margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .rating-box { background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(59,130,246,0.04)); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+    .rating-item .val  { font-size: 20px; font-weight: 800; color: white; }
+    .rating-item .val.buy  { color: var(--green); }
+    .rating-item .val.hold { color: var(--yellow); }
+    .rating-item .val.sell { color: var(--red); }
+    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+    .trigger-card      { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .trigger-card h5   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .trigger-card.buy  h5 { color: var(--green); }
+    .trigger-card.sell h5 { color: var(--red); }
+    .trigger-list    { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
+    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    @media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+    .investor-no  { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-no  h5 { color: var(--red);   font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+    .investor-no  li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+    .geo-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+    .geo-card   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .geo-pct    { font-size: 20px; font-weight: 700; color: white; }
+    .geo-note   { font-size: 12px; color: var(--text-muted); }
+    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+    .outlook-card .when-then strong { color: var(--primary); }
+    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+    .source a { color: var(--text-dim); }
+    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+    .alert-box { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+    .divider   { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .pill      { display: inline-block; background: rgba(59,130,246,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════ HEADER ═══════════════════ -->
+<div class="header">
+  <div class="header-left">
+    <h1>Meta Platforms <span>META · NASDAQ</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 27. März 2026 · NASDAQ · Sektor: Communication Services</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-blue">Family of Apps</span>
+      <span class="badge badge-orange">Reality Labs</span>
+      <span class="badge badge-green">AI / LLaMA</span>
+      <span class="badge badge-yellow">Digital Advertising</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$656</div>
+    <div class="price-meta">Schlusskurs 27.02.2026 · NASDAQ</div>
+    <div class="price-change down">▼ –17% vom ATH ($796,25)</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $479,80 – $796,25</div>
+  </div>
+</div>
+
+<!-- ═══════════════════ NAV ═══════════════════ -->
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<!-- ═══════════════════ MAIN ═══════════════════ -->
+<div class="main">
+
+  <!-- KPI OVERVIEW -->
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Kurs</div>
+      <div class="kpi-value orange">$656</div>
+      <div class="kpi-sub">USD · 27.02.2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Market Cap</div>
+      <div class="kpi-value">$1,65 Bio.</div>
+      <div class="kpi-sub">USD</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">P/E (TTM)</div>
+      <div class="kpi-value">21,5x</div>
+      <div class="kpi-sub">5J-Ø: ~24,5x</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">FWD P/E</div>
+      <div class="kpi-value">~23x</div>
+      <div class="kpi-sub">FY 2026E</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">EV/EBITDA</div>
+      <div class="kpi-value green">~11,8x</div>
+      <div class="kpi-sub">NTM · 5J-Ø ~17x</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Op. Marge</div>
+      <div class="kpi-value green">41%</div>
+      <div class="kpi-sub">FY 2025</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Nächste Earnings</div>
+      <div class="kpi-value" style="font-size:16px;">29. Apr.</div>
+      <div class="kpi-sub">Q1 2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Konsens</div>
+      <div class="kpi-value green">KAUFEN</div>
+      <div class="kpi-sub">Ziel $900–$1.100</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 1 ═══ -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Revenue-Streams & Kernsegmente</h3>
+      <p>Meta Platforms verdient sein Geld beinahe ausschließlich mit digitaler Werbung. Im Geschäftsjahr 2025 entfielen ~97% des Gesamtumsatzes von $201 Mrd. auf Werbeerlöse innerhalb der <em>Family of Apps</em> (FoA) – dem Ökosystem aus Facebook, Instagram, WhatsApp, Messenger und Threads. Die Monetarisierungslogik basiert auf einer simplen, aber mächtigen Formel: Je präziser die Werbeplatzierung (Targeting), desto höher der Preis pro Anzeige – und je mehr Menschen täglich auf den Plattformen aktiv sind, desto mehr Werbeinventory steht zur Verfügung. In Q4 2025 nutzten täglich 3,58 Mrd. Menschen mindestens eine Meta-App (DAP).</p>
+      <h3>Zwei-Seiten-Markt & AI-Monetarisierungsmaschine</h3>
+      <p>Das Kerngeschäft ist ein klassisches Zwei-Seiten-Markt-Modell: Nutzer zahlen nicht für den Zugang, sondern mit ihrer Aufmerksamkeit und ihren Verhaltensdaten. Werbetreibende – vom globalen FMCG-Konzern bis zum lokalen Handwerksbetrieb – kaufen Zugang zu diesen Nutzern auf Basis präziser Zielgruppen-Signale. Über 10 Mio. aktive Werbetreibende nutzen Metas Plattform, was eine enorme Erlösdiversifikation gewährleistet.</p>
+      <p>AI ist seit 2023/24 zur eigentlichen Wachstumsmaschine geworden. Metas proprietäre Anzeigentechnologie – insbesondere das GEM-Ranking-Modell und die <em>Advantage+</em>-Suite – nutzt Machine Learning, um automatisch Creatives zu generieren, Zielgruppen zu optimieren und Conversion-Raten zu steigern, ohne manuelle Eingriffe der Werbetreibenden. Das senkt die Nutzungshürde erheblich und erschließt Millionen neuer KMU-Werbekunden.</p>
+      <h3>Reality Labs & neue Umsatzströme</h3>
+      <p>Neben dem Kerngeschäft betreibt Meta das Segment <em>Reality Labs</em> (RL) mit Hardware (Ray-Ban Meta Smart Glasses, Quest VR-Headsets) und AR/VR-Softwareplattformen. Reality Labs schreibt strukturelle Verluste (FY 2025: ca. $18–20 Mrd. operativer Verlust) und ist als 10+-Jahreswette auf die nächste Computingplattform zu verstehen. Neue Umsatzströme aus WhatsApp Paid Messaging (~$2 Mrd. Jahresrate in Q4 2025) und Meta Verified Subscriptions befinden sich noch im Frühstadium, zeigen aber erste Diversifikationsansätze jenseits des reinen Werbemodells.</p>
+      <div class="source">Quellen: Meta Q4 2025 Earnings Press Release (28.01.2026); Meta IR Presentations 2025; CNBC Earnings Coverage (28.01.2026)</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 2 ═══ -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben & Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Netzwerkeffekte</h3>
+      <p>Mit 3,58 Mrd. Daily Active People besitzt Meta den weltweit größten sozialen Graphen. Ein neues soziales Netzwerk muss nicht nur eine bessere Benutzeroberfläche bieten – es muss alle Freunde, Familienmitglieder, Bekannten und Gruppen mitbringen. Diese kritische Masse ist praktisch nicht replizierbar. TikTok ist das einzige Netzwerk, das in den letzten Jahren Aufmerksamkeit gewann – aber selbst dort entstand kein sozialer Graph, der Facebook/Instagram verdrängt.</p>
+      <h3>Switching Costs & Datenvorteil</h3>
+      <p>Für Nutzer sind die Wechselkosten durch gespeicherte Inhalte, Kontakte und Kommunikationshistorie (insb. WhatsApp) erhöht. Für Werbetreibende liegen die Kosten im aufgebauten Know-how über Kampagnen-Setups, Custom Audiences und CAPI-Integrationen. Wer fünf Jahre lang Advantage+-Kampagnen optimiert hat, wechselt nicht leichtfertig zu einem kleineren Anbieter ohne vergleichbare First-Party-Daten-Infrastruktur. Meta verfügt über den tiefsten und breitesten Nutzerverhaltens-Datensatz der Digitalwirtschaft – jede neue Impression trainiert das Werbesystem weiter, ein klassischer Flywheel-Effekt.</p>
+      <h3>AI-Technologischer Vorsprung</h3>
+      <p>Der Launch von LLaMA als Open-Source-Modell hat Meta eine außergewöhnliche Stellung im Entwicklerökosystem verschafft. Gleichzeitig ist der Vorsprung nach dem LLaMA-4-Misserfolg (DeepSeek überholte das Modell) temporär geschwunden. Die Gründung von Meta Superintelligence Labs (MSL) und der $14,3 Mrd.-Zukauf von Scale AI sollen diese Lücke schließen – aber der Ausgang bleibt offen. Schwachstelle: Meta ist kein nativer Cloud-Anbieter und kämpft um Top-AI-Talente gegen OpenAI und Google DeepMind.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Burggraben-Dimension</th><th>Score</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td>Netzwerkeffekte</td><td><span class="beat">9/10</span></td><td>3,58 Mrd. DAP – nicht replizierbar</td></tr>
+            <tr><td>Switching Costs</td><td><span class="beat">7/10</span></td><td>Hoch für Werbetreibende, mittel für Nutzer</td></tr>
+            <tr><td>Brand Power</td><td><span class="beat">8/10</span></td><td>Facebook/Instagram global dominant</td></tr>
+            <tr><td>Scale Advantages</td><td><span class="beat">9/10</span></td><td>Daten-Flywheel ist einzigartig</td></tr>
+            <tr><td>Tech-Vorsprung (AI)</td><td><span class="neutral">7/10</span></td><td>Post-LLaMA4-Rückschlag, MSL-Aufbau läuft</td></tr>
+            <tr style="background:rgba(59,130,246,0.08);"><td><strong>Ø Burggraben-Score</strong></td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Meta 10-K 2025; CNBC AI Strategy Coverage (Dez. 2025); FinancialContent Deep Dive META (Feb. 2026)</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 3 ═══ -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale (Q1–Q4 2025)</div>
+      <div class="section-score">Beat-Ratio: 4/4 ✅</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kennzahl</th><th>Q1 2025</th><th>Q2 2025</th><th>Q3 2025</th><th>Q4 2025</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Umsatz ($B)</td><td>42,31</td><td>47,52</td><td>51,24</td><td>59,89</td></tr>
+            <tr><td>YoY Wachstum</td><td>+16%</td><td>+22%</td><td>+26%</td><td>+24%</td></tr>
+            <tr><td>EPS (GAAP, $)</td><td>5,71</td><td>7,25</td><td>7,25</td><td>8,88</td></tr>
+            <tr><td>EPS Konsens ($)</td><td>5,25</td><td>6,74</td><td>6,67</td><td>8,19–8,23</td></tr>
+            <tr><td>Beat EPS?</td><td><span class="beat">✅ Beat</span></td><td><span class="beat">✅ Beat</span></td><td><span class="beat">✅ Beat</span></td><td><span class="beat">✅ Beat</span></td></tr>
+            <tr><td>Beat Revenue?</td><td><span class="beat">✅ Beat</span></td><td><span class="beat">✅ Beat</span></td><td><span class="beat">✅ Beat</span></td><td><span class="beat">✅ Beat</span></td></tr>
+            <tr><td>Op. Marge</td><td>38%</td><td>40%</td><td>40%</td><td>41%</td></tr>
+            <tr><td>CapEx ($B)</td><td>13,7</td><td>15,9</td><td>19,4</td><td>22,1</td></tr>
+            <tr><td>DAP (Mrd.)</td><td>3,27</td><td>3,35</td><td>3,54</td><td>3,58</td></tr>
+            <tr><td>Kursreaktion</td><td>+4%</td><td>+11%</td><td>+4%</td><td>+9,7% AH</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Meta erzielte in 4/4 Quartalen 2025 sowohl EPS- als auch Revenue-Beats – ein eindrucksvolles Bild konsistenter Überperformance. Besonders bemerkenswert ist die Beschleunigung des Umsatzwachstums von +16% in Q1 auf +26% in Q3, bevor eine leichte Normalisierung auf +24% in Q4 eintrat. Das operative Ergebnis stieg im Gesamtjahr auf $83,3 Mrd. (+20% YoY) bei einer operativen Marge von 41%.</p>
+      <p>CEO Mark Zuckerberg kommunizierte auf allen Earnings Calls 2025 ein konsistentes Narrativ: KI ist der Hebel für weiteres Wachstum. Das GEM-Ranking-Modell steigerte Ad Clicks auf Facebook um 3,5% YoY; die Lattice-Model-Konsolidierung verbesserte die Ad Quality um 12% YoY. CFO Susan Li kündigte für 2026 nochmals signifikant steigende Kosten an: Total Expenses $162–169 Mrd., CapEx $115–135 Mrd.</p>
+      <div class="alert-box">⏰ <strong>Nächste Quartalsergebnisse (Q1 2026):</strong> Voraussichtlich am <strong>29. April 2026</strong>. Konsens-EPS: $6,62–6,63 | Konsens-Revenue: $55,3 Mrd. | Guidance: $53,5–56,5 Mrd.</div>
+      <div class="source">Quellen: Meta Q4/Q3/Q2/Q1 2025 Press Releases; Zacks/public.com EPS Tracker; Investing.com (28.01.2026)</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 4 ═══ -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Historische Revenue-Entwicklung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Jahr</th><th>Umsatz ($B)</th><th>YoY %</th><th>Op. Income ($B)</th><th>Op. Marge</th></tr></thead>
+          <tbody>
+            <tr><td>2022</td><td>116,6</td><td><span class="miss">–1%</span></td><td>28,9</td><td>25%</td></tr>
+            <tr><td>2023</td><td>134,9</td><td><span class="beat">+16%</span></td><td>46,8</td><td>35%</td></tr>
+            <tr><td>2024</td><td>164,5</td><td><span class="beat">+22%</span></td><td>69,4</td><td>42%</td></tr>
+            <tr><td>2025</td><td>201,0</td><td><span class="beat">+22%</span></td><td>83,3</td><td>41%</td></tr>
+            <tr><td>2026E</td><td>~237</td><td><span class="neutral">+18%E</span></td><td>~88–95E</td><td>~38–40%E</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Geografische Verteilung (FY 2025, geschätzt)</h3>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">USA &amp; Kanada</div>
+          <div class="geo-pct">~44%</div>
+          <div class="geo-note">+18% YoY · ARPU $68+</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Europa</div>
+          <div class="geo-pct">~24%</div>
+          <div class="geo-note">+14% YoY · EU-Regulierungsrisiko</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Asien-Pazifik</div>
+          <div class="geo-pct">~19%</div>
+          <div class="geo-note">+28% YoY · Stärktes Wachstum</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Rest der Welt</div>
+          <div class="geo-pct">~13%</div>
+          <div class="geo-note">+30% YoY · Großes Potenzial</div>
+        </div>
+      </div>
+      <p>Das Profitabilitätswachstum übertrifft das Umsatzwachstum strukturell – eine klassische operative Hebelwirkung. Von 2022 bis 2024 stieg die operative Marge von 25% auf 42%. Die leichte Marge-Kompression 2025 (41%) und der Ausblick 2026 (~38–40%) sind durch massive AI-CapEx erklärt und nicht durch strukturelle Schwäche. Das Wachstum ist vollständig organisch und durch keine M&A-Aktivitäten im Kerngeschäft verzerrt.</p>
+      <div class="source">Quellen: Meta Annual Report 2025; Meta Q4 2025 Earnings (28.01.2026); StockStory Research Report META (Feb. 2026)</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 5 ═══ -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Multiple</th><th>Aktuell (27.02.26)</th><th>5J-Ø</th><th>Kommentar</th></tr></thead>
+          <tbody>
+            <tr><td>P/E (TTM)</td><td><span class="beat">~21,5x</span></td><td>~24,5x</td><td>Deutlich unter 5J-Schnitt</td></tr>
+            <tr><td>P/E (FWD 2026E)</td><td>~23x</td><td>–</td><td>Moderat bei &gt;18% Wachstum</td></tr>
+            <tr><td>EV/EBITDA (NTM)</td><td><span class="beat">~11,8x</span></td><td>~17x</td><td>Historisch sehr attraktiv</td></tr>
+            <tr><td>P/Sales</td><td>~8,1x</td><td>~9x</td><td>Fair für Hochmargentitel</td></tr>
+            <tr><td>P/FCF</td><td>~22x</td><td>~25x</td><td>Solide FCF-Yield ~4,5%</td></tr>
+            <tr><td>PEG (FWD)</td><td><span class="beat">~1,1–1,3x</span></td><td>–</td><td>Vertretbar bei ~18% EPS-Wachstum</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Die Bewertung von META erscheint auf dem aktuellen Kursniveau von ~$656 überraschend moderat. Ein P/E (TTM) von ~21,5x liegt deutlich unter dem 5-Jahres-Durchschnitt von ~24,5x – obwohl das Unternehmen heute profitabler, wachstumsstärker und AI-exponierter ist als in der Vergangenheit. Dies ist zum Teil auf Investor-Unsicherheit über die $115–135 Mrd. CapEx-Guidance für 2026 zurückzuführen.</p>
+      <p>Das EV/EBITDA von ~11,8x auf NTM-Basis ist für ein Unternehmen mit ~41% operativer Marge und ~20% EBITDA-Wachstum sehr günstig. Zum Vergleich: Alphabet handelt auf ~14x NTM EV/EBITDA bei deutlich niedrigeren Margen. Ein fairer Wert bei 15–16x EV/EBITDA impliziert einen Kurs von $850–$1.000 und damit 30–52% Upside gegenüber dem aktuellen Niveau.</p>
+      <div class="source">Quellen: MacroTrends PE Ratio META (26.02.2026); public.com PE-Analyse (Feb. 2026); StockStory EV/EBITDA; Seeking Alpha Valuation-Daten</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 6 ═══ -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>FY 2024</th><th>FY 2025</th><th>Trend</th></tr></thead>
+          <tbody>
+            <tr><td>FCF ($B)</td><td>~52,1</td><td>~52,1</td><td>→ Stabil</td></tr>
+            <tr><td>FCF / Net Income</td><td>~84%</td><td>~86%</td><td class="beat">↑ Konversion hoch</td></tr>
+            <tr><td>Gross Margin</td><td>~81%</td><td>~81%</td><td>→ Konstant stark</td></tr>
+            <tr><td>Op. Margin</td><td>42%</td><td>41%</td><td class="neutral">→ Leicht rückl. (AI-Invest.)</td></tr>
+            <tr><td>ROE</td><td>~36%</td><td>~35%</td><td>→ Sehr hoch</td></tr>
+            <tr><td>Capex / Revenue</td><td>~22%</td><td>~36%</td><td class="miss">↑↑ AI-Investitionszyklus</td></tr>
+            <tr><td>Debt / EBITDA</td><td>&lt;0,5x</td><td>&lt;0,5x</td><td class="beat">→ Faktisch schuldenfrei</td></tr>
+            <tr><td>Dividende + Buyback</td><td>$0,50/Q + BB</td><td>$0,50/Q + $26,3B BB</td><td class="beat">↑</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Metas Cashflow-Qualität ist herausragend. Die FCF-Konversionsrate von ~86% zeigt, dass die ausgewiesenen Gewinne durch tatsächliche Barmittelzuflüsse unterlegt sind. Das Unternehmen ist faktisch schuldenfrei (Netto-Cash-Position) und hat 2025 $26,3 Mrd. eigener Aktien zurückgekauft, plus erstmals eine Quartalsdividende von $0,50/Aktie eingeführt.</p>
+      <p>Der massiv gestiegene CapEx (von $39 Mrd. 2023 auf $72 Mrd. 2025, geplant $115–135 Mrd. 2026) führt temporär zu niedrigerem FCF. Für 2026 ist mit einem FCF-Rückgang zu rechnen, da CapEx stärker steigt als der operative Cashflow. Dies ist akzeptabel, solange die AI-Investitionen in 2027+ in Werbeumsätze konvertieren – was historisch Metas Playbook ist (Mobile-Transition 2012–2015, Reels 2020–2022).</p>
+      <div class="source">Quellen: Meta Q4 2025 Press Release (28.01.2026); Alpha-sense Earnings Summary; Meta 10-K 2025</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 7 ═══ -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Unternehmen</th><th>Mkt. Cap ($B)</th><th>Rev. Growth (FY25)</th><th>Op. Marge</th><th>P/E FWD</th><th>EV/EBITDA</th></tr></thead>
+          <tbody>
+            <tr><td><strong>META</strong></td><td>~1.650</td><td><span class="beat">+22%</span></td><td><span class="beat">41%</span></td><td>~23x</td><td><span class="beat">~12x</span></td></tr>
+            <tr><td>GOOGL</td><td>~2.100</td><td>+12–14%</td><td>30%</td><td>~20x</td><td>~14x</td></tr>
+            <tr><td>SNAP</td><td>~18</td><td>+14%</td><td><span class="miss">&lt;0%</span></td><td><span class="miss">NM</span></td><td><span class="miss">NM</span></td></tr>
+            <tr><td>PINS</td><td>~22</td><td>+18%</td><td>~15%</td><td>~25x</td><td>~18x</td></tr>
+            <tr><td>TikTok (qual.)</td><td>~300–500E</td><td>~25–30%E</td><td>k. A.</td><td>privat</td><td>privat</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Im Peer-Vergleich sticht Meta als klarer Qualitätsführer heraus. Mit einer operativen Marge von 41% übertrifft Meta Alphabet (30%) deutlich und lässt Snap (negativ) sowie Pinterest (15%) weit hinter sich. Das Umsatzwachstum von +22% im FY 2025 ist höher als das von Alphabet (+12–14%) und vergleichbar mit Pinterest (+18%). Gleichzeitig handelt META auf einem leicht niedrigeren FWD-P/E als Pinterest, obwohl Meta ein Vielfaches der Größe, Profitabilität und AI-Infrastruktur aufweist.</p>
+      <p>Das entscheidende Duell ist das zwischen Meta und Alphabet. In Q3 2025: Alphabet Werbeumsatz $74 Mrd. (+12,6% YoY) vs. Meta $50 Mrd. (+25,6% YoY). Meta gewinnt Marktanteile im digitalen Werbemarkt, getrieben durch AI-optimiertes Targeting, das Googles PMax in einzelnen Retail-Kategorien übertrifft. TikTok ist die einzige echte Wildcard – ein US-Bann wäre ein erheblicher Tailwind für Meta.</p>
+      <div class="source">Quellen: MirrorReview Meta vs. Google Q3 2025 (30.10.2025); Trefis Peer Analysis META (Aug. 2025); Yahoo Finance Key Statistics</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 8 ═══ -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">28.01.2026 – Q4 2025 Earnings: Starker Beat <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Umsatz $59,9B (+24% YoY), EPS $8,88 (Konsens: $8,19–8,23). 4/4 Beat-Serie für FY 2025. Kursreaktion: +9,7% after-hours. Quelle: Meta IR, CNBC (28.01.2026)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">28.01.2026 – CapEx 2026 Guidance $115–135 Mrd. <span class="badge badge-yellow">Neutral/Risiko</span></div>
+          <div class="event-text">Massiver Investitionsanstieg; Markt reagiert kurzfristig negativ, dann positiv nach Management-Erklärung. Quelle: Meta Q4 Earnings Call (28.01.2026)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Jul. 2025 – Meta Superintelligence Labs (MSL) gegründet <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Separates AI-Forschungslabor für Frontier-Modelle, geleitet von Yann LeCuns Nachfolger. Ziel: LLaMA-Strategie neu aufstellen. Quelle: BuiltIn MSL-Analyse (Feb. 2026)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Jun. 2025 – Scale AI-Akquisition ($14,3 Mrd.) <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Zugang zu erstklassiger Datenannotierung für Frontier-AI-Training. Stärkt MSL-Pipeline erheblich. Quelle: CNBC (Jun. 2025)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Dez. 2025 – Avocado/LLaMA-4-Misserfolg <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">DeepSeek R1 überholte LLaMAs Open-Weights-Modelle. Release von Avocado verschoben. Interne Organisationsprobleme berichtet. Quelle: CNBC (09.12.2025)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Feb. 2026 – AMD-Partnership: $100 Mrd., 6 GW AI-Infrastruktur <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Multi-Jahres-Infrastruktur-Deal zur Sicherung der AI-Rechenkapazitäten für MSL und Werbe-AI. Quelle: FinancialContent META (Feb. 2026)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Ende 2025 – FTC-Antitrust-Klage temporär abgewiesen <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Gericht weist FTC-Klage auf erzwungene Abspaltung von Instagram/WhatsApp zurück. Existenzielles Risiko kurzfristig stark reduziert. Quelle: Reuters</div>
+        </div>
+      </div>
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">TikTok US-Bann-Androhung hält an <span class="badge badge-green">Tailwind</span></div>
+          <div class="event-text">Anhaltender Druck auf TikTok/ByteDance im US-Markt. Meta wäre primärer Nutznießer eines Verbots: ~100 Mio. US-Nutzer und Reels-Werbebudgets könnten zufließen.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">DeepSeek R1 überholt LLaMA bei Open-Weights <span class="badge badge-red">Wettbewerbsdruck</span></div>
+          <div class="event-text">Chinesisches Open-Source-Modell übertrifft LLaMAs Performance bei niedrigerem Trainingsaufwand – schwächt Metas Position als Open-Source-AI-Leader.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">EU Digital Markets Act – „Less Personalized Ads" <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">EU-DMA zwingt Meta zu weniger personalisierten Werbeanzeigen in Europa. Mögliche weitere Verschärfungen könnten ~24% des Gesamtumsatzes (~$48 Mrd.) belasten.</div>
+        </div>
+      </div>
+      <h3>Ebene 3: Makro</h3>
+      <p>Das makroökonomische Umfeld per 27.02.2026 ist für Meta günstig: Digitale Werbebudgets sind konjunkturresistenter als klassische Medienausgaben. Die US-Wirtschaft zeigt sich widerstandsfähig – kein Rezessionsszenario in Basisfällen der Analysten. Zinssenkungserwartungen der Fed stützen Growth-Aktien. Geopolitisch bleibt Unsicherheit (US-China-Handelspolitik) ein Risiko für globale Werbeausgaben; Europa ist der wichtigste regulatorische Risikofaktor.</p>
+      <div class="source">Quellen: CNBC (28.01.2026, 09.12.2025); BuiltIn MSL-Analyse (Feb. 2026); Meta Q4 Earnings Transcript; Futurum Research Q4 FY2025 (Jan. 2026)</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 9 ═══ -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); margin-bottom:16px;">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$656</div><div class="kpi-sub">27.02.2026</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value red">$668</div><div class="kpi-sub">Kurs darunter 🔴</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value green">$650</div><div class="kpi-sub">Kurs leicht darüber</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value red">$670</div><div class="kpi-sub">Kurs darunter 🔴</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value">~48</div><div class="kpi-sub">Neutral 🟡</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value red">$796,25</div><div class="kpi-sub">–17% darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value" style="font-size:14px;">Leicht neg.</div><div class="kpi-sub">Seitwärts 🟡</div></div>
+      </div>
+      <p>META befindet sich nach dem ATH bei $796,25 (August 2025) in einer Seitwärtskonsolidierung. Der Kurs kämpft mit dem SMA 20 und SMA 200 als Widerstände. Der RSI bei ~48 zeigt keine Extremzone – weder überkauft noch überverkauft. Der schwache ADX (~14) bestätigt: kein klarer Trend, der Markt ist in einer gesunden Konsolidierung nach einer starken Jahresrallye 2025.</p>
+      <p>Support Level 1 liegt bei $629–640 (Pivot-Support), Support Level 2 bei $582 (starker technischer Boden). Resistance Level 1 bei $686–690, Resistance Level 2 bei $740–774 (Post-Earnings-Hoch-Zone). Ein nachhaltiger Ausbruch über $690 würde das nächste Ziel bei $740–774 in den Fokus rücken. Der Wochenchart zeigt eine Lower-Highs-Sequenz seit ATH – Timing-Risiko für kurzfristige Investoren ist real.</p>
+      <div class="source">Quellen: Capital.com Technical Analysis META (27.02.2026); TipRanks TA META; Investing.com TA Summary; Financhill.com (01.02.2026)</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 10 ═══ -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <h3>9a) Strukturelle &amp; zyklische Risiken</h3>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ CapEx-Overrun / ROI-Enttäuschung</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-yellow">Wahrsch.: Mittel</span></div>
+        </div>
+        <div class="event-text">$115–135 Mrd. CapEx 2026 ohne klar messbaren AI-ROI bis 2027/28 → FCF-Druck, mögliches „Metaverse 2.0"-Narrativ. Historisch hat Meta solche Investments aber gut umgesetzt.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🌍 EU-Regulierung (DMA / „Less Personalized Ads")</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-red">Wahrsch.: Hoch</span></div>
+        </div>
+        <div class="event-text">EU-DMA könnte Targeting-Möglichkeiten weiter einschränken. ~$48 Mrd. Europa-Umsatz (~24% des Totals) wäre betroffen. Mögliche Umsatzeinbuße $10–20 Mrd. p. a.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚖️ US Youth Safety Trials (Los Angeles)</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-red">Wahrsch.: Hoch</span></div>
+        </div>
+        <div class="event-text">Laufende Prozesse um Suchtpotenzial sozialer Medien bei Minderjährigen. Mögliche Milliarden-Vergleiche + Reputationsschaden.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🤖 AI-Talentmangel / Schlüsselpersonen (Yann LeCun-Abgang)</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Wahrsch.: Mittel</span></div>
+        </div>
+        <div class="event-text">Abgang prominenter AI-Forscher und interne MSL-Organisationskonflikte könnten Frontier-AI-Roadmap verzögern.</div>
+      </div>
+
+      <h3>9b) AI-Risiko &amp; Technologische Disruption (Kernfokus)</h3>
+      <p><strong>Bullisches AI-Szenario:</strong> Metas AI-Strategie ist dreifach abgesichert: Erstens steigert AI unmittelbar die Werberendite (Advantage+, GEM-Modell, Lattice) – bereits messbar in höheren Konversionsraten. Zweitens schafft AI neue Umsatzströme (WhatsApp Business AI, AI-Agents, autonomes Ad-Management für KMUs). Drittens positioniert die MSL-Strategie Meta als Hardware-AI-Konvergenzplayer (Ray-Ban AI Glasses, Orion AR 2026E). Falls Avocado in H1 2026 stark performt, könnte eine völlig neue Monetarisierungsebene entstehen.</p>
+      <p><strong>Bärisches AI-Szenario:</strong> Die Gründung von MSL und der Scale-AI-Deal offenbaren gleichzeitig eine Schwäche: LLaMA 4 war enttäuschend, DeepSeek überholte Meta mit dem eigenen Open-Source-Fundament. Das ist das strukturelle Risiko der „Llama Doctrine" – wenn man kein unbestrittener Leader ist, wird das Open-Source-Modell zum kostenlosen R&D-Subsidy für Konkurrenten. Falls Avocado erneut hinter den Erwartungen zurückbleibt, droht ein Vertrauensverlust am Markt mit Bewertungsabschlag.</p>
+
+      <h3>9c) Chancen</h3>
+      <p>Die größten Chancen liegen in der AI-nativen Werberevolution (vollautomatische Kampagnen erschließen Millionen neuer KMU-Advertiser), der WhatsApp-Monetarisierung (geschätztes Potenzial $10–30+ Mrd., erst bei $2 Mrd. Jahresrate), dem TikTok-US-Bann-Szenario (sofortiger Marktanteilsgewinn ~100 Mio. US-Nutzer), dem AR-Wearables-Durchbruch (Orion 2026 als potenzieller iPhone-Moment) sowie dem Llama-Developer-Ökosystem als langfristigem Competitive-Moat.</p>
+
+      <h3>9d) Red Flags &amp; Dealbreaker</h3>
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">🟡 Red Flag: CapEx-ROI-Sichtbarkeit</div><div><span class="badge badge-yellow">Beobachten</span></div></div>
+        <div class="event-text">Falls kein klarer AI-Umsatz-ROI bis 2027/28 sichtbar → droht „Metaverse 2.0"-Narrativ mit starkem Bewertungsabschlag.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">🟡 Red Flag: EU-DMA-Eskalation</div><div><span class="badge badge-yellow">Beobachten</span></div></div>
+        <div class="event-text">Weiteres EU-Targeting-Verbot könnte Europa-Umsatz (~24%) signifikant treffen. Aktiv beobachten.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">🔴 Dealbreaker: FTC-Erzwingung Instagram/WhatsApp-Abspaltung</div><div><span class="badge badge-red">Existenziell</span></div></div>
+        <div class="event-text">Nach Klage-Abweisung aktuell unwahrscheinlich – aber theoretisch existenzbedrohend. Klage weiterverfolgen in nächsten 12 Monaten.</div>
+      </div>
+      <div class="source">Quellen: CNBC Meta Strategy (09.12.2025); BuiltIn MSL-Analyse; Meta Q4 Earnings Call (28.01.2026); Klover.ai AI Strategy Report (Jul. 2025)</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 11: SCORING ═══ -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring &amp; User-spezifische Analyse (AI-Positionierung)</div>
+    </div>
+    <div class="section-body">
+      <h3>Gesamt-Scoring-Tabelle</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Score-Bar</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td>Geschäftsmodell</td><td><span class="beat">9/10</span></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>AI-optimierte Werbemaschine, Asset-Light, skalierbar</td></tr>
+            <tr><td>Burggraben</td><td><span class="beat">8/10</span></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>Unerreichbarer sozialer Graph + Daten-Flywheel</td></tr>
+            <tr><td>Operative Entw. (4Q)</td><td><span class="beat">9/10</span></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>4/4 Beats, +22% FY25, Op. Marge 41%</td></tr>
+            <tr><td>Wachstum</td><td><span class="beat">8/10</span></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>Organisch, profitabel, geografisch diversifiziert</td></tr>
+            <tr><td>Bewertung</td><td><span class="neutral">7/10</span></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>P/E 21,5x unter 5J-Schnitt; EV/EBITDA 11,8x günstig</td></tr>
+            <tr><td>Cashflow &amp; Margen</td><td><span class="neutral">7/10</span></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>FCF-Konversion 86%, temporär durch CapEx gedrückt</td></tr>
+            <tr><td>Risiken (invertiert)</td><td><span class="neutral">6/10</span></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>EU-Regulierung + AI-CapEx-Risiko real, kein Dealbreaker</td></tr>
+            <tr><td>Technische Analyse</td><td><span class="miss">5/10</span></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Neutral-bärisch kurzfristig, Konsolidierung nach ATH</td></tr>
+            <tr><td>Peer-Vergleich</td><td><span class="beat">8/10</span></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>Klar führend in Marge und AI-gestütztem Wachstum</td></tr>
+            <tr style="background:rgba(59,130,246,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>7,4/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:74%; background:linear-gradient(90deg,var(--primary),#93c5fd);"></div></div><span class="score-num" style="color:var(--primary);">7,4</span></div></td>
+              <td>Qualitätswert mit attraktiver Bewertung für AI-fokussierte Investoren</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>User-spezifische Analyse: AI-Positionierung – Konsistenzprüfung</h3>
+      <p><strong>These 1 – AI als unmittelbarer Werbewachstumstreiber: BESTÄTIGT.</strong> Die Q3/Q4 2025-Daten zeigen konkret: +3,5% Ad Clicks durch GEM-Modell, +12% Ad Quality durch Lattice-Konsolidierung, +1% Instagram Conversions durch AI-Updates. Dies ist kein theoretisches Potenzial, sondern bereits in den Zahlen messbar und rechtfertigt den Burggraben-Score von 8/10.</p>
+      <p><strong>These 2 – Avocado/Mango als disruptiver AI-Faktor: OFFEN.</strong> Interne Berichte über Organisationsprobleme bei MSL (CNBC, Dez. 2025), der LLaMA-4-Misserfolg und der LeCun-Abgang schwächen das Vertrauen in die Frontier-AI-Pipeline. Gleichzeitig gibt der $14,3 Mrd. Scale-AI-Deal Meta Zugang zu Weltklasse-Datenannotierung. Avocado im H1 2026 ist der entscheidende Test.</p>
+      <p><strong>These 3 – CapEx $115–135 Mrd. als Risiko vs. Chance: BEIDES.</strong> Das Management argumentiert überzeugend: Die AI-Infrastruktur wird sofort genutzt (Werbealgorithmen), mittelfristig (AI-Assistenten in allen Apps) und langfristig (AR/AGI-Hardware). Historisch hat Meta jede große Investitionsrunde in Shareholder Value umgewandelt. Der Risiko-Score bleibt bei 6/10 – die Größenordnung des aktuellen Investments ist jedoch beispiellos.</p>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 12 ═══ -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+    </div>
+    <div class="section-body">
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p>Das bullische Narrativ ruht auf drei Säulen. <strong>Erstens</strong> ist die operative Überlegenheit strukturell: $83,3 Mrd. Operating Income bei 41% Marge – kein anderes Social-Media-Unternehmen erreicht das annähernd. Die 4/4-Beat-Serie 2025 zeigt verlässliche Management-Execution. AI-Integration ist heute der Wachstumstreiber des Werbegeschäfts: +3,5% Ad Clicks durch GEM-Modell bedeuten auf $200 Mrd. Umsatz Milliarden inkrementeller Erlöse.</p>
+          <p><strong>Zweitens</strong> ist der adressierbare Markt deutlich größer als das Kerngeschäft. WhatsApp hat 2 Mrd. Nutzer und erzielt erst $2 Mrd. Jahresumsatz. WeChat in China generiert ~$10 Mrd. mit weniger Nutzern. Selbst 20% von WeChats Monetarisierungseffizienz in Indien, Brasilien und Europa würden $15–20 Mrd. zusätzlichen Jahresumsatz bedeuten. Agentic-AI-Modelle auf WhatsApp/Messenger als SaaS-ähnliche Monetarisierung sind erst am Anfang.</p>
+          <p><strong>Drittens</strong> ist die Bewertung für diese Qualität günstig. TTM-P/E ~21,5x liegt unter dem 5J-Schnitt von 24,5x, EV/EBITDA ~11,8x weit unter dem historischen Niveau von ~17x. Fairer Wert bei 15–16x EV/EBITDA impliziert $850–$1.000 Kurs. AMD-Deal, Orion AR-Brille 2026E und der potenzielle TikTok-US-Bann sind uneingepreiste Upside-Katalysatoren.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p>Das bärische Narrativ beginnt mit der berechtigten Frage: Ist der CapEx-Anstieg auf $115–135 Mrd. in 2026 eine geniale Vorwärtsinvestition oder ein kostspieliges „Metaverse 2.0"? 2021/22 investierte Meta massiv in Reality Labs und verlor drei Viertel des Börsenwerts. Sollte der ROI aus MSL/Avocado bis 2027/28 nicht klar messbar sein, droht erneuter Vertrauensverlust mit 20–30% Bewertungsabschlag.</p>
+          <p>Der EU Digital Markets Act zwingt Meta zur „Less Personalized Ads"-Option. Falls die EU-Kommission weitere Verschärfungen erzwingt, könnten $48 Mrd. Europa-Umsatz (~24% des Totals) signifikant belastet werden. Youth Safety Trials in Los Angeles könnten Milliarden-Vergleiche auslösen. DeepSeek und andere Open-Source-Akteure nutzen LLaMAs Architektur und überholen Meta technologisch, ohne $115 Mrd. CapEx zu tragen.</p>
+          <p>Technisch ist die Lage bärisch: META liegt ~17% unter dem ATH, unter SMA 200, mit einer Lower-Highs-Sequenz seit August 2025. Historisch ist Februar Metas schwächster Monat (nur 25% Wahrscheinlichkeit positiver Monatsrendite). P/E ~23x FWD ist nicht billig, falls das Wachstum auf &lt;15% verlangsamt und der CapEx-Zyklus länger dauert als erwartet.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Das bullische Narrativ ist strukturell überzeugender. Die Profitabilitätswende ist nicht zyklisch, sondern durch AI-getriebene operative Hebel strukturell abgesichert. Die Bewertung ist fair bis günstig für ein Unternehmen mit 41% operativer Marge und ~18–22% Umsatzwachstum. Die Risiken – EU-Regulierung, CapEx-ROI, AI-Rückstand – sind real, aber kein einziges ist existenzbedrohend für ein Unternehmen mit $83 Mrd. Operating Income.</p>
+      <p>Das bärische Argument zum CapEx überzeugt kurzfristig, aber nicht langfristig: Metas Track-Record – Mobile (2012), Stories (2016), Reels (2020) – zeigt, dass das Unternehmen große Plattformwetten regelmäßig in Shareholder Value umwandelt. Historisch war „Meta kaufen, wenn die CapEx-Diskussion maximal negativ ist" eine profitable Strategie. Ich könnte falsch liegen, wenn Avocado erneut enttäuscht, EU-Regulierung eskaliert oder der Gesamtmarkt in eine tiefe Rezession läuft – diese Szenarien sind möglich, aber nicht das Basisszenario.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Zeitraum</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kurzfristig<br>0–6 Monate</strong></td><td>Q1-Earnings 29.04.26; Avocado-Launch H1 2026; TikTok-Bann-Entwicklung</td><td>CapEx-Skepsis; EU-Regulierungsschritt; Technische Schwäche</td><td><span class="badge badge-yellow">Tranchiert einsteigen; auf $629–640 warten</span></td></tr>
+            <tr><td><strong>Mittelfristig<br>6–24 Monate</strong></td><td>AI-Ad-Revenue Uplift messbar; WhatsApp skaliert; Orion AR Launch 2026E</td><td>Avocado-Enttäuschung; EU-Umsatzrückgang; Makroabschwächung</td><td><span class="badge badge-blue">Aufstocken bei Konsolidierung; Kernposition halten</span></td></tr>
+            <tr><td><strong>Langfristig<br>2–5 Jahre</strong></td><td>Agentic AI auf 3,58 Mrd. Nutzer; AR-Wearables als neue Plattform; WhatsApp Super-App</td><td>Struktureller AI-Rückstand; Anti-Monopol-Regulierung; unbekannte Plattformdisruption</td><td><span class="badge badge-green">KAUFEN &amp; HALTEN · Quality-Growth</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>Meta ist die profitabelste Social-Media-Maschine der Welt mit einem nachgewiesenen Track-Record, große Plattformwetten in Shareholder Value umzuwandeln. Die AI-Integration ist kein zukünftiges Versprechen – sie ist heute der Wachstumstreiber des Werbegeschäfts. Die Bewertung ist für diese Qualität günstig. Die Risiken (EU, CapEx, AI-Rückstand) sind real, aber nicht existenzbedrohend für ein Unternehmen mit $83 Mrd. Operating Income und einer faktisch schuldenfreien Bilanz.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$800–$900</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">3–5 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–20%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+40–70%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:2,5</div></div>
+      </div>
+
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Avocado enttäuscht erneut UND AI-Werbeumsätze stagnieren in Q2 2026 → Position auf 50% reduzieren</li>
+            <li>EU erzwingt vollständiges Targeting-Verbot in Europa → Stop-Loss ~$540</li>
+            <li>Operating Income FY 2026 unter FY 2025 (Guidance gebrochen) → Verkaufen</li>
+            <li>FTC-Klage auf Abspaltung von Instagram/WhatsApp erneut aufgenommen und erfolgreich → Sofort verkaufen</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Avocado ≥90% von OpenAI Frontier auf SWE-bench → Aggressiv nachkaufen</li>
+            <li>WhatsApp AI-Agent-Revenue &gt;$5 Mrd. Run-Rate 2026 → Position erhöhen</li>
+            <li>TikTok US-Bann vollzogen → Sofort nachkaufen, +15–25% Kursreaktion erwartet</li>
+            <li>META konsolidiert auf $629–640 (technischer Support) → Tranche kaufen</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Quality Growth Investors (2–5J Horizont)</li>
+            <li>Tech/AI-Themen-Investoren</li>
+            <li>Contrarian Investors (CapEx-Diskussion)</li>
+            <li>Moderate bis aggressive Risikotoleranz</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Value Investors (P/E 21x nicht „billig")</li>
+            <li>Income Investors (Dividende nur 0,3% Yield)</li>
+            <li>Kurzfristige Trader (Technisch neutral-bärisch)</li>
+            <li>Konservative Investoren mit &lt;12M Horizont</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / Tranchiert</span></td><td>Abwarten auf Avocado-Launch oder Konsolidierung bei $629–640</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-blue">Tranchiert einsteigen</span></td><td>50% jetzt, 50% nach Q1-Earnings-Bestätigung (29.04.26)</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Risk/Reward 1:2,5 bei aktuellem Kurs fundamental attraktiv</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>AI-Plattform-Transformation stützt $900–$1.100 Szenario in 3–5 Jahren</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 13 ═══ -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Die 3 wichtigsten anstehenden Events</div>
+    </div>
+    <div class="section-body">
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q1 2026 Quartalsergebnisse – voraussichtlich 29. April 2026</h4>
+        <p>Der erste harte Datentest des CapEx-Zyklus. Entscheidend ist nicht nur der Top-Line-Umsatz, sondern ob das Management erste messbare AI-Umsatz-KPIs (Ad Revenue per User, Ad Impression Wachstum, WhatsApp Business-Metriken) präsentiert. Der Markt braucht Sichtbarkeit auf den ROI der $72 Mrd. CapEx 2025.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Umsatz ≥$55 Mrd. (oberes Ende der Guidance) und mindestens ein AI-Umsatz-KPI positiv überrascht (z. B. Ad Impression Wachstum &gt;12% YoY oder WhatsApp Business &gt;$600 Mio. Quartalsumsatz) → klares <strong>Nachkaufsignal</strong>; AI-ROI wird früher sichtbar als befürchtet.<br><br>
+          <strong>Wenn:</strong> Umsatz unter $54 Mrd. und/oder Management erhöht CapEx-Guidance ohne klare AI-Umsatzfortschritte → <strong>Position auf 50% reduzieren</strong>; nächste Quartalsergebnisse abwarten.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>🤖 Event 2: Avocado-Modell-Release &amp; Benchmarks – H1 2026 (voraussichtlich Q2 2026)</h4>
+        <p>Der entscheidende Test für Meta Superintelligence Labs und die $14,3 Mrd. Scale-AI-Investition. Nach dem LLaMA-4-Misserfolg steht die gesamte MSL-Strategie unter Beweis. Markt und Analysten werden Avocados Performance unmittelbar mit OpenAI GPT-5 und Google Gemini 2.5 vergleichen.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Avocado erzielt bei anerkannten Benchmarks (SWE-bench Verified, MMLU, HumanEval) eine Performance ≥90% von OpenAIs aktuellem Frontier-Modell und wird in Meta AI mit messbarer Nutzeradoption ausgerollt → <strong>starkes Nachkaufsignal</strong>; MSL-Proof-of-Concept gelingt, Burggraben-Score steigt von 7/10 auf 9/10.<br><br>
+          <strong>Wenn:</strong> Avocado erneut hinter ChatGPT und Gemini zurückbleibt oder Release erneut verschoben wird → <strong>Warnsignal: Position auf 70% reduzieren</strong>; fundamentales Re-Rating des AI-Scores.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>⚖️ Event 3: TikTok US-Status &amp; EU-DMA-Entscheidung – Q1–Q2 2026</h4>
+        <p>Zwei externe Faktoren mit dem potenziell größten unmittelbaren Kurseinfluss. TikTok-Bann und EU-DMA-Verschärfung bewegen sich in entgegengesetzte Richtungen für Metas Bewertung. Beide Events sind regulatorisch getrieben und schwer zu timen, aber in ihrer Auswirkung klar einzuschätzen.</p>
+        <div class="when-then">
+          <strong>Wenn</strong> (TikTok-Bann): Vollständiger TikTok-Bann in den USA wird vollzogen → <strong>sofortige aggressive Aufstockung</strong>; ~100 Mio. US-Nutzer und Reels-Werbebudgets fließen zu Meta. Geschätzter Umsatzgewinn $5–15 Mrd. p. a., Kursreaktion +15–25% erwartet.<br><br>
+          <strong>Wenn</strong> (EU-DMA-Eskalation): EU-Kommission ordnet faktisches Targeting-Verbot in personalisierter Werbung an → <strong>defensiv repositionieren</strong>; Europa-Umsatz (~24%) um 30–50% in der Bewertung abwerten; Zielkurs auf $780–$900 reduzieren.
+        </div>
+      </div>
+
+      <div class="source">Quellen: TradingView Earnings Calendar META; CNBC (28.01.2026); Capital.com TA META (27.02.2026); BuiltIn MSL-Report; FinancialContent META Deep Dive (Feb. 2026)</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung dar. Investitionen in Aktien sind mit erheblichen Risiken verbunden, einschließlich des vollständigen Kapitalverlusts. Vergangene Performance ist kein Indikator für zukünftige Ergebnisse. Bitte konsultieren Sie einen zugelassenen Finanzberater, bevor Sie Anlageentscheidungen treffen. Stand: 27. Februar 2026.</div>
+
+</div>
+</body>
+</html>
