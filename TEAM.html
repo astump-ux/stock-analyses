@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEAM – Aktienanalyse Canvas v2.2</title>
+  <style>
+    :root {
+      --primary: #FF6900;
+      --primary-dark: #cc5400;
+      --bg: #0f0f12;
+      --bg-card: #1a1a1f;
+      --bg-card2: #22222a;
+      --border: #2e2e38;
+      --text: #e8e8ec;
+      --text-muted: #888898;
+      --text-dim: #555566;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --teal: #14b8a6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7;
+    }
+    .header {
+      background: linear-gradient(135deg, #1a0800 0%, #2a1000 40%, #0f0f12 100%);
+      border-bottom: 1px solid var(--primary);
+      padding: 36px 40px 28px; display: flex; justify-content: space-between;
+      align-items: flex-start; flex-wrap: wrap; gap: 20px;
+    }
+    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .header-left h1 span { color: var(--primary); }
+    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    .header-right { text-align: right; }
+    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+    .price-change.up   { background: rgba(34,197,94,0.15); color: var(--green); }
+    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+    .nav {
+      background: var(--bg-card); border-bottom: 1px solid var(--border);
+      padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+    .kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .kpi-value.green  { color: var(--green); }
+    .kpi-value.red    { color: var(--red); }
+    .kpi-value.orange { color: var(--primary); }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .section-title  { font-size: 16px; font-weight: 700; color: white; }
+    .section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+    .section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+    .section-body   { padding: 20px 24px; }
+    p { margin-bottom: 12px; color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+    h3:first-child { margin-top: 0; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,105,0,0.04); }
+    .beat    { color: var(--green);  font-weight: 600; }
+    .miss    { color: var(--red);    font-weight: 600; }
+    .neutral { color: var(--yellow); font-weight: 600; }
+    .badge        { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
+    .badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .badge-blue   { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .badge-orange { background: rgba(255,105,0,0.15);  color: var(--primary); }
+    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+    .event-item:last-child { border-bottom: none; }
+    .event-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+    .dot-green  { background: var(--green); }
+    .dot-red    { background: var(--red); }
+    .dot-yellow { background: var(--yellow); }
+    .event-label { font-weight: 600; color: white; }
+    .event-text  { font-size: 14px; color: var(--text); }
+    .risk-item   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px; }
+    .risk-title  { font-weight: 600; color: white; font-size: 14px; }
+    .score-bar       { display: flex; align-items: center; gap: 10px; }
+    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .score-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #ff9500); }
+    .score-num       { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bear-card h4 { color: var(--red);   margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .rating-box { background: linear-gradient(135deg, rgba(255,105,0,0.12), rgba(255,105,0,0.04)); border: 1px solid rgba(255,105,0,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+    .rating-item .val  { font-size: 20px; font-weight: 800; color: white; }
+    .rating-item .val.buy  { color: var(--green); }
+    .rating-item .val.hold { color: var(--yellow); }
+    .rating-item .val.sell { color: var(--red); }
+    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+    .trigger-card      { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .trigger-card h5   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .trigger-card.buy  h5 { color: var(--green); }
+    .trigger-card.sell h5 { color: var(--red); }
+    .trigger-list    { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
+    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    @media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+    .investor-no  { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-no  h5 { color: var(--red);   font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+    .investor-no  li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+    .geo-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+    .geo-card   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .geo-pct    { font-size: 20px; font-weight: 700; color: white; }
+    .geo-note   { font-size: 12px; color: var(--text-muted); }
+    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+    .outlook-card .when-then strong { color: var(--primary); }
+    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+    .source a { color: var(--text-dim); }
+    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+    .alert-box { background: rgba(255,105,0,0.08); border: 1px solid rgba(255,105,0,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+    .divider   { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .pill      { display: inline-block; background: rgba(255,105,0,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>Atlassian Corporation <span>TEAM · NASDAQ</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 27. Februar 2026 · NASDAQ · Sektor: Tech / Enterprise SaaS</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">Jira / Confluence</span>
+      <span class="badge badge-blue">AI / Rovo</span>
+      <span class="badge badge-orange">Enterprise SaaS</span>
+      <span class="badge badge-blue">PLG</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$79.00</div>
+    <div class="price-meta">Schlusskurs 26. Feb 2026 · NASDAQ</div>
+    <div class="price-change up">▲ +8.89% (26.02. – Jira Agents Launch)</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $67.85 – $295.91</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <!-- KPI OVERVIEW -->
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Kurs</div>
+      <div class="kpi-value orange">$79.00</div>
+      <div class="kpi-sub">USD · 26.02.2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Market Cap</div>
+      <div class="kpi-value">~$21 Mrd.</div>
+      <div class="kpi-sub">-73% vom 52W-High</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">EV/Rev (NTM)</div>
+      <div class="kpi-value green">~3.3x</div>
+      <div class="kpi-sub">Peer-Median ~9x</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Fwd P/E (FY26e)</div>
+      <div class="kpi-value green">~16.6x</div>
+      <div class="kpi-sub">Non-GAAP EPS ~$4.76e</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">FCF (TTM)</div>
+      <div class="kpi-value green">$1.28 Mrd.</div>
+      <div class="kpi-sub">EV/FCF ~16x</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Bruttomarge</div>
+      <div class="kpi-value green">87%</div>
+      <div class="kpi-sub">Non-GAAP · Beste Klasse</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">NRR</div>
+      <div class="kpi-value green">&gt;120%</div>
+      <div class="kpi-sub">3 Quartale in Folge</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Nächste Earnings</div>
+      <div class="kpi-value orange">30. Apr 26</div>
+      <div class="kpi-sub">Q3 FY2026</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ SEKTION 1 – GESCHÄFTSMODELL ═══ -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6 Monate</div>
+    </div>
+    <div class="section-body">
+      <p>Atlassian Corporation (gegründet 2002, Sydney / San Francisco) ist ein weltweit führender Anbieter von Team-Collaboration- und Productivity-Software. Das Unternehmen bedient über 350.000 Kunden weltweit, darunter mehr als 80 % der Fortune-500-Unternehmen, und hat im zweiten Quartal des Fiskaljahres 2026 (Q2 FY2026, endend Dezember 2025) erstmals eine jährliche Umsatz-Run-Rate von 6 Milliarden USD überschritten.</p>
+
+      <p>Das Kernportfolio besteht aus fünf ineinandergreifenden Produktlinien: <strong>Jira Software</strong> (Softwareentwicklung &amp; Projektmanagement), <strong>Jira Service Management</strong> (IT-Service-Management &amp; Enterprise Service Management), <strong>Confluence</strong> (kollaborative Wissensdatenbank), <strong>Loom</strong> (asynchrone Videokommunikation, 2023 akquiriert) sowie <strong>Trello</strong> (visuelles Projektmanagement für kleinere Teams). Die neueste strategische Erweiterung ist <strong>Rovo</strong>, Atlassians KI-Assistent- und Agenten-Plattform, eingebettet in alle Kernprodukte.</p>
+
+      <p>Das Geschäftsmodell ist vollständig subscription-basiert und asset-light. Atlassian unterscheidet drei Deployment-Modi: <strong>Cloud</strong> (im Q2 FY2026 erstmals über $1 Mrd. Quartalsumsatz, +26 % YoY), <strong>Data Center</strong> (On-Premise-Eigenhosting für regulierungsintensive Kunden) sowie <strong>Server</strong> (ausgelaufen 2024). Die Cloud-Migration ist ein langfristiger Umsatztreiber, da Cloud-Kunden höhere Tarifstufen (Standard, Premium, Enterprise) wählen und mehr Seat-Expansion betreiben. Über 40 % des Umsatzes werden durch Enterprise-Kunden generiert – gegenüber nur 15 % im Jahr 2020.</p>
+
+      <p>Atlassian verfolgt ein Low-Touch-Vertriebsmodell (Product-Led Growth): Kunden starten mit einem kostenlosen oder günstigen Plan, expandieren organisch und wandern in bezahlte Stufen. Dieser PLG-Ansatz führt zu sehr niedrigen Customer-Acquisition-Costs (CAC) und hohen Net Revenue Retention Rates (NRR &gt; 120 % seit drei Quartalen). Am 25. Februar 2026 startete Atlassian die Open Beta von <strong>„Agents in Jira"</strong> – KI-Agenten können nun direkt in Jira-Workflows integriert werden, ein potenziell transformativer Schritt hin zu Atlassian als Kontrollzentrum für Human-AI-Collaboration.</p>
+
+      <div class="source">Quellen: Atlassian Q2 FY2026 Earnings Release (businesswire.com, 05.02.2026); Atlassian IR (investors.atlassian.com); Q2 FY2026 Earnings Call Transcript (fool.com, 05.02.2026); Atlassian Rovo MCP Announcement (businesswire.com, 25.02.2026)</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ SEKTION 2 – BURGGRABEN ═══ -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Switching Costs – Das Kernfundament</h3>
+      <p>Atlassians Burggraben wird primär durch extrem hohe Switching Costs getragen. Jira ist seit über zwei Jahrzehnten das Betriebssystem für Softwareentwicklungs-Teams. Die Daten in Jira – Tickets, Sprints, Epics, historische Fehlerberichte, CI/CD-Anbindungen – sind hochgradig firmenspezifisch, tief in Entwicklungsprozesse integriert und praktisch unmöglich ohne erhebliche Kosten und Risiko zu migrieren. Der durchschnittliche Jira-Kunde hat jahrelange Prozess-Konfigurationen, Automationsregeln, Marketplace-Integrationen (über 5.000 Apps) und Mitarbeiter-Schulungen angehäuft.</p>
+
+      <h3>Netzwerkeffekte, Brand &amp; Scale</h3>
+      <p>Der Netzwerkeffekt ist moderat, aber real: Confluence und Jira sind bessere Werkzeuge, wenn mehr Teams eines Unternehmens sie nutzen. Mit 350.000 Kunden profitiert Atlassian vom Flywheel – neue Entwickler kennen Jira aus früheren Unternehmen, was die Einführung in neuen Organisationen beschleunigt. Die Brand Power ist außergewöhnlich: „Jira" ist zur Gattungsbezeichnung für Ticket-Systeme geworden. Scale Advantages entstehen dadurch, dass Atlassian neue Produkte (KI-Funktionen, Rovo) auf einer bereits profitablen Cloud-Basis ausrollt, ohne proportional steigende Kosten.</p>
+
+      <p>Technologischer Vorsprung durch den größten Datenschatz an Workflow-Daten: Rovo wird mit realen Enterprise-Workflow-Daten trainiert, die kein Startup replizieren kann. <strong>Schwachstelle:</strong> Bei signifikanter technologischer Disruption (KI-nativ ersetzte Ticketsysteme) könnte der Switching-Cost-Schutz abnehmen – das ist das Kernrisiko dieser Analyse.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Dimension</th><th>Bewertung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td>Switching Costs</td><td class="beat">Sehr Hoch</td><td>Jahrelange Konfigurationsdaten, CI/CD-Integrationen, Compliance-Historien</td></tr>
+            <tr><td>Netzwerkeffekte</td><td class="neutral">Moderat</td><td>Unternehmensübergreifend wirksam, kein viraler Netzwerkeffekt nach außen</td></tr>
+            <tr><td>Brand Power</td><td class="beat">Hoch</td><td>„Jira" = Gattungsbegriff; 80 %+ der Fortune-500 nutzen Atlassian</td></tr>
+            <tr><td>Scale Advantages</td><td class="beat">Hoch</td><td>AI-Rollout auf bestehender Cloud-Infrastruktur ohne proportionale Kosten</td></tr>
+            <tr><td>Technologischer Vorsprung</td><td class="neutral">Mittel-Hoch</td><td>Proprietäre Workflow-Daten, Rovo-Plattform; Konkurrenz durch AI-Startups</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="score-bar" style="margin-top:16px;">
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div>
+        <span class="score-num">7</span>
+      </div>
+
+      <div class="source">Quellen: Atlassian Q4 FY2025 Earnings (motleyfool.com, 07.08.2025); BTIG Initiierung (insidermonkey.com, 17.12.2025); Q2 FY2026 Earnings Call (fool.com, 05.02.2026)</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ SEKTION 3 – LETZTE 4 QUARTALE ═══ -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Beat-Ratio: 4/4</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Atlassian ist an der NASDAQ notiert. Quartals-Kennzahlen stammen von investing.com, Yahoo Finance, TipRanks und der Unternehmens-IR (Stand: 27.02.2026). Nächste Quartalsergebnisse (Q3 FY2026) voraussichtlich <strong>30. April 2026</strong>.</div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quartal</th><th>Revenue</th><th>YoY</th><th>Cloud-Rev.</th><th>Non-GAAP EPS</th><th>vs. Konsens</th><th>Beat?</th><th>Kursreaktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q3 FY25</strong> <span style="font-size:11px;color:var(--text-muted);">Mär 25</span></td>
+              <td>$1.295 Mrd.</td>
+              <td class="beat">+21.4%</td>
+              <td>$854 Mio.</td>
+              <td>$0.88</td>
+              <td class="beat">Beat</td>
+              <td><span class="badge badge-green">Beat</span></td>
+              <td class="beat">+3% AH</td>
+            </tr>
+            <tr>
+              <td><strong>Q4 FY25</strong> <span style="font-size:11px;color:var(--text-muted);">Jun 25</span></td>
+              <td>$1.384 Mrd.</td>
+              <td class="beat">+22%</td>
+              <td>$928 Mio.</td>
+              <td>$0.98</td>
+              <td class="beat">+18% vs $0.83e</td>
+              <td><span class="badge badge-green">Beat</span></td>
+              <td class="miss">–7% AH</td>
+            </tr>
+            <tr>
+              <td><strong>Q1 FY26</strong> <span style="font-size:11px;color:var(--text-muted);">Sep 25</span></td>
+              <td>$1.430 Mrd.</td>
+              <td class="beat">+21%</td>
+              <td>$998 Mio.</td>
+              <td>$1.04</td>
+              <td class="beat">+24% vs $0.84e</td>
+              <td><span class="badge badge-green">Beat</span></td>
+              <td class="neutral">–1% AH</td>
+            </tr>
+            <tr>
+              <td><strong>Q2 FY26</strong> <span style="font-size:11px;color:var(--text-muted);">Dez 25</span></td>
+              <td>$1.586 Mrd.</td>
+              <td class="beat">+23%</td>
+              <td><strong>$1.003 Mrd. ★</strong></td>
+              <td>$1.22</td>
+              <td class="beat">+9% vs $1.12e</td>
+              <td><span class="badge badge-green">Beat</span></td>
+              <td class="miss">–6% AH</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text-muted);">★ Erster Cloud-Quartalsumsatz &gt;$1 Mrd. in der Unternehmensgeschichte · Ø EPS-Surprise: +20.7%</p>
+
+      <h3>Operative Schlüsselmetriken</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Metrik</th><th>Q1 FY26</th><th>Q2 FY26</th><th>Trend</th></tr></thead>
+          <tbody>
+            <tr><td>RPO (Remaining Performance Obligations)</td><td>$3.3 Mrd. (+42% YoY)</td><td>$3.8 Mrd. (+44% YoY)</td><td class="beat">▲ Akzelerierung</td></tr>
+            <tr><td>Net Revenue Retention (NRR)</td><td>&gt;120%</td><td>&gt;120%</td><td class="beat">▲ 3Q in Folge &gt;120%</td></tr>
+            <tr><td>Rovo Monthly Active Users</td><td>3.5 Mio.</td><td>5.0 Mio.</td><td class="beat">▲ +43% QoQ</td></tr>
+            <tr><td>Enterprise Deals &gt;$1M ACV</td><td>Record</td><td>Fast 2x YoY</td><td class="beat">▲ Starke Dynamik</td></tr>
+            <tr><td>Non-GAAP Operating Margin</td><td>~25.5%</td><td>~25.5% (FY26-Guidance)</td><td class="beat">▲ Strukturell verbessernd</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>CEO Mike Cannon-Brookes (Q2 FY2026 Earnings Call): <em>„Wir haben das erste Quartal mit mehr als 1 Milliarde Dollar Cloud-Umsatz erreicht, 350.000 Kunden überschritten, und Rovo hat 5 Millionen aktive Nutzer pro Monat übertroffen."</em> Die paradoxe Marktreaktion (Beats + sinkende Kurse) spiegelt die Dominanz der AI-Disruptions-Angst über die operativen Fundamentaldaten wider.</p>
+
+      <div class="source">Quellen: Atlassian Q2 FY2026 Earnings Release (businesswire.com, 05.02.2026); Q1 FY2026 Earnings (investing.com, 30.10.2025); Q4 FY2025 Earnings (businesswire.com, 07.08.2025); Zacks EPS-Analyse (nasdaq.com, 06.02.2026); TipRanks Earnings Calendar (tipranks.com)</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ SEKTION 4 – WACHSTUM ═══ -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <p>Atlassians Wachstumsprofil lässt sich als <strong>„Decelerating-but-Re-Accelerating Quality Growth"</strong> charakterisieren. Nach dem Hyper-Growth-Plateau von ~30 % p.a. (FY2021–FY2023) verlangsamte sich das Wachstum auf rund 20–23 %. Entscheidend: Der YoY-Umsatzwachstum stieg zuletzt von +21 % (Q1 FY26) auf +23 % (Q2 FY26), während RPO-Wachstum von 42 % auf 44 % anzog – ein vorauslaufender Indikator für künftige Einnahmen.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Fiskaljahr</th><th>Gesamtumsatz</th><th>YoY-Wachstum</th><th>Cloud-Anteil</th><th>Bewertung</th></tr></thead>
+          <tbody>
+            <tr><td>FY2023</td><td>$3.53 Mrd.</td><td class="beat">+26%</td><td>~55%</td><td>—</td></tr>
+            <tr><td>FY2024</td><td>$4.35 Mrd.</td><td class="beat">+23%</td><td>~62%</td><td>—</td></tr>
+            <tr><td>FY2025</td><td>$5.08 Mrd.</td><td class="neutral">+17%</td><td>~67%</td><td>Verlangsamung</td></tr>
+            <tr><td><strong>FY2026e (Guidance)</strong></td><td>~$6.3 Mrd.</td><td class="beat">+22%</td><td>&gt;72%e</td><td class="beat">Re-Akzelerierung</td></tr>
+            <tr><td><strong>FY2027e (Midterm)</strong></td><td>~$7.5 Mrd.</td><td class="beat">+20%+ CAGR</td><td>&gt;78%e</td><td class="beat">Mgmt-Guidance</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Geografische Verteilung</h3>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">Nordamerika</div>
+          <div class="geo-pct">~50%</div>
+          <div class="geo-note">Größter Einzelmarkt, Enterprise-getrieben</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">EMEA</div>
+          <div class="geo-pct">~30%</div>
+          <div class="geo-note">Starke Europaexpansion, regulatorisch komplex</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">APAC</div>
+          <div class="geo-pct">~20%</div>
+          <div class="geo-note">Heimatmarkt Australien, wachsendes APAC-Enterprise</div>
+        </div>
+      </div>
+
+      <p>Das Wachstum ist als <strong>strukturell echt</strong> zu bewerten: Keine M&A-Inflation, keine Accounting-Tricks. Der stärkste Treiber ist die Cloud-Migration kombiniert mit Enterprise-Upsell. Die NRR &gt;120 % beweist, dass bestehende Kunden mehr ausgeben – das Merkmal nachhaltigen, profitablen Wachstums. Das Hauptrisiko: Data Center läuft in FY2027 „meaningfully down" ab (~23 % des Umsatzes) und muss durch Cloud vollständig kompensiert werden.</p>
+
+      <div class="score-bar">
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div>
+        <span class="score-num">7</span>
+      </div>
+
+      <div class="source">Quellen: Atlassian Midterm Guidance (investors.atlassian.com); Q2 FY2026 Earnings Call Transcript (fool.com, 05.02.2026); TIKR Bull Case Analysis (tikr.com, 20.02.2026); Zacks Revenue Analysis (nasdaq.com, 06.02.2026)</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ SEKTION 5 – BEWERTUNG ═══ -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 9/10</div>
+    </div>
+    <div class="section-body">
+      <p>Atlassian handelt bei ca. $79 USD auf historischen Bewertungstiefs. Die Kombination aus einer 73 %-Korrektur vom 52-Wochen-Hoch und kontinuierlich starken Fundamentaldaten erzeugt eine signifikante Bewertungsdiskrepanz. Auf Basis der FY2026-Konsensschätzungen (Umsatz ~$6.3 Mrd., Non-GAAP EPS ~$4.76) ergibt sich ein Forward P/E von ~16.6x – historisch niedrig für ein Unternehmen mit 22 % Umsatzwachstum und 20 %+ Non-GAAP Operating Margins.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Multiple</th><th>TEAM (aktuell)</th><th>Peer-Median</th><th>Histor. TEAM Ø</th><th>Bewertung</th></tr></thead>
+          <tbody>
+            <tr><td>EV/Revenue (NTM)</td><td class="beat">~3.3x</td><td>~8–9x</td><td>~12–15x (2022–23)</td><td class="beat">Stark unterbewertet</td></tr>
+            <tr><td>Forward P/E (FY26e)</td><td class="beat">~16.6x</td><td>~45–55x (NOW)</td><td>n/a (hist. negativ)</td><td class="beat">Sehr attraktiv</td></tr>
+            <tr><td>P/S (TTM)</td><td class="beat">~3.6x</td><td>~9.4x (Peer-Ø)</td><td>~10x+ (2023)</td><td class="beat">Historisches Tief</td></tr>
+            <tr><td>EV/FCF (TTM)</td><td class="beat">~16x</td><td>~40–50x</td><td>&gt;60x (2021–22)</td><td class="beat">Extrem günstig</td></tr>
+            <tr><td>P/E (GAAP TTM)</td><td class="neutral">Negativ</td><td>Unterschiedlich</td><td>Hist. negativ</td><td class="neutral">SBC-bedingt, nicht operativ</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Der Konsens-Zielkurs von 25 Analysten liegt bei $177–184 (Stand 20.02.2026), was +125 % Aufwärtspotenzial gegenüber dem aktuellen Kurs impliziert. Kein einziger Analyst hat eine Verkaufsempfehlung. Das DCF-Modell von SimplyWallSt errechnet einen fairen Wert von $246. Bei einem mittelfristig angemessenen Multiple von 30–35x Non-GAAP P/E (historisch gerechtfertigt für ein ~20 %-wachsendes SaaS-Unternehmen mit 87 % Bruttomargen) ergibt sich ein fairer Wert von $143–167 – ohne Berücksichtigung eines AI-Monetisierungs-Aufschlags.</p>
+
+      <div class="score-bar">
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div>
+        <span class="score-num">9</span>
+      </div>
+
+      <div class="source">Quellen: StockAnalysis.com (stockanalysis.com, Feb 2026); SimplyWallSt (simplywall.st, Feb 2026); TIKR-Analyse (tikr.com, 20.02.2026); Insider Monkey Analyst Consensus (insidermonkey.com, 18.02.2026); Multiples.vc (Feb 2026)</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ SEKTION 6 – CASHFLOW ═══ -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <p>Atlassians Kapitalqualität ist trotz GAAP-Verlusten hervorragend. Der Free Cashflow (TTM) beträgt $1.28 Mrd. bei einem Capex von lediglich $52.8 Mio. – ein Asset-Light-Profil mit &gt;98 % FCF-Konversionsrate aus dem Operating Cashflow. Die GAAP-Verluste sind rein buchhalterische Artefakte aus erheblicher Stock-Based Compensation (SBC &gt;$1 Mrd./Jahr) und keine echte Cashburn-Situation. Atlassian verdient real Geld.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>Wert (TTM / aktuell)</th><th>Trend</th><th>Bewertung</th></tr></thead>
+          <tbody>
+            <tr><td>Free Cashflow (TTM)</td><td>$1.28 Mrd.</td><td class="beat">▲ wächst</td><td class="beat">Sehr stark</td></tr>
+            <tr><td>Operating Cashflow (TTM)</td><td>$1.33 Mrd.</td><td class="beat">▲</td><td class="beat">Strukturell wachsend</td></tr>
+            <tr><td>Gross Margin (Non-GAAP)</td><td><strong>~87%</strong></td><td class="beat">▲ stabil hoch</td><td class="beat">Beste Klasse</td></tr>
+            <tr><td>Non-GAAP OP-Marge (FY26 Guidance)</td><td>25.5%</td><td class="beat">▲ verbessert</td><td class="beat">Strukturell expandierend</td></tr>
+            <tr><td>GAAP Operating Margin (TTM)</td><td>–3.21%</td><td class="neutral">SBC-bedingt</td><td class="neutral">Buchhalterisch negativ</td></tr>
+            <tr><td>Cash &amp; Equivalents</td><td>$1.57 Mrd.</td><td>—</td><td class="beat">Solid</td></tr>
+            <tr><td>Debt (Long-Term)</td><td>$1.22 Mrd.</td><td>—</td><td class="beat">Beherrschbar</td></tr>
+            <tr><td>Net Cash Position</td><td><strong>+$351 Mio.</strong></td><td>—</td><td class="beat">Netto-Cash-Positiv</td></tr>
+            <tr><td>Share Buyback (aktiv)</td><td>$2.5 Mrd. Programm (Okt 25), $579M in Q1 FY26</td><td class="beat">▲ aggressiv</td><td class="beat">12 % der Market Cap</td></tr>
+            <tr><td>Dividende</td><td>Keine</td><td>—</td><td class="neutral">Growth-Fokus</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Das $2.5-Mrd.-Buyback-Programm (von dem bereits $579 Mio. in einem einzigen Quartal genutzt wurden) signalisiert starkes Management-Vertrauen und schafft einen bedeutsamen Kurspuffer. Die Kombination aus 87 % Bruttomarge, $1.28 Mrd. FCF und expandierender Non-GAAP-Margin macht Atlassian zu einem der kapitaleffizientesten Software-Unternehmen seiner Größe.</p>
+
+      <div class="score-bar">
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div>
+        <span class="score-num">8</span>
+      </div>
+
+      <div class="source">Quellen: StockAnalysis.com Financials (stockanalysis.com, Feb 2026); Trefis Atlassian-Analyse (trefis.com); Q2 FY2026 Earnings Release (businesswire.com, 05.02.2026)</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ SEKTION 7 – PEER-VERGLEICH ═══ -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <p>Für den Peer-Vergleich wurden <strong>ServiceNow (NOW)</strong>, <strong>Monday.com (MNDY)</strong> und <strong>Asana (ASAN)</strong> gewählt. ServiceNow ist der direkteste Enterprise-Workflow-Konkurrent; Monday.com und Asana konkurrieren im Work-Management-Segment.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Metrik</th><th>TEAM (Atlassian)</th><th>NOW (ServiceNow)</th><th>MNDY (Monday)</th><th>ASAN (Asana)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Market Cap</td><td class="beat">~$21 Mrd.</td><td>~$113 Mrd.</td><td>~$7 Mrd.</td><td>~$2 Mrd.</td></tr>
+            <tr><td>Umsatz (TTM)</td><td>$5.76 Mrd.</td><td>$13.2 Mrd.</td><td>~$1.0 Mrd.</td><td>~$0.75 Mrd.</td></tr>
+            <tr><td>Umsatzwachstum YoY</td><td class="beat">+23% (Q2)</td><td class="beat">+20.7%</td><td class="beat">+30%</td><td class="neutral">+9%</td></tr>
+            <tr><td>Gross Margin</td><td class="beat">83.5% (GAAP)</td><td>~77%</td><td>~90%</td><td>~90%</td></tr>
+            <tr><td>Non-GAAP OP-Marge</td><td>~25% (FY26e)</td><td class="beat">~28–30%</td><td class="neutral">breakeven</td><td class="neutral">+7%</td></tr>
+            <tr><td>EV/Revenue (NTM)</td><td class="beat">~3.3x</td><td>~8.2x</td><td>~6x</td><td>~2.5x</td></tr>
+            <tr><td>NRR</td><td class="beat">&gt;120%</td><td class="beat">&gt;120%e</td><td>&gt;115%e</td><td class="miss">96%</td></tr>
+            <tr><td>Peer-Score</td><td class="beat">8/10</td><td>9/10 (Referenz)</td><td>7/10</td><td>5/10</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>Qualitative Differenzierung:</strong> Atlassian unterscheidet sich fundamental von Monday.com und Asana durch die Tiefe der Entwickler-Workflows und das Enterprise-Service-Management-Portfolio. ServiceNow adressiert einen überlappenden Enterprise-Markt (ITSM), ist aber primär auf IT-Abteilungen fokussiert. Die Bewertungsdiskrepanz von TEAM vs. NOW (3.3x vs. 8.2x EV/Rev) ist schwer zu rechtfertigen bei ähnlichen Wachstumsraten, vergleichbarer NRR und 87 % Bruttomarge. Asana ist trotz niedrigerer Bewertung fundamentals-schwächer (NRR 96 %, deutlich langsamerem Wachstum).</p>
+
+      <div class="score-bar">
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div>
+        <span class="score-num">8</span>
+      </div>
+
+      <div class="source">Quellen: Multiples.vc (Feb 2026); SaaStr Monday vs. Asana (saastr.com, Jul 2025); ServiceNow Q4 2025 (seekingalpha.com, Jan 2026); Asana Q3 FY2026 (investors.asana.com, Dez 2025)</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ SEKTION 8 – NEWS & EVENTS ═══ -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">25.02.2026 – Agents in Jira Open Beta &amp; Rovo MCP Server GA <span class="badge badge-green">Sehr Positiv</span></div>
+          <div class="event-text">KI-Agenten können nun direkt in Jira-Workflows integriert werden. Atlassian positioniert sich als Kommandozentrale für Human-AI-Zusammenarbeit. Kursreaktion: +8.89 % am 26.02.2026. Quelle: BusinessWire / techinformed.com, 25.02.2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">05.02.2026 – Q2 FY2026 Earnings: Rev $1.59 Mrd. +23%, EPS $1.22 vs. $1.12e <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Erster Cloud-Quartalsumsatz &gt;$1 Mrd.; RPO +44%; Rovo 5 Mio. MAU; NRR &gt;120 %. Trotz Beat Kurs –6 % AH wegen AI-Disruptions-Sorgen. Quelle: BusinessWire, 05.02.2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Dez 2025 – AWS Marketplace-Partnerschaft <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Atlassian-Cloud-Apps über AWS Marketplace vertrieben; erweitert den Enterprise-Distributionskanal erheblich. Kursreaktion: +6 %. Quelle: Atlassian IR</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Okt 2025 – $2.5 Mrd. Aktienrückkauf-Programm autorisiert <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">$579 Mio. bereits in Q1 FY26 zurückgekauft (ca. 12 % der Market Cap). Starkes Managementsignal. Quelle: Q2 FY2026 Earnings Call</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Feb 2026 – CFO-Wechsel: James Chuong (ex-LinkedIn) ab 30.03.2026 <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Erfahrener CFO mit starkem Tech-Track-Record, aber Übergangsunsicherheit. Neues Board-Mitglied: Anil Sabharwal (Google VP Product, KI-Expertise). Quelle: Atlassian IR, Feb 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Sep–Dez 2025 – Insider-Verkäufe &gt;$88 Mio. in 90 Tagen <span class="badge badge-red">Beobachten</span></div>
+          <div class="event-text">Signifikante Insider-Abverkäufe könnten auf Kursoptimismus der Führungsebene hinweisen. Kein Dealbreaker, aber beobachtenswert. Quelle: SEC-Filings via InsiderMonkey</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Feb 2026 – MCP-Standard: Atlassian wird AI-Infrastruktur-Hub <span class="badge badge-green">Sehr Positiv</span></div>
+          <div class="event-text">Atlassian integriert Rovo in das MCP-Ökosystem (Claude, Cursor, Google Gemini). Positioniert sich als offenes Ökosystem für die gesamte Agent-Economy. Quelle: BusinessWire, 25.02.2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Feb 2026 – Jefferies AI Disruption Report: Warnung für SaaS-Sektor <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Jefferies warnt vor steigenden AI-Disruptions-Risiken für SaaS-Applikationsschicht. Verstärkt Marktstimmung gegen TEAM. Quelle: Jefferies Research Note, Feb 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">2025/26 – Breiterer SaaS-Selloff: „SaaSpocalypse" Narrativ <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Systematischer Bewertungsdruck auf gesamten SaaS-Sektor aufgrund AI-Disruptions-Angst. TEAM ist überproportional betroffen wegen Dev-Tools-Fokus. Quelle: Multiples.vc / Morgan Stanley</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">2026 – AI-Investitionsboom in Enterprise <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Enterprises erhöhen AI-Budget stark. Atlassian als AI-Workflow-Hub profitiert von Enterprise-AI-Spending-Wellen. Quelle: Gartner / IDC Enterprise AI Outlook 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – Hohe Zinsen / Fed-Vorsicht: IT-Budgets unter Druck <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Moderat negativ; Essential-SaaS-Lösungen wie Jira weniger betroffen als diskretionäre Tools. Quelle: Fed Meeting Minutes / IT Budget Surveys</div>
+        </div>
+      </div>
+
+      <div class="source">Quellen: BusinessWire TEAM-Meldungen (businesswire.com, Feb 2026); TechInformed Jira Agents (techinformed.com, 26.02.2026); Insider Monkey (insidermonkey.com, Feb 2026); Jefferies Research (Feb 2026)</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ SEKTION 9 – TECHNISCHE ANALYSE ═══ -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 3/10</div>
+    </div>
+    <div class="section-body">
+
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom:20px;">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$79.00</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value red">~$90–95</div><div class="kpi-sub">Kurs darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value red">~$105–115</div><div class="kpi-sub">Kurs darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value red">~$165–180</div><div class="kpi-sub">Kurs stark darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14T)</div><div class="kpi-value green">~28–35</div><div class="kpi-sub">Überverkauft</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value red">$295.91</div><div class="kpi-sub">–73% aktuell</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value red">Negativ</div><div class="kpi-sub">Sell-Signal</div></div>
+      </div>
+
+      <p>TEAM befindet sich in einem ausgeprägten Abwärtstrend – der Kurs liegt unter allen relevanten Moving Averages (SMA 20, 50, 200). Nach dem +8.89 %-Rally vom 26.02.2026 (Catalyst: Jira Agents Launch) notiert die Aktie noch immer 73 % unter dem 52-Wochen-Hoch und nahe dem Jahrestief ($67.85). Die technische Situation ist fundamental bearish.</p>
+
+      <p><strong>Support/Resistance:</strong> Unmittelbarer Support bei ~$68 (52W-Tief). Nächster signifikanter Widerstand bei ~$90–95 (SMA 20), dann ~$105 (SMA 50). Für eine echte Trendwende wäre ein Schluss über SMA 50 (~$105) mit erhöhtem Volumen nötig.</p>
+
+      <p><strong>Contrarian-Signal:</strong> Der RSI von ~28–35 ist klar überverkauft. Der gestrige Rally-Tag (26.02.) mit erhöhtem Volumen und fundamentalem Catalyst ist möglicherweise das erste Bodenbildungssignal – muss sich aber in den Folgetagen bestätigen. Für langfristige Investoren ist die technische Schwäche eine Einstiegsgelegenheit, nicht ein Warnsignal.</p>
+
+      <div class="score-bar">
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:30%"></div></div>
+        <span class="score-num">3</span>
+      </div>
+
+      <div class="source">Quellen: Investing.com TEAM Technische Analyse (investing.com, 25.02.2026); MacroTrends 52W-Daten (macrotrends.net); FinancialContent Kursanalyse (financialcontent.com, 26.02.2026); StockStory (stockstory.org, 26.02.2026)</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ SEKTION 10 – RISIKEN & CHANCEN ═══ -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen (inkl. AI-Disruption)</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+
+      <h3>9a) Strukturelle &amp; zyklische Risiken</h3>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ AI-Disruption: Weniger Dev-Jobs → weniger Jira-Seats</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Sehr Hoch</span></div>
+        </div>
+        <div class="event-text">Das Kernbärenargument: AI-Coding-Tools (Cursor, GitHub Copilot, Claude Code, Devin) könnten Entwicklerteams stark verkleinern → weniger Seat-Lizenzen. Worst-Case: –30–40 % des Kernumsatzes. <em>Aktuelle Datenlage: NRR &gt;120 %, RPO beschleunigt – kein operativer Beweis für dieses Szenario.</em> Wahrscheinlichkeit mittelfristig: ~40 %.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">📉 Data-Center-Ablauf in FY2027 „meaningfully down"</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">~23 % des Umsatzes (~$1.4 Mrd.) entfällt auf Data Center. Ein 20–30 %iger Rückgang in FY2027 entspricht einem Headwind von $280–420 Mio. Cloud muss vollständig kompensieren – bisher auf Kurs. Wahrscheinlichkeit des negativen Überraschens: ~30 %.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🔄 CFO-Transition &amp; Führungsunsicherheit</div>
+          <div><span class="badge badge-green">Niedrig</span> <span class="badge badge-yellow">Auswirkung: Niedrig</span></div>
+        </div>
+        <div class="event-text">James Chuong (ex-LinkedIn CFO) tritt 30.03.2026 an. Erfahrener Finanzexperte, aber kurzfristige Übergangsunsicherheit. Insider-Verkäufe (&gt;$88 Mio. in 90 Tagen) könnten Kursoptimismus der Führungsebene widerspiegeln.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">💸 Hohe Stock-Based Compensation (&gt;$1 Mrd./Jahr)</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Dilutiert ~1 % p.a. und drückt GAAP-Profitabilität dauerhaft ins Negative. Wird durch $2.5-Mrd.-Buyback-Programm teilkompensiert. Strukturell beobachtenswert.</div>
+      </div>
+
+      <h3>9b) AI-Risiko &amp; technologische Disruption – KERNANALYSE</h3>
+      <p>Das bullische AI-Gegenargument ist durch Daten gestützt: Atlassian berichtete, dass Unternehmen, die AI-Code-Generierung nutzen, <strong>5 % mehr Jira-Aufgaben erstellen</strong>, <strong>5 % höhere MAU</strong> in Jira haben und Jira-Seats <strong>5 % schneller ausbauen</strong>. Der Mechanismus: AI generiert mehr Code → mehr Pull Requests, Bugs, Features → mehr Tickets. Am 25.02.2026 wurde „Agents in Jira" gelauncht – KI-Agenten koordinieren ihre Arbeit direkt in Jira neben Menschen.</p>
+      <p>Das <strong>reale mittelfristige Risiko</strong> liegt nicht im vollständigen Wegfall, sondern in der Preissetzungsmacht: Falls Teams deutlich kleiner werden (5 statt 10 Entwickler bei gleicher Produktivität), könnte Atlassian Seats verlieren. Dieser Effekt wäre graduell – kein Cliff Event.</p>
+
+      <h3>9c) Chancen</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div><div class="event-label">Rovo-Monetisierung</div><div class="event-text">5 Mio. MAU, noch weitgehend kostenfrei. Umstieg auf Paid-Tier/nutzungsbasierte Abrechnung könnte erheblichen Umsatz generieren – noch nicht in Guidance eingepreist.</div></div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div><div class="event-label">Enterprise Service Management Expansion</div><div class="event-text">Jira Service Management außerhalb der IT (HR, Legal, Finance) – stark wachsender TAM. 93 % MCP-Nutzung in bezahlten Enterprise-Tiers.</div></div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div><div class="event-label">Jira als AI-Orchestrierungslayer</div><div class="event-text">MCP Server GA positioniert Atlassian als zentrales AI-Infrastructure-Hub für die gesamte Agent-Economy. Natürliche Positionierung als „System of Work für Human-AI-Teams".</div></div>
+      </div>
+
+      <h3>9d) Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> Insider-Verkäufe &gt;$88 Mio. in 90 Tagen; SBC &gt;$1 Mrd./Jahr; Data-Center-Rückgang muss vollständig durch Cloud kompensiert werden.</p>
+      <p><strong>Dealbreaker (NICHT investieren wenn):</strong> NRR fällt auf unter 100 % (beweist Kunden reduzieren Lizenzen) oder Kundenzahl schrumpft absolut. Dies wäre der direkte operative Beweis für die AI-Disruptions-These.</p>
+
+      <div class="score-bar">
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div>
+        <span class="score-num">5</span>
+      </div>
+
+      <div class="source">Quellen: SiliconAngle Jira Agents (siliconangle.com, 25.02.2026); Q2 FY2026 Earnings Call (fool.com, 05.02.2026); BTIG AI Concerns (insidermonkey.com, Dez 2025); Bernstein Atlassian Note (insidermonkey.com, 06.02.2026)</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ SEKTION 11 – SCORING ═══ -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring-Tabelle (inkl. User-Analyse AI-Disruption)</div>
+      <div class="section-note">Canvas v2.2</div>
+    </div>
+    <div class="section-body">
+      <p>Die User-spezifische Schwerpunktfrage war <strong>„AI-Risiko &amp; Disruption durch neue Tools"</strong>. Die Analyse (Sektion 10b) ergab: Das Disruptions-Risiko ist real, aber aktuell in den operativen Daten nicht messbar – NRR &gt;120 %, RPO-Akzelerierung, AI-Nutzer expandieren Jira-Seats schneller. Kein Score-Update gegenüber der Ausgangsanalyse erforderlich. Der Burggraben-Score (7/10) und Risiko-Score (5/10) reflektieren bereits das AI-Risiko.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kategorie</th><th>Score</th><th>Score-Bar</th><th>Begründung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Geschäftsmodell</td>
+              <td class="beat">8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div></div></td>
+              <td>Asset-light, PLG, >350K Kunden, #1 in DevOps-Collaboration, starkes Enterprise-Mix-Shift</td>
+            </tr>
+            <tr>
+              <td>Burggraben</td>
+              <td class="beat">7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div></div></td>
+              <td>Sehr hohe Switching Costs, starke Brand; AI-Disruption möglich aber nicht sicher</td>
+            </tr>
+            <tr>
+              <td>Operative Entwicklung (4Q)</td>
+              <td class="beat">8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div></div></td>
+              <td>4/4 Beats, RPO-Akzelerierung, NRR &gt;120 %, erstes $1B Cloud-Quarter, Enterprise-Momentum</td>
+            </tr>
+            <tr>
+              <td>Wachstum</td>
+              <td class="beat">7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div></div></td>
+              <td>Re-Akzelerierung +23 %, Cloud +26 % YoY; Data-Center-Ablauf FY2027 drückt Score</td>
+            </tr>
+            <tr>
+              <td>Bewertung</td>
+              <td class="beat">9/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div></div></td>
+              <td>Historisches Tief bei 3.3x EV/Rev; ~16.6x Fwd P/E; 25/0 Analysten kaufen/verkaufen</td>
+            </tr>
+            <tr>
+              <td>Cashflow &amp; Kapitalqualität</td>
+              <td class="beat">8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div></div></td>
+              <td>$1.28 Mrd. FCF, 87 % GM, Net-Cash-positiv, aggressives $2.5B Buyback-Programm</td>
+            </tr>
+            <tr>
+              <td>Peer-Vergleich</td>
+              <td class="beat">8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div></div></td>
+              <td>Stark vs. Peers bei Wachstum &amp; NRR; massiv unterbewertet vs. ServiceNow</td>
+            </tr>
+            <tr>
+              <td>Risiken (invertiert)</td>
+              <td class="neutral">5/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div></div></td>
+              <td>AI-Disruption real, nicht sicher; Data-Center-Ablauf beherrschbar; SBC-Last</td>
+            </tr>
+            <tr>
+              <td>Technische Analyse</td>
+              <td class="miss">3/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:30%"></div></div></div></td>
+              <td>Starker Abwärtstrend, alle SMAs bearish; extremes Überverkaufs-Niveau als Contrarian-Signal</td>
+            </tr>
+            <tr style="background:rgba(255,105,0,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>6.9/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track"><div class="score-bar-fill" style="width:69%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div>
+                  <span class="score-num" style="color:var(--primary);">6.9</span>
+                </div>
+              </td>
+              <td>Fundamental sehr stark, technisch schwach – klassisches Contrarian-Value-Setup bei extremer AI-Angst</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ SEKTION 12 – FAZIT ═══ -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit &amp; Investment-These</div>
+      <div class="section-note">Canvas v2.2</div>
+    </div>
+    <div class="section-body">
+
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p>Das bullische Narrativ basiert auf drei sich verstärkenden Säulen. Erstens ist die operative Momentum-Entwicklung eindeutig positiv: 4/4 Beats mit Ø +20.7 % EPS-Surprise, RPO von +42 % auf +44 % akzelerierend, NRR drei Quartale in Folge &gt;120 %, erster Cloud-Quartalsumsatz &gt;$1 Mrd. – Metriken, die nicht auf Disruption, sondern auf Beschleunigung hindeuten.</p>
+          <p>Zweitens dreht sich die AI-Narrative: Atlassians eigene Daten beweisen, dass AI-Coding-Nutzer Jira-Seats 5 % schneller ausbauen und 20 % mehr Tickets erstellen. Der Jira-Agents-Launch (+8.89 % am 26.02.) macht Jira zur Kommandozentrale für Human-AI-Teamarbeit. Morgan Stanley: AI-Disruptions-Ängste seien „zu viele Schritte voraus".</p>
+          <p>Drittens: Bewertung auf historischem Tief bei 3.3x EV/Rev (Peer-Median: ~9x). Forward P/E ~16.6x bei 22 % Wachstum und 87 % Bruttomargen. 25/0 Analysten Kauf/Verkauf. Konsens-Zielkurs $178 (+125 % Upside). PEG-Ratio &lt;1x – klassisches Qualitätswachstum zum Value-Preis.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p>Das Kernrisiko ist strukturell kohärent: Atlassian verdient primär über Seat-Lizenzen in Softwareentwicklungsteams. Falls AI-Tools (Cursor, GitHub Copilot, Devin) die Produktivität so steigern, dass Unternehmen deutlich kleinere Teams betreiben, schrumpft die Seat-Basis. Im Worst Case: –30–40 % des Kernumsatzes. Mit &gt;15 Mio. GitHub-Copilot-Nutzern ist das kein hypothetisches Szenario.</p>
+          <p>Der CFO-Wechsel (März 2026) schafft kurzfristige Führungsunsicherheit. Insider-Verkäufe &gt;$88 Mio. in 90 Tagen sind beobachtenswert. Der erwartete Data-Center-Abschwung in FY2027 („meaningfully down") stellt einen realen Umsatz-Headwind von $280–420 Mio. dar, der vollständig durch Cloud kompensiert werden muss.</p>
+          <p>Die technische Situation ist klar bearish: Kurs –73 % vom 52W-Hoch, unter allen SMAs, Momentum-Indikatoren auf „Starkes Verkauf". P/E 16.6x ist nicht billig, falls das Wachstum auf &lt;15 % verlangsamt. Jefferies warnte explizit vor steigenden AI-Disruptions-Risiken für die SaaS-Schicht.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Das bullische Narrativ überzeugt mehr – aber die bärischen Risiken sind real und dürfen nicht bagatellisiert werden. Die operative Realität (4/4 Beats, NRR &gt;120 %, RPO-Akzelerierung, Rovo 5 Mio. MAU) widerspricht der These einer unmittelbaren AI-Disruption. Unternehmen streichen keine Jira-Lizenzen – im Gegenteil expandieren AI-nutzende Kunden ihre Atlassian-Footprints schneller. Die strukturelle Profitabilitätsverbesserung (Non-GAAP OP-Marge von ~25,5 % in FY2026) macht das Unternehmen auch in einem Verlangsamungs-Szenario widerstandsfähig.</p>
+      <p>Das verbleibende Risiko ist mittelfristig (18–36 Monate): Falls KI-Produktivitätsgewinne dramatisch ausfallen, könnte organisches Wachstum in den einstelligen Bereich fallen. Das wäre keine Existenzbedrohung (Switching Costs bleiben hoch), aber würde die aktuelle Bewertung als fair statt als Schnäppchen rechtfertigen. Entscheidend: Dieser Worst Case ist in den Daten noch nicht messbar. <strong>Ich könnte falsch liegen, weil:</strong> Der Markt hat Recht und AI zerstört das Entwickler-Workforce-Modell schneller als erwartet; oder der CFO-Wechsel enthüllt interne Probleme, die bisher nicht öffentlich sind.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kurzfristig</strong> (0–6 Mon.)</td><td>Q3 FY26 Earnings (30.04.26), weitere AI-Ankündigungen, technische Bodenbildung</td><td>Makro-Selloff, Data-Center-Rückgang sichtbar, CFO-Transition</td><td class="neutral">Vorsichtig kaufen, in Tranchen</td></tr>
+            <tr><td><strong>Mittelfristig</strong> (6–24 Mon.)</td><td>Rovo-Monetisierung sichtbar, Enterprise-AI-Workflow-Markt wächst</td><td>AI-induzierter NRR-Rückgang unter 110 %</td><td class="beat">Kaufen bei Stabilisierung. Ziel: $140–160</td></tr>
+            <tr><td><strong>Langfristig</strong> (2–5 J.)</td><td>Atlassian als AI-Orchestrierungsplattform #1, Rovo skaliert</td><td>Strukturelle Seat-Schrumpfung bei massiver AI-Adoption</td><td class="beat">Strong Buy. Ziel: $180–220+</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>Atlassian ist ein fundamentals-starkes, KI-transformierendes Unternehmen, das vom Markt aufgrund übertriebener AI-Disruptions-Ängste auf historische Bewertungstiefs gedrückt wurde. Die operativen Daten widersprechen der Disruptions-These. Die Jira-Agents-Ankündigung zeigt, dass Atlassian AI aktiv als Wachstumsmotor gestaltet. Bei 3.3x EV/Rev und ~16.6x Fwd P/E bei 22 % Wachstum und 87 % Bruttomargen wird ein Worst-Case-AI-Szenario eingepreist, das aktuell nicht durch Daten gestützt wird.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+        <div class="rating-item"><label>Zielkurs (2–4 Jahre)</label><div class="val">$140 – $200</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–4 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–14%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+80–150%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:6–11</div></div>
+      </div>
+
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>NRR fällt unter 110 % (zwei aufeinanderfolgende Quartale)</li>
+            <li>Kundenzahl schrumpft absolut (aktuell noch wachsend)</li>
+            <li>FY26-Umsatz-Guidance nach unten revidiert (&lt;+18 %)</li>
+            <li>CFO-Wechsel enthüllt überraschende bilanzielle Probleme</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Q3 FY2026 erneut Beat + RPO-Akzelerierung auf &gt;45 %</li>
+            <li>Rovo-Monetisierung erstmals in Revenue sichtbar</li>
+            <li>Kurs schließt über $105 (SMA 50) mit erhöhtem Volumen</li>
+            <li>Strategische Akquisition oder Microsoft-Deepening-Partnership</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Quality-Growth-Investoren (2–5 J. Horizont)</li>
+            <li>Contrarian-Investoren gegen AI-Disruptions-Narrativ</li>
+            <li>Tech-Sektorkennern mit Enterprise-SaaS-Erfahrung</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Income-Investoren (keine Dividende)</li>
+            <li>Value-Investoren mit GAAP-Profitabilitätsfokus</li>
+            <li>Kurzfrist-Trader (kein klares technisches Setup)</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / Tranchiert</span></td><td>Erste Tranche nach Q3 FY2026 Bestätigung (30.04.26); Stop-Loss bei $65</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>50 % jetzt bei ~$79, 50 % nach Q3-Bestätigung</td></tr>
+            <tr><td><strong>Aggressiv / Contrarian</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Bei ~$79 mit 73 % Discount zum 52W-High; Risk/Reward ~1:6–11</td></tr>
+            <tr><td><strong>Langfristig (3–5 J.)</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>AI-Transformation macht Atlassian relevanter; Rovo-Monetisierung erwartet</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="source">Quellen: Atlassian Q2 FY2026 Earnings Call (fool.com, 05.02.2026); Bernstein Note (insidermonkey.com, 06.02.2026); Morgan Stanley SaaS Note (Feb 2026); SimplyWallSt DCF (simplywall.st, Feb 2026)</div>
+    </div>
+  </div>
+
+
+  <!-- ═══ SEKTION 13 – OUTLOOK ═══ -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Die 3 entscheidenden Events</div>
+      <div class="section-note">Wenn / Dann</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q3 FY2026 Quartalsergebnisse – voraussichtlich 30. April 2026</h4>
+        <p>Das wichtigste kurzfristige Katalyse-Event. Guidance: Revenue $1.689–1.697 Mrd. (+21 % YoY), Non-GAAP OP-Marge 27.5 %. RPO-Wachstum und NRR sind die entscheidenden AI-Disruptions-Indikatoren.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Revenue im Rahmen oder besser, RPO &gt;44 %, NRR &gt;120 %, Rovo MAU &gt;6 Mio. → AI-Disruptions-Risiko für die nächsten 12 Monate operativ nicht messbar. <strong>Aggressives Nachkaufen gerechtfertigt.</strong> Kurs $130–150 kurzfristig möglich.<br><br>
+          <strong>Wenn:</strong> Revenue miss (&lt;$1.60 Mrd.), RPO-Wachstum fällt auf &lt;40 %, NRR unter 115 % → erste operative Belege für die AI-Disruptions-These. <strong>Sofortige Halbierung der Position.</strong> Kurs könnte in Richtung $50–60 fallen.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>🤖 Event 2: Rovo AI-Monetisierungs-Bekanntmachung – erwartet H2 2026</h4>
+        <p>Atlassian hat Rovo mit 5 Mio. MAU bisher weitgehend kostenfrei bereitgestellt. Die Frage ist nicht ob, sondern wann eine explizite Monetisierungsstrategie kommuniziert wird (nutzungsbasierte Abrechnung, AI-Premium-Tier, Agenten-Seats). Mit dem MCP-Standard-Engagement ist die technische Basis vorhanden.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Klar kommunizierte Rovo-Monetisierungsstrategie mit messbarem Revenue-Impact (erstes AI-ARR-Reporting, nutzungsbasierte Preiskomponente) → AI ist nicht nur kein Risiko mehr, sondern ein neues Umsatz-Layer. TEAM könnte auf 5–6x EV/Revenue repriced werden ($140–190). <strong>Sofortiges Nachkaufen auf jede Korrektur.</strong><br><br>
+          <strong>Wenn:</strong> Rovo bleibt bis Ende FY2026 ohne separaten Revenue-Beitrag und wird weiterhin als Feature-Inklusiv positioniert → fehlt der AI-Aufschlag in der Bewertung. Kursaufwärtspotenzial auf +60–80 % begrenzt (kein Bull Case). Keine Anpassung der Kernposition notwendig, aber keine weitere Aufstockung.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📉 Event 3: FY2027-Guidance &amp; Data-Center-Kompensation – erkennbar August 2026</h4>
+        <p>Das Data-Center-Segment (~23 % des Umsatzes, ~$1.4 Mrd.) wird in FY2027 „meaningfully down" gehen. Ein 20–30 %iger Rückgang entspricht einem Headwind von $280–420 Mio. Der strukturelle Wachstumspfad hängt davon ab, ob Cloud und AI-Monetisierung diesen vollständig kompensieren.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Q4 FY2026 (ca. August 2026) FY2027-Guidance bestätigt 20 %+ CAGR trotz Data-Center-Ablauf → struktureller Wachstumspfad validiert. TEAM sollte deutlich höher bewertet werden. <strong>Aufbau zur Volllposition.</strong><br><br>
+          <strong>Wenn:</strong> FY2027-Guidance impliziert Gesamtumsatz-Wachstum von unter 15 % (Data-Center-Rückgang nicht vollständig kompensiert) → Neubewertung der mittelfristigen Annahmen erforderlich. <strong>Reduktion auf 50 % der Zielgewichtung</strong> und Abwarten der Q1 FY2027 Daten.
+        </div>
+      </div>
+
+      <div class="source">Quellen: TipRanks Earnings Calendar (tipranks.com); Atlassian Q3 FY2026 Guidance (businesswire.com, 05.02.2026); Atlassian Midterm Guidance (investors.atlassian.com); Q2 FY2026 Earnings Call (fool.com, 05.02.2026)</div>
+    </div>
+  </div>
+
+
+  <div class="disclaimer">
+    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung, Kauf- oder Verkaufsempfehlung dar. Die enthaltenen Informationen basieren auf öffentlich verfügbaren Quellen (Stand 27. Februar 2026). Vergangene Wertentwicklungen sind kein verlässlicher Indikator für zukünftige Ergebnisse. Investitionen in Aktien sind mit Risiken verbunden, einschließlich des Totalverlustes des eingesetzten Kapitals. Bitte konsultieren Sie einen qualifizierten Finanzberater vor jeder Anlageentscheidung. Der Verfasser dieser Analyse übernimmt keine Haftung für etwaige Verluste, die aus der Nutzung dieser Informationen entstehen.
+  </div>
+
+</div>
+</body>
+</html>
