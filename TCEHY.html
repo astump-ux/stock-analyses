@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TCEHY – Aktienanalyse Canvas v2.2</title>
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --bg: #0f0f12;
+      --bg-card: #1a1a1f;
+      --bg-card2: #22222a;
+      --border: #2e2e38;
+      --text: #e8e8ec;
+      --text-muted: #888898;
+      --text-dim: #555566;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --teal: #14b8a6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7;
+    }
+    .header {
+      background: linear-gradient(135deg, #00081a 0%, #001028 40%, #0f0f12 100%);
+      border-bottom: 1px solid var(--primary);
+      padding: 36px 40px 28px; display: flex; justify-content: space-between;
+      align-items: flex-start; flex-wrap: wrap; gap: 20px;
+    }
+    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .header-left h1 span { color: var(--primary); }
+    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    .header-right { text-align: right; }
+    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+    .price-change.up   { background: rgba(34,197,94,0.15); color: var(--green); }
+    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+    .nav {
+      background: var(--bg-card); border-bottom: 1px solid var(--border);
+      padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+    .kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .kpi-value.green  { color: var(--green); }
+    .kpi-value.red    { color: var(--red); }
+    .kpi-value.orange { color: var(--primary); }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .section-title  { font-size: 16px; font-weight: 700; color: white; }
+    .section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+    .section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+    .section-body   { padding: 20px 24px; }
+    p { margin-bottom: 12px; color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+    h3:first-child { margin-top: 0; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(59,130,246,0.04); }
+    .beat    { color: var(--green);  font-weight: 600; }
+    .miss    { color: var(--red);    font-weight: 600; }
+    .neutral { color: var(--yellow); font-weight: 600; }
+    .badge        { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
+    .badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .badge-blue   { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .badge-orange { background: rgba(59,130,246,0.15); color: var(--primary); }
+    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+    .event-item:last-child { border-bottom: none; }
+    .event-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+    .dot-green  { background: var(--green); }
+    .dot-red    { background: var(--red); }
+    .dot-yellow { background: var(--yellow); }
+    .dot-blue   { background: var(--blue); }
+    .event-label { font-weight: 600; color: white; }
+    .event-text  { font-size: 14px; color: var(--text); }
+    .risk-item   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .risk-title  { font-weight: 600; color: white; font-size: 14px; }
+    .score-bar       { display: flex; align-items: center; gap: 10px; }
+    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .score-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #60a5fa); }
+    .score-num       { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bear-card h4 { color: var(--red);   margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .rating-box { background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(59,130,246,0.04)); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+    .rating-item .val  { font-size: 20px; font-weight: 800; color: white; }
+    .rating-item .val.buy  { color: var(--green); }
+    .rating-item .val.hold { color: var(--yellow); }
+    .rating-item .val.sell { color: var(--red); }
+    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+    .trigger-card      { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .trigger-card h5   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .trigger-card.buy  h5 { color: var(--green); }
+    .trigger-card.sell h5 { color: var(--red); }
+    .trigger-list    { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
+    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    @media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+    .investor-no  { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-no  h5 { color: var(--red);   font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+    .investor-no  li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+    .geo-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+    .geo-card   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .geo-pct    { font-size: 20px; font-weight: 700; color: white; }
+    .geo-note   { font-size: 12px; color: var(--text-muted); }
+    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+    .outlook-card .when-then strong { color: var(--primary); }
+    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+    .alert-box { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+    .divider   { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .pill      { display: inline-block; background: rgba(59,130,246,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>Tencent Holdings <span>0700.HK · TCEHY</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 27. Februar 2026 · HKEX / OTC · Sektor: Tech / Consumer</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-blue">Gaming</span>
+      <span class="badge badge-blue">Social / WeChat</span>
+      <span class="badge badge-blue">FinTech & Cloud</span>
+      <span class="badge badge-blue">AI / Yuanbao</span>
+      <span class="badge badge-yellow">Fokus: AI/Tech-Disruption</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$81.27</div>
+    <div class="price-meta">Schlusskurs 27.02.2026 · TCEHY OTC (HKD ~601)</div>
+    <div class="price-change up">▲ +74% gegenüber 52-W-Tief</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $46.76 – $87.68 (TCEHY)</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <!-- KPI OVERVIEW -->
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Kurs (TCEHY)</div>
+      <div class="kpi-value orange">$81.27</div>
+      <div class="kpi-sub">USD · 27.02.2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Marktkapitalisierung</div>
+      <div class="kpi-value">~$734 Mrd.</div>
+      <div class="kpi-sub">USD</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">P/E (TTM)</div>
+      <div class="kpi-value orange">~21x</div>
+      <div class="kpi-sub">Ø 5J: ~30x</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">P/E (FWD)</div>
+      <div class="kpi-value green">~15x</div>
+      <div class="kpi-sub">PEG &lt;1x</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">EV/EBITDA</div>
+      <div class="kpi-value">~15x</div>
+      <div class="kpi-sub">Ø 5J: ~22x</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Bruttomarge</div>
+      <div class="kpi-value green">56%</div>
+      <div class="kpi-sub">Q3 2025 · +3pp YoY</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Nächste Earnings</div>
+      <div class="kpi-value" style="font-size:16px; color:var(--yellow);">~17.–18. Mär</div>
+      <div class="kpi-sub">Q4 2025 Results</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Gesamtscore</div>
+      <div class="kpi-value orange">7.1 / 10</div>
+      <div class="kpi-sub">Canvas v2.2</div>
+    </div>
+  </div>
+
+  <!-- S1: GESCHÄFTSMODELL -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 9 Monate</div>
+    </div>
+    <div class="section-body">
+      <p>Tencent Holdings (gegr. 1998, Shenzhen) ist Chinas bedeutendster Internettechnologiekonzern und operiert als umfassendes digitales Ökosystem. Das Unternehmen verdient sein Geld primär über vier Segmente: Value-Added Services (VAS), Marketing Services, FinTech &amp; Business Services sowie sonstige Aktivitäten. Der VAS-Bereich — das historische Herzstück — umfasst Online-Gaming (national: Honor of Kings, Peacekeeper Elite, Delta Force; international via Supercell, Riot Games, Epic Games) sowie Social Networks (WeChat/Weixin, QQ, Video Accounts, Tencent Music, Tencent Video). Diese Sparte erwirtschaftete in Q3 2025 allein RMB 95,9 Mrd. (+16% YoY) und ist mit Abstand das umsatz- und margenstärkste Standbein.</p>
+      <p>WeChat/Weixin ist das strategische Zentrum des Tencent-Universums: 1,414 Mrd. monatlich aktive Nutzer (Stand September 2025) machen es zur dominantesten Super-App Chinas. WeChat vereint Messaging, soziale Feeds, Mini Programs (über 4 Mrd. Nutzer), Mobile Payments (WeChat Pay), Video Accounts, E-Commerce und zunehmend AI-Features (Yuanbao). Dieser „Walled Garden" ermöglicht Cross-Selling über alle Segmente hinweg und schafft Netzwerkeffekte, die praktisch unüberwindbar sind. Das Marketing-Services-Segment nutzt genau diese Datentiefe: KI-gestützte Werbetargeting-Systeme steigerten den Umsatz in Q3 2025 um 21% YoY auf RMB 36,2 Mrd.</p>
+      <p>FinTech &amp; Business Services — das wachstumsstärkste Segment der letzten Jahre — umfasst WeChat Pay, Wealth Management, Consumer Loans und Tencent Cloud. In Q3 2025 wuchs dieser Bereich 10% YoY auf RMB 58,2 Mrd. Die Cloud-Unit verzeichnete dabei besonders starkes Wachstum durch gestiegene Unternehmenskunden-Nachfrage nach AI-Services (GPU-Rental, API-Token). Strukturell ist Tencent ein Asset-Light-Geschäftsmodell — erst seit 2024 steigt der CapEx massiv durch AI-Investitionen (FY2024: ~$10,7 Mrd., +221% YoY).</p>
+      <p>Das Beteiligungsportfolio ist ein weiterer, oft unterschätzter Wertblock: Tencent hält Anteile an börsennotierten Unternehmen im Wert von RMB 800,8 Mrd. sowie nicht-börsennotierten Beteiligungen von RMB 345 Mrd. (u.a. PDD Holdings, Kuaishou, Sea Limited). Addiert ergibt das ca. $160 Mrd. — ein strategischer Wertpuffer, der den „Sum-of-the-Parts"-Wert erheblich über den operativen Wert hebt.</p>
+      <div class="source">Quellen: Tencent Q3 2025 Results (13.11.2025); Q4 2024 Annual Results (19.03.2025); Yahoo Finance (27.02.2026); StockAnalysis.com (27.02.2026)</div>
+    </div>
+  </div>
+
+  <!-- S2: BURGGRABEN -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <p>Tencents Burggraben ist einer der breitesten im globalen Tech-Sektor und basiert auf vier sich gegenseitig verstärkenden Säulen. Erstens sind die Netzwerkeffekte von WeChat/Weixin mit 1,414 Mrd. MAU quasi unüberwindbar: Da nahezu die gesamte chinesische Online-Bevölkerung WeChat nutzt, ist ein Wechsel für Nutzer faktisch ausgeschlossen. Die Switching Costs sind exzessiv hoch, weil WeChat gleichzeitig Zahlungssystem, Mini-App-Store, Suchmaschine und Government-Interface ist — eine Kombination, die kein einzelner Konkurrent replizieren kann.</p>
+      <p>Zweitens profitiert Tencent von enormen Scale Advantages in Gaming: Als weltgrößter Spiele-Publisher mit Beteiligungen an Riot Games (Valorant, LoL), Supercell (Clash of Clans), Epic Games und einem eigenen Entwicklungsstudio-Netzwerk kann Tencent Entwicklungskosten amortisieren und Global-IP schnell für chinesische Märkte adaptieren. Das Evergreen-Games-Portfolio sorgt für planbare, hochmargige Cashflows. Drittens ist die Datentiefe durch WeChat ein technologischer Moat: KI-gestützte Werbealgorithmen, die auf diesem Datenfundament aufbauen, liefern Advertisern messbaren ROAS-Vorteil — ein Selbstverstärkungseffekt zugunsten des Werbebuchungsvolumens.</p>
+      <p>Schwachstellen des Burggrabens: Die regulatorische Abhängigkeit vom chinesischen Staat ist real — 2021/22 führten Gaming-Regulierungen und Anti-Monopol-Maßnahmen zu zweistelligen Kursverlusten. Auch DeepSeek und ByteDance (Douyin/TikTok, Doubao-AI) zeigen, dass die App-Ebene des WeChat-Ökosystems grundsätzlich attackierbar ist. International bleibt Tencents Burggraben schwach.</p>
+      <div class="source">Quellen: Tencent Q3 2025 Earnings Call (13.11.2025); Morningstar Analysis (23.12.2025); Klover.ai Tencent AI Strategy (25.07.2025)</div>
+    </div>
+  </div>
+
+  <!-- S3: QUARTALE -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale – Operative Entwicklung</div>
+      <div class="section-score">Beat-Ratio: 4/4</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">
+        ⚠️ <strong>Hinweis:</strong> Da Tencent (0700.HK) primär an der HKEX notiert, sind keine finviz.com-Daten verfügbar. Alle Kennzahlen stammen von Tencent IR, Yahoo Finance, StockAnalysis.com und investing.com (Stand: 27.02.2026). Nächste Quartalsergebnisse (Q4 2025): voraussichtlich <strong>17.–18. März 2026</strong>.
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quartal</th>
+              <th>Umsatz (RMB Mrd.)</th>
+              <th>YoY %</th>
+              <th>Non-IFRS Op.-Marge</th>
+              <th>Dil. EPS Non-IFRS (RMB)</th>
+              <th>Beat/Miss</th>
+              <th>Kurs-Reaktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q4 2024</strong></td>
+              <td>172,4</td>
+              <td>+11%</td>
+              <td>~37%</td>
+              <td>~5,8</td>
+              <td><span class="beat">✓ Beat</span></td>
+              <td class="beat">+ca. +3%</td>
+            </tr>
+            <tr>
+              <td><strong>Q1 2025</strong></td>
+              <td>180,0</td>
+              <td>+13%</td>
+              <td>~39%</td>
+              <td>6,58</td>
+              <td><span class="beat">✓ Beat</span></td>
+              <td class="beat">+ca. +4%</td>
+            </tr>
+            <tr>
+              <td><strong>Q2 2025</strong></td>
+              <td>184,5</td>
+              <td>+15%</td>
+              <td>~38%</td>
+              <td>~7,0</td>
+              <td><span class="beat">✓ Beat</span></td>
+              <td class="beat">+ca. +2%</td>
+            </tr>
+            <tr>
+              <td><strong>Q3 2025</strong></td>
+              <td>192,9</td>
+              <td>+15%</td>
+              <td>38%</td>
+              <td>7,575</td>
+              <td><span class="beat">✓ Beat</span></td>
+              <td class="beat">+ca. +3%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Tencent hat in allen vier betrachteten Quartalen sowohl beim Umsatz als auch beim Gewinn die Analystenerwartungen übertroffen. Besonders auffällig ist die Beschleunigung des Umsatzwachstums von +11% in Q4 2024 auf stabile +15% in Q2 und Q3 2025, getrieben durch Gaming (international: +43% in Q3) und Marketing Services (+21% in Q3). Die Bruttomarge verbesserte sich von 53% (Q3 2024) auf 56% (Q3 2025), was operative Hebelwirkung bei Mix-Shift hin zu höhermargigen Revenue-Streams signalisiert.</p>
+      <p>Für Q4 2025 erwartet der Konsens einen Umsatz von ca. RMB 216 Mrd. (+ca. 12% YoY) und EPS von 7,73 HKD. Das Management kommunizierte erhöhte AI-CapEx-Investitionen für 2025 (Low-Teens-Prozent vom Umsatz), was kurzfristig FCF-Druck erzeugt, aber langfristig Wachstumskapital aufbaut.</p>
+      <div class="source">Quellen: Tencent IR Press Releases Q4 2024–Q3 2025; CNBC Earnings Report (19.03.2025); Variety Q3 2025 Report (14.11.2025); TradingView Consensus Estimates (27.02.2026)</div>
+    </div>
+  </div>
+
+  <!-- S4: WACHSTUM -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <p>Tencents Wachstum hat sich nach der Regulierungsdepression 2021/22 seit 2023 strukturell erholt und befindet sich nun im „Growth-at-Scale"-Modus. Der Konzernumsatz erreichte in FY2024 RMB 660,3 Mrd. (+8,4% YoY) — ein moderates Headline-Wachstum, das jedoch durch starke Profitabilitätssteigerung übertroffen wird: Non-IFRS Operating Profit wuchs 2024 um +24% YoY, weit über dem Umsatzwachstum.</p>
+      <h3>Segment-Wachstum (Q3 2025)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Segment</th><th>Umsatz (RMB Mrd.)</th><th>YoY %</th><th>Treiber</th><th>Marge-Trend</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Domestic Games</td><td>42,8</td><td class="beat">+15%</td><td>Delta Force, VALORANT Mobile, Evergreen-Portfolio</td><td>↑ Hoch</td></tr>
+            <tr><td>International Games</td><td>20,8</td><td class="beat">+43%</td><td>Supercell-Konsolidierung, Dying Light: Beast</td><td>↑ Hoch</td></tr>
+            <tr><td>Social Networks</td><td>32,3</td><td class="neutral">+5%</td><td>Video Accounts, Musik-Abo, Mini Games</td><td>→ Stabil</td></tr>
+            <tr><td>Marketing Services</td><td>36,2</td><td class="beat">+21%</td><td>KI-Werbetargeting, Video Accounts Ads</td><td>↑ +4pp</td></tr>
+            <tr><td>FinTech &amp; Business Services</td><td>58,2</td><td class="beat">+10%</td><td>Cloud/AI, Payments, Consumer Loans</td><td>↑ Mix-Shift</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Geografische Verteilung</h3>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">Mainland China</div>
+          <div class="geo-pct">~85%</div>
+          <div class="geo-note">+~12% (2025E) · Kernmarkt</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">International</div>
+          <div class="geo-pct">~12%</div>
+          <div class="geo-note">+~40% (Games) · Wachstumsmotor</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Sonstige</div>
+          <div class="geo-pct">~3%</div>
+          <div class="geo-note">moderat · Früh-Stadium</div>
+        </div>
+      </div>
+      <p>Das Wachstum ist nicht durch M&amp;A inflationiert — organische Stärke in Gaming und Advertising trägt den Löwenanteil. Warnung: Der 43%-Sprung bei International Games enthält Sondereffekte (Umsatz-Vorauserfassung, Studio-Konsolidierungen), weshalb das Management selbst für Q4 eine Normalisierung ankündigte. Das mittelfristige nachhaltige Wachstumsziel liegt bei +12–15% YoY.</p>
+      <div class="source">Quellen: Tencent Q3 2025 Press Release; Q4 2024 Annual Results Presentation (19.03.2025); Quartr Investor Relations; TechNode AI Update (2025/2026)</div>
+    </div>
+  </div>
+
+  <!-- S5: BEWERTUNG -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">
+        ⚠️ <strong>Hinweis:</strong> Da 0700.HK kein US-Listing ist, sind keine Finviz-Daten verfügbar. Alle Kennzahlen stammen von StockAnalysis.com, MacroTrends, Multiples.vc und Yahoo Finance (Stand: 27.02.2026).
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Multiple</th><th>Tencent (akt.)</th><th>Tencent Ø 5J</th><th>Alibaba</th><th>Meta</th><th>NetEase</th><th>Kommentar</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>P/E (TTM)</td><td><strong>~21x</strong></td><td>~30x</td><td>~21x</td><td>~27x</td><td>~18x</td><td>Deutlicher Discount zur Historie</td></tr>
+            <tr><td>P/E (FWD)</td><td><strong class="beat">~15x</strong></td><td>–</td><td>~15x</td><td>~22x</td><td>~16x</td><td>Sehr attraktiv bei +15% Wachstum</td></tr>
+            <tr><td>EV/EBITDA</td><td><strong>~15x</strong></td><td>~22x</td><td>~14x</td><td>~17x</td><td>~12x</td><td>Unter historischem Durchschnitt</td></tr>
+            <tr><td>P/S (TTM)</td><td><strong>~6x</strong></td><td>–</td><td>~2,5x</td><td>~9x</td><td>~4x</td><td>Gaming-/Tech-Premium</td></tr>
+            <tr><td>PEG (FWD)</td><td><strong class="beat">&lt;1x</strong></td><td>–</td><td>~1,5x</td><td>~1,1x</td><td>~1,0x</td><td>Sehr attraktiv unter 1x</td></tr>
+            <tr><td>ROE</td><td><strong>~20%</strong></td><td>–</td><td>~9%</td><td>~37%</td><td>~25%</td><td>Solide; Meta überlegen</td></tr>
+            <tr><td>Net Cash (RMB Mrd.)</td><td><strong>~102</strong></td><td>–</td><td>~650</td><td>–</td><td>–</td><td>Solide Bilanz</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Tencent handelt aktuell mit einem deutlichen Discount zur eigenen Historie und zum globalen Tech-Sektor. Das Forward P/E von ~15x bei einem Wachstum von +13–15% YoY ergibt ein PEG-Ratio von unter 1x — traditionell als attraktive Bewertung eingestuft. Der Morningstar-Analyst Ivan Su setzte einen Fair Value bei ~$102 (TCEHY-ADR) mit dem Hinweis „High Uncertainty" aufgrund des China-Risiko-Abschlags.</p>
+      <p>Ein wesentlicher Aspekt der Bewertung: Addiert man den Wert des Beteiligungsportfolios (börsennotiert + nicht-börsennotiert = ca. $160 Mrd.) und subtrahiert ihn vom Enterprise Value, zahlt man für das operative Kerngeschäft einen noch deutlich günstigeren Preis. Dies ist das klassische „Sum-of-the-Parts"-Argument für Tencent-Bullen.</p>
+      <div class="source">Quellen: StockAnalysis.com (27.02.2026); Multiples.vc (02.02.2026); MacroTrends PE Ratio (20.02.2026); Morningstar Fair Value (Dez 2025); Yahoo Finance (27.02.2026)</div>
+    </div>
+  </div>
+
+  <!-- S6: CASHFLOW -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kennzahl</th><th>Q3 2025</th><th>YoY</th><th>FY 2024</th><th>FY 2023 (est.)</th><th>Trend</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Bruttomarge</td><td><strong>56%</strong></td><td class="beat">+3pp</td><td>~53%</td><td>~50%</td><td>↑ Stark steigend</td></tr>
+            <tr><td>Non-IFRS Op.-Marge</td><td><strong>38%</strong></td><td class="beat">+1pp</td><td>~35%</td><td>~32%</td><td>↑ Steigend</td></tr>
+            <tr><td>FCF (RMB Mrd.)</td><td><strong>58,5</strong></td><td class="neutral">~0%</td><td>200+</td><td>170+</td><td>→ Stabil (AI-CapEx drückt)</td></tr>
+            <tr><td>CapEx (RMB Mrd.)</td><td><strong>13,0</strong></td><td class="miss">+AI-Invest</td><td>~77 (FY)</td><td>~25 (FY)</td><td>↑ AI-Investitionen</td></tr>
+            <tr><td>Net Cash (RMB Mrd.)</td><td><strong>102,4</strong></td><td class="beat">+7%</td><td>–</td><td>–</td><td>↑ Solide</td></tr>
+            <tr><td>ROE</td><td><strong>~20%</strong></td><td>–</td><td>~19%</td><td>~15%</td><td>↑ Verbessernd</td></tr>
+            <tr><td>Debt/EBITDA</td><td><strong>~0,3x</strong></td><td>–</td><td>–</td><td>–</td><td>✓ Sehr niedrig</td></tr>
+            <tr><td>Buyback FY2024 (HKD Mrd.)</td><td>–</td><td>–</td><td><strong>112</strong></td><td>~49</td><td>↑ Stark (+127%)</td></tr>
+            <tr><td>Dividende (HKD/Aktie)</td><td>–</td><td>–</td><td><strong>4,50</strong></td><td>3,40</td><td>↑ +32% Erhöhung</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Die Kapitalqualität ist beeindruckend. Die strukturell steigende Bruttomarge reflektiert den bewussten Mix-Shift weg von margenarmen Cloud-Services hin zu hochmargigen Eigenentwicklungs-Games, Video Accounts und WeChat Search Advertising. Die FCF-Konversionsrate bleibt trotz des massiven CapEx-Anstiegs (+221% in FY2024) solide — das operative Cash-Generierungsvermögen ist weiterhin stark.</p>
+      <p>Das Aktienrückkaufprogramm von HKD 112 Mrd. in 2024 (mehr als Verdoppelung gegenüber 2023) und das Commitment für mindestens HKD 80 Mrd. in 2025 signalisieren hohes Management-Vertrauen in die eigene Unterbewertung. Der flache FCF in Q3 2025 ist ein „Invest-for-Growth"-Signal — kein strukturelles Problem.</p>
+      <div class="source">Quellen: Tencent Q3 2025 Results Press Release (13.11.2025); Q4 2024 Annual Results (19.03.2025); StockAnalysis.com Statistics (27.02.2026)</div>
+    </div>
+  </div>
+
+  <!-- S7: PEERS -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Unternehmen</th><th>Marktk. ($Mrd.)</th><th>Rev. Growth (LTM)</th><th>Bruttomarge</th><th>P/E (FWD)</th><th>EV/EBITDA</th><th>AI-Positionierung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Tencent (TCEHY)</strong></td>
+              <td>~734</td>
+              <td class="beat">+~14%</td>
+              <td class="beat">56%</td>
+              <td class="beat">~15x</td>
+              <td>~15x</td>
+              <td><span class="badge badge-blue">Stark: Hunyuan + WeChat-Distrib.</span></td>
+            </tr>
+            <tr>
+              <td>Alibaba (BABA)</td>
+              <td>~350</td>
+              <td class="neutral">+~5%</td>
+              <td>~40%</td>
+              <td>~15x</td>
+              <td>~14x</td>
+              <td><span class="badge badge-yellow">Aggressiv: Qwen, $53B AI-Invest</span></td>
+            </tr>
+            <tr>
+              <td>Meta (META)</td>
+              <td>~1.500</td>
+              <td class="beat">+~20%</td>
+              <td class="beat">~82%</td>
+              <td class="miss">~22x</td>
+              <td>~17x</td>
+              <td><span class="badge badge-green">Weltklasse: Llama, Meta AI, Orion</span></td>
+            </tr>
+            <tr>
+              <td>NetEase (NTES)</td>
+              <td>~60</td>
+              <td class="neutral">+~5%</td>
+              <td>~60%</td>
+              <td>~16x</td>
+              <td>~12x</td>
+              <td><span class="badge badge-yellow">Gaming-Fokus, kaum AI-Exposure</span></td>
+            </tr>
+            <tr>
+              <td>ByteDance (privat)</td>
+              <td>~300 est.</td>
+              <td class="beat">+~30%</td>
+              <td>–</td>
+              <td>–</td>
+              <td>–</td>
+              <td><span class="badge badge-red">Sehr stark: Doubao, TikTok, Trae</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Im direkten Peer-Vergleich sticht Tencent durch seine Kombination aus starkem Umsatzwachstum (+14%) und relativer Bewertungsgünstigkeit (FWD P/E ~15x) heraus. Gegenüber Meta ist Tencent deutlich günstiger, wächst aber langsamer und ohne westliche Bewertungsprämie. Alibaba ist als Turnaround-Kandidat interessant, hat aber fundamentale Wachstumsprobleme im Kerngeschäft (E-Commerce verliert Marktanteile an PDD).</p>
+      <p>ByteDance ist der gefährlichste Wettbewerber — privat, extrem kapitalstark und mit Doubao (AI-Chatbot) und Douyin direkt in Konkurrenz zu Tencents Kernprodukten. Qualitativ ist Tencents Vorteil gegenüber allen chinesischen Peers die WeChat-Distributionsplattform, die kein anderes Unternehmen replizieren kann.</p>
+      <div class="source">Quellen: Yahoo Finance; MacroTrends PE Ratios (Feb 2026); StockAnalysis.com; KoalaGains Alibaba Analysis (27.10.2025)</div>
+    </div>
+  </div>
+
+  <!-- S8: NEWS -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events (letzte 3 Monate)</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">13.11.2025 – Q3 2025 Earnings: Revenue +15%, Gewinn +18% <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">4/4 Beat-Serie, Bruttomarge auf 56%, International Games +43% YoY. Quelle: Tencent IR, 13.11.2025</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">08.12.2025 – Hunyuan 2.0 Launch <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">MoE-Architektur, 406B Parameter, 256K Context Window. Stärkstes Tencent-Modell bisher. Quelle: TechNode, 08.12.2025</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Feb 2026 – Yuanbao: #1 China iOS App nach WeChat-Integration <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Überholt DeepSeek unmittelbar nach nativer WeChat-Integration — demonstriert Tencents Distributionsvorteil. Quelle: SCMP, Feb 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Mär 2025 – HKD 80 Mrd. Buyback-Commitment 2025 + Dividende +32% <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">HKD 4,50/Aktie für FY2024. Starkes Management-Signal zur eigenen Unterbewertung. Quelle: Tencent IR, 19.03.2025</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Feb 2025 – Hunyuan Turbo S Release <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Effizienter als DeepSeek in Response-Speed-Benchmarks. Quelle: Fortune Asia, Feb 2025</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Feb 2025 – DeepSeek R1/V3-Integration in Yuanbao <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Pragmatische Partnerschaft — stärkt Yuanbao, zeigt aber auch externe Modell-Abhängigkeit. Quelle: SCMP, Feb 2025</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Jan 2026 – 1 Mrd. RMB Yuanbao-Promo (Lunar New Year) <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Aggressives Marketing à la WeChat Pay-Anfänge — langfristig sinnvoll, kurzfristig Kostenbelastung. Quelle: CNBC, Jan 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-blue"></div>
+        <div>
+          <div class="event-label">17.–18. März 2026 – Q4 2025 Earnings (pending) <span class="badge badge-blue">Pending</span></div>
+          <div class="event-text">Konsens: RMB 216 Mrd. Umsatz, EPS 7,73 HKD. Entscheidend für AI-Monetarisierungs-Narrativ.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Laufend 2025/26 – China AI-Preiskrieg <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Alibaba, ByteDance, Tencent unterbieten sich bei Cloud/AI — Margendruck im B2B-Segment. Quelle: TechNode, Feb 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Dez 2025 – DeepSeek V3 &amp; Jan 2026 – Moonshot Kimi K2.5 <span class="badge badge-yellow">Ambivalent</span></div>
+          <div class="event-text">Starke Konkurrenz für proprietäre Modelle — Tencent integriert pragmatisch statt zu konkurrieren. Quelle: Scientific American, Dez 2025</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Q4 2025 – China: 497 neue Spiellizenzen <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Regulatorische Entspannung bei Gaming — Blaupause für weiteres Gaming-Wachstum 2026. Quelle: China NPPA, Q4 2025</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Feb 2026 – Alibaba $53 Mrd. AI-Investment angekündigt <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Erhöht Wettbewerbsdruck im Cloud/AI-Bereich erheblich. Quelle: CNBC, Feb 2026</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Jan–Feb 2026 – US-China Tech-Entspannung <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Handelswaffenstillstand stabilisiert Tarife und öffnet Fenster für AI/Tech-Entwicklung. Quelle: SCMP, Jan 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Jan 2026 – China 15. Fünfjahresplan (2026–2030): AI als Priorität <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Staatliche Rückendeckung für AI/Tech-Investitionen — struktureller Tailwind für Tencent Cloud. Quelle: Xinhua, Jan 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Dez 2025 – China CAC: „Anthropomorphic AI" Regulierung in Konsultation <span class="badge badge-yellow">Neutral/Negativ</span></div>
+          <div class="event-text">Neue Compliance-Anforderungen für AI-Chatbots (u.a. Yuanbao) — finale Regelung ausstehend. Quelle: Carnegie Endowment, Feb 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Laufend – US AI-Export-Kontrollen (GPU-Sanktionen) <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Limitiert GPU-Verfügbarkeit für AI-Training in China — Tencent bestätigte proaktiven Beschaffungsplan. Quelle: Reuters, 2025</div>
+        </div>
+      </div>
+      <div class="source">Quellen: Tencent IR; CNBC (Feb 2026); TechNode (Dez 2025/Feb 2026); SCMP (Mär 2025, Feb 2026); Fortune Asia (Feb 2025); Scientific American (Dez 2025); Yahoo Finance (Jan 2026)</div>
+    </div>
+  </div>
+
+  <!-- S9: TECHNISCH -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <p>Es ist wichtig, zwischen dem US-OTC-Listing (TCEHY) und dem Primärlisting in Hongkong (0700.HK) zu unterscheiden, da sie aktuell divergierende technische Signale senden.</p>
+      <h3>TCEHY (OTC/ADR) — 27.02.2026</h3>
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom: 16px;">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$81.27</div><div class="kpi-sub">USD</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value green">$78.45</div><div class="kpi-sub">Kurs &gt; SMA ✓</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value green">~$79.65</div><div class="kpi-sub">Kurs &gt; SMA ✓</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value green">~$73–78</div><div class="kpi-sub">Kurs &gt; SMA ✓</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value orange">~54–59</div><div class="kpi-sub">Neutral/Bullisch</div></div>
+        <div class="kpi-card"><div class="kpi-label">52-W-High</div><div class="kpi-value">$87.68</div><div class="kpi-sub">Nahe ATH</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value green">+0.16</div><div class="kpi-sub">Positiv</div></div>
+      </div>
+      <p>TCEHY zeigt ein klares <strong>Strong Buy</strong>-Signal (10/12 MA-Signale positiv). Der Kurs liegt oberhalb aller drei Moving Averages, der RSI ist nicht überkauft, und das MACD-Momentum ist intakt. Key Support: ~$80 (Fibonacci-Pivot) und $78,55 (MA-Cluster). Resistance: $87,68 (52-W-Hoch).</p>
+      <h3>0700.HK (Primärlisting Hongkong) — 27.02.2026</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Indikator</th><th>Wert</th><th>Signal</th><th>Kommentar</th></tr></thead>
+          <tbody>
+            <tr><td>Kurs</td><td>~HKD 601</td><td class="neutral">–</td><td>Unter SMA 200 bei HKD 628,53</td></tr>
+            <tr><td>SMA 50</td><td>HKD 610,22</td><td class="miss">⚠ Kurs &lt; SMA</td><td>Kurzfristig bearisch</td></tr>
+            <tr><td>SMA 200</td><td>HKD 628,53</td><td class="miss">⚠ Kurs &lt; SMA</td><td>Unter dem 200-Tage-MA</td></tr>
+            <tr><td>RSI (14)</td><td>~42,5</td><td class="miss">⚠ Verkaufsdruck</td><td>Unter 50 = bärisch</td></tr>
+            <tr><td>MACD</td><td>–2,62</td><td class="miss">❌ Negativ</td><td>Negativer Kreuzungspunkt</td></tr>
+            <tr><td>Gesamtsignal</td><td colspan="3"><span class="badge badge-red">Strong Sell (HK) — 2/12 MA-Signale positiv</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Die Divergenz erklärt sich durch Währungseffekte, unterschiedliche Anlegertypen und HK-Markt-Schwäche im Februar 2026. Für 0700.HK gilt HKD 575–590 als wichtige Unterstützungszone, HKD 630 als Widerstand. Langfristige Investoren können die kurzfristige HK-Schwäche als Einstiegsgelegenheit sehen.</p>
+      <div class="source">Quellen: Investing.com Technical Analysis TCEHY und 0700 (27.02.2026); TipRanks Technical Analysis TCEHY; TradingView 0700.HK Community Analysis</div>
+    </div>
+  </div>
+
+  <!-- S10: RISIKEN -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <h3>9a) Strukturelle &amp; Zyklische Risiken</h3>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Regulierung (Gaming, AI, FinTech)</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-yellow">Wahrschl.: Mittel</span></div>
+        </div>
+        <div class="event-text">Neue Eingriffe analog 2021/22 könnten EPS um 10–20% reduzieren. CAC-AI-Regulierung in Finalisierungsphase. Gaming-Lizenzen entspannt, aber strukturell nie eliminierbar.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🌐 Geopolitik / US-Delisting (HFCAA)</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-blue">Wahrschl.: Niedrig-Mittel</span></div>
+        </div>
+        <div class="event-text">Extremszenario: -50%+ Kurs bei Zwangsdelisting. Normales Umfeld: -10–15% struktureller Bewertungsabschlag. Aktuell stabile US-China-Handelsbeziehungen.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🤖 ByteDance WeChat-Substitution</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Wahrschl.: Mittel (lang)</span></div>
+        </div>
+        <div class="event-text">Langsamer struktureller Marktanteilsverlust möglich. Douyin (~750 Mio. DAU), Doubao AI — ähnliche Datentiefe. Worst Case: -5% Revenue p.a. über 3–5 Jahre.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">📉 AI-Monetarisierungsverzögerung</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Wahrschl.: Mittel</span></div>
+        </div>
+        <div class="event-text">AI-Investitionen ohne messbare Revenue-Rückkehr: FCF-Druck, -10–15% Bewertungskompression. Yuanbao-Monetarisierungsmodell noch nicht etabliert.</div>
+      </div>
+
+      <h3>9b) AI/Tech-Disruption — Fokusanalyse (User-Schwerpunkt)</h3>
+      <p>Die zentrale Frage: Ist DeepSeek und die AI-Native-App-Welle eine existenzielle Bedrohung oder ein Katalysator? DeepSeek hat die Spielregeln verändert, indem hochqualitative Foundation Models nun open-source verfügbar sind. Tencent hat darauf pragmatisch reagiert: Integration von DeepSeek R1/V3 in Yuanbao (statt zu konkurrieren), paralleler Ausbau von Hunyuan V2.0/Turbo S, und WeChat-native AI-Features.</p>
+      <p><strong style="color:var(--green);">Bullisches AI-Szenario:</strong> Tencents Vorteil liegt nicht im Modell, sondern im Ökosystem. Mit 1,414 Mrd. WeChat-Nutzern als Distributionskanal skaliert jeder AI-Service schneller als bei jedem Wettbewerber. Yuanbao wurde nach WeChat-Integration sofort #1 iOS App — genau dieser Distributionsvorteil ist replizierbar und nachgewiesen. AI verbessert bereits messbar das Advertising (+21% Marketing Services Q3).</p>
+      <p><strong style="color:var(--red);">Bärisches AI-Szenario:</strong> Wenn AI-native Interfaces (Doubao, DeepSeek, Kimi) die primäre User-Interaktion übernehmen, könnte WeChat als „Default Layer" erodieren. ByteDance ist der gefährlichste Angreifer mit ähnlicher Datentiefe und agilerer Unternehmenskultur. Der AI-Preiskrieg in China drückt Cloud-Margen.</p>
+
+      <h3>9c) Chancen</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Chance</th><th>Potenzial</th><th>Zeithorizont</th><th>Details</th></tr></thead>
+          <tbody>
+            <tr><td>WeChat AI-Monetarisierung</td><td class="beat">Hoch</td><td>2026–28</td><td>AI-Search, AI-Ads, AI-Mini-Programs — enormer Revenue-Uplift möglich</td></tr>
+            <tr><td>Internationale Gaming-Expansion</td><td class="beat">Hoch</td><td>Kurzfristig</td><td>Weitere Studio-Akquisitionen, Global-IP-Export aus China</td></tr>
+            <tr><td>Yuanbao B2B/Enterprise AI</td><td class="neutral">Mittel-Hoch</td><td>Mittelfristig</td><td>Tencent Cloud + Yuanbao als Enterprise-AI-Anbieter</td></tr>
+            <tr><td>Video Accounts Skalierung</td><td class="neutral">Mittel-Hoch</td><td>Laufend</td><td>Noch früh — Potenzial analog WeChat Pay</td></tr>
+            <tr><td>Sum-of-the-Parts Rerating</td><td class="neutral">Mittel</td><td>Langfristig</td><td>Abbau Beteiligungsportfolio / Spin-offs heben Wert</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>9d) Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> FCF-Wachstum flach trotz Operating Leverage — AI-CapEx muss Rendite zeigen. Yuanbao-Nutzergewinne basieren noch auf Marketingsubventionen. Internationale Gaming-Beschleunigung enthält Einmaleffekte. HK-Aktie technisch schwach.</p>
+      <p><strong>Dealbreaker (aktuell nicht vorhanden):</strong> Eine neue massive Gaming-Regulierung analog 2021 oder ein erzwungenes Delisting wären potenziell existenzbedrohend für westliche Investoren. Beide Szenarien haben aktuell niedrige Wahrscheinlichkeit.</p>
+      <div class="source">Quellen: Tencent Q3 2025 Earnings Call; CNBC News (Feb 2026); SCMP AI News; Klover.ai AI Strategy (Jul 2025); Carnegie Endowment China AI Regulation (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- S11: SCORING -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring &amp; User-spezifische Analyse (AI/Tech-Disruption)</div>
+      <div class="section-note">Canvas v2.2</div>
+    </div>
+    <div class="section-body">
+      <h3>Scoring-Übersicht</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kategorie</th><th>Score</th><th style="min-width:220px;">Score-Bar</th><th>Begründung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Geschäftsmodell</td>
+              <td><strong>9/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+              <td>WeChat-Ökosystem, breit diversifiziert, AI-ready</td>
+            </tr>
+            <tr>
+              <td>Burggraben</td>
+              <td><strong>8/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>Tiefer Moat durch WeChat &amp; Netzwerkeffekte; int. Schwäche</td>
+            </tr>
+            <tr>
+              <td>Operative Entwicklung (4Q)</td>
+              <td><strong>8/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>4/4 Beats, Margenausdehnung, starkes Gaming</td>
+            </tr>
+            <tr>
+              <td>Wachstum</td>
+              <td><strong>7/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>+13–15% Konzernwachstum, Mix-Shift positiv</td>
+            </tr>
+            <tr>
+              <td>Bewertung</td>
+              <td><strong>7/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>FWD P/E ~15x, PEG &lt;1x — günstig für Wachstumsrate</td>
+            </tr>
+            <tr>
+              <td>Cashflow &amp; Margen</td>
+              <td><strong>8/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>Bruttomarge +3pp auf 56%, solider FCF, Buybacks</td>
+            </tr>
+            <tr>
+              <td>Risiken (invertiert)</td>
+              <td><strong>6/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Regulierung &amp; Geopolitik real — China-Discount gerechtfertigt</td>
+            </tr>
+            <tr>
+              <td>Technische Analyse</td>
+              <td><strong>6/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>TCEHY OTC stark, 0700.HK kurzfristig schwach — Divergenz</td>
+            </tr>
+            <tr style="background:rgba(59,130,246,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>7.1/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track">
+                    <div class="score-bar-fill" style="width:71%; background:linear-gradient(90deg,var(--primary),#93c5fd);"></div>
+                  </div>
+                  <span class="score-num" style="color:var(--primary);">7.1</span>
+                </div>
+              </td>
+              <td>Attraktives China-Tech mit vertretbarem Risiko / Qualitätswachstum zu fairer Bewertung</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>User-Spezifische Analyse: AI/Tech-Disruption &amp; Wettbewerb (DeepSeek, Alibaba)</h3>
+      <p>Die Kernfrage: Ist Tencent durch DeepSeek, Alibabas Qwen und ByteDance/Doubao disruptionsgefährdet? Die bereits messbaren positiven AI-Effekte sind nachweisbar: Marketing Services wuchs +21% in Q3 2025 direkt getrieben durch KI-Werbetargeting. Morningstar-Analyst Ivan Su argumentiert überzeugend, dass das Fokussieren auf AI-Benchmarks von Tencents realem Vorteil ablenkt — WeChat als Distributionskanal für jeden AI-Service übertrifft jeden Modell-Benchmark.</p>
+      <p>Historische Parallele: Als WeChat Pay 2013/14 startete, nutzten „Red Packet"-Kampagnen (analog dem aktuellen 1 Mrd. RMB Yuanbao-Promo) dieselbe Strategie, um schnell Marktanteile zu gewinnen — mit nachhaltigem Erfolg. Diese Analogie stärkt das bullische Szenario. Das Hauptrisiko — dass AI-native Interfaces WeChat als „Default Layer" untergraben — ist real genug, um den Burggraben-Score nicht weiter zu erhöhen. Die Scoring-Einschätzungen werden nach dieser Tiefenanalyse bestätigt; keine Anpassung notwendig.</p>
+      <div class="source">Quellen: Morningstar Ivan Su Note (Dez 2025); SCMP Yuanbao vs. DeepSeek (Feb 2026); CNBC Tencent 'Trust Advantage' (16.02.2026); Fortune Asia Hunyuan Turbo S (Feb 2025); Variety Q3 2025 Earnings Analysis (14.11.2025)</div>
+    </div>
+  </div>
+
+  <!-- S12: FAZIT -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-note">Gesamtsynthese</div>
+    </div>
+    <div class="section-body">
+
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 – Profitabilitätswende:</strong> Non-IFRS Operating Profit wuchs 2024 um +24% YoY bei nur +8% Umsatzwachstum. Bruttomarge steigt strukturell von ~50% (2023) auf 56% (Q3 2025) — nicht durch Einmaleffekte, sondern durch bewussten Mix-Shift zu hochmargigen Eigenentwicklungs-Games und AI-Werbung. 4/4 Quartale Beat.</p>
+          <p><strong>Säule 2 – AI-Distributionschampion:</strong> Tencent muss nicht der Modell-Innovator sein. 1,414 Mrd. WeChat-Nutzer als captive Distribution für jeden AI-Service — Yuanbao wurde nach WeChat-Integration sofort #1 China iOS App. Marketing Services +21% durch KI-Targeting bereits messbar monetarisiert. PEG &lt;1x zeigt: AI-Optionalität noch nicht eingepreist.</p>
+          <p><strong>Säule 3 – Kapitalrückführung:</strong> HKD 112 Mrd. Buybacks in 2024 (+127% YoY), Dividende +32%, Minimum HKD 80 Mrd. 2025. Beteiligungsportfolio ~$160 Mrd. kaum in Bewertung reflektiert — operatives Kerngeschäft im einstelligen FWD P/E wenn man das Portfolio abzieht.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 – Regulierung:</strong> Das strukturell nicht eliminierbare China-Regulierungsrisiko ist real. 2021/22 führten Gaming-Eingriffe zu >70% Kursverlust. Eine neue massive Regulierung (Gaming, AI via CAC, FinTech) könnte EBITDA-Marge von ~38% auf ~30–32% drücken — das ist das Hauptrisiko.</p>
+          <p><strong>Risiko 2 – ByteDance-Disruption:</strong> ByteDance ist die nicht-börsennotierte Bedrohungsvariable. Douyin (~750 Mio. DAU), Doubao AI, ähnliche Datenpools, agilere Kultur. Wenn AI-native Interfaces WeChat als Default Layer verdrängen, verliert Tencent 5–10pp Wachstum über 3–5 Jahre — ohne dass westliche Investoren am Gewinner partizipieren können.</p>
+          <p><strong>Risiko 3 – Bewertung + Timing:</strong> FWD P/E ~15x ist nicht „billig" — und eine Geopolitik-Eskalation oder AI-Enttäuschungsquartal kann Multiple auf 12–13x komprimieren (-20–25% Kurs). 0700.HK unter dem 200-Tage-MA signalisiert, dass informiertere HK-Investoren aktuell Vorsicht walten lassen.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Das bullische Narrativ ist überzeugender, aber das bärische enthält valide Risikopunkte. Die Profitabilitätswende ist strukturell und nicht zyklisch — Operating Income wächst doppelt so schnell wie der Umsatz. Die Bewertung (FWD P/E ~15x, PEG &lt;1x) ist für ein Unternehmen mit 1,4 Mrd. WeChat-Nutzern, dominanter Gaming-Position und AI-Distributionsvorteil günstig bis fair. Der entscheidende Vorteil: Tencent muss nicht der AI-Modell-Gewinner sein, um zu profitieren — es reicht, der AI-Distributionsgewinner zu sein.</p>
+      <p>Risk/Reward: ~-20% Downside (technisches Support $64–66, geopolitisches Stressszenario) vs. +40–50% Upside mittelfristig ($102–$120) und +60–100% langfristig. Das ergibt ein asymmetrisches Verhältnis von 2:1 bis 3:1. Ich könnte falsch liegen, weil: Ein erneuter regulatorischer Schlag à la 2021 oder eine Delisting-Gefahr dieses Kalkül schnell umkehren würden.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Zeithorizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Kurzfristig (0–6M)</strong></td>
+              <td>Q4 2025 Earnings Beat (März 2026); Yuanbao-Wachstum; AI-Revenue sichtbar</td>
+              <td>HK-Markt-Volatilität; AI-CapEx-Sorgen</td>
+              <td><span class="badge badge-green">KAUFEN (tranchiert)</span><br>Einstieg bei Schwäche &lt;$78</td>
+            </tr>
+            <tr>
+              <td><strong>Mittelfristig (6–24M)</strong></td>
+              <td>WeChat AI-Monetarisierung; Video Accounts Scale; B2B-Cloud</td>
+              <td>Regulierung; AI-Preiskrieg; ByteDance</td>
+              <td><span class="badge badge-green">KAUFEN &amp; HALTEN</span><br>Zielkurs $95–$105</td>
+            </tr>
+            <tr>
+              <td><strong>Langfristig (2–5J)</strong></td>
+              <td>AI-Ökosystem monetarisiert; Int. Gaming-Leadership</td>
+              <td>Geopolitik; strukturelle China-Abwertung</td>
+              <td><span class="badge badge-green">KAUFEN &amp; HALTEN</span><br>Zielkurs $120–$150</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>Tencent ist ein seltener Fall: eine globale Tech-Plattform mit breitem Burggraben, strukturell steigenden Margen, 1,4 Mrd. Nutzern als AI-Distributionshebel und einem Forward P/E von ~15x. Das bullische Argument ist stärker als das bärische — die Profitabilitätswende ist messbar, die AI-Optionalität noch nicht eingepreist, und die Kapitalrückführung schafft einen validen „Floor". Das bärische Szenario (Regulierung, ByteDance, Geopolitik) ist ernst zu nehmen, aber nicht existenziell bei aktuellem Risikoniveau.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$95 – $110</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2 – 3 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–20%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+40–50%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1 : 2–3</div></div>
+      </div>
+
+      <h3>Was falsifiziert die These?</h3>
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Neue massive Gaming-Regulierung analog 2021 → sofort verkaufen</li>
+            <li>Q4 2025 Revenue Miss &gt;5% + Guidance-Senkung → 30% Positionsreduktion</li>
+            <li>US-China Delisting-Gefahr konkretisiert (HFCAA) → vollständige Liquidation</li>
+            <li>Non-IFRS Op.-Marge &lt;35% für 2 Quartale → reduzieren</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Yuanbao MAU &gt;50 Mio. + AI-Revenue &gt;RMB 10 Mrd./Q → deutlich aufstocken</li>
+            <li>Q4 2025 Beat + positive AI-Revenue-Guidance → aufstocken</li>
+            <li>Marketing Services &gt;25% YoY für 2+ Quartale → halten/aufstocken</li>
+            <li>Kurs-Korrektur &gt;15% ohne Fundamentalverschlechterung → nachkaufen</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Für welchen Anlegertyp geeignet?</h3>
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Quality Growth Investors</li>
+            <li>Contrarian Investors (China-Discount)</li>
+            <li>Aggressive / Tech Growth Investors</li>
+            <li>Langfristige Investoren (2–5 Jahre)</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Value Investors (kein Deep Value)</li>
+            <li>Income Investors (Dividende nur ~0,7%)</li>
+            <li>Kurzfristige Trader (HK-Listing schwach)</li>
+            <li>Risikoaverse konservative Investoren</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Konservativ</strong></td>
+              <td><span class="badge badge-yellow">Warten / Tranchiert</span></td>
+              <td>25% Position jetzt, Rest bei Kurskorrektur –10%+ oder nach Q4-Bestätigung</td>
+            </tr>
+            <tr>
+              <td><strong>Moderat</strong></td>
+              <td><span class="badge badge-orange">Tranchiert einsteigen</span></td>
+              <td>50% jetzt bei $79–82, 50% nach Q4 Earnings-Bestätigung (18. März 2026)</td>
+            </tr>
+            <tr>
+              <td><strong>Aggressiv</strong></td>
+              <td><span class="badge badge-green">Jetzt kaufen</span></td>
+              <td>Volle Position, Risk/Reward 2:1–3:1 bei aktuellem Kurs — AI-Optionalität günstig</td>
+            </tr>
+            <tr>
+              <td><strong>Langfristig</strong></td>
+              <td><span class="badge badge-green">Kaufen &amp; Halten</span></td>
+              <td>Buy-and-Hold, Korrekturen zum Aufstocken nutzen — struktureller Burggraben intakt</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Alle Quellen: aggregiert aus Sektionen 1–11; Morningstar (Dez 2025); CNBC (Feb 2026); Tencent IR (2025/2026)</div>
+    </div>
+  </div>
+
+  <!-- S13: OUTLOOK -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Die 3 wichtigsten anstehenden Events</div>
+      <div class="section-note">Wenn/Dann-Szenarien</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q4 2025 Quartalsergebnisse – voraussichtlich 17.–18. März 2026</h4>
+        <p>Das unmittelbar wichtigste Event für das Investment-Narrativ. Konsens: RMB 216 Mrd. Umsatz (+~12% YoY), EPS 7,73 HKD. Entscheidend sind drei Subindikatoren: (1) Marketing Services &gt;18% YoY?, (2) FinTech &amp; Business Services &gt;10%?, und (3) erstmalige AI-Revenue-Guidance oder konkrete Kommentierung des AI-Cloud-Wachstums (&gt;20%).</p>
+        <div class="when-then">
+          <strong>Wenn</strong> alle drei Indikatoren bestätigt werden und Management positiv auf AI-Monetarisierung für 2026 hinweist → bullisches AI-Narrativ bestätigt. Sofort nachkaufen bis 10% Portfoliogewicht, Zielkurs $105–$120 valide.<br><br>
+          <strong>Wenn</strong> Umsatz &gt;3% unter Konsens ODER Non-IFRS Op.-Marge &lt;36% ODER cautious H1-2026-Guidance → Vorsicht geboten. Keine Aufstockung, ggf. 25–30% Positionsreduktion zur Risikosteuerung.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>🤖 Event 2: Yuanbao AI-Monetarisierung – Entwicklung Q1–Q2 2026 (laufend)</h4>
+        <p>Tencent hat angekündigt, AI aggressiv in WeChat zu integrieren (agentic AI, Weixin AI Search, AI-Companion). Derzeit ist Yuanbao kostenlos — die Frage ist, wann sich AI-Investitionen in messbaren Umsätzen niederschlagen. Die historische Parallele WeChat Pay 2013/14 (Red Envelope-Strategie → Marktdominanz) stützt das bullische Szenario.</p>
+        <div class="when-then">
+          <strong>Wenn</strong> innerhalb von 12 Monaten AI-bezogene Umsätze explizit ausgewiesen werden (&gt;RMB 5 Mrd./Q) oder ein klares Monetarisierungsmodell kommuniziert wird → Upside-Szenario $120–$150 realistisch. Deutlich aufstocken.<br><br>
+          <strong>Wenn</strong> nach 4 weiteren Quartalen (bis Ende 2026) keine messbaren AI-Umsätze kommuniziert werden und ByteDance/Alibaba gleichzeitig Marktanteile gewinnen → AI-Premium nicht gerechtfertigt. Reduktion auf Kernposition; Multiple-Compression auf ~12–13x FWD P/E möglich.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>🌐 Event 3: Geopolitische/Regulatorische Entwicklung China–USA – laufend, Eskalationspotenzial H1 2026</h4>
+        <p>Der aktuelle US-China-Handelswaffenstillstand ist fragil. Trump-Administration, Taiwan-Spannungen und GPU-Export-Kontrollen können sich jederzeit verschärfen. Gleichzeitig finalisiert die CAC ihre neue AI-Regulierung für Chatbots (Konsultationsphase abgeschlossen Anfang 2026 — finale Regelung ausstehend). Dieses Szenario hat zwar niedrige Wahrscheinlichkeit, aber potenziell hohe Auswirkung.</p>
+        <div class="when-then">
+          <strong>Wenn</strong> die CAC-Regulierung in milder Form verabschiedet wird (Disclosure-Pflichten, keine drastischen Nutzungseinschränkungen) UND keine neuen HFCAA-Delisting-Bedrohungen entstehen → Normalbetrieb. Aktuelle Position halten, China-Discount bleibt begrenzt.<br><br>
+          <strong>Wenn</strong> neue Gesetze Yuanbao erheblich einschränken ODER US-China-Konflikte auf Tech-Listings ausweiten → Risikokontrolle: defensive Positionsreduktion 30–50%. Extremszenario Zwangsdelisting → vollständige Liquidation erforderlich.
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Einstiegsstrategie</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / Tranchiert</span></td><td>25% jetzt, Rest nach Q4-Bestätigung (März 2026)</td><td>China-Risiko erfordert Sicherheitsmarge</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Kaufen (tranchiert)</span></td><td>50% bei $79–82, 50% nach Q4 Earnings</td><td>Optimales Risk/Reward durch Zeitdiversifikation</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Volle Position, Durchschnittskauf bei Schwäche</td><td>AI-Optionalität + günstiges FWD Multiple</td></tr>
+            <tr><td><strong>Langfristig (&gt;3J)</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>Buy-and-Hold, bei Korrekturen aufstocken</td><td>Strukturelle Stärke überwiegt Volatilität</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Tencent IR; CNBC (Feb 2026); TechNode (Feb 2026); Carnegie Endowment China AI Regulation (Feb 2026); SCMP (Feb 2026)</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung, Anlageempfehlung oder Aufforderung zum Kauf oder Verkauf von Wertpapieren dar. Investitionen in Aktien sind mit erheblichen Risiken verbunden, einschließlich des vollständigen Kapitalverlustes. Vergangene Wertentwicklungen sind kein verlässlicher Indikator für zukünftige Ergebnisse. Alle Informationen basieren auf öffentlich verfügbaren Quellen mit Stand 27. Februar 2026. Keine Haftung für Richtigkeit, Vollständigkeit oder Aktualität der enthaltenen Angaben. Im Zweifelsfall professionellen Anlageberater konsultieren.
+  </div>
+
+</div>
+</body>
+</html>
