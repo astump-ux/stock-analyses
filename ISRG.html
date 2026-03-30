@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ISRG – Aktienanalyse Canvas v2.2</title>
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --bg: #0f0f12;
+      --bg-card: #1a1a1f;
+      --bg-card2: #22222a;
+      --border: #2e2e38;
+      --text: #e8e8ec;
+      --text-muted: #888898;
+      --text-dim: #555566;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --teal: #14b8a6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+    .header {
+      background: linear-gradient(135deg, #00081a 0%, #001028 40%, #0f0f12 100%);
+      border-bottom: 1px solid var(--primary);
+      padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;
+    }
+    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .header-left h1 span { color: var(--primary); }
+    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    .header-right { text-align: right; }
+    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+    .price-change.up   { background: rgba(34,197,94,0.15); color: var(--green); }
+    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+    .nav {
+      background: var(--bg-card); border-bottom: 1px solid var(--border);
+      padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100;
+    }
+    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+    .kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .kpi-value.green  { color: var(--green); }
+    .kpi-value.red    { color: var(--red); }
+    .kpi-value.orange { color: var(--primary); }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .section-title  { font-size: 16px; font-weight: 700; color: white; }
+    .section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+    .section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+    .section-body   { padding: 20px 24px; }
+    p { margin-bottom: 12px; color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+    h3:first-child { margin-top: 0; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(59,130,246,0.04); }
+    .beat    { color: var(--green);  font-weight: 600; }
+    .miss    { color: var(--red);    font-weight: 600; }
+    .neutral { color: var(--yellow); font-weight: 600; }
+    .badge        { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
+    .badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .badge-blue   { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .badge-orange { background: rgba(59,130,246,0.15); color: var(--primary); }
+    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+    .event-item:last-child { border-bottom: none; }
+    .event-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+    .dot-green  { background: var(--green); }
+    .dot-red    { background: var(--red); }
+    .dot-yellow { background: var(--yellow); }
+    .event-label { font-weight: 600; color: white; }
+    .event-text  { font-size: 14px; color: var(--text); }
+    .risk-item   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .risk-title  { font-weight: 600; color: white; font-size: 14px; }
+    .score-bar       { display: flex; align-items: center; gap: 10px; }
+    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .score-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #60a5fa); }
+    .score-num       { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bear-card h4 { color: var(--red);   margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .rating-box { background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(59,130,246,0.04)); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+    .rating-item .val  { font-size: 20px; font-weight: 800; color: white; }
+    .rating-item .val.buy  { color: var(--green); }
+    .rating-item .val.hold { color: var(--yellow); }
+    .rating-item .val.sell { color: var(--red); }
+    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+    .trigger-card      { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .trigger-card h5   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .trigger-card.buy  h5 { color: var(--green); }
+    .trigger-card.sell h5 { color: var(--red); }
+    .trigger-list    { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
+    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    @media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+    .investor-no  { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-no  h5 { color: var(--red);   font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+    .investor-no  li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+    .geo-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+    .geo-card   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .geo-pct    { font-size: 20px; font-weight: 700; color: white; }
+    .geo-note   { font-size: 12px; color: var(--text-muted); }
+    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+    .outlook-card .when-then strong { color: var(--primary); }
+    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+    .alert-box { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+    .divider   { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .pill      { display: inline-block; background: rgba(59,130,246,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+    .highlight-box { background: rgba(59,130,246,0.07); border: 1px solid rgba(59,130,246,0.2); border-radius: 8px; padding: 14px 16px; margin: 12px 0; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Intuitive Surgical <span>ISRG · NASDAQ</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 04. März 2026 · NASDAQ · Sektor: Healthcare / MedTech</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-blue">Robotik-Chirurgie</span>
+      <span class="badge badge-orange">da Vinci Plattform</span>
+      <span class="badge badge-blue">Medizintechnik</span>
+      <span class="badge badge-green">Marktführer Soft Tissue</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$494.00</div>
+    <div class="price-meta">Schlusskurs 04. März 2026 · NASDAQ</div>
+    <div class="price-change down">▼ −12.5% (52W)</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $425.00 – $603.88</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <!-- KPI OVERVIEW -->
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Kurs</div>
+      <div class="kpi-value orange">$494</div>
+      <div class="kpi-sub">USD · 04. Mrz 2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Marktkapitalisierung</div>
+      <div class="kpi-value">$175B</div>
+      <div class="kpi-sub">355 Mio. Aktien</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">P/E (TTM)</div>
+      <div class="kpi-value">62x</div>
+      <div class="kpi-sub">FWD: 48x</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">EV/EBITDA</div>
+      <div class="kpi-value">48x</div>
+      <div class="kpi-sub">TTM</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Umsatz FY2025</div>
+      <div class="kpi-value green">$10.1B</div>
+      <div class="kpi-sub">+20.5% YoY</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Bruttomarge</div>
+      <div class="kpi-value">66–67%</div>
+      <div class="kpi-sub">Non-GAAP 67.6%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">FCF FY2025</div>
+      <div class="kpi-value green">$2.5B</div>
+      <div class="kpi-sub">+92% YoY</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Nächste Earnings</div>
+      <div class="kpi-value orange">21. Apr</div>
+      <div class="kpi-sub">Q1 2026 (after close)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Konsens-Rating</div>
+      <div class="kpi-value green">Buy</div>
+      <div class="kpi-sub">Ziel: $612 (+24%)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 1 -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell & Unternehmensübersicht</div>
+      <div class="section-note">Quellen ≤ 6 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Das Plattformmodell</h3>
+      <p>Intuitive Surgical ist seit 25 Jahren der unangefochtene Pionier der robotergestützten Chirurgie. Das Unternehmen entwickelt, produziert und vermarktet das da Vinci Chirurgiesystem – die weltweit meistgenutzte Plattform für minimal-invasive Weichteiloperationen. Per Ende 2025 umfasst die installierte Basis 11.106 da Vinci Systeme in Krankenhäusern weltweit, ein Plus von 12% gegenüber dem Vorjahr. Ergänzt wird das Portfolio durch das Ion Endoluminalsystem für Lungenbiopsien (995 Systeme) sowie die SP-Plattform für Einport-Eingriffe.</p>
+      <p>Das Geschäftsmodell ist dreigeteilt: Erstens Systemverkäufe, bei denen ein da Vinci 5 System für rund 2,0–2,5 Mio. USD verkauft oder verleast wird. Zweitens der hochmargige und wiederkehrende Umsatz aus Instrumenten und Zubehör – jede Operation erfordert patentgeschützte Einweg-Instrumente, was zu einem einzigartigen "Razor-and-Blade"-Modell führt. Dieser Bereich wächst proportional zu den Prozedurvolumina und ist der Wachstumsmotor des Unternehmens. Drittens Service- und Wartungsverträge, die stabile Deckungsbeiträge liefern. In FY2025 entfiel der Großteil des Umsatzes von $10,06 Mrd. auf Instrumente und Zubehör (~$5,9 Mrd.) sowie Systeme (~$3,0 Mrd.).</p>
+      <p>Die Kostenstruktur ist kapitalintensiv in Entwicklung und Fertigung, jedoch ausgesprochen asset-light im laufenden Betrieb. Intuitive besitzt eine eigene Fertigungs- und Forschungsbasis in Sunnyvale, CA, sowie neue Produktionsstätten, die in 2025/2026 in Betrieb gehen. Das Unternehmen beschäftigt rund 17.000 Mitarbeiter. Die Unit Economics sind exzellent: Eine höhere installierte Basis führt direkt zu mehr Prozeduren, was mehr Instrumente- und Zubehörkäufe generiert – ein selbstverstärkender Wachstumskreislauf ohne zusätzliche Marketingkosten.</p>
+      <p>Mit der fünften Generation – dem da Vinci 5 (dV5), eingeführt in 2024 – hat Intuitive einen technologischen Generationssprung vollzogen. Erstmals verfügt ein Chirurgieroboter über Force Feedback (haptisches Kraftfeedback), einem 150-Watt-Energieinstrument sowie KI-gestützten Echtzeit-Datenanalytiken. In 2025 wurden bereits 870 dV5-Systeme platziert (von 1.721 gesamt), was den frühen Adoptionszyklus belegt. Insgesamt wurden 2025 mehr als 3,1 Millionen da Vinci Eingriffe durchgeführt, ein Anstieg von 18% gegenüber dem Vorjahr.</p>
+      <div class="source">Quellen: Intuitive Surgical Q4 2025 Earnings Release (22. Januar 2026); IR Presentation J.P. Morgan Healthcare Conference 2026 (14. Januar 2026); TradingView/StockAnalysis.com (März 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 2 -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Fünf-Schichten-Burggraben</h3>
+      <p>Intuitive Surgicals Wettbewerbsvorteile sind außergewöhnlich tief und mehrschichtig. Die erste Schicht sind massive Wechselkosten: Ein Krankenhaus, das einmal auf da Vinci setzt, hat typischerweise mehrere Millionen Dollar in Geräte, OR-Integration und vor allem Chirurgenausbildung investiert. Die Zertifizierung eines Chirurgen auf dem da Vinci System erfordert 200–300+ dokumentierte Eingriffe und mehrmonatige Trainingsprogramme. Ein Wechsel auf ein Konkurrenzsystem bedeutet de facto eine Neuausbildung des gesamten chirurgischen Teams – ein prohibitives Vorhaben in der Praxis.</p>
+      <p>Die zweite Schicht sind Netzwerkeffekte: Mit 11.106 installierten Systemen und mehr als 3,1 Millionen Jahresprozeduren verfügt Intuitive über die weltweit größte Datenbank chirurgischer Robotereingriffe. Dies ermöglicht einzigartige KI-Lernsysteme, kontinuierliche Plattformverbesserungen und klinische Evidenzgenerierung, die Wettbewerber nicht replizieren können. Jede neue Operation stärkt die Überlegenheit der nächsten Generation. Die dritte Schicht sind Skalenvorteile in Forschung, Fertigung und globalem Service – Intuitive gibt jährlich rund $2,2 Mrd. für F&amp;E aus, was kein Mittbewerber im Soft-Tissue-Segment auch nur annähernd erreicht.</p>
+      <p>Schwachstellen des Burggrabens existieren jedoch. Die wichtigsten Patente auf das Kerndesign sind 2019 abgelaufen, was den Markteintritt von Konkurrenten strukturell ermöglicht. Zudem ist das System in Schwellenländern wegen des hohen Preises schwer skalierbar – hier ergibt sich ein Angriffspunkt für günstigere Konkurrenten wie MicroPort MedBot aus China. Im Urologiebereich, dem größten Segment, hat Medtronic mit Hugo nun die erste US-Zulassung (Dezember 2025) erhalten, was erstmals seit zwei Jahrzehnten einen formalen US-Wettbewerber schafft. Das dV5-System mit Force Feedback und KI-Integration setzt jedoch die Latte für Konkurrenten deutlich höher – ein nachhaltiger technologischer Vorsprung von mindestens 3–5 Jahren ist realistisch.</p>
+      <div class="source">Quellen: MedTech Dive (Dezember 2025); Finviz/StockAnalysis.com (März 2026); Intuitive Surgical Annual Report 2024</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 3 -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale – Operative Entwicklung</div>
+      <div class="section-score">Beat-Ratio: 4/4</div>
+    </div>
+    <div class="section-body">
+      <p>Intuitive Surgical hat in den letzten vier Quartalen eine bemerkenswert konsistente Outperformance gegenüber den Analystenerwartungen gezeigt. Die Nächsten Quartalsergebnisse (Q1 2026) werden am 21. April 2026 nach Börsenschluss erwartet.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quartal</th>
+              <th>Umsatz (Ist)</th>
+              <th>Umsatz (Est.)</th>
+              <th>EPS non-GAAP (Ist)</th>
+              <th>EPS (Est.)</th>
+              <th>Beat/Miss</th>
+              <th>dV-Prozeduren YoY</th>
+              <th>Kursreaktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q4 2025</strong></td>
+              <td>$2,87 Mrd.</td>
+              <td>$2,75 Mrd.</td>
+              <td class="beat">$2,53</td>
+              <td>$2,09</td>
+              <td><span class="badge badge-green">Beat +21%</span></td>
+              <td>+17%</td>
+              <td class="neutral">+0,6% (AH)</td>
+            </tr>
+            <tr>
+              <td><strong>Q3 2025</strong></td>
+              <td>$2,51 Mrd.</td>
+              <td>$2,41 Mrd.</td>
+              <td class="beat">$2,40</td>
+              <td>$1,99</td>
+              <td><span class="badge badge-green">Beat +21%</span></td>
+              <td>+19%</td>
+              <td class="beat">+15% (Folgetag)</td>
+            </tr>
+            <tr>
+              <td><strong>Q2 2025</strong></td>
+              <td>~$2,19 Mrd.</td>
+              <td>~$2,15 Mrd.</td>
+              <td class="beat">$1,84</td>
+              <td>~$1,58</td>
+              <td><span class="badge badge-green">Beat</span></td>
+              <td>+18%</td>
+              <td class="miss">−7% (Margendruck)</td>
+            </tr>
+            <tr>
+              <td><strong>Q1 2025</strong></td>
+              <td>~$2,25 Mrd.</td>
+              <td>~$2,18 Mrd.</td>
+              <td class="beat">$1,81</td>
+              <td>$1,74</td>
+              <td><span class="badge badge-green">Beat</span></td>
+              <td>+19%</td>
+              <td class="neutral">Neutral</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Management-Kernaussagen</h3>
+      <p>CEO Dave Rosa betonte zum Jahresabschluss 2025, das Unternehmen befinde sich "noch in der Frühphase seiner Reise" – ein Signal, das auf einen langen Wachstumskorridor hinweist. Für 2026 wird ein Prozedurwachstum von 13–15% (da Vinci) erwartet. Die Non-GAAP-Bruttomarge soll zwischen 67% und 68% liegen, wobei Tarif-Auswirkungen von ~1,2% des Umsatzes eingepreist sind. Der stärkste Wachstumstreiber ist nach wie vor der dV5-Adoptionszyklus: Die Upgrading-Welle ist noch jung, und Krankenhäuser, die auf dV5 wechseln, setzen ältere Xi-Systeme in Sekundärkliniken ein, was die Prozedurkapazität ohne zusätzliche Kapitalkosten erhöht.</p>
+      <div class="source">Quellen: Intuitive Surgical Q4 2025 / Q3 2025 / Q2 2025 / Q1 2025 Earnings Releases (Januar / Oktober / Juli / April 2025); Investing.com (Januar 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 4 -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Umsatzwachstum (historisch &amp; Prognose)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Jahr</th><th>Umsatz</th><th>Wachstum YoY</th><th>Gross Margin</th><th>Kommentar</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>2021</td><td>$5,71 Mrd.</td><td>+31%</td><td>~70%</td><td>Post-COVID-Aufholjagd</td></tr>
+            <tr><td>2022</td><td>$6,22 Mrd.</td><td>+9%</td><td>~69%</td><td>Normalisierung</td></tr>
+            <tr><td>2023</td><td>$7,12 Mrd.</td><td>+15%</td><td>~69%</td><td>Solides Wachstum</td></tr>
+            <tr><td>2024</td><td>$8,35 Mrd.</td><td>+17%</td><td>~69%</td><td>dV5 Launch</td></tr>
+            <tr><td>2025</td><td>$10,06 Mrd.</td><td class="beat">+20,5%</td><td>~67%</td><td>dV5-Adoptionszyklus</td></tr>
+            <tr><td>2026E</td><td>~$11,5–12,0 Mrd.</td><td>~14–19%</td><td>~67–68%</td><td>Guidance: 13–15% Prozedurwachstum</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Segmentwachstum 2025</h3>
+      <p>Das Instrumenten- und Zubehörsegment wuchs um 18,5% auf ca. $5,9 Mrd. – getrieben durch das Prozedurwachstum von 18% bei da Vinci und 51% bei Ion. Das Systemsegment wuchs durch höhere Platzierungszahlen (1.721 vs. 1.526 Systeme) und höhere Durchschnittspreise des dV5. Die SP-Plattform verzeichnete ein spektakuläres Prozedurwachstum von 87% in 2025, mit neuen FDA-Zulassungen wie Nipple-sparing Mastektomie.</p>
+      <h3>Geografische Verteilung</h3>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">USA</div>
+          <div class="geo-pct">~65%</div>
+          <div class="geo-note">Größter Markt; dV5-Upgrade läuft</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Europa</div>
+          <div class="geo-pct">~18%</div>
+          <div class="geo-note">UK/DE Budget-Druck; Wachstum ~15%</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Asien-Pazifik</div>
+          <div class="geo-pct">~12%</div>
+          <div class="geo-note">Indien, Korea, Taiwan stark; China schwächer</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">China</div>
+          <div class="geo-pct">~5%</div>
+          <div class="geo-note">Wachstum unter Konzern-Durchschnitt; Druck durch Lokale Konkurrenz</div>
+        </div>
+      </div>
+      <p>Das internationale Segment – außerhalb der USA – verzeichnete in Q4 2025 ein da Vinci Prozedurwachstum von 23% YoY, deutlich über dem US-Wert. Besonders stark waren Benign General Surgery (+39% OUS), Colorectal (+28%), Hysterektomie (+27%) und Thoraxchirurgie (+26%). China bleibt der einzige signifikante Schwachpunkt, wo inländische Konkurrenten (MicroPort MedBot) und staatliche Tender-Aktivitäten das Wachstum dämpfen. Das Unternehmen adressiert preissensitive Schwellenmärkte gezielt durch den Einsatz refurbished Xi-Systeme, was neue Märkte in Asien und Lateinamerika erschließt.</p>
+      <div class="source">Quellen: Intuitive Q4 2025 Earnings Release (22. Januar 2026); MacroTrends.net (Februar 2026); Zacks Investment Research (Dezember 2025)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 5 -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <p>Intuitive Surgical ist teuer – das ist unbestreitbar. Die Frage ist nicht ob, sondern ob die Prämie durch das Wachstumsprofil und die strukturelle Marktposition gerechtfertigt ist. Zum aktuellen Kurs von $494 handelt ISRG bei einem Trailing-KGV von rund 62x und einem Forward-KGV (FY2026E) von ~48x. Das EV/EBITDA liegt bei ~48x. Diese Bewertungen sind signifikant höher als der Branchendurchschnitt (~27–30x Fwd P/E für MedTech), jedoch deutlich unter dem 5-Jahres-Median von ~71x.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kennzahl</th><th>Aktuell</th><th>5J-Median</th><th>3J-Median</th><th>Industrie-Ø</th><th>Bewertung</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>P/E (TTM)</strong></td><td>62x</td><td>~71x</td><td>~72x</td><td>~30x</td><td><span class="badge badge-yellow">Premium, aber unter Median</span></td></tr>
+            <tr><td><strong>P/E (FWD)</strong></td><td>~48x</td><td>–</td><td>–</td><td>~27x</td><td><span class="badge badge-red">Deutliches Premium</span></td></tr>
+            <tr><td><strong>EV/EBITDA</strong></td><td>~48x</td><td>~55x</td><td>~58x</td><td>~20x</td><td><span class="badge badge-yellow">Teuer, aber historisch günstiger</span></td></tr>
+            <tr><td><strong>PEG</strong></td><td>3,16</td><td>–</td><td>–</td><td>–</td><td><span class="badge badge-red">Teuer (>2 = teuer)</span></td></tr>
+            <tr><td><strong>EV/FCF</strong></td><td>~68x</td><td>–</td><td>–</td><td>–</td><td><span class="badge badge-red">Sehr teuer</span></td></tr>
+            <tr><td><strong>P/Sales</strong></td><td>~17x</td><td>–</td><td>–</td><td>~4x</td><td><span class="badge badge-red">Massi Premium</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Das Bewertungsargument muss im Kontext von Qualität und Wachstum betrachtet werden. ISRG ist eines der wenigen MedTech-Unternehmen mit >20% Umsatzwachstum, ~$2,5 Mrd. FCF und nahezu null Verschuldung. Das FCF-Wachstum von 92% in 2025 (von $1,3 Mrd. auf $2,5 Mrd.) deutet auf einen deutlichen FCF-Hebeleffekt hin, der die Bewertung optisch entlastet. Morningstar sieht ISRG aktuell bei einer Prämie von ~563% zum fairen Wert, was auf eine substanzielle Überbewertung hindeutet. Demgegenüber sehen Analysten im Durchschnitt ein Kursziel von $612 (+24%), was impliziert, dass das Wachstumspotenzial die aktuelle Prämie rechtfertigt. Bei einem EPS-Wachstum von ~20% pro Jahr wäre ein Forward-P/E von 35–40x in 24 Monaten realistisch – und rechtfertigt den heutigen Kurs.</p>
+      <div class="source">Quellen: StockAnalysis.com / FullRatio.com (März 2026); Morningstar ISRG Quote (März 2026); Yahoo Finance Key Statistics (März 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 6 -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 9/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Cashflow-Qualität</h3>
+      <p>Intuitive Surgical demonstriert außergewöhnliche Kapitalqualität. Der Free Cashflow mehr als verdoppelte sich in 2025 auf $2,5 Mrd. (von $1,3 Mrd. in 2024), was einer FCF-Marge von rund 25% entspricht. Diese starke FCF-Konversion belegt, dass die hohen Non-GAAP-Gewinne keine Buchhaltungsartefakte sind. Die Bilanzsituation ist makellos: $5,93 Mrd. Cash und liquide Mittel, bei nahezu null Nettoverschuldung (Debt/Equity: 0,01). Der Altman Z-Score von 46,31 signalisiert keine Insolvenzgefahr in der überschaubaren Zukunft.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kennzahl</th><th>FY2025</th><th>FY2024</th><th>Trend</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Bruttomarge (Non-GAAP)</td><td>~67,6%</td><td>~69,1%</td><td><span class="badge badge-yellow">Leicht rückläufig (dV5-Mix)</span></td></tr>
+            <tr><td>Operating Margin (GAAP)</td><td>~29–30%</td><td>~26%</td><td><span class="badge badge-green">Verbessernd</span></td></tr>
+            <tr><td>Net Margin</td><td>~28%</td><td>~25%</td><td><span class="badge badge-green">Stark</span></td></tr>
+            <tr><td>EBITDA Marge</td><td>~35%</td><td>~33%</td><td><span class="badge badge-green">Wachsend</span></td></tr>
+            <tr><td>Free Cashflow (FCF)</td><td>$2,5 Mrd.</td><td>$1,3 Mrd.</td><td><span class="badge badge-green">+92% YoY</span></td></tr>
+            <tr><td>FCF-Marge</td><td>~25%</td><td>~16%</td><td><span class="badge badge-green">Deutlicher Sprung</span></td></tr>
+            <tr><td>ROE</td><td>~16,7%</td><td>–</td><td><span class="badge badge-blue">Solide</span></td></tr>
+            <tr><td>ROIC</td><td>~20,9%</td><td>–</td><td><span class="badge badge-green">Exzellent</span></td></tr>
+            <tr><td>Cash &amp; Investments</td><td>$5,93 Mrd.</td><td>$8,8 Mrd.*</td><td><span class="badge badge-yellow">*inkl. Investitionen verschoben</span></td></tr>
+            <tr><td>Verschuldung</td><td>~$170 Mio.</td><td>–</td><td><span class="badge badge-green">Nahezu schuldenfrei</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Die leicht rückläufige Bruttomarge (von 69,1% auf 67,6%) ist primär auf den höheren Mix aus dV5-Systemen und Ion (beide noch in der Kostenabschreibungsphase) zurückzuführen, sowie auf Tarif-Effekte (~1,2% Umsatzdruck). Dies ist kein strukturelles Problem, sondern ein temporäres Phänomen des Plattformübergangs. Mittelfristig – wenn dV5 skaliert und die Stückkosten sinken – sollte die Marge wieder in Richtung 68–70% tendieren. Das Unternehmen zahlt keine Dividende, setzt jedoch aktiv auf Aktienrückkäufe (in Q3 2025: 4,0 Mio. Aktien zurückgekauft).</p>
+      <div class="source">Quellen: Investing.com ISRG Earnings (Januar 2026); StockAnalysis.com Statistics (März 2026); TradingView ISRG (März 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 7 -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <p>Der Peer-Vergleich zeigt ISRG als klaren Wachstumsführer im MedTech-Sektor – aber zu einem erheblichen Bewertungsaufschlag. Stryker und J&amp;J sind die nächsten relevanten Robotik-Spieler, bewegen sich aber in anderen Marktsegmenten (Orthopädie vs. Weichteilchirurgie). Medtronic ist als aufkommender Soft-Tissue-Konkurrent separat zu betrachten.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Unternehmen</th><th>Umsatz FY2025</th><th>Umsatzwachstum</th><th>Bruttomarge</th><th>Fwd P/E</th><th>Mkt Cap</th><th>Robotik-Fokus</th></tr>
+          </thead>
+          <tbody>
+            <tr style="background:rgba(59,130,246,0.06);">
+              <td><strong>ISRG</strong></td>
+              <td>$10,1 Mrd.</td>
+              <td class="beat">+20,5%</td>
+              <td class="beat">~67%</td>
+              <td class="miss">~48x</td>
+              <td>$175 Mrd.</td>
+              <td><span class="badge badge-green">Soft Tissue – Marktführer</span></td>
+            </tr>
+            <tr>
+              <td><strong>Stryker (SYK)</strong></td>
+              <td>~$24 Mrd.</td>
+              <td>+10–11%</td>
+              <td>~67%</td>
+              <td>~24x</td>
+              <td>~$130 Mrd.</td>
+              <td><span class="badge badge-blue">Mako – Orthopädie</span></td>
+            </tr>
+            <tr>
+              <td><strong>Johnson &amp; Johnson (JNJ)</strong></td>
+              <td>~$93 Mrd.</td>
+              <td>+5–6%</td>
+              <td>~66%</td>
+              <td>~20x</td>
+              <td>~$430 Mrd.</td>
+              <td><span class="badge badge-yellow">Ottava – In Entwicklung</span></td>
+            </tr>
+            <tr>
+              <td><strong>Medtronic (MDT)</strong></td>
+              <td>~$33 Mrd.</td>
+              <td>+5–8%</td>
+              <td>~65%</td>
+              <td>~17x</td>
+              <td>~$95 Mrd.</td>
+              <td><span class="badge badge-red">Hugo – US FDA Dez. 2025</span></td>
+            </tr>
+            <tr>
+              <td><strong>Becton Dickinson (BDX)</strong></td>
+              <td>~$20 Mrd.</td>
+              <td>+4–5%</td>
+              <td>~53%</td>
+              <td>~15x</td>
+              <td>~$55 Mrd.</td>
+              <td><span class="badge badge-yellow">Marginale Robotik-Präsenz</span></td>
+            </tr>
+            <tr>
+              <td><strong>Zimmer Biomet (ZBH)</strong></td>
+              <td>~$7,5 Mrd.</td>
+              <td>+5–7%</td>
+              <td>~70%</td>
+              <td>~12x</td>
+              <td>~$11 Mrd.</td>
+              <td><span class="badge badge-blue">ROSA – Orthopädie</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Qualitative Einordnung</h3>
+      <p>ISRG ist der einzige Peer, der >20% Umsatzwachstum bei gleichzeitig >65% Bruttomarge und ~$2,5 Mrd. FCF erzielt – das ist eine Kombination, die im gesamten MedTech-Universum einzigartig ist. Stryker ist der qualitativste Vergleich: ähnliche Margen, starkes Wachstum (~10%), aber kein direkter Soft-Tissue-Konkurrent. Mako (Orthopädie) und da Vinci (Weichteil) adressieren weitgehend unterschiedliche OP-Prozeduren und OP-Teams. Medtronic ist der kritischste Peer für die Kernfrage dieser Analyse – der Wettbewerbsbedrohung – und wird in Sektion 11 detailliert analysiert. J&amp;J ist erst FDA-Antrag gestellt (De Novo, Januar 2026), also noch 12–18 Monate vom US-Markt entfernt.</p>
+      <div class="source">Quellen: Yahoo Finance (Q2/Q3 2025 Earnings); TradingView (März 2026); Zacks/Reuters Peer Analysis (Februar 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 8 -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen (Company-spezifisch)</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">22. Januar 2026 – Q4 2025 Earnings: Starker Beat <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Umsatz $2,87 Mrd. (+19% YoY) übertraf Erwartungen von $2,75 Mrd. EPS $2,53 schlug Konsens $2,09 um 21%. FCF verdoppelte sich auf $2,5 Mrd. Aktie stieg ~4% nachbörslich. Quelle: Intuitive Surgical IR / Investing.com, 22. Januar 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">März 2026 – da Vinci 5: FDA-Clearance für Herzchirurgie <span class="badge badge-green">Sehr positiv</span></div>
+          <div class="event-text">Die FDA erteilte die Zulassung des dV5 Systems für ausgewählte kardiale Eingriffe (u.a. Mitralklappen-Reparatur). Dies erschließt den größten neuen Markt in ISRG's Geschichte – Herzchirurgie mit massivem TAM. Quelle: Robinhood/Nasdaq News, März 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">01. März 2026 – Akquisition der eigenen Distributionsbasis <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Intuitive schloss die Übernahme seines da Vinci und Ion Distributions-Netzwerks ab – stärkt die Kontrolle über die Lieferkette und verbessert Kundennähe in Schlüsselmärkten. Quelle: Robinhood News, März 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Januar 2026 – 2026 Guidance enttäuscht leicht <span class="badge badge-yellow">Neutral/Negativ</span></div>
+          <div class="event-text">Obwohl Q4 2025 stark war, fiel die Aktie nach der Earnings-Veröffentlichung kurzzeitig – das Management-Guidance für dV5-Platzierungswachstum in 2026 lag leicht unter optimistischen Markterwartungen. Prozedurwachstum 13–15% gegenüber 18% in 2025. Quelle: Zacks/Yahoo Finance, Januar 2026.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche (Sektor-spezifisch)</h3>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">04. Dezember 2025 – Medtronic Hugo erhält US-FDA-Zulassung für Urologie <span class="badge badge-red">Negativ für ISRG</span></div>
+          <div class="event-text">Medtronic wurde die erste US-Zulassung für das Hugo RAS System in urologischen Eingriffen erteilt. Dies ist der erste echte Soft-Tissue-Konkurrent für ISRG in den USA seit 25 Jahren. Allerdings beginnt Medtronic mit einem gezielten Rollout bei ausgewählten Leading Institutions. Quelle: MedTech Dive / Medtronic IR, Dezember 2025.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">07. Januar 2026 – J&amp;J Ottava FDA De Novo Antrag eingereicht <span class="badge badge-yellow">Mittel- bis Langfristig negativ</span></div>
+          <div class="event-text">J&amp;J reichte den De Novo Antrag für das Ottava System für Allgemeinchirurgie (oberer Bauch) ein. Frühestmögliche US-Zulassung: Ende 2026 / Anfang 2027. Materieller Wettbewerbs-Einfluss laut Jefferies nicht vor 2028. Quelle: J&amp;J IR / MedTech Dive, Januar 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Januar 2026 – Chirurgie-Robotik-Markt wächst auf $7,2 Mrd. bis 2033 <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Der gesamte chirurgische Robotikmarkt wächst mit 15,7% CAGR. Von ~50 Mio. Weichteil-Operationen weltweit werden noch ~30 Mio. als offene OP durchgeführt – ein gewaltiges Penetrationspotenzial. Quelle: MedTech Dive Branchenanalyse, Januar 2026.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Tarife &amp; US-Handelspolitik 2025–2026 <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">US-Importzölle belasten die Herstellungskosten von ISRG. Das Unternehmen quantifiziert den Tarif-Einfluss auf ~1,2% des Umsatzes in 2026, was die Non-GAAP-Bruttomarge um ca. 100–120 bps belastet. Risiko einer Ausweitung. Quelle: ISRG Q4 2025 Earnings Conference Call, Januar 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">GLP-1 Medikamente reduzieren bariatrische Eingriffe in den USA <span class="badge badge-yellow">Moderat negativ</span></div>
+          <div class="event-text">Der Boom von GLP-1-Medikamenten (Ozempic, Wegovy) führt zu einem moderaten Rückgang bei bariatrischen Eingriffen (Magenbypass etc.), die historisch eine wichtige ISRG-Prozedurkategorie waren. Management sieht begrenzte Visibilität zur Stabilisierung. Quelle: ISRG Q2 2025 Management Commentary, Juli 2025.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Öffentliche Gesundheitsbudgets unter Druck (UK, Deutschland, Japan) <span class="badge badge-yellow">Neutral bis negativ</span></div>
+          <div class="event-text">Staatliche Budgetbeschränkungen in mehreren Schlüsselmärkten verlangsamen Kapitalentscheidungen für neue Robotik-Systeme. ISRG adressiert dies teilweise durch verstärkte Leasing-Angebote. Quelle: ISRG Q4 2024 Earnings Call, Januar 2025.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEKTION 9 -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom:20px;">
+        <div class="kpi-card">
+          <div class="kpi-label">Kurs (4. Mrz)</div>
+          <div class="kpi-value red">$494</div>
+          <div class="kpi-sub">−12,5% (52W)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 20</div>
+          <div class="kpi-value red">~$515</div>
+          <div class="kpi-sub">Kurs darunter ▼</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 50</div>
+          <div class="kpi-value red">$532</div>
+          <div class="kpi-sub">Kurs darunter ▼</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 200</div>
+          <div class="kpi-value red">$515</div>
+          <div class="kpi-sub">Kurs darunter ▼</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">RSI (14d)</div>
+          <div class="kpi-value orange">~48</div>
+          <div class="kpi-sub">Neutral</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">52W-Hoch</div>
+          <div class="kpi-value">$603,88</div>
+          <div class="kpi-sub">Feb. 2025</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">MACD</div>
+          <div class="kpi-value green">~+2,9</div>
+          <div class="kpi-sub">Leicht positiv</div>
+        </div>
+      </div>
+      <h3>Chartbild &amp; Trendanalyse</h3>
+      <p>Das technische Bild von ISRG ist aktuell gemischt mit leicht negativem Unterton. Die Aktie handelt unterhalb aller relevanten gleitenden Durchschnitte (SMA20, SMA50, SMA200) – ein bearisches Signal. Von ihrem 52-Wochen-Hoch bei $603,88 (Februar 2025) ist die Aktie um rund 18% gefallen, was technisch als Korrektur in einem Aufwärtstrend interpretiert werden kann. Der RSI bei ~48 signalisiert weder überkaufte noch überverkaufte Bedingungen, was für Neutralität spricht.</p>
+      <p>Positiv zu bewerten ist der MACD, der mit ~+2,9 eine leicht bullische Divergenz zeigt. Ein "Golden Crossover" (SMA50 über SMA200) wurde im Dezember 2025 ausgebildet, was historisch als langfristig bullisches Signal gilt. Seit dem Earnings-Beat im Januar 2026 (Kurs sprang ~4% nachbörslich) hat die Aktie jedoch wieder abgegeben. Die aktuelle Konsolidierung im Bereich $490–510 könnte entweder der Beginn einer Erholung oder einer weiteren Abwärtsbewegung in Richtung $425 (52-Wochen-Tief) sein.</p>
+      <p>Unterstützungsniveaus liegen bei ~$465–475 (2024-Konsolidierungszone) sowie $425 (52-Wochen-Tief). Widerstandsniveaus befinden sich bei $530–535 (SMA50), $560 (SMA200 / analyst targets) und $600+ (langfristiges Ziel). Das technische Setup bietet für geduldige, langfristige Investoren einen interessanteren Einstiegspunkt als noch Anfang 2025.</p>
+      <div class="source">Quellen: Meyka.com ISRG Technical (2. März 2026); Investing.com ISRG Technical (März 2026); MacroTrends.net ISRG 52W History (März 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 10 -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 6/10 (invertiert)</div>
+    </div>
+    <div class="section-body">
+      <h3>10a) Strukturelle &amp; Zyklische Risiken</h3>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Wettbewerbsdruck durch Hugo (Medtronic) &amp; Ottava (J&amp;J)</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel-Hoch</span></div>
+        </div>
+        <div class="event-text">Medtronic hat im Dezember 2025 die erste US-FDA-Zulassung für Hugo in Urologie erhalten. J&amp;J hat im Januar 2026 den De Novo Antrag für Ottava gestellt. In Urologie ist ISRG's Marktdurchdringung bereits bei ~83% – neues Marktwachstum geht verloren, aber der bestehende Kundenstamm bleibt aufgrund der Wechselkosten sehr sticky. Materialster Einfluss von Hugo auf ISRG's US-Marktanteil: frühestens 2027–2028. Wahrscheinlichkeit signifikanter Marktanteilsverluste in 5 Jahren: 20–30%.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Marginendruck durch dV5-Rollout &amp; Tarife</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Die Bruttomarge sank von 69,1% auf 67,6% und soll 2026 bei 67–68% verbleiben. Tarife belasten ~1,2% des Umsatzes. Wenn sich diese Effekte verstärken, könnte die Operating Leverage-Story verzögert eintreten, was bei einer Premiumvaluation von ~48x Fwd P/E besonders schmerzhaft wäre.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ China-Headwinds &amp; geopolitische Risiken</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Moderat</span></div>
+        </div>
+        <div class="event-text">China (~5% Umsatz) wächst unter dem Konzern-Durchschnitt. Lokale Konkurrenten wie MicroPort MedBot expandieren aggressiv. Im Worst Case könnten staatliche Tender-Einschränkungen und lokale Bevorzugungspolitik den China-Anteil dauerhaft reduzieren. Wahrscheinlichkeit: hoch, finanzielle Auswirkung auf Gesamtkonzern aber begrenzt.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ GLP-1 struktureller Rückgang bei bariatrischen Prozeduren</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Moderat</span></div>
+        </div>
+        <div class="event-text">Bariatrische Eingriffe (Magenbypass etc.) sind eine wichtige, hochmargige ISRG-Prozedur. GLP-1-Medikamente (Ozempic, Wegovy) ersetzen einen Teil dieser Operationen dauerhaft. Dies ist ein struktureller, kein zyklischer Gegenwind. Kompensiert wird er durch den Aufbau neuer Kategorien (Kardiochirurgie, Thorax).</div>
+      </div>
+      <h3>10b) Chancen</h3>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🚀 Herzchirurgie: Neue FDA-Zulassung = Riesiger TAM</div>
+          <div><span class="badge badge-green">Sehr hoch</span></div>
+        </div>
+        <div class="event-text">Die FDA-Freigabe des dV5 für kardiale Eingriffe (März 2026) erschließt einen adressierbaren Markt von mehreren Millionen zusätzlicher Operationen pro Jahr. Herzchirurgie hat typischerweise höhere Instrument-Revenue pro Eingriff als Standard-dV-Prozeduren.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🚀 Digitale Monetarisierung &amp; My Intuitive+ Subscription</div>
+          <div><span class="badge badge-green">Hoch</span></div>
+        </div>
+        <div class="event-text">ISRG entwickelt eine digitale Abonnement-Plattform (My Intuitive+/MIA+), die KI-basierte OP-Analysen, Telementoring und predictive maintenance bietet. Dies könnte einen neuen, wiederkehrenden Revenue-Stream mit hohen Margen schaffen – vergleichbar mit dem Software-Modell in der Tech-Branche.</div>
+      </div>
+      <h3>10d) Red Flags &amp; Dealbreaker</h3>
+      <p>Red Flags (zu beobachten): Kontinuierlicher Rückgang der Systemplacements gegenüber Vorjahr; Verlust von mehr als 5% Marktanteil in einer Kernindikation innerhalb von 12 Monaten; Gross Margin-Rutsch unter 65% Non-GAAP. Dealbreaker: Keine identifizierten existenzbedrohenden Risiken. ISRG hat $5,93 Mrd. Cash, nahezu keine Verschuldung, und einen Altman Z-Score von 46 (tief solide).</p>
+      <div class="source">Quellen: MedTech Dive (Jan./Dez. 2025); ISRG Q4 2025 Conference Call (Januar 2026); Bloomberg/Reuters (März 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 11 -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">User-spezifische Analyse: Wie gefährdet ist ISRG's Monopol?</div>
+      <div class="section-note">Wettbewerbs-Deep-Dive</div>
+    </div>
+    <div class="section-body">
+      <h3>These: Medtronic Hugo &amp; J&J Ottava als Monopol-Brecher?</h3>
+      <p>Die Kernannahme dieser Analyse ist, dass Hugo und Ottava das da Vinci-Monopol gefährden könnten. Nach gründlicher Untersuchung lautet das Urteil: <strong>Die Bedrohung ist real, wird aber auf 3–5 Jahre unterschätzt und auf 5–10 Jahre unterschätzt.</strong> Hier die Analyse der entscheidenden Faktoren:</p>
+
+      <div class="highlight-box">
+        <strong style="color:var(--primary);">Kurzfristig (1–2 Jahre):</strong> Minimale Bedrohung. Hugo ist nur in Urologie zugelassen; Ottava noch nicht zugelassen. ISRGs Marktdurchdringung in Urologie beträgt bereits ~83% – der Expansionsraum für Hugo ist klein. Materieller Impact auf ISRG's Instrumenten-Revenue: nahezu null in 2026.
+      </div>
+      <div class="highlight-box" style="margin-top:8px;">
+        <strong style="color:var(--yellow);">Mittelfristig (2–5 Jahre):</strong> Wachsende Bedrohung. Hugo erweitert Indikationen (Gynäkologie, Allgemeinchirurgie). Ottava kommt auf den Markt. Der Wettbewerb konzentriert sich auf neu aufzubauende Robotik-Programme in kleineren Krankenhäusern und ASCs (ambulante Chirurgiezentren) – ISRG hat diese Segmente historisch weniger erschlossen, bietet aber auch dafür jetzt Lösungen an.
+      </div>
+      <div class="highlight-box" style="margin-top:8px;">
+        <strong style="color:var(--red);">Langfristig (5–10 Jahre):</strong> Strukturelle Disruption möglich. Hugo + Ottava + MicroPort + chinesische Anbieter könnten die Preissetzungsmacht von ISRG für neue Systemverkäufe erheblich unter Druck setzen. Der bestehende installierte Base (11.000+ Systeme) bleibt jedoch durch Wechselkosten weitgehend geschützt.
+      </div>
+
+      <h3>Medtronic Hugo: Stärken &amp; Schwächen</h3>
+      <p>Hugo's Stärken liegen im modularen Design (separate Roboterarme statt eines integrierten Systems), der strategischen Verbündelung mit Medtronics bestehendem OP-Instrumentarium-Portfolio (Stapler, Gefäßversiegelung), und dem offenen Konsolen-Design, das manche Chirurgen als ergonomisch überlegen empfinden. Medtronic hat mit seinen bestehenden Kundenbeziehungen zu Tausenden von Krankenhäusern einen wichtigen Hebel. Andererseits ist Hugos Evidenzbasis deutlich dünner als die von da Vinci: Zehntausende globale Eingriffe vs. >30 Millionen bei ISRG. Die US-Marktstrategie beginnt mit einem bewusst engen Rollout bei ausgewählten Institutionen – ein Signal, dass Medtronic selbst keine schnelle Markteroberung erwartet.</p>
+
+      <h3>J&amp;J Ottava: Stärken &amp; Schwächen</h3>
+      <p>Ottava's Alleinstellungsmerkmal ist die in den Operationstisch integrierte Architektur, die Raumoptimierung im OP ermöglicht. Die Verbindung mit Ethicons führender Chirurgieinstrumentierung und dem Polyphonic Digital-Ökosystem könnten langfristig Differenzierungsmerkmale sein. Der De Novo Antrag wurde erst im Januar 2026 eingereicht – das FDA-Verfahren dauert typischerweise 12–18 Monate. Materieller Markteinfluss laut Jefferies-Analyst Matthew Taylor: "wahrscheinlich nicht vor 2028." J&amp;J hat zudem eine Geschichte von Verzögerungen bei Ottava: Die ursprüngliche Timeline wurde bereits 2021 um zwei Jahre verschoben.</p>
+
+      <h3>Scoring-Update nach User-Analyse</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Dimension</th><th>Original Score</th><th>Update nach Wettbewerbs-Analyse</th><th>Begründung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Burggraben</strong></td>
+              <td>8/10</td>
+              <td class="neutral"><strong>7/10</strong> (−1)</td>
+              <td>Hugo US-Zulassung ist erster echter Riss im Monopol. Noch kein struktureller Schaden, aber die strukturelle Erosion hat begonnen.</td>
+            </tr>
+            <tr>
+              <td><strong>Risiken (invertiert)</strong></td>
+              <td>7/10</td>
+              <td class="neutral"><strong>6/10</strong> (−1)</td>
+              <td>Wettbewerbsrisiko nun konkreter und zeitnäher als vor 12 Monaten. Medtronic + J&J in der Pipeline bedeutet erhöhter Risikograd.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Das übergreifende Urteil: ISRGs Burggraben ist noch tief, aber es ist nicht mehr uneinnehmbar. Das Management-Narrativ von "wir sind in den frühen Phasen unserer Reise" wird 2027–2028 auf die Probe gestellt werden, wenn Hugo in Allgemeinchirurgie und Ottava auf dem Markt sind. Die Wechselkosten-Barriere, der dV5-technologische Vorsprung und die überlegene klinische Datenbasis verschaffen ISRG jedoch einen komfortablen Puffer von mindestens 3 Jahren.</p>
+      <div class="source">Quellen: MedTech Dive Hugo/Ottava Coverage (Dezember 2025 – Januar 2026); Massdevice.com (Dezember 2025); Modern Healthcare (Oktober 2025); Jefferies Analyst Commentary via MedTech Dive (Januar 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 12: SCORING TABELLE (jetzt #s12-scoring, aber wir nennen es s11b für klarheit, aber im skill ist sektion 11 scoring) -->
+  <!-- Wir befolgen den Canvas korrekt: Sektion 11 = Scoring, Sektion 12 = Fazit, Sektion 13 = Outlook -->
+  <!-- Der User-Analyse-Abschnitt oben war die "user-spezifische" Analyse, jetzt folgt das Scoring -->
+  <!-- Ich verschiebe die Sektion-IDs entsprechend: s11 = user analysis, aber im Canvas ist s11 = scoring -->
+  <!-- Gemäß dem SKILL ist Section 11 = Scoring. Ich passe das HTML-Anker-System an. -->
+
+  <div class="section" id="s12" style="border-top:2px solid var(--primary);">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Scoring-Übersicht</div>
+      <div class="section-note">Gesamtbewertung aller Dimensionen</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kategorie</th><th>Score</th><th>Score-Bar</th><th>Begründung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Geschäftsmodell</td>
+              <td>9/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+              <td>Platform-Modell mit Razor-and-Blade; einzigartiger Wachstumskreislauf</td>
+            </tr>
+            <tr>
+              <td>Burggraben <span class="badge badge-yellow" style="font-size:10px;">Update −1</span></td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Tiefer Burggraben, aber Hugo-US-Zulassung markiert ersten echten Riss</td>
+            </tr>
+            <tr>
+              <td>Operative Entwicklung (4Q)</td>
+              <td>9/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+              <td>4/4 Beats; starkes Prozedurwachstum; Guidance trotzdem etwas enttäuschend</td>
+            </tr>
+            <tr>
+              <td>Wachstum</td>
+              <td>8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>+20,5% Umsatzwachstum FY2025; Verlangsamung auf 13–15% Guidance 2026</td>
+            </tr>
+            <tr>
+              <td>Bewertung</td>
+              <td>5/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td>
+              <td>P/E 62x / Fwd 48x; teuer, aber 13% unter 5J-Median; gerechtfertigt bei Qualität</td>
+            </tr>
+            <tr>
+              <td>Cashflow &amp; Kapitalqualität</td>
+              <td>9/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+              <td>FCF $2,5 Mrd. (+92%); nahezu schuldenfrei; ROIC 21%; Bilanz makellos</td>
+            </tr>
+            <tr>
+              <td>Peer-Vergleich</td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Wachstums- und Qualitätsführer unter Peers; aber massives Bewertungspremium</td>
+            </tr>
+            <tr>
+              <td>Risiken (invertiert) <span class="badge badge-yellow" style="font-size:10px;">Update −1</span></td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Hugo/Ottava, Tarife, China, GLP-1; real aber nicht existenzbedrohend</td>
+            </tr>
+            <tr>
+              <td>Technische Analyse</td>
+              <td>5/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td>
+              <td>Unter SMA20/50/200; bearisches Setup kurzfristig; Golden Cross Dez 2025</td>
+            </tr>
+            <tr style="background:rgba(59,130,246,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>7.2/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track"><div class="score-bar-fill" style="width:72%; background:linear-gradient(90deg,var(--primary),#a78bfa);"></div></div>
+                  <span class="score-num" style="color:var(--primary);">7.2</span>
+                </div>
+              </td>
+              <td>Quality-Growth-Titel mit starkem Fundamentalrahmen; Bewertung und Wettbewerb als Risikofaktoren</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEKTION 13: FAZIT (umbenannt zu s13 gemäß Canvas) -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-note">Stand: 04. März 2026</div>
+    </div>
+    <div class="section-body">
+      <h3>Das Bullische Narrativ</h3>
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p>Das bullische Narrativ basiert auf drei Säulen. Erstens ist die Wachstumsdynamik strukturell und nachhaltig: Der da Vinci 5 Adoptionszyklus ist erst in seinen ersten 18 Monaten, mit 870 dV5-Platzierungen in 2025 bei einer Gesamtbasis von 11.106 Systemen. Der Upgrade-Zyklus der bestehenden 10.000+ Xi-Systeme auf dV5 wird über 4–6 Jahre weiterlaufen und dabei höhere Durchschnittspreise, steigende Utilization und expanding Margins treiben. Der FCF-Sprung von $1,3 Mrd. auf $2,5 Mrd. in 2025 – ein Anstieg von 92% – ist kein Einmalereignis, sondern der Beginn eines Operating-Leverage-Zyklus.</p>
+          <p>Zweitens ist der TAM-Expansions-Katalysator massiv: Die FDA-Clearance für kardiale Eingriffe (März 2026) eröffnet ein adressierbares Volumen von mehreren Millionen zusätzlicher OPs pro Jahr. Management schätzt, dass 2026 rund 9 Millionen Eingriffe in direkter Pipeline sind (vs. 7 Millionen in 2024). Ion-Prozedurwachstum von 51% in 2025 zeigt, dass auch die Lungendiagnostik-Plattform skaliert. Drittens rechtfertigt die aktuelle Bewertung von 48x Fwd P/E bei 20% EPS-Wachstum (PEG ~2,4) eine "Quality at a Reasonable Price" Einschätzung, wenn man den Konsensus-Zielkurs von $612 (+24%) und die einzigartige Kapitalstruktur ($5,9 Mrd. Cash, null Schulden) berücksichtigt.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p>Das bärische Narrativ fokussiert sich ebenfalls auf drei Punkte. Erstens ist die Wettbewerbsbedrohung nun nicht mehr hypothetisch. Hugo hat die US-Zulassung, und Medtronic besitzt ein Vertriebs-Netzwerk zu tausenden von Krankenhäusern sowie eine etablierte Partnerschaft mit Operationsteams. Gelingt Medtronic die Instrumenten-Bündelung (Stapler + Hugo), könnte es insbesondere für neue Krankenhäuser ohne bestehende ISRG-Infrastruktur eine attraktive Alternative darstellen. Falls Hugo und Ottava zusammen 10–15% Marktanteil in neuen Indikationen gewinnen, könnte die Prozedurwachstumsrate auf <10% fallen – was bei einem KGV von 48x eine erhebliche Neubewertung auslösen würde.</p>
+          <p>Zweitens ist die Margenkompression real: Bruttomarge rutschte von 69% auf 67,6%, und für 2026 wird kein Aufschwung erwartet. Tarife (1,2% Umsatzdruck), der dV5-Kostenrucksack und steigende OpEx (11–15% Guidance) begrenzen den Operating-Leverage kurzfristig. Drittens signalisiert die technische Situation Schwäche: Die Aktie notiert unterhalb aller relevanten gleitenden Durchschnitte, mit einem -12,5% Performance in 52 Wochen während der S&amp;P 500 stieg. Ein PE von 48x ist nicht günstig, wenn das Wachstum auf 13–15% verlangsamt, und Investoren könnten in MDT (17x Fwd PE) oder SYK (24x) rotieren.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Das bullische Narrativ überzeugt auf einem 3–5-Jahres-Horizont mehr als das bärische – aber das bärische Narrativ hat valide Punkte für den Zeitraum 2026–2028. Die fundamentale Stärke von ISRG ist außergewöhnlich: kein Unternehmen in MedTech kombiniert 20%+ Umsatzwachstum, 67% Bruttomarge, $2,5 Mrd. FCF und ein faszinierendes TAM-Expansionspotenzial (Herzchirurgie, Lungenbiospsie, digitale Subscription) in diesem Umfang. Die Wettbewerbsbedrohung durch Hugo und Ottava ist in ihrer kurzfristigen Wirkung überschätzt und in ihrer langfristigen Wirkung eventuell unterschätzt. Das Fenster von 2–4 Jahren, in dem ISRG auf dV5 allein dominiert, reicht aus, um die Marktposition weiter zu festigen.</p>
+      <p>Ich könnte falsch liegen, weil: (a) Medtronic schneller als erwartet multiple Indikationen zulässt und aggressiv auf neue Krankenhäuser zielt; (b) das Makroumfeld Kapitalausgaben in Healthcare weiter drückt; (c) GLP-1 Medikamente bariatrische Prozeduren stärker reduzieren als modelliert. Der aktuelle Kurs bei $494 – etwa 18% unter dem 52-Wochen-Hoch und unter allen wichtigen gleitenden Durchschnitten – bietet ein günstigeres Risiko/Ertrags-Verhältnis als noch vor 12 Monaten. Risk/Reward: ca. −12% Downside (Support $425–435) vs. +24% Upside (Konsens $612).</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Kurzfristig (0–6M)</strong></td>
+              <td>Q1 2026 Earnings (21. April); dV5 Cardiac Rollout; weitere Indikations-Expansionen</td>
+              <td>Hugo US-Rollout beginnt; Margen weiter unter Druck; technisch schwach</td>
+              <td><span class="badge badge-yellow">Abwarten / Einstieg bei Rücksetzer auf $455–475</span></td>
+            </tr>
+            <tr>
+              <td><strong>Mittelfristig (6–24M)</strong></td>
+              <td>dV5-Upgrade-Zyklus voll aktiv; Herzchirurgie-Skalierung; Ion Wachstum; ggf. Senkung Fwd PE auf ~35x</td>
+              <td>Ottava-Markteintritt; Hugo erweitert Indikationen; GLP-1 Persistenz</td>
+              <td><span class="badge badge-green">Kaufen / Aufstocken – mit Überzeugung</span></td>
+            </tr>
+            <tr>
+              <td><strong>Langfristig (2–5J)</strong></td>
+              <td>>15 Mio. Eingriffe/Jahr; digitale Subscriptions; telesurgery; ASC-Penetration</td>
+              <td>Strukturelle Marktanteilserosion; Regulierung; potenzieller Preiskampf</td>
+              <td><span class="badge badge-green">Kaufen &amp; Halten – strukturelles Growth-Asset</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>Intuitive Surgical ist keine günstige Aktie – aber es ist möglicherweise das qualitativ hochwertigste Unternehmen in der gesamten Medizintechnik-Branche. Das "Monopol ist in Gefahr"-Narrativ ist aus heutiger Sicht übertrieben: Hugo ist in einer Indikation zugelassen, Ottava noch nicht einmal auf dem Markt. Die 11.000 installierten Systeme, die Surgeon-Training-Wechselkosten und der dV5-Technologievorsprung (Force Feedback, KI, Cardiac Clearance) bilden eine mehrjährige Festung. Bei aktuellen ~$494 – unter dem historischen PE-Median und nach einer -18% Korrektur – ist das Risiko/Ertrags-Verhältnis für langfristige Investoren attraktiver als in den letzten zwei Jahren.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN / KAUFEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$560–620</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">3–5 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">−12%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+15–25%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:2</div></div>
+      </div>
+
+      <h3>Was falsifiziert die These?</h3>
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Hugo gewinnt in 2026 >5% Marktanteil in einer ISRG-Kernindikation (Urologie oder Hysterektomie) → Position reduzieren</li>
+            <li>da Vinci Prozedurwachstum fällt in Q1 oder Q2 2026 unter 10% YoY → sofort verkaufen (Strukturbruch)</li>
+            <li>Non-GAAP Bruttomarge fällt dauerhaft unter 65% → Verkaufen (Preisdruck)</li>
+            <li>Management senkt FY2026 Guidance auf unter 10% Prozedurwachstum → erheblich reduzieren</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Kurs fällt auf $455–475 (Support-Zone) bei unveränderter Fundamentalerholung → aggressive Aufstockung</li>
+            <li>dV5 Cardiac Procedures übertreffen in Q2 2026 Erwartungen → nachkaufen</li>
+            <li>Ottava-FDA-Entscheidung wird abgelehnt oder weiter verzögert → bullish für ISRG, nachkaufen</li>
+            <li>Ion Procedurwachstum bleibt >40% für zwei weitere Quartale → Überzeugungskauf</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Welcher Anlegertyp passt?</h3>
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Quality Growth Investoren (3–5J)</li>
+            <li>Healthcare-Sektor-Investoren</li>
+            <li>Contrarian (nach -18% Korrektur)</li>
+            <li>Thematische Robotik-Anleger</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Value Investoren (P/E 62x ist kein Value)</li>
+            <li>Income Investoren (keine Dividende)</li>
+            <li>Kurzfristige Trader (schwaches Chart)</li>
+            <li>Risikoaverse Investoren (Beta 1,3–1,7)</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / Tranchiert</span></td><td>Abwarten auf Q1 2026 Earnings (21. April) als Bestätigungssignal</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>50% jetzt bei $494, 50% bei Rücksetzer auf $455–475</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Risk/Reward 1:2 bei $494; unter allen MAs = besserer Einstieg als Feb. 2025</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>Strukturelles Growth-Asset im Healthcare-Megatrend Robotik-Chirurgie</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEKTION 14: OUTLOOK (umbenannt zu s14 wg. Sektion-11-Sonderfall, im Anker s14) -->
+  <div class="section" id="s14">
+    <div class="section-header">
+      <div class="section-number">14</div>
+      <div class="section-title">Outlook – 3 Schlüsselevents</div>
+      <div class="section-note">Wenn/Dann Handlungsanleitung</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q1 2026 Earnings – 21. April 2026</h4>
+        <p>Das erste Quartal 2026 ist der erste vollständige Test unter dem neuen Wettbewerbsumfeld (Hugo US-Rollout ab Dezember 2025). Entscheidend ist, ob ISRGs da Vinci-Prozedurwachstum stabil bleibt oder die Guidance-Untergrenze von 13% hält. Da ISRG in den letzten 4 Quartalen durchgehend geschlagen hat, liegt die Messlatte hoch. Besonders beobachtet werden sollten: (a) US-Urologieprozeduren YoY, (b) Systemplacements dV5, (c) Gross Margin Guidance Update, (d) Management-Kommentar zu Hugo-Aktivitäten.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> da Vinci Prozedurwachstum ≥ 14% und US-Urologieprozeduren ohne sichtbaren Hugo-Impact → Long-These bestätigt, Nachkauf sinnvoll. Kurs-Upside: +8–12% möglich.<br><br>
+          <strong>Wenn:</strong> Prozedurwachstum unter 12% und/oder Management erstmals Hugo als expliziten Gegenwind nennt → Reduktion der Position auf 50%, da mittelfristige These in Frage gestellt.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 2: Ottava FDA-Entscheidung – Erwartet H2 2026 / Anfang 2027</h4>
+        <p>Die FDA-Entscheidung über den De Novo Antrag von J&J (eingereicht Januar 2026) wird als zweites Schlüsselevent für das ISRG-Investmentnarrativ erwartet. Der De Novo Prozess dauert typischerweise 12–18 Monate. Eine Ablehnung oder erhebliche Verzögerung würde ISRGs Monopolstellung weiter stabilisieren; eine schnelle Zulassung würde den Wettbewerbsdruck früher als erwartet eskalieren. J&J's Ottava zielt primär auf Allgemeinchirurgie im oberen Bauchraum – eine Domäne, in der ISRG ebenfalls stark wächst.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Ottava erhält FDA-Zulassung bis Ende 2026 → erhöhter Wettbewerbsdruck in 2027 signalisiert; Position auf neutrale Gewichtung reduzieren, bis Prozedur-Impact in ISRG-Ergebnissen messbar oder nicht messbar ist.<br><br>
+          <strong>Wenn:</strong> Ottava-Entscheidung verzögert sich auf 2027+ oder FDA fordert weitere Studien → bullish für ISRG; Übergewichtung rechtfertigt sich. Kein Anlass zur Reduktion, solange ISRG-Fundamentals intakt.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 3: da Vinci 5 Herzchirurgie-Rollout – Skalierung Q2–Q4 2026</h4>
+        <p>Die FDA-Zulassung des dV5 für kardiale Eingriffe (März 2026, u.a. Mitralklappenreparatur) ist der wichtigste strukturelle TAM-Erweiterungskatalysator in der Geschichte von ISRG. Kardiale Eingriffe haben eine deutlich höhere Komplexität und damit höhere Instrumenten-Revenue pro Fall als Standard-Prozeduren. Wenn ISRG bis Ende 2026 erste kardiale dV5-Volumen-Daten veröffentlicht und diese die Akzeptanz von Herzchirurgen belegen, stärkt das die Langfrist-These erheblich – und rechtfertigt erstmals die "revolutionäre" Plattformbeschreibung des dV5 in Zahlen.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Management berichtet in Q3 oder Q4 2026 von >500 kardialen dV5-Eingriffen pro Quartal mit positiven klinischen Outcomes → Long-These massiv gestärkt; Kardio als neue Wachstumssäule belegt. Zielkurs-Erhöhung auf $650–700 rechtfertigbar.<br><br>
+          <strong>Wenn:</strong> Kardiale dV5-Prozeduren stagnieren bei unter 100/Quartal durch H2 2026 → Akzeptanzprobleme bei Herzchirurgen; TAM-Erweiterungs-Narrativ muss revidiert werden. Beobachten, aber kein sofortiger Handlungsbedarf.
+        </div>
+      </div>
+
+      <div class="source">Quellen: Intuitive Surgical Q4 2025 Earnings Call (22. Januar 2026); J&J Ottava FDA Submission (7. Januar 2026); Robinhood/Nasdaq News dV5 Cardiac Clearance (März 2026); MedTech Dive 5 Robotik Trends 2026 (27. Januar 2026)</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung, Kauf- oder Verkaufsempfehlung dar. Sie wurde auf Basis öffentlich verfügbarer Quellen (Stand: 04. März 2026) erstellt. Alle Prognosen, Schätzungen und Zielkurse sind Meinungen und keine garantierten Ergebnisse. Investitionen in Aktien sind mit erheblichen Risiken verbunden, einschließlich des vollständigen Kapitalverlusts. Vor jeder Anlageentscheidung sollte ein zugelassener Finanzberater konsultiert werden. Vergangene Performance ist kein Indikator für zukünftige Ergebnisse. ISRG Canvas v2.2 · Erstellt mit KI-Unterstützung.
+  </div>
+
+</div>
+</body>
+</html>
