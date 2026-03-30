@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xiaomi (1810.HK) – Aktienanalyse Canvas v2.2</title>
+<style>
+  :root {
+    --primary: #FF6900;
+    --primary-dark: #cc5400;
+    --bg: #0f0f12;
+    --bg-card: #1a1a1f;
+    --bg-card2: #22222a;
+    --border: #2e2e38;
+    --text: #e8e8ec;
+    --text-muted: #888898;
+    --text-dim: #555566;
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --blue: #3b82f6;
+    --purple: #8b5cf6;
+    --teal: #14b8a6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #1a0800 0%, #2a1000 40%, #0f0f12 100%);
+    border-bottom: 1px solid var(--primary);
+    padding: 36px 40px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .header-left h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: -0.5px;
+  }
+  .header-left h1 span { color: var(--primary); }
+  .header-left .subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-top: 4px;
+  }
+  .header-right {
+    text-align: right;
+  }
+  .price-tag {
+    font-size: 38px;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
+  }
+  .price-meta {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  .price-change {
+    display: inline-block;
+    background: rgba(239,68,68,0.15);
+    color: var(--red);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  /* NAVIGATION */
+  .nav {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 14px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+  /* MAIN */
+  .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+  /* SCORECARD TOP */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .kpi-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+  .kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .kpi-value.green { color: var(--green); }
+  .kpi-value.red { color: var(--red); }
+  .kpi-value.orange { color: var(--primary); }
+  /* SECTION */
+  .section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .section-header {
+    background: var(--bg-card2);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-number {
+    background: var(--primary);
+    color: white;
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-title { font-size: 16px; font-weight: 700; color: white; }
+  .section-score {
+    margin-left: auto;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .section-body { padding: 20px 24px; }
+  /* TEXT */
+  p { margin-bottom: 12px; color: var(--text); }
+  p:last-child { margin-bottom: 0; }
+  /* TABLE */
+  .table-wrap { overflow-x: auto; margin: 16px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th {
+    background: var(--bg-card2);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(46,46,56,0.5);
+    color: var(--text);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,105,0,0.04); }
+  .beat { color: var(--green); font-weight: 600; }
+  .miss { color: var(--red); font-weight: 600; }
+  .neutral { color: var(--yellow); font-weight: 600; }
+  /* BADGES */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+  .badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+  .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+  .badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+  .badge-orange { background: rgba(255,105,0,0.15); color: var(--primary); }
+  /* EVENT LIST */
+  .event-item {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(46,46,56,0.5);
+    align-items: flex-start;
+  }
+  .event-item:last-child { border-bottom: none; }
+  .event-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-top: 7px;
+    flex-shrink: 0;
+  }
+  .dot-green { background: var(--green); }
+  .dot-red { background: var(--red); }
+  .dot-yellow { background: var(--yellow); }
+  .event-label { font-weight: 600; color: white; }
+  .event-text { font-size: 14px; color: var(--text); }
+  /* RISK */
+  .risk-item {
+    background: var(--bg-card2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .risk-title { font-weight: 600; color: white; font-size: 14px; }
+  /* SCORE TABLE */
+  .score-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .score-bar-track {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--primary), #ff9500);
+  }
+  .score-num { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+  /* FAZIT CARDS */
+  .bull-bear-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+  .bull-card {
+    background: rgba(34,197,94,0.08);
+    border: 1px solid rgba(34,197,94,0.2);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .bear-card {
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+  /* RATING */
+  .rating-box {
+    background: linear-gradient(135deg, rgba(255,105,0,0.12), rgba(255,105,0,0.04));
+    border: 1px solid rgba(255,105,0,0.3);
+    border-radius: 12px;
+    padding: 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+  .rating-item .val { font-size: 20px; font-weight: 800; color: white; }
+  .rating-item .val.buy { color: var(--green); }
+  .rating-item .val.hold { color: var(--yellow); }
+  .rating-item .val.sell { color: var(--red); }
+  /* TRIGGER TABLE */
+  .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  @media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+  .trigger-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+  .trigger-card h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .trigger-card.buy h5 { color: var(--green); }
+  .trigger-card.sell h5 { color: var(--red); }
+  .trigger-list { font-size: 13px; color: var(--text); }
+  .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+  .trigger-list li::before { content: "→"; position: absolute; left: 0; }
+  /* INVESTOR TYPE */
+  .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+  @media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+  .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+  .investor-no { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+  .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+  .investor-no h5 { color: var(--red); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+  .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+  .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+  .investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+  /* EINSTIEG TABLE */
+  .einstieg-table td:first-child { font-weight: 600; color: white; }
+  /* SUBHEADING */
+  h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+  h3:first-child { margin-top: 0; }
+  /* SOURCE */
+  .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+  .source a { color: var(--text-dim); }
+  /* OUTLOOK */
+  .outlook-card {
+    background: var(--bg-card2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--primary);
+    border-radius: 0 8px 8px 0;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+  .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+  .outlook-card .when-then strong { color: var(--primary); }
+  /* DISCLAIMER */
+  .disclaimer {
+    background: var(--bg-card2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 32px;
+  }
+  /* GEOGRAPHY */
+  .geo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+  .geo-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+  .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .geo-pct { font-size: 20px; font-weight: 700; color: white; }
+  .geo-note { font-size: 12px; color: var(--text-muted); }
+  /* INLINE PILL */
+  .pill { display: inline-block; background: rgba(255,105,0,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+  /* DIVIDER */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+  /* PHASE TAG */
+  .phase-label {
+    display: inline-block;
+    background: var(--primary);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+  .section-note {
+    font-size: 12px;
+    color: var(--text-dim);
+    background: rgba(46,46,56,0.4);
+    border-radius: 4px;
+    padding: 4px 10px;
+    margin-left: auto;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>Xiaomi Corporation <span>1810.HK</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 &nbsp;·&nbsp; Stand: 03. März 2026 &nbsp;·&nbsp; HKEX &nbsp;·&nbsp; Sektor: Consumer Tech / EV</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">Smartphones</span>
+      <span class="badge badge-blue">AIoT</span>
+      <span class="badge badge-green">Smart EV</span>
+      <span class="badge badge-yellow">Internet Services</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">HKD 33.14</div>
+    <div class="price-meta">Schlusskurs 03.03.2026 · HKEX</div>
+    <div class="price-change">▼ 52-Wochen-Tief · –46% vom ATH</div>
+    <div style="margin-top:6px; font-size:12px; color: var(--text-muted);">52W: HKD 33.00 – 61.45 &nbsp;·&nbsp; ATH: 61.46 (27.06.2025)</div>
+  </div>
+</div>
+
+<!-- NAVIGATION -->
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+<!-- KPI OVERVIEW -->
+<div class="kpi-grid" style="margin-top:24px;">
+  <div class="kpi-card">
+    <div class="kpi-label">Kurs</div>
+    <div class="kpi-value red">33.14</div>
+    <div class="kpi-sub">HKD · 03.03.2026</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Marktkapitalisierung</div>
+    <div class="kpi-value orange">~HKD 866B</div>
+    <div class="kpi-sub">≈ USD 111B</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">P/E (TTM)</div>
+    <div class="kpi-value">16.65x</div>
+    <div class="kpi-sub">Günstig für Wachstum</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">EV/EBITDA</div>
+    <div class="kpi-value">12.49x</div>
+    <div class="kpi-sub">TTM</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Bruttomarge</div>
+    <div class="kpi-value green">22.9%</div>
+    <div class="kpi-sub">Rekordniveau Q3/2025</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">ROE</div>
+    <div class="kpi-value green">19.9%</div>
+    <div class="kpi-sub">TTM</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Nächste Earnings</div>
+    <div class="kpi-value orange">24.03.26</div>
+    <div class="kpi-sub">Q4 2025 Ergebnisse</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Analyst-Konsens</div>
+    <div class="kpi-value green">KAUFEN</div>
+    <div class="kpi-sub">28 Buy · 3 Sell · Ø HKD 53.83</div>
+  </div>
+</div>
+
+<!-- SECTION 1 -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Geschäftsmodell</div>
+    <div class="section-note">Quellen ≤ 9 Monate</div>
+  </div>
+  <div class="section-body">
+    <p>Xiaomi Corporation (gegründet 2010, Hauptsitz Peking) ist eines der faszinierendsten Geschäftsmodelle der globalen Technologiebranche: Das Unternehmen kombiniert ein auf Volumen ausgerichtetes Hardware-Geschäft mit einem wachsenden High-Margin-Ökosystem aus Internet-Diensten und hat jüngst als weltweit erstes Unternehmen gleichzeitig eine führende Smartphone- und Elektrofahrzeugsparte aufgebaut. Der Gründer Lei Jun beschreibt die Unternehmensphilosophie als „Human × Car × Home" – ein vernetztes Ökosystem, das alle Lebensbereiche des Nutzers durchdringt.</p>
+
+    <p>Das Kerngeschäft gliedert sich in zwei offizielle Segmente. Das erste und größte Segment, <strong>Smartphone × AIoT</strong>, umfasst Smartphones, IoT-Geräte (Smart-Home-Appliances, Wearables, Smart-TV, etc.) sowie Internet-Dienste (Werbung, Gaming, Fintech, Cloud). Im dritten Quartal 2025 erwirtschaftete dieses Segment RMB 84,1 Mrd. Umsatz, wobei Smartphones RMB 46 Mrd. (40,6 % des Konzernumsatzes), IoT-Produkte RMB 27,6 Mrd. (24,4 %) und Internet-Dienste RMB 9,4 Mrd. (8,3 %) beitrugen. Das zweite und am schnellsten wachsende Segment, <strong>Smart EV, AI & New Initiatives</strong>, generierte im selben Quartal RMB 29 Mrd. (25,6 % des Konzernumsatzes) und erzielte erstmals einen operativen Gewinn.</p>
+
+    <p>Xiaomis Revenue-Modell ist mehrschichtig: Im Smartphone-Bereich verfolgt das Unternehmen eine „Premiumisierungsstrategie" – günstige Einstiegsgeräte für Marktanteilsgewinne in Schwellenländern, kombiniert mit wachsenden Premium-Produktlinien (Xiaomi 15 Ultra, Xiaomi 17 Pro Max) in China und zunehmend auch in Europa. Die IoT-Plattform verbindet über 1 Milliarde Geräte (Stand Q3 2025) und generiert Netzwerkeffekte: Nutzer mit 5+ Geräten im Ökosystem bleiben deutlich loyaler. Internet-Dienste (Werbung, Spiele, Fintech) monetarisieren die global rund 742 Millionen monatlich aktiven Nutzer (MAU) mit einer Bruttomarge von ~77 % – das ist die weitaus profitabelste Sparte. Das EV-Geschäft (Xiaomi SU7 Sedan, YU7 SUV, SU7 Ultra) folgt einem vertikal integrierten Modell mit direktem Vertrieb über 200+ Showrooms in China.</p>
+
+    <p>Die Kostenstruktur ist hybnd: Das Hardware-Geschäft ist kapitalintensiver und margenärmer (Smartphone-Marge ~11 %, IoT ~24 %). Der EV-Bereich erforderte massive Anfangsinvestitionen (R&D über RMB 10 Mrd. von 2021–2024), ist aber jetzt erstmals profitabel (Q3 2025: operative Marge +). Das Internet-Dienste-Segment ist nahezu asset-light und skaliert überproportional. Die Gesamtbruttomarge des Konzerns hat sich dank des wachsenden Anteils hochmargiger Geschäftsbereiche auf ein Rekordniveau von 22,9 % (Q3 2025) verbessert.</p>
+
+    <p>Für 2026 sind mehr als 550.000 EV-Auslieferungen geplant, was eine ~34-prozentige Steigerung gegenüber den 410.000 Fahrzeugen in 2025 bedeutet. Mit kumulativen Auslieferungen von über 600.000 Fahrzeugen (Stand März 2026) hat Xiaomi den Meilenstein schneller erreicht als Tesla seinerzeit. Zielgruppen sind primär B2C-Kunden in China (Smartphones, EV, IoT) sowie zunehmend internationale Märkte über Xiaomi.com, Amazon und stationäre Mi Stores in über 100 Ländern.</p>
+
+    <div class="source">
+      Quellen: Xiaomi IR Q3/2025 Earnings Call (18.11.2025), Xiaomi Annual Report 2024 (18.03.2025), CnEVPost (März 2025), Reuters (01.03.2026) · Stichtag für Aktualität: 03.03.2026
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2 -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">Burggraben & Wettbewerbsvorteile</div>
+    <div class="section-score">Score: 7/10</div>
+  </div>
+  <div class="section-body">
+    <p><strong>Netzwerkeffekte (stark):</strong> Das AIoT-Ökosystem mit über 1 Milliarde vernetzter Geräte ist Xiaomis wertvollster Burggraben. Nutzer, die in das Ökosystem investiert haben (Smart-TV, Kühlschrank, Klimaanlage, Smartphone, jetzt auch EV), wechseln mit jedem hinzugefügten Gerät schwerer. Die Mi Home App hat 114,6 Millionen MAU (Q3 2025, +14,4 % YoY). Die Integration zwischen Smartphone, IoT-Gerät und EV (das Auto erscheint als „Hub" in der Mi Home App) schafft eine Stickyness, die einzelne Produktkategorien nicht erreichen könnten. Dieser Netzwerkeffekt wächst noch: 21,6 Millionen Nutzer besitzen bereits 5 oder mehr Xiaomi-Geräte.</p>
+
+    <p><strong>Switching Costs (mittel-hoch):</strong> Im Smartphone-Segment sind die Wechselkosten für bestehende MIUI-Nutzer (742 Mio. MAU global) relevant, aber nicht unüberwindbar – insbesondere gegen Huawei und Apple in China. Im IoT-Bereich sind die Switching Costs deutlich höher, da ein Ecosystem-Wechsel die Kompatibilität aller Smart-Home-Geräte in Frage stellt. Im EV-Segment entstehen langfristige Bindungen über Softwareupdates, Over-the-Air-Features und das integrierte Smartphone-Ökosystem.</p>
+
+    <p><strong>Brand Power (wachsend):</strong> Xiaomi hat sich von seiner früheren Wahrnehmung als „Budget-Brand" emanzipiert. Das Xiaomi SU7 Ultra (Startpreis RMB 529.900, ~USD 73.000) und das Xiaomi 15 Ultra positionieren die Marke erstmals ernsthaft im Premium-Segment. In Q1 2025 verkaufte sich das Xiaomi 15 Ultra über 50 % besser als das Vorgängermodell. Dennoch ist die Markenpositionierung gegenüber Apple oder BMW noch nicht gleichwertig – das ist sowohl Risiko als auch Chance.</p>
+
+    <p><strong>Scale Advantages (sehr stark):</strong> Mit über 168 Millionen verschifften Smartphones (2024) und der Fertigung von Millionen von IoT-Geräten profitiert Xiaomi von erheblichen Einkaufsvorteilen in der Lieferkette. Die Amortisation von R&D-Kosten über ein breites Produktportfolio ist ein deutlicher Vorteil. Im EV-Segment ist der Skaleneffekt noch im Aufbau, aber das Ziel von 550.000 Einheiten 2026 stellt bereits eine kritische Masse dar.</p>
+
+    <p><strong>Technologischer Vorsprung (wachsend):</strong> Xiaomi investiert 2025 über RMB 30 Mrd. in R&D (+52 % YoY), davon ein Viertel in KI. Das Unternehmen hat ein eigenes 3-Nanometer-Flaggschiff-Chip entwickelt (Ersatz für Qualcomm-Abhängigkeit) und eigene AI-Modelle (Xiaomi-MiMo-Audio, Miloco) open-source veröffentlicht. Die ADAS-Kompetenz im EV-Bereich wird zunehmend als Unterscheidungsmerkmal wahrgenommen. Schwachstelle: Beim Self-Driving fehlt noch der entscheidende Nachweis gegenüber Huawei ADS und Tesla FSD.</p>
+
+    <p><strong>Schwachstellen:</strong> Im Smartphone-Segment fehlt Xiaomi das iOS-äquivalent eines eigenen Betriebssystems, das echte Ökosystem-Lock-in erzeugt. HyperOS (der MIUI-Nachfolger) ist bislang kein ernsthafter Wechselhemmer. Die EV-Sicherheitsprobleme (zwei fatale SU7-Unfälle 2025) haben das Premiumimage beschädigt und zeigen, dass der technische Tiefgang in der Fahrzeugsicherheit noch nicht das Niveau traditioneller Automobilhersteller erreicht hat.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Dimension</th><th>Stärke</th><th>Kommentar</th></tr></thead>
+        <tbody>
+          <tr><td>Netzwerkeffekte</td><td><span class="badge badge-green">Stark</span></td><td>1 Mrd. IoT-Geräte, 742 Mio. MAU</td></tr>
+          <tr><td>Switching Costs</td><td><span class="badge badge-yellow">Mittel-Hoch</span></td><td>IoT &amp; EV hoch; Smartphone mittel</td></tr>
+          <tr><td>Brand Power</td><td><span class="badge badge-yellow">Wachsend</span></td><td>Aufstieg ins Premium, noch nicht etabliert</td></tr>
+          <tr><td>Scale Advantages</td><td><span class="badge badge-green">Sehr stark</span></td><td>Lieferkette &amp; R&D-Amortisation</td></tr>
+          <tr><td>Technologischer Vorsprung</td><td><span class="badge badge-yellow">Wachsend</span></td><td>3nm Chip, AI-Modelle, ADAS</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Gesamtscore <strong>7/10</strong>: Xiaomis Burggraben ist real und wächst, aber noch nicht in der Liga von Apple (Ökosystem-Monopol) oder BYD (Batterie-Technologie-Führerschaft). Das AIoT-Flywheel ist der langfristig entscheidende Differentiator.</p>
+
+    <div class="source">Quellen: Xiaomi IR Q3/2025 (18.11.2025), Xiaomi Annual Report 2024 (18.03.2025), AlphaPilot Research (27.10.2025), CNBC (23.01.2026)</div>
+  </div>
+</div>
+
+<!-- SECTION 3 -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">Letzte 4 Quartale (Q4 2024 – Q3 2025)</div>
+    <div class="section-score">Beat-Ratio: 3/4</div>
+  </div>
+  <div class="section-body">
+    <p style="background:rgba(255,105,0,0.08); border:1px solid rgba(255,105,0,0.2); border-radius:6px; padding:10px 14px; margin-bottom:16px; font-size:13px;">
+      ⚠️ <strong>Hinweis:</strong> Da Xiaomi an der HKEX notiert ist, sind keine direkten finviz.com-Daten verfügbar. Kennzahlen stammen von investing.com, CNBC, Xiaomi IR und Yahoo Finance (03.03.2026). Nächste Quartalsergebnisse: <strong>24. März 2026</strong> (Q4 2025 Jahreszahlen).
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Quartal</th>
+            <th>Umsatz (RMB Mrd.)</th>
+            <th>YoY</th>
+            <th>Adj. Nettogewinn (RMB Mrd.)</th>
+            <th>YoY</th>
+            <th>Bruttomarge</th>
+            <th>Konsens Beat/Miss</th>
+            <th>Aktienreaktion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Q4 2024</strong></td>
+            <td>109,0</td>
+            <td class="beat">+48,8%</td>
+            <td>8,3</td>
+            <td class="beat">+69,4%</td>
+            <td>~20,4%</td>
+            <td><span class="beat">Beat</span> (Umsatz &gt; 102,2B Konsens)</td>
+            <td class="beat">Positiv</td>
+          </tr>
+          <tr>
+            <td><strong>Q1 2025</strong></td>
+            <td>111,0</td>
+            <td class="beat">+47,4%</td>
+            <td>10,7</td>
+            <td class="beat">+65,0%</td>
+            <td>22,8%</td>
+            <td><span class="beat">Beat</span> (~10% über Konsens)</td>
+            <td class="beat">Positiv</td>
+          </tr>
+          <tr>
+            <td><strong>Q2 2025</strong></td>
+            <td>116,0</td>
+            <td class="beat">+30,5%</td>
+            <td>10,8</td>
+            <td class="beat">+75,3%</td>
+            <td>~22,5%</td>
+            <td><span class="miss">Umsatz-Miss</span> (Konsens: 125,6B), <span class="beat">EPS Beat</span></td>
+            <td class="neutral">Gemischt</td>
+          </tr>
+          <tr>
+            <td><strong>Q3 2025</strong></td>
+            <td>113,1</td>
+            <td class="beat">+22,3%</td>
+            <td>11,3</td>
+            <td class="beat">+80,9%</td>
+            <td>22,9% (Rekord)</td>
+            <td><span class="beat">Beat</span> (EPS 0,51 vs. Konsens 0,41)</td>
+            <td class="beat">Positiv</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Segment-Entwicklung Q3 2025</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Segment</th><th>Umsatz (RMB Mrd.)</th><th>Anteil</th><th>Bruttomarge</th><th>Highlight</th></tr></thead>
+        <tbody>
+          <tr><td>Smartphones</td><td>46,0</td><td>40,6%</td><td>~11%</td><td>43,3 Mio. Einheiten, 9 Q in Folge YoY-Wachstum</td></tr>
+          <tr><td>IoT & Lifestyle</td><td>27,6</td><td>24,4%</td><td>23,9%</td><td>7 Q in Folge YoY-Wachstum; 1 Mrd. vernetzte Geräte</td></tr>
+          <tr><td>Internet Services</td><td>9,4</td><td>8,3%</td><td>76,9%</td><td>Rekord; Werbung +17,4% YoY; Int'l 34,9%</td></tr>
+          <tr><td>Smart EV & AI</td><td>29,0</td><td>25,6%</td><td>25,5%</td><td>Erst. operativer Gewinn (+0,7B); 108.796 Einheiten (+173% YoY)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Wichtigste Management-Statements</h3>
+    <p>CFO Alain Lam betonte in Q3 2025, dass das EV-Geschäft nun seine erste operative Rentabilität erreicht hat und Volumen kurzfristig über Marge priorisiert wird. Präsident Lu Weibing kündigte für 2025 eine R&D-Gesamtinvestition von über RMB 30 Mrd. an, davon ein Viertel in KI-Forschung. Lei Jun präsentierte am 27. Februar 2026 die neue SU7-Generation mit erheblichen Sicherheitsverbesserungen (mechanische Türgriffe, Standard-LiDAR, 9 Airbags), nachdem zwei fatale Unfälle 2025 die öffentliche Diskussion dominiert hatten.</p>
+
+    <div class="source">Quellen: Xiaomi IR Q3/2025 (18.11.2025), Futubull Earnings (Nov 2024 – Nov 2025), Pandaily (18.11.2025), TipRanks Earnings (Jan 2026) · Nächste Earnings: 24.03.2026</div>
+  </div>
+</div>
+
+<!-- SECTION 4 -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">Wachstumseinordnung</div>
+    <div class="section-score">Score: 9/10</div>
+  </div>
+  <div class="section-body">
+    <h3>Revenue Growth (historisch)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Jahr</th><th>Umsatz (RMB Mrd.)</th><th>YoY-Wachstum</th><th>Kommentar</th></tr></thead>
+        <tbody>
+          <tr><td>FY2022</td><td>280,0</td><td class="miss">–0,1%</td><td>COVID, Nachfrageflaute Smartphones</td></tr>
+          <tr><td>FY2023</td><td>271,0</td><td class="miss">–3,2%</td><td>Weiterer Rückgang, Marktbereinigung</td></tr>
+          <tr><td>FY2024</td><td>365,9</td><td class="beat">+35,0%</td><td>Rekord: EV-Launch, Smartphone-Erholung</td></tr>
+          <tr><td>FY2025 (9M)</td><td>340,4</td><td class="beat">+~34%</td><td>9M bereits fast gleich FY2024-Gesamtjahr</td></tr>
+          <tr><td>FY2025E (Konsens)</td><td>~471</td><td class="beat">+~29%</td><td>Auf Basis 9M + Q4-Schätzung</td></tr>
+          <tr><td>FY2026E (Konsens)</td><td>~609</td><td class="beat">+~29%</td><td>Getrieben von EV &amp; Premium-Smartphones</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Geografische Verteilung</h3>
+    <div class="geo-grid">
+      <div class="geo-card">
+        <div class="geo-region">China (Inland)</div>
+        <div class="geo-pct">~60%</div>
+        <div class="geo-note">Stärkstes Premiumwachstum; EV nur Inland</div>
+      </div>
+      <div class="geo-card">
+        <div class="geo-region">Europa</div>
+        <div class="geo-pct">~15%</div>
+        <div class="geo-note">#2 Smartphone-Marktanteil; EV ab 2027</div>
+      </div>
+      <div class="geo-card">
+        <div class="geo-region">Südostasien / Indien</div>
+        <div class="geo-pct">~12%</div>
+        <div class="geo-note">#1 Marktanteil SEA</div>
+      </div>
+      <div class="geo-card">
+        <div class="geo-region">LatAm / MENA</div>
+        <div class="geo-pct">~8%</div>
+        <div class="geo-note">#2 Marktanteil LATAM & MENA</div>
+      </div>
+      <div class="geo-card">
+        <div class="geo-region">Sonstige</div>
+        <div class="geo-pct">~5%</div>
+        <div class="geo-note">Afrika, Ozeanien</div>
+      </div>
+    </div>
+    <p style="font-size:13px; color:var(--text-muted);">Overseas Internet Services Revenue Q3 2025: RMB 3,3 Mrd. (+19,1% YoY) – neuer Rekord; Anteil 34,9% der Gesamt-Internet-Dienste. Das internationale Wachstum ist ein starkes Signal für Ökosystem-Monetarisierung außerhalb Chinas.</p>
+
+    <h3>Profitabilitätswachstum vs. Umsatzwachstum</h3>
+    <p>Xiaomis Profitabilität wächst deutlich schneller als der Umsatz – ein Zeichen echter operativer Hebelwirkung. Die Bruttomarge stieg von 20,4% (Q4 2024) auf 22,9% (Q3 2025, Rekordniveau). Der bereinigte Nettogewinn der ersten neun Monate 2025 (RMB 32,8 Mrd.) übersteigt bereits den Jahresabschluss 2024 (RMB 27,2 Mrd.). Treiber sind: Premiumisierung im Smartphone-Segment, margenstarkes IoT-Wachstum, explosives Wachstum der Internet-Dienste (76,9% Marge) und die nun rentable EV-Sparte (25,5% Marge).</p>
+
+    <h3>Wachstumsreifegrad & Qualitätsbewertung</h3>
+    <p>Xiaomi befindet sich im Übergang von <strong>High-Growth</strong> zu <strong>Growth-at-Scale</strong>. Das Smartphone-Segment wächst moderat (+0,5% Shipments YoY in Q3 2025, aber signifikante Premiumisierung), IoT skaliert stark, Internet-Dienste monetarisieren zunehmend, und EV liefert noch dreistellige Wachstumsraten. Das Wachstum ist organisch (kein M&A-inflationiertes Wachstum), technologisch getrieben und multidimensional – das macht es strukturell robust. Einziger Vorbehalt: Der Q2-2025-Umsatz-Miss (116B vs. 125,6B Konsens) signalisiert, dass EV-Lieferkettenbeschränkungen und saisonale Smartphone-Nachfrage die kurzfristige Revenue-Visibilität begrenzen.</p>
+
+    <p>Gesamtbewertung <strong>9/10</strong>: Xiaomis Wachstumstrajektorie ist außergewöhnlich – zweistellige Revenue-Wachstumsraten bei gleichzeitig beschleunigender Profitabilität und echter Diversifikation durch EV. Abzug für partielle Lieferketten-Abhängigkeit und EV-Marktrisiken 2026.</p>
+
+    <div class="source">Quellen: Xiaomi IR Q3/2025 & Annual Report 2024; CMB International Research (27.10.2025); Minichart Analysis (29.05.2025)</div>
+  </div>
+</div>
+
+<!-- SECTION 5 -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <div class="section-title">Bewertung & Multiples</div>
+    <div class="section-score">Score: 8/10</div>
+  </div>
+  <div class="section-body">
+    <p style="background:rgba(255,105,0,0.08); border:1px solid rgba(255,105,0,0.2); border-radius:6px; padding:10px 14px; margin-bottom:16px; font-size:13px;">
+      ⚠️ Da Xiaomi an der HKEX notiert ist (kein US-Listing), sind finviz.com-Daten nicht direkt verfügbar. Alle Kennzahlen stammen von investing.com, CNBC und Yahoo Finance, Stand 03.03.2026.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Multiple</th><th>Aktuell (03.03.2026)</th><th>Kommentar / Einordnung</th></tr></thead>
+        <tbody>
+          <tr><td><strong>P/E (TTM)</strong></td><td>16.65x</td><td>Günstig für ein 30%+ YoY Wachstumsunternehmen</td></tr>
+          <tr><td><strong>EV/EBITDA</strong></td><td>12.49x</td><td>EBITDA TTM: RMB 41,9 Mrd.; attraktiv</td></tr>
+          <tr><td><strong>P/S (TTM)</strong></td><td>~1.7x</td><td>Sehr günstig; Revenue TTM RMB 511,6 Mrd.</td></tr>
+          <tr><td><strong>P/B</strong></td><td>2.99x</td><td>Moderate Prämie; ROE 19,9%</td></tr>
+          <tr><td><strong>Earnings Yield</strong></td><td>~6.0%</td><td>Attraktiv vs. 10Y Anleihen</td></tr>
+          <tr><td><strong>Bruttomarge TTM</strong></td><td>22.2–22.9%</td><td>Rekordniveau, Aufwärtstrend</td></tr>
+          <tr><td><strong>Nettomarge TTM</strong></td><td>9.8%</td><td>Solide für Hardware-Konzern</td></tr>
+          <tr><td><strong>Analyst-Konsensus Zielkurs</strong></td><td>HKD 53.83</td><td>+62% Upside vom aktuellen Kurs</td></tr>
+          <tr><td><strong>Goldman Sachs Zielkurs</strong></td><td>HKD 47.50</td><td>BUY-Rating bestätigt Jan 2026</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Historische Einordnung & Bewertungskontext</h3>
+    <p>Der aktuelle Kurs von HKD 33.14 liegt rund 46% unter dem Allzeithoch vom 27. Juni 2025 (HKD 61.46). Damit hat Xiaomi trotz konsistent starker operativer Performance eine massive Bewertungskontraktion erlebt – getrieben durch Enttäuschung über das moderate 2026-EV-Lieferziel (550.000 statt erwarteter Milliarden-Ambitionen), Sorgen über den chinesischen EV-Preiskampf und die SU7-Sicherheitsunfälle. Bei einem P/E von 16,65x handelt die Aktie faktisch auf Basis eines reifen Industrieunternehmens, obwohl die Gewinnwachstumsrate 2025 bei über 70% liegt.</p>
+
+    <p>Das PEG-Verhältnis (P/E dividiert durch Wachstumsrate) liegt bei geschätzten 0,22–0,25x – ein Wert, der historisch eine signifikante Unterbewertung signalisiert. Selbst bei einem konservativen Forward-P/E von 20x auf geschätzte FY2026-Gewinne ergibt sich ein fairer Wert von ~HKD 46–50. Goldman Sachs erwartet HKD 47,50, der breite Analystenkon­sens HKD 53,83. Der Markt preist offensichtlich erhebliche Risiken aus dem chinesischen EV-Markt und dem globalen Makroumfeld ein.</p>
+
+    <p>Bewertungsscore <strong>8/10</strong>: Günstige absolute und relative Bewertung für die gebotenen Wachstumsraten. Hauptrisiko: Weitere Gewinnrevisionen nach unten falls EV-Margen unter Druck bleiben oder Smartphone-Chip-Kosten steigen.</p>
+
+    <div class="source">Quellen: investing.com (03.03.2026), CNBC (03.03.2026), Goldman Sachs via Futunn (26.01.2026), Capital.com (10.02.2026)</div>
+  </div>
+</div>
+
+<!-- SECTION 6 -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <div class="section-title">Cashflow, Margen & Kapitalqualität</div>
+    <div class="section-score">Score: 7/10</div>
+  </div>
+  <div class="section-body">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Kennzahl</th><th>Wert</th><th>Trend</th><th>Kommentar</th></tr></thead>
+        <tbody>
+          <tr><td><strong>ROE (TTM)</strong></td><td>19.9%</td><td class="beat">↑</td><td>Solide Eigenkapitalrendite</td></tr>
+          <tr><td><strong>ROA (TTM)</strong></td><td>10.3%</td><td class="beat">↑</td><td>Effiziente Kapitalnutzung</td></tr>
+          <tr><td><strong>Bruttomarge Q3/2025</strong></td><td>22.9%</td><td class="beat">Rekord ↑</td><td>+2,5 pp YoY</td></tr>
+          <tr><td><strong>Nettomarge (TTM)</strong></td><td>9.8%</td><td class="beat">↑</td><td>Adj. Nettomarge ~7-8%</td></tr>
+          <tr><td><strong>Internet Services Marge</strong></td><td>76.9%</td><td class="beat">Stabil</td><td>Hochmarginigster Bereich</td></tr>
+          <tr><td><strong>EV Bruttomarge Q3/2025</strong></td><td>25.5%</td><td class="beat">↑ (von 18,5% FY2024)</td><td>Schnelle Margenerholung</td></tr>
+          <tr><td><strong>Debt/Equity (MRQ)</strong></td><td>10.39%</td><td class="beat">Niedrig</td><td>Gesunde Bilanz</td></tr>
+          <tr><td><strong>EBITDA (TTM)</strong></td><td>RMB ~41,9 Mrd.</td><td class="beat">↑</td><td>EBITDA-Marge ~7,6%</td></tr>
+          <tr><td><strong>Capex (9M 2025)</strong></td><td>RMB 13 Mrd.</td><td class="miss">+87% YoY</td><td>Kapitalintensiv durch EV-Fabrik</td></tr>
+          <tr><td><strong>Dividende</strong></td><td>–</td><td class="neutral">Keine</td><td>Mögliche erstmalige Div. 2026 evaluiert</td></tr>
+          <tr><td><strong>Share Buybacks</strong></td><td>HKD 2,5 Mrd. Programm</td><td class="beat">Aktiv</td><td>Jan 2026 angekündigt; 3M Aktien März 2026</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Qualitätsbewertung der Gewinne</h3>
+    <p>Xiaomis Gewinne sind real: Der Bereinigungsposten zwischen IFRS-Gewinn und bereinigtem Nettogewinn bezieht sich primär auf Aktienvergütungen und Bewertungsänderungen von Investitionen – keine strukturell manipulierten Metriken. Der starke Capex-Anstieg (+87% YoY in den ersten drei Quartalen 2025, RMB 13 Mrd.) reflektiert die EV-Fabrik-Investitionen und ist kurzfristig eine Cashflow-Belastung, aber strategisch notwendig und zeitlich begrenzt. Die Großzügige-Einkommen-Strategie (neue Xiaomi-Haushaltsgerätenfabrik seit Oktober 2025 in Betrieb) wird ab 2026 Capex entlasten.</p>
+
+    <p>Das Schulden-Eigenkapital-Verhältnis von lediglich 10,39% ist bemerkenswert solide für ein Unternehmen, das gleichzeitig einen Multimilliarden-EV-Konzern aufbaut. Xiaomis starke Bilanzkraft wird durch die Ankündigung einer möglichen erstmaligen Dividende am 24. März 2026 (Board Meeting) unterstrichen – ein weiteres Zeichen der gestiegenen Profitabilität. Das aktive Share-Buyback-Programm (HKD 2,5 Mrd.) zeigt zusätzlich das Vertrauen des Managements in die aktuelle Unterbewertung.</p>
+
+    <p>Score <strong>7/10</strong>: Abzüge für hohen Capex-Bedarf und fehlenden FCF-Ausweis (Xiaomi reportiert keinen expliziten FCF als Headline-Metrik, was Analysen erschwert). Die Margen-Expansion ist echter und strukturell – aber die Smartphone-Chip-Kostensteigerungen 2026 sind ein reales kurzfristiges Risiko.</p>
+
+    <div class="source">Quellen: investing.com (03.03.2026), Xiaomi IR Q3/2025 (18.11.2025), CNBC (23.01.2026), TipRanks (24.02.2026)</div>
+  </div>
+</div>
+
+<!-- SECTION 7 -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-number">7</div>
+    <div class="section-title">Peer-Vergleich</div>
+    <div class="section-score">Score: 7/10</div>
+  </div>
+  <div class="section-body">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Unternehmen</th>
+            <th>Revenue (LTM)</th>
+            <th>Rev. Wachstum</th>
+            <th>Bruttomarge</th>
+            <th>Nettomarge</th>
+            <th>P/E (TTM)</th>
+            <th>Marktkapital.</th>
+            <th>Hauptunterschied</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:rgba(255,105,0,0.06);">
+            <td><strong>Xiaomi 1810.HK</strong></td>
+            <td>RMB 511B (~USD 71B)</td>
+            <td class="beat">~30%+</td>
+            <td>22.9%</td>
+            <td>9.8%</td>
+            <td>16.65x</td>
+            <td>~USD 111B</td>
+            <td>Tech-Ökosystem + EV</td>
+          </tr>
+          <tr>
+            <td><strong>Samsung 005930.KS</strong></td>
+            <td>KRW 333T (~USD 233B)</td>
+            <td class="neutral">~8%</td>
+            <td>~35%</td>
+            <td>~8%</td>
+            <td>~13x</td>
+            <td>~USD 210B</td>
+            <td>Halbleiter, Displays, Consumer</td>
+          </tr>
+          <tr>
+            <td><strong>Apple AAPL</strong></td>
+            <td>USD 416B</td>
+            <td class="neutral">~4%</td>
+            <td>46.9%</td>
+            <td>~27%</td>
+            <td>~32x</td>
+            <td>~USD 3.900B</td>
+            <td>Premium-Ökosystem, Services</td>
+          </tr>
+          <tr>
+            <td><strong>OPPO/OnePlus</strong></td>
+            <td>Nicht börsennotiert</td>
+            <td>k.A.</td>
+            <td>k.A.</td>
+            <td>k.A.</td>
+            <td>k.A.</td>
+            <td>Privat</td>
+            <td>China-Markt, Mid-Range</td>
+          </tr>
+          <tr>
+            <td><strong>BYD 002594.SZ</strong></td>
+            <td>RMB ~770B (~USD 107B)</td>
+            <td class="neutral">~13%</td>
+            <td>~18–21%</td>
+            <td>~4%</td>
+            <td>~20x</td>
+            <td>~USD 85B</td>
+            <td>Purer EV-Player, Batterietechnologie</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Qualitative Unterschiede</h3>
+    <p><strong>Xiaomi vs. Samsung:</strong> Beide verfolgen ein diversifiziertes Hardware-Modell, aber Xiaomis Stärke liegt im Software-Ökosystem und der Community, nicht in Halbleitern. Samsung dominiert im Memory-Chip-Markt und hat strukturell höhere Bruttomargen. Xiaomis EV-Strategie hat Samsung nicht – hier liegt ein asymmetrischer Vorteil. Xiaomi hat aber eine viel kleinere Marktkapitalisierung trotz vergleichbarem Wachstumsprofil.</p>
+
+    <p><strong>Xiaomi vs. Apple:</strong> Apple ist der unerreichbare Goldstandard für Ökosystem-Monetarisierung: ~47% Bruttomarge, 27% Nettomarge, P/E von 32x – aber kaum Wachstum (+4% Revenue). Xiaomi wächst 7x schneller als Apple, ist 35x kleiner und handelt zu ~half dem P/E – das ist aus fundamental-analytischer Sicht ein interessantes Risk/Reward-Verhältnis, aber die Qualitätslücke (Margen, Brand, Ökosystem-Lock-in) ist real.</p>
+
+    <p><strong>Xiaomi vs. BYD (EV-Vergleich):</strong> BYD ist der direkte EV-Konkurrent mit 4,6 Millionen Fahrzeugen (2025E) vs. Xiaomis 410.000. BYD hat tiefere Batterie-Kompetenz, aber Xiaomis EV-Bruttomarge (25,5% in Q3 2025) übertrifft BYDs typische Fahrzeugmarge (~21%) bereits nach nur 18 Monaten – ein beeindruckendes Zeichen der Kosteneffizienz. Xiaomis Differenzierung liegt im software-defined vehicle und IoT-Integration, BYDs in schlichter Skalenproduktion.</p>
+
+    <p>Score <strong>7/10</strong>: Xiaomi ist relativ zu den Peers bei vergleichbarer oder überlegener Wachstumsdynamik unterbewer­tet. Die Margen-Lücke zu Apple und Samsung ist real, aber schrumpft systematisch.</p>
+
+    <div class="source">Quellen: Samsung Statistics 2026 (demandsage.com), Apple Annual Report FY2025, BYD Morningstar (31.10.2025), Xiaomi IR Q3/2025, CNBC Market Data (03.03.2026)</div>
+  </div>
+</div>
+
+<!-- SECTION 8 -->
+<div class="section" id="s8">
+  <div class="section-header">
+    <div class="section-number">8</div>
+    <div class="section-title">Aktuelle News & Events (3 Ebenen)</div>
+    <div class="section-note">Quellen ≤ 3 Monate</div>
+  </div>
+  <div class="section-body">
+
+    <h3>Ebene 1: Unternehmen (Company-spezifisch)</h3>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">03.01.2026 – EV-Lieferziel 2026: 550.000 Einheiten <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Lei Jun verkündete via Livestream das neue Lieferziel von 550.000 EVs für 2026 (+34% vs. 410.000 in 2025). Markt reagierte enttäuscht (Erwartungen waren höher), was zum Kursrückgang beitrug. Quelle: Bloomberg, 03.01.2026</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">23.01.2026 – HKD 2,5 Mrd. Aktienrückkauf angekündigt <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Xiaomi kündigte ein HKD 2,5 Mrd. (~USD 321 Mio.) Buyback-Programm an. Signal für Management-Vertrauen in die Unterbewertung. Am 02.03.2026 wurden 3 Millionen Aktien für HKD 100 Mio. zurückgekauft. Quelle: CNBC, 23.01.2026; TradingView, 02.03.2026</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">Jan/Feb 2026 – SU7-Sicherheitsunfälle & regulatorische Reaktion <span class="badge badge-yellow">Neutral-Negativ</span></div>
+        <div class="event-text">Zwei fatale SU7-Unfälle 2025 (inkl. einem Fall, bei dem verborgene Türgriffe eine Rettung verhinderten) führten zu nationalem Regulierungsdruck. China erließ im Feb 2026 ein Verbot für versteckte Türgriffe (wirksam 2027). Lei Jun reagierte mit öffentlichem Sicherheits-Commitment (Livestream 27.02.2026), Sicherheitsausschuss mit Veto-Recht und verbesserten Designs in der neuen SU7-Generation. Quelle: Gasgoo (02.03.2026), CarNewsChina (26.02.2026)</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">27.02.2026 – SU7 Ultra Launch & Neue SU7-Generation angekündigt <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">SU7 Ultra (RMB 529.900, ~USD 73.000) wurde offiziell gestartet. Innerhalb von 3 Tagen: über 10.000 verbindliche Bestellungen. Next-Gen SU7 geht in Serienproduktion, Massenproduktion läuft an. Quelle: Xiaomi IR, CnEVPost (März 2025), Reuters (01.03.2026)</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">01.03.2026 – Kumulierte EV-Auslieferungen überschreiten 600.000 Einheiten <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Xiaomi erreichte 600.000 kumulierte EV-Auslieferungen schneller als Tesla einen vergleichbaren Meilenstein. Feb 2026: 20.000+ Einheiten (saisonaler Rückgang durch Mondneujahr, strukturell nicht negativ). Quelle: Reuters via Investing.com (01.03.2026)</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">24.02.2026 – Board Meeting 24.03.2026 zur Dividendenprüfung angekündigt <span class="badge badge-yellow">Neutral/Positiv</span></div>
+        <div class="event-text">Erstmalige Dividendenprüfung durch den Vorstand – Zeichen gesteigerter Kapitalstärke. Investoren warten auf Q4-2025-Jahreszahlen. Quelle: TipRanks, 24.02.2026</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">Jan 2026 – Ford-Kooperationsgespräche für US-EV-Fertigung <span class="badge badge-yellow">Spekulativ/Positiv</span></div>
+        <div class="event-text">Financial Times berichtete über Gespräche zwischen Ford und Xiaomi über gemeinsame EV-Produktion in den USA. Xiaomi plant Automotive-Export erst ab 2027. Quelle: Financial Times (Januar 2026)</div>
+      </div>
+    </div>
+
+    <h3>Ebene 2: Branche (Sektorspezifisch)</h3>
+    <div class="event-item">
+      <div class="event-dot dot-red"></div>
+      <div>
+        <div class="event-label">Feb/März 2026 – Eskalierender EV-Preiskampf in China <span class="badge badge-red">Negativ</span></div>
+        <div class="event-text">BYD, Tesla, NIO, Xiaomi und andere bieten nun 7-Jahres-Null-Zins-Finanzierungen an. Retail-EV-Absatz Januar 2026 in China: –20% YoY (saisonaler Effekt + Ende Steuersubventionen Ende 2025). Strukturelle Margenbedrohung für alle Akteure. Quelle: CarNewsChina (26.02.2026)</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-red"></div>
+      <div>
+        <div class="event-label">Q1 2026 – DRAM/NAND-Engpass erhöht Smartphone-BOM-Kosten <span class="badge badge-red">Negativ</span></div>
+        <div class="event-text">Counterpoint Research warnt, dass 2026 für chinesische OEMs besonders herausfordernd wird aufgrund von Chip-Shortages. Steigende HBM-Nachfrage treibt Speicherkosten. Xiaomi-Management adressierte dies explizit im Q3-2025-Call. Quelle: CNBC (23.01.2026), Counterpoint Research</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">Feb 2026 – Xiaomi YU7 SUV: Meistverkauftes SUV in China <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Xiaomis YU7 SUV verkaufte sich im Februar doppelt so gut wie das Tesla Model Y – starkes Nachfragesignal für das Midsize-Premium-SUV-Segment. Quelle: CNBC (12.02.2026)</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">Feb 2026 – Kanada reduziert Importzoll auf chinesische EVs von 100% auf 6,1% <span class="badge badge-yellow">Langfristig Positiv</span></div>
+        <div class="event-text">Premier Carney senkte Kanadas EV-Importzölle drastisch. Ermöglicht mittelfristig Xiaomis EV-Export in Nordamerika (Partnerschaft mit Ford möglich). Quelle: Stockanalysis.com (Feb 2026)</div>
+      </div>
+    </div>
+
+    <h3>Ebene 3: Makro</h3>
+    <div class="event-item">
+      <div class="event-dot dot-red"></div>
+      <div>
+        <div class="event-label">2026 – US-Zölle & Handelspolitik unter Trump <span class="badge badge-red">Negativ (indirektes Risiko)</span></div>
+        <div class="event-text">Xiaomi verkauft aktuell keine EVs in den USA, ist aber auf US-Technologie (Qualcomm-Chips, Google-Android) angewiesen. Eskalierender US-China-Handelskrieg und mögliche CHIPS-Act-Beschränkungen könnten Xiaomis Chip-Sourcing belasten. Quelle: MEXC News, Reuters</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">2026 – Chinesische Makroumgebung: Wachstumsverlangsamung <span class="badge badge-yellow">Neutral-Negativ</span></div>
+        <div class="event-text">Chinas BIP-Wachstum verlangsamt sich; EV-Subventionen liefen Ende 2025 aus. Gleichzeitig starke staatliche Unterstützung für Tech-Champion-Unternehmen wie Xiaomi (MSCI ESG Rating A). Quelle: Various macro sources, Jan-Feb 2026</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">Feb 2026 – UBS erhöht Allokation in chinesische Tech-Aktien <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">UBS-Analysten erhöhten ihre Allokationen in chinesische Technologieaktien nach dem jüngsten Kursrückgang – bullishes Signal für institutionelle Nachfrage. Quelle: Investing.com (Feb 2026)</div>
+      </div>
+    </div>
+
+    <div class="source">Alle Quellen: Reuters, Bloomberg, CNBC, Gasgoo, CarNewsChina, TradingView, Xiaomi IR (Dez 2025 – März 2026)</div>
+  </div>
+</div>
+
+<!-- SECTION 9 -->
+<div class="section" id="s9">
+  <div class="section-header">
+    <div class="section-number">9</div>
+    <div class="section-title">Technische Analyse</div>
+    <div class="section-score">Score: 3/10</div>
+  </div>
+  <div class="section-body">
+    <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom: 16px;">
+      <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">33.14</div><div class="kpi-sub">52W-Tief!</div></div>
+      <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value red">~35.80</div><div class="kpi-sub">Darunter</div></div>
+      <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value red">~38.50</div><div class="kpi-sub">Darunter</div></div>
+      <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value red">~48.50</div><div class="kpi-sub">Weit darunter</div></div>
+      <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value orange">41.5</div><div class="kpi-sub">Neutral, Richtung OS</div></div>
+      <div class="kpi-card"><div class="kpi-label">52W High</div><div class="kpi-value">61.45</div><div class="kpi-sub">27.06.2025</div></div>
+      <div class="kpi-card"><div class="kpi-label">MACD (3M)</div><div class="kpi-value green">Kaufsignal</div><div class="kpi-sub">3-Monats-MA</div></div>
+    </div>
+
+    <h3>Aktueller Trend & Chart-Situation</h3>
+    <p>Die technische Situation von Xiaomi ist zum aktuellen Zeitpunkt (03.03.2026) klar bearish. Der Kurs liegt <strong>unterhalb aller relevanten Moving Averages</strong>: SMA 20 (~HKD 35,80), SMA 50 (~HKD 38,50) und SMA 200 (~HKD 48,50). Das bedeutet, dass der Kurs ca. 46% unter dem 200-Tage-Durchschnitt notiert – eine ausgeprägte technische Schwäche. Der übergeordnete Trend ist klar abwärts: Von HKD 61,46 (ATH, 27.06.2025) bis auf das heutige 52-Wochen-Tief von HKD 33,00 – ein Rückgang von fast exakt 46% in rund 8 Monaten.</p>
+
+    <p>Der RSI liegt bei 41,5 – noch nicht im überverkauften Bereich (<30), aber eindeutig in schwachem Territorium. Dies ist ein zweischneidiges Schwert: Einerseits besteht weiteres Abwärtspotenzial bis zur klassischen Überverkauft-Zone; andererseits ist der Kurs nach einem Rückgang von über 46% fundamental zunehmend attraktiv und könnte bei positivem Katalysator (z.B. starke Q4-2025-Zahlen am 24.03.2026) eine technische Erholung einleiten. Ein positives Signal: Der 3-Monats-MACD zeigt ein Kaufsignal, und ein Pivot-Bottom wurde am 04.02.2026 bei ~HKD 33,14 ausgebildet – seitdem +4,83%.</p>
+
+    <h3>Support & Resistance</h3>
+    <p>Der aktuelle Kurs von HKD 33,14 liegt <em>exakt</em> am 52-Wochen-Tief (HKD 33,00) – diese Zone ist die entscheidende Unterstützung. Ein Bruch darunter öffnet technisch das Feld für weitere Verluste in Richtung HKD 28–30. Erste Widerstände liegen bei HKD 36,18 und HKD 36,41 (kurzfristige Moving Averages), dann bei HKD 38,50 (SMA 50) und zuletzt bei HKD 48,50 (SMA 200).</p>
+
+    <h3>Volumen & Marktstruktur</h3>
+    <p>Das tägliche Handelsvolumen ist mit ~150 Millionen Aktien hoch, was eine hohe Liquidität signalisiert. Der Kursrückgang wurde von rückläufigem Volumen begleitet, was nach technischer Lehre das Abwärtsrisiko leicht moderiert ("Volume follows price"). Die Marktkapitalisierung liegt trotz des Rückgangs bei rund HKD 866 Mrd. – kein Small-Cap-Risiko.</p>
+
+    <p>Technischer Score <strong>3/10</strong>: Eindeutig schwaches Chart-Bild. Für kurzfristige Trader keine Kaufsituation. Für langfristige Investoren mit Fokus auf Fundamentaldaten liegt die Aktie an einem potenziell attraktiven Einstiegs­niveau (52W-Tief, signifikant oversolide Fundamentals).</p>
+
+    <div class="source">Quellen: Capital.com (10.02.2026), StockInvest.us (25.02.2026), investing.com (03.03.2026), TradingView (03.03.2026)</div>
+  </div>
+</div>
+
+<!-- SECTION 10 -->
+<div class="section" id="s10">
+  <div class="section-header">
+    <div class="section-number">10</div>
+    <div class="section-title">Risiken & Chancen</div>
+    <div class="section-score">Risiko-Score: 6/10</div>
+  </div>
+  <div class="section-body">
+
+    <h3>9a) Strukturelle & Zyklische Risiken</h3>
+
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">⚡ Chinesischer EV-Preiskampf & Marktabkühlung</div>
+        <div><span class="badge badge-red">Hoch</span> &nbsp; <span class="badge badge-orange">Finanzielle Auswirkung: Mittel-Hoch</span></div>
+      </div>
+      <div class="event-text">Der chinesische EV-Markt kämpft 2026 mit einem Ende der staatlichen Kaufprämien, intensivem Preiswettbewerb und Überkapazitäten. Sieben-Jahres-Null-Zins-Finanzierungen von BYD, Tesla und Xiaomi deuten auf Nachfrageschwäche hin. Falls Xiaomis EV-Margen von 25,5% auf 18-20% sinken, könnte der EV-Segmentgewinn deutlich schrumpfen. Wahrscheinlichkeit: Mittel (50%).</div>
+    </div>
+
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">💾 DRAM/NAND-Chip-Engpass 2026</div>
+        <div><span class="badge badge-red">Hoch</span> &nbsp; <span class="badge badge-orange">Finanzielle Auswirkung: Mittel</span></div>
+      </div>
+      <div class="event-text">Steigende Speicherchip-Kosten durch HBM-Nachfrage belasten Smartphone-, Tablet- und Notebook-Bruttomargen. Xiaomi-Management schätzte, dass 2026 ein herausforderndes Jahr für chinesische OEMs wird. Compressiert Smartphone-Marge von ~11% möglicherweise auf 8-9%. Wahrscheinlichkeit: Hoch (70%).</div>
+    </div>
+
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">🌐 Geopolitik: US-Chip-Restriktionen & China-Tech-Embargo</div>
+        <div><span class="badge badge-yellow">Mittel</span> &nbsp; <span class="badge badge-orange">Finanzielle Auswirkung: Hoch (falls eskaliert)</span></div>
+      </div>
+      <div class="event-text">Xiaomi ist auf US-Technologie angewiesen (Qualcomm Snapdragon für Premium-Geräte, Google Android Services international). Weitere Export-Beschränkungen könnten die internationale Smartphone-Wettbewerbsfähigkeit beschädigen. Xiaomi wurde 2021 kurzfristig auf die US-Militär-Blacklist gesetzt (später aufgehoben) – eine Wiederholung ist nicht ausgeschlossen. Wahrscheinlichkeit: Niedrig-Mittel (20-30%).</div>
+    </div>
+
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">🚗 EV-Sicherheitsrisiken & Reputationsschaden</div>
+        <div><span class="badge badge-yellow">Mittel</span> &nbsp; <span class="badge badge-orange">Finanzielle Auswirkung: Mittel</span></div>
+      </div>
+      <div class="event-text">Zwei fatale SU7-Unfälle 2025 haben Xiaomis Premium-Image beschädigt und den Regulator aktiviert. Lei Jun hat mit Transparenz und technischen Verbesserungen reagiert – aber weitere Zwischenfälle könnten das Vertrauen nachhaltig schädigen. Regulatory Recall wäre ein erheblicher Kostentreiber. Wahrscheinlichkeit: Niedrig (15% für weitere schwere Vorfälle).</div>
+    </div>
+
+    <h3>9b) AI/Tech-Disruptions-Risiko</h3>
+    <p>Xiaomi ist selbst ein KI-Angreifer, nicht primär ein KI-Opfer. Das Risiko: Konkurrenten wie Huawei (mit eigenem Kirin-Chip und HarmonyOS), OPPO und Apple könnten im Smartphone-AI-Segment schneller skalieren. Im EV-Bereich droht technologische Disruption durch autonomes Fahren (Huawei ADS, Tesla FSD) – hier ist Xiaomis ADAS-Stack noch nicht auf Augenhöhe. Das bullishe Szenario: Xiaomis eigener 3nm-Chip (2025 gelauncht) und die massiven R&D-Investitionen (RMB 30+ Mrd. 2025) bauen einen echten technologischen Burggraben auf. Das bärische Szenario: KI-native Smartphone-Alternativen wie Huawei Mate-Series oder Apple Intelligence kannibalisieren Xiaomis Premium-Segment in China.</p>
+
+    <h3>9c) Chancen</h3>
+    <p><strong>EV-Expansion außerhalb Chinas ab 2027:</strong> Europäischer Markt mit gemilderten EU-Zöllen und Kanada (6,1% Zoll statt 100%) bieten erhebliches Wachstumspotenzial. Ford-Kooperationsgespräche deuten auf strategischen US-Marktzugang hin. <strong>Internet-Services-Monetarisierung:</strong> 742 Millionen MAU bei nur RMB 9,4 Mrd. Quartalsumsatz entspricht einem ARPU von ~RMB 50/Quartal – erhebliches Upside-Potenzial. <strong>Smart Home Appliances Fabrik:</strong> Neue Fabrik mit 7 Mio. Einheiten Kapazität pro Jahr (Oct 2025 in Betrieb) ermöglicht weiteres IoT-Margenwachstum. <strong>Premium-Marktanteil in China:</strong> Xiaomis Anteil im RMB 4.000–6.000-Segment stieg auf 18,9% (+5,6 pp YoY) – strukturelle Premiumisierung setzt sich fort.</p>
+
+    <h3>9d) Red Flags & Dealbreaker</h3>
+    <p><strong>Red Flags (beobachten, aber keine Dealbreaker):</strong> Hoher Capex-Anstieg (+87% YoY in 9M 2025); Q2-2025-Umsatz-Miss signalisiert Lieferkettenbeschränkungen; Aktienkurs auf 52W-Tief trotz starker Fundamentaldaten (Sentiment-Problem). <strong>Dealbreaker (aktuell NICHT vorhanden):</strong> Kein US-Blacklisting; keine existenzielle Schuldenlast (D/E 10,39%); kein struktureller Nachfrageeinbruch im Kerngeschäft erkennbar.</p>
+
+    <div class="source">Quellen: CNBC (23.01.2026), CarNewsChina (26.02.2026), Gasgoo (02.03.2026), Counterpoint Research, IMD (16.02.2026)</div>
+  </div>
+</div>
+
+<!-- SECTION 11: SCORING -->
+<div class="section" id="s11">
+  <div class="section-header">
+    <div class="section-number">11</div>
+    <div class="section-title">Scoring-Übersicht</div>
+    <div class="section-score">Ø 7.0/10</div>
+  </div>
+  <div class="section-body">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Kategorie</th>
+            <th>Score</th>
+            <th>Visuell</th>
+            <th>Begründung</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Geschäftsmodell</strong></td>
+            <td>8/10</td>
+            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+            <td>Einzigartiges Tech+EV-Ökosystem, stark skalierbar, Multi-Revenue-Streams</td>
+          </tr>
+          <tr>
+            <td><strong>Burggraben</strong></td>
+            <td>7/10</td>
+            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+            <td>AIoT-Netzwerkeffekte stark, aber Brand und OS-Lock-in noch nicht Apple-Niveau</td>
+          </tr>
+          <tr>
+            <td><strong>Operative Entwicklung (4Q)</strong></td>
+            <td>8/10</td>
+            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+            <td>3/4 Quartale Beat; Rekordgewinne; EV erstmals profitabel; Beat-Ratio stark</td>
+          </tr>
+          <tr>
+            <td><strong>Wachstum</strong></td>
+            <td>9/10</td>
+            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+            <td>~30% Revenue-Wachstum, 70-80% Gewinnwachstum, organisch & multidimensional</td>
+          </tr>
+          <tr>
+            <td><strong>Bewertung</strong></td>
+            <td>8/10</td>
+            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+            <td>P/E 16.65x für 70%+ Gewinnwachstum; PEG ~0.22; historische Unterbewertung</td>
+          </tr>
+          <tr>
+            <td><strong>Cashflow & Margen</strong></td>
+            <td>7/10</td>
+            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+            <td>Solide, aber hoher Capex; Gewinnqualität gut; Buybacks positiv</td>
+          </tr>
+          <tr>
+            <td><strong>Risiken (invertiert)</strong></td>
+            <td>6/10</td>
+            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+            <td>EV-Preiskampf, Chip-Kosten, Geopolitik – reale, aber handhabbare Risiken</td>
+          </tr>
+          <tr>
+            <td><strong>Technische Analyse</strong></td>
+            <td>3/10</td>
+            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:30%"></div></div><span class="score-num">3</span></div></td>
+            <td>52W-Tief, unter allen MAs, Downtrend; kurzfristig kein Entry-Signal</td>
+          </tr>
+          <tr style="background:rgba(255,105,0,0.08);">
+            <td><strong>⌀ Gesamtscore</strong></td>
+            <td><strong>7.0/10</strong></td>
+            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%; background: linear-gradient(90deg, var(--primary), #ffd700);"></div></div><span class="score-num" style="color:var(--primary);">7.0</span></div></td>
+            <td>Fundamental attraktiv; technisch schwach; asymmetrisches Risk/Reward für LT-Investoren</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 12: FAZIT -->
+<div class="section" id="s12">
+  <div class="section-header">
+    <div class="section-number">12</div>
+    <div class="section-title">Fazit – Investment-These</div>
+  </div>
+  <div class="section-body">
+
+    <div class="bull-bear-grid">
+      <div class="bull-card">
+        <h4>🐂 Das Bullische Narrativ</h4>
+        <p style="font-size:14px; color: var(--text);">
+          Das bullische Narrativ basiert auf drei strukturellen Säulen: Erstens ist Xiaomis Profitabilitätswende fundamental und nicht zyklisch. Der bereinigte Nettogewinn der ersten neun Monate 2025 (RMB 32,8 Mrd.) übersteigt bereits das Gesamtjahresergebnis 2024 (RMB 27,2 Mrd.) – trotz massiver R&D-Reinvestition von RMB 23,5 Mrd. in nur neun Monaten. Die Bruttomarge erreichte mit 22,9% einen Rekordwert, getrieben von echter operativer Hebelwirkung: höher­margige Internet-Dienste (76,9% Marge) wachsen schneller als Smartphones, und die EV-Marge (25,5%) übertrifft BYDs Fahrzeugmarge nach nur 18 Monaten Serienproduktion.
+        </p>
+        <p style="font-size:14px; color: var(--text);">
+          Zweitens ist das AIoT-Ökosystem mit über 1 Milliarde vernetzter Geräte und 742 Millionen MAU ein noch stark untermonetarisierter Wert. Der aktuelle Internet-Services-ARPU von ~RMB 50/Quartal ist ein Bruchteil von Apples Services-Monetarisierung. Das gewaltige MAU-Wachstum (+8,2% YoY international) und der steigende Anteil der Übersee-Internet-Dienste (34,9%, Rekord) zeigen, dass Xiaomis Monetarisierungsmaschine erst warm läuft.
+        </p>
+        <p style="font-size:14px; color: var(--text);">
+          Drittens ist die Bewertung mit P/E 16,65x und PEG ~0,22 bei 70%+ Gewinnwachstum schlicht anomal günstig für ein Wachstumsunternehmen dieser Qualität. Der breite Analystenkon­sens sieht HKD 53,83 als fairen Wert (+62% Upside), Goldman Sachs HKD 47,50. Der Kurs befindet sich exakt am 52-Wochen-Tief und hat 46% vom ATH korrigiert – eine Bewertungskontraktion, die operativ vollkommen unbegründet ist.
+        </p>
+      </div>
+      <div class="bear-card">
+        <h4>🐻 Das Bärische Narrativ</h4>
+        <p style="font-size:14px; color: var(--text);">
+          Das bärische Narrativ konzentriert sich auf drei genuine Risikodimensionen: Erstens könnten der eskalierende EV-Preiskampf in China und das Ende der staatlichen Kaufprämien Xiaomis EV-Bruttomarge von 25,5% deutlich unter Druck setzen. Falls die Marge auf 18-20% fällt, verschwindet der Q3-2025-EV-Segment-Gewinn (RMB 0,7 Mrd.) wieder – und das EV-Segment würde erneut zum Verlustbringer. Xiaomis 2026-Lieferziel von 550.000 Einheiten wurde vom Markt als zu konservativ und enttäuschend bewertet.
+        </p>
+        <p style="font-size:14px; color: var(--text);">
+          Zweitens stellen steigende DRAM/NAND-Chip-Kosten (durch HBM-Nachfrage von AI-Chips) eine konkrete Bedrohung für die Smartphone-Marge (~11%) dar. Xiaomis Management selbst warnte, dass 2026 für chinesische OEMs herausfordernd wird. Eine Kompression der Smartphone-Marge auf 8-9% würde ~RMB 5-8 Mrd. Bruttogewinnpotenzial vernichten. Die Aktie handelt trotz 46% Kursrückgang immer noch nicht auf historischen Tief-Multiples – das legt nahe, dass der Markt weitere negative Revisionen einpreist.
+        </p>
+        <p style="font-size:14px; color: var(--text);">
+          Drittens ist die technische Situation eindeutig bearish: Kurs unter allen gleitenden Durchschnitten, 52-Wochen-Tief heute, kein klares Bodenbildungsmuster. Der saisonal schwache Q4 EV (Jan/Feb Einbruch) kombiniert mit möglicher Dividendenenttäuschung am 24.03.2026 könnte weitere Verkaufswellen auslösen. Geopolitische Risiken (US-Chip-Embargo, Indien-Markt-Restriktionen) sind schwer kalkulierbar, aber real.
+        </p>
+      </div>
+    </div>
+
+    <h3>Eigene Einschätzung</h3>
+    <p>Das bullische Narrativ ist überzeugender, aber das bärische enthält valide kurzfristige Risikopunkte. Xiaomis operative Performance der letzten vier Quartale ist schlicht außergewöhnlich: Das Unternehmen liefert Rekordgewinne, expandiert die Bruttomarge auf Rekordniveau, hat seine EV-Sparte in nur 18 Monaten zur Profitabilität gebracht (schneller als Tesla seinerzeit) und baut gleichzeitig das größte Consumer-IoT-Ökosystem der Welt. Diese Leistung wird am Kapitalmarkt aktuell mit einer P/E von 16,65x bewertet – das entspricht in etwa einem reifen, langsam wachsenden Industrieunternehmen.</p>
+
+    <p>Die kurzfristigen Risiken (EV-Preiskampf, Chip-Kosten, technisches Chartbild) sind real und sollten nicht unterschätzt werden. Ein konservativer Investor wartet auf ein erstes technisches Stabilisierungssignal (Kurs nachhaltig über SMA 20 bei HKD 35,80) oder auf den Katalysator der Q4-2025-Jahresergebnisse am 24.03.2026. Das Risk/Reward ist asymmetrisch: Das fundamentale Downside bei HKD 33 ist begrenzt (Support am 52W-Tief), während das Upside von HKD 47-54 einem Potenzial von +42-63% entspricht – auf 12-18 Monate.</p>
+
+    <p>Ich könnte falsch liegen, wenn: (a) der chinesische EV-Preiskampf 2026-2027 die Margen tiefer und länger drückt als erwartet; (b) geopolitische Eskalation Xiaomis Zugang zu westlichen Chip-Technologien einschränkt; oder (c) Xiaomi den Reputationsschaden durch die SU7-Sicherheitsvorfälle unterschätzt hat und die Q4-2025-Delivery-Zahlen enttäuschen.</p>
+
+    <hr class="divider">
+
+    <h3>Zeithorizont-Einschätzung</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Kurzfristig (0–6M)</strong></td>
+            <td>Q4/2025 Jahresergebnisse (24.03.2026), mögliche Dividende, starke März-EV-Deliveries</td>
+            <td>Technischer Downtrend, Chip-Kosten, EV-Preiskampf</td>
+            <td><span class="badge badge-yellow">Tranchiert / Abwarten</span></td>
+          </tr>
+          <tr>
+            <td><strong>Mittelfristig (6–24M)</strong></td>
+            <td>EV-Expansion Europa (2027), Premium-Smartphone-Marktanteil, IoT-Monetarisierung</td>
+            <td>China-Makro, geopolitisches Risiko</td>
+            <td><span class="badge badge-green">Kaufen</span></td>
+          </tr>
+          <tr>
+            <td><strong>Langfristig (2–5J)</strong></td>
+            <td>AIoT-Monetarisierung, EV-Profitabilität, globales Ökosystem</td>
+            <td>Struktureller Wettbewerb Apple/Huawei</td>
+            <td><span class="badge badge-green">Kaufen & Halten</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Kernthese</h3>
+    <p>Xiaomi ist eines der wenigen Technologieunternehmen weltweit, das gleichzeitig drei starke Wachstumsthemen in sich vereint: die globale Premiumisierung im Smartphone-Markt, den chinesischen EV-Boom und die IoT-Ökosystem-Monetarisierung. Die Bewertung auf einem 52-Wochen-Tief bei P/E 16,65x auf ein Unternehmen mit 70%+ Gewinnwachstum bietet ein asymmetrisches Risk/Reward. Die technische Schwäche schafft eine Einstiegsmöglichkeit für Investoren mit 2–5-Jahres-Horizont.</p>
+
+    <div class="rating-box">
+      <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+      <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">HKD 47–55</div></div>
+      <div class="rating-item"><label>Zeithorizont</label><div class="val">2–5 Jahre</div></div>
+      <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–10% (HKD 30)</div></div>
+      <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+42–66% (HKD 47–55)</div></div>
+      <div class="rating-item"><label>Risk/Reward</label><div class="val green">~1:5 bis 1:7</div></div>
+    </div>
+
+    <h3>Was falsifiziert die These?</h3>
+    <div class="trigger-grid">
+      <div class="trigger-card sell">
+        <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+        <ul class="trigger-list">
+          <li>EV-Bruttomarge fällt unter 18% für zwei aufeinanderfolgende Quartale → strukturelle Margenschwäche</li>
+          <li>Xiaomi auf US-Entity-List / Blacklist → sofort reduzieren</li>
+          <li>Q4-2025-Jahresergebnisse (24.03.2026): bereinigter Jahresgewinn unter RMB 38 Mrd. → deutliche Enttäuschung</li>
+          <li>Kurs bricht nachhaltig unter HKD 28 → weiteres Abwärtsmomentum</li>
+        </ul>
+      </div>
+      <div class="trigger-card buy">
+        <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+        <ul class="trigger-list">
+          <li>Q4-2025 Jahresergebnisse (24.03.2026) zeigen bereinigten Jahresgewinn über RMB 42 Mrd. → Nachkaufen</li>
+          <li>EV-Monatslieferungen überschreiten 50.000+ in Q2 2026 → strukturelle EV-Nachfrage bestätigt</li>
+          <li>Erstmalige Dividende angekündigt → Katalysator für institutionelle Käufer</li>
+          <li>Technischer Kursausbruch über SMA 50 (HKD 38,50) mit hohem Volumen → Entry-Signal</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Welcher Anlegertyp passt?</h3>
+    <div class="investor-grid">
+      <div class="investor-yes">
+        <h5>✅ Geeignet für</h5>
+        <ul>
+          <li>Growth Investors (2–5 Jahre Horizont)</li>
+          <li>Quality Growth Investoren (starke Fundamentaldaten)</li>
+          <li>Contrarian Investoren (antizyklisch beim 52W-Tief)</li>
+          <li>China-Tech-Spezialisten mit Risikotoleranz</li>
+          <li>Emerging Market Tech Fonds</li>
+        </ul>
+      </div>
+      <div class="investor-no">
+        <h5>❌ NICHT geeignet für</h5>
+        <ul>
+          <li>Value Investoren (keine Dividende, Wachstumspremium)</li>
+          <li>Income Investoren (keine stabile Dividende)</li>
+          <li>Kurzfristige Trader (charttechnisch bearish)</li>
+          <li>Investoren mit geringer China-Risikobereitschaft</li>
+          <li>Sicherheitsorientierte Anleger (Geopolitik-Risiko)</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Empfohlener Einstieg</h3>
+    <div class="table-wrap">
+      <table class="einstieg-table">
+        <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+        <tbody>
+          <tr><td>Konservativ</td><td><span class="badge badge-yellow">Warten auf Stabilisierung</span></td><td>Abwarten auf: (1) Kurs über HKD 35,80 (SMA 20) oder (2) positive Q4-2025-Überraschung am 24.03.2026</td></tr>
+          <tr><td>Moderat</td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>30% Position jetzt (52W-Tief), 70% nach Q4-Bestätigung oder technischem Ausbruch</td></tr>
+          <tr><td>Aggressiv</td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Risk/Reward 1:5–7 bei 52W-Tief; klares Upside-Potenzial +42-66%</td></tr>
+          <tr><td>Langfristig (5J+)</td><td><span class="badge badge-green">Kaufen & Halten</span></td><td>AIoT-Ökosystem + EV-Expansion = strukturelles Wachstumsthema für das Jahrzehnt</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- SECTION 13: OUTLOOK -->
+<div class="section" id="s13">
+  <div class="section-header">
+    <div class="section-number">13</div>
+    <div class="section-title">Outlook – Die 3 wichtigsten anstehenden Events</div>
+  </div>
+  <div class="section-body">
+
+    <div class="outlook-card">
+      <h4>📊 Event 1: Q4 2025 Jahresergebnisse – 24. März 2026</h4>
+      <p>Dies ist der wichtigste kurzfristige Katalysator. Der Markt hat hohe Erwartungen nach einem außergewöhnlichen FY2025. Zentraler Fokus: (1) Bereinigte Nettogewinn für Q4/FY2025; (2) EV-Deliveries und Marge im Q4; (3) Ausblick auf 2026 EV-Ziele; (4) Erstmalige Dividende?</p>
+      <div class="when-then">
+        <strong>Wenn:</strong> FY2025 bereinigter Jahresgewinn ≥ RMB 43 Mrd. UND EV-Q4-Bruttomarge ≥ 22% UND Management bekräftigt 550.000+ EV-Ziel 2026 → <strong>Nachkaufen bis 15% der Zielposition</strong>. Signal für strukturelle Profitabilitätsstärke und robuste EV-Nachfrage.
+        <br><br>
+        <strong>Wenn:</strong> FY2025 bereinigter Jahresgewinn unter RMB 38 Mrd. ODER EV-Marge Q4 unter 18% → <strong>Bestehende Position um 30–40% reduzieren</strong>. Warnsignal für schwächeren EV-Skalierungseffekt und erhöhte Chipkosten-Belastung.
+      </div>
+    </div>
+
+    <div class="outlook-card">
+      <h4>🚗 Event 2: Monatliche EV-Deliveries März–Juni 2026 (fortlaufend)</h4>
+      <p>Xiaomi hatte im Januar 2026 über 39.000 Fahrzeuge ausgeliefert, im Februar 2026 saisonbedingt nur 20.000 (Mondneujahr + Fabrikumrüstung auf neue SU7-Generation). Der kritische Test ist, ob Xiaomi ab März 2026 wieder auf 40.000+ pro Monat kommt und das 550.000-Jahres­ziel realistisch angeht (~46.000 Auslieferungen pro Monat im Durchschnitt benötigt).</p>
+      <div class="when-then">
+        <strong>Wenn:</strong> März–April 2026 monatliche Deliveries ≥ 40.000 Einheiten UND YU7 SUV-Nachfrage hält an → <strong>Klares Kaufsignal</strong>. Bestätigt strukturelle EV-Nachfrage und eliminiert den saisonalen Delivery-Einbruch als Risiko. Preis-Upside-Potenzial: HKD 40–45 kurzfristig.
+        <br><br>
+        <strong>Wenn:</strong> Deliveries März–April 2026 stagnieren unter 30.000 für zwei aufeinanderfolgende Monate → <strong>Vorsicht, Position nicht aufstocken</strong>. Könnte auf strukturelle Produktionsprobleme oder nachlassende Nachfrage im Premium-EV-Segment hinweisen.
+      </div>
+    </div>
+
+    <div class="outlook-card">
+      <h4>🌍 Event 3: EV-Internationalisierung – Europäischer Markteintritt 2027 (Vorankündigung erwartet H2 2026)</h4>
+      <p>Lei Jun hat angekündigt, dass Xiaomi EVs erst 2027 außerhalb Chinas verkauft werden sollen. Die Vorbereitungsphase (Zulassungsverfahren, Händlernetz, Logistik) wird voraussichtlich in H2 2026 sichtbar. Canada hat bereits die Importzölle auf 6,1% gesenkt; EU-Zölle auf chinesische EVs wurden moderiert. Ford-Kooperationsgespräche für US-Fertigung sind ein Wildcard.</p>
+      <div class="when-then">
+        <strong>Wenn:</strong> Xiaomi gibt in H2 2026 konkrete Ankündigung für EU-Marktstart (Partnerschaft, Händlernetz, Typgenehmigung) → <strong>Signifikanter Neubewertungskatalysator</strong>. Der europäische EV-Markt mit 4,9 Mio. Einheiten p.a. würde Xiaomis adressierbaren Markt verdoppeln. Rating-Upgrade auf Ø-Analystenkon­sens (HKD 53+) möglich.
+        <br><br>
+        <strong>Wenn:</strong> EU-Markteintritt auf 2028+ verschoben ODER Ford-Gespräche scheitern → <strong>Keine direkte Sell-Empfehlung</strong>, aber den China-only-EV-Diskurs neu bewerten. In diesem Szenario bleibt Xiaomis EV-Wachstum stärker von der chinesischen Nachfragekurve abhängig – erhöht das Konzentrationsrisiko.
+      </div>
+    </div>
+
+    <div class="source">
+      Quellen: Bloomberg (03.01.2026), Reuters (01.03.2026), CNBC (12.02.2026), Financial Times (Jan 2026), Xiaomi IR (27.02.2026), MEXC News (Jan 2026), TipRanks (24.02.2026)
+    </div>
+  </div>
+</div>
+
+<!-- DISCLAIMER -->
+<div class="disclaimer">
+  <strong>⚠️ Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken und stellt keine Anlageberatung dar. Alle Investitionsentscheidungen sollten auf Basis einer eigenen Analyse und ggf. unter Hinzuziehung eines zugelassenen Finanzberaters getroffen werden. Vergangenheitsdaten sind kein verlässlicher Indikator für zukünftige Entwicklungen. Stand: 03. März 2026. Der Autor dieser Analyse hält möglicherweise Positionen in genannten Wertpapieren.
+  <br><br>
+  <strong>Quellen-Übersicht:</strong> Xiaomi IR (ir.mi.com), Reuters, Bloomberg, CNBC, investing.com, TradingView, Capital.com, CarNewsChina, Gasgoo, CMB International Research, Pandaily, Counterpoint Research, Yahoo Finance, TipRanks · Alle Preisangaben in HKD, alle Finanzgrößen in RMB sofern nicht anders angegeben.
+</div>
+
+</div><!-- /main -->
+</body>
+</html>
