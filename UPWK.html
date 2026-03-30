@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UPWK – Aktienanalyse Canvas v2.2</title>
+  <style>
+    :root {
+      --primary: #FF6900;
+      --primary-dark: #cc5400;
+      --bg: #0f0f12;
+      --bg-card: #1a1a1f;
+      --bg-card2: #22222a;
+      --border: #2e2e38;
+      --text: #e8e8ec;
+      --text-muted: #888898;
+      --text-dim: #555566;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --teal: #14b8a6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+    .header {
+      background: linear-gradient(135deg, #1a0800 0%, #2a1000 40%, #0f0f12 100%);
+      border-bottom: 1px solid var(--primary);
+      padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;
+    }
+    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .header-left h1 span { color: var(--primary); }
+    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    .header-right { text-align: right; }
+    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+    .price-change.up   { background: rgba(34,197,94,0.15); color: var(--green); }
+    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+    .nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100; }
+    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+    .kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .kpi-value.green  { color: var(--green); }
+    .kpi-value.red    { color: var(--red); }
+    .kpi-value.orange { color: var(--primary); }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .section-title  { font-size: 16px; font-weight: 700; color: white; }
+    .section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+    .section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+    .section-body   { padding: 20px 24px; }
+    p { margin-bottom: 12px; color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+    h3:first-child { margin-top: 0; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,105,0,0.04); }
+    .beat    { color: var(--green);  font-weight: 600; }
+    .miss    { color: var(--red);    font-weight: 600; }
+    .neutral { color: var(--yellow); font-weight: 600; }
+    .badge        { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
+    .badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .badge-blue   { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .badge-orange { background: rgba(255,105,0,0.15);  color: var(--primary); }
+    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+    .event-item:last-child { border-bottom: none; }
+    .event-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+    .dot-green  { background: var(--green); }
+    .dot-red    { background: var(--red); }
+    .dot-yellow { background: var(--yellow); }
+    .event-label { font-weight: 600; color: white; }
+    .event-text  { font-size: 14px; color: var(--text); }
+    .risk-item   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px; }
+    .risk-title  { font-weight: 600; color: white; font-size: 14px; }
+    .score-bar       { display: flex; align-items: center; gap: 10px; }
+    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .score-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #ff9500); }
+    .score-num       { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bear-card h4 { color: var(--red);   margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .rating-box { background: linear-gradient(135deg, rgba(255,105,0,0.12), rgba(255,105,0,0.04)); border: 1px solid rgba(255,105,0,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+    .rating-item .val  { font-size: 20px; font-weight: 800; color: white; }
+    .rating-item .val.buy  { color: var(--green); }
+    .rating-item .val.hold { color: var(--yellow); }
+    .rating-item .val.sell { color: var(--red); }
+    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+    .trigger-card      { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .trigger-card h5   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .trigger-card.buy  h5 { color: var(--green); }
+    .trigger-card.sell h5 { color: var(--red); }
+    .trigger-list    { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
+    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    @media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+    .investor-no  { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-no  h5 { color: var(--red);   font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+    .investor-no  li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+    .geo-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+    .geo-card   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .geo-pct    { font-size: 20px; font-weight: 700; color: white; }
+    .geo-note   { font-size: 12px; color: var(--text-muted); }
+    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+    .outlook-card .when-then strong { color: var(--primary); }
+    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+    .source a { color: var(--text-dim); }
+    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+    .divider   { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .pill      { display: inline-block; background: rgba(255,105,0,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+    .horizon-table tr td:first-child { font-weight: 600; color: white; width: 150px; }
+    .horizon-table tr td:nth-child(2) { color: var(--primary); font-weight: 600; width: 120px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Upwork <span>UPWK · NASDAQ</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 04. März 2026 · NASDAQ · Sektor: Tech / Online-Marketplace</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">Freelance Marketplace</span>
+      <span class="badge badge-blue">Enterprise / Lyfted</span>
+      <span class="badge badge-green">AI-Enabled Work</span>
+      <span class="badge badge-yellow">Turnaround-These</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$ 13.13</div>
+    <div class="price-meta">Schlusskurs 02. März 2026 · NASDAQ</div>
+    <div class="price-change down">▼ −37.3% (1 Monat)</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $11.13 – $22.84 · ATH: $64.49 (Jul 2021)</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Kurs</div>
+      <div class="kpi-value red">$13.13</div>
+      <div class="kpi-sub">USD · 02.03.2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Marktkapitalisierung</div>
+      <div class="kpi-value">$1,71 Mrd.</div>
+      <div class="kpi-sub">130,4 Mio. Aktien</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">EV / Adj. EBITDA</div>
+      <div class="kpi-value green">6,4×</div>
+      <div class="kpi-sub">TTM · sehr günstig</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">P/E (normalisiert)</div>
+      <div class="kpi-value green">11,2×</div>
+      <div class="kpi-sub">Morningstar, Feb 2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Bruttomarge</div>
+      <div class="kpi-value green">78%</div>
+      <div class="kpi-sub">Rekord FY 2025</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">FCF (2025)</div>
+      <div class="kpi-value green">$223 Mio.</div>
+      <div class="kpi-sub">FCF-Marge ~28%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Nächste Earnings</div>
+      <div class="kpi-value orange">Mai 2026</div>
+      <div class="kpi-sub">Q1 2026 Ergebnisse</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Konsens Zielkurs</div>
+      <div class="kpi-value">$21,00</div>
+      <div class="kpi-sub">Analyst Ø (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 1 -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Das Plattformmodell</h3>
+      <p>Upwork betreibt den weltweit größten Online-Marktplatz für Wissensarbeit, auf dem Unternehmen qualifizierte Freelancer, Agenturen und auf Projektbasis arbeitende Fachkräfte finden und bezahlen können. Das Unternehmen wurde 2013 durch die Fusion von Elance und oDesk gegründet und ist seit Oktober 2018 an der NASDAQ notiert. Die Plattform bedient sowohl Klein- und Mittelbetriebe (SMBs) als auch Fortune-500-Konzerne und deckt über 10.000 Fähigkeiten ab, von Softwareentwicklung über KI-gestützte Dienstleistungen bis hin zu Marketing und Design.</p>
+      <p>Das Geschäftsmodell ist zweiseitig und marktplatzbasiert: Upwork verdient über einen Gross Services Volume (GSV)-basierten Ansatz, bei dem eine prozentuale Servicegebühr auf jede abgewickelte Transaktion erhoben wird. Seit 2024 beträgt die einheitliche Freelancer-Gebühr 10% des abgerechneten Betrags (zuvor gestaffelt bis 20%). Clientseitig wird über Abonnements (Upwork Basic, Plus, Business Plus, Enterprise) sowie transaktionsbasierte Gebühren monetarisiert. Der GSV lag 2025 bei über 4 Milliarden US-Dollar, was einem annualisierten Take Rate von rund 19% entspricht.</p>
+      <p>Das Unternehmen hat in den letzten drei Jahren eine tiefgreifende strategische Transformation durchlaufen: weg vom rein transaktionalen Freelance-Marktplatz hin zu einer umfassenden "Human + AI"-Plattform. Wesentliche Elemente sind das SMB-Angebot "Business Plus" mit ~2,5-fachem Spend-Niveau des Marktplatzdurchschnitts, sowie die 2025 lancierte Enterprise-Tochter "Lyfted", die über Akquisitionen (Bubty B.V. und Ascen) den gesamten Lebenszyklus des kontingenten Arbeitskräftemanagements abdeckt. Das Zielsegment des Gesamtmarkts beläuft sich auf 1,3 Billionen USD (flexible digitale Wissensarbeit).</p>
+      <h3>Revenue-Streams & Kostenstruktur</h3>
+      <p>Die zwei Hauptsegmente sind Marketplace (Talent + Client-Gebühren) mit rund 87% des Umsatzes und Enterprise Solutions (Lyfted) mit rund 13%. Das Modell ist asset-light mit geringer Capex-Intensität (keine physische Infrastruktur), was sich in der rekordhohen Bruttomarge von 78% im Jahr 2025 widerspiegelt. Mit nur ca. 630 Vollzeitmitarbeitern erzielt Upwork einen Umsatz von 788 Mio. USD, was auf eine außergewöhnliche operative Hebelwirkung hindeutet. Die eingeführte KI-Funktionalität (Uma-Assistent, Ooma-Agent, AI-generierte Work Summaries) hat den Infrastrukturaufwand optimiert und gleichzeitig den GSV je Vertrag um 10% gesteigert.</p>
+      <div class="source">Quellen: Upwork Q4 2025 Earnings Release (09.02.2026); Upwork Investor Day Präsentation (18.11.2025); Upwork 10-K 2025 (filing erwartet März 2026); Backlinko / Upwork Revenue Stats (Jan 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 2 -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Netzwerkeffekte &amp; Switching Costs</h3>
+      <p>Upworks stärkstes Wettbewerbsmerkmal ist der zweiseitige Netzwerkeffekt: Je mehr hochqualifizierte Freelancer auf der Plattform tätig sind, desto attraktiver wird sie für Kunden – und umgekehrt. Mit 18 Millionen registrierten Freelancern aus über 180 Ländern ist dieser Effekt real, aber nicht unüberwindbar. Die verifizierten Arbeitshistorien und das kumulierte Kundenfeedback schaffen einen erheblichen Informationsvorteil gegenüber Neuzugängen, was die Wechselkosten für Bestandskunden erhöht. Insbesondere Enterprise-Kunden, die Upworks Compliance-, Onboarding- und Payment-Infrastruktur in ihre HR-Prozesse integriert haben, weisen hohe Switching Costs auf.</p>
+      <p>Die Marktführerschaft mit einem Marktanteil von rund 61% im Online-Freelance-Segment (Crunchbase) bietet Skalenvorteile in der Datenverarbeitung und KI-Inferenz. Upworks proprietary KI-Funktionen – darunter der Uma-Assistent und das HAPI (Human-Agent-Pair)-Benchmark – basieren auf Millionen von abgewickelten Projekten und sind schwer zu replizieren. Die Partnerschaft mit OpenAI für KI-Trainings- und Zertifizierungsangebote stärkt das Ökosystem zusätzlich. Der kumulative GSV-Datenschatz, der die Matching-Algorithmen trainiert, stellt einen proprietären Technologievorsprung dar.</p>
+      <p>Schwachstellen bestehen in der niedrigen Einstiegsbarriere für das Basisgeschäft: Fiverr, Toptal, LinkedIn-Marketplace und direkte Hiring-Kanäle konkurrieren für einfachere Projekte. Das niedrigmargige Transaktionsvolumen (Verträge unter 300 USD) schrumpft bereits durch KI-Automatisierung. Die Preissetzungsmacht ist begrenzt, da Freelancer bei zu hohen Plattformgebühren auf Konkurrenzplattformen ausweichen oder direkte Beziehungen mit Kunden aufbauen. Ein echter "Economic Moat" im Sinne eines nachhaltigen Wettbewerbsgrabens existiert im Enterprise-Segment (Lyfted) durch Compliance-Integration – im SMB/Basismarkt hingegen ist der Burggraben moderat.</p>
+      <div class="source">Quellen: Crunchbase Marktanteilsanalyse (2024); Upwork Q4 2025 Earnings Call Transcript (09.02.2026); Upwork Investor Day (18.11.2025); Finviz / StockStory Research (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 3 -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Beat-Ratio: 4/4 ✓</div>
+    </div>
+    <div class="section-body">
+      <p>Upwork hat in allen vier Quartalen des Geschäftsjahres 2025 die Konsensschätzungen bei EPS und EBITDA übertroffen. Die operative Entwicklung zeigt eine klare Verbesserung der Profitabilität und Monetarisierungseffizienz, auch wenn das GSV-Wachstum moderat bleibt. Die nächsten Quartalsergebnisse (Q1 2026) werden voraussichtlich im Mai 2026 veröffentlicht.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quartal</th>
+              <th>Revenue</th>
+              <th>YoY</th>
+              <th>Adj. EBITDA</th>
+              <th>EBITDA-Marge</th>
+              <th>Adj. EPS</th>
+              <th>EPS vs. Konsens</th>
+              <th>Kursreaktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q1 2025</strong></td>
+              <td>$192,7 Mio.</td>
+              <td class="neutral">+0,9%</td>
+              <td>$54,2 Mio.</td>
+              <td>28,1%</td>
+              <td>$0,27</td>
+              <td class="beat">Beat (+8%)</td>
+              <td class="beat">+2%</td>
+            </tr>
+            <tr>
+              <td><strong>Q2 2025</strong></td>
+              <td>$194,9 Mio.</td>
+              <td class="neutral">+1,6%</td>
+              <td>$59,7 Mio.</td>
+              <td>30,6%</td>
+              <td>$0,28</td>
+              <td class="beat">Beat (+7%)</td>
+              <td class="neutral">±0%</td>
+            </tr>
+            <tr>
+              <td><strong>Q3 2025</strong></td>
+              <td>$201,7 Mio.</td>
+              <td class="beat">+4,1%</td>
+              <td>$59,6 Mio.</td>
+              <td>29,6%</td>
+              <td>$0,36</td>
+              <td class="beat">Beat (+25,9%)</td>
+              <td class="beat">+13%</td>
+            </tr>
+            <tr>
+              <td><strong>Q4 2025</strong></td>
+              <td>$198,4 Mio.</td>
+              <td class="beat">+3,6%</td>
+              <td>$52,9 Mio.</td>
+              <td>26,6%</td>
+              <td>$0,36</td>
+              <td class="beat">Beat (+15,5%)</td>
+              <td class="miss">−25%*</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px; color: var(--text-muted);">* Die anfängliche Post-Earnings-Reaktion war +6% am 09.02.2026, gefolgt von einem starken Kursrückgang in den Folgewochen aufgrund der Q1 2026-Guidance, die mit $192–197 Mio. unterhalb der Konsenserwartung von $200,7 Mio. lag, sowie wegen Sorgen um die Enterprise-Übergangsphase.</p>
+      <h3>Management-Highlights</h3>
+      <p>CEO Hayden Brown betonte, dass 2025 das Abschlussjahr einer dreijährigen Unternehmenstransformation war. Die Rückkehr zum GSV-Wachstum erfolgte zwei Quartale früher als geplant. CFO Erica Gessert hob rekordhohe Jahresumsätze ($788 Mio.), eine Rekordjahres-EBITDA-Marge (29%) und freien Cashflow von $223 Mio. hervor. Im Q4 stieg der GSV aus AI-bezogenen Projekten auf annualisiert über $300 Mio. (+50% YoY), wobei AI-Kunden rund 3-fachen Spend verglichen mit dem Plattformdurchschnitt aufweisen. Im gleichen Quartal wurden mit dem Lyfted-Enterprise-Segment zwei neue Kunden gewonnen, und Business Plus verzeichnete +49% QoQ-Wachstum bei aktiven Kunden.</p>
+      <div class="source">Quellen: Upwork Q4 2025 Earnings Call Transcript – The Motley Fool (09.02.2026); StockTitan / Upwork Financial Results Press Release (09.02.2026); Finviz Deep Dive Q4 2025 (Feb 2026); TipRanks Earnings Summary (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 4 -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Revenue-Wachstumshistorie</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Jahr</th><th>Umsatz</th><th>Wachstum YoY</th><th>Adj. EBITDA</th><th>EBITDA-Marge</th></tr></thead>
+          <tbody>
+            <tr><td>2020</td><td>$373,6 Mio.</td><td class="beat">+24,3%</td><td>–</td><td>–</td></tr>
+            <tr><td>2021</td><td>$502,8 Mio.</td><td class="beat">+34,6%</td><td>–</td><td>–</td></tr>
+            <tr><td>2022</td><td>$618,3 Mio.</td><td class="beat">+23,0%</td><td>–</td><td>–</td></tr>
+            <tr><td>2023</td><td>$689,1 Mio.</td><td class="neutral">+11,5%</td><td>–</td><td>–</td></tr>
+            <tr><td>2024</td><td>$769,3 Mio.</td><td class="neutral">+11,6%</td><td>$167,5 Mio.</td><td>21,8%</td></tr>
+            <tr><td>2025</td><td>$788,0 Mio.</td><td class="miss">+2,4%</td><td>$226,0 Mio.</td><td>29,0%</td></tr>
+            <tr><td>2026E</td><td>$835–850 Mio.</td><td class="neutral">+6–8% (Guidance)</td><td>$240–250 Mio.</td><td>~29%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Der Wachstumstrend zeigt eine klare Dezeleration: von +35% (2021) über +11% (2024) auf nur +2,4% (2025). Ursächlich sind KI-bedingte Rückgänge in niedrigwertigen Kategorien (insbesondere Writing und Translation), der Abbau des kleinvolumigen Transaktionsgeschäfts (Verträge unter $300) sowie ein generell angespannter Arbeitsmarkt. Die strategische Entscheidung, Qualität statt Volumen zu priorisieren, ist strukturell richtig, dämpft aber kurzfristig das Wachstum. GSV per aktivem Client stieg hingegen auf Rekordhöhe von $5.129 (+7% YoY), was die Qualitätsverbesserung belegt. Für 2026 erwartet das Management mit 6–8% Umsatzwachstum eine beschleunigende Dynamik, wobei die Guidance stark auf das zweite Halbjahr gesetzt ist (Lyfted-Ramp).</p>
+      <h3>Geografische Verteilung (FY 2024)</h3>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">USA (Freelancer)</div>
+          <div class="geo-pct">25%</div>
+          <div class="geo-note">$111,7 Mio. · +28% ggü. 2022</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Indien (Freelancer)</div>
+          <div class="geo-pct">13%</div>
+          <div class="geo-note">$56,9 Mio. · schnellst wachsend</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Philippinen</div>
+          <div class="geo-pct">10%</div>
+          <div class="geo-note">$45,9 Mio. · stabil</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Int'l Clients</div>
+          <div class="geo-pct">28%</div>
+          <div class="geo-note">$91,4 Mio. · Client-Seite</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">USA (Clients)</div>
+          <div class="geo-pct">72%</div>
+          <div class="geo-note">Dominanter Client-Markt</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Restl. Welt</div>
+          <div class="geo-pct">~24%</div>
+          <div class="geo-note">Pakistan, UK, Ukraine u.a.</div>
+        </div>
+      </div>
+      <h3>Segmentwachstum &amp; Take Rate</h3>
+      <p>Der Marketplace-Take Rate stieg von 13,2% (2021) auf 18–19% (2025), was die verbesserte Monetarisierungsfähigkeit belegt und strukturell zu höherem Umsatz je GSV-Dollar führt. AI-bezogene GSV-Kategorien wachsen mit >50% YoY am schnellsten. Business Plus (SMB-Segment) verzeichnete +49% aktive Kunden QoQ in Q4 2025 und liegt Spend-seitig 2,5× über dem Marktplatzdurchschnitt. Enterprise/Lyfted ist bewusst in einer Übergangssituation (Q4 2025: –3% YoY), wird aber für H2 2026 mit +25% GSV-Wachstum prognostiziert. Das Wachstum ist somit strukturell vorhanden, aber auf H2 2026 und 2027 verlagert.</p>
+      <div class="source">Quellen: WallStreetZen UPWK Revenue History (2025); Backlinko Upwork Revenue Statistics (Jan 2026); Upwork Q4 2025 Earnings Call (09.02.2026); Upwork Investor Day Daten (18.11.2025); Upwork IR (investors.upwork.com)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 5 -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <p>Bei einem Kurs von $13,13 und einer Marktkapitalisierung von $1,71 Mrd. ist Upwork angesichts seiner Fundamentaldaten außergewöhnlich günstig bewertet. Der Enterprise Value liegt nach Abzug von rund $673 Mio. Cash & Wertpapieren bei nur ca. $1,4 Mrd. Das EV/adj. EBITDA (TTM, basierend auf $226 Mio.) berechnet sich damit auf 6,4×. Morningstar schätzt den fairen Wert auf $29,97 – ein implizites Upside von über 128% zum aktuellen Kurs.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>Aktuell (TTM)</th><th>Forward 2026E</th><th>5J-Median (ca.)</th><th>Einordnung</th></tr></thead>
+          <tbody>
+            <tr><td>P/E (normalisiert)</td><td>11,2×</td><td>~9,0×</td><td>~35–50×</td><td class="beat">Günstig</td></tr>
+            <tr><td>EV/Adj. EBITDA</td><td>6,4×</td><td>~5,8×</td><td>~25–40×</td><td class="beat">Sehr günstig</td></tr>
+            <tr><td>P/Sales (TTM)</td><td>2,2×</td><td>~2,0×</td><td>~5–8×</td><td class="beat">Günstig</td></tr>
+            <tr><td>EV/FCF</td><td>~6,3×</td><td>~5,8×</td><td>~30–50×</td><td class="beat">Sehr günstig</td></tr>
+            <tr><td>P/CF</td><td>~7,6×</td><td>~7,0×</td><td>~20–30×</td><td class="beat">Günstig</td></tr>
+            <tr><td>PEG (FWD)</td><td>~1,3×</td><td>~1,1×</td><td>~2–3×</td><td class="neutral">Fair</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Die extreme Bewertungskontraktion gegenüber den Höchstwerten 2021 (P/S ~20×) und selbst den 5-Jahres-Medianen spiegelt sowohl die Wachstumsverlangsamung als auch eine erhebliche Marktpessimismus-Prämie wider. Der aktuelle EV/EBITDA von 6,4× ist für ein Plattformunternehmen mit 78% Bruttomarge, 29% EBITDA-Marge und $223 Mio. FCF historisch einmalig günstig. Selbst eine moderate Neubewertung auf 10–12× EV/EBITDA würde einen Kurswert von $18–22 implizieren. Der Morningstar Fair-Value-Schätzung von $29,97 gegenüber dem aktuellen Kurs von $13,13 signalisiert ein "Deep Value"-Szenario. Analysten-Konsens sieht Zielkurse zwischen $15 (Minimum) und $27 (Goldman Sachs, Feb 2026), was weiteres Aufwärtspotenzial suggeriert.</p>
+      <div class="source">Quellen: Morningstar UPWK Valuation (28.02.2026); multiples.vc Upwork (18.02.2026); StockStory Research UPWK (Feb 2026); Yahoo Finance Key Statistics (03.2026); CNBC / TipRanks Analyst Targets (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 6 -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Cashflow &amp; Margenentwicklung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>FY 2024</th><th>FY 2025</th><th>Δ YoY</th></tr></thead>
+          <tbody>
+            <tr><td>Umsatz</td><td>$769,3 Mio.</td><td>$788,0 Mio.</td><td class="neutral">+2,4%</td></tr>
+            <tr><td>Bruttomarge</td><td>~76%</td><td>77,8%</td><td class="beat">+180 bps</td></tr>
+            <tr><td>Adj. EBITDA</td><td>$167,5 Mio.</td><td>$226,0 Mio.</td><td class="beat">+34,9%</td></tr>
+            <tr><td>Adj. EBITDA-Marge</td><td>21,8%</td><td>28,7%</td><td class="beat">+693 bps</td></tr>
+            <tr><td>Operating Income (GAAP)</td><td>~$54 Mio.</td><td>~$113 Mio.</td><td class="beat">+109%</td></tr>
+            <tr><td>FCF</td><td>~$185 Mio.</td><td>$223,1 Mio.</td><td class="beat">+21%</td></tr>
+            <tr><td>FCF-Marge</td><td>~24%</td><td>28,3%</td><td class="beat">+430 bps</td></tr>
+            <tr><td>Operating Cash Flow</td><td>–</td><td>$248,3 Mio.</td><td>–</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Bilanzqualität &amp; Kapitalallokation</h3>
+      <p>Upworks Cashflow-Qualität ist hervorragend: Das Unternehmen verfügte zum Jahresende 2025 über $673 Mio. Cash, Cash-Äquivalente und Wertpapiere und ist de facto schuldenfrei im operativen Sinne. Das ROE erreicht ~47% und spiegelt die hohe Asset-Effizienz des Plattformmodells wider. Im Jahr 2025 wurden $136 Mio. über Aktienrückkäufe an Aktionäre zurückgegeben (9,4 Mio. Aktien). Am 18. Februar 2026 wurde ein neues Aktienrückkaufprogramm über $300 Mio. genehmigt – angesichts einer Marktkapitalisierung von ~$1,71 Mrd. ein Signal außergewöhnlicher Managementzuversicht (Buyback-Yield von ~17,5%).</p>
+      <p>Die FCF-Konversionsrate (FCF/Adj. EBITDA) liegt bei ca. 99%, was bedeutet, dass der ausgewiesene adj. EBITDA nahezu vollständig in echten Cashflow überführt wird. Es gibt keine wesentlichen Capex-Aufwendungen, keine Schulden und keine Dividendenverpflichtung. Das Unternehmen generiert seine Earnings nicht durch buchhalterische Tricks, sondern durch echte Kundentransaktionen. Die einzige Schwachstelle ist die erhebliche Stock-Based Compensation (SBC), die in der GAAP-Betrachtung die Nettoergebnisse belastet.</p>
+      <div class="source">Quellen: Upwork Q4 2025 Earnings Release / Press Release (09.02.2026); Upwork $300M Buyback Announcement (18.02.2026); StockAnalysis.com UPWK Statistics (März 2026); Markets Daily Earnings Highlights (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 7 -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Unternehmen</th>
+              <th>Ticker</th>
+              <th>Umsatz 2025</th>
+              <th>Rev.-Wachstum</th>
+              <th>Adj. EBITDA-Marge</th>
+              <th>Market Cap</th>
+              <th>P/S TTM</th>
+              <th>EV/EBITDA</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:rgba(255,105,0,0.05);">
+              <td><strong>Upwork</strong></td>
+              <td><strong>UPWK</strong></td>
+              <td>$788 Mio.</td>
+              <td class="miss">+2,4%</td>
+              <td class="beat">29,0%</td>
+              <td>$1,71 Mrd.</td>
+              <td class="beat">2,2×</td>
+              <td class="beat">6,4×</td>
+            </tr>
+            <tr>
+              <td>Fiverr</td>
+              <td>FVRR</td>
+              <td>$430,9 Mio.</td>
+              <td class="neutral">+10,1%</td>
+              <td class="neutral">21,3%</td>
+              <td>~$450 Mio.</td>
+              <td class="beat">~1,0×</td>
+              <td>~5×</td>
+            </tr>
+            <tr>
+              <td>TaskUs</td>
+              <td>TASK</td>
+              <td>$1,18 Mrd.</td>
+              <td class="beat">+19,0%</td>
+              <td class="neutral">21,1%</td>
+              <td>~$1,1 Mrd.</td>
+              <td class="neutral">~0,9×</td>
+              <td class="neutral">~9×</td>
+            </tr>
+            <tr>
+              <td>Kforce</td>
+              <td>KFRC</td>
+              <td>~$1,33 Mrd.</td>
+              <td class="miss">−3,0%</td>
+              <td class="miss">~4–5%</td>
+              <td>~$600 Mio.</td>
+              <td class="neutral">~0,5×</td>
+              <td>~8×</td>
+            </tr>
+            <tr>
+              <td>LinkedIn (MSFT)</td>
+              <td>MSFT</td>
+              <td>~$17 Mrd.+</td>
+              <td class="beat">+9%</td>
+              <td class="beat">>35%</td>
+              <td>~$3 Bio. (MSFT)</td>
+              <td>–</td>
+              <td>–</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Qualitative Einordnung</h3>
+      <p>Upwork weist gegenüber seinen direkten Peers die höchste EBITDA-Marge auf (29% vs. 21% bei Fiverr und TaskUs) und hat damit eine deutlich überlegene operative Hebelwirkung für ein Plattformgeschäft. Der EV/EBITDA von 6,4× erscheint niedrig gegenüber TaskUs (9×) und Fiverr (5×), letztere hat jedoch für 2026 eine Umsatzreduktion angekündigt (Guidance: $380–420 Mio. vs. $430 Mio. 2025). Kforce ist als traditioneller Personaldienstleister mit physischem Personalmodell strukturell anders – niedrigere Margen, aber dividendenstark.</p>
+      <p>LinkedIn/Microsoft ist das eigentliche Bedrohungsszenario: Mit 1 Milliarde Mitgliedern und einem tief integrierten Jobmarkt-Ökosystem deckt LinkedIn das gehobene Professional-Segment ab. Allerdings adressiert LinkedIn eher Festanstellungen als kurzfristige Projektarbeit, und die flexible Workforce-Lösung (kontingente Arbeit, Compliance, internationale Zahlungen) bietet Upwork/Lyfted einen klar differenzierten Ansatz für Enterprise-Kunden.</p>
+      <p>TaskUs ist in gewisser Weise ein Wachstumsvergleich: 19% Revenue-Wachstum bei 21% EBITDA-Margin ist attraktiv, aber TaskUs ist ein BPO-Dienstleister (Outsourcing von Service-Leistungen) und kein zweiseitiger Marktplatz. Der Vergleich zeigt: Upwork hat strukturell höhere Margen, aber schlechteres Wachstum im vergleichbaren Zeitraum.</p>
+      <div class="source">Quellen: Fiverr Q4 2025 Earnings (18.02.2026); TaskUs Q4 2025 Earnings Call, Investing.com (Feb 2026); Kforce Q4 2025 Earnings (02.02.2026); StockTitan UPWK Financial Data (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 8 -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">09.02.2026 – Q4 &amp; FY 2025 Ergebnisse: Rekordumsatz &amp; EBITDA <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Upwork veröffentlichte Rekordergebnisse: $788 Mio. Umsatz (+2,4% YoY), $226 Mio. adj. EBITDA (29% Marge), $223 Mio. FCF. AI-bezogener GSV +50% YoY auf annualisiert $300 Mio. Quelle: Upwork IR Press Release (globenewswire.com)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">09.02.2026 – Q1 2026 Guidance unterhalb Konsens <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Guidance Q1 2026: Umsatz $192–197 Mio. (Konsens: $200,7 Mio.), adj. EBITDA $45–47 Mio. (23–24% Marge). Enterprise-Umsatz erwartet sequenziell rückläufig durch Lyfted-Übergangsphase. Kurs fiel in den Folgewochen um ~30%. Quelle: Motley Fool Q4 Earnings Transcript (09.02.2026)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">18.02.2026 – $300 Mio. Aktienrückkaufprogramm genehmigt <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Board genehmigt neues Aktienrückkaufprogramm in Höhe von $300 Mio. – entspricht ~17,5% der aktuellen Marktkapitalisierung. Zeigt Managementüberzeugung über Unterbewertung. Quelle: Upwork Press Release, globenewswire (18.02.2026)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Jan. 2026 – OpenAI-Partnerschaft für KI-Talentqualifizierung <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Upwork gab Partnerschaft mit OpenAI bekannt: Freelancer erhalten Zugang zu KI-Trainings- und Zertifizierungsprogrammen, die direkt auf der Plattform verfügbar sind. Erstes Partnerschaftsprojekt dieser Art. Quelle: Upwork IR / StockTitan (Jan 2026)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Nov. 2025 – Investor Day: Doppelstellige CAGR bis 2028 angestrebt <span class="badge badge-blue">Strategisch</span></div>
+          <div class="event-text">Upwork prognostizierte doppelstellige CAGR für Umsatz und adj. EBITDA durch 2028, getragen von AI, SMB-Wachstum (Business Plus) und Enterprise-Expansion (Lyfted). Zielmarge: ~35% adj. EBITDA langfristig. Quelle: Upwork Investor Day PR (18.11.2025)</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Feb. 2026 – Fiverr gibt umsatzrückläufige 2026-Guidance <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Fiverr (FVRR) meldete $430,9 Mio. Umsatz 2025 (+10%), gab aber für 2026 eine Guidance von nur $380–420 Mio. aus (–7% bis –12% YoY) aufgrund von KI-Disruption bei Basistasks. Zeigt strukturellen Druck auf den gesamten Sektor, aber auch Upworks relative Stärke im höherwertigen Segment. Quelle: Fiverr Q4 2025 Earnings (18.02.2026)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Feb. 2026 – AI-Agents-Markt wächst auf $120 Mrd. bis 2028 <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Drittpartei-Berichte (u.a. referenziert im Upwork Earnings Call) schätzen den AI-Agents-Markt für Unternehmensanwendungen auf rund $120 Mrd. bis 2028. Upwork positioniert sich als "operatives Rückgrat" für Human+AI-Arbeit. Quelle: Upwork Q4 Earnings Call / TipRanks (Feb 2026)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Jan. 2026 – Kforce leitet Trendwende nach 3 rückläufigen Jahren ein <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Kforce (KFRC) meldete Q4 2025 mit $332 Mio. (+3% sequenziell) und starkem Jahresstart 2026. Signalisiert mögliche Erholung im Tech-Staffing-Markt, was mittelfristig auch Upworks Enterprise-Kunden zugutekommen könnte. Quelle: Kforce Q4 Earnings Release (02.02.2026)</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Q1 2026 – Schleppender Arbeitsmarkt dämpft Hiring-Budgets <span class="badge badge-yellow">Negativ</span></div>
+          <div class="event-text">CEO Hayden Brown beschrieb den Arbeitsmarkt als "still sluggish" – Unternehmen verzögern Hiring-Entscheidungen bei makroökonomischer Unsicherheit. Dies betrifft sowohl Freelance-Auftragsvergabe als auch Enterprise-Hiring-Entscheidungen und begrenzt kurzfristiges Wachstum. Quelle: Upwork Q4 Earnings Call (09.02.2026)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Feb./März 2026 – Tech-Sektor unter Druck durch US-Zollsorgen &amp; Makrounsicherheit <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Breiterer Marktrückgang im Tech-Segment im Feb/März 2026 verstärkte den Kursrückgang bei UPWK. Small- und Mid-Cap-Tech mit Wachstumsverlangsamung besonders betroffen. Erhöhte Risikoaversion der Investoren drückt Multiple weiter. Quelle: CNBC Market Data (Mrz 2026)</div>
+        </div>
+      </div>
+      <div class="source">Quellen: Upwork IR / GlobeNewswire (Nov 2025–Feb 2026); Motley Fool / TipRanks Earnings Transcripts; CNBC Marktdaten (März 2026); Fiverr / Kforce / TaskUs IR-Veröffentlichungen (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 9 -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 3/10</div>
+    </div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom: 20px;">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">$13,13</div><div class="kpi-sub">02.03.2026</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value red">~$16,88</div><div class="kpi-sub">Kurs darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value red">$18,51</div><div class="kpi-sub">Kurs darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value red">$19,94</div><div class="kpi-sub">Kurs −34% darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value green">~25</div><div class="kpi-sub">Stark überverkauft</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value">$22,84</div><div class="kpi-sub">Kurs −42% darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value red">−0,58</div><div class="kpi-sub">Sell-Signal</div></div>
+      </div>
+      <h3>Chart-Situation</h3>
+      <p>Die technische Lage ist eindeutig bearish: Der Kurs befindet sich unterhalb aller wesentlichen gleitenden Durchschnitte (SMA 20, 50, 200) und hat seit dem 52-Wochen-Hoch von $22,84 rund 42% verloren. Der Rückgang von ~$19 (Post-Earnings Feb 9) auf ~$13 (März 4) in weniger als vier Wochen entspricht einem Kursverlust von rund 30% und kennzeichnet eine kapitulationsartige Bewegung. Alle Moving Averages auf dem Tages-Chart zeigen ein "Strong Sell"-Signal, mit 12 von 12 Sell-Signalen bei MAs von MA5 bis MA200.</p>
+      <p>Der RSI von ~25 (Stand: Anfang März 2026) signalisiert eine massive Überverkauft-Situation. Historisch haben stark überverkaufte Werte bei RSI unter 25–30 oft kurzfristige technische Erholungen erfahren, auch wenn der übergeordnete Trend negativ bleibt. Support-Level befinden sich bei $11,13 (52-Wochen-Tief) und rund $12 (psychologische Unterstützungszone). Resistance liegt bei $16–17 (SMA 20-Bereich) und $18,50 (SMA 50). Ein nachhaltiger Trendwechsel würde einen Schlusskurs über $18,50 (SMA 50) erfordern.</p>
+      <p>Das Volumenbild zeigt erhöhtes Verkaufsvolumen nach den Ergebnissen – ein klares Zeichen institutioneller Rebalancierung. Der Stochastic RSI von ~17 und der Stochastic Oscillator von ~17,5 bestätigen die extreme Überverkauft-Lage. Für langfristige Investoren mit 12–24-Monats-Horizont kann dies eine antizyklische Einstiegsgelegenheit darstellen; kurzfristige Trader sollten allerdings auf eine technische Stabilisierung warten.</p>
+      <div class="source">Quellen: Investing.com UPWK Technical Analysis (03.03.2026); TradingView UPWK Technicals (03.03.2026); MacroTrends UPWK Price History (Feb 2026); Morningstar UPWK Quote (02.03.2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 10 -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <h3>9a) Strukturelle &amp; zyklische Risiken</h3>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ KI-Disruption: Automatisierung von Kerntätigkeiten</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-yellow">Auswirkung: Mittel–Hoch</span></div>
+        </div>
+        <div class="event-text">KI-Tools (ChatGPT, Copilot, etc.) automatisieren Standardaufgaben in Writing, Translation, Coding und Design – die historischen Kernkategorien von Upwork. Bereits 2025 zeigt sich Umsatzrückgang in diesen Kategorien. Falls die KI-Substitution schneller als die Plattform-Neupositionierung verläuft, könnten 15–25% des bisherigen GSV strukturell wegfallen. Wahrscheinlichkeit: 40% im 3-Jahres-Horizont.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Lyfted-Integrations- und Ausführungsrisiko</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Lyfted als Enterprise-Plattform ist die zentrale Wachstumswette für 2026/2027. Der Einstieg in den $650-Mrd.-Enterprise-Contingent-Work-Markt gelingt nur, wenn Sales-Zyklen (12+ Monate), technische Integration und Kundenbindung wie geplant verlaufen. Bislang wurden nur 2 neue Kunden gewonnen. Falls die Pipeline im H2 2026 nicht wie erwartet skaliert, verfehlt Upwork seine Wachstumsziele deutlich. Wahrscheinlichkeit Verfehlung: ~35%.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Rückgang aktiver Kunden</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Trotz steigendem GSV je Klient sinkt die absolute Zahl aktiver Kunden (785K in Q4 2025, –6% YoY). Sollte die Strategie "Quality over Quantity" nicht durch ausreichend hochwertige Neukunden kompensiert werden, entsteht mittelfristig ein Volumenproblem. Plattform-Traffic (upwork.com) zeigte zuletzt –6,5% MoM Rückgang. Wahrscheinlichkeit: 30%.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Makroökonomischer Gegenwind</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Ein anhaltend schwacher Arbeitsmarkt oder eine Rezession würde Hiring-Budgets – sowohl bei SMBs als auch bei Enterprise-Kunden – reduzieren. Upwork ist konjunkturzyklisch sensitiv, trotz des Flexibilitätsvorteils gegenüber Festanstellungen. Szenario: –10% Umsatz in einer leichten Rezession.</div>
+      </div>
+
+      <h3>9b) AI-Risiko &amp; Technologische Disruption</h3>
+      <p>Das bullische AI-Szenario für Upwork: KI erhöht die Nachfrage nach hochqualifizierten Freelancern für KI-Implementierung, Prompt-Engineering, Daten-Annotation und Agenten-Überwachung. Dies spiegelt sich bereits im +50% YoY AI-GSV wider. Freelancer werden Produktivitätsmultiplikatoren durch KI und können dadurch hochwertigere Arbeit anbieten, was den Spend je Projekt steigert.</p>
+      <p>Das bärische AI-Szenario: Mittelfristig werden KI-Agenten in der Lage sein, vollständige Projekte autonom abzuwickeln, ohne Freelancer einzubeziehen. Upworks Abhängigkeit von menschlicher Arbeitsvermittlung würde dann strukturell untergraben. Unternehmen wie Anthropic, OpenAI und Google DeepMind entwickeln bereits agentische Systeme für Codierung, Analyse und kreative Arbeit – wenn diese in 3–5 Jahren reifen, könnte der addressierbare Markt für mittelmäßig qualifizierte Freelancer schrumpfen.</p>
+
+      <h3>9c) Chancen</h3>
+      <p>Der $300-Mio.-Aktienrückkauf bei aktuellem Kurs von $13 signalisiert massivstes Management-Commitment und reduziert den Float. Die Lyfted-Enterprise-Plattform erschließt einen $650-Mrd.-Markt, der bislang durch fragmentierte Lösungen bedient wird – Upwork könnte hier zum "Salesforce der Contingent Workforce" werden. Business Plus zeigt mit +49% Client-Wachstum QoQ eine vielversprechende SMB-Traktionskurve. Die OpenAI-Partnerschaft schafft einzigartigen Zugang zu KI-qualifiziertem Talent und differenziert gegenüber Fiverr und anderen Wettbewerbern.</p>
+
+      <h3>9d) Red Flags &amp; Dealbreaker</h3>
+      <p>Red Flags: (1) Kunden-Traffic-Rückgang auf upwork.com trotz Q4-Wachstum. (2) Enterprise-Umsatz rückläufig (-3% YoY Q4) während Lyfted noch kaum Umsatz generiert – eine gefährliche Übergangsphase. (3) SBC (Stock-Based Compensation) bleibt erheblich und verwässert GAAP-Ergebnisse. Dealbreaker: Keine existenzbedrohenden Risiken identifiziert – $673 Mio. Cash, kein Schuldendienst, profitabler FCF macht eine Insolvenz ausgeschlossen.</p>
+      <div class="source">Quellen: Upwork Q4 2025 Earnings Call (09.02.2026); StockStory UPWK Research (Feb 2026); Electroiq Upwork Statistics (Okt 2025); TipRanks Earnings Summary UPWK (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 11 -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">User-spezifische Analyse: Turnaround-These</div>
+      <div class="section-note">Konsistenzcheck Turnaround</div>
+    </div>
+    <div class="section-body">
+      <h3>Kernthese: Kann Upwork das Wachstum wieder beschleunigen?</h3>
+      <p>Die Turnaround-These basiert auf drei Säulen: (1) Rückkehr zum GSV-Wachstum durch AI-tailwinds und Business Plus, (2) Enterprise-Penetration via Lyfted für eine strukturell neue Umsatzgröße, und (3) Monetarisierungsverbesserung durch steigenden Take Rate (13% → 19%) und höheren Spend je Klient. Die vorliegende Analyse bestätigt diese These partiell – die Profitabilitätswende ist strukturell und vollständig vollzogen. Die Wachstumsbeschleunigung hingegen ist noch nicht ausreichend belegt und stärker auf H2 2026 konzentriert als der Markt erwartet hatte.</p>
+      <p>Für die These spricht: Die Beschleunigung von +0,9% (Q1 2025) auf +4,1% (Q3 2025) zeigt einen klaren Trend. AI-GSV wächst mit >50% YoY und hat eine kritische Masse von $300 Mio. annualisiert erreicht. Business Plus liefert +2,5× Spend und +49% QoQ Kunden – ein handfester Datenpunkt für das "Quality over Quantity"-Modell. Die 2026-Guidance von 6–8% Wachstum ist konsistent mit dem Trend und erscheint konservativ, da Lyfted noch kaum beiträgt.</p>
+      <p>Gegen die volle Turnaround-Bestätigung spricht: Q4 2025 zeigte sequenziell rückläufige Revenue gegenüber Q3 (von $201,7 auf $198,4 Mio.) – also eine Plateaubildung, nicht Beschleunigung. Q1 2026-Guidance unterhalb des Konsens signalisiert, dass der Turnaround noch nicht ausreichend Fahrt aufgenommen hat. Lyfted ist operativ noch in der Pilotphase – das Risiko der Ausführung ist real. Fazit zur These: Die Turnaround-These ist valide und fundamental unterstützt, aber sie liegt in der Zukunft (H2 2026 / 2027), nicht in der Gegenwart. Die aktuell hohe Bewertungsgunst (EV/EBITDA 6,4×) kompensiert dieses Zeitrisiko erheblich.</p>
+      <div class="source">Quellen: Eigene Analyse auf Basis Sektionen 1–10; Upwork Q3 & Q4 2025 Earnings (Nov 2025, Feb 2026); Finviz Q3/Q4 Deep Dives (2025)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 11 SCORING -->
+  <div class="section" id="s11-score">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Gesamt-Scoring</div>
+      <div class="section-score">Ø 6,1/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Score-Bar</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Geschäftsmodell</td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Asset-light, hohe Bruttomarge, zweiseitiger Marktplatz; aber Wachstumsverlangsamung und KI-Disruption in Kernsegmenten</td>
+            </tr>
+            <tr>
+              <td>Burggraben</td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Netzwerkeffekte vorhanden, aber moderate Einstiegsbarrieren im Basisgeschäft; Enterprise/Lyfted noch unbewiesen</td>
+            </tr>
+            <tr>
+              <td>Operative Entwicklung (4Q)</td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>4/4 Beats, Profitabilitätswende vollständig vollzogen; aber Wachstumsdynamik moderat und H1 2026 schwächer erwartet</td>
+            </tr>
+            <tr>
+              <td>Wachstum</td>
+              <td>5/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td>
+              <td>+2,4% FY2025 enttäuschend; Rebound auf 6–8% für 2026 geplant, aber stark H2-gewichtet und Ausführungsrisiken bei Lyfted</td>
+            </tr>
+            <tr>
+              <td>Bewertung</td>
+              <td>8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>EV/EBITDA 6,4× ist für eine 78%-Bruttomarge-Plattform mit $223 Mio. FCF außergewöhnlich günstig; Morningstar FV $29,97</td>
+            </tr>
+            <tr>
+              <td>Cashflow &amp; Kapitalqualität</td>
+              <td>8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>$223 Mio. FCF, $673 Mio. Cash, $300 Mio. Buyback-Programm, kein Schuldendienst; FCF-Konversion ~99%</td>
+            </tr>
+            <tr>
+              <td>Peer-Vergleich</td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Höchste EBITDA-Marge unter Peers; aber geringeres Umsatzwachstum als TaskUs; Fiverr kämpft stärker mit Disruption</td>
+            </tr>
+            <tr>
+              <td>Risiken (invertiert)</td>
+              <td>5/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td>
+              <td>KI-Disruption und Lyfted-Ausführungsrisiko sind real; kein existenzielles Risiko, aber mittelfristige Wachstumsunsicherheit hoch</td>
+            </tr>
+            <tr>
+              <td>Technische Analyse</td>
+              <td>3/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:30%"></div></div><span class="score-num">3</span></div></td>
+              <td>Strong Sell auf allen MAs; RSI ~25 (überverkauft); Kurs −34% unter SMA 200; keine technische Trendwende in Sicht</td>
+            </tr>
+            <tr style="background:rgba(255,105,0,0.08);">
+              <td><strong>Ø Gesamtscore</strong></td>
+              <td><strong>6,1/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track">
+                    <div class="score-bar-fill" style="width:61%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
+                  </div>
+                  <span class="score-num" style="color:var(--primary);">6,1</span>
+                </div>
+              </td>
+              <td>Attraktive Bewertung und starke Kapitalqualität kompensieren das moderate Wachstum; Turnaround läuft, ist aber noch nicht vollständig bewiesen</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEKTION 12 -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-note">Synthese Sektionen 1–11</div>
+    </div>
+    <div class="section-body">
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p>Das bullische Narrativ ruht auf drei robusten Säulen. Erstens: Die Profitabilitätswende ist nicht zyklisch, sondern strukturell. Die adj. EBITDA-Marge stieg von 21,8% (2024) auf 29% (2025), der FCF verdoppelte sich in zwei Jahren auf $223 Mio., und der $300-Mio.-Buyback signalisiert Managementüberzeugung. Die Bruttomarge von 78% ist für ein Marktplatzunternehmen exzellent und kaum angreifbar.</p>
+          <p>Zweitens: AI ist für Upwork ein Wachstumstreiber, keine Bedrohung. AI-bezogener GSV wuchs +50% YoY auf $300 Mio. annualisiert, AI-Kunden zahlen 3× den Plattformdurchschnitt, und die OpenAI-Partnerschaft schafft eine einzigartige Talentqualifizierungsinfrastruktur. Business Plus zeigt mit +49% Client-Wachstum QoQ, dass der "Quality over Quantity"-Pivot greift. Upworks Uma-Assistent und der proprietäre HAPI-Benchmark positionieren das Unternehmen als Leader im Human+AI-Arbeitssegment.</p>
+          <p>Drittens: Die Bewertung ist auf historischen Tiefstständen. EV/EBITDA von 6,4× bei $223 Mio. FCF, 78% Bruttomarge und $673 Mio. Nettocash ist für ein Tech-Plattformunternehmen außergewöhnlich günstig. Selbst eine bescheidene Rerating auf 10× EV/EBITDA – was für dieses Qualitätsprofil konservativ ist – würde einen Kurswert von ~$17–20 implizieren. Morningstar schätzt den fairen Wert auf $29,97. Der Buyback-Yield von 17,5% bei aktuellen Kursen ist für sich allein schon investierbar.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p>Das bärische Narrativ fokussiert auf drei substanzielle Risiken. Erstens: Das Kernwachstum ist gefangen. Mit +2,4% Umsatzwachstum 2025 und Q1-2026-Guidance von $192–197 Mio. (unterhalb Konsens) zeigt Upwork ein Unternehmen, das operativ stagniert. GSV ist trotz aller Repositionierung in 2022 wie 2025 um die $4 Mrd.-Marke geblieben. Fiverr, der direkte Wettbewerber, gibt 2026-Guidance mit fallenden Umsätzen – was systemische Nachfrageprobleme im Freelance-Markt signalisiert.</p>
+          <p>Zweitens: Lyfted ist die Existenzwette für die Wachstumsthese und noch kaum bewiesen. Bisher: zwei gewonnene Kunden, ein Pipeline-Aufbau in einem Markt mit 12+ Monaten Verkaufszyklen. Falls Lyfted H2 2026 keine signifikanten Enterprise-Wins liefert, fehlt der Katalysator für die 6–8%-Guidance und für eine substanzielle Kurs-Rerating. Die Marge-Guidance zeigt bereits die Kostenbelastung durch Lyfted-Integration (~2% EBITDA-Marginverwässerung 2026).</p>
+          <p>Drittens: Langfristig bedroht die KI-Automatisierung die Existenz eines Teils des Marktplatzes. Falls KI-Agenten in 3–5 Jahren kostengünstig Programmier-, Design- und Analysetasks autonom erledigen, schrumpft der adressierbare Freelance-Markt strukturell. Konkurrenten wie Direct-AI-Services (OpenAI API, Anthropic API) ermöglichen es Unternehmen, ohne Freelancer auszukommen. P/E von 11× ist nicht billig, wenn Wachstum dauerhaft unter 5% verbleibt.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Das bullische Narrativ überzeugt mehr – aber mit entscheidenden Einschränkungen. Die strukturelle Profitabilitätswende ist ein harter Fakt: $223 Mio. FCF, 78% Bruttomarge und $673 Mio. Nettocash sind nicht wegzudiskutieren. Die Bewertung bei EV/EBITDA 6,4× ist für dieses Qualitätsprofil außergewöhnlich attraktiv. Gleichzeitig ist das bärische Narrativ nicht zu ignorieren: Die Wachstumsbeschleunigung steht und fällt mit dem H2-2026-Lyfted-Ramp – ein echter, quantifizierbarer Ausführungsrisikofaktor.</p>
+      <p>Das Risk/Reward-Verhältnis erscheint asymmetrisch zugunsten des Bullen: Ein Scheitern der Lyfted-These würde den Kurs bei ~$11–12 (52-Wochen-Tief) decken, während eine Bestätigung des Wachstumspfades eine Rerating auf $20–28 auslösen könnte. Das entspricht einer Downside von ~−15% versus Upside von +50–100%. Das $300-Mio.-Buyback-Programm schafft technischen Preis-Support. Ich könnte falsch liegen, weil: Die KI-Disruption schneller als erwartet verläuft, oder weil das Enterprise-Segment nicht in der nötigen Zeitlinie skaliert.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap horizon-table">
+        <table>
+          <thead><tr><th>Horizont</th><th>Einschätzung</th><th>Katalysatoren</th><th>Risiken</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Kurzfristig (0–6 Mon.)</td>
+              <td class="neutral">Neutral–Schwach</td>
+              <td>RSI ~25 = technische Erholungsmöglichkeit; Q1 Buyback-Aktivität stützt Kurs</td>
+              <td>Weiter schwaches Makro; Q1-2026-Ergebnisse könnten erneut enttäuschen</td>
+            </tr>
+            <tr>
+              <td>Mittelfristig (6–24 Mon.)</td>
+              <td class="beat">Positiv</td>
+              <td>Lyfted-Ramp ab H2 2026; Business Plus Skalierung; Wachstumsbeschleunigung auf 8–12%</td>
+              <td>Ausführungsrisiken Lyfted; anhaltend schleppender Arbeitsmarkt</td>
+            </tr>
+            <tr>
+              <td>Langfristig (2–5 Jahre)</td>
+              <td class="beat">Bullish</td>
+              <td>$1,3 Bio. TAM; KI als Wachstumstreiber; double-digit CAGR angestrebt bis 2028</td>
+              <td>Strukturelle KI-Disruption; Wettbewerbsdruck durch LinkedIn/Microsoft</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>Upwork ist ein strukturell profitables, hochmarginiges Plattformunternehmen, das nach einem dreijährigen Transformationsprogramm am Anfang einer Wachstumsbeschleunigung steht – und dessen Aktie auf historischen Bewertungstiefs notiert. Der Schlüssel zur Turnaround-These liegt im erfolgreichen H2-2026-Ramp von Lyfted und der Skalierung von Business Plus. Bei einem EV/EBITDA von 6,4× und einem FCF-Yield von ~16% wird man für das Warten auf den Beweis reichlich entschädigt.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN / Tranchiert einsteigen</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$18 – $24</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–3 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">−15% (~$11)</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+70–100% ($22–26)</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:4,5</div></div>
+      </div>
+
+      <h3>Was falsifiziert die These?</h3>
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Lyfted gewinnt weniger als 5 zahlende Enterprise-Kunden bis Ende 2026 → Wachstumsthese bricht zusammen, Position deutlich reduzieren</li>
+            <li>Umsatzwachstum FY2026 verfehlt die eigene Guidance (&lt;4%) oder EBITDA-Marge fällt unter 24% → Rerating auf niedrigere Multiples wahrscheinlich</li>
+            <li>GSV-Wachstum kehrt auf negative Territory zurück → fundamentale Verschlechterung, Verkaufen</li>
+            <li>Aktienrückkäufe werden ausgesetzt → Konfidenz-Signal für Liquiditätsprobleme oder Investitionsbedarf</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Q2/Q3 2026 zeigt Umsatzwachstum über 8% YoY mit Lyfted-Beitrag → Turnaround bestätigt, aggressiv nachkaufen</li>
+            <li>Lyfted gewinnt 5+ Großkunden mit $50 Mio.+ Contingent Spend → Enterprise-Thesis bewiesen</li>
+            <li>AI-GSV übersteigt $500 Mio. annualisiert (+67% YoY) → AI-Tail-Wind stärker als erwartet</li>
+            <li>Kurs fällt auf 52-Wochen-Tief $11 bei unveränderter Fundamentallage → antizyklischer Kauf</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Contrarian / Deep-Value Investoren</li>
+            <li>Quality Growth Investoren (2–3J+)</li>
+            <li>Turnaround-Spezialisten</li>
+            <li>Technologie-Plattform Investoren</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Income Investoren (keine Dividende)</li>
+            <li>Kurzfristige Momentum-Trader</li>
+            <li>Risikoaverse Investoren (hohe Volatilität)</li>
+            <li>Marktneutrale Strategien</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / Tranchiert</span></td><td>Warten auf Q1 2026-Ergebnisse (Mai 2026) für erste Bestätigung des Lyfted-Ramps; dann 50% Tranche</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>50% jetzt ($13–14), weitere 50% nach Bestätigung der Lyfted-Pipeline (H2 2026)</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Risk/Reward 1:4,5 bei EV/EBITDA 6,4× und $300M Buyback-Programm als Preis-Support</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>$1,3 Bio. TAM, doppelstellige CAGR-Ziele bis 2028, strukturelle AI-Tailwinds</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Eigene Analyse; Morningstar UPWK Fair Value (28.02.2026); Goldman Sachs Price Target $27 (10.02.2026); Upwork 2025 Annual Results; StockStory / TipRanks Analysten-Konsens (Feb/März 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 13 -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – 3 Entscheidende Events</div>
+      <div class="section-note">Konkretes Wenn/Dann · 2026</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q1 2026 Quartalsergebnisse – voraussichtlich Mai 2026</h4>
+        <p>Das erste entscheidende Prüfereignis für die Turnaround-These. Upwork hat Q1 2026 mit Guidance von $192–197 Mio. Umsatz (23–24% EBITDA-Marge) bereits unterhalb Konsens angekündigt. Entscheidend ist: (a) Bestätigt Business Plus seinen Wachstumspfad?, (b) Wird die Lyfted-Pipeline konkret?, (c) Zeigt AI-GSV weitere Beschleunigung? Das Quartal ist für sich genommen schwächer, könnte aber als "letzter schwacher Datenpunkt vor dem Ramp" eingepreist werden.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Q1-Ergebnisse treffen die eigene Guidance und das Management hebt Lyfted-Pipeline auf 10+ Großkunden-Perspektive an, AI-GSV überschreitet $320 Mio. annualisiert → kurzfristig nachkaufen, Turnaround-Timing-Signal bestätigt, Kurs-Recovery in Richtung $16–18 wahrscheinlich.<br><br>
+          <strong>Wenn:</strong> Q1-Ergebnisse verfehlen die eigene Guidance (Umsatz &lt;$192 Mio.) oder Management senkt das H2-Wachstumsziel → deutliches Warnzeichen, Position auf 50% reduzieren, Erholung abwarten.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 2: Lyfted Enterprise-Wins &amp; Q3 2026 Update – August/November 2026</h4>
+        <p>Lyfted ist die eigentliche Transformation-Wette: Upwork adressiert mit $650 Mrd. Contingent-Work-Market einen zehnfach größeren Markt als das bisherige Freelance-Business. Entscheidend ist, ob bis Ende 2026 mindestens 5–10 zahlende Enterprise-Kunden mit signifikantem Contingent Spend ($50 Mio.+ p.a.) auf die Lyfted-Plattform ongeboardet wurden. Die ersten zwei Kunden sind "gewonnen" – der kritische Beweis steht aus.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Upwork berichtet Q3 2026 mit mindestens 8 Lyfted-Enterprise-Kunden, Enterprise-GSV zeigt +20% YoY-Wachstum wie geplant, und Gesamtumsatz wächst über 8% YoY → Enterprise-These bewiesen, Lyfted-Monetarisierung sichtbar, Zielkurs $22–26 realistisch; Position deutlich aufstocken.<br><br>
+          <strong>Wenn:</strong> Enterprise-Segment bleibt unter 5 Neukunden und Enterprise-GSV bleibt rückläufig → die gesamte 2028-Wachstumsprognose verliert ihre Grundlage; Bewertungsargument hält noch (EV/FCF ~6×), aber Growth-Premium entfällt; Position halten, aber Zielkurs auf $15–17 reduzieren.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 3: AI-Plattform-Monetarisierung &amp; Agentic-Work-Rollout – Q4 2026 / Q1 2027</h4>
+        <p>Upwork prognostiziert, dass KI-Agenten-Arbeit bis 2028 auf ~$120 Mrd. anwächst. Die Plattform testet bereits Human-Agent-Pairings (HAPI-Benchmark) und berichtet, dass menschlich-agentische Zusammenarbeit die Projektabschlussquote um bis zu 70% steigert. Die Frage ist, ob Upwork dieses emerging Segment als Erster monetarisiert – oder ob direkte AI-APIs (OpenAI, Anthropic) den Marktplatz disintermedieren.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Upwork kündigt bis Ende 2026 eine dedizierte Agentic-Work-Monetarisierungslösung (z.B. Upwork Agents Marketplace) an und AI-GSV überschreitet $500 Mio. annualisiert (+67% YoY) → strukturelles Wachstumsfundament für 2027+ gesichert; langfristige Trendwende zum nachhaltigen Double-Digit-Wachstum eingeleitet; volle Position aufbauen, langfristiger Zeithorizont 3–5 Jahre.<br><br>
+          <strong>Wenn:</strong> AI-GSV-Wachstum verlangsamt sich auf unter 30% YoY und Upwork kündigt keine klare Agentic-Monetarisierungsstrategie an → KI ist kein struktureller Wachstumstreiber, sondern wird vom Marktplatz-Kerngeschäft kannibalisiert; Upwork ist ein "Value-Trap"-Risiko; Position auf Cashflow-basierte Bewertung ($11–14 Fair Value) reduzieren.
+        </div>
+      </div>
+      <div class="source">Quellen: Upwork Q4 2025 Earnings Call / Investor Day Guidance (Feb/Nov 2025); TipRanks EPS Forecast Q1 2026; Upwork IR 2026 Annual Guidance; Markets Daily Earnings Highlights (Feb 2026)</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung, Kaufempfehlung oder Aufforderung zum Erwerb von Wertpapieren dar. Alle Angaben wurden sorgfältig recherchiert, sind aber ohne Gewähr. Investitionen in Aktien sind mit erheblichen Risiken verbunden, inklusive des möglichen Totalverlusts des eingesetzten Kapitals. Stand der Analyse: 04. März 2026. Der Autor übernimmt keine Haftung für Entscheidungen, die auf Grundlage dieser Analyse getroffen werden. Vergangene Wertentwicklungen sind kein verlässlicher Indikator für zukünftige Ergebnisse.
+  </div>
+</div>
+
+</body>
+</html>
