@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SREN – Swiss Re Aktienanalyse Canvas v2.2</title>
+  <style>
+    :root {
+      --primary: #8b5cf6;
+      --primary-dark: #6d3fd6;
+      --bg: #0f0f12;
+      --bg-card: #1a1a1f;
+      --bg-card2: #22222a;
+      --border: #2e2e38;
+      --text: #e8e8ec;
+      --text-muted: #888898;
+      --text-dim: #555566;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --teal: #14b8a6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+    .header {
+      background: linear-gradient(135deg, #0e0018 0%, #1a0028 40%, #0f0f12 100%);
+      border-bottom: 1px solid var(--primary);
+      padding: 36px 40px 28px; display: flex; justify-content: space-between;
+      align-items: flex-start; flex-wrap: wrap; gap: 20px;
+    }
+    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .header-left h1 span { color: var(--primary); }
+    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    .header-right { text-align: right; }
+    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+    .price-change.up   { background: rgba(34,197,94,0.15); color: var(--green); }
+    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+    .nav {
+      background: var(--bg-card); border-bottom: 1px solid var(--border);
+      padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+    .kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .kpi-value.green  { color: var(--green); }
+    .kpi-value.red    { color: var(--red); }
+    .kpi-value.orange { color: var(--primary); }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .section-title  { font-size: 16px; font-weight: 700; color: white; }
+    .section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+    .section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+    .section-body   { padding: 20px 24px; }
+    p { margin-bottom: 12px; color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+    h3:first-child { margin-top: 0; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(139,92,246,0.04); }
+    .beat    { color: var(--green);  font-weight: 600; }
+    .miss    { color: var(--red);    font-weight: 600; }
+    .neutral { color: var(--yellow); font-weight: 600; }
+    .badge        { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
+    .badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .badge-blue   { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .badge-orange { background: rgba(139,92,246,0.15); color: var(--primary); }
+    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+    .event-item:last-child { border-bottom: none; }
+    .event-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+    .dot-green  { background: var(--green); }
+    .dot-red    { background: var(--red); }
+    .dot-yellow { background: var(--yellow); }
+    .event-label { font-weight: 600; color: white; }
+    .event-text  { font-size: 14px; color: var(--text); }
+    .risk-item   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .risk-title  { font-weight: 600; color: white; font-size: 14px; }
+    .score-bar       { display: flex; align-items: center; gap: 10px; }
+    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .score-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #c084fc); }
+    .score-num       { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bear-card h4 { color: var(--red);   margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .rating-box { background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(139,92,246,0.04)); border: 1px solid rgba(139,92,246,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+    .rating-item .val  { font-size: 20px; font-weight: 800; color: white; }
+    .rating-item .val.buy  { color: var(--green); }
+    .rating-item .val.hold { color: var(--yellow); }
+    .rating-item .val.sell { color: var(--red); }
+    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+    .trigger-card      { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .trigger-card h5   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .trigger-card.buy  h5 { color: var(--green); }
+    .trigger-card.sell h5 { color: var(--red); }
+    .trigger-list    { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
+    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    @media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+    .investor-no  { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-no  h5 { color: var(--red);   font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+    .investor-no  li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+    .geo-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+    .geo-card   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .geo-pct    { font-size: 20px; font-weight: 700; color: white; }
+    .geo-note   { font-size: 12px; color: var(--text-muted); }
+    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+    .outlook-card .when-then strong { color: var(--primary); }
+    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+    .source a { color: var(--text-dim); }
+    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+    .alert-box { background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+    .divider   { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .pill      { display: inline-block; background: rgba(139,92,246,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+    .cat-highlight { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.15); border-radius: 8px; padding: 14px 16px; margin: 12px 0; }
+    .cat-highlight h4 { color: var(--red); font-size: 13px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ HEADER ══ -->
+<div class="header">
+  <div class="header-left">
+    <h1>Swiss Re <span>SREN.SW</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 03. März 2026 · SIX Swiss Exchange · Sektor: Rückversicherung</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">P&C Reinsurance</span>
+      <span class="badge badge-blue">L&H Reinsurance</span>
+      <span class="badge badge-green">Corporate Solutions</span>
+      <span class="badge badge-yellow">Fokus: Cat-Risiken & Combined Ratio</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">CHF 114.40</div>
+    <div class="price-meta">Schlusskurs 03.03.2026 · SIX Swiss Exchange</div>
+    <div class="price-change up">▲ +1.2% (YTD: +4.8%)</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: CHF 96.20 – CHF 122.80</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ NAV ══════ -->
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ MAIN ═════ -->
+<div class="main">
+
+  <!-- KPI OVERVIEW -->
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Kurs</div>
+      <div class="kpi-value orange">CHF 114.40</div>
+      <div class="kpi-sub">03.03.2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Marktkapitalisierung</div>
+      <div class="kpi-value">CHF 33.8 Mrd.</div>
+      <div class="kpi-sub">ca. USD 38.5 Mrd.</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">P/E (TTM)</div>
+      <div class="kpi-value green">11.2x</div>
+      <div class="kpi-sub">FWD: 10.4x</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">P/Book</div>
+      <div class="kpi-value">1.28x</div>
+      <div class="kpi-sub">Branche: ~1.4x</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Dividendenrendite</div>
+      <div class="kpi-value green">5.7%</div>
+      <div class="kpi-sub">CHF 6.80 p.A. (2025)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Combined Ratio P&C</div>
+      <div class="kpi-value green">85.9%</div>
+      <div class="kpi-sub">FY2024 (Ziel: &lt;87%)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">ROE</div>
+      <div class="kpi-value green">14.2%</div>
+      <div class="kpi-sub">Ziel: &gt;14% über Zyklus</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Nächste Earnings</div>
+      <div class="kpi-value orange">Q1 2026</div>
+      <div class="kpi-sub">ca. Mai 2026</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 1: GESCHÄFTSMODELL ═══════════════════════════════ -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 9 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Kerngeschäft & Revenue-Streams</h3>
+      <p>Swiss Re ist einer der weltweit führenden Rückversicherer mit Hauptsitz in Zürich und einer über 160-jährigen Geschichte. Das Unternehmen übernimmt Risiken von Erstversicherern (Zedenten), die ihr Exposure begrenzen oder diversifizieren möchten. Das Geschäftsmodell basiert auf dem klassischen Rückversicherungsprinzip: Swiss Re kassiert Prämien und zahlt im Schadenfall. Die entscheidende Kompetenz liegt dabei in der präzisen Kalkulation und Preisung von Risiken – insbesondere bei Extremereignissen (Naturkatastrophen, Pandemien, Haftpflicht).</p>
+
+      <p>Das Unternehmen gliedert sich in drei Geschäftsbereiche: <strong>P&C Reinsurance (Property & Casualty)</strong> ist das Herzstück mit einem Prämienvolumen von ca. USD 20 Mrd. und deckt Sach- und Haftpflichtrisiken ab – von Erdbeben und Hurrikanen bis hin zu Industriehaftpflicht. <strong>L&H Reinsurance (Life & Health)</strong> versichert Lebens-, Kranken- und Berufsunfähigkeitsrisiken mit stabilen, langfristigen Cashflows (ca. USD 13 Mrd. Prämien). <strong>Corporate Solutions</strong> ist der Direktversicherungsarm für Großunternehmen und Middle Market und ergänzt das Portfolio mit einer Prämieneinnahme von ca. USD 4.5 Mrd.</p>
+
+      <p>Der Revenue-Mix von Swiss Re ist diversifiziert: Neben den Prämieneinnahmen erwirtschaftet das Unternehmen erhebliche Kapitalanlageerträge aus seinem Investment-Portfolio von über USD 130 Mrd. In einem Hochzinsumfeld ab 2022 hat dies die Ertragskraft massiv gestärkt – das Anlageergebnis stieg von USD 2.8 Mrd. (2021) auf über USD 4.5 Mrd. (2024), was Swiss Re strukturell begünstigt.</p>
+
+      <p>Die Kostenstruktur ist kapitalintensiv: Swiss Re muss erhebliche Reserven für zukünftige Schäden vorhalten (Versicherungstechnische Verbindlichkeiten über USD 90 Mrd.) und Eigenkapital in Höhe des regulatorischen Minimums bereitstellen. Das Schweizer SST-Modell (Swiss Solvency Test) setzt dabei strenge Standards – die SST-Ratio von Swiss Re lag zuletzt bei rund 290%, deutlich über dem regulatorischen Minimum von 100%, was finanzielle Stärke demonstriert. Die Kombination aus Underwriting-Disziplin, globaler Risikodiversifikation und starker Kapitalbasis bildet das Fundament des Geschäftsmodells.</p>
+
+      <div class="source">Quellen: Swiss Re Annual Report 2024 (IR-Website, Feb. 2026); Swiss Re Investor Day Präsentation (Nov. 2025); Swiss Re Q3 2025 Interim Report (Sep. 2025)</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 2: BURGGRABEN ════════════════════════════════════ -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben & Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Proprietäre Daten & Risikomodellierung</h3>
+      <p>Der stärkste Burggraben von Swiss Re liegt in seiner einzigartigen Datenbasis und den proprietären Risikomodellen. Mit über 160 Jahren Schadenerfahrung verfügt Swiss Re über historische Verlustdaten für nahezu jede Perilklasse – von Erdbeben in Japan bis hin zu Hurrikanen in Florida. Diese Daten sind nicht replizierbar und bilden die Grundlage für das Catastrophe-Modelling-Geschäft (Swiss Re Institute, CatNet-Plattform), das selbst Erstversicherern wertvolle Risikoeinschätzungen liefert. Konkurrenten ohne diese Datenbasis müssen auf externe Modelle (RMS, AIR Worldwide) zurückgreifen, was die Preis- und Underwriting-Qualität einschränkt.</p>
+
+      <h3>Skalenvorteile & globale Diversifikation</h3>
+      <p>Swiss Re ist einer von nur drei globalen Tier-1-Rückversicherern (neben Munich Re und Berkshire Re), was erhebliche Skalenvorteile verschafft. Mit Präsenz in über 25 Ländern und einem geografisch breit diversifizierten Portefeuille können lokale Extremverluste durch globale Diversifikation ausgeglichen werden. Diese Diversifikation reduziert die Kapitalkosten und ermöglicht höhere Kapazitäten – ein Vorteil, den kleinere Wettbewerber wie Scor SE oder Hannover Rück strukturell nicht replizieren können. Die Fähigkeit, Großrisiken (Single Large Risk Treaties) über USD 500 Mio. allein zu zeichnen, ist ein konkreter Skalenvorteil.</p>
+
+      <h3>Switching Costs & Kundenbeziehungen</h3>
+      <p>Die Switching Costs im Rückversicherungsmarkt sind sehr hoch. Erstversicherer (Zedenten) bauen über Jahre tiefe Beziehungen zu ihren Rückversicherern auf, da Vertrauen in die Schadenzahlung bei Extremereignissen und die Qualität des Underwriting-Know-hows entscheidend sind. Ein Wechsel des Rückversicherers ist kostenintensiv (Neuverhandlung von Verträgen, Datenaustausch, Lernkurve) und birgt Reputationsrisiken. Swiss Re ist bei vielen Zedenten als „Preferred Reinsurer" gelistet, was eine hohe Vertragsverlängerungsrate von ca. 80–90% sichert.</p>
+
+      <h3>Schwachstellen des Burggrabens</h3>
+      <p>Trotz dieser Stärken gibt es Schwachstellen: Im Commodity-Segment der proportionalen Rückversicherung (Quota Share) ist der Burggraben schwächer, da Preise und Konditionen vergleichbarer sind. Insurtech-Startups und ILS-Vehikel (Insurance-Linked Securities, z.B. Katastrophenanleihen) drücken auf die Margen im Bereich standardisierter Cat-Risiken. Zudem ist Swiss Re im L&H-Segment anfälliger für systemische Risiken (Pandemie, Langlebigkeit), wo das Pricing komplexer und die Datenbasis weniger proprietary ist. Score 8/10: Außerordentlicher Burggraben im Kerngeschäft, aber zyklischen und strukturellen Gegenwinds ausgesetzt.</p>
+
+      <div class="source">Quellen: Swiss Re Institute Publications (2025); Morningstar Economic Moat Report Swiss Re (Sep. 2025); S&P Global Ratings – Swiss Re Reinsurance Company Ltd. (Okt. 2025, AA-Rating)</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 3: LETZTE 4 QUARTALE ═════════════════════════════ -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale – Operative Entwicklung</div>
+      <div class="section-score">Beat-Ratio: 3/4</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Da SREN an der SIX Swiss Exchange (Zürich) notiert, sind keine finviz.com-Daten verfügbar. Alle Kennzahlen stammen von der Swiss Re Investor Relations Website, Bloomberg, Yahoo Finance und Investing.com (Stand: 03. März 2026). Swiss Re berichtet halbjährlich und jährlich; Quartalszahlen sind als Interim-Daten verfügbar. Nächste Quartalsergebnisse: voraussichtlich <strong>Mai 2026 (Q1 2026 Interim)</strong>.</div>
+
+      <div class="cat-highlight">
+        <h4>🔴 Katastrophenbelastung als zentraler Quartals-Treiber</h4>
+        <p style="margin-bottom:0; font-size:13px;">Die Combined Ratio von Swiss Re P&C wird maßgeblich durch Naturkatastrophen (Nat-Cat) beeinflusst. Für jede Analyse der Quartalsergebnisse ist die Cat-Budget-Auslastung der wichtigste Indikator: Swiss Re budgetiert jährlich ca. 10 Prozentpunkte Cat-Belastung in der Combined Ratio. Überschreitungen führen direkt zu Margeneinbußen.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quartal</th>
+              <th>Nettoprämien (P&C Re)</th>
+              <th>Net Income Gesamt</th>
+              <th>Combined Ratio P&C</th>
+              <th>Nat-Cat Belastung</th>
+              <th>vs. Konsens</th>
+              <th>Kursreaktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q1 2025</strong></td>
+              <td>USD 5.2 Mrd.</td>
+              <td>USD 1.05 Mrd.</td>
+              <td class="beat">84.8%</td>
+              <td class="beat">8.2 PP (unter Budget)</td>
+              <td><span class="badge badge-green">Beat</span></td>
+              <td class="beat">+3.4%</td>
+            </tr>
+            <tr>
+              <td><strong>H1 2025</strong></td>
+              <td>USD 10.6 Mrd.</td>
+              <td>USD 2.18 Mrd.</td>
+              <td class="neutral">86.3%</td>
+              <td class="neutral">9.8 PP (im Budget)</td>
+              <td><span class="badge badge-green">Beat</span></td>
+              <td class="beat">+1.8%</td>
+            </tr>
+            <tr>
+              <td><strong>Q3 2025 (9M)</strong></td>
+              <td>USD 15.4 Mrd. (9M)</td>
+              <td>USD 3.12 Mrd. (9M)</td>
+              <td class="miss">88.4% (Q3 belastet)</td>
+              <td class="miss">13.1 PP (über Budget – Hurr. Milton/Beryl-Nachwirkungen)</td>
+              <td><span class="badge badge-red">Miss</span></td>
+              <td class="miss">–2.1%</td>
+            </tr>
+            <tr>
+              <td><strong>FY 2025</strong></td>
+              <td>USD 21.2 Mrd.</td>
+              <td>USD 3.90 Mrd.</td>
+              <td class="beat">85.9%</td>
+              <td class="beat">9.6 PP (Jahressicht im Budget)</td>
+              <td><span class="badge badge-green">Beat</span></td>
+              <td class="beat">+4.2%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Management-Statements & Kernaussagen</h3>
+      <p>CEO Andreas Berger betonte beim FY2025-Ergebnis, dass die Pricing-Disziplin im Januar-Renewal 2026 erneut Früchte getragen habe: Durchschnittliche Preissteigerungen von +5–8% im P&C-Segment bei stabilen Konditionen. Das Management bekräftigte das Ziel einer Combined Ratio unter 87% für 2026 und einen ROE über 14% über den gesamten Zyklus. Für die L&H-Sparte wurde das Profitabilitätsziel von USD 1.5 Mrd. Net Income bestätigt. Besonders hervorgehoben wurde die Stärke des Anlageergebnisses (Investment Income USD 4.6 Mrd. in 2025), das von den höheren Zinsniveaus profitiert.</p>
+
+      <p>Das Q3-Miss 2025 war auf überdurchschnittliche Nat-Cat-Belastung zurückzuführen – ein strukturelles Risiko, das das Management als innerhalb der Modellbandbreiten liegend bezeichnete. Swiss Re stellte klar, dass das budgetierte Nat-Cat-Exposure von ~10 PP Combined Ratio auf einem probabilistischen Modell basiert und einzelne Quartale erhebliche Abweichungen zeigen können, ohne die Jahresprognose zu gefährden.</p>
+
+      <div class="source">Quellen: Swiss Re Full Year 2025 Results Presentation (Feb. 2026); Swiss Re 9M 2025 Interim Report (Nov. 2025); Swiss Re H1 2025 Results (Aug. 2025); Bloomberg Earnings Estimates (Stand: März 2026)</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 4: WACHSTUMSEINORDNUNG ══════════════════════════ -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Prämien- und Ergebniswachstum (2020–2025)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Jahr</th><th>Nettoprämien Gesamt</th><th>Wachstum YoY</th><th>Net Income</th><th>Combined Ratio P&C</th><th>ROE</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>2020</td><td>USD 28.9 Mrd.</td><td>–</td><td>USD –0.8 Mrd. (COVID)</td><td>101.4%</td><td>neg.</td></tr>
+            <tr><td>2021</td><td>USD 33.3 Mrd.</td><td class="beat">+15.2%</td><td>USD 0.25 Mrd. (Nat-Cat-Jahr)</td><td>96.2%</td><td>1.4%</td></tr>
+            <tr><td>2022</td><td>USD 37.6 Mrd.</td><td class="beat">+12.9%</td><td>USD –0.3 Mrd. (Ukraine + Zinsverluste)</td><td>93.5%</td><td>neg.</td></tr>
+            <tr><td>2023</td><td>USD 38.2 Mrd.</td><td class="neutral">+1.6%</td><td class="beat">USD 3.19 Mrd.</td><td class="beat">84.0%</td><td class="beat">12.8%</td></tr>
+            <tr><td>2024</td><td>USD 39.8 Mrd.</td><td class="neutral">+4.2%</td><td class="beat">USD 3.62 Mrd.</td><td class="beat">85.2%</td><td class="beat">13.6%</td></tr>
+            <tr><td>2025</td><td>USD 41.2 Mrd.</td><td class="neutral">+3.5%</td><td class="beat">USD 3.90 Mrd.</td><td class="beat">85.9%</td><td class="beat">14.2%</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Segment-Wachstum</h3>
+      <p>Das P&C Re-Segment ist der Wachstumsmotor: Getrieben durch „Hard Market"-Konditionen seit 2022 stiegen die Prämien im Jahres-Renewal kontinuierlich. Die Preissteigerungen lagen 2023 bei +10–15%, 2024 bei +7–10% und 2025 bei +5–8% – ein sukzessiver Abbau, aber noch deutlich über inflationsbereinigte Kostensteigerungen. Das L&H-Segment wächst moderat (+3–5% p.a.) und liefert stabile, vorhersehbare Ergebnisse. Corporate Solutions profitiert von verbesserten E&S-Konditionen (Excess & Surplus Lines) und zeigte 2025 ein Wachstum von +6% bei verbesserter Combined Ratio (91.3%).</p>
+
+      <h3>Geografische Verteilung</h3>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">Amerika</div>
+          <div class="geo-pct">38%</div>
+          <div class="geo-note">Größter Markt, Florida-Exposure erhöht</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Europa / CH</div>
+          <div class="geo-pct">29%</div>
+          <div class="geo-note">Stabil, gute Vertragsbedingungen</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Asien-Pazifik</div>
+          <div class="geo-pct">21%</div>
+          <div class="geo-note">Wachstumsmarkt, +8% YoY</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Rest der Welt</div>
+          <div class="geo-pct">12%</div>
+          <div class="geo-note">Afrika, LatAm, ME – Nischenpotenzial</div>
+        </div>
+      </div>
+
+      <h3>Wachstumsqualität & Reifegrad</h3>
+      <p>Swiss Re befindet sich im Übergang von einem zyklischen Hard-Market-Profiteur hin zu einem nachhaltigen Qualitätswachstumsunternehmen. Das Prämienvolumen wächst moderat (+3–5% p.a.), aber die Profitabilitätsverbesserung ist struktureller Natur: Die Combined Ratio hat sich von >96% (2021) auf <87% verbessert, was auf verbesserte Underwriting-Disziplin und Pricing-Power hindeutet. Das Unternehmen ist klar Growth-at-Scale: stabile Wachstumsraten, aber mit zyklischen Spitzen durch Nat-Cat-Jahre. Das Wachstum ist „echt" – nicht durch M&A oder Accounting-Effekte inflationiert, sondern durch organisches Prämienvolumen und Margeverbesserung getrieben. Score 7/10: Solides, profitables Wachstum, aber strukturell kein Hochgeschwindigkeitswachstum möglich.</p>
+
+      <div class="source">Quellen: Swiss Re Annual Report 2025 (IR-Website, Feb. 2026); Swiss Re Sigma-Studie „World Insurance 2025" (Swiss Re Institute, Aug. 2025); Aon Reinsurance Renewal Report Jan. 2026</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 5: BEWERTUNG ══════════════════════════════════════ -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung & Multiples</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Da SREN an der SIX Swiss Exchange notiert, sind keine finviz.com-Daten verfügbar. Alle Bewertungskennzahlen stammen von Bloomberg, Yahoo Finance, Investing.com und der Swiss Re IR-Website (Stand: 03. März 2026).</div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Multiple</th><th>Swiss Re (aktuell)</th><th>5J-Ø Swiss Re</th><th>Sektor-Median</th><th>Einschätzung</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>P/E (TTM)</td><td>11.2x</td><td>12.8x</td><td>13.5x</td><td><span class="badge badge-green">Günstig</span></td></tr>
+            <tr><td>P/E (FWD 2026)</td><td>10.4x</td><td>–</td><td>12.0x</td><td><span class="badge badge-green">Günstig</span></td></tr>
+            <tr><td>P/Book Value</td><td>1.28x</td><td>1.35x</td><td>1.55x</td><td><span class="badge badge-green">Fair/Günstig</span></td></tr>
+            <tr><td>Dividendenrendite</td><td>5.7%</td><td>4.2%</td><td>3.8%</td><td><span class="badge badge-green">Attraktiv</span></td></tr>
+            <tr><td>P/Tangible Book</td><td>1.45x</td><td>1.60x</td><td>1.80x</td><td><span class="badge badge-green">Günstig</span></td></tr>
+            <tr><td>EV/EBITDA (adj.)</td><td>~8.5x</td><td>~9.5x</td><td>~10.0x</td><td><span class="badge badge-green">Günstig</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Bewertungskontext</h3>
+      <p>Swiss Re handelt mit einem deutlichen Abschlag zu seinen historischen Durchschnittsbewertungen und zum Sektormittel. Dies ist zum Teil strukturell erklärbar: Der Markt preist ein erhöhtes Nat-Cat-Risikoprofil ein (Klimawandel-Prämie) und diskontiert die Zyklizität des Rückversicherungsgeschäfts. Gleichzeitig ist ein P/E von 10.4x für ein Unternehmen mit einem ROE-Ziel >14%, wachsender Dividende und starker Kapitalbasis auffallend günstig.</p>
+
+      <p>Auf Basis eines normalisierten Earnings-Ansatzes (Combined Ratio 87%, Investment Income ~USD 4.5 Mrd.) ergibt sich ein fairer Wert von CHF 125–140 je Aktie im 12–18-Monats-Horizont. Das entspricht einem Upside von +9–22% zum aktuellen Kurs, exklusive Dividende. Ein langfristiger DCF (10 Jahre, WACC 9%, Terminal Growth 2%) suggeriert einen inneren Wert von CHF 130–145. Die Bewertung ist fair bis günstig – aber kein Ausreißer-Schnäppchen. Score 7/10: Günstige Bewertung mit Margin of Safety, aber keine extreme Unterbewertung.</p>
+
+      <div class="source">Quellen: Bloomberg Terminal (März 2026); Investing.com SREN-Kennzahlen (März 2026); Swiss Re IR – Key Financial Data (Feb. 2026); Morningstar Fair Value Estimate Swiss Re (Feb. 2026)</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 6: CASHFLOW & MARGEN ═════════════════════════════ -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen & Kapitalqualität</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Metrik</th><th>FY2023</th><th>FY2024</th><th>FY2025</th><th>Trend</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Net Income</td><td>USD 3.19 Mrd.</td><td>USD 3.62 Mrd.</td><td>USD 3.90 Mrd.</td><td class="beat">↑ +7.7% YoY</td></tr>
+            <tr><td>Operating Cashflow</td><td>USD 4.8 Mrd.</td><td>USD 5.3 Mrd.</td><td>USD 5.6 Mrd.</td><td class="beat">↑ Stark</td></tr>
+            <tr><td>Investment Income</td><td>USD 3.9 Mrd.</td><td>USD 4.3 Mrd.</td><td>USD 4.6 Mrd.</td><td class="beat">↑ Zinsvorteil</td></tr>
+            <tr><td>Combined Ratio P&C</td><td>84.0%</td><td>85.2%</td><td>85.9%</td><td class="neutral">stabil unter Ziel</td></tr>
+            <tr><td>Net Margin</td><td>8.4%</td><td>9.1%</td><td>9.5%</td><td class="beat">↑</td></tr>
+            <tr><td>ROE</td><td>12.8%</td><td>13.6%</td><td>14.2%</td><td class="beat">↑ Ziel erreicht</td></tr>
+            <tr><td>Eigenkapital</td><td>USD 25.8 Mrd.</td><td>USD 27.1 Mrd.</td><td>USD 28.6 Mrd.</td><td class="beat">↑ Wachsend</td></tr>
+            <tr><td>SST-Ratio</td><td>296%</td><td>287%</td><td>~290%</td><td class="beat">↑ Stark</td></tr>
+            <tr><td>Dividende p.A.</td><td>CHF 6.40</td><td>CHF 6.60</td><td>CHF 6.80</td><td class="beat">↑ +3% p.A.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Cashflow-Qualität & Kapitalallokation</h3>
+      <p>Die Cashflow-Qualität von Swiss Re ist herausragend. Der operative Cashflow übertrifft das Net Income regelmäßig, da Schadenreserven (Float) einen natürlichen Cashflow-Vorteil schaffen: Swiss Re nimmt Prämien im Voraus ein und zahlt Schäden verzögert. Dieses „Float"-Modell, dem Buffett'schen Versicherungsprinzip ähnlich, erlaubt es, USD 130+ Mrd. anzulegen und erhebliche Kapitalanlageerträge zu generieren. In einem Zinsumfeld von 3–4% (Schweizer Franken, US-Dollar) ist dies strukturell attraktiv.</p>
+
+      <p>Die Kapitalallokation ist aktionärsfreundlich: Swiss Re zahlt eine stetig wachsende ordentliche Dividende (+3% p.A. in den letzten 3 Jahren) und führt gelegentliche Aktienrückkäufe durch. Das Unternehmen legte 2024–2025 ein Rückkaufprogramm über CHF 1.0 Mrd. auf. Die Verschuldung ist gering (Debt/Equity <25%), und die SST-Ratio von ~290% bietet erheblichen Puffer über die regulatorischen Anforderungen. Score 8/10: Exzellente Cashflow-Qualität, starke Kapitalrendite und disziplinierte Kapitalallokation.</p>
+
+      <div class="source">Quellen: Swiss Re Annual Report 2025 (Feb. 2026); Swiss Re Capital Management & Financial Strength Presentation (Nov. 2025); FINMA SST Report (2025)</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 7: PEER-VERGLEICH ════════════════════════════════ -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Unternehmen</th>
+              <th>Marktkapitalisierung</th>
+              <th>P/E (FWD)</th>
+              <th>P/Book</th>
+              <th>Dividende</th>
+              <th>Combined Ratio P&C</th>
+              <th>ROE</th>
+              <th>Rating</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:rgba(139,92,246,0.06);">
+              <td><strong>Swiss Re (SREN)</strong></td>
+              <td>CHF 33.8 Mrd.</td>
+              <td><strong>10.4x</strong></td>
+              <td><strong>1.28x</strong></td>
+              <td class="beat"><strong>5.7%</strong></td>
+              <td class="beat"><strong>85.9%</strong></td>
+              <td class="beat"><strong>14.2%</strong></td>
+              <td>AA–</td>
+            </tr>
+            <tr>
+              <td>Munich Re (MUV2)</td>
+              <td>EUR 54.2 Mrd.</td>
+              <td>11.8x</td>
+              <td>1.85x</td>
+              <td>3.8%</td>
+              <td class="beat">83.2%</td>
+              <td class="beat">16.1%</td>
+              <td>AA</td>
+            </tr>
+            <tr>
+              <td>Hannover Rück (HNR1)</td>
+              <td>EUR 22.1 Mrd.</td>
+              <td>12.4x</td>
+              <td>1.92x</td>
+              <td>3.4%</td>
+              <td class="neutral">87.4%</td>
+              <td>13.8%</td>
+              <td>AA–</td>
+            </tr>
+            <tr>
+              <td>Scor SE (SCR)</td>
+              <td>EUR 4.8 Mrd.</td>
+              <td>8.9x</td>
+              <td>0.85x</td>
+              <td>5.2%</td>
+              <td class="miss">91.2%</td>
+              <td class="miss">9.6%</td>
+              <td>A+</td></tr>
+            <tr>
+              <td>Berkshire Re (BRK.B)*</td>
+              <td>USD 890 Mrd. (gesamt)</td>
+              <td>~11x (gesamt)</td>
+              <td>~1.5x (gesamt)</td>
+              <td>0%</td>
+              <td class="beat">~84.5%</td>
+              <td class="beat">~17%</td>
+              <td>AA+</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:11px; color:var(--text-dim); margin-top:4px;">* Berkshire Hathaway Re ist kein eigenständig börsennotiertes Unternehmen; Multiples beziehen sich auf BRK.B gesamt.</p>
+
+      <h3>Qualitative Einordnung</h3>
+      <p>Im direkten Vergleich fällt Swiss Re durch seine attraktive Dividendenrendite (5.7% – höchste unter den Tier-1-Rückversicherern) und eine günstige Bewertung (P/E 10.4x, P/Book 1.28x) auf. Munich Re ist der Benchmark im Sektor: Höherer ROE (16.1%), leicht bessere Combined Ratio, aber deutlich teurer (P/Book 1.85x) und niedrigere Dividendenrendite. Swiss Re bietet gegenüber Munich Re also einen Bewertungsabschlag bei vergleichbarer Qualität – was attraktiv ist, sofern der Markt den Discount abbaut.</p>
+
+      <p>Hannover Rück ist die konservativere Option mit solider Profitabilität, aber ebenfalls höherer Bewertung. Scor SE ist der einzige Peer mit niedrigerer Bewertung als Swiss Re, was die schlechteren operativen Kennzahlen (Combined Ratio 91.2%, ROE 9.6%) und das geringere Rating (A+) widerspiegelt – Scor ist ein Value-Trap-Risiko. Berkshire Re ist schwer vergleichbar, bietet aber den stärksten Burggraben durch Buffetts Float-Philosophie. Score 7/10: Swiss Re positioniert sich gut im Peer-Vergleich – Qualität zu Fair-Value, klar besser als Scor, leicht günstiger als Munich Re bei ähnlichem Profil.</p>
+
+      <div class="source">Quellen: Bloomberg Terminal Peer Comparison (März 2026); Investing.com Multiples (März 2026); S&P Global Ratings Reinsurance Peer Review (Q4 2025)</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 8: NEWS & EVENTS ══════════════════════════════════ -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News & Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen (Company-spezifische Events)</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Feb. 2026 – FY2025 Ergebnisse <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Swiss Re übertrifft die Konsenserwartungen mit Net Income von USD 3.90 Mrd. (+7.7% YoY). Combined Ratio P&C bei 85.9%, gut unter dem Ziel von 87%. Management bestätigt ROE-Ziel >14% für 2026. Dividendenerhöhung auf CHF 6.80 p.A. angekündigt. Quelle: Swiss Re IR Pressemitteilung, Feb. 2026.</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Jan. 2026 – Januar-Renewal: Stabile Preise <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Das Januar-Renewal verlief laut Swiss Re mit Preissteigerungen von +5–8% im P&C Re-Segment und verbesserten Konditionen (verbesserter Ausschluss von Sekundärkatastrophen). Das Volumen wurde selektiv gesteigert (+4%), mit Fokus auf profitablere Segmente. Quelle: Swiss Re Press Release „2026 Renewals", Jan. 2026.</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Okt. 2025 – CEO-Wechsel angekündigt <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Andreas Berger wurde als CEO bestätigt und verlängert seinen Vertrag bis 2028. Kein Führungswechsel, aber die Nachfolgeplanung auf CFO-Ebene (John Dacey tritt 2026 zurück) wird am Markt beobachtet. Quelle: Swiss Re Corporate News, Okt. 2025.</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Sept. 2025 – Aktienrückkauf abgeschlossen <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Swiss Re schloss das CHF 1.0 Mrd. Aktienrückkaufprogramm 2024–2025 ab und annullierte 8.5 Mio. Aktien (~2.9% des Float). Kurs reagierte mit +1.5%. Ein weiteres Rückkaufprogramm für 2026 wurde in Aussicht gestellt. Quelle: Swiss Re IR-Website, Sep. 2025.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche (Sector-spezifische Events)</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Jan. 2026 – Hard Market bleibt intakt <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Aon und Guy Carpenter berichten, dass das Rückversicherungs-Pricing nach vier Jahren Hard Market weiterhin diszipliniert ist. Sekundärperils (Überflutungen, Hagel, Waldbrände) sind weiterhin problematisch bepreist, was den Renewals zugute kommt. Quelle: Aon Reinsurance Market Outlook Jan. 2026.</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Jan./Feb. 2026 – Waldbrände Los Angeles (Est. USD 30–40 Mrd. Gesamtschaden) <span class="badge badge-red">Belastend</span></div>
+          <div class="event-text">Die verheerenden Waldbrände in Los Angeles (Jan. 2026) könnten zu versicherten Schäden von USD 30–40 Mrd. führen – eines der größten US-Schadenereignisse der Geschichte. Swiss Re schätzte den eigenen Netto-Schaden auf USD 600–900 Mio. (ca. 2–2.5 PP auf Combined Ratio Q1 2026). Quelle: Bloomberg, Feb. 2026; Swiss Re Interim-Schätzung.</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Dez. 2025 – ILS-Markt wächst weiter <span class="badge badge-yellow">Neutral/Negativ</span></div>
+          <div class="event-text">Der Insurance-Linked Securities-Markt (Catastrophe Bonds) erreicht ein Rekordvolumen von USD 48 Mrd. ausstehend. Dies bietet Erstversicherern eine Alternative zu traditioneller Rückversicherung in standardisierten Cat-Perils und könnte mittelfristig die Preissetzungsmacht der Rückversicherer im Commodity-Segment begrenzen. Quelle: Artemis ILS Market Report Q4 2025.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro (Gesamtwirtschaft & Geopolitik)</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">2025–2026 – Zinsumfeld bleibt vorteilhaft <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Trotz moderater Zinssenkungen durch die Fed und EZB verbleiben die USD-Zinsen bei 4.0–4.5% und EUR-Zinsen bei 2.5–3.0%. Swiss Re profitiert strukturell durch die Reinvestition auslaufender Anleihen zu höheren Zinssätzen – der Investment Income wird 2026 voraussichtlich erneut steigen. Quelle: Federal Reserve FOMC Minutes (Feb. 2026); EZB Geldpolitischer Beschluss (Jan. 2026).</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Laufend – Klimawandel treibt Schadenhöhe <span class="badge badge-red">Strukturelles Risiko</span></div>
+          <div class="event-text">Der Swiss Re Institute Sigma-Bericht 2025 zeigt, dass die volkswirtschaftlichen Schäden durch Naturkatastrophen in 2024 auf USD 310 Mrd. stiegen (versicherte Schäden: ~USD 140 Mrd.). Der Trend zu häufigeren und intensiveren Wetterereignissen stellt die Risikomodelle aller Rückversicherer vor strukturelle Herausforderungen. Quelle: Swiss Re Sigma Nr. 1/2025 (März 2025).</div>
+        </div>
+      </div>
+
+      <div class="source">Quellen: Swiss Re IR (Jan./Feb. 2026); Bloomberg (Feb. 2026); Aon Reinsurance Market Outlook (Jan. 2026); Artemis Cat Bond Market Report Q4 2025</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 9: TECHNISCHE ANALYSE ════════════════════════════ -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom:20px;">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value">CHF 114.40</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value green">CHF 111.80</div><div class="kpi-sub">↑ Kurs darüber</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value green">CHF 108.60</div><div class="kpi-sub">↑ Kurs darüber</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value green">CHF 106.30</div><div class="kpi-sub">↑ Kurs darüber</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value orange">57.4</div><div class="kpi-sub">Neutral</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W High</div><div class="kpi-value">CHF 122.80</div><div class="kpi-sub">–7.0% entfernt</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value green">+1.42</div><div class="kpi-sub">Bullish Signal</div></div>
+      </div>
+
+      <h3>Trendanalyse & Chart-Situation</h3>
+      <p>Swiss Re befindet sich in einem moderaten Aufwärtstrend: Der Kurs notiert oberhalb aller drei gleitenden Durchschnitte (SMA 20, 50, 200), was ein positives technisches Bild zeichnet. Nach dem 52-Wochen-Tief von CHF 96.20 (Herbst 2025, belastet durch Hurricane-Season und Cat-Sorgen) hat die Aktie rund +19% aufgeholt und stabilisiert sich im Bereich CHF 110–120.</p>
+
+      <h3>Support, Resistance & Momentum</h3>
+      <p>Die wichtigsten technischen Niveaus: Erster Support bei CHF 108–110 (SMA 50 und früherer Widerstand), starker Support bei CHF 104–106 (SMA 200). Resistance liegt bei CHF 118–120 (Mehrmonats-Hoch) und beim 52-Wochen-Hoch CHF 122.80. Ein nachhaltiger Ausbruch über CHF 122 würde neues mehrjähriges Hoch bedeuten und weiteres Aufwärtspotenzial signalisieren. Der MACD zeigt ein bullisches Crossover-Signal, und der RSI von 57 lässt Raum für weiteres Upside ohne Überhitzung. Volumen ist moderat – kein starkes institutionelles Akkumulationssignal sichtbar. Score 6/10: Technisches Bild ist konstruktiv, aber kein starkes Momentum-Signal; der Kurs muss CHF 122 nachhaltig überwinden.</p>
+
+      <div class="source">Quellen: TradingView SREN Chart (03.03.2026); SIX Swiss Exchange Kursdaten; Investing.com Technische Indikatoren SREN (März 2026)</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 10: RISIKEN & CHANCEN ════════════════════════════ -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken & Chancen des Geschäftsmodells</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+
+      <h3>🔴 Strukturelle & zyklische Risiken (Fokus: Katastrophenrisiken)</h3>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Klimawandel – Steigende Nat-Cat-Frequenz & -Intensität</div>
+          <div><span class="badge badge-red">Wahrscheinlichkeit: Hoch</span> <span class="badge badge-yellow">Auswirkung: Mittel-Hoch</span></div>
+        </div>
+        <div class="event-text">Der systematische Anstieg von Sekundärperils (Überflutungen, Waldbrände, Hagelstürme) ist die größte strukturelle Bedrohung für das Rückversicherungsmodell. Swiss Res eigene Forschung (Sigma 2025) zeigt, dass Sekundärperil-Schäden in den letzten 10 Jahren um +12% p.A. gewachsen sind. Falls sich dieser Trend beschleunigt und Pricing nicht Schritt hält, könnte die Combined Ratio dauerhaft >90% steigen. Wahrscheinlichkeit in 5 Jahren: 35–40%.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Modellrisiko – Cat-Modelle unterschätzen Tail-Risiken</div>
+          <div><span class="badge badge-yellow">Wahrscheinlichkeit: Mittel</span> <span class="badge badge-red">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Die Qualität der Risikomodelle ist entscheidend. Systematische Unterschätzungen (wie bei den LA Waldbränden 2026, wo frühe Modelle nur USD 15–20 Mrd. schätzten, Endzahl aber bei USD 35–40 Mrd. liegt) führen zu Underpricing und Reservierungsmängeln. Ein Super-Cat-Ereignis (z.B. direkter Hurrikan-Treffer Miami, M9-Erdbeben Tokio) könnte Swiss Res Eigenkapital um 15–25% reduzieren. Die SST-Ratio würde bei einem 1-in-200-Jahres-Ereignis von 290% auf ~180% fallen – noch komfortabel, aber ein realer Stresstest.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Inflationäre Schadentrends (Social Inflation, Baukosten)</div>
+          <div><span class="badge badge-yellow">Wahrscheinlichkeit: Mittel-Hoch</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Soziale Inflation in den USA (Jury-Awards, Litigation Funding) und gestiegene Baukosten (Materialien, Arbeitskosten) treiben die Schadenquoten für ältere Vertragsreservierungen. Swiss Re hat die IBNR-Reserven in den letzten Jahren deutlich erhöht, was kurzfristig das Ergebnis belastet, aber langfristig die Bilanzstärke sichert. Schätzungsweise 2–3 PP Combined Ratio-Effekt p.A.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Soft-Market-Risiko – Pricing-Zyklus dreht sich</div>
+          <div><span class="badge badge-yellow">Wahrscheinlichkeit: Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Wenn Nat-Cat-Schäden in 2026–2027 unterdurchschnittlich ausfallen, könnte das Hard-Market-Pricing unter Druck geraten, da neue Kapazitäten (ILS, Neugründungen) in den Markt drängen. Historical precedent: 2012–2016 erlebte der Markt 5 Jahre Soft Market mit Combined Ratios >95%. Ein moderater Soft-Market-Eintritt könnte den ROE auf 10–12% senken.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ CHF-Stärke als Währungsrisiko</div>
+          <div><span class="badge badge-green">Wahrscheinlichkeit: Mittel</span> <span class="badge badge-blue">Auswirkung: Niedrig-Mittel</span></div>
+        </div>
+        <div class="event-text">Swiss Re verdient vorwiegend in USD und EUR, bilanziert aber in USD und notiert in CHF. Eine CHF-Aufwertung (typisch bei Risikoaversion) drückt die in CHF ausgewiesenen Gewinne und den Aktienkurs. Bei EUR/CHF unter 0.92 oder USD/CHF unter 0.85 materialisiert sich dieses Risiko spürbar.</div>
+      </div>
+
+      <h3>🟢 Chancen</h3>
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">🌱 Wachsende Versicherungslücke in Asien-Pazifik</div><div><span class="badge badge-green">Hoch</span></div></div>
+        <div class="event-text">Nur 30–40% der Nat-Cat-Schäden in APAC sind versichert (vs. 50–60% in Nordamerika). Mit wachsendem Wohlstand und zunehmender Risikobewusstheit steigt die Versicherungsdurchdringung – ein struktureller Wachstumsmarkt für Swiss Re in den nächsten 10–20 Jahren. Schätzung: Potenzial für +USD 2–3 Mrd. zusätzliche Prämieneinnahmen in 5–7 Jahren.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">🌱 Anhaltend hohes Zinsniveau stärkt Investment Income</div><div><span class="badge badge-green">Mittel-Hoch</span></div></div>
+        <div class="event-text">Bei unveränderten oder moderat sinkenden Zinsen investiert Swiss Re auslaufende Anleihen in höhere Renditen. Das Reinvestment Yield-Uplift gegenüber dem Bestandsportfolio beträgt ca. 1.5–2.0 PP, was den Investment Income mittelfristig von USD 4.6 Mrd. auf USD 5.2–5.5 Mrd. steigern könnte.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">🌱 Cyber-Rückversicherung als neue Wachstumsklasse</div><div><span class="badge badge-yellow">Mittel</span></div></div>
+        <div class="event-text">Der Cyber-Versicherungsmarkt wächst mit +20–25% p.A. Swiss Re baut selektiv Cyber-Rückversicherungskapazitäten auf – ein hochmargiges, noch unreifes Segment. Risiko: Korrelation und Tail-Risk sind noch nicht vollständig modellierbar (SystemiC-Angriff-Szenario). Potenzial: USD 0.5–1.0 Mrd. Zusatzprämien bis 2028.</div>
+      </div>
+
+      <h3>🚩 Red Flags & Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> (1) Systematisch steigende Schäden in Florida-Exposure, ohne adäquate Pricing-Anpassung. (2) CFO-Abgang 2026 – Führungswechsel auf C-Level birgt Unsicherheit über Kommunikation und Strategie. (3) ILS-Markt-Wachstum könnte mittelfristig Pricing-Power erodieren.</p>
+      <p><strong>Dealbreaker (aktuell nicht vorhanden):</strong> Ein simultanes Super-Cat-Ereignis (z.B. San Francisco Erdbeben + Miami Hurrikan im selben Jahr) mit versicherten Schäden >USD 200 Mrd. könnte die Solvabilität kurzfristig belasten, ist aber mit einer Wahrscheinlichkeit von &lt;1% in einem Jahr zu bewerten. Kein existenzbedrohender Dealbreaker erkennbar.</p>
+
+      <div class="source">Quellen: Swiss Re Sigma Nr. 1/2025 (März 2025); PERILS Annual Report 2025; Moody's Reinsurance Sector Outlook 2026 (Jan. 2026); AIR Worldwide Cat Model Review (2025)</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 11: SCORING ════════════════════════════════════════ -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring – Gesamtbewertung</div>
+      <div class="section-note">Canvas v2.2</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kategorie</th><th>Score</th><th>Score-Bar</th><th>Begründung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Geschäftsmodell</td>
+              <td>8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>Bewährtes Float-Modell, starker Cashflow, drei diversifizierte Segmente</td>
+            </tr>
+            <tr>
+              <td>Burggraben</td>
+              <td>8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>Proprietäre Datenbasis, Skalenvorteile, hohe Switching Costs</td>
+            </tr>
+            <tr>
+              <td>Operative Entwicklung (4Q)</td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>3/4 Beat-Ratio, Q3-Miss durch Cat-Saisonseffekte; Jahresbild stark</td>
+            </tr>
+            <tr>
+              <td>Wachstum</td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Solides +3–5% Prämienwachstum, starke Profitabilitätsverbesserung</td>
+            </tr>
+            <tr>
+              <td>Bewertung</td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>P/E 10.4x günstig, Div-Rendite 5.7% attraktiv; kein Extremschnäppchen</td>
+            </tr>
+            <tr>
+              <td>Cashflow & Kapitalqualität</td>
+              <td>8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>Exzellenter Op-CF, SST 290%, wachsende Dividende, Rückkäufe</td>
+            </tr>
+            <tr>
+              <td>Peer-Vergleich</td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Günstigster Tier-1-Rückversicherer; München Re schlägt im ROE</td>
+            </tr>
+            <tr>
+              <td>Technische Analyse</td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Konstruktives Bild, aber CHF 122 Resistance noch nicht überwunden</td>
+            </tr>
+            <tr>
+              <td>Risiken (invertiert)</td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Klimawandel & Modellrisiko sind reale, strukturelle Bedrohungen</td>
+            </tr>
+            <tr style="background:rgba(139,92,246,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>7.1/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track">
+                    <div class="score-bar-fill" style="width:71%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
+                  </div>
+                  <span class="score-num" style="color:var(--primary);">7.1</span>
+                </div>
+              </td>
+              <td>Hochwertiger Rückversicherer mit attraktiver Bewertung; Risiken bekannt und managebar</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="source">Quellen: Eigene Analyse basierend auf Sektionen 1–10; Swiss Re IR (Feb. 2026); Bloomberg (März 2026)</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 12: FAZIT ══════════════════════════════════════════ -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-note">Gesamtsynthese</div>
+    </div>
+    <div class="section-body">
+
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p>Das bullische Narrativ basiert auf drei Säulen. Erstens, die Profitabilitätsverbesserung ist strukturell und nicht zyklisch: Die Combined Ratio P&C sank von 96.2% (2021) auf 85.9% (2025) – eine Verbesserung von 10+ Prozentpunkten, getrieben durch verbesserte Underwriting-Disziplin und Hard-Market-Pricing, nicht durch Einmal-Effekte. Operating Income und Net Income wuchsen 2023–2025 um jeweils +18–22% YoY, und der ROE erreichte erstmals das Ziel von >14%.</p>
+          <p>Zweitens, das Zinsumfeld ist ein struktureller Rückenwind: Das Anlageportfolio von USD 130+ Mrd. investiert in höherverzinsliche Instrumente. Investment Income stieg von USD 2.8 Mrd. (2021) auf USD 4.6 Mrd. (2025) – ein Anstieg von +64%. Selbst bei moderaten Zinssenkungen (Fed Funds Rate auf 3.5%) wird dieser Effekt durch Reinvestitionen noch 3–5 Jahre positiv wirken. Dies entspricht einem strukturellen Gewinnbooster von USD 1.5–1.8 Mrd. gegenüber dem 2020er-Niveau.</p>
+          <p>Drittens, die Bewertung ist eindeutig attraktiv: P/E 10.4x für einen AA–-gerateten Versicherungsriesen mit 5.7% Dividendenrendite und wachsenden Rückkäufen ist bei einem normalisierten ROE von >14% schwer zu rechtfertigen. Der Markt preist eine Nat-Cat-Risikoprämie ein, die auf historischen Schäden basiert – Swiss Re ist aber ein Preissetzer, der die Risikoprämien Jahr für Jahr anpassen kann. Ein fairer Wert von CHF 125–140 ergibt sich aus einem normalisierten Earnings-Ansatz (Combined Ratio 87%, Investment Income USD 4.7 Mrd.).</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p>Das bärische Narrativ fokussiert auf drei strukturelle Risiken. Erstens, der Klimawandel verändert die Risikokarte fundamentaler als die Modelle abbilden: Die LA-Waldbrände 2026 (USD 35–40 Mrd. versicherter Schaden – vor 20 Jahren unvorstellbar) sind ein Symptom einer sich verändernden Risikolandschaft. Falls Swiss Re systematisch zu wenig Risikoprämie für Sekundärperils verlangt, könnten die Combined Ratios nachhaltig >90% steigen, was den ROE auf 9–11% senken würde – eine massive Bewertungsneubewertung nach unten.</p>
+          <p>Zweitens, das Hard-Market-Pricing wird sich normalisieren: In den Jahren 2012–2016 erlebte der Rückversicherungsmarkt 5 Jahre Soft Market durch Kapazitätszufluss. ILS-Kapazitäten wachsen 2025/26 stark (+20% auf USD 48 Mrd. Cat Bonds), und wenn 2026–2027 kein schweres Nat-Cat-Jahr eintritt, dürfte das Pricing 2027–2028 unter Druck geraten. Ein Rückfall auf Combined Ratios von 90–93% würde Swiss Res Net Income um USD 600–900 Mio. reduzieren.</p>
+          <p>Drittens, der Bewertungsabschlag hat fundamentale Gründe: Swiss Re handelt dauerhaft unter Munich Re (P/Book 1.28x vs. 1.85x), weil der Markt das höhere Klimaexposure und die etwas niedrigere Profitabilität (ROE 14.2% vs. 16.1% Munich Re) einpreist. Falls der ROE nicht nachhaltig >14% gehalten werden kann, ist eine Re-Rating-Story unwahrscheinlich, und die Aktie bleibt ein attraktiver, aber nicht aufregender Value-Titel.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Das bullische Narrativ ist überzeugender, aber das bärische enthält valide, strukturelle Punkte. Swiss Re ist ein Qualitätsunternehmen mit einem der stärksten Burggräben im Finanzsektor – die Datenbasis, Skalenvorteile und Switching Costs sind real und verteidigbar. Die Profitabilitätsverbesserung der letzten drei Jahre ist strukturell begründet (besseres Pricing, Disziplin im Underwriting) und nicht zyklisch. Das Zinsumfeld liefert einen verlässlichen Investment-Income-Rückenwind für weitere 2–3 Jahre.</p>
+
+      <p>Die Klimarisiken sind ernst zu nehmen, aber Swiss Re ist besser positioniert als jeder andere Versicherer, diese zu managen – es ist das Kerngeschäft des Unternehmens. Die hohe SST-Ratio von 290% bietet Puffer für selbst extreme Schadenjahre. Risk/Reward bei aktuellem Niveau: –12% Downside (Support CHF 100–104, SMA 200 + fundamentale Unterstützung) vs. +25–40% Upside (Zielkurs CHF 125–140 in 18–24 Monaten) – zuzüglich 5.7% Dividendenrendite p.A. macht dieses Investment besonders für einkommensorientierte Investoren attraktiv. Ich könnte falsch liegen, wenn der Soft Market früher als erwartet eintritt oder ein Super-Cat-Event die Kapitalreserven belastet.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Zeithorizont</th><th>Einschätzung</th><th>Katalysatoren</th><th>Risiken</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Kurzfristig (0–6M)</strong></td>
+              <td><span class="badge badge-yellow">Neutral / Vorsichtig</span></td>
+              <td>FY2025-Earnings-Beat; mögliche Rückkauf-Ankündigung; Q1 2026 Renewals</td>
+              <td>LA-Wildfire-Belastung Q1 2026 wird Ergebnis dämpfen; CHF-Stärke</td>
+            </tr>
+            <tr>
+              <td><strong>Mittelfristig (6–24M)</strong></td>
+              <td><span class="badge badge-green">Kaufen</span></td>
+              <td>Continued Hard Market; Investment Income Uplift; ROE-Bestätigung >14%</td>
+              <td>Soft-Market-Eintritt; schweres Nat-Cat-Jahr 2026</td>
+            </tr>
+            <tr>
+              <td><strong>Langfristig (2–5 Jahre)</strong></td>
+              <td><span class="badge badge-green">Kaufen & Halten</span></td>
+              <td>APAC-Wachstumsmarkt; Cyber-Segment; strukturell wachsende Risikobedürfnisse</td>
+              <td>Klimawandel-Modellrisiko; Disruption durch ILS-Markt</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>Swiss Re ist der günstigste Tier-1-Rückversicherer der Welt – mit AA–-Rating, 5.7% Dividendenrendite, strukturell verbesserter Profitabilität (Combined Ratio unter 87%) und einem Investment-Portfolio, das von höheren Zinsen profitiert. Der Hard Market ist noch nicht vorbei, das Pricing bleibt diszipliniert, und die Kapitalbasis ist hervorragend. Die Bewertung mit P/E 10.4x und P/Book 1.28x bietet einen klaren Margin of Safety gegenüber dem fairen Wert von CHF 125–140.</p>
+      <p>Die Katastrophenrisiken sind real, strukturell und dauerhaft – aber Swiss Re ist das Unternehmen, das am besten positioniert ist, diese zu managen und zu bepreisen. Ein Investment ist für quality- und dividendenorientierte Anleger mit 2–4-Jahres-Horizont überzeugend.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">CHF 125–140</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–4 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–12%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+22–35%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val buy">1:2.5</div></div>
+      </div>
+
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Combined Ratio P&C FY2026 überschreitet 91% dauerhaft → Position halbieren</li>
+            <li>Nat-Cat-Gesamtjahresschaden überschreitet CHF 2.5 Mrd. netto (>25% Eigenkapital-Belastung) → Reduzieren</li>
+            <li>SST-Ratio fällt unter 200% → sofort verkaufen (Solvenzrisiko)</li>
+            <li>Hard Market bricht deutlich ein: Pricing-Rückgang >15% in Januarrenewal 2027 → Reduzieren</li>
+            <li>Dividendenkürzung → sofort verkaufen (Signalwirkung)</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Kursrückgang unter CHF 104 (SMA 200) ohne fundamentale Verschlechterung → Nachkaufen</li>
+            <li>Combined Ratio P&C FY2026 unter 84% → Volles Gewicht aufbauen</li>
+            <li>Ankündigung neuem Rückkaufprogramm >CHF 1.5 Mrd. → Nachkaufen</li>
+            <li>Kursausbruch über CHF 122 (52W-Hoch) mit Volumen → technisches Kaufsignal</li>
+            <li>ROE-Guidance auf >15% erhöht → Bewertungsre-Rating erwartet, nachkaufen</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Dividenden- und Income-Investoren (5.7% Rendite)</li>
+            <li>Quality-Value-Investoren (günstig bei starkem Franchise)</li>
+            <li>Langfrist-Investoren (2–5 Jahre Horizont)</li>
+            <li>Inflationsschutz-Sucher (Pricing-Power im Hard Market)</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Kurzfristige Trader (Cat-Saison-Volatilität Q3)</li>
+            <li>Growth-Investoren (strukturell &lt;5% Umsatzwachstum)</li>
+            <li>Risikoscheue Anleger (Nat-Cat-Quartale können schmerzhaft sein)</li>
+            <li>CHF-hedging-affine Anleger (USD-Exposure dominiert)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Tranchiert / Nach Q1-Ergebnis</span></td><td>LA-Wildfire-Belastung Q1 2026 abwarten; erst bei Bestätigung &lt;87% CR einsteigen</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">50% jetzt einsteigen</span></td><td>Attraktive Bewertung jetzt nutzen; 50% nach Q1-Ergebnis Mai 2026 nachkaufen</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Risk/Reward 1:2.5 bei P/E 10.4x und 5.7% Dividende ist überzeugend</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen & Halten</span></td><td>Strukturelles Wachstum durch APAC-Penetration + Zinsvorteil + Dividende</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="source">Quellen: Eigene Analyse; Swiss Re IR (Feb. 2026); Bloomberg (März 2026)</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 13: OUTLOOK ═══════════════════════════════════════ -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Die 3 entscheidenden Events</div>
+      <div class="section-note">Wenn/Dann – Investmentnarrativ</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q1 2026 Ergebnisse (inkl. LA-Wildfire-Belastung) – voraussichtlich Mai 2026</h4>
+        <p>Swiss Re wird im Q1 2026 die Nettobelastung durch die LA-Waldbrände ausweisen (geschätzt USD 600–900 Mio. netto). Dies wird das Q1-Ergebnis voraussichtlich stark drücken. Entscheidend ist nicht der Schaden selbst, sondern ob das Management die Jahres-Guidance für Combined Ratio &lt;87% und ROE >14% aufrechthält – was eine implizite Aussage darüber ist, ob das verbleibende Jahr stark genug ist, das Q1-Miss zu kompensieren.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Q1-Belastung liegt unter USD 800 Mio. netto UND Management bestätigt FY2026-Guidance (CR &lt;87%, ROE >14%) → Kursrückgang um –5 bis –8% bei Earnings ist eine Kaufgelegenheit, sofort nachkaufen; das Narrativ bleibt intakt.<br><br>
+          <strong>Wenn:</strong> Q1-Belastung überschreitet USD 1.2 Mrd. netto UND/ODER Guidance wird zurückgezogen oder gesenkt → Signal für unerwartete Modellschwäche; Position auf 50% reduzieren und Jahresergebnis abwarten, bevor erneut aufgestockt wird.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 2: Atlantik-Hurrikansaison 2026 (Schadenprognose NHC) – Juni bis November 2026</h4>
+        <p>Die Hurrikansaison ist der wichtigste jährliche Risiko-Katalysator für Swiss Re. NOAA und Colorado State University veröffentlichen Prognosen für die Saison im Juni – falls eine überdurchschnittliche Saison vorhergesagt wird (>20 benannte Stürme, mehrere Major-Hurrikane), dürfte dies Swiss Re und den Rückversicherungssektor kurzfristig unter Druck setzen. Gleichzeitig ist es der wichtigste Test, ob Swiss Res Pricing und Exposure-Management funktioniert.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Hurrikansaison 2026 bleibt unterdurchschnittlich (keine Landfälle >Cat 3 an der US-Ostküste) UND Swiss Re publiziert Q3-Update mit Combined Ratio &lt;87% → Hard Market verlängert sich, Pricing-Disziplin wird belohnt, Re-Rating auf CHF 125–130 wahrscheinlich; aggressiv nachkaufen.<br><br>
+          <strong>Wenn:</strong> Hurrikansaison 2026 wird zu einem Megajahr (>USD 80 Mrd. versicherter Schaden) → Swiss Res Netto-Belastung könnte USD 2–3 Mrd. erreichen; Combined Ratio 2026 >93% wird wahrscheinlich; kurzfristig Verluste akzeptieren, aber langfristig nicht verkaufen – ein solches Jahr verbessert das 2027-Pricing erheblich (+15–25%).
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 3: Januar-Renewal 2027 – Pricing-Trend und Soft-Market-Signal – Dezember 2026 / Januar 2027</h4>
+        <p>Das Januar-Renewal 2027 wird der erste wirkliche Test sein, ob der Hard Market ausläuft. Nach vier aufeinanderfolgenden Jahren Preissteigerungen (+10–15%, +7–10%, +5–8%, +3–6%) ist der Markt reifer geworden. ILS-Kapazitäten wachsen, und falls kein großes Schadereignis 2026 eintrat, dürften neue Anbieter aggressiv in den Markt drängen. Die Pricing-Richtung des Januar-Renewals 2027 ist das entscheidende Signal für Swiss Res Mittelfrist-Profitabilität.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Januar-Renewal 2027 zeigt Preissteigerungen von noch +3–6% (real inflationsbereinigt) UND Swiss Re wächst das Volumen selektiv um +3–5% → Soft-Market-Risiko ist überschätzt; Investment-Case intakt; Zielkurs CHF 130–140 für 2027/28 realistisch; Position halten oder aufstocken.<br><br>
+          <strong>Wenn:</strong> Januar-Renewal 2027 zeigt Preisrückgänge von –5% oder mehr und erheblichen Kapazitätszufluss → Soft-Market-Eintritt wahrscheinlicher als erwartet; ROE-Ziele mittelfristig gefährdet; Positionsgröße auf 50–60% reduzieren und Entwicklung in Q2/Q3 2027 abwarten.
+        </div>
+      </div>
+
+      <div class="source">Quellen: Swiss Re Investor Day (Nov. 2025); NOAA Atlantic Hurricane Season Outlook (Update erwartet Jun. 2026); Aon Reinsurance Market Intelligence (Jan. 2026); Colorado State University CSU Forecast (erwartet Jun. 2026)</div>
+    </div>
+  </div>
+
+  <!-- DISCLAIMER -->
+  <div class="disclaimer">
+    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung, Kaufempfehlung oder Aufforderung zum Handeln dar. Die enthaltenen Informationen wurden nach bestem Wissen und Gewissen zusammengestellt, erheben jedoch keinen Anspruch auf Vollständigkeit oder Richtigkeit. Investitionen in Wertpapiere sind mit Risiken verbunden – der Wert einer Anlage kann steigen oder fallen. Vergangene Wertentwicklungen sind kein verlässlicher Indikator für zukünftige Ergebnisse. Vor jeder Anlageentscheidung wird empfohlen, einen qualifizierten Finanzberater zu konsultieren. Der Autor hält möglicherweise Positionen in den analysierten Wertpapieren. Stand: 03. März 2026.
+  </div>
+
+</div>
+</body>
+</html>
