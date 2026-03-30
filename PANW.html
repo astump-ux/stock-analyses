@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PANW – Aktienanalyse Canvas v2.2</title>
+  <style>
+    :root {
+      --primary: #FF6900;
+      --primary-dark: #cc5400;
+      --bg: #0f0f12;
+      --bg-card: #1a1a1f;
+      --bg-card2: #22222a;
+      --border: #2e2e38;
+      --text: #e8e8ec;
+      --text-muted: #888898;
+      --text-dim: #555566;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --teal: #14b8a6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7;
+    }
+    .header {
+      background: linear-gradient(135deg, #1a0800 0%, #2a1000 40%, #0f0f12 100%);
+      border-bottom: 1px solid var(--primary);
+      padding: 36px 40px 28px; display: flex; justify-content: space-between;
+      align-items: flex-start; flex-wrap: wrap; gap: 20px;
+    }
+    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .header-left h1 span { color: var(--primary); }
+    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    .header-right { text-align: right; }
+    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+    .price-change.up   { background: rgba(34,197,94,0.15); color: var(--green); }
+    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+    .nav {
+      background: var(--bg-card); border-bottom: 1px solid var(--border);
+      padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+    .kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .kpi-value.green  { color: var(--green); }
+    .kpi-value.red    { color: var(--red); }
+    .kpi-value.orange { color: var(--primary); }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .section-title  { font-size: 16px; font-weight: 700; color: white; }
+    .section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+    .section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+    .section-body   { padding: 20px 24px; }
+    p { margin-bottom: 12px; color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+    h3:first-child { margin-top: 0; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,105,0,0.04); }
+    .beat    { color: var(--green);  font-weight: 600; }
+    .miss    { color: var(--red);    font-weight: 600; }
+    .neutral { color: var(--yellow); font-weight: 600; }
+    .badge        { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
+    .badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .badge-blue   { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .badge-orange { background: rgba(255,105,0,0.15);  color: var(--primary); }
+    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+    .event-item:last-child { border-bottom: none; }
+    .event-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+    .dot-green  { background: var(--green); }
+    .dot-red    { background: var(--red); }
+    .dot-yellow { background: var(--yellow); }
+    .event-label { font-weight: 600; color: white; }
+    .event-text  { font-size: 14px; color: var(--text); }
+    .risk-item   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px; }
+    .risk-title  { font-weight: 600; color: white; font-size: 14px; }
+    .score-bar       { display: flex; align-items: center; gap: 10px; }
+    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .score-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #ff9500); }
+    .score-num       { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bear-card h4 { color: var(--red);   margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .rating-box { background: linear-gradient(135deg, rgba(255,105,0,0.12), rgba(255,105,0,0.04)); border: 1px solid rgba(255,105,0,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+    .rating-item .val  { font-size: 20px; font-weight: 800; color: white; }
+    .rating-item .val.buy  { color: var(--green); }
+    .rating-item .val.hold { color: var(--yellow); }
+    .rating-item .val.sell { color: var(--red); }
+    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+    .trigger-card      { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .trigger-card h5   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .trigger-card.buy  h5 { color: var(--green); }
+    .trigger-card.sell h5 { color: var(--red); }
+    .trigger-list    { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
+    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    @media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+    .investor-no  { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-no  h5 { color: var(--red);   font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+    .investor-no  li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+    .geo-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+    .geo-card   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .geo-pct    { font-size: 20px; font-weight: 700; color: white; }
+    .geo-note   { font-size: 12px; color: var(--text-muted); }
+    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+    .outlook-card .when-then strong { color: var(--primary); }
+    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+    .source a { color: var(--text-dim); }
+    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+    .alert-box { background: rgba(255,105,0,0.08); border: 1px solid rgba(255,105,0,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+    .divider   { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .pill      { display: inline-block; background: rgba(255,105,0,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+    .focus-box { background: rgba(59,130,246,0.07); border: 1px solid rgba(59,130,246,0.25); border-left: 3px solid var(--blue); border-radius: 0 8px 8px 0; padding: 14px 16px; margin-bottom: 14px; }
+    .focus-box .focus-title { font-size: 13px; font-weight: 700; color: var(--blue); margin-bottom: 6px; }
+    .focus-box.warn { background: rgba(245,158,11,0.07); border-color: rgba(245,158,11,0.25); border-left-color: var(--yellow); }
+    .focus-box.warn .focus-title { color: var(--yellow); }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>Palo Alto Networks <span>PANW · NASDAQ</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 27. März 2026 · NASDAQ · Sektor: Technology / Cybersecurity</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">Cybersecurity Platform</span>
+      <span class="badge badge-blue">SASE / Cloud Security</span>
+      <span class="badge badge-blue">AI-Driven SOC</span>
+      <span class="badge badge-orange">Identity Security</span>
+    </div>
+    <div style="margin-top:10px; font-size:12px; color:var(--text-muted); background:rgba(255,105,0,0.07); border:1px solid rgba(255,105,0,0.2); border-radius:6px; padding:6px 12px; display:inline-block;">
+      🔍 <strong style="color:var(--primary);">Analysefokus:</strong> Product Moat &amp; KI-Disruptions-Risiko · Alphabet/Wiz · Datadog &amp; Dynatrace Cybersecurity-Expansion
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$149.50</div>
+    <div class="price-meta">Schlusskurs 27. Feb. 2026 · NASDAQ</div>
+    <div class="price-change down">▼ −8.2% (Post-Earnings)</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $135.40 – $205.90</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ NAV -->
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ MAIN -->
+<div class="main">
+
+  <!-- KPI OVERVIEW -->
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Kurs</div>
+      <div class="kpi-value red">$149.50</div>
+      <div class="kpi-sub">USD · 27. Feb. 2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Marktkapitalisierung</div>
+      <div class="kpi-value">~$103 Mrd.</div>
+      <div class="kpi-sub">USD</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">NGS ARR</div>
+      <div class="kpi-value green">$6.33 Mrd.</div>
+      <div class="kpi-sub">+33% YoY · Q2 FY26</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Forward P/E (FY27)</div>
+      <div class="kpi-value orange">~46x</div>
+      <div class="kpi-sub">TTM P/E ~99x</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Bruttomarge</div>
+      <div class="kpi-value green">76.1%</div>
+      <div class="kpi-sub">Q2 FY26 · stabil</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">FCF (TTM)</div>
+      <div class="kpi-value green">$3.75 Mrd.</div>
+      <div class="kpi-sub">~38% FCF-Marge</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Nächste Earnings</div>
+      <div class="kpi-value orange">Mai 2026</div>
+      <div class="kpi-sub">Q3 FY2026 · ca. 19.–26. Mai</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Konsens-Rating</div>
+      <div class="kpi-value green">KAUFEN</div>
+      <div class="kpi-sub">Ø Zielkurs ~$220–230</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 1: GESCHÄFTSMODELL ═══ -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6 Monate</div>
+    </div>
+    <div class="section-body">
+      <p>Palo Alto Networks (PANW) wurde 2005 von Nir Zuk gegründet und hat sich vom reinen Firewall-Anbieter zum umfassendsten <strong style="color:var(--primary);">„Cybersecurity Operating System"</strong> für Großunternehmen und Behörden weltweit entwickelt. Das Unternehmen bedient über 70.000 Kunden global – darunter Fortune-500-Konzerne, Regierungsbehörden und kritische Infrastrukturen. Das Kerngeschäft gliedert sich in drei integrierte Plattformen: <strong>Strata</strong> (Netzwerksicherheit), <strong>Prisma</strong> (Cloud-Sicherheit &amp; SASE) und <strong>Cortex</strong> (KI-gestützte Sicherheitsoperationen). Mit der Integration der CyberArk-Technologie in 2026 ist „Identity Security" nun als vierte Säule hinzugekommen.</p>
+      <p>Das Geschäftsmodell wurde unter CEO Nikesh Arora fundamental umgebaut. Die <strong>„Platformization"-Strategie</strong> incentiviert Kunden aktiv dazu, ihre fragmentierten Point Solutions (oft 50–60 Einzelprodukte verschiedener Anbieter) gegen die einheitliche PANW-Plattform einzutauschen. Dabei bietet das Unternehmen temporäre Plattform-Credits und kostenfreie On-Ramp-Perioden an, um die Migration zu beschleunigen. Dieser Ansatz belastete kurzfristig die Billing-Metriken (was den 28%-Kursrückgang im Februar 2024 auslöste), generiert aber langfristig hochmargige Subscription-Verträge mit sehr niedrigen Abwanderungsquoten.</p>
+      <p>Der Revenue-Mix ist stark auf wiederkehrende Einnahmen ausgerichtet: Über 80% der Umsätze stammen aus Subscription- und Support-Verträgen, die planbare Cashflows sichern. Die verbleibenden Umsätze entfallen auf Produktverkäufe (Hardware-Firewalls und Software-Appliances). Zentrale Leading Indicator sind die <strong>Next-Generation Security ARR</strong> (NGS ARR, zum Ende Q2 FY2026: $6,33 Mrd., +33% YoY) sowie die Remaining Performance Obligation (RPO: $16,0 Mrd., +23% YoY), die mehrjährige Umsatzsichtbarkeit bietet. PANW ist das erste rein dedizierte Cybersecurity-Unternehmen mit einer Jahresumsatz-Run-Rate von über 10 Mrd. USD.</p>
+      <p>Die Kostenstruktur ist zunehmend asset-light: Software-Firewalls machen bereits 45% der Produktumsätze aus. Die Bruttomarge liegt bei 76,1%, die Non-GAAP Operating Margin überschritt drei Quartale in Folge die 30%-Marke. PANW strebt bis FY2028 eine FCF-Marge von 40% an und weist eine sehr gesunde Bilanz aus – $7,9 Mrd. Cash bei einem Verschuldungsgrad (Debt/Equity) von nur 0,04.</p>
+      <div class="source">Quellen: PANW Investor Relations (investors.paloaltonetworks.com), Q2 FY2026 Earnings Call Transcript (17. Feb. 2026), Futurum Research (21. Feb. 2026), PANW 10-K FY2025.</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 2: BURGGRABEN ═══ -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <h3>2.1 Netzwerkeffekte &amp; Daten-Moat</h3>
+      <p>PANW verfügt über einen der bedeutendsten proprietären Datenschätze der Cybersecurity-Industrie: Unit 42, das hauseigene Threat-Intelligence-Team, analysiert täglich Milliarden von Datenpunkten aus den Netzwerken von über 70.000 Kunden. Diese Daten fließen direkt in das hauseigene KI-Modell <strong>„Precision AI"</strong> ein. Entscheidend ist, dass die Qualität dieser KI mit jedem neu gewonnenen Kunden steigt – ein echter Netzwerkeffekt auf Datenbasis. Kein neuer Marktteilnehmer kann diesen Datenvorteil ohne jahrelange Kundengewinnung replizieren. Gleichzeitig besteht ein residuales Risiko: Wenn KI-native Angreifer mit generativer KI neuartige, noch nie dagewesene Angriffsmuster generieren (Zero-Day-at-Scale), verliert historisch trainierte KI partiell an Wirksamkeit.</p>
+
+      <h3>2.2 Switching Costs &amp; Plattform-Lock-In</h3>
+      <p>Nach erfolgter Platformization sind die Switching Costs extrem hoch. Wenn ein Unternehmen alle vier Sicherheitsdomänen (Netzwerk, Cloud, SOC, Identity) auf PANW konsolidiert hat, entstehen tiefe Integrationen in die IT-Infrastruktur, die einen Anbieterwechsel außerordentlich teuer und riskant machen. Evidenz: Die Net Retention Rate bei platformisierten Kunden liegt bei <strong style="color:var(--green);">119%</strong>, mit Low-Single-Digit-Churn. 173 Kunden generieren über $5 Mio. ARR – ein Wachstum von 48% YoY.</p>
+
+      <h3>2.3 Brand Power &amp; CISO-Vertrauen</h3>
+      <p>In der Enterprise-Cybersecurity gilt das „No One Gets Fired for Buying Palo Alto"-Prinzip. Der Markenname ist in Unternehmens-Security-Entscheidungen ein belastbares Qualitätssignal. CISOs großer Konzerne tendieren zu bewährten Plattformen, deren Ausfall sie nicht persönlich verantworten müssten. Dieser „Safe Haven"-Status ist ein messbarer Wettbewerbsvorteil in langen Enterprise-Verkaufszyklen.</p>
+
+      <h3>2.4 Technologischer Vorsprung: Precision AI &amp; Agentic Remediation</h3>
+      <p>Cortex XSIAM (KI-getriebene SOC-Plattform) hat über 600 Kunden gewonnen und nähert sich einem Jahresbuchungsvolumen von $1 Mrd. XSIAM ersetzt Legacy-SIEM-Systeme (Splunk/Cisco) und reduziert Mean-Time-to-Remediation von Tagen auf Minuten durch autonome KI-Agenten. Prisma AIRS (AI Runtime Security) sichert die KI-Applikationen, die andere Unternehmen bauen – ein völlig neues Produkt ohne direkten Wettbewerber. Die SASE-ARR (Prisma Access) überstieg $1,5 Mrd. (+40% YoY). Kritisch: Der Technologievorsprung beruht auf Execution und Datenmasse, nicht auf strukturell geschützten Patenten.</p>
+
+      <h3>⚡ Fokusthema: Google/Wiz – Bedrohung des Cloud-Security-Burggrabens</h3>
+      <div class="focus-box">
+        <div class="focus-title">🔵 Alphabet/Wiz ($32 Mrd. Akquisition – Abschluss erwartet Ende März 2026)</div>
+        Google schloss die $32-Mrd.-Akquisition von Wiz ab – die größte Technologieakquisition im Cybersecurity-Bereich aller Zeiten. Wiz ist der führende CNAPP-Anbieter (Cloud-Native Application Protection Platform) mit ~45% Marktanteil unter Fortune-100-Unternehmen und $350+ Mio. ARR. Wiz deckt exakt dieselbe Domäne ab wie PANWs Prisma Cloud (CSPM, Vulnerability Management, AI-SPM). <strong>Entscheidend:</strong> Wiz verbleibt laut offizieller Zusage cloud-agnostisch (AWS, Azure, GCP). Falls Google diese Zusage einhält, ist die direkte Bedrohung für PANW begrenzt – beide sind cloud-agnostisch positioniert. Falls Google Wiz exklusiv an GCP bindet, entsteht struktureller Prisma-Cloud-Druck.
+      </div>
+      <div class="focus-box warn">
+        <div class="focus-title">🟡 Datadog &amp; Dynatrace – Einmarsch in Security-Territorium</div>
+        Datadog (DDOG) skalierte seinen Security-ARR in 2025 auf über $100 Mio. und konkurriert nun aktiv in CSPM und SIEM – beides Kernbereiche von PANWs Cortex-Plattform. Datadogs „Land &amp; Expand"-Modell ist bewährt: 83% der Kunden nutzen zwei oder mehr Produkte – der organische Übergang von Monitoring zu Security ist strukturell wahrscheinlich. PANWs Gegenbewegung: die Chronosphere-Akquisition ($3,35 Mrd.) marschiert direkt in Datadogs Observability-Kerngeschäft ein – ein symmetrischer Konvergenz-Wettbewerb. Dynatrace (DT) ist kein signifikanter direkter Cybersecurity-Konkurrent für PANW; der Fokus liegt auf Observability/APM für Legacy-Systeme.
+      </div>
+
+      <div style="margin-top:16px;">
+        <div style="font-size:13px; color:var(--text-muted); margin-bottom:6px;">Burggraben-Score</div>
+        <div class="score-bar">
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div>
+          <span class="score-num">7</span>
+        </div>
+      </div>
+      <div class="source">Quellen: Google Blog (18. März 2025), SiliconAngle (6. Nov. 2025), FinancialContent/Finterra (11. &amp; 27. Feb. 2026), PANW Q2 FY2026 Earnings Call (17. Feb. 2026), Datadog Annual Report 2024.</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 3: QUARTALE ═══ -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Beat-Ratio: 4/4</div>
+    </div>
+    <div class="section-body">
+      <p>PANW berichtet nach einem Fiskaljahrende im Juli. Die letzten vier Quartale umfassen Q3 FY2025 bis Q2 FY2026. Die Beat-Ratio beträgt <strong style="color:var(--green);">4/4</strong> bei Revenue und EPS. <strong>Nächste Quartalsergebnisse: voraussichtlich 19.–26. Mai 2026 (Q3 FY2026).</strong></p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quartal</th>
+              <th>Umsatz</th>
+              <th>YoY</th>
+              <th>Non-GAAP EPS</th>
+              <th>Konsens EPS</th>
+              <th>Beat/Miss</th>
+              <th>NGS ARR</th>
+              <th>Kursreaktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q3 FY2025</strong><br><small style="color:var(--text-muted);">Apr. 2025</small></td>
+              <td>$2,29 Mrd.</td>
+              <td>+15%</td>
+              <td>$0,80</td>
+              <td>$0,77</td>
+              <td><span class="beat">+3,9% ✓</span></td>
+              <td>$5,09 Mrd. <span class="badge badge-green">+34%</span></td>
+              <td><span class="miss">−4%</span> (Marge miss)</td>
+            </tr>
+            <tr>
+              <td><strong>Q4 FY2025</strong><br><small style="color:var(--text-muted);">Jul. 2025</small></td>
+              <td>$2,54 Mrd.</td>
+              <td>+15,7%</td>
+              <td>$0,95</td>
+              <td>$0,88</td>
+              <td><span class="beat">+7,9% ✓</span></td>
+              <td>$5,52 Mrd. <span class="badge badge-green">+36%</span></td>
+              <td><span class="beat">Positiv</span></td>
+            </tr>
+            <tr>
+              <td><strong>Q1 FY2026</strong><br><small style="color:var(--text-muted);">Okt. 2025</small></td>
+              <td>$2,50 Mrd.</td>
+              <td>+16%</td>
+              <td>$1,03</td>
+              <td>$0,94</td>
+              <td><span class="beat">+9,6% ✓</span></td>
+              <td>$5,90 Mrd. <span class="badge badge-blue">+29%</span></td>
+              <td><span class="beat">Positiv</span></td>
+            </tr>
+            <tr>
+              <td><strong>Q2 FY2026</strong><br><small style="color:var(--text-muted);">Jan. 2026</small></td>
+              <td>$2,59 Mrd.</td>
+              <td>+15%</td>
+              <td>$1,03</td>
+              <td>$0,94</td>
+              <td><span class="beat">+9,6% ✓</span></td>
+              <td>$6,33 Mrd. <span class="badge badge-green">+33%</span></td>
+              <td><span class="miss">−8%</span> (Q3-Guidance miss)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Die operative Entwicklung ist konsistent positiv. In Q2 FY2026 übertraf PANW sowohl beim Umsatz ($2,59 Mrd., +15% YoY) als auch beim EPS ($1,03 vs. $0,94 Konsens) die Erwartungen deutlich. Die Non-GAAP Operating Margin hielt zum dritten Mal in Folge bei 30,3% – ein bedeutender Meilenstein auf dem Weg zur angestrebten FCF-Marge von 40% bis FY2028. Trotz operativer Stärke fiel die Aktie nach den Ergebnissen um ca. 8%, da die Q3-EPS-Guidance ($0,78–0,80) rund 15% unterhalb des Konsens von $0,92 lag – bedingt durch Integrationsaufwendungen für die jüngsten Akquisitionen (CyberArk, Chronosphere).</p>
+      <p>CEO Nikesh Arora betonte: <em style="color:var(--text-muted);">„As AI agents become autonomous employees, the old security playbook is obsolete."</em> PANW erzielte in Q2 FY2026 einen Rekordwert von 110 neuen Platformization-Deals. Die SASE-ARR überschritt $1,5 Mrd. (+40%). Alle drei Regionen (Americas +14%, EMEA +17%, JPAC +17%) wuchsen zweistellig.</p>
+      <div class="source">Quellen: PANW Q2 FY2026 Earnings Call (17. Feb. 2026, investors.paloaltonetworks.com), Futurum Research (21. Feb. 2026), CNBC (20. Mai 2025), Nasdaq.com, Motley Fool (22. Feb. 2026).</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 4: WACHSTUM ═══ -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <p>Das Wachstum von PANW ist qualitativ hochwertig, aber es findet eine bewusste Verlangsamung auf einem höheren Qualitätsniveau statt. Mit dem ersten Überschreiten der $10-Mrd.-Revenue-Run-Rate ist PANW vom Hyper-Growth-Modus in die <strong>„Growth-at-Scale"</strong>-Phase eingetreten. Revenue wächst bei 15–16% YoY – solide, aber nicht mehr explosiv. Entscheidend ist der NGS ARR, der mit +33% YoY deutlich schneller wächst als der Gesamtumsatz und auf einen günstigen Mix-Shift hin zu hochmarginigem, rekurrentem Geschäft hinweist.</p>
+
+      <h3>Segmentales &amp; geografisches Wachstum</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Segment / Region</th><th>Wachstum YoY</th><th>Kommentar</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>NGS ARR (Gesamt)</strong></td><td><span class="beat">+33%</span> (Q2 FY26)</td><td>Führende Wachstumsmetrik; Kern des Plattformwerts</td></tr>
+            <tr><td><strong>SASE ARR</strong></td><td><span class="beat">+40%</span> (Q2 FY26)</td><td>Überschritt $1,5 Mrd.; stärkster einzelner Wachstumstreiber</td></tr>
+            <tr><td><strong>Cortex XSIAM</strong></td><td><span class="beat">>200%</span> (TTM)</td><td>600+ Kunden; TTM-Bookings nähern sich $1 Mrd.</td></tr>
+            <tr><td><strong>Prisma AIRS</strong></td><td><span class="neutral">Neu (2025)</span></td><td>Über 100 Kunden; noch pre-revenue skalierend; neues TAM</td></tr>
+            <tr><td><strong>Americas</strong></td><td>+14% (Q2 FY26)</td><td>Größte Region; solides zweistelliges Wachstum</td></tr>
+            <tr><td><strong>EMEA</strong></td><td><span class="beat">+17%</span> (Q2 FY26)</td><td>Schnellere Wachstumsrate; regulatorischer NIS2-Rückenwind</td></tr>
+            <tr><td><strong>JPAC</strong></td><td><span class="beat">+17%</span> (Q2 FY26)</td><td>Gleiches Tempo wie EMEA; staatliche Sicherheitsaufgaben</td></tr>
+            <tr><td><strong>Produktumsatz (HW/SW)</strong></td><td>+22% (Q2 FY26)</td><td>45% davon Software – günstige Mix-Verschiebung</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Geografische Verteilung</h3>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">Americas</div>
+          <div class="geo-pct">~57%</div>
+          <div class="geo-note">+14% YoY · Kernmarkt</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">EMEA</div>
+          <div class="geo-pct">~26%</div>
+          <div class="geo-note">+17% YoY · NIS2-Rückenwind</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">JPAC</div>
+          <div class="geo-pct">~17%</div>
+          <div class="geo-note">+17% YoY · staatl. Mandate</div>
+        </div>
+      </div>
+
+      <p>Das Wachstum ist organisch und nicht durch buchhalterische Effekte inflationiert. PANW weist explizit „28% NGS ARR-Wachstum organisch" vs. 33% inkl. M&A-Beiträgen aus. Der RPO-Aufbau ($16,0 Mrd., +23%) schafft mehrjährige Wachstumsvisibilität. Kritischer Punkt: Die FY2026-Gesamtjahresguidance von $11,28–11,31 Mrd. impliziert eine Wachstumsbeschleunigung auf 22–23% in H2 FY2026 – das Management muss beweisen, dass M&A-Integrationen nicht weiter auf die Margen drücken.</p>
+      <div class="source">Quellen: PANW Q2 FY2026 Earnings Call &amp; Q3 FY2025 Earnings Call, Investor Relations (investors.paloaltonetworks.com), Futurum Research (21. Feb. 2026).</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 5: BEWERTUNG ═══ -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <p>PANW handelt nach dem Kursrückgang von ca. 25–27% gegenüber dem 52-Wochen-Hoch auf einem deutlich niedrigeren Bewertungsniveau als historisch üblich – was eine interessante Einstiegsgelegenheit darstellen könnte, aber auch widerspiegelt, dass der Markt kurzfristige EPS-Druckpunkte einpreist.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Metrik</th><th>PANW (aktuell)</th><th>PANW (Ø 5J)</th><th>Sektor-Ø</th><th>Einschätzung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>P/E TTM</strong></td>
+              <td>~92–106x</td>
+              <td><span class="neutral">~197x</span></td>
+              <td>~29x</td>
+              <td>Teuer vs. Sektor, <span class="beat">günstig vs. Geschichte</span></td>
+            </tr>
+            <tr>
+              <td><strong>P/E Forward (FY27)</strong></td>
+              <td>~43–49x</td>
+              <td>N/A</td>
+              <td>~20x</td>
+              <td>Moderat für Quality-Growth</td>
+            </tr>
+            <tr>
+              <td><strong>PEG</strong></td>
+              <td>2,69</td>
+              <td>N/A</td>
+              <td>&lt;2 = gut</td>
+              <td><span class="neutral">Leicht erhöht</span></td>
+            </tr>
+            <tr>
+              <td><strong>EV/EBITDA TTM</strong></td>
+              <td>~43–55x</td>
+              <td>N/A</td>
+              <td>~15x</td>
+              <td>Premiumvaluation; durch ARR-Wachstum gerechtfertigt</td>
+            </tr>
+            <tr>
+              <td><strong>P/S</strong></td>
+              <td>~9–10x</td>
+              <td>N/A</td>
+              <td>~3–4x</td>
+              <td>Hoch; FCF-Wachstum rechtfertigt Prämie</td>
+            </tr>
+            <tr>
+              <td><strong>FCF Yield</strong></td>
+              <td>~3–4%</td>
+              <td>N/A</td>
+              <td>N/A</td>
+              <td>Moderat attraktiv beim aktuellen Kurs</td>
+            </tr>
+            <tr>
+              <td><strong>Kurs vs. 52W-Hoch</strong></td>
+              <td class="miss">−27%</td>
+              <td>N/A</td>
+              <td>N/A</td>
+              <td><span class="beat">Erheblicher Discount zum Jahreshoch</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Die Bewertung ist zweischneidig. Einerseits ist PANW gegenüber seinem 5-Jahres-Durchschnitts-KGV von ~197x massiv günstiger geworden – der aktuelle Trailing P/E von ~92–106x liegt über 50% unter dem historischen Durchschnitt. Das Forward-KGV von ~43–49x für FY2027 erscheint für ein Unternehmen mit 30%+ ARR-Wachstum, 30%+ Operating Margin und einer FCF-Run-Rate von fast $4 Mrd. vertretbar. Andererseits ist das absolute Niveau noch immer hoch: Der Sektor handelt zu 29x Earnings, PANW zu über 90x TTM. Für das Upside-Szenario muss PANW liefern: NGS ARR-Beschleunigung, M&A-Synergien und EPS-Normalisierung nach Integrationsdruck.</p>
+      <div class="source">Quellen: StockAnalysis.com, GuruFocus.com, MacroTrends, FullRatio.com – Daten vom 20.–27. Feb. 2026. Finviz PANW-Profil.</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 6: CASHFLOW ═══ -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Metrik</th><th>Wert</th><th>Trend / Kommentar</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Umsatz TTM</strong></td><td>$9,89 Mrd.</td><td>+15% YoY; über $10 Mrd. Run-Rate</td></tr>
+            <tr><td><strong>Bruttomarge</strong></td><td class="beat">76,1%</td><td>Stabil; Softwareanteil steigt positiv</td></tr>
+            <tr><td><strong>Non-GAAP Operating Margin</strong></td><td class="beat">30,3%</td><td>Drittes Quartal in Folge über 30%; Ziel: 37%+ FCF bis FY28</td></tr>
+            <tr><td><strong>GAAP Net Income TTM</strong></td><td>$1,28 Mrd.</td><td>ROE 16,3%; ROIC 17%</td></tr>
+            <tr><td><strong>FCF TTM (Adjusted)</strong></td><td class="beat">$3,75 Mrd.</td><td>FCF Yield ~3–4% beim aktuellen Kurs</td></tr>
+            <tr><td><strong>FCF-Konversionsrate</strong></td><td class="beat">~38% Marge</td><td>Auf dem Weg zum 40%-Ziel bis FY2028</td></tr>
+            <tr><td><strong>Cash &amp; Equivalents</strong></td><td class="beat">$7,9 Mrd.</td><td>Stark trotz aktiver M&A-Ausgaben</td></tr>
+            <tr><td><strong>Verschuldung (Debt/Equity)</strong></td><td class="beat">0,04</td><td>Nahezu schuldenfrei</td></tr>
+            <tr><td><strong>Capex-Intensität</strong></td><td>~$250 Mio. TTM</td><td>Niedrig; asset-light Modell</td></tr>
+            <tr><td><strong>Dividende / Buybacks</strong></td><td>Keine Dividende</td><td>Fokus auf Wachstumsinvestitionen &amp; M&A</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Die Kapitalqualität ist ausgezeichnet. PANW generiert hohe, wiederkehrende Free Cashflows aus seinem Subscription-Modell. Die Earnings-Qualität ist hoch: Der FCF übersteigt den GAAP-Nettogewinn, und es gibt keine Anzeichen für buchhalterische Manipulationen. Der starke Cashflow von $3,75 Mrd. TTM finanziert die aggressive M&A-Strategie, ohne externe Fremdfinanzierung zu benötigen. Einziger Schwachpunkt: Die hohe Stock-Based Compensation (SBC) führt zu einem permanenten Unterschied zwischen GAAP- und Non-GAAP-Ergebnissen. Der FCF-Rückgang in Q2 ist temporär und durch Akquisitionsausgaben begründet.</p>
+      <div class="source">Quellen: PANW Q2 FY2026 Earnings Release (17. Feb. 2026), StockAnalysis.com Statistics, GuruFocus PANW-Profil (Feb. 2026).</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 7: PEER-VERGLEICH ═══ -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Unternehmen</th><th>Umsatz TTM</th><th>Rev.-Wachstum</th><th>Bruttomarge</th><th>FCF-Marge</th><th>Forward P/E</th><th>Mkt. Cap</th></tr>
+          </thead>
+          <tbody>
+            <tr style="background:rgba(255,105,0,0.06);">
+              <td><strong>PANW ★</strong></td>
+              <td>$9,89 Mrd.</td>
+              <td>+15%</td>
+              <td class="beat">76,1%</td>
+              <td class="beat">~38%</td>
+              <td>~43–49x</td>
+              <td>~$103 Mrd.</td>
+            </tr>
+            <tr>
+              <td><strong>CrowdStrike (CRWD)</strong></td>
+              <td>~$4,5 Mrd.</td>
+              <td class="beat">+29%</td>
+              <td>~76%</td>
+              <td>~30%</td>
+              <td>~55x</td>
+              <td>~$85 Mrd.</td>
+            </tr>
+            <tr>
+              <td><strong>Fortinet (FTNT)</strong></td>
+              <td>~$6,0 Mrd.</td>
+              <td>~+12%</td>
+              <td>~79%</td>
+              <td>~30%</td>
+              <td class="beat">~28x</td>
+              <td>~$65 Mrd.</td>
+            </tr>
+            <tr>
+              <td><strong>Zscaler (ZS)</strong></td>
+              <td>~$2,4 Mrd.</td>
+              <td>~+22%</td>
+              <td>~78%</td>
+              <td>~25%</td>
+              <td>~50x</td>
+              <td>~$30 Mrd.</td>
+            </tr>
+            <tr>
+              <td><strong>Check Point (CHKP)</strong></td>
+              <td>~$2,6 Mrd.</td>
+              <td>~+6%</td>
+              <td class="beat">~89%</td>
+              <td class="beat">~40%</td>
+              <td class="beat">~18x</td>
+              <td>~$22 Mrd.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Im Peer-Vergleich zeigt PANW ein differenziertes Bild. <strong>CrowdStrike</strong> wächst mit 29% deutlich schneller, ist aber enger fokussiert (Endpoint &amp; Cloud Security) und hat keine vollständige Plattformabdeckung – der Outage-Vorfall 2024 hat kaum Marktanteile verschoben, was die Stärke des Plattform-Lock-Ins auch bei Wettbewerbern belegt. <strong>Fortinet</strong> ist der Preis-Leistungs-Champion im Mid-Market, schwächer in KI-Automation, und handelt als günstigstes der fünf Unternehmen (28x Forward P/E). <strong>Zscaler</strong> ist ein reines SASE-Play und damit direkter Konkurrent zu PANWs Prisma Access. <strong>Check Point</strong> ist der Value-Player: günstigste Bewertung, höchste Bruttomarge, aber das niedrigste Wachstum der Gruppe.</p>
+      <p>Der qualitative Vorteil von PANW: Kein anderer dedizierter Security-Anbieter deckt Netzwerk + Cloud + SOC + Identity + AI-Security unter einer einheitlichen Plattform ab. PANW ist der einzige Anbieter, der ernsthaft „Autonomous SOC" als Produkt vermarkten kann – durch die Kombination aus XSIAM, Unit-42-Threat-Intelligence und Precision AI.</p>
+      <div class="source">Quellen: Futurum Research (Feb. 2026), FinancialContent/Finterra (Jan.–Feb. 2026), öffentliche Unternehmensberichte CRWD, FTNT, ZS, CHKP (Stand Q4 2025/Q1 2026).</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 8: NEWS & EVENTS ═══ -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+
+      <h3>Ebene 1: Unternehmen (Company-spezifische Events)</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">17. Feb. 2026 – Q2 FY2026 Earnings <span class="badge badge-yellow">Gemischt</span></div>
+          <div class="event-text">Rev. $2,59 Mrd. (+15%), NGS ARR $6,33 Mrd. (+33%), EPS $1,03 Beat (+9,6%). Kursrückgang −8% wegen Q3-EPS-Guidance-Miss ($0,78–0,80 vs. $0,92 Konsens). Quelle: PANW Investor Relations, 17. Feb. 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Feb. 2026 – CyberArk-Akquisition abgeschlossen <span class="badge badge-green">Strategisch positiv</span></div>
+          <div class="event-text">Hinzufügung von Identity Security als vierte Plattformsäule. CyberArk NGS ARR ~$1,2 Mrd. Cross-Sell-Potenzial im bestehenden Kundenstamm erheblich. Quelle: PANW Q2 Earnings Call, Feb. 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Dez. 2025 – Chronosphere-Akquisition ($3,35 Mrd.) <span class="badge badge-green">Strategisch positiv</span></div>
+          <div class="event-text">Cloud-native Observability stärkt Cortex XSIAM. Direkte Gegenbewegung zu Datadogs Expansion in Security. Quelle: PANW Investor Relations, Dez. 2025.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Nov. 2025 – Prisma AIRS Launch <span class="badge badge-green">Positiv (neues TAM)</span></div>
+          <div class="event-text">AI Runtime Security für Enterprise-LLM-Schutz. Über 100 Kunden onboarded. Bisher kein direkter Wettbewerber im Markt. Quelle: PANW Produktblog, Nov. 2025.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Q2 FY2026 – Rekord 110 neue Platformization-Deals <span class="badge badge-green">Sehr positiv</span></div>
+          <div class="event-text">Net Retention Rate bei platformisierten Kunden: 119%. 173 Kunden generieren über $5 Mio. ARR (+48% YoY). Quelle: PANW Q2 FY2026 Earnings Call, 17. Feb. 2026.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche (Sector-spezifische Events)</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">10. Feb. 2026 – EU-Kommission genehmigt Google/Wiz-Deal ($32 Mrd.) <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Größte Cybersecurity-Akquisition aller Zeiten. Wiz deckt exakt PANWs Prisma-Cloud-Domäne (CNAPP/CSPM) ab. Abschluss erwartet Ende März 2026. Quelle: SiliconAngle, 6. Nov. 2025; FinancialContent, 10. Feb. 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">2025 – Datadog Cloud Security ARR überschreitet $100 Mio. <span class="badge badge-red">Negativ für Budget-Anteile</span></div>
+          <div class="event-text">FedRAMP High Authorization erhalten. Konkurriert nun aktiv in SIEM &amp; CSPM. Schnell skalierendes Land-and-Expand-Modell. Quelle: Datadog Annual Report 2024; Cybersecurity Dive, 2025.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2025 – CrowdStrike erholt sich vom Outage-Rückschlag <span class="badge badge-yellow">Neutral–leicht negativ</span></div>
+          <div class="event-text">CRWD wächst wieder +29% YoY. Keine signifikanten PANW-Marktanteilsgewinne durch den Vorfall. Quelle: CrowdStrike Q3 FY2026 Earnings, Dez. 2025.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">2026 – NIS2-Richtlinie (EU) tritt in Kraft <span class="badge badge-green">Positiv für EMEA</span></div>
+          <div class="event-text">Zwingt europäische Unternehmen zu höheren Security-Investitionen. Direkt positiv für PANWs EMEA-Wachstum (+17% aktuell). Quelle: EU-Kommission, 2025.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro (Gesamtwirtschaft &amp; Politik)</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">2026 – Gartner: Security-Ausgaben über $300 Mrd. bis 2028 <span class="badge badge-green">Stark positiv</span></div>
+          <div class="event-text">+15% CAGR-Prognose für Cybersecurity-Ausgaben. KI-gesteuerte Bedrohungen treiben Investitionsdruck. Säkularer Rückenwind für PANW. Quelle: Gartner Security Forecast 2025.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Laufend – SALT Typhoon &amp; staatliche Hackeraktivitäten <span class="badge badge-green">Positiv (Demand Driver)</span></div>
+          <div class="event-text">Zunehmende staatlich gesponserte Cyberangriffe erhöhen Enterprise-Security-Dringlichkeit und -Budgets – direkter Nachfragetreiber für PANW. Quelle: CISA, US-Regierung, 2025–2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – Fed restriktiv; Hochzinsumfeld hält an <span class="badge badge-yellow">Negativ für Valuation</span></div>
+          <div class="event-text">Hochzinsumfeld belastet High-Multiple-Wachstumstitel strukturell. PANW mit Forward P/E ~46x ist davon betroffen. Quelle: Fed FOMC, Jan. 2026.</div>
+        </div>
+      </div>
+
+      <div class="source">Quellen: Google Blog, SiliconAngle, Cybersecurity Dive, PANW Q2 FY2026 Earnings (alle verfügbar über o.g. Links), Futurum Research, Gartner Security Forecast 2025.</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 9: TECHNISCHE ANALYSE ═══ -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 4/10</div>
+    </div>
+    <div class="section-body">
+
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom:20px;">
+        <div class="kpi-card">
+          <div class="kpi-label">Kurs</div>
+          <div class="kpi-value red">$149.50</div>
+          <div class="kpi-sub">27. Feb. 2026</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 20</div>
+          <div class="kpi-value red">Darunter</div>
+          <div class="kpi-sub">Bearish kurzfristig</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 50</div>
+          <div class="kpi-value red">Darunter</div>
+          <div class="kpi-sub">Bearish mittelfristig</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 200</div>
+          <div class="kpi-value red">Darunter</div>
+          <div class="kpi-sub">Langfr. Downtrend</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">RSI (14)</div>
+          <div class="kpi-value orange">~42</div>
+          <div class="kpi-sub">Neutral; nicht überverkauft</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">52W-Hoch</div>
+          <div class="kpi-value">$205.90</div>
+          <div class="kpi-sub">−27% aktuell</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">MACD</div>
+          <div class="kpi-value red">Negativ</div>
+          <div class="kpi-sub">Bearish seit Jan. 2026</div>
+        </div>
+      </div>
+
+      <p>Das technische Bild ist klar bearish: PANW befindet sich in einem mittelfristigen Abwärtstrend und notiert unterhalb aller drei relevanten Moving Averages (SMA 20, 50, 200) – ein klares technisches Verkaufssignal. Der RSI ist mit ~42 nicht überverkauft, was bedeutet, dass eine schnelle technische Erholung nicht zwingend überfällig ist. Das erhöhte Handelsvolumen (>15 Mio. Aktien) beim Rückgang nach Q2 deutet auf institutionelle Distribution hin.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Level</th><th>Kurs</th><th>Bedeutung</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Support Level 1</strong></td><td>$135–140</td><td>52-Wochen-Tief-Zone; kritisches technisches Niveau</td></tr>
+            <tr><td><strong>Support Level 2</strong></td><td>$120–125</td><td>Langfristiger Support (Referenz 2023)</td></tr>
+            <tr><td><strong>Resistance Level 1</strong></td><td>$170–180</td><td>Erste signifikante Widerstandszone</td></tr>
+            <tr><td><strong>Resistance Level 2</strong></td><td>$195–206</td><td>52-Wochen-Hoch / langfristiger Widerstand</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Für langfristige Investoren bietet das Support-Level bei $135–140 einen attraktiven Einstiegspunkt mit klar definiertem Risiko (Stop-Loss unterhalb $120). Sollte dieses Level halten, wäre ein Reversalversuch Richtung $170–180 wahrscheinlich. Das Timing-Risiko für kurzfristige Investoren ist im aktuellen technischen Umfeld erhöht.</p>
+      <div class="source">Quellen: TickerOn.com PANW-Profil (Feb. 2026), GuruFocus PANW PE-Ratio, Macrotrends PANW (20. Feb. 2026), Motley Fool (22. Feb. 2026), Finviz PANW Chart (27. Feb. 2026).</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 10: RISIKEN ═══ -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+
+      <h3>10a) Strukturelle &amp; zyklische Risiken</h3>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Google/Wiz-Bedrohung für Prisma Cloud</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-yellow">Wahrscheinlichkeit: Mittel</span></div>
+        </div>
+        <div class="event-text">Möglicher Verlust von 15–25% des Prisma-Cloud-ARR in 3–5 Jahren, falls Wiz exklusiv an GCP gebunden wird. Entscheidend: Wiz-Cloud-Agnostizität muss beobachtet werden.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Datadog-Vordringen in SIEM &amp; CSPM</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-red">Wahrscheinlichkeit: Hoch</span></div>
+        </div>
+        <div class="event-text">Budget-Umschichtung; 5–10% ARR-Druck im SOC-Bereich möglich. Datadogs $100 Mio. Security-ARR wächst schnell. FedRAMP-Zertifizierung öffnet Government-Budgets.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ M&amp;A-Integrationsrisiko (CyberArk, Chronosphere)</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Wahrscheinlichkeit: Mittel</span></div>
+        </div>
+        <div class="event-text">EPS-Druck: −15% vs. Konsens in Q3 FY2026. Falls Integrationen länger dauern als erwartet, bleibt der EPS-Druck in FY2027 bestehen. Vier signifikante Akquisitionen in kurzer Zeit erhöhen das Integrationsrisiko.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Microsoft-Bundling (Security with M365)</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-red">Wahrscheinlichkeit: Hoch</span></div>
+        </div>
+        <div class="event-text">Mid-Market-Druck; PANW verliert Budget-Anteile bei SMBs. Microsoft ist tiefer in der Enterprise-IT verankert als jeder Security-Pure-Play.</div>
+      </div>
+
+      <h3>10b) KI-Disruptions-Risiko (Fokusthema)</h3>
+      <p>Das KI-Disruptions-Risiko ist zweischneidig. <strong>Risikoseite:</strong> Generative KI ermöglicht Angreifern, mit nie dagewesener Geschwindigkeit neue, individualisierte Angriffsvektoren zu generieren (Zero-Day-at-Scale). PANWs historisch trainiertes Precision-AI-Modell könnte bei völlig neuartigen Angriffsmustern zunächst Schwächen zeigen. Theoretisch könnten auch KI-native Security-Startups mit einem „blank slate"-Ansatz effizienter sein als ein historisch gewachsenes System.</p>
+      <p><strong>Chancenseite:</strong> PANW ist derzeit einer der wenigen Anbieter, der „Agentic Remediation" ernsthaft skalieren kann – autonome KI-Agenten, die nicht nur Bedrohungen erkennen, sondern autonom reagieren und patchen. Prisma AIRS ist ein neuartiges Produkt ohne direkten Wettbewerber. Je mehr Unternehmen KI-Agenten einsetzen, desto größer wird das TAM für PANW.</p>
+
+      <h3>10c) Chancen</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Chance</th><th>Zeithorizont</th><th>Potenzial</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Prisma AIRS – AI Runtime Security</strong></td><td>2–4 Jahre</td><td class="beat">$1–5 Mrd. ARR-Potenzial</td></tr>
+            <tr><td><strong>Agentic Remediation / Autonomous SOC</strong></td><td>2–5 Jahre</td><td class="beat">Sehr hoch; branchendefinierende Kategorie</td></tr>
+            <tr><td><strong>Quantum-Safe-Security-Suite</strong></td><td>3–7 Jahre</td><td>Mittel-hoch; „Harvest now, decrypt later"</td></tr>
+            <tr><td><strong>EU NIS2 + AI Act Compliance-Nachfrage</strong></td><td>1–3 Jahre</td><td>Positiv für EMEA-Wachstum (+17% aktuell)</td></tr>
+            <tr><td><strong>US Federal Zero Trust Mandate</strong></td><td>2–4 Jahre</td><td>Positiv; PANW ist zertifiziert &amp; positioniert</td></tr>
+            <tr><td><strong>M&amp;A-Synergien (CyberArk Identity)</strong></td><td>1–3 Jahre</td><td>Mittel; Cross-Sell im bestehenden Kundenstamm</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>10d) Red Flags &amp; Dealbreaker</h3>
+      <div class="alert-box">
+        🚩 <strong>Red Flags (beobachten – kein Dealbreaker):</strong> Q3 FY2026 EPS-Guidance 15% unter Konsens (temporär vs. strukturell?); FCF-Rückgang in Q2 (Akquisitionsausgaben); erhöhte M&A-Frequenz (4 Akquisitionen kurzfristig); technisches Bild negativ (alle MAs auf Verkauf); Datadog-Security-Wachstum auf $100 Mio. ARR beschleunigend.
+      </div>
+      <div class="risk-item" style="border-color:rgba(34,197,94,0.3);">
+        <div class="risk-header">
+          <div class="risk-title" style="color:var(--green);">✅ Dealbreaker – derzeit KEINER erkennbar</div>
+        </div>
+        <div class="event-text">Kein einziges der erkannten Risiken ist aktuell existenzbedrohend. Die Bilanz ist nahezu schuldenfrei ($7,9 Mrd. Cash). Google/Wiz richtet sich primär gegen Prisma Cloud (ein Segment von mehreren). Theoretische Dealbreaker wären: (a) Erfolgreicher Cyberangriff auf PANWs eigene Infrastruktur mit massivem Kundendatenverlust, oder (b) regulatorische Erzwingung zum Verkauf einer Kernkomponente (beides unwahrscheinlich).</div>
+      </div>
+
+      <div class="source">Quellen: Google SEC Filing (März 2025), SiliconAngle (Nov. 2025), FinancialContent/Finterra (Jan.–Feb. 2026), Futurum Research (Feb. 2026), Datadog Annual Report 2024.</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 11: SCORING ═══ -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring &amp; User-spezifische Analyse</div>
+    </div>
+    <div class="section-body">
+
+      <h3>Gesamtscoring-Tabelle</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kategorie</th><th>Score</th><th style="min-width:220px;">Score-Bar</th><th>Begründung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Geschäftsmodell</strong></td>
+              <td>8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>Asset-light, hochmargig, ARR-fokussiert; klarer Plattformansatz</td>
+            </tr>
+            <tr>
+              <td><strong>Burggraben</strong></td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Datenmasse-Moat + Switching Costs; Google/Wiz &amp; Datadog begrenzen Ceiling</td>
+            </tr>
+            <tr>
+              <td><strong>Operative Entwicklung (4Q)</strong></td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Konsistente Beats (4/4); Q3-Guidance-Miss und FCF-Rückgang</td>
+            </tr>
+            <tr>
+              <td><strong>Wachstum</strong></td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>NGS ARR +33%, SASE +40%; Revenue +15% etwas moderat</td>
+            </tr>
+            <tr>
+              <td><strong>Bewertung</strong></td>
+              <td>5/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td>
+              <td>Historisch günstig, absolut noch teuer; PEG 2,69 eingepreist</td>
+            </tr>
+            <tr>
+              <td><strong>Cashflow &amp; Margen</strong></td>
+              <td>8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>FCF $3,75 Mrd. TTM, 30%+ Op. Margin, nahezu schuldenfrei</td>
+            </tr>
+            <tr>
+              <td><strong>Risiken (invertiert)</strong></td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Keine Dealbreaker; Google/Wiz &amp; Datadog real; M&amp;A-Integration läuft</td>
+            </tr>
+            <tr>
+              <td><strong>Technische Analyse</strong></td>
+              <td>4/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td>
+              <td>Alle MAs negativ; MACD negativ; Distribution-Volumen</td>
+            </tr>
+            <tr style="background:rgba(255,105,0,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>6,5/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track">
+                    <div class="score-bar-fill" style="width:65%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
+                  </div>
+                  <span class="score-num" style="color:var(--primary);">6,5</span>
+                </div>
+              </td>
+              <td>Solides Quality-Growth-Investment mit verbessertem Risk/Reward nach −25%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>User-spezifische Analyse: Fokus-Check der drei Thesen</h3>
+
+      <p><strong style="color:var(--primary);">These 1 – Product Moat unter KI-Disruptions-Druck:</strong> Die These, dass KI den PANW-Burggraben erodieren könnte, ist partiell korrekt. Der Datenmasse-Moat (Unit 42 + 70.000 Kunden) ist durch KI eher verstärkt als geschwächt – je mehr Daten für KI-Training, desto besser das Modell. Das Management-Argument, dass LLMs Security-Plattformen nicht ersetzen werden, da Genauigkeit und proprietäre Threat-Daten entscheidend bleiben, ist überzeugend. Das Risiko liegt in KI-nativen Angreifern, nicht in KI-nativen Verteidigern. Score-Auswirkung: Burggraben-Score bleibt bei 7/10.</p>
+
+      <p><strong style="color:var(--primary);">These 2 – Alphabet/Wiz-Bedrohung:</strong> Real und bedeutsam, aber begrenzt auf den CNAPP/Cloud-Security-Bereich. PANWs Plattform (Strata + Cortex + Prisma SASE + Identity) ist deutlich breiter als das, was Wiz/Google abdeckt. Google Cloud ist der drittgrößte Cloud-Anbieter (~12% Marktanteil) – PANWs Prisma Cloud funktioniert auch auf AWS und Azure. Die größere strukturelle Bedrohung als Wiz bleibt Microsofts Security-Bundling mit M365. Score-Auswirkung: Burggraben minimal von 7,5 auf 7/10 gesenkt – bereits berücksichtigt.</p>
+
+      <p><strong style="color:var(--primary);">These 3 – Datadog &amp; Dynatrace Cybersecurity-Expansion:</strong> Datadogs Vorstoß ist das realistischere kurzfristige Risiko. Mit $100+ Mio. Cloud-Security-ARR und FedRAMP High konkurriert Datadog ernsthaft um SIEM- und CSPM-Budgets in DevSecOps-Umgebungen. PANWs Antwort (Chronosphere-Akquisition) ist eine direkte Gegenbewegung – beide Märkte (Security und Observability) fusionieren zunehmend. PANW mit 70.000 Kunden (vs. ~29.000 bei Datadog) und breiterem Sicherheits-DNA hat strukturell die bessere Ausgangsposition. Dynatrace ist hingegen kein signifikanter direkter Cybersecurity-Konkurrent für PANW. Score-Auswirkung: Risiko-Score minimal von 6,5 auf 6/10 gesenkt.</p>
+
+      <div class="source">Quellen: Alle Sektionen 1–10; Datadog Annual Report 2024; SiliconAngle; Futurum Research.</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 12: FAZIT ═══ -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+    </div>
+    <div class="section-body">
+
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1: Strukturelle Profitabilitätswende.</strong> PANWs Non-GAAP Operating Margin überschritt drei Quartale in Folge die 30%-Marke. Der FCF von $3,75 Mrd. TTM auf dem Weg zu 40%-FCF-Marge bis FY2028 belegt, dass das Modell nicht nur wächst, sondern hochprofitabel wird. Die operative Hebelwirkung ist stark: Marginalkosten für jeden weiteren Software-Plattform-Nutzer tendieren gegen null.</p>
+          <p><strong>Säule 2: NGS ARR als unübertrefflicher Leading Indicator.</strong> $6,33 Mrd. NGS ARR (+33% YoY), $16 Mrd. RPO (+23%), 119% Net Retention Rate, 110 neue Platformization-Deals in einem Quartal. Diese Kennzahlen signalisieren, dass künftige Umsätze langfristig vertraglich gesichert sind. Kein Peer erreicht diese Qualität an vorgebuchtem Wachstum.</p>
+          <p><strong>Säule 3: Unadressierbares KI-TAM.</strong> Prisma AIRS (AI Runtime Security) für LLM-Schutz, Autonomous SOC und Agentic Remediation sind Produktkategorien ohne direkten Wettbewerber. Mit jedem Unternehmen, das KI-Agenten einführt, wächst das TAM für PANW. Die Bewertung nach −27% vs. 52W-Hoch bietet ~45–70% Upside zum Analystenkonsens-Zielkurs ($220–230).</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1: Google/Wiz strukturelle Verschiebung.</strong> Alphabet hat mit $32 Mrd. den führenden CNAPP-Anbieter gekauft und in Google Cloud integriert. Falls Wiz exklusiv für GCP optimiert wird UND Google Cloud weiter Marktanteile gewinnt, schrumpft PANWs Prisma-Cloud-ARR-Wachstum strukturell von >20% auf &lt;15%.</p>
+          <p><strong>Risiko 2: Datadog ist keine Nischen-Bedrohung mehr.</strong> $100+ Mio. Security-ARR in einem neu geschaffenen Produktbereich mit beschleunigendem Wachstum. Das Land-and-Expand-Modell (83% der Kunden nutzen ≥2 Produkte) ist ein bewiesener Wachstumsmotor in CISO-Budgets. Falls Datadog bis 2028 $500 Mio.–$1 Mrd. Security-ARR erreicht, gerät PANWs SOC-Segment unter direkten Druck.</p>
+          <p><strong>Risiko 3: EPS-Druck trifft hohe Bewertung.</strong> Q3-Guidance 15% unter Konsens. Bei Forward-P/E ~46x gibt es keinen Puffer für Guidance-Misses – wie der −8%-Post-Earnings-Rückgang zeigt. Alle Moving Averages negativ, MACD bearish, Distributions-Volumen erhöht. Falls M&A-Integrationen (CyberArk, Chronosphere) schwerer als erwartet verlaufen, könnte EPS-Druck in FY2027 anhalten.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung (ausgewogen)</h3>
+      <p>Das bullische Narrativ ist überzeugender, aber nur für Investoren mit einem <strong>2–5-Jahres-Zeithorizont</strong>. Die Profitabilitätswende ist strukturell (nicht zyklisch), der Datenmasse-Moat ist ein echter Wettbewerbsvorteil, und das KI-TAM (Prisma AIRS, Autonomous SOC) bietet ein Wachstumspotenzial, das in keiner Bewertungsmetrik vollständig abgebildet ist. Das bärische Narrativ enthält valide Risikopunkte: Google/Wiz und Datadog sind echte Wettbewerber, keine Hypothesen.</p>
+      <p>Die entscheidende Frage ist die <strong>Plattform-vs.-Best-of-Breed-Debatte</strong>: Werden CISOs zukünftig integrierte Plattformen (PANW) oder spezialisierte Tools (Wiz für Cloud, Datadog für Security-Monitoring, CrowdStrike für Endpoint) bevorzugen? Historische Evidenz in Enterprise-IT tendiert zur Plattform-Konsolidierung in reifen Märkten – was PANWs Strategie langfristig richtig positioniert. Das Risk/Reward nach dem Kursrückgang: ca. −15 bis −20% Downside (technischer Support $127–135) vs. ca. +45–70% Upside (Zielkurs $220–250 in 3 Jahren). Ich könnte falsch liegen, wenn: (1) Google Wiz exklusiv an GCP bindet, (2) M&A-Integration schwerer als erwartet läuft, oder (3) ein KI-nativer Security-Disruptor aufsteigt, den wir heute nicht auf dem Radar haben.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Zeithorizont</th><th>Empfehlung</th><th>Katalysatoren</th><th>Hauptrisiken</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Kurzfristig (0–6M)</strong></td>
+              <td><span class="badge badge-yellow">Warten / Tranchiert</span></td>
+              <td>Q3 FY26 Earnings (Mai 2026) als Bestätigung; technische Erholung über SMA 50</td>
+              <td>M&A-Integrationskosten; technische Schwäche aller MAs</td>
+            </tr>
+            <tr>
+              <td><strong>Mittelfristig (6–24M)</strong></td>
+              <td><span class="badge badge-orange">Kaufen (tranchiert)</span></td>
+              <td>NGS ARR-Beschleunigung über 35%; XSIAM-Skalierung; Prisma AIRS Ramp-up</td>
+              <td>Google/Wiz-Produktintegration; Datadog-Security-ARR-Wachstum</td>
+            </tr>
+            <tr>
+              <td><strong>Langfristig (2–5 Jahre)</strong></td>
+              <td><span class="badge badge-green">Kaufen &amp; Halten</span></td>
+              <td>40% FCF-Marge Realisierung; Agentic SOC; Identity+AI-Security TAM</td>
+              <td>Struktureller Plattformwechsel durch KI-native Anbieter</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>PANW ist das einzige dedizierte Cybersecurity-Unternehmen, das alle vier Security-Domänen (Netzwerk, Cloud, SOC, Identity) unter einer einheitlichen Plattform vereint und gleichzeitig KI-native Produkte ohne direkten Wettbewerber (Prisma AIRS, Autonomous SOC) skaliert. Der Burggraben ist real, der Free Cashflow gesund, und der Kursrückgang von −27% hat eine attraktivere Einstiegsbewertung erzeugt. Die Risiken (Google/Wiz, Datadog, M&A-Integration) sind real, aber nicht existenzbedrohend. Für Quality-Growth-Investoren mit 3–5-Jahres-Horizont überwiegen die Chancen deutlich.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$195–220</div></div>
+        <div class="rating-item"><label>Zielkurs (3 Jahre)</label><div class="val">$220–250</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">3–5 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">−15 bis −20%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+45 bis +70%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:3 bis 1:4</div></div>
+      </div>
+
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Google bricht Wiz-Cloud-Agnostizität → Prisma-Cloud-ARR-Wachstum fällt unter 15%</li>
+            <li>Q3 FY2026: NGS ARR unter $7,5 Mrd. AND Revenue-Guidance-Miss → Position 30–50% reduzieren</li>
+            <li>Datadog Security-ARR überschreitet $300 Mio. annualisiert (Q4 2026) → erhöhte Beobachtung</li>
+            <li>Kurs bricht unter $120 (langfristiger Support) → Stop-Loss prüfen</li>
+            <li>Net Retention Rate fällt unter 115% → Warnsignal; schrittweise Reduktion</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>NGS ARR ≥ $7,9 Mrd. in Q3 FY2026 (organisch &gt;30%) → Thesis bestätigt; nachkaufen</li>
+            <li>Prisma AIRS ARR-Contribution erstmals sichtbar (&gt;$100 Mio.) → Position erhöhen</li>
+            <li>Wiz bleibt cloud-agnostisch nach GCP-Integration (Kundenbestätigung) → Burggraben-Risiko reduziert</li>
+            <li>Kurs hält $135–140 Support mit steigendem Volumen → technischer Einstieg möglich</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Quality Growth Investors (3–5J)</li>
+            <li>Buy &amp; Hold Langfristinvestoren</li>
+            <li>Contrarian Investors (nach Kursrückgang)</li>
+            <li>Tech-Sektor-Portfolios</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Value Investors (P/E 90x+)</li>
+            <li>Income Investors (keine Dividende)</li>
+            <li>Kurzfristige Trader (alle MAs negativ)</li>
+            <li>Risikoaverse Investoren</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Konservativ</strong></td>
+              <td><span class="badge badge-yellow">Warten / Tranchiert</span></td>
+              <td>Abwarten auf Q3 FY2026 Earnings-Bestätigung (Mai 2026); Einstieg nach positivem Signal</td>
+            </tr>
+            <tr>
+              <td><strong>Moderat</strong></td>
+              <td><span class="badge badge-orange">Tranchiert einsteigen</span></td>
+              <td>50% jetzt bei ~$148–155, 50% nach Q3-Earnings-Bestätigung</td>
+            </tr>
+            <tr>
+              <td><strong>Aggressiv</strong></td>
+              <td><span class="badge badge-green">Jetzt kaufen</span></td>
+              <td>Risk/Reward 1:3–1:4 bei aktuellem Kurs; −27% Discount vs. 52W-Hoch</td>
+            </tr>
+            <tr>
+              <td><strong>Langfristig</strong></td>
+              <td><span class="badge badge-green">Kaufen &amp; Halten</span></td>
+              <td>Plattform-Lock-In + KI-TAM + 40%-FCF-Marge-Ziel = struktureller Wachstumsthema</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="source">Quellen: Alle Sektionen 1–11; Seeking Alpha Analystenkonsens; Futurum Research; Motley Fool (22. Feb. 2026); eigene Auswertung.</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEKTION 13: OUTLOOK ═══ -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Die 3 wichtigsten anstehenden Events</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📅 Event 1: Q3 FY2026 Earnings – voraussichtlich 19.–26. Mai 2026</h4>
+        <p>Das Q3-Ergebnis ist der wichtigste kurzfristige Test für die Investment-These. Die Guidance impliziert EPS von $0,78–0,80 (vs. $0,92 Konsens) – ein 15%iger Miss. Der Markt hat dies bereits teilweise eingepreist (−8% Post-Q2). Entscheidend wird sein, ob das NGS ARR-Wachstum und die Revenue-Guidance erfüllt werden, während die EPS-Druckphase als temporal erkennbar ist.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> NGS ARR ≥ $7,9 Mrd. (organisch &gt;30%) UND Revenue ≥ $2,94 Mrd. UND Non-GAAP Operating Margin ≥ 30% → M&A-Integrationssorgen sind temporal; Platformization-Momentum ist intakt; Kauf / Nachkauf bei positivem Kurs-Rücksetzer. Erholung Richtung $170–185 realistisch.<br><br>
+          <strong>Wenn:</strong> NGS ARR &lt; $7,5 Mrd. ODER Revenue-Guidance-Miss ODER EPS-Guidance nochmals &gt;10% unter Konsens → Integrationsrisiko ist struktureller als angenommen; Position 30–50% reduzieren; kurzfristiger Rückgang auf $120–130 möglich.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>🌐 Event 2: Wiz-Integration in Google Cloud – Produktintegration H2 2026</h4>
+        <p>Nach dem Deal-Abschluss Ende März 2026 beginnt die technische und kommerzielle Integration von Wiz in das Google Cloud-Ökosystem. Die kritische Frage: Hält Google die Cloud-Agnostizität von Wiz aufrecht (wie offiziell zugesagt), oder wird Wiz schrittweise exklusiv für GCP optimiert? Diese Entscheidung wird sich in H2 2026 durch konkrete Produktankündigungen und Kundenberichte zeigen.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Wiz bleibt nach GCP-Integration nachweislich cloud-agnostisch (bestätigt durch AWS/Azure-Kundenreferenzen und fortlaufende Multi-Cloud-Features) → Bedrohungslevel Google/Wiz für Prisma Cloud bleibt begrenzt; Burggraben-Score steigt auf 7,5/10; Rating KAUFEN bestätigt.<br><br>
+          <strong>Wenn:</strong> Wiz-Preise werden exklusiv für GCP-Kunden subventioniert ODER Wiz-Features werden primär auf GCP ausgerollt → Prisma-Cloud-ARR-Wachstum fällt unter 15%; bei nächsten Earnings Monitoring. Falls Prisma Cloud ARR-Wachstum &lt;15% fällt: Position schrittweise reduzieren.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 3: Datadog Q2/Q3 2026 Earnings – Security-ARR-Update August/November 2026</h4>
+        <p>Datadogs nächste Earnings-Berichte werden zeigen, ob das Security-Momentum bei $100 Mio. ARR stagniert (Nischen-Angebot) oder beschleunigt (ernsthafter Budgetkonkurrent). Der Key Indicator ist die Wachstumsrate des Cloud-Security-ARR im Verhältnis zum Gesamt-ARR. Gleichzeitig wird PANWs Net Retention Rate bei platformisierten Kunden Indikator sein, ob Datadog tatsächlich Budgets abzieht.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Datadogs Cloud-Security-ARR verbleibt unter $200 Mio. (annualisiert) bis Ende 2026 und wächst langsamer als Datadogs Gesamt-ARR → Security-Expansion bleibt in der DevSecOps-Nische; PANWs SOC-Budgets bleiben unberührt; PANW-Thesis voll intakt.<br><br>
+          <strong>Wenn:</strong> Datadogs Cloud-Security-ARR überschreitet $300 Mio. (annualisiert) mit beschleunigendem Wachstum UND PANW kommentiert erhöhten Wettbewerb im SIEM/CSPM-Segment → Falls PANWs NRR unter 115% fällt: Warning-Signal; Position schrittweise reduzieren. Falls NRR stabil ≥ 119%: Thesis hält trotz Wettbewerb – PANW's Plattformbreite schützt.
+        </div>
+      </div>
+
+      <p style="margin-top:16px; color:var(--text-muted); font-size:13px;">Analysedatum: 27. Februar 2026 · Nächstes geplantes Update: nach Q3 FY2026 Earnings (Mai 2026).</p>
+      <div class="source">Quellen: PANW Q2 FY2026 Earnings Call, Google Cloud Blog, Datadog Investor Relations, Futurum Research.</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung dar. Die enthaltenen Informationen und Einschätzungen basieren auf öffentlich zugänglichen Quellen und eigenen Analysen und können fehlerhaft oder unvollständig sein. Jede Investitionsentscheidung liegt in der alleinigen Verantwortung des Lesers. Vergangene Wertentwicklungen sind kein verlässlicher Indikator für zukünftige Ergebnisse. Der Autor dieser Analyse kann zum Zeitpunkt der Veröffentlichung Positionen in den genannten Wertpapieren halten oder nicht halten.
+  </div>
+
+</div><!-- /main -->
+</body>
+</html>
