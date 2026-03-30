@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEG – TAG Immobilien Aktienanalyse Canvas v2.2</title>
+  <style>
+    :root {
+      --primary: #8b5cf6;
+      --primary-dark: #6d3fd4;
+      --bg: #0f0f12;
+      --bg-card: #1a1a1f;
+      --bg-card2: #22222a;
+      --border: #2e2e38;
+      --text: #e8e8ec;
+      --text-muted: #888898;
+      --text-dim: #555566;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --teal: #14b8a6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7;
+    }
+    .header {
+      background: linear-gradient(135deg, #0e0018 0%, #1a0028 40%, #0f0f12 100%);
+      border-bottom: 1px solid var(--primary);
+      padding: 36px 40px 28px; display: flex; justify-content: space-between;
+      align-items: flex-start; flex-wrap: wrap; gap: 20px;
+    }
+    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .header-left h1 span { color: var(--primary); }
+    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    .header-right { text-align: right; }
+    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+    .price-change.up   { background: rgba(34,197,94,0.15); color: var(--green); }
+    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+    .nav {
+      background: var(--bg-card); border-bottom: 1px solid var(--border);
+      padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+    .kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .kpi-value.green  { color: var(--green); }
+    .kpi-value.red    { color: var(--red); }
+    .kpi-value.orange { color: var(--primary); }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .section-title  { font-size: 16px; font-weight: 700; color: white; }
+    .section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+    .section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+    .section-body   { padding: 20px 24px; }
+    p { margin-bottom: 12px; color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+    h3:first-child { margin-top: 0; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(139,92,246,0.04); }
+    .beat    { color: var(--green);  font-weight: 600; }
+    .miss    { color: var(--red);    font-weight: 600; }
+    .neutral { color: var(--yellow); font-weight: 600; }
+    .badge        { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
+    .badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .badge-blue   { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .badge-orange { background: rgba(139,92,246,0.15); color: var(--primary); }
+    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+    .event-item:last-child { border-bottom: none; }
+    .event-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+    .dot-green  { background: var(--green); }
+    .dot-red    { background: var(--red); }
+    .dot-yellow { background: var(--yellow); }
+    .event-label { font-weight: 600; color: white; }
+    .event-text  { font-size: 14px; color: var(--text); }
+    .risk-item   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px; }
+    .risk-title  { font-weight: 600; color: white; font-size: 14px; }
+    .score-bar       { display: flex; align-items: center; gap: 10px; }
+    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .score-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #c084fc); }
+    .score-num       { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bear-card h4 { color: var(--red);   margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .rating-box { background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(139,92,246,0.04)); border: 1px solid rgba(139,92,246,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+    .rating-item .val  { font-size: 20px; font-weight: 800; color: white; }
+    .rating-item .val.buy  { color: var(--green); }
+    .rating-item .val.hold { color: var(--yellow); }
+    .rating-item .val.sell { color: var(--red); }
+    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+    .trigger-card      { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .trigger-card h5   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .trigger-card.buy  h5 { color: var(--green); }
+    .trigger-card.sell h5 { color: var(--red); }
+    .trigger-list    { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
+    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    @media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+    .investor-no  { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-no  h5 { color: var(--red);   font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+    .investor-no  li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+    .geo-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+    .geo-card   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .geo-pct    { font-size: 20px; font-weight: 700; color: white; }
+    .geo-note   { font-size: 12px; color: var(--text-muted); }
+    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+    .outlook-card .when-then strong { color: var(--primary); }
+    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+    .source a { color: var(--text-dim); }
+    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+    .alert-box { background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+    .divider   { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .pill      { display: inline-block; background: rgba(139,92,246,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>TAG Immobilien <span>TEG.DE</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 04. März 2026 · XETRA · Sektor: Wohnimmobilien</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">Wohnimmobilien Deutschland</span>
+      <span class="badge badge-blue">Polen Expansion</span>
+      <span class="badge badge-green">MDAX</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">€ 15,49</div>
+    <div class="price-meta">Intraday 04.03.2026 · XETRA</div>
+    <div class="price-change down">▼ −3,6 % zum Vortag</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: €11,55 – €16,80</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <!-- KPI OVERVIEW -->
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Kurs</div>
+      <div class="kpi-value orange">€15,49</div>
+      <div class="kpi-sub">XETRA · 04.03.2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Marktkapitalisierung</div>
+      <div class="kpi-value">€2,93 Mrd.</div>
+      <div class="kpi-sub">189 Mio. Aktien</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">EPRA NTA/Aktie</div>
+      <div class="kpi-value green">€20,19</div>
+      <div class="kpi-sub">Rabatt: −23%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">FFO I 2025e</div>
+      <div class="kpi-value">€174–179M</div>
+      <div class="kpi-sub">+4% YoY</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">P/FFO I (FWD 2026)</div>
+      <div class="kpi-value">~15,3x</div>
+      <div class="kpi-sub">FFO I 2026e: €0,99–1,04</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">LTV</div>
+      <div class="kpi-value">42,3%</div>
+      <div class="kpi-sub">Q3 2025 (Ziel: ~45%)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Dividendenrendite</div>
+      <div class="kpi-value">~3,4%</div>
+      <div class="kpi-sub">+30% Div. für 2026e</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Nächste Earnings</div>
+      <div class="kpi-value red">18.03.26</div>
+      <div class="kpi-sub">Q4 2025 / FY 2025</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 1: GESCHÄFTSMODELL -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Kerngeschäft: Wohnimmobilien Deutschland</h3>
+      <p>Die TAG Immobilien AG ist ein auf Wohnimmobilien fokussierter Bestandshalter mit Sitz in Hamburg und über 125-jähriger Geschichte. Herzstück des Geschäftsmodells ist die Bewirtschaftung eines Portfolios von rund 83.000 Wohneinheiten in Deutschland, das sich primär auf B- und C-Städte in Nord- und Ostdeutschland konzentriert – Großraum Hamburg, Berlin/Brandenburg, Salzgitter, Thüringen/Sachsen und Nordrhein-Westfalen. Die Mieteinnahmen aus diesen Beständen bilden den stabilen Cashflow-Kern des Unternehmens, gemessen im Branchenjargon als FFO I (Funds from Operations aus dem Vermietungsgeschäft). TAG zielt bewusst auf das untere bis mittlere Preissegment ab – bezahlbarer Wohnraum, keine Prestigeobjekte in Premiumlagen.</p>
+      <p>Der strategische Ansatz ist bewusst industriell: Standardisierte Prozesse, digitalisierte Verwaltung, eigene Handwerkerdienste und aktives Asset Management sollen aus tausenden einzelner Wohnungen einen skalierbaren Ertragsträger machen. Die Kostenstruktur ist Asset-intensiv (Capex für Instandhaltung und Modernisierung), aber operativ effizient aufgestellt. Instandhaltungsausgaben je Einheit belaufen sich auf ca. €10–14/m²/Jahr. Die Leerstandsquote im deutschen Portfolio lag in 9M 2025 bei unter 4,5 % und wird konsequent durch aktives Leerstandsmanagement gesenkt.</p>
+      <h3>Wachstumsbein: Polen (Build-to-Hold & Build-to-Sell)</h3>
+      <p>Seit der Übernahme des polnischen Immobilienentwicklers ROBYG im Jahr 2022 verfügt TAG über ein dynamisches Zweitstandbein in Polen. Dort werden Neubauwohnungen in zwei Formen entwickelt: Beim Build-to-Sell (BTS)-Modell werden Eigentumswohnungen in polnischen Städten (Warschau, Danzig, Posen, Breslau, Krakau) entwickelt und verkauft – mit Nettomargen von über 30 %. Das Build-to-Hold (BTH)-Modell baut langfristige Mietportfolios in Polen auf und trägt perspektivisch zum FFO I bei. Für 2026 plant TAG den Verkauf von rund 2.900 Einheiten in Polen mit einem Gesamtvolumen von ca. €500 Mio. Zusätzlich erwarb TAG Ende 2025/Anfang 2026 rund 5.300 Mietwohnungen in Polen, was die Plattform deutlich erweitert. Die Revenue-Streams teilen sich damit in: (1) Nettomieteinnahmen Deutschland (~€370 Mio./Jahr), (2) Verkaufserlöse Polen (~€400–500 Mio./Jahr brutto), (3) Kleinere Gewerbevermietung und Dienstleistungen.</p>
+      <div class="source">Quellen: TAG Immobilien AG – Q3 2025 Statement (11.11.2025); H1 2025 Bericht (12.08.2025); Unternehmens-IR tag-ag.com; ad-hoc-news.de (Jan/Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 2: BURGGRABEN -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Switching Costs &amp; Lokale Netzwerke</h3>
+      <p>Der Burggraben von TAG Immobilien ist solide, aber strukturell begrenzt – wie bei den meisten Wohnimmobilienunternehmen. Mieter wechseln selten die Wohnung, was für stabile Auslastung sorgt, jedoch ist die "Stickiness" des Mieters kein echter strategischer Vorteil gegenüber Wettbewerbern. Die eigentliche Verteidigungslinie liegt in drei Bereichen: Zum Ersten verfügt TAG über ein skalierbares, digital unterstütztes Property-Management-System, das Effizienzvorteile gegenüber kleineren Bestandshaltern schafft. Eigene Handwerkerdienste reduzieren externe Kosten und sichern Reaktionsgeschwindigkeit. Zum Zweiten gibt es Skalenvorteile: 83.000 Einheiten erlauben günstigere Einkaufskonditionen bei Instandhaltung und Versicherungen sowie günstigere Refinanzierungskonditionen am Kapitalmarkt (Investment-Grade-Rating von Moody's).</p>
+      <h3>Brand &amp; Nischenstrategie als Defensivmerkmal</h3>
+      <p>Die Konzentration auf B- und C-Standorte mit bezahlbarem Wohnraum ist ein echtes Differenzierungsmerkmal, das regulatorische und zyklische Risiken reduziert. In Regionen wie Leipzig, Gera oder Salzgitter ist der politische Druck durch Mietendeckel und Regulierung geringer als in A-Städten wie Berlin oder München. Die strukturelle Wohnraumknappheit in Deutschland (Neubaubedarf ca. 400.000 Einheiten/Jahr, tatsächlich gebaut ~200.000/Jahr) wirkt wie ein natürlicher Burggraben gegen Nachfragerückgänge. Kritisch bleibt jedoch, dass ein struktureller Eintrittsbarrier gegenüber Wettbewerbern fehlt: Das Geschäftsmodell selbst ist replizierbar, und der Preiswettbewerb bei Akquisitionen ist hoch. Der technologische Vorsprung durch Digitalisierung ist real, aber kein dauerhafter Abstandshalter.</p>
+      <h3>Polen: Wachstumsoption mit strategischer Logik</h3>
+      <p>Die Polen-Plattform (ROBYG) bietet einen echten Differenzierungsvorteil gegenüber rein deutschlandfokussierten Wettbewerbern wie LEG Immobilien oder Grand City Properties. Die langjährige Entwicklungspipeline, die etablierten Kundenbeziehungen und der regulierungsgünstigere Markt schaffen einen strukturellen Vorteil für TAG in diesem Segment. Schwäche: Das BTH-Portfolio in Polen ist noch klein (3.348 Einheiten) und der Aufbau erfordert erheblichen Kapitalaufwand. Score 5/10: Solider, aber nicht überragender Burggraben – typisch für das Wohnimmobiliensegment.</p>
+      <div class="source">Quellen: TAG Unternehmens-IR (2025); ad-hoc-news.de (Jan 2026); Unternehmens-Strategie-Präsentation</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 3: LETZTE 4 QUARTALE -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Beat-Ratio: 3/3 (Q4 ausstehend)</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Da TAG Immobilien an der XETRA (Frankfurt) notiert ist, sind keine finviz.com-Daten verfügbar. Alle Kennzahlen stammen von TAG IR (tag-ag.com), investing.com und Yahoo Finance (Stand: 04.03.2026). Q4 2025-Ergebnisse werden am 18.03.2026 veröffentlicht.</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quartal</th>
+              <th>Nettomieteinnahmen</th>
+              <th>EBITDA adj. (Vermietung)</th>
+              <th>FFO I</th>
+              <th>FFO I/Aktie</th>
+              <th>LfL-Mietwachstum DE</th>
+              <th>EPRA NTA/Aktie</th>
+              <th>LTV</th>
+              <th>vs. Konsens</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q1 2025</strong></td>
+              <td>€91,9 Mio.</td>
+              <td>€62,8 Mio. (+2,3% YoY)</td>
+              <td>€44,9 Mio.</td>
+              <td>€0,26</td>
+              <td class="beat">+3,0% p.a.</td>
+              <td class="green">€19,75 (+6% YoY)</td>
+              <td>45,6%</td>
+              <td><span class="badge badge-green">Beat</span></td>
+            </tr>
+            <tr>
+              <td><strong>Q2 2025</strong></td>
+              <td>€92,3 Mio.</td>
+              <td>€63,6 Mio. (+7,1% YoY)</td>
+              <td>€46,7 Mio.</td>
+              <td>€0,26</td>
+              <td class="beat">+2,7% p.a.</td>
+              <td class="green">€20,18 (+10% YoY)</td>
+              <td>45,3%</td>
+              <td><span class="badge badge-green">Beat</span></td>
+            </tr>
+            <tr>
+              <td><strong>Q3 2025</strong></td>
+              <td>€92,9 Mio.</td>
+              <td>€62,0 Mio. (+6,1% YoY)</td>
+              <td>€44,2 Mio.</td>
+              <td>€0,24</td>
+              <td class="beat">+2,6% p.a.</td>
+              <td class="green">€20,19 (+8% YoY)</td>
+              <td><span class="beat">42,3%</span></td>
+              <td><span class="badge badge-green">Beat</span></td>
+            </tr>
+            <tr>
+              <td><strong>Q4 2025</strong></td>
+              <td>~€93–96 Mio. (e)</td>
+              <td>~€63–65 Mio. (e)</td>
+              <td>~€38–43 Mio. (e)</td>
+              <td>~€0,21–0,23 (e)</td>
+              <td>+2,5% (e)</td>
+              <td>~€21–22 (e)</td>
+              <td>~46% pro forma</td>
+              <td><span class="badge badge-yellow">18.03.2026</span></td>
+            </tr>
+            <tr>
+              <td><strong>FY 2025 (Guidance)</strong></td>
+              <td>~€370 Mio. (e)</td>
+              <td>~€250–256 Mio. (e)</td>
+              <td><strong>€174–179 Mio.</strong></td>
+              <td>~€0,92–0,95</td>
+              <td>~2,7%</td>
+              <td>–</td>
+              <td>~46% (pro forma)</td>
+              <td><span class="badge badge-orange">Guidance erhöht</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>TAG zeigte in den ersten drei Quartalen 2025 eine konsistente operative Stärke. Der FFO I stieg in 9M 2025 auf €135,8 Mio. (+4% YoY), die EBITDA-Marge im Vermietungsgeschäft verbesserte sich deutlich. Bemerkenswert ist die kontinuierliche LTV-Reduktion von 46,9% (Ende 2024) auf 42,3% (Q3 2025) – getrieben durch die Barkapitalerhöhung von €186 Mio. im Q3 2025 und den starken operativen Cashflow. In Q4 2025 werden erhebliche Wohnungsübergaben in Polen erwartet (Großteil der 2025er Handovers), was den FFO II deutlich ankurbeln sollte. Nächste reguläre Quartalsergebnisse (Q4 2025 / FY 2025): 18. März 2026.</p>
+      <p>Die Management-Statements (CEO Claudia Hoyer) sind durchgehend positiv: Operative Stärke in Deutschland und Polen, Portfoliobewertungsgewinne (+1,4% in DE in H1 2025) und eine klare Strategie zur Verschuldungsreduktion prägen das Narrativ. Wichtigste Management-Aussage aus Q3 2025: Die Prognose für 2026 zeigt ein FFO I von €187–197 Mio. (+9%), FFO II von €279–295 Mio. (+19%) und eine Dividendenerhöhung um ca. 30%.</p>
+      <div class="source">Quellen: TAG Immobilien AG – Q3 2025 Statement (11.11.2025); H1 2025 Bericht (12.08.2025); Q1 2025 Statement (08.05.2025); tag-ag.com IR</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 4: WACHSTUM -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Mietwachstum Deutschland: Solide Like-for-Like-Dynamik</h3>
+      <p>Das organische Wachstum im deutschen Bestandsportfolio ist stabil und vorhersehbar. Das Like-for-Like-Mietwachstum in Deutschland betrug in den ersten neun Monaten 2025 konsistent rund 2,6–3,0 % per annum – getrieben durch Wiedervermietungssteigerungen, Modernisierungsumlagen und allgemein angespannte Wohnungsmärkte. Die Nettomieteinnahmen stiegen von €268,2 Mio. (9M 2024) auf €277,1 Mio. (9M 2025), was einem Wachstum von ca. 3,3 % entspricht. Der operative Ergebnishebel ist dabei höher als das reine Umsatzwachstum: EBITDA (adj.) aus dem Vermietungsgeschäft stieg im selben Zeitraum um 5,7 % auf €188,4 Mio., da Kostenpositionen unterproportional wachsen. Dies entspricht einer operativen Hebelwirkung, die für langfristige Margensteigerung spricht.</p>
+      <h3>Geografische Verteilung des Immobilienvermögens (GAV)</h3>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">Deutschland (Gesamt)</div>
+          <div class="geo-pct">77,8%</div>
+          <div class="geo-note">GAV €5.354 Mio. · 82.953 Einh.</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Polen (Vermietung)</div>
+          <div class="geo-pct">8,4%</div>
+          <div class="geo-note">GAV €578 Mio. · 3.348 Einh.</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Polen (Verkauf/BTS)</div>
+          <div class="geo-pct">13,7%</div>
+          <div class="geo-note">GAV €944 Mio. · Entwicklungspipeline</div>
+        </div>
+      </div>
+      <h3>Polen: Wachstumstreiber mit hoher Dynamik</h3>
+      <p>Das Polen-Segment ist der eigentliche Wachstumstreiber: In 9M 2025 wurden 1.973 Wohneinheiten in Polen verkauft (Vorjahr: 1.435, +37,5 %), mit einem Gesamtvolumen von €327 Mio. (Vorjahr: €261 Mio.). Für 2026 plant TAG den Verkauf von rund 2.900 Einheiten bei einem Volumen von ca. €500 Mio. und Margen von über 30 %. Das Build-to-Hold-Portfolio wächst ebenfalls: Mit der geplanten Übernahme von ca. 5.300 Mietwohnungen in Polen (voraussichtlich Q1/Q2 2026) wird das polnische Mietportfolio auf ca. 8.600 Einheiten anwachsen – ein Sprung von rund 157 %. Für 2026 sind zudem 2.300 neue BTH-Einheiten im Bau geplant.</p>
+      <p>Das Gesamtimmobilienvermögen (GAV) wuchs von €6.505,9 Mio. (Ende 2024) auf €6.876,0 Mio. (Q3 2025, +5,7 %), trotz leichter Portfolioverkäufe in Deutschland. Der Reifegrad des deutschen Geschäfts ist "Growth-at-Scale" mit moderatem, aber stabilen Wachstum. Das Polen-Segment befindet sich dagegen in der Hyper-Growth-Phase mit zweistelligen Wachstumsraten. Kritisch anzumerken: Das Wachstum ist nicht durch M&A inflationiert, sondern operativ organisch – ein wichtiges Qualitätsmerkmal.</p>
+      <div class="source">Quellen: TAG Q3 2025 Statement (11.11.2025); H1 2025 Bericht (12.08.2025); quartr.com/TAG (Dez. 2025)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 5: BEWERTUNG -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Da TEG an der XETRA notiert, sind keine finviz.com-Daten verfügbar. Alle Kennzahlen stammen von investing.com, Yahoo Finance, TAG IR und finanzen.net (Stand: 04.03.2026).</div>
+      <h3>Multiples-Übersicht</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Kennzahl</th>
+              <th>Aktueller Wert</th>
+              <th>Historischer Ø (3J)</th>
+              <th>Einschätzung</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Kurs / EPRA NTA</td>
+              <td>0,77x (Rabatt: −23%)</td>
+              <td>~0,85–1,10x</td>
+              <td><span class="badge badge-green">Attraktiv</span></td>
+            </tr>
+            <tr>
+              <td>P/FFO I (TTM 2025e)</td>
+              <td>~16,7x</td>
+              <td>~16–22x</td>
+              <td><span class="badge badge-green">Fair</span></td>
+            </tr>
+            <tr>
+              <td>P/FFO I (FWD 2026e)</td>
+              <td>~15,3x</td>
+              <td>–</td>
+              <td><span class="badge badge-green">Attraktiv</span></td>
+            </tr>
+            <tr>
+              <td>KGV (P/E TTM)</td>
+              <td>~20,8x</td>
+              <td>~20–30x (IFRS-bereinigt)</td>
+              <td><span class="badge badge-yellow">Neutral</span></td>
+            </tr>
+            <tr>
+              <td>Dividendenrendite (2026e)</td>
+              <td>~3,4% (€0,52e)</td>
+              <td>–</td>
+              <td><span class="badge badge-green">Attraktiv</span></td>
+            </tr>
+            <tr>
+              <td>Konsens-Kursziel (Analysten)</td>
+              <td>€18,33 (Yahoo)</td>
+              <td>–</td>
+              <td><span class="badge badge-green">+18% Upside</span></td>
+            </tr>
+            <tr>
+              <td>Deutsche Bank Kursziel</td>
+              <td>€19,00</td>
+              <td>–</td>
+              <td><span class="badge badge-green">+23% Upside</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Bewertungseinordnung</h3>
+      <p>Die wichtigste Bewertungskennzahl für Wohnimmobilienunternehmen ist der Kurs in Relation zum EPRA NTA (Net Tangible Assets). TAG handelt aktuell mit einem Rabatt von rund 23 % auf den EPRA NTA von €20,19 je Aktie. Historisch haben deutsche Wohnimmobilienunternehmen in "normalen" Marktphasen zum NAV oder sogar mit Aufschlag gehandelt. Der aktuelle Rabatt reflektiert noch die Nachwirkungen der Zinswende 2022–2023 und die erhöhte Risikoaversion gegenüber dem Sektor. Sofern das Zinsumfeld sich weiter entspannt und die EPRA NTA-Wachstumsstory fortschreibt (für Ende 2025 wird ein NTA von ~€21–22 je Aktie erwartet), ist eine Neubewertung auf 0,90–1,00x NTA (entspricht €19–22) plausibel.</p>
+      <p>Das P/FFO I von ~15,3x für 2026 ist für ein Unternehmen mit 9 % FFO-I-Wachstum und 30 % Dividendenwachstum attraktiv. Der PEG-Analoge (P/FFO I geteilt durch FFO-Wachstum) liegt unter 2x – ein Signal für faire bis günstige Bewertung. Das KGV von ~20,8x ist für Immobilienunternehmen weniger aussagekräftig, da es durch IFRS-Aufwertungsgewinne und Abschreibungen verzerrt wird.</p>
+      <div class="source">Quellen: TAG IR (Stand: Q3 2025); Yahoo Finance (19.02.2026); finanzen.net (03.03.2026); investing.com (13.02.2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 6: CASHFLOW & MARGEN -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <h3>FFO &amp; Cashflow-Qualität</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kennzahl</th><th>9M 2025</th><th>9M 2024</th><th>YoY</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Nettomieteinnahmen</td><td>€277,1 Mio.</td><td>€268,2 Mio.</td><td class="beat">+3,3%</td></tr>
+            <tr><td>EBITDA adj. (Vermietung DE+PL)</td><td>€188,4 Mio.</td><td>€178,3 Mio.</td><td class="beat">+5,7%</td></tr>
+            <tr><td>EBITDA-Marge (Vermietung)</td><td>~68,0%</td><td>~66,5%</td><td class="beat">+150bp</td></tr>
+            <tr><td>FFO I (Vermietungsergebnis)</td><td>€135,8 Mio.</td><td>€130,5 Mio.</td><td class="beat">+4,1%</td></tr>
+            <tr><td>FFO II (inkl. Polen-Verkäufe)</td><td>€169,3 Mio.</td><td>€167,5 Mio.</td><td class="beat">+1,1%</td></tr>
+            <tr><td>EPRA NTA je Aktie</td><td>€20,19</td><td>€18,63 (Q3'24)</td><td class="beat">+8,4%</td></tr>
+            <tr><td>Gesamtverschuldung (LTV)</td><td>42,3%</td><td>~47,0%</td><td class="beat">−470bp</td></tr>
+            <tr><td>Zinsdeckungsgrad (ICR)</td><td>5,9x</td><td>~5,5x</td><td class="beat">Stark</td></tr>
+            <tr><td>Net Debt / adj. EBITDA</td><td>9,3x</td><td>~10,0x</td><td class="beat">Verbesserung</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Margen &amp; Kapitalstruktur</h3>
+      <p>Die operative Marge im Kerngeschäft Vermietung Deutschland (EBITDA/Nettomieteinnahmen) liegt bei rund 68 % und verbessert sich kontinuierlich durch operativen Hebel. Die FFO I-Marge (FFO I / Nettomieteinnahmen) beträgt ~49 % – ein solider Wert für einen Bestandshalter dieser Größe. Die Cashflow-Qualität ist hoch: FFO I basiert auf echten Mieteinnahmen und enthält keine Sonderposten, Bewertungsgewinne oder Non-Cash-Items. Die EPRA NTA je Aktie stieg trotz der €186 Mio. Kapitalerhöhung in Q3 2025 (die 9 % verwässernd wirkte) auf €20,19 – ein Zeichen der operativen Stärke des Modells.</p>
+      <p>Die Kapitalstruktur verbesserte sich markant: Der LTV sank von 46,9 % (Ende 2024) auf 42,3 % in Q3 2025 und liegt damit unter dem eigenen Zielwert von ~45 %. Nach dem Vollzug der polnischen Übernahme wird er pro forma bei ca. 46,1 % liegen – noch immer nah am Ziel. Das Moody's Investment-Grade-Rating wurde mit positivem Ausblick versehen (Upgrades von "stable" auf "positive" in H1 2025). Keine Dividende wurde für FY 2024 gezahlt (Kapitalerhalt priorisiert), aber für FY 2025 ist eine Dividende von €0,40 geplant, und für FY 2026 eine Erhöhung um ca. 30 % auf rund €0,52 je Aktie (50 % Ausschüttungsquote des FFO I). Aktienrückkäufe sind aktuell kein Thema – der Fokus liegt auf Wachstum und Bilanzstärkung.</p>
+      <div class="source">Quellen: TAG Q3 2025 Statement (11.11.2025); H1 2025 Bericht (12.08.2025); tag-ag.com IR; quartr.com (Dez. 2025)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 7: PEER-VERGLEICH -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Unternehmen</th>
+              <th>Marktkapitalisierung</th>
+              <th>Portfolio-Größe</th>
+              <th>FFO I (TTM)</th>
+              <th>P/FFO I (FWD)</th>
+              <th>LTV</th>
+              <th>Rabatt z. NTA</th>
+              <th>LfL-Mietw.</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:rgba(139,92,246,0.06);">
+              <td><strong>TAG Immobilien (TEG)</strong></td>
+              <td>€2,93 Mrd.</td>
+              <td>83k DE + 3,4k PL</td>
+              <td>€179 Mio.e</td>
+              <td>~15,3x</td>
+              <td>42,3%</td>
+              <td class="beat">−23%</td>
+              <td class="beat">+2,6%</td>
+            </tr>
+            <tr>
+              <td><strong>Vonovia (VNA)</strong></td>
+              <td>~€23 Mrd.</td>
+              <td>~500k DE/AT/SE</td>
+              <td>~€1,8 Mrd.e</td>
+              <td>~12–13x</td>
+              <td>~46%</td>
+              <td>−15 bis −20%</td>
+              <td>+3,5%</td>
+            </tr>
+            <tr>
+              <td><strong>Deutsche Wohnen (DWNI)</strong></td>
+              <td>~€8 Mrd.*</td>
+              <td>~155k (Vonovia-Konzern)</td>
+              <td>n/a (konsolidiert)</td>
+              <td>n/a</td>
+              <td>n/a</td>
+              <td>n/a</td>
+              <td>n/a</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>*Deutsche Wohnen (DWNI.DE) wird zu ca. 88 % von Vonovia gehalten und ist de facto kein eigenständiger Investmentcase mehr. Der Streubesitz ist minimal, und die Aktie hat nur geringe Handelsaktivität. Ein echter Peer-Vergleich auf quantitativer Ebene ist daher nur mit Vonovia möglich.</p>
+      <h3>Qualitative Einordnung: TAG vs. Vonovia</h3>
+      <p>Vonovia ist das ~8-fache von TAG in Bezug auf Marktkapitalisierung und verfügt über wesentlich stärkere Skalenvorteile sowie eine tiefere Kapitalmarktzugangsfähigkeit. Vonovia handelt mit einem geringeren NTA-Rabatt als TAG, was das Vertrauen des Marktes in die Qualität des Portfolios widerspiegelt. Die EBITDA-Marge von Vonovia ist durch die integrierte Value-Add-Plattform (eigene Handwerksdienstleistungen, Energiegeschäft) höher als bei TAG. Vonovia ist stärker in A-Städten positioniert (höhere Mietsteigerungsdynamik, aber auch höherer Regulierungsdruck), während TAG in B- und C-Märkten defensiver aufgestellt ist. TAG bietet im Vergleich die günstigere Bewertung (P/FFO I ~15x vs. ~12x bei Vonovia, aber höheres relatives Wachstumspotenzial durch Polen). Die Verschuldungskennzahl (LTV 42,3 %) ist aktuell besser als bei Vonovia (~46 %), was TAG in einem Zinsanstiegsszenario defensiver macht. Für risikobewusste Investoren, die einen reinen Wohnimmobilien-Cashflow ohne die Komplexität des Vonovia-Konzernverbunds suchen, ist TAG der klarere Case.</p>
+      <div class="source">Quellen: TAG Q3 2025 Statement (11.11.2025); Vonovia H1 2025 Bericht; Yahoo Finance (Feb. 2026); boerse.de</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 8: NEWS & EVENTS -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen (Company-spezifische Events)</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">11.11.2025 – Q3 2025 Statement &amp; erhöhte Prognosen <span class="badge badge-green">Sehr Positiv</span></div>
+          <div class="event-text">TAG erhöhte die FFO I-Prognose für 2025 auf €174–179 Mio. (zuvor: €172–176 Mio.) und veröffentlichte erstmals Guidance für 2026: FFO I €187–197 Mio. (+9%), FFO II €279–295 Mio. (+19%), Dividende +30%. Reaktion der Aktie: deutlich positiv. Quelle: TAG IR, 11.11.2025</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Q3 2025 – Barkapitalerhöhung €186 Mio. &amp; Polen-Akquisition <span class="badge badge-orange">Strategisch</span></div>
+          <div class="event-text">TAG führte eine Kapitalerhöhung über €186 Mio. durch zur Finanzierung der Übernahme von ~5.300 Mietwohnungen in Polen (Closing erwartet Ende Q1 / Anfang Q2 2026). Verwässerung ~9%; LTV sinkt gleichzeitig auf 42,3%. Strategisch sinnvoll, aber kurzfristig belastend. Quelle: TAG IR, Nov. 2025</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">12.08.2025 – H1 2025 Ergebnisse: FFO I +4%, NTA +10% YoY <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Moody's hebt Ausblick für TAG von "stable" auf "positive" an – ein bedeutsames Signal für die Kreditqualität. FFO I im ersten Halbjahr bei €91,6 Mio. EPRA NTA stieg auf €20,18 je Aktie (+10% gegenüber Vorjahr). Quelle: TAG IR, EQS News, 12.08.2025</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Feb. 2026 – Deutsche Bank hebt Kursziel auf €19,00 an <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Deutsche Bank erhöhte Kursziel von €18,00 auf €19,00 und bekräftigt "Buy"-Rating. Begründung: starke operative Entwicklung, attraktiver NTA-Rabatt und Polen-Wachstumspotenzial. Quelle: investing.com, Feb. 2026</div>
+        </div>
+      </div>
+      <h3>Ebene 2: Branche (Sector-spezifische Events)</h3>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Jan. 2026 – Europäische Wohnimmobilien: Tiefster Discount zur Gesamtmarkt seit Jahren <span class="badge badge-yellow">Sektoral</span></div>
+          <div class="event-text">Investing.com berichtete, dass europäische börsennotierte Immobilien Anfang 2026 mit dem weitesten historischen Rabatt zur Gesamtmarktbewertung handeln. Dies indiziert eine strukturelle Unterbewertung des Sektors und potenzielle Neubewertungsfantasie. Quelle: investing.com, Jan. 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2025–2026 – Wohnraummangel Deutschland: 700.000 Einheiten Fehlbedarf <span class="badge badge-orange">Strukturell Positiv</span></div>
+          <div class="event-text">Der Bundesverband der Wohnungs- und Immobilienunternehmen (GdW) und unabhängige Studien bestätigen einen Fehlbedarf von 700.000+ Wohneinheiten in Deutschland. Neubautätigkeit bei ~200.000 Einheiten/Jahr gegenüber einem Bedarf von ~400.000. Direkter Rückenwind für Leerstandsabbau und Mietsteigerungen bei Bestandshaltern wie TAG. Quelle: myinvest24.de, Dez. 2025</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">2026 – BGH-Urteil: Verbot exorbitanter Untervermietungsaufschläge <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Der BGH untersagte im Januar 2026 überhöhte Aufschläge bei der Untervermietung. Für TAG als klassischen Bestandshalter ohne aktiven Untervermietungsmarkt nur marginale Relevanz; kein direkter Cashflow-Effekt. Quelle: finanzen.net, 28.01.2026</div>
+        </div>
+      </div>
+      <h3>Ebene 3: Makro (Gesamtwirtschaft &amp; Politik)</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">H2 2025 / 2026 – EZB-Zinssenkungszyklus (8 Senkungen seit 2024) <span class="badge badge-green">Sehr Positiv</span></div>
+          <div class="event-text">Die EZB hat seit Mitte 2024 ihren Leitzins acht Mal gesenkt. Der Einlagezins liegt aktuell bei ca. 2,5–3,0 %. Für zinssensitive Wohnimmobilienunternehmen wie TAG wirkt dies positiv auf Refinanzierungskosten, Portfoliobewertungen und das Marktsentiment. Bauzinsen für 10-jährige Laufzeiten liegen bei ca. 3,0–3,7 %. Quelle: baufi24.de, Feb. 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">März 2026 – Deutsches Sondervermögen (€900 Mrd.) treibt Anleiherenditen <span class="badge badge-red">Kurzfristig Negativ</span></div>
+          <div class="event-text">Die Ankündigung massiver Sondervermögen für Verteidigung und Infrastruktur durch die neue Bundesregierung ließ die Renditen 10-jähriger Bundesanleihen sprunghaft steigen. Dies belastet kurzfristig die Bewertungsmultiples von Immobilienunternehmen und erklärt den Kursrückgang der TAG-Aktie von €16,80 (27.02.) auf ~€15,49 (04.03.). Quelle: baufi24.de, März 2026; wallstreetONLINE</div>
+        </div>
+      </div>
+      <div class="source">Quellen: TAG IR (11.11.2025, 12.08.2025); finanzen.net; investing.com; baufi24.de; wallstreetONLINE (2025–2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 9: TECHNISCHE ANALYSE -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom: 16px;">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">€15,49</div><div class="kpi-sub">04.03.2026</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value green">~€15,20</div><div class="kpi-sub">Kurs darüber</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value green">~€14,50</div><div class="kpi-sub">Kurs darüber</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value green">~€13,80</div><div class="kpi-sub">Kurs darüber</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14T)</div><div class="kpi-value">~52</div><div class="kpi-sub">Neutral</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value">€16,80</div><div class="kpi-sub">27.02.2026</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Low</div><div class="kpi-value red">€11,55</div><div class="kpi-sub">09.04.2025</div></div>
+      </div>
+      <h3>Trend &amp; Chart-Situation</h3>
+      <p>Die TAG-Aktie zeigte in den letzten 12 Monaten eine bemerkenswerte Erholung: Vom 52-Wochen-Tief von €11,55 (April 2025) erholte sie sich bis auf ein neues 52-Wochen-Hoch von €16,80 am 27. Februar 2026 – ein Anstieg von +45 % innerhalb eines Jahres und eine der stärksten Jahresperformances unter deutschen Immobilienaktien. Die Aktie befindet sich technisch im mittelfristigen Aufwärtstrend: Sie notiert über allen relevanten gleitenden Durchschnitten (SMA 20, 50, 200). Investing.com wertet das technische Gesamtbild als "Strong Buy".</p>
+      <p>Der aktuelle Kursrückgang von €16,80 auf €15,49 (-7,8 % in einer Woche) ist fundamentalem Anlass geschuldet: Die Ankündigung des deutschen Sondervermögens ließ Bundesanleiherenditen sprunghaft steigen, was zinssensitive Sektoren belastet. Dies ist ein externes makroökonomisches Ereignis, kein unternehmensinternes Problem. Support-Level liegen bei €14,80–15,00 (SMA 20) und €14,00–14,50 (SMA 50). Widerstand liegt am bisherigen 52-Wochen-Hoch bei €16,80. Ein RSI von ca. 52 zeigt eine neutrale, nicht überkaufte Situation – technisch ein konstruktiver Ausgangspunkt nach dem Pullback.</p>
+      <p>Das MACD-Signal war zuletzt leicht bearisch (kurzfristiger Momentum-Verlust durch den Einwochenverlauf), dürfte sich aber bei Stabilisierung der Anleiherenditen schnell wieder drehen. Volumenanalyse: Das Handelsvolumen war in der Korrekturwoche erhöht, was auf institutionellen Abbau hindeutet – jedoch kein Panikverkauf. Das technische Bild spricht auf 3–6 Monate für eine Rückkehr an die €16–17-Zone, sofern keine weitere Eskalation der Makrosituation erfolgt.</p>
+      <div class="source">Quellen: wallstreetONLINE (04.03.2026); investing.com (13.02.2026); boerse.de (06.02.2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 10: RISIKEN & CHANCEN -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <h3>9a) Strukturelle &amp; Zyklische Risiken</h3>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Zinsrisiko &amp; Refinanzierungsrisiko</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-red">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">TAG hat trotz Verbesserungen noch einen LTV von 42–46 % und erhebliche Fremdfinanzierung. Das neu angekündigte Bundesschuldenpaket (~€900 Mrd.) hat Bundesanleiherenditen sprunghaft erhöht und damit auch Hypothekenzinsen (3,4–3,7 % für 10J). Sofern die EZB ihren Zinssenkungszyklus pausiert oder die Kapitalmarktzinsen strukturell höher bleiben, werden Refinanzierungskosten bei Anschlussfinanzierungen steigen. Wahrscheinlichkeit: 35 %. Auswirkung: FFO I könnte bei +50bp höheren Refinanzierungskosten um €8–12 Mio. sinken.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Regulierungsrisiko (Mietrecht Deutschland)</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Diskussionen um Mietpreisbremse, Mietendeckel (Berliner Beispiel 2020/21) und verschärfte Energieeindorderungen (Wärmewende, EU-Gebäuderichtlinie) sind strukturelle Risiken für Bestandshalter. TAG ist durch seine Fokussierung auf B/C-Städte mit geringerem politischen Druck als Vonovia in Berlin/München, aber nicht immun. Sanierungspflichten könnten mittelfristig Capex-Anforderungen erhöhen. Wahrscheinlichkeit: 30 %. Auswirkung: Schrittweiser Margendruck über 3–5 Jahre, kein existenzielles Risiko.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Polen-Länderrisiko &amp; Ausführungsrisiko</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Die Polen-Plattform wächst schnell und wird nach der Übernahme der 5.300 Einheiten ein Drittel des GAV ausmachen. Länderrisiken (politische Instabilität, EUR/PLN-Wechselkurs, regulatorische Änderungen in Polen) nehmen zu. Der polnische Wohnungsmarkt ist dynamisch, aber saisonal und konjunkturabhängig. Falls Verkaufspreise in Polen stagnieren, könnte FFO II-Wachstum deutlich hinter den Erwartungen (€279–295 Mio.) zurückbleiben. Wahrscheinlichkeit: 25 %. Auswirkung: FFO II bis zu 15 % unter Guidance.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Verwässerungsrisiko durch künftige Kapitalerhöhungen</div>
+          <div><span class="badge badge-green">Niedrig</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">TAG hat in Q3 2025 eine Kapitalerhöhung von €186 Mio. (9 % Verwässerung) durchgeführt. Bei weiterem Wachstum in Polen könnten zusätzliche Kapitalmaßnahmen nötig sein. Das Scrip-Dividenden-Programm (Aktien statt Cash) wirkt ebenfalls leicht verwässernd. Wahrscheinlichkeit: 20 % (nächste Kapitalerhöhung in 12 Monaten). Auswirkung: EPS/FFO I per share Verwässerung von 5–10 %.</div>
+      </div>
+      <h3>9b) AI-Risiko &amp; Technologische Disruption</h3>
+      <p>Für Wohnimmobilienbestandshalter ist das AI-Disruptions-Risiko gering. Property-Management kann durch KI effizienter werden (Leerstandsmanagement, Predictive Maintenance), was eher als Chance denn als Bedrohung zu werten ist. Es gibt keine strukturelle Bedrohung des Geschäftsmodells durch AI. TAG setzt intern auf Digitalisierung der Prozesse, was Kostenvorteile schafft.</p>
+      <h3>9c) Chancen</h3>
+      <p>Die zentralen Chancen liegen in drei Bereichen: Erstens profitiert TAG von der strukturellen Wohnraumknappheit in Deutschland (700.000 Fehleinheiten, nur 200.000 Neubauten/Jahr) – dies sichert anhaltend niedrige Leerstandsquoten und ermöglicht kontinuierliche Mietsteigerungen. Zweitens bietet der Polen-Boom (stark wachsender Mittelstand, EU-Urbanisierung, Arbeitsmigration aus der Ukraine) ideale Rahmenbedingungen für das BTS- und BTH-Geschäft – hochmargige Verkäufe mit >30 % Nettomarge und strukturelles Wachstum des BTH-Portfolios. Drittens eröffnet der NTA-Rabatt von 23 % mittelfristig Neubewertungspotenzial auf 0,90–1,00x NTA (entspricht €18–20/Aktie), sollte das Zinsumfeld moderat bleiben und die operativen Ziele 2026 erreicht werden.</p>
+      <h3>9d) Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> Der sprunghafte Anstieg der Anleiherenditen infolge des Bundesschuldenpakets (März 2026) ist ein Signal, das weitere Zinserhöhungsrisiken indiziert. Die Verwässerung durch die Q3-Kapitalerhöhung war notwendig, signalisiert aber erhöhten Kapitalbedarf für das Polen-Wachstum. Der deutliche Kursrückgang von €16,80 auf €15,49 innerhalb einer Woche sollte technisch beobachtet werden.</p>
+      <p><strong>Dealbreaker (existenzbedrohend – nicht vorhanden):</strong> Keine existenziellen Risiken identifiziert. LTV unter 45 %, Moody's Investment-Grade, ICR von 5,9x, und alle Fälligkeiten durch Liquidität gedeckt. Das Unternehmen ist fundamental solide aufgestellt.</p>
+      <div class="source">Quellen: TAG Q3 2025 (11.11.2025); ad-hoc-news.de (Jan./Feb. 2026); baufi24.de (Feb./März 2026); myinvest24.de (Dez. 2025)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 11: SCORING -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring &amp; Gesamtbewertung</div>
+      <div class="section-score">Ø 6,1/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kategorie</th><th>Score</th><th>Score-Bar</th><th>Begründung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Geschäftsmodell</td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Klares, fokussiertes Modell; Polen als Wachstumsoption; bezahlbares Wohnen strukturell stabil</td>
+            </tr>
+            <tr>
+              <td>Burggraben</td>
+              <td>5/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td>
+              <td>Moderate Switching Costs; Skalenvorteile real; kein echter struktureller Eintrittsbarrier</td>
+            </tr>
+            <tr>
+              <td>Operative Entwicklung (4Q)</td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>3/3 Quartale Beat; FFO I +4%; Guidance erhöht; LTV-Senkung überzeugt</td>
+            </tr>
+            <tr>
+              <td>Wachstum</td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Moderates DE-Wachstum (~3%); Polen dynamisch (+37% Verkäufe YoY); Gesamtbild: solide</td>
+            </tr>
+            <tr>
+              <td>Bewertung</td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>−23% Rabatt auf NTA; P/FFO I (FWD) ~15,3x attraktiv; Konsens-Upside +18–23%</td>
+            </tr>
+            <tr>
+              <td>Cashflow &amp; Kapitalqualität</td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>FFO I-Marge ~49%; LTV 42,3%; ICR 5,9x; Moody's positiver Ausblick; Cashflow qualitativ hochwertig</td>
+            </tr>
+            <tr>
+              <td>Risiken (invertiert)</td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Zinsrisiko real aber manageable; kein Dealbreaker; Polen-Risiken moderat; Investment Grade Rating</td>
+            </tr>
+            <tr>
+              <td>Technische Analyse</td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Über allen SMAs; +39% vom Tief; kurzfristiger Pullback durch Makro; RSI neutral (~52)</td>
+            </tr>
+            <tr style="background:rgba(139,92,246,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>6,4/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track"><div class="score-bar-fill" style="width:64%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div>
+                  <span class="score-num" style="color:var(--primary);">6,4</span>
+                </div>
+              </td>
+              <td>Solides Fundament mit Upside-Potenzial; Bewertung attraktiv; Wachstumsmotor Polen; Risiken überschaubar</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Gesamtanalyse basierend auf TAG Q3 2025 Statement, H1 2025, Q1 2025; investing.com; ad-hoc-news.de</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 12: FAZIT -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit &amp; Investment-These</div>
+      <div class="section-note">Gesamtsynthese</div>
+    </div>
+    <div class="section-body">
+
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1: Operativer Momentum trifft günstige Bewertung.</strong> Das FFO I wächst 2025 um +4 % auf €174–179 Mio. und soll 2026 auf €187–197 Mio. (+9 %) steigen – getrieben durch Like-for-Like-Mietwachstum von ~3 % in Deutschland und den Polen-Ergebnisboom. Gleichzeitig handelt die Aktie mit 23 % Rabatt auf den EPRA NTA von €20,19 – historisch eine Kaufgelegenheit. Der P/FFO I für 2026 liegt bei nur ~15,3x, fair für ein Unternehmen mit 9 % FFO-Wachstum und 30 % Dividendenwachstum.</p>
+          <p><strong>Säule 2: Polen als unterschätzte Wachstumsoption.</strong> Das Polen-Geschäft entwickelt sich besser als erwartet: 1.973 Einheiten verkauft in 9M 2025 (+38% YoY), Verkaufsvolumen €327 Mio. Für 2026 plant TAG 2.900 Verkäufe bei ~€500 Mio. Volumen mit Margen über 30 %. Dazu kommen 5.300 neue Mietwohnungen durch die laufende Akquisition. Dieses duale Modell (stabile DE-Mieten + dynamisches PL-Wachstum) ist im Peer-Vergleich einzigartig und wird vom Markt noch nicht vollständig eingepreist.</p>
+          <p><strong>Säule 3: Strukturelle Wohnraumknappheit als permanenter Rückenwind.</strong> Deutschland baut jährlich nur ~200.000 neue Wohnungen bei einem Bedarf von ~400.000 – ein strukturelles Defizit, das TAG als Bestandshalter dauerhaft begünstigt. Leerstandsquote unter 4,5 %, kontinuierliche Mietsteigerungen, keine Preiserosion in Sicht. Moody's positiver Ausblick und das Investment-Grade-Rating sichern günstige Refinanzierungskonditionen.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1: Zinswende in die falsche Richtung.</strong> Das Bundesschuldenpaket (€900 Mrd.) hat Bundesanleiherenditen bereits sprunghaft erhöht und erklärt den scharfen Kursrückgang von -7,8 % innerhalb einer Woche (€16,80 → €15,49). Falls die Kapitalmarktzinsen strukturell auf 3,5–4,0 % für 10-jährige Bundesanleihen verbleiben, erhöhen sich Refinanzierungskosten und drücken die Portfoliobewertungen. Eine +50bp-Erhöhung der Finanzierungskosten würde den FFO I um geschätzte €8–12 Mio. belasten und den EPRA NTA je Aktie um ~€0,50–1,00 reduzieren.</p>
+          <p><strong>Risiko 2: Polen-Execution-Risk & Verwässerung.</strong> Die Kapitalerhöhung von €186 Mio. in Q3 2025 (9 % Verwässerung) zeigt, dass das Polen-Wachstum kapitalintensiv ist. Weitere Kapitalmaßnahmen für künftiges Wachstum sind nicht auszuschließen. Falls die polnischen Verkaufspreise stagnieren oder Übergaben verzögert werden, könnte FFO II 2026 (Guidance: €279–295 Mio.) um 10–20 % verfehlt werden. Das LTV nach der Polen-Akquisition steigt pro forma auf ~46 % – nahe am Zielwert, kein Puffer für weitere Schocks.</p>
+          <p><strong>Risiko 3: Bewertungs-Timing &amp; Peer-Konkurrenz.</strong> Bei einem P/FFO I von ~15x ist TAG nicht billig, sofern das Wachstum durch höhere Zinsen auf unter 5 % p.a. fällt. Vonovia als dominierender Peer handelt mit ähnlichem P/FFO I, aber bietet mehr Skaleneffekte und tiefere Kapitalmarktzugangsfähigkeit. Der NTA-Rabatt könnte persistent bleiben, wenn das Makroumfeld nicht kooperiert.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Das bullische Narrativ überzeugt in der Gesamtschau mehr als das bärische. Die operative Entwicklung von TAG ist konsistent stark: Guidance wurde dreimal erhöht, Moody's hat den Ausblick verbessert, und das FFO I wächst verlässlich. Der aktuelle Kursrückgang auf €15,49 ist makroökonomisch begründet (Anleiherenditen durch Bundesschuldenpaket), nicht fundamental, und stellt damit eine verbesserte Einstiegsmöglichkeit dar. Das Risiko/Ertrag-Verhältnis ist bei aktuellem Niveau attraktiv: Downside-Szenario (LTV-Stress + Polen-Verfehlung) impliziert Kurse um €12–13 (-16 bis -20 %), während das Upside-Szenario (NTA-Annäherung auf 0,90x + Polen-Boom realisiert) Kurse von €19–22 (+23 bis +42 %) impliziert.</p>
+      <p>Ich könnte falsch liegen, weil: (1) Der Bundesanleihe-Renditeanstieg möglicherweise strukturell ist und nicht reversibel, was die Bewertungsmultiples dauerhaft unter Druck setzt. (2) Das Polen-Geschäft in seiner Komplexität (Wechselkurs, lokale Regulierung, Übergabe-Timing) operationelle Überraschungen birgt. (3) Der Markt den NTA-Rabatt länger aufrechterhalten könnte als das Fundament rechtfertigt.</p>
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Zeithorizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Kurzfristig (0–6M)</strong></td>
+              <td>Q4 2025 Earnings (18.03.), starker Polen-Q4, Anleiherenditen stabilisieren</td>
+              <td>Weiterer Renditeanstieg DE-Anleihen, makro Unsicherheit</td>
+              <td><span class="badge badge-yellow">Moderat: Tranchiert einsteigen</span></td>
+            </tr>
+            <tr>
+              <td><strong>Mittelfristig (6–24M)</strong></td>
+              <td>Polen-Akquisition vollzogen, Dividendensteigerung +30%, NTA-Wachstum, EZB-Zinssenkungen</td>
+              <td>Regulierung, Refinanzierung, Kapitalerhöhungen</td>
+              <td><span class="badge badge-green">Bullisch: Kaufen</span></td>
+            </tr>
+            <tr>
+              <td><strong>Langfristig (2–5J)</strong></td>
+              <td>Deutschland-Wohnraumknappheit, Polen-BTH-Skalierung, NTA-Annäherung</td>
+              <td>Dauerhafte Regulierungsverschärfung, strukturell höhere Zinsen</td>
+              <td><span class="badge badge-green">Bullisch: Halten &amp; Nachkaufen</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>TAG Immobilien ist ein solide geführter Wohnimmobilien-Cashflow-Generatoren mit einer attraktiven Sonderstory durch das Polen-Wachstum. Die Aktie handelt mit einem ungerechtfertigt hohen Abschlag von 23 % auf den EPRA NTA und bietet bei einer FFO I-Wachstumsrate von 9 % für 2026 ein P/FFO I von nur ~15x. Der Katalysator-Kalender ist dicht: Q4 2025 Earnings am 18. März (erwarteter Polen-FFO II-Boom), Polen-Akquisitionsschließung Q1/Q2 2026, und eine Dividendenerhöhung um 30 % schaffen klare binäre Events mit Aufwärtspotenzial. Das aktuelle Kursniveau bietet ein Risk/Reward von etwa 1:2,5 (−16 % Downside vs. +35–40 % Upside auf 18–24 Monate).</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">€18–20</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">1,5–3 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">−16%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+30–42%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1 : 2,5</div></div>
+      </div>
+
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>LTV übersteigt dauerhaft 50 % → Position reduzieren</li>
+            <li>FFO I 2026 verfehlt €180 Mio. (Guidance-Untergrenze -4 %) → sofort verkaufen</li>
+            <li>Kurs fällt unter €13,00 (SMA 200-Bruch + Fundamentalverschlechterung) → Stop-Loss</li>
+            <li>Polen-Verkaufsmargen fallen unter 20 % → Wachstumsthese in Frage stellen</li>
+            <li>Moody's Downgrade des Investment-Grade-Ratings → sofort verkaufen</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Q4 2025 Earnings (18.03.): FFO II 2025 FY über €240 Mio. → Nachkaufen</li>
+            <li>Polen-Akquisitions-Closing bestätigt → Position aufstocken</li>
+            <li>EZB senkt Leitzins unter 2 % → Sektor-Aufwärtsbewegung, Nachkaufen</li>
+            <li>Kurs-NTA-Rabatt weitet sich auf >30 % aus → starke Kaufgelegenheit</li>
+            <li>Aktie übersteigt €16,80 (52W-Hoch) mit hohem Volumen → Ausbruch, nachkaufen</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Income / Dividenden-Investoren (30 % Div.-Wachstum 2026)</li>
+            <li>Value Investors (NTA-Rabatt 23 %)</li>
+            <li>Opportunistische Investoren (Polen-Sonderstory)</li>
+            <li>Langfristige Buy-and-Hold Investoren</li>
+            <li>Contrarian-Investoren (Sektornervosität ausnutzen)</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Kurzfristige Trader (hohe Makro-Volatilität)</li>
+            <li>Wachstums-Investoren (kein Tech-Wachstum, moderate Rendite)</li>
+            <li>Konservative Investoren ohne Zinsrisiko-Toleranz</li>
+            <li>Investoren, die Einfachheit bevorzugen (Polen-Komplexität)</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / Tranchiert</span></td><td>Abwarten auf Q4 2025 Earnings (18.03.) – Bestätigung der 2026er Guidance als Einstiegssignal</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>50 % jetzt bei €15,49, weitere 50 % nach Q4 Earnings oder bei Polen-Akquisitions-Closing</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Risk/Reward 1:2,5; Kursrückgang ist makro-bedingt, nicht fundamental; guter Einstieg</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>Polen-BTH skaliert über 5 Jahre; Wohnraumknappheit DE strukturell; Dividendenwachstum 30 %+</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Gesamtanalyse; TAG Q3 2025 Statement (11.11.2025); investing.com; wallstreetONLINE; ad-hoc-news.de</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 13: OUTLOOK -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook &amp; Wenn/Dann Szenarien</div>
+      <div class="section-note">Entscheidende Events</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q4 2025 &amp; FY 2025 Jahresergebnisse – 18. März 2026</h4>
+        <p>Dies ist der nächste und unmittelbar wichtigste Katalysator. Im Q4 2025 werden die Großteil der polnischen Wohnungsübergaben (Handovers) des Jahres 2025 erwartet – was FFO II erheblich ansteigen lassen sollte. Zudem gibt das Management erstmals konkrete FY 2025-Zahlen sowie die endgültige Bestätigung der 2026-Guidance (FFO I €187–197 Mio., FFO II €279–295 Mio.). Für das Investmentnarrativ ist Q4 2025 entscheidend: Es bestätigt oder falsifiziert das Polen-Wachstumsversprechen.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> FFO II FY 2025 ≥ €235 Mio. (Guidance-Untergrenze) und Polen-Handovers Q4 ≥ 1.600 Einheiten → Das Polen-Wachstumsversprechen ist bestätigt, 2026 Guidance glaubwürdig; kurzfristig Nachkaufen bis €17,00 sinnvoll.<br><br>
+          <strong>Wenn:</strong> FFO II FY 2025 verfehlt €220 Mio. (Konsens-Untergrenze) und Polen-Übergaben deutlich unter Erwartungen → Polen-Ausführungsrisiko materialisiert sich; Position auf 50 % reduzieren und Guidance-Update für 2026 abwarten.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 2: Closing der Polen-Mietwohnungs-Akquisition (~5.300 Einheiten) – Q1/Q2 2026</h4>
+        <p>Der Vollzug der Übernahme von ~5.300 Mietwohnungen in Polen zum Ende Q1 / Anfang Q2 2026 ist ein transformierendes Ereignis für das Unternehmensportfolio. Das polnische BTH-Portfolio wächst von 3.348 auf ~8.650 Einheiten (+157 %), der LTV steigt pro forma auf ~46,1 %. Dieser Deal entscheidet, ob TAG langfristig als ernstzunehmende Pan-Europäische Wohnimmobilienplattform gilt oder als rein deutscher Bestandshalter mit einem Polen-Experiment. Das Closing und die ersten Integrations-Updates sind kritische Kursinformationen.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Closing vollzogen, LTV bleibt unter 47 %, und Mieteinnahmen der neuen polnischen Einheiten im Rahmen der Prognosebeiträge (€15–20 Mio. annualisierter FFO I-Beitrag) → Bestätigung der BTH-Strategie; mittelfristig nachkaufen, da NTA-Aufwertungseffekt folgt.<br><br>
+          <strong>Wenn:</strong> Closing verzögert sich über Q2 2026 hinaus oder LTV überschreitet 48 % → Kapitalstruktur-Disziplin in Frage gestellt; keine weiteren Käufe bis Klarheit über Finanzierungsstruktur herrscht.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 3: Kapitalmarktzinsen / EZB-Entscheidungen – H1 2026</h4>
+        <p>Das makroökonomische Umfeld ist der entscheidende Hintergrundtreiber für die gesamte Immobiliensektorbewertung. Die EZB befindet sich nach 8 Zinssenkungen in einer Phase der Unsicherheit: Das deutsche Sondervermögen und steigende Staatsausgaben in Europa könnten die Zinssenkungsdynamik unterbrechen oder gar umkehren. Die 10-jährige Bundesanleihe als Pricing-Anker für deutsche Immobilienbewertungen ist nach dem Schuldenpaket bereits von ~2,5 % auf ~2,9–3,0 % gestiegen (März 2026). Für TAG bedeutet jede weitere 50bp-Bewegung bei Bundesanleiherenditen eine Portfoliowert-Auswirkung von schätzungsweise €150–200 Mio. (ca. 2–3 % des GAV).</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> 10-jährige Bundesanleiherenditen stabilisieren sich unter 3,0 % und EZB senkt Leitzins auf ≤ 2,0 % bis Mitte 2026 → Sektorneubewertung nach oben erwartet; NTA-Rabatt auf &lt;15 % möglich; Zielkurs €19–22 erreichbar; bestehende Position halten, ggf. aufstocken.<br><br>
+          <strong>Wenn:</strong> 10-jährige Bundesanleiherenditen steigen über 3,5 % strukturell → Bewertungsmultiples unter Druck; EPRA NTA-Wachstum verlangsamt sich; Position auf 50–60 % des Maximalgewichts reduzieren und FFO I-Entwicklung genau beobachten.
+        </div>
+      </div>
+
+      <div class="source">Quellen: TAG IR (Nov. 2025); baufi24.de (März 2026); wallstreetONLINE; quartr.com; investing.com</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung dar. Alle Aussagen basieren auf öffentlich verfügbaren Informationen zum Stand 04. März 2026. Vergangene Wertentwicklungen sind kein verlässlicher Indikator für künftige Ergebnisse. Investitionen in Aktien sind mit Risiken verbunden, die bis zum Totalverlust des eingesetzten Kapitals führen können. Bitte konsultieren Sie einen qualifizierten Finanzberater vor Anlageentscheidungen. Der Analyst kann eigene Positionen in der analysierten Aktie halten.</div>
+
+</div>
+</body>
+</html>
