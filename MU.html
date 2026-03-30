@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MU – Aktienanalyse Canvas v2.2</title>
+  <style>
+    :root {
+      --primary: #FF6900;
+      --primary-dark: #cc5400;
+      --bg: #0f0f12;
+      --bg-card: #1a1a1f;
+      --bg-card2: #22222a;
+      --border: #2e2e38;
+      --text: #e8e8ec;
+      --text-muted: #888898;
+      --text-dim: #555566;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --teal: #14b8a6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+    .header { background: linear-gradient(135deg, #1a0800 0%, #2a1000 40%, #0f0f12 100%); border-bottom: 1px solid var(--primary); padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; }
+    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .header-left h1 span { color: var(--primary); }
+    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    .header-right { text-align: right; }
+    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+    .price-change.up { background: rgba(34,197,94,0.15); color: var(--green); }
+    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+    .nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100; }
+    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+    .kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .kpi-value.green { color: var(--green); }
+    .kpi-value.red { color: var(--red); }
+    .kpi-value.orange { color: var(--primary); }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .section-title { font-size: 16px; font-weight: 700; color: white; }
+    .section-score { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+    .section-note { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+    .section-body { padding: 20px 24px; }
+    p { margin-bottom: 12px; color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+    h3:first-child { margin-top: 0; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,105,0,0.04); }
+    .beat { color: var(--green); font-weight: 600; }
+    .miss { color: var(--red); font-weight: 600; }
+    .neutral { color: var(--yellow); font-weight: 600; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+    .badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .badge-orange { background: rgba(255,105,0,0.15); color: var(--primary); }
+    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+    .event-item:last-child { border-bottom: none; }
+    .event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+    .dot-green { background: var(--green); }
+    .dot-red { background: var(--red); }
+    .dot-yellow { background: var(--yellow); }
+    .event-label { font-weight: 600; color: white; }
+    .event-text { font-size: 14px; color: var(--text); }
+    .risk-item { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .risk-title { font-weight: 600; color: white; font-size: 14px; }
+    .score-bar { display: flex; align-items: center; gap: 10px; }
+    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #ff9500); }
+    .score-num { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .rating-box { background: linear-gradient(135deg, rgba(255,105,0,0.12), rgba(255,105,0,0.04)); border: 1px solid rgba(255,105,0,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+    .rating-item .val { font-size: 20px; font-weight: 800; color: white; }
+    .rating-item .val.buy { color: var(--green); }
+    .rating-item .val.hold { color: var(--yellow); }
+    .rating-item .val.sell { color: var(--red); }
+    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+    .trigger-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .trigger-card h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .trigger-card.buy h5 { color: var(--green); }
+    .trigger-card.sell h5 { color: var(--red); }
+    .trigger-list { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
+    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    @media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+    .investor-no { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-no h5 { color: var(--red); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+    .investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+    .geo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+    .geo-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .geo-pct { font-size: 20px; font-weight: 700; color: white; }
+    .geo-note { font-size: 12px; color: var(--text-muted); }
+    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+    .outlook-card .when-then strong { color: var(--primary); }
+    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+    .source a { color: var(--text-dim); }
+    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+    .alert-box { background: rgba(255,105,0,0.08); border: 1px solid rgba(255,105,0,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .pill { display: inline-block; background: rgba(255,105,0,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>Micron Technology <span>MU · NASDAQ</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 14. März 2026 · NASDAQ · Sektor: Halbleiter / AI-Infrastruktur</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">DRAM / HBM</span>
+      <span class="badge badge-blue">NAND Flash</span>
+      <span class="badge badge-green">AI-Infrastruktur</span>
+      <span class="badge badge-blue">Data Center</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$420</div>
+    <div class="price-meta">Schlusskurs ca. 14. März 2026 · NASDAQ</div>
+    <div class="price-change up">▲ +3.9% (13. März)</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: ~$94 – $455.50 (ATH: 30. Jan 2026)</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <!-- KPI OVERVIEW -->
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Kurs</div>
+      <div class="kpi-value orange">$420</div>
+      <div class="kpi-sub">USD · 14. März 2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Marktkapitalisierung</div>
+      <div class="kpi-value">$479B</div>
+      <div class="kpi-sub">~1,14 Mrd. Aktien</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">P/E (TTM / FWD)</div>
+      <div class="kpi-value orange">38x / 11x</div>
+      <div class="kpi-sub">PEG: 0,16</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">EV/EBITDA</div>
+      <div class="kpi-value">~21x</div>
+      <div class="kpi-sub">TTM-Basis</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Bruttomarge (Q1 FY26)</div>
+      <div class="kpi-value green">56,8%</div>
+      <div class="kpi-sub">Non-GAAP; Rekordwert</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Umsatz TTM</div>
+      <div class="kpi-value">$42,3B</div>
+      <div class="kpi-sub">+57% YoY (Q1 FY26)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Nächste Earnings</div>
+      <div class="kpi-value orange">18. Mrz</div>
+      <div class="kpi-sub">Q2 FY26 · AMC</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Konsens EPS Q2</div>
+      <div class="kpi-value green">$8,56</div>
+      <div class="kpi-sub">vs. $1,56 Vorjahr (+449%)</div>
+    </div>
+  </div>
+
+  <!-- S1: GESCHÄFTSMODELL -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Kerngeschäft: Memory & Storage</h3>
+      <p>Micron Technology ist der einzige US-amerikanische Hersteller von DRAM- und NAND-Speicherchips in nennenswertem Maßstab und agiert damit in einem globalen Oligopol mit nur drei relevanten Playern: SK Hynix, Samsung Electronics und Micron selbst. Das Unternehmen designt, produziert und vermarktet ein breites Portfolio an Hochleistungs-Speicherprodukten unter den Marken Micron und Crucial, wobei DRAM (Dynamic Random Access Memory) mit ca. 79% des Umsatzes das dominierende Segment darstellt.</p>
+      <p>Das Geschäftsmodell ist klassisch vertikal integriert: Micron betreibt eigene Fab-Anlagen in Idaho, Virginia, Taiwan und Singapur, wo Wafer gefertigt werden. Dies ist capex-intensiv – für FY2026 plant Micron CapEx von 20 Mrd. USD – bietet aber volle Kontrolle über Technologie-Roadmap und Kostenstruktur. Die Kostenstruktur ist skalengetrieben: Wer auf den neuesten Technologieknoten (z.B. 1-gamma DRAM) wechselt, produziert mehr Bits pro Wafer zu niedrigeren Stückkosten, was direkt in Margenverbesserung übersetzt.</p>
+      <h3>Vier Geschäftsbereiche</h3>
+      <p>Micron gliedert sich in vier Business Units: (1) Cloud Memory Business Unit (CMBU) – Rechenzentrum-DRAM, HBM und Data-Center-NAND; (2) Core Data Center Business Unit (CDBU) – Enterprise-Server und Networking; (3) Mobile & Client Business Unit – Smartphones, PCs, Laptops; (4) Automotive & Embedded Business Unit (AEBU) – Fahrzeugsysteme und IoT. Die strategische Schwerpunktverlagerung hin zur CMBU ist eindeutig: Dieses Segment wuchs im Q1 FY2026 um +100% YoY auf 5,3 Mrd. USD und wird primär durch HBM (High Bandwidth Memory) für KI-Beschleuniger getrieben.</p>
+      <h3>Revenue-Modell & AI-Pivot</h3>
+      <p>Micron verdient sowohl durch Volumengeschäfte (commodity DRAM/NAND) als auch zunehmend durch hochmarginige, vertraglich gebundene HBM-Lieferungen. Die gesamte HBM-Kapazität für das Kalenderjahr 2026 ist bereits zu festen Preisen und Volumina kontrahiert – ein struktureller Wandel vom volatilen Spot-Markt hin zu planbaren Multi-Year-Agreements mit Hyperscalern und GPU-Herstellern. Diese Sichtbarkeit ist für eine Memory-Company historisch beispiellos und signalisiert, dass AI-Infrastrukturnachfrage den klassischen Memory-Zyklus fundamental verändert hat.</p>
+      <div class="source">Quellen: Micron Q1 FY2026 Earnings Release (SEC, 17. Dez. 2025); Micron IR Präsentation FQ4 FY2025 (23. Sep. 2025); Motley Fool Q1 FY2026 Earnings Call Transcript (17. Dez. 2025)</div>
+    </div>
+  </div>
+
+  <!-- S2: BURGGRABEN -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben & Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Technologischer Vorsprung & Scale Advantages</h3>
+      <p>Microns primärer Burggraben liegt in seinem proprietären Prozess-Know-how und der vollvertikalen Integration. Die firmeneigene 1-gamma DRAM-Node liefert überlegene Bit-Dichte und niedrigere Stückkosten, was einen messbaren Produktionskostenvorteil gegenüber Wettbewerbern auf veralteten Nodes erzeugt. Im HBM-Bereich liefert Micron HBM3E-Chips mit einer 12-Hi-Stapelarchitektur, die laut Unternehmensaussagen bei Energieeffizienz und Yield-Qualität an der Spitze liegt. HBM4 mit Geschwindigkeiten über 11 Gbps befindet sich bereits im Kunden-Sampling und soll ab Q2 CY2026 in den Massenausstoß übergehen – rascher als ursprünglich geplant.</p>
+      <h3>Switching Costs & Kundenbeziehungen</h3>
+      <p>HBM-Kunden (Hyperscaler, GPU-OEMs wie NVIDIA und AMD) haben extrem hohe Switching Costs, da HBM-Integration direkt in die GPU-Architektur (z.B. via CoWoS-Packaging) eingebettet ist. Ein Wechsel des HBM-Lieferanten erfordert aufwendige Re-Qualifizierungszyklen, die sechs bis zwölf Monate dauern können. Micron hat nach eigenen Angaben Kunden aus GPU- und ASIC-Bereichen auf mehreren Plattformen beliefert, was ein früh aufgebautes Qualifizierungs-Ökosystem belegt. Die vollständige Kontrahierung der 2026er HBM-Kapazität zeigt, dass Großkunden multi-year Commitments eingehen – ein klarer Switching-Cost-Beweis.</p>
+      <h3>Schwachstellen des Burggrabens</h3>
+      <p>Kritisch zu bewerten ist, dass SK Hynix mit ca. 57% HBM-Marktanteil (Q3 2025) strukturell dominiert und der bevorzugte Lieferant von NVIDIA ist, dem wichtigsten AI-GPU-Hersteller weltweit. Micron hält nur ca. 21% HBM-Marktanteil und ist damit deutlich kleiner als der Marktführer. Samsung erholt sich ebenfalls: Nach einem Einbruch auf 17% (Q2 2025) stieg der Anteil auf 22% (Q3 2025), und HBM4-Qualifizierungen verlaufen offenbar schneller als erwartet. In der Standard-DRAM-Produktion fehlt Micron der Skaleneffekt von Samsung und SK Hynix, die je rund 33-34% des DRAM-Markts halten, verglichen mit Microns 26%.</p>
+      <p>Zudem ist Microns Moat im NAND-Segment fragiler: YMTC aus China rückt aggressiv nach, und Kioxia/WDC bieten starke Alternativen. Der Burggraben ist real, aber nicht uneinnehmbar – Score 6/10 reflektiert eine solide, jedoch nicht dominante Wettbewerbsstellung.</p>
+      <div class="source">Quellen: Counterpoint Research HBM Market Share Q3 2025 (Dez. 2025); Astute Group "SK Hynix holds 62% of HBM" (Sep. 2025); TrendForce HBM4 Update (Feb. 2026); blocksandfiles.com Micron Q1 FY2026 (Dez. 2025)</div>
+    </div>
+  </div>
+
+  <!-- S3: QUARTALE -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale – Operative Entwicklung</div>
+      <div class="section-score">Beat-Ratio: 4/4 ✓</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Achtung Earnings-Termin:</strong> Micron berichtet Q2 FY2026 am <strong>18. März 2026 (nach Börsenschluss)</strong>. Konsens EPS: $8,42–$8,61 | Konsens Revenue: ~$18,7–$19,2 Mrd. Die Ergebnisse können das Rating dieser Analyse direkt beeinflussen.</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quartal</th>
+              <th>Revenue</th>
+              <th>YoY Wachstum</th>
+              <th>Bruttomarge</th>
+              <th>Non-GAAP EPS</th>
+              <th>Konsens EPS</th>
+              <th>Beat/Miss</th>
+              <th>Kursreaktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>FQ2 FY2025</strong><br><small style="color:var(--text-muted)">Feb 2025; HBM >$1Mrd.</small></td>
+              <td>$8,05 Mrd.</td>
+              <td class="neutral">+38% YoY</td>
+              <td>37,9%</td>
+              <td>$1,56</td>
+              <td>$1,40</td>
+              <td><span class="beat">BEAT +11%</span></td>
+              <td class="neutral">Neutral / leicht pos.</td>
+            </tr>
+            <tr>
+              <td><strong>FQ3 FY2025</strong><br><small style="color:var(--text-muted)">Mai 2025; Rekord DC-Revenue</small></td>
+              <td>$9,30 Mrd.</td>
+              <td class="beat">+37% YoY</td>
+              <td>39,0%</td>
+              <td>$1,91</td>
+              <td>$1,75</td>
+              <td><span class="beat">BEAT +9%</span></td>
+              <td class="beat">+Positiv</td>
+            </tr>
+            <tr>
+              <td><strong>FQ4 FY2025</strong><br><small style="color:var(--text-muted)">Aug 2025; Rekord FY-Revenue</small></td>
+              <td>$11,32 Mrd.</td>
+              <td class="beat">+46% YoY</td>
+              <td>45,7%</td>
+              <td>$3,03</td>
+              <td>$2,85</td>
+              <td><span class="beat">BEAT +6%</span></td>
+              <td class="beat">+Positiv</td>
+            </tr>
+            <tr>
+              <td><strong>FQ1 FY2026</strong><br><small style="color:var(--text-muted)">Nov 2025; Allzeit-Rekord</small></td>
+              <td>$13,64 Mrd.</td>
+              <td class="beat">+57% YoY</td>
+              <td>56,8%</td>
+              <td>$4,78</td>
+              <td>$3,82</td>
+              <td><span class="beat">BEAT +25%</span></td>
+              <td class="beat">+Sehr positiv</td>
+            </tr>
+            <tr style="background:rgba(255,105,0,0.06);">
+              <td><strong>FQ2 FY2026 (E)</strong><br><small style="color:var(--text-muted)">Feb 2026; Bericht: 18.03.</small></td>
+              <td><strong>$18,7 Mrd. (E)</strong></td>
+              <td class="beat"><strong>+132% YoY (E)</strong></td>
+              <td><strong>~68% (E)</strong></td>
+              <td><strong>$8,42 (E)</strong></td>
+              <td>$8,42–8,56</td>
+              <td><span class="badge badge-orange">AUSSTEHEND</span></td>
+              <td>18. März 2026</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Management-Statements & Operative Highlights</h3>
+      <p>CEO Sanjay Mehrotra stellte in jedem der vier Quartale Rekordergebnisse vor. Besonders bemerkenswert: Die Bruttomargen expandierten von 37,9% (FQ2 FY25) auf 56,8% (FQ1 FY26) und sollen im FQ2 FY26 nochmals auf ~68% springen – ein Anstieg um 30 Prozentpunkte innerhalb von vier Quartalen, der in der Halbleiterbranche selten ist. Dies spiegelt die strukturelle Transformation von commoditised Memory hin zu hochmarginem AI-Memory wider. Mehrotra betonte zudem, dass die gesamte 2026er HBM-Kapazität inklusive HBM4 bereits vollständig zu Festpreisen kontrahiert ist – ein Novum für das Unternehmen.</p>
+      <div class="source">Quellen: Micron SEC Earnings Releases FQ2-FQ4 FY2025 (März–Sep. 2025); Micron FQ1 FY2026 Press Release (SEC, 17. Dez. 2025); public.com Earnings History MU; StockTitan Earnings Date (Feb. 2026)</div>
+    </div>
+  </div>
+
+  <!-- S4: WACHSTUM -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 9/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Revenue-Wachstum: Beschleunigung auf Allzeithoch</h3>
+      <p>Microns Umsatzentwicklung zeigt eine der stärksten Wachstumsbeschleunigungen im gesamten Halbleitersektor: Von 25,1 Mrd. USD (FY2024) auf 37,4 Mrd. USD (FY2025, +49% YoY), und auf Basis des Q1-FY2026-Rekords von 13,64 Mrd. USD sowie der Q2-Guidance von 18,7 Mrd. USD lässt sich eine annualisierte Rate von über 70 Mrd. USD für FY2026 extrapolieren – was nahezu einer Verdreifachung gegenüber FY2024 entspräche. Das DRAM-Segment allein wuchs im Q1 FY2026 um 69% YoY auf 10,8 Mrd. USD, getrieben durch HBM und Data-Center-Nachfrage.</p>
+      <h3>HBM-Segment: Wachstumsmotor mit 40% CAGR TAM</h3>
+      <p>HBM ist das Herzstück der Wachstumsthese. Microns HBM-Umsätze überstiegen erstmals im FQ2 FY2025 die Marke von 1 Mrd. USD und setzen seitdem Rekorde. Die HBM-TAM wächst von ca. 35 Mrd. USD (2025) auf prognostizierte 100 Mrd. USD (2028), entsprechend einem CAGR von ~40% – ein Zielpfad, der laut Management zwei Jahre früher erreicht wird als zuvor prognostiziert. Micron hält derzeit ca. 21% HBM-Marktanteil und strebt eine Ausweitung auf rund 26%, entsprechend seinem allgemeinen DRAM-Marktanteil. Selbst bei konstantem Marktanteil würde das TAM-Wachstum Microns HBM-Umsätze bis 2028 auf rund 21 Mrd. USD treiben.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Business Unit</th><th>Q1 FY2026 Revenue</th><th>YoY Wachstum</th><th>Bruttomarge BU</th><th>Kommentar</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Cloud Memory (CMBU)</strong></td><td>$5,3 Mrd.</td><td class="beat">+100% YoY</td><td>~55%</td><td>HBM-Boom; AI-Datacenter</td></tr>
+            <tr><td><strong>Core Data Center (CDBU)</strong></td><td>$2,4 Mrd.</td><td class="neutral">+4% YoY</td><td>~48%</td><td>Enterprise Server/Networking</td></tr>
+            <tr><td><strong>Mobile & Client</strong></td><td>$4,3 Mrd.</td><td class="beat">+63% YoY</td><td>~47%</td><td>Smartphone/PC-Erholung</td></tr>
+            <tr><td><strong>Automotive & Embedded</strong></td><td>$1,7 Mrd.</td><td class="beat">+49% YoY</td><td>~45%</td><td>Autonomes Fahren, IoT</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Geografische Verteilung</h3>
+      <p>Micron ist global aufgestellt, wobei der US-Markt (Hyperscaler wie AWS, Google, Microsoft) und APAC (Smartphones, PCs) die Hauptmärkte sind. Das China-Geschäft ist strukturell rückläufig: Nach einem China-Umsatzanteil von ~14% (FY2023) sank dieser auf ~7% (FY2025), bedingt durch die CAC-Entscheidung 2023, die Micron aus kritischer chinesischer Infrastruktur verbannte. In absoluten Zahlen verlor Micron rund 2,4–2,6 Mrd. USD Chinageschäft, das teilweise von CXMT übernommen wurde. Positiv: Indien gewinnt an strategischer Bedeutung – Micron eröffnete am 28. Februar 2026 Indiens erste Halbleiter-Assembly & Test-Anlage in Sanand (Gujarat).</p>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">USA / Nordamerika</div>
+          <div class="geo-pct">~45%</div>
+          <div class="geo-note">Hyperscaler, Data Center</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">APAC (ex-China)</div>
+          <div class="geo-pct">~30%</div>
+          <div class="geo-note">Samsung-Ökosystem, Smartphones</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">EMEA</div>
+          <div class="geo-pct">~18%</div>
+          <div class="geo-note">Automotive (wachsend)</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">China</div>
+          <div class="geo-pct">~7%</div>
+          <div class="geo-note">Stark rückläufig (CAC-Bann)</div>
+        </div>
+      </div>
+      <h3>Profitabilitätswachstum überholt Revenue-Wachstum</h3>
+      <p>Das Operating Income beschleunigte von 1,7 Mrd. USD (FQ2 FY25) auf 6,4 Mrd. USD (FQ1 FY26), was einer Vervierfachung in drei Quartalen entspricht. Die operative Hebelwirkung ist eindeutig strukturell: Während Umsatz um +57% stieg, wuchs Operating Income um +168% YoY. Dies belegt, dass Microns Wachstum nicht durch einmalige Effekte inflationiert ist, sondern durch echten Mischeffekt (HBM-Mix-Shift), Skaleneffekte und verbessertes Pricing.</p>
+      <div class="source">Quellen: Micron IR FQ1 FY2026 Segment-Tabellen (SEC, Dez. 2025); Futurumgroup "Micron Q1 FY2026 Sets Records" (Dez. 2025); Introl.com AI Memory Supercycle (Jan. 2026); Gilder Report CXMT (Jan. 2026)</div>
+    </div>
+  </div>
+
+  <!-- S5: BEWERTUNG -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung & Multiples</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kennzahl</th><th>MU (aktuell)</th><th>MU 5J-Ø</th><th>Sektor-Ø (Semis)</th><th>Bewertung</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>P/E (TTM)</td><td>~38x</td><td>~26x</td><td>~35x</td><td><span class="badge badge-yellow">Aufgeholt</span></td></tr>
+            <tr><td>P/E (FWD, NTM)</td><td><strong>~11x</strong></td><td>~17x</td><td>~29x</td><td><span class="badge badge-green">Sehr attraktiv</span></td></tr>
+            <tr><td>PEG-Ratio</td><td><strong>0,16</strong></td><td>—</td><td>~1,5–2,0x</td><td><span class="badge badge-green">Extrem niedrig</span></td></tr>
+            <tr><td>EV/EBITDA (TTM)</td><td>~21x</td><td>—</td><td>~20–25x</td><td><span class="badge badge-yellow">Fair</span></td></tr>
+            <tr><td>P/Sales</td><td>~11x</td><td>~4x</td><td>~6x</td><td><span class="badge badge-yellow">Premium gerechtfertigt</span></td></tr>
+            <tr><td>ROE</td><td>22,5%</td><td>—</td><td>~15%</td><td><span class="badge badge-green">Überdurchschnittlich</span></td></tr>
+            <tr><td>Debt / Equity</td><td>0,21x</td><td>—</td><td>—</td><td><span class="badge badge-green">Sehr solide</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Bewertungseinschätzung</h3>
+      <p>Das entscheidende Bewertungsargument für Micron ist der Riss zwischen dem TTM-PE (38x, scheinbar teuer) und dem Forward-PE von nur ~11x. Dieser Riss reflektiert, dass die Earnings-Explosion gerade erst begonnen hat: Das Q2 FY2026-Quartal (Bericht: 18. März) dürfte mit EPS ~8,42 USD gegenüber $1,56 Vorjahr einen YoY-Anstieg von über 440% zeigen. Bei einem Kurs von 420 USD und einem annualisierten EPS-Run-Rate von rund 35–38 USD für FY2026 liegt das Forward-Multiple damit deutlich unter dem historischen Durchschnitt von ~17x.</p>
+      <p>Der PEG-Wert von 0,16 ist außergewöhnlich niedrig für ein Unternehmen mit strukturellem AI-Wachstum. Üblicherweise gelten PEG-Werte unter 1,0 als attraktiv; Micron notiert bei einem Bruchteil davon. Die Bewertung erscheint selbst nach dem erheblichen Kursanstieg (+345% im vergangenen Jahr) noch nicht ausgereizt, wenn das HBM-Wachstumsnarrativ weiter intakt bleibt. Risikofaktoren wie Memory-Zyklusumkehr oder HBM-Überangebot ab 2027 könnten das Bild jedoch schnell trüben – weshalb die Bewertungsattraktion hauptsächlich für die nächsten 12-18 Monate gilt.</p>
+      <div class="source">Quellen: stockanalysis.com MU Statistics (14. März 2026); GuruFocus Forward PE (März 2026); financecharts.com PE Ratio (Feb. 2026); macrotrends.net PE History; Seeking Alpha Q2 Preview (13. März 2026)</div>
+    </div>
+  </div>
+
+  <!-- S6: CASHFLOW -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen & Kapitalqualität</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Metrik</th><th>FQ2 FY25</th><th>FQ3 FY25</th><th>FQ4 FY25</th><th>FQ1 FY26</th><th>Trend</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Bruttomarge (Non-GAAP)</td><td>37,9%</td><td>39,0%</td><td>45,7%</td><td>56,8%</td><td class="beat">↑ Stark</td></tr>
+            <tr><td>Operating Margin (Non-GAAP)</td><td>24,9%</td><td>26,8%</td><td>35,0%</td><td>47,0%</td><td class="beat">↑ Stark</td></tr>
+            <tr><td>Operating Cash Flow</td><td>$3,94 Mrd.</td><td>$4,61 Mrd.</td><td>$5,73 Mrd.</td><td>$8,41 Mrd.</td><td class="beat">↑ Rekord</td></tr>
+            <tr><td>Free Cash Flow (FCF)</td><td>$0,86 Mrd.</td><td>~$1,5 Mrd.</td><td>~$2,0 Mrd.</td><td>$3,93 Mrd.</td><td class="beat">↑ Rekord</td></tr>
+            <tr><td>CapEx</td><td>$3,09 Mrd.</td><td>~$3,1 Mrd.</td><td>$3,7 Mrd.</td><td>$4,5 Mrd.</td><td class="neutral">↑ Steigend</td></tr>
+            <tr><td>Non-GAAP EPS</td><td>$1,56</td><td>$1,91</td><td>$3,03</td><td>$4,78</td><td class="beat">↑ Exponentiell</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Cashflow-Qualität & CapEx-Spannungsfeld</h3>
+      <p>Microns FCF erreichte im Q1 FY2026 mit 3,93 Mrd. USD einen historischen Rekord, und CEO Mehrotra versprach, dass FCF im Q2 FY2026 nochmals signifikant steigen soll. Das entspricht einer FCF-Konversionsrate (FCF / Operating Cash Flow) von ~47% – solide für ein so kapital­intensives Unternehmen. Die FCF-Yield (FCF / Marktkapitalisierung) liegt bei annualisiert ~3,5% auf Basis Q1-FY26-Rate, steigend in Richtung 6-8% bei Q2-Q4-FY26-Projektion.</p>
+      <p>Die kritische Einschränkung: Micron plant für FY2026 CapEx von 20 Mrd. USD (zuvor 18 Mrd. USD), vorrangig für HBM-Kapazitätserweiterung und 1-gamma-DRAM-Node. Bei einem Betriebscashflow von ~8,4 Mrd. USD im Q1 FY26 (annualisiert ~34 Mrd. USD) ist die CapEx-Last von 20 Mrd. USD absolut handhabbar, begrenzt aber die absolute FCF-Generierung und zeigt die Kapitalintensität des Geschäftsmodells. Hinzukommt der Aufbau einer Idaho-Fab (erste Wafer Q2 CY2027), New York, Singapur und Taiwan, was strukturell hohe CapEx auch über FY2026 hinaus impliziert.</p>
+      <h3>Bilanz & Aktionärsrenditen</h3>
+      <p>Microns Bilanz ist mit einem Debt/Equity-Ratio von 0,21x und einer Current Ratio von 2,46 gut aufgestellt. Das Unternehmen zahlt eine kleine Dividende (0,115 USD/Quartal) und hat keinen aggressiven Buyback-Plan – Kapital wird vorrangig für Kapazitätsinvestitionen genutzt, was in der aktuellen Boom-Phase wirtschaftlich sinnvoll ist.</p>
+      <div class="source">Quellen: Micron SEC Filings Q1-Q4 FY2025 + Q1 FY2026; stockanalysis.com MU Statistics; Micron Q1 FY2026 Prepared Remarks IR (Dez. 2025)</div>
+    </div>
+  </div>
+
+  <!-- S7: PEERS -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Unternehmen</th><th>Marktkapitalisierung</th><th>Rev. TTM (approx.)</th><th>Rev. Wachstum YoY</th><th>Bruttomarge</th><th>P/E (FWD)</th><th>HBM-Position</th></tr>
+          </thead>
+          <tbody>
+            <tr style="background:rgba(255,105,0,0.05);">
+              <td><strong>Micron (MU)</strong></td>
+              <td>$479 Mrd.</td>
+              <td>$42,3 Mrd.</td>
+              <td class="beat">+57% (Q1 FY26)</td>
+              <td class="beat">56,8%</td>
+              <td><strong>~11x</strong></td>
+              <td><span class="badge badge-orange">#3, ~21%</span></td>
+            </tr>
+            <tr>
+              <td>SK Hynix (000660.KS)</td>
+              <td>~$110 Mrd.</td>
+              <td>~$40 Mrd.</td>
+              <td class="beat">~+30-40%</td>
+              <td>~55%</td>
+              <td>~10x</td>
+              <td><span class="badge badge-green">#1, ~57%</span></td>
+            </tr>
+            <tr>
+              <td>Samsung Electr. (005930.KS)</td>
+              <td>~$260 Mrd.</td>
+              <td>~$180 Mrd. (Konzern)</td>
+              <td class="neutral">Schwach (HBM-Krise)</td>
+              <td>~35%</td>
+              <td>~15x</td>
+              <td><span class="badge badge-yellow">#2 (erholt), ~22%</span></td>
+            </tr>
+            <tr>
+              <td>Western Digital (WDC)</td>
+              <td>~$95 Mrd.</td>
+              <td>~$10 Mrd.</td>
+              <td class="beat">+108% YoY (Q2 FY26)</td>
+              <td>45,7%</td>
+              <td>~20x</td>
+              <td><span class="badge badge-red">Kein HBM</span></td>
+            </tr>
+            <tr>
+              <td>Seagate (STX)</td>
+              <td>~$89 Mrd.</td>
+              <td>~$9,6 Mrd.</td>
+              <td class="beat">~+25% (HDD-Boom)</td>
+              <td>41,6%</td>
+              <td>~23x</td>
+              <td><span class="badge badge-red">Kein HBM</span></td>
+            </tr>
+            <tr>
+              <td>NVIDIA (NVDA)</td>
+              <td>~$3.000 Mrd.</td>
+              <td>~$130 Mrd.</td>
+              <td class="beat">+114% YoY</td>
+              <td>~73%</td>
+              <td>~30x</td>
+              <td><span class="badge badge-blue">HBM-Abnehmer (Kunde)</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Qualitative Differenzierung</h3>
+      <p>Im Direktvergleich mit SK Hynix sticht Microns attraktive Bewertung hervor: Ähnliches Revenue-Niveau, ähnliche Margen, aber deutlich günstigeres Forward-Multiple und US-Börsen­notierung (leichter zugänglich für westliche institutionelle Investoren). SK Hynix führt das HBM-Rennen technologisch, was sich im NVIDIA-Primärlieferanten-Status zeigt – das ist der wichtigste strukturelle Nachteil Microns. Samsung hingegen bietet tiefes Bewertungs-Discount, kämpft aber mit HBM-Qualifizierungsproblemen und breiter konzernaler Diversifikation, die den Memory-Hebel verwässert.</p>
+      <p>Western Digital und Seagate sind im Kern Storage-Player ohne HBM-Exposure. Ihre starken YoY-Wachstumszahlen spiegeln den AI-Data-Boom im HDD/SSD-Segment, nicht den HBM-Superzyklus. WDC handelt mit ~20x Forward-PE, Seagate mit ~23x – beide teurer als Micron auf Forward-Basis, bei geringerem strukturellen Wachstumspotenzial. NVIDIA ist streng genommen kein Mitbewerber, sondern Microns größter Wachstumstreiber als HBM-Abnehmer; die Beziehung ist symbiotisch, nicht kompetitiv.</p>
+      <div class="source">Quellen: Tickeron STX vs WDC (Feb. 2026); PortfoliosLab WDC/STX Vergleich (März 2026); tradingkey.com Micron vs Samsung vs SK Hynix (März 2026); macrotrends.net WDC Market Cap (März 2026)</div>
+    </div>
+  </div>
+
+  <!-- S8: NEWS -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News & Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen (Company-spezifische Events)</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">18. März 2026 – Q2 FY2026 Earnings (ausstehend) <span class="badge badge-orange">Kritisch</span></div>
+          <div class="event-text">Micron berichtet Q2 FY2026 nach Börsenschluss. Konsens: $18,7 Mrd. Revenue / EPS $8,42–8,61. Guidance für Q3 dürfte ebenso zentral sein wie die absoluten Zahlen. Quelle: Micron IR / StockTitan (Feb. 2026)</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">17. Dez. 2025 – FQ1 FY2026 Rekordergebnisse <span class="badge badge-green">Sehr Positiv</span></div>
+          <div class="event-text">Revenue $13,64 Mrd. (+57% YoY), Non-GAAP EPS $4,78 (+25% über Konsens). Gesamte 2026er HBM-Kapazität inkl. HBM4 vollständig zu Festpreisen kontrahiert. CapEx auf $20 Mrd. angehoben. Quelle: Micron SEC Earnings Release (17. Dez. 2025)</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">28. Feb. 2026 – Eröffnung Halbleiter-Anlage Indien <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Micron eröffnet Indiens erste Halbleiter-Assembly & Test-Anlage in Sanand (Gujarat). Strategische Diversifikation weg von Taiwan/China-Abhängigkeit; profitiert von India Semiconductor Mission-Subventionen. Quelle: GlobeNewsWire (28. Feb. 2026)</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Feb. 2026 – HBM4 Serienlieferung gestartet <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Laut Wolfe Research Conference (11. Feb. 2026): Micron hat HBM4-Hochvolumenproduktion und Kundenlieferungen begonnen, Rampe läuft ahead of schedule. HBM4 mit >11 Gbps, Yields und Performance planmäßig. Quelle: Quartr / Micron IR Conference Update (Feb. 2026)</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Jan. 2026 – CXMT IPO-Ankündigung (Konkurrenz) <span class="badge badge-yellow">Neutral/Negativ</span></div>
+          <div class="event-text">Chinas CXMT plant 29,5 Mrd. Yuan ($4,22 Mrd.) Shanghai-IPO für DRAM-Kapazitätsausbau und HBM-Packaging-Einstieg bis Ende 2026. Mittelfristiger Wettbewerbsdruck v.a. im Legacy-DRAM-Segment. Quelle: Reuters / ts2.tech (Jan. 2026)</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche (Sektor-Events)</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Q3 2025 – HBM-Markt wächst auf $38 Mrd. TAM <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">HBM-Markt wächst von $38 Mrd. (2025) auf projizierte $58 Mrd. (2026). JEDEC verabschiedet HBM4-Standard (April 2025) mit verdoppeltem Interface auf 2.048 Bit → 2 TB/s pro Stack. Quelle: Introl.com HBM Evolution (Feb. 2026)</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Feb. 2026 – Samsung HBM4 Comeback <span class="badge badge-yellow">Wettbewerbs-Warnung</span></div>
+          <div class="event-text">Samsung soll HBM4-Qualifizierung bei NVIDIA früher als erwartet bestanden haben; NVIDIA provisorisch: SK Hynix mid-50%, Samsung mid-20%, Micron ~20% der HBM4-Allokation. Samsungs HBM-Comeback könnte Microns Marktanteil unter Druck setzen. Quelle: TrendForce (Feb. 2026)</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Dez. 2025 – DRAM-Preiszyklus Hochphase, Engpass bis 2027 <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Hersteller erscheinen in 2026 ausverkauft. DRAM-Engpass entsteht durch HBM-Wafer-Umleitung (1 HBM-Wafer ersetzt ~3 DDR5-Wafer im Erlösportfolio). Tight Supply erwartet über 2026 hinaus. Quelle: Semiecosystem / Counterpoint Research (Dez. 2025)</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">März 2026 – Zoll-/Tarifdiskussion USA <span class="badge badge-yellow">Risiko im Blick</span></div>
+          <div class="event-text">Microns FQ2-Guidance enthält explizit keine Auswirkungen potenzieller neuer Zölle ("impacts from potential new tariffs are not included in our guidance"). US-Halbleiterzölle auf Taiwan-Importe könnten die Kostenstruktur beeinflussen. Quelle: Micron FQ1 FY2026 Prepared Remarks IR (Dez. 2025)</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">2025–2026 – US CHIPS Act Subventionen <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Micron ist einer der größten Nutznießer des US CHIPS & Science Act. Die Idaho- und New-York-Fab-Investitionen werden mit Bundessubventionen unterstützt, was die CapEx-Kosten für US-Produktionsstandorte teilweise kompensiert und gleichzeitig geopolitische Risikodiversifikation ermöglicht.</div>
+        </div>
+      </div>
+
+      <div class="source">Quellen: Micron IR / SEC, GlobeNewsWire, Reuters, TrendForce, Counterpoint Research, Quartr Conference Updates (Dez. 2025 – März 2026)</div>
+    </div>
+  </div>
+
+  <!-- S9: TECHNISCH -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <div class="kpi-grid" style="margin-bottom:16px; grid-template-columns: repeat(auto-fill, minmax(130px,1fr));">
+        <div class="kpi-card">
+          <div class="kpi-label">Kurs</div>
+          <div class="kpi-value orange">$420</div>
+          <div class="kpi-sub">14. März 2026</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 20</div>
+          <div class="kpi-value red">~$405</div>
+          <div class="kpi-sub">Kurs leicht darüber</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 50</div>
+          <div class="kpi-value red">~$400</div>
+          <div class="kpi-sub">Kurs leicht darüber</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SMA 200</div>
+          <div class="kpi-value red">~$408</div>
+          <div class="kpi-sub">Kurs über/unter</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">RSI (14d)</div>
+          <div class="kpi-value orange">~32–50</div>
+          <div class="kpi-sub">Überverkauft / Neutral</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">ATH / 52W-High</div>
+          <div class="kpi-value">$455,50</div>
+          <div class="kpi-sub">30. Jan 2026; -7,8%</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">MACD</div>
+          <div class="kpi-value red">-6,5</div>
+          <div class="kpi-sub">Bearish Signal</div>
+        </div>
+      </div>
+      <h3>Chart-Einordnung & Technische Lage</h3>
+      <p>Micron befand sich nach dem Allzeithoch von $455,50 (30. Januar 2026) in einer Konsolidierungsphase und handelte Ende Februar / Anfang März in der Range $400–425. Die Erholung auf $418 (13. März, +3,86%) deutet auf einen möglichen Boden hin, bleibt aber charttechnisch noch unbestätigt. Der kurzfristige Aufwärtstrend ist intakt, aber der Kurs kämpft gleichzeitig mit den SMA 50 ($400) und SMA 200 ($408) als kritischen Leveln – ein "Death Cross"-Risiko besteht, falls der SMA 50 unter den SMA 200 fällt.</p>
+      <p>Der RSI zeigt je nach Quelle und Zeitrahmen zwischen ~32 (kurzfristig überverkauft, per investing.com) und ~50 (neutral). Die überverkaufte Kurzfristlage könnte als Kaufgelegenheit für taktische Investoren interpretiert werden. Support liegt bei ~$394-406 (SMA-Cluster), ein Unterschreiten würde weiteres technisches Abwärtspotenzial bis ~$340-360 freigeben. Resistance liegt am ATH $455,50; ein Ausbruch darüber würde neues Kaufsignal generieren.</p>
+      <p>Das MACD-Signal (-6,5) ist bearish, korreliert aber mit dem Pullback und nicht mit einer Trendwende-Bestätigung. Wichtig: Die nächste Earnings-Veröffentlichung (18. März) dürfte den Chart dominieren und alle technischen Signale überlagern. Ein starkes Q2-Ergebnis mit positiver Q3-Guidance könnte einen neuen Aufwärtsschub initiieren.</p>
+      <div class="source">Quellen: investing.com MU Technical Analysis (März 2026); TradingView MU Chart (März 2026); stockinvest.us MU (März 2026)</div>
+    </div>
+  </div>
+
+  <!-- S10: RISIKEN -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken & Chancen</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <h3>10a) Strukturelle & zyklische Risiken</h3>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Memory-Zyklusrisiko – Post-2026 Überangebot</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Halbleiterspeicher ist historisch hyperzyklisch. Alle drei Hauptanbieter (SK Hynix, Samsung, Micron) investieren massiv in HBM-Kapazität. Sobald HBM-Angebot die Nachfrage übersteigt – wahrscheinlich frühestens 2027-2028 – könnten Preise einbrechen und Margen wieder auf 20-30% fallen. Die aktuelle "Sold-out"-Situation könnte sich in 18-24 Monaten in ihr Gegenteil verkehren. Wahrscheinlichkeit: 40-50% für signifikante Preiskorrektur ab 2027.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ HBM-Marktanteilsverlust an SK Hynix & Samsung</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel-Hoch</span></div>
+        </div>
+        <div class="event-text">SK Hynix bleibt NVIDIA-Primärlieferant für HBM3E und voraussichtlich auch HBM4 (mid-50% Allokation). Samsung erholt sich rapide (mid-20% HBM4-Allokation erwartet). Microns ~20% HBM4-Anteil könnte unter Druck geraten, falls Samsung-Qualifizierung rascher als erwartet verläuft. Wahrscheinlichkeit: 30% für Marktanteilsverlust auf unter 18%.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ CXMT / China-Konkurrenz im Legacy-DRAM</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">CXMT verdrängt Micron gezielt aus dem chinesischen Markt. Microns China-Umsatz fiel von ~14% (FY2023) auf ~7% (FY2025) – real ein Verlust von ~2,5 Mrd. USD. CXMT zielt auf Legacy-DRAM, wo Micron aktiv aussteigt zugunsten von HBM. Direkte Auswirkung auf Premium-Produkte ist begrenzt, da CXMT 3-4 Jahre hinter dem HBM-State-of-the-Art liegt.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Taiwan-Geopolitik & Fabrikationsrisiko</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-red">Auswirkung: Sehr Hoch</span></div>
+        </div>
+        <div class="event-text">Ein wesentlicher Teil von Microns DRAM-Output stammt aus Taiwan. Laut Microns eigenem Risikobericht würde ein Verlust der Taiwan-Produktion das Unternehmen "material adversely" beeinflussen. US-CHIPS-Act-Subventionen und Indien-Expansion diversifizieren, aber Taiwan bleibt mittelfristig Kernrisiko.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ NAND-Segment Strukturschwäche</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">NAND (ca. 20% des Umsatzes) bleibt strukturell schwächer als DRAM: More Wettbewerber (YMTC, Kioxia, WDC), niedrigere Margen, schwächeres AI-Exposure. Die NAND-Gross-Margin hat sich verbessert, liegt aber deutlich unter DRAM. Bei NAND-Überangebot (historisch häufig) droht Margenkompression im gesamten Portfolio.</div>
+      </div>
+
+      <h3>10b) AI-Disruption & Chancen</h3>
+      <p>Paradoxerweise ist AI für Micron sowohl die größte Chance als auch ein indirektes Risiko: Sollte die KI-Nachfrage enttäuschen (z.B. Regulierung, Effizienzsprünge, "AI Winter"), würde die HBM-Investitionsthese kollabieren. Das bullische Szenario: HBM-TAM wächst wie projiziert auf $100 Mrd. bis 2028, Micron gewinnt Marktanteile auf 25%+ und generiert 2028 HBM-Erlöse von >$25 Mrd. Das bärische Szenario: KI-Capex-Zyklus dreht 2027, HBM-Pricing fällt, Microns Gross Margin kollabiert von ~60% auf 30-35%.</p>
+
+      <h3>10c) Chancen</h3>
+      <p>Die strukturellen Chancen für Micron sind erheblich: (1) HBM-TAM-Expansion von $35B → $100B bis 2028 = 40% CAGR bei stabilem Marktanteil; (2) Marktanteilsgewinn in HBM auf 25%+ möglich, da Samsung-Schwäche Raum lässt; (3) Edge-AI-Boom (LPCAMM2, mobile HBM) erschließt neue hochmarginige Segmente; (4) Automotive-Segment wächst mit +49% YoY bei steigendem ADAS-Content pro Fahrzeug; (5) US-CHIPS-Act und India-Förderung reduzieren effektive CapEx-Last.</p>
+      <div class="source">Quellen: Micron Risk Factor Summary (IR); Gilder Report CXMT Jan 2026; fxleaders.com CXMT Analyse Jan 2026; Introl.com AI Memory Supercycle</div>
+    </div>
+  </div>
+
+  <!-- S11: SCORING -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring-Übersicht</div>
+      <div class="section-note">Canvas v2.2</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kategorie</th><th>Score</th><th>Score-Bar</th><th>Begründung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Geschäftsmodell</strong></td>
+              <td>8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>Vertikale Integration, AI-Pivot, HBM-Leitprodukt, capex-intensiv aber skalierbar</td>
+            </tr>
+            <tr>
+              <td><strong>Burggraben</strong></td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Solide Switching-Costs via HBM-Qualifizierung, aber #3 in HBM; SK Hynix dominiert strukturell</td>
+            </tr>
+            <tr>
+              <td><strong>Operative Entwicklung (4Q)</strong></td>
+              <td>9/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+              <td>4/4 Beat-Ratio; Margin-Expansion von 38% auf 57% in 4 Quartalen; record FCF Q1 FY26</td>
+            </tr>
+            <tr>
+              <td><strong>Wachstum</strong></td>
+              <td>9/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+              <td>+57% Revenue YoY; HBM-TAM 40% CAGR; Cloud BU +100% YoY; strukturell keine Einmal-Effekte</td>
+            </tr>
+            <tr>
+              <td><strong>Bewertung</strong></td>
+              <td>8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>Forward-PE ~11x extrem attraktiv; PEG 0,16; TTM-PE 38x optisch hoch aber durch Wachstum gerechtfertigt</td>
+            </tr>
+            <tr>
+              <td><strong>Cashflow</strong></td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Rekord-FCF $3,9 Mrd. Q1 FY26; aber $20 Mrd. CapEx FY26 begrenzt absolute FCF; solide Bilanz D/E 0,21x</td>
+            </tr>
+            <tr>
+              <td><strong>Peer-Vergleich</strong></td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Günstigster Forward-PE unter Peers; aber HBM-Marktanteil strukturell hinter SK Hynix</td>
+            </tr>
+            <tr>
+              <td><strong>Risiken (invertiert)</strong></td>
+              <td>5/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td>
+              <td>Memory-Hyperzyklizität, Taiwan-Risiko, Samsung-Comeback, CXMT – erhebliche, wenn auch nicht existenzielle Risiken</td>
+            </tr>
+            <tr>
+              <td><strong>Technische Analyse</strong></td>
+              <td>5/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td>
+              <td>-8% unter ATH; RSI überverkauft kurzfristig; MACD bearish; SMA 200 als Widerstand; Earnings als Catalyst</td>
+            </tr>
+            <tr style="background:rgba(255,105,0,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>7,1/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track">
+                    <div class="score-bar-fill" style="width:71%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
+                  </div>
+                  <span class="score-num" style="color:var(--primary);">7,1</span>
+                </div>
+              </td>
+              <td>Starke operative Exzellenz + AI-Wachstum kompensieren erhebliche Zyklus- und Wettbewerbsrisiken; attraktive Bewertung</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- S12: FAZIT -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-note">HBM/AI-Fokus</div>
+    </div>
+    <div class="section-body">
+
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 – Strukturelle Profitabilitätswende:</strong> Die Bruttomargen-Expansion von 37,9% (FQ2 FY25) auf 56,8% (FQ1 FY26) und prognostiziert ~68% für FQ2 FY26 ist kein zyklisches Glück, sondern Produkt-Mix-Shift. HBM erzielt deutlich höhere Margen als Standard-DRAM, und da HBM den Umsatz immer stärker dominiert, ist der Anstieg strukturell und nachhaltig. Das Operating Income verfünffachte sich innerhalb von vier Quartalen auf 6,4 Mrd. USD – ein Hebel, den selbst bei moderat verlangsamtem Wachstum nicht vollständig reversiert.</p>
+          <p><strong>Säule 2 – HBM-Markt mit 40% CAGR:</strong> Die HBM-TAM soll von 35 Mrd. USD (2025) auf 100 Mrd. USD (2028) wachsen – und dieser Meilenstein wurde zuletzt um zwei Jahre vorgezogen. Micron hat seine gesamte 2026er HBM-Kapazität inklusive HBM4 zu Festpreisen und -volumina kontrahiert; kein anderes Quartal in der Unternehmensgeschichte bot diese Umsatzsichtbarkeit. Selbst bei stabilem 21% Marktanteil würde das TAM-Wachstum Microns HBM-Umsätze bis 2028 auf ~21 Mrd. USD katapultieren.</p>
+          <p><strong>Säule 3 – Bewertungsattraktion auf Forward-Basis:</strong> Ein Forward-PE von ~11x ist für ein Unternehmen mit +50-60% Umsatzwachstum und exponentiell steigenden Margen schlicht günstig. Der PEG-Wert von 0,16 liegt weit unter dem Industriedurchschnitt von 1,5-2,0x. Mit Kurs $420 und annualisiertem EPS-Laufkurs von ca. 35-40 USD für FY2026 (annualisiert aus Q1+Q2-Guidance) ergibt sich ein Multiple, das bei selbst moderatem Wachstumsabflachen erheblichen Puffer bietet. Micron ist damit der günstigste direktionale AI-Memory-Trade an US-Börsen.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 – Memory-Zyklus ist und bleibt hyperzyklisch:</strong> Halbleiterspeicher folgt dem berüchtigten Boom-Bust-Muster. Derzeit investieren alle drei Haupthersteller massiv in HBM-Kapazität (~$20 Mrd. Micron, plus SK Hynix und Samsung). Wenn diese Kapazitäten gleichzeitig online gehen (frühestens 2027), droht HBM-Überangebot. Die Bruttomargen könnten dann von ~60% auf 25-30% einbrechen – wie 2022-2023 geschehen, als Micron Quartalsverluste schrieb. Anleger, die auf 12-18 Monate schauen, sind in einer guten Position; 2-3 Jahres-Investoren müssen den Zyklus-Turn im Blick behalten.</p>
+          <p><strong>Risiko 2 – SK Hynix ist strukturell voraus, Samsung erholt sich:</strong> Micron bleibt mit ~20% HBM-Marktanteil abgeschlagen hinter SK Hynix (57%) und ist nicht der primäre NVIDIA-Lieferant. Samsungs überraschend schnelles HBM4-Comeback (mid-20% NVIDIA-Allokation erwartet) zeigt, dass der Marktanteilsvorteil Microns kurzlebig sein könnte. Falls Samsung dauerhaft bei 25%+ HBM-Anteil stabilisiert, bleibt für Micron strukturell weniger als 20%. Ein Forward-PE von 11x ist attraktiv, aber falls der Marktanteil stagniert statt wächst, ist das Gewinnwachstum 2027+ nicht selbstverständlich.</p>
+          <p><strong>Risiko 3 – CapEx-Spiral und Tariff-Unsicherheit:</strong> Die $20 Mrd. CapEx für FY2026 (plus Idaho-Fab ab CY2027) schaffen strukturell hohe Cash-Bindung für Jahre. Micron hat Tariff-Auswirkungen explizit aus seiner Guidance ausgeschlossen – ein Hinweis, dass Unsicherheit real ist. Bei einer P/S-Ratio von ~11x (TTM) auf Basis der nun hohen Umsatzbasis gibt es wenig Sicherheitsmarge, falls externe Schocks (Handelskrieg, Geopolitik Taiwan) eintreten.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Das bullische Narrativ ist überzeugender, aber nicht ohne Einschränkungen. Die These ist zeitlich begrenzt: Für die nächsten 12-18 Monate ist Micron einer der attraktivsten strukturellen AI-Plays mit einer Bewertung, die den Wachstumspfad nicht einpreist. Der Katalysator ist unmittelbar – Q2 FY2026 Earnings (18. März 2026) dürften $18,7 Mrd. Revenue und ~68% Bruttomarge zeigen; falls Guidance für Q3 erneut positiv überrascht, könnte der Kurs die ATH-Zone $455 anlaufen.</p>
+      <p>Das bärische Narrativ enthält valide Punkte, die keineswegs ignoriert werden dürfen. Memory-Zyklen enden schnell; die historische Evidenz mahnt zur Vorsicht für Horizonte über 18-24 Monate. Der HBM-Strukturvorteil gegenüber SK Hynix ist real aber nicht uneinholbar – und der Samsung-Wildcard ist ein echtes Risiko für Microns mittelfristige Marktanteils-Ambition von 25%+. Ich könnte falsch liegen, wenn: (a) Samsung schneller als erwartet zu 30%+ HBM-Marktanteil zurückkehrt; oder (b) der US-KI-CapEx-Zyklus 2026 dreht, was die HBM-Nachfrage schwächt.</p>
+      <p>Risk/Reward: Downside ~$340 (Support SMA 200-Bereich ca. -19% vom Kurs); Upside-Szenario Kurs $600-700 bis Ende FY2026 (starke Beat-Kette + HBM4-Ramp = +43-67%). Das ergibt ein Risk/Reward von ca. 1:2,5 bis 1:3 – attraktiv genug für einen Buy, aber mit aktivem Stop-Loss-Management.</p>
+
+      <h3>Zeithorizont-Tabelle</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Katalysator</th><th>Risiko</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr><td>0–6 Monate</td><td>Q2 FY2026 Earnings 18.03.; Q3-Guidance; HBM4-Ramp-Bestätigung</td><td>Miss bei EPS/Guidance; Technischer Bruch unter $394</td><td><span class="badge badge-green">Kaufen / Taktisch</span></td></tr>
+            <tr><td>6–24 Monate</td><td>HBM-TAM-Expansion; Marktanteilsgewinn auf 25%; Idaho-Fab-Fortschritt</td><td>Samsung-Comeback; Überangebot-Signale; Tariff-Eskalation</td><td><span class="badge badge-orange">Kaufen mit Stop-Loss</span></td></tr>
+            <tr><td>2–5 Jahre</td><td>HBM-TAM $100Mrd. 2028; LPCAMM2 Edge-AI; Automotive wächst</td><td>Memory-Zyklus-Umkehr 2027-2028; CXMT reift heran</td><td><span class="badge badge-yellow">Halten / Selektiv Kaufen</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese (Zusammenfassung)</h3>
+      <p>Micron ist die einzige US-börsennotierte pure-play Memory-Anlage mit etablierter HBM-Produktion und wächst in einen Markt mit 40% CAGR. Die Forward-Bewertung von ~11x P/E ist für das gebotene Wachstumsprofil strukturell attraktiv und wird durch das PEG-Ratio von 0,16 unterstrichen. Das Investment-Case funktioniert, solange der HBM-Superzyklus intakt bleibt und Micron seinen Marktanteil mindestens stabil hält. Die Earnings vom 18. März sind der unmittelbare Katalysator.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$550–650</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">1–2 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–19% ($340)</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+55% ($650)</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:2,9</div></div>
+      </div>
+
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Q2 FY2026 Revenue unter $17,5 Mrd. oder Gross Margin unter 62% → sofort reduzieren</li>
+            <li>Q3-Guidance unter $15 Mrd. (Wachstumsbeschleunigung bricht ab) → verkaufen</li>
+            <li>Micron verliert weiteren HBM-Marktanteil auf unter 17% (Samsung > 30%) → Position halbieren</li>
+            <li>Kurs bricht nachhaltig unter $340 (SMA 200-Bereich) → Stop-Loss auslösen</li>
+            <li>AI-CapEx-Cycle dreht erkennbar bei NVIDIA / Hyperscalern → sellieren</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Q2 FY2026 EPS über $9 USD (deutliches Beat) + positive Q3-Guidance → Nachkaufen</li>
+            <li>HBM4-Massenproduktion bestätigt und Micron nennt neue Großkunden → Positionsaufbau</li>
+            <li>Microns HBM-Marktanteil steigt über 25% (Marktanteilsgewinn vs. Samsung) → Buy</li>
+            <li>Kurs-Pullback auf $360-380 ohne fundamentale Verschlechterung → Chance zum Einstieg</li>
+            <li>HBM-TAM Update: Prognose über $120 Mrd. für 2028 → Positionsgröße erhöhen</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Growth Investors (AI/Semiconductor-Fokus)</li>
+            <li>Quality Growth Investors</li>
+            <li>Mittelfristig orientierte Anleger (1-2 Jahre)</li>
+            <li>Anleger mit Halbleiter-Zykluserfahrung</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Value Investors (P/S 11x ist kein klassisches Value)</li>
+            <li>Income Investors (Dividende minimal, $0,46/Jahr)</li>
+            <li>Risikoscheue Anleger (Beta 1,5-2,3)</li>
+            <li>Langfristige Buy-and-Hold-Anleger (Zyklusrisiko ab 2027)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="table-wrap" style="margin-top:16px;">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten auf Earnings</span></td><td>Q2-Ergebnis (18. März) abwarten; Einstieg nach Bestätigung</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">50% jetzt / 50% nach Earnings</span></td><td>Aktuelles Niveau attraktiv, Earnings-Katalysator als Nachkauf-Trigger</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>PEG 0,16 + Forward PE 11x bei 60%+ Umsatzwachstum; Risk/Reward 1:2,9</td></tr>
+            <tr><td><strong>Langfristig (&lt;2J)</strong></td><td><span class="badge badge-orange">Tranchiert aufbauen</span></td><td>Zyklusrisiko ab 2027 macht Stop-Loss und Monitoring unerlässlich</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="source">Quellen: Analyse basiert auf Sektionen 1-10; Seeking Alpha Q2 Preview MU (13. März 2026); Trefis MU vs Competition (Dez. 2025)</div>
+    </div>
+  </div>
+
+  <!-- S13: OUTLOOK -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – 3 entscheidende Events</div>
+      <div class="section-note">Wenn/Dann – Konkrete Trigger</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q2 FY2026 Quartalsergebnisse – 18. März 2026 (AMC)</h4>
+        <p>Das unmittelbar bevorstehende Q2-Ergebnis ist der wichtigste Catalyst für die nächste Kursphase. Konsens: Revenue $18,7 Mrd. / Non-GAAP EPS $8,42 / Gross Margin ~68%. Die Guidance für Q3 FY2026 ist mindestens ebenso entscheidend: Setzt Micron die Rekord-Kette fort oder beginnt das Wachstum sich zu verlangsamen?</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Revenue ≥ $19 Mrd. UND EPS ≥ $9 UND Q3-Revenue-Guidance ≥ $20 Mrd. → Starkes Signal, dass der HBM-Superzyklus beschleunigt und Microns Marktpositionierung stärker ist als erwartet. Sofort Nachkaufen; Kursziel $600 rückt näher.<br><br>
+          <strong>Wenn:</strong> Revenue $17,5-18,7 Mrd. (in-line) bei positiver aber verhaltener Q3-Guidance ($17-18 Mrd.) → Ergebnis solide aber deckt nicht die "Beat-Erwartung" des Markts. Neutrale Kursreaktion wahrscheinlich; Position halten, nichts verändern.<br><br>
+          <strong>Wenn:</strong> Revenue unter $17,5 Mrd. ODER Q3-Guidance enttäuscht deutlich (unter $16 Mrd.) → Wachstumsbeschleunigung bricht ab; Gross-Margin-Peak möglicherweise erreicht. Sofortige Reduzierung um 50% der Position.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 2: HBM4 Massenproduktions-Update & Marktanteilsdata – Q2/Q3 CY2026</h4>
+        <p>Micron hat HBM4-Serienlieferungen begonnen (Feb. 2026) und strebt Ramp-Produktion ab Q2 CY2026 an. Entscheidend für das Investmentnarrativ ist, ob Micron seinen HBM4-Marktanteil gegenüber dem HBM3E-Level (21%) ausbauen oder mindestens halten kann, nachdem Samsung ebenfalls HBM4 massenproduktionsreif ist. Industrie-Marktanteilsdaten von Counterpoint/TrendForce für Q1/Q2 CY2026 erwartet in Q2-Q3 2026.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Microns HBM4-Marktanteil steigt auf ≥ 24% (gemäß Counterpoint/TrendForce für Q1/Q2 CY2026) → Bestätigung, dass Microns Technologie-Leadership in HBM4 gegenüber Samsung Bestand hat. Starkes Kaufsignal; Positionsaufbau rechtfertigen; strukturelles Argument für 25%+ Marktanteil 2027 valide.<br><br>
+          <strong>Wenn:</strong> Microns HBM4-Marktanteil fällt auf unter 17% (Samsung gewinnt über 30%) → Microns mittelfristiges Potenzial ist strukturell beschränkt. Analyse der Burggraben-Score-Justierung auf 4/10; Position auf Halten reduzieren.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 3: Erstproduktion Idaho-Fab & DRAM-Zyklusindikator – H2 CY2026 / Q1 CY2027</h4>
+        <p>Micron zieht den Zeitplan für die erste Idaho-Fab vor (erste Wafer-Output: Mitte CY2027, vorgezogen von späterem Datum). Parallel ist die Branchenbeobachtung entscheidend: Beginnen Branchenberichte über DRAM-Lageranstieg bei Hyperscalern oder Preiskorrekturen in H2 CY2026, wäre dies das erste Warnsignal eines Zyklus-Turns. Dies ist der für die Langfrist-These wichtigste Monitor-Punkt.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Keine Hinweise auf DRAM/HBM-Überangebot in H1 CY2027 (weiter straffe Marktbedingungen, DRAM-Spotpreise stabil oder steigend) UND Idaho-Fab-Ramp verläuft planmäßig → HBM-Superzyklus hält an; Micron kann Earnings-Momentum in FY2027 fortsetzen. Langfristig halten; Kursziel $700+ plausibel für 2028.<br><br>
+          <strong>Wenn:</strong> Erste Berichte über Lageranstieg bei Hyperscalern oder DRAM-Spotpreisrückgang um mehr als 15% in H2 CY2026 → Frühwarnsignal eines Zyklusumkehr. Risikomanagement aktivieren: Schrittweise Positionsreduktion auf 50%; defensivere Zielkurse neu kalibrieren auf $380-450.
+        </div>
+      </div>
+
+      <div class="source">Quellen: Micron Q1 FY2026 Prepared Remarks / Mehrotra Statements; Seeking Alpha Q2 Preview (März 2026); Counterpoint Research HBM Market Share Methodology; TrendForce HBM4 Competitive Outlook (Feb. 2026)</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken und stellt keine Anlageberatung dar. Sie ist keine Aufforderung zum Kauf oder Verkauf von Wertpapieren. Alle Aussagen basieren auf öffentlich zugänglichen Quellen; Fehler und Unvollständigkeiten sind möglich. Investitionen in Aktien sind mit erheblichen Risiken verbunden, einschließlich des Totalverlusts des eingesetzten Kapitals. Vergangenheitswerte sind kein verlässlicher Indikator für zukünftige Entwicklungen. Der Ersteller übernimmt keine Haftung für Entscheidungen, die auf Basis dieser Analyse getroffen werden. Bitte konsultieren Sie einen lizenzierten Finanzberater vor jeder Anlageentscheidung. Stand: 14. März 2026 · Aktienanalyse Canvas v2.2
+  </div>
+
+</div>
+</body>
+</html>
