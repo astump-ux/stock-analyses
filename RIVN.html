@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RIVN – Aktienanalyse Canvas v2.2</title>
+  <style>
+    :root {
+      --primary: #FF6900;
+      --primary-dark: #cc5400;
+      --bg: #0f0f12;
+      --bg-card: #1a1a1f;
+      --bg-card2: #22222a;
+      --border: #2e2e38;
+      --text: #e8e8ec;
+      --text-muted: #888898;
+      --text-dim: #555566;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+      --teal: #14b8a6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+    .header {
+      background: linear-gradient(135deg, #1a0800 0%, #2a1000 40%, #0f0f12 100%);
+      border-bottom: 1px solid var(--primary);
+      padding: 36px 40px 28px; display: flex; justify-content: space-between;
+      align-items: flex-start; flex-wrap: wrap; gap: 20px;
+    }
+    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .header-left h1 span { color: var(--primary); }
+    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    .header-right { text-align: right; }
+    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+    .price-change.up { background: rgba(34,197,94,0.15); color: var(--green); }
+    .nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100; }
+    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+    .kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .kpi-value.green { color: var(--green); }
+    .kpi-value.red { color: var(--red); }
+    .kpi-value.orange { color: var(--primary); }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .section-title { font-size: 16px; font-weight: 700; color: white; }
+    .section-score { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+    .section-note { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+    .section-body { padding: 20px 24px; }
+    p { margin-bottom: 12px; color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+    h3:first-child { margin-top: 0; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,105,0,0.04); }
+    .beat { color: var(--green); font-weight: 600; }
+    .miss { color: var(--red); font-weight: 600; }
+    .neutral { color: var(--yellow); font-weight: 600; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+    .badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .badge-orange { background: rgba(255,105,0,0.15); color: var(--primary); }
+    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+    .event-item:last-child { border-bottom: none; }
+    .event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+    .dot-green { background: var(--green); }
+    .dot-red { background: var(--red); }
+    .dot-yellow { background: var(--yellow); }
+    .event-label { font-weight: 600; color: white; }
+    .event-text { font-size: 14px; color: var(--text); }
+    .risk-item { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .risk-title { font-weight: 600; color: white; font-size: 14px; }
+    .score-bar { display: flex; align-items: center; gap: 10px; }
+    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #ff9500); }
+    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media(max-width:700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .rating-box { background: linear-gradient(135deg, rgba(255,105,0,0.12), rgba(255,105,0,0.04)); border: 1px solid rgba(255,105,0,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+    .rating-item .val { font-size: 20px; font-weight: 800; color: white; }
+    .rating-item .val.buy { color: var(--green); }
+    .rating-item .val.hold { color: var(--yellow); }
+    .rating-item .val.sell { color: var(--red); }
+    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media(max-width:700px) { .trigger-grid { grid-template-columns: 1fr; } }
+    .trigger-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .trigger-card h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .trigger-card.buy h5 { color: var(--green); }
+    .trigger-card.sell h5 { color: var(--red); }
+    .trigger-list { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
+    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    @media(max-width:600px) { .investor-grid { grid-template-columns: 1fr; } }
+    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+    .investor-no { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-no h5 { color: var(--red); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+    .investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+    .geo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+    .geo-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .geo-pct { font-size: 20px; font-weight: 700; color: white; }
+    .geo-note { font-size: 12px; color: var(--text-muted); }
+    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+    .outlook-card .when-then strong { color: var(--primary); }
+    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+    .source a { color: var(--text-dim); }
+    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+    .alert-box { background: rgba(255,105,0,0.08); border: 1px solid rgba(255,105,0,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .pill { display: inline-block; background: rgba(255,105,0,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+    .highlight-box { background: rgba(255,105,0,0.06); border: 1px solid rgba(255,105,0,0.15); border-radius: 8px; padding: 14px 16px; margin: 12px 0; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Rivian Automotive <span>RIVN · NASDAQ</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 13. April 2026 · NASDAQ · Sektor: Electric Vehicles / Automotive Tech</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">Consumer EVs</span>
+      <span class="badge badge-blue">Software & Services</span>
+      <span class="badge badge-blue">SDV-Plattform</span>
+      <span class="badge badge-yellow">Commercial Vans</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$15.45</div>
+    <div class="price-meta">Schlusskurs 12. Apr 2026 · NASDAQ</div>
+    <div class="price-change down">▼ –31.9% vs 52W-High</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $10.85 – $22.69</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Plattformthese</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <!-- KPI OVERVIEW -->
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Kurs</div>
+      <div class="kpi-value orange">$15.45</div>
+      <div class="kpi-sub">USD · 12. Apr 2026</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Marktkapitalisierung</div>
+      <div class="kpi-value">$19,2 Mrd</div>
+      <div class="kpi-sub">1,24 Mrd Aktien</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">P/S (TTM)</div>
+      <div class="kpi-value red">3,55x</div>
+      <div class="kpi-sub">Rev. TTM $5,39 Mrd</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">EV/EBITDA</div>
+      <div class="kpi-value red">n.a.</div>
+      <div class="kpi-sub">EBITDA –$2,75 Mrd</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Bruttomargen</div>
+      <div class="kpi-value green">2,7%</div>
+      <div class="kpi-sub">Erstmals positiv 2025</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Cashbestand</div>
+      <div class="kpi-value green">$6,1 Mrd</div>
+      <div class="kpi-sub">Ende Q4 2025</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Nächste Earnings</div>
+      <div class="kpi-value orange">30. Apr</div>
+      <div class="kpi-sub">Q1 2026 after close</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Analystenkonsens</div>
+      <div class="kpi-value">$17,74</div>
+      <div class="kpi-sub">10 Buy · 11 Hold · 4 Sell</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 1: GESCHÄFTSMODELL -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Zwei-Segment-Strategie</h3>
+      <p>Rivian Automotive (NASDAQ: RIVN) wurde 2009 gegründet und ist seit November 2021 börsennotiert. Das Unternehmen betreibt zwei Hauptsegmente: Automotive (Produktion und Verkauf von Elektrofahrzeugen) sowie Software & Services (technologiegetriebene Erlöse aus der Zusammenarbeit mit dem Volkswagen-Konzern, Serviceverträge, Telematiksoftware und zukünftige Autonomie-Abonnements). Die Fahrzeuge – der R1T Pickup Truck, das R1S SUV sowie ein elektrischer Lieferwagen (EDV) für Amazon – richten sich primär an den gehobenen Outdoor- und Freizeitbereich im nordamerikanischen Markt.</p>
+      <p>Das Automotive-Segment generierte 2025 einen Umsatz von rund $3,83 Mrd., was einem Rückgang von 15 % gegenüber dem Vorjahr entspricht, hauptsächlich aufgrund des Wegfalls staatlicher Regulierungsgutschriften und rückläufiger Auslieferungszahlen. Das Segment Software & Services hingegen explodierte auf $1,56 Mrd. (+222 % YoY) und machte damit rund 29 % des Gesamtumsatzes von $5,39 Mrd. aus – ein struktureller Wandel, der die Investmentstory maßgeblich verändert.</p>
+      <p>Das Revenue-Modell wird bewusst um Software erweitert: Neben dem klassischen Fahrzeugverkauf (Transaktional) strebt Rivian Einnahmen aus Lizenzgebühren (VW-JV), Autonomie-Abonnements (ab April 2026) sowie Fleet-Telematics (Amazon EDV-Flotte) an. Die Kostenstruktur ist derzeit noch stark Capex-intensiv: Das Unternehmen investiert jährlich rund $2 Mrd. in Produktionsanlagen, und die Fabrik in Normal, Illinois wird seit Q3 2025 für die R2-Produktion umgerüstet. Ein zweites Werk in Georgia (Investitionsvolumen $5 Mrd.) befindet sich im Bau und soll ab Ende 2027 in Betrieb gehen.</p>
+      <p>Die Unit Economics verbessern sich deutlich: Der Automotive-Bruttoverlust sank von –$1,21 Mrd. in 2024 auf –$432 Mio. in 2025. Gleichzeitig erwirtschaftete das Software-Segment $576 Mio. Bruttogewinn bei hohen Margen (ca. 37 %). Der erstmalige positive Gesamt-Bruttogewinn von $144 Mio. im vollen Jahr 2025 markiert einen wichtigen Meilenstein auf dem Weg zur operativen Profitabilität.</p>
+      <div class="source">Quellen: Rivian Q4 2025 Earnings Release (12.02.2026); SEC 8-K FY2025; CNBC Earnings Report (12.02.2026); InsideEVs (April 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 2: BURGGRABEN -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <h3>SDV-Architektur als technologischer Kernvorteil</h3>
+      <p>Rivians stärkstem Burggraben ist die selbst entwickelte zonale Software-Defined-Vehicle (SDV)-Architektur. Anders als traditionelle Fahrzeugarchitekturen mit hunderten verteilten Steuergeräten (ECUs) setzt Rivians Ansatz auf leistungsstarke zentrale Rechner, die alle Fahrzeugzonen kontrollieren und Over-the-Air-Updates (OTA) ermöglichen. Volkswagen hat diese Technologie im Rahmen des 50/50-Joint-Ventures "RV Tech" für bis zu $5,8 Mrd. lizenziert – ein industrieller Beweis für die technologische Qualität dieser Architektur, der schwer zu ignorieren ist.</p>
+      <p>Die Switching Costs im B2B-Plattformgeschäft sind erheblich: Einmal integriert, ist Rivians SDV-Stack tief in die Fahrzeugentwicklung von VW, Audi, Porsche und Scout eingebettet. Die 1.500+ Ingenieure des JV, die Hardware-Spezifikationen für Referenzfahrzeuge sowie die abgeschlossenen Wintertests in Arjeplog (Schweden) und Phoenix (Arizona) legen den Grundstein für eine langjährige technische Abhängigkeit des VW-Konzerns. Das VW-SSP-Plattform, auf der bis zu 30 Millionen Fahrzeuge gebaut werden sollen, wird auf Rivians Architektur aufsetzen.</p>
+      <p>Im Konsumentenbereich besitzt Rivian eine starke Markenidentität im Outdoor-Adventure-Segment: Das R1T wurde mehrfach als "bestes E-Pickup" ausgezeichnet, und die Kundenloyalität ist überdurchschnittlich hoch. Allerdings sind Netzwerkeffekte auf Konsumentenseite begrenzt, und die Marke hat noch keine Massenmarktpräsenz erreicht. CEO RJ Scaringe hat explizit bestätigt, dass man über VW hinaus weitere Lizenznehmer für die SDV-Plattform anstrebt – was eine skalierbare B2B-Softwareeinnahmequelle darstellen würde, aber noch nicht materialisiert ist. Der Score von 6/10 reflektiert den echten technologischen Vorsprung, die aber noch limitierte Skalierung.</p>
+      <div class="source">Quellen: VW Group Press Release (12.11.2025); CleanTechnica (01.04.2026); Wikipedia RV Tech; WardsAuto (26.08.2025)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 3: LETZTE 4 QUARTALE -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Beat-Ratio: 3/4 EPS · 4/4 Revenue</div>
+    </div>
+    <div class="section-body">
+      <h3>Quartalsentwicklung 2025</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quartal</th>
+              <th>Umsatz (Akt.)</th>
+              <th>vs. Konsens</th>
+              <th>adj. EPS</th>
+              <th>vs. Konsens</th>
+              <th>Bruttogew.</th>
+              <th>Auslieferungen</th>
+              <th>YoY</th>
+              <th>Kursbewegung</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q1 2025</strong></td>
+              <td>$1,29 Mrd</td>
+              <td class="beat">Beat +11,5%</td>
+              <td>–$0,48</td>
+              <td class="beat">Beat +48%</td>
+              <td class="beat">$206 Mio</td>
+              <td>8.640</td>
+              <td class="miss">–37% YoY</td>
+              <td class="beat">+12%</td>
+            </tr>
+            <tr>
+              <td><strong>Q2 2025</strong></td>
+              <td>~$1,21 Mrd</td>
+              <td class="neutral">In-Line</td>
+              <td>–$1,16</td>
+              <td class="miss">Miss</td>
+              <td class="miss">–$206 Mio</td>
+              <td>10.661</td>
+              <td class="neutral">+6% YoY</td>
+              <td class="miss">–5%</td>
+            </tr>
+            <tr>
+              <td><strong>Q3 2025</strong></td>
+              <td>$1,60 Mrd</td>
+              <td class="beat">Beat +2,8%</td>
+              <td>–$0,70</td>
+              <td class="beat">Beat +2,8%</td>
+              <td class="neutral">$24 Mio</td>
+              <td>13.201</td>
+              <td class="beat">+78% YoY</td>
+              <td class="beat">+8%</td>
+            </tr>
+            <tr>
+              <td><strong>Q4 2025</strong></td>
+              <td>$1,29 Mrd</td>
+              <td class="beat">Beat +2,1%</td>
+              <td>–$0,54</td>
+              <td class="beat">Beat +21,5%</td>
+              <td class="beat">$120 Mio (9%)</td>
+              <td>9.745</td>
+              <td class="miss">–31% YoY</td>
+              <td class="beat">+21%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Das Quartalsbild ist gemischt, aber mit einem positiven Trend bei der Kapitalqualität. Q2 war durch einen dreiwöchigen Werks-Shutdown (Umbau für R2-Produktion) sowie den Wegfall staatlicher EV-Steuergutschriften geprägt, was zu einem Nettoverlust beim Bruttogewinn führte. Ab Q3 erholten sich die Auslieferungen auf über 13.000 Einheiten – dem Jahreshöhepunkt gemäß Management-Guidance. Q4 wiederum litt unter dem Nachfragerückgang nach Ablauf des $7.500 Federal EV Tax Credit (30. September 2025), was zu einem Auslieferungsrückgang von 31 % führte.</p>
+      <p>Das Management kommentierte in Q4: Die Verbesserungen beim durchschnittlichen Verkaufspreis (+$5.500/Einheit im Jahresverlauf) und die gesunkenen COGS pro Einheit (–$9.500) zeigen, dass die operative Hebelwirkung greift. Der adj. EBITDA-Verlust verbesserte sich von –$602 Mio. in Q3 auf –$465 Mio. in Q4 (+$137 Mio. sequenziell). Das Software-Segment lieferte in Q4 allein $447 Mio. Umsatz bei ~40 % Bruttomarge – davon rund $273 Mio. direkt aus dem VW-JV.</p>
+      <p><strong>Nächster Quartalsbericht: 30. April 2026 (Q1 2026).</strong> Rivian lieferte in Q1 2026 bereits 10.365 Fahrzeuge (+13 % QoQ, aber –26,5 % bei reinen US-Verkäufen), hielt die Jahresguidance von 62.000–67.000 Einheiten aufrecht. Erste R2-Auslieferungen sollen noch in Q2 2026 beginnen.</p>
+      <div class="source">Quellen: Rivian Q4 2025 Earnings (CNBC, 12.02.2026); SEC 8-K Q2 2025; Rivian Shareholder Letter Q3 2025 (04.11.2025); InsideEVs (April 2026); TipRanks Earnings Summary (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 4: WACHSTUM -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Umsatzwachstum nach Segmenten</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Segment</th><th>2024</th><th>2025</th><th>Wachstum</th><th>Anteil 2025</th><th>Outlook 2026</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Automotive</strong></td><td>$4,51 Mrd</td><td>$3,83 Mrd</td><td class="miss">–15%</td><td>71%</td><td>Stabil zzgl. R2-Ramp</td></tr>
+            <tr><td><strong>Software &amp; Services</strong></td><td>$0,49 Mrd</td><td>$1,56 Mrd</td><td class="beat">+222%</td><td>29%</td><td>+60% YoY erwartet</td></tr>
+            <tr><td><strong>Gesamt</strong></td><td>$4,97 Mrd</td><td>$5,39 Mrd</td><td class="neutral">+8%</td><td>100%</td><td>~$6,9 Mrd (Konsens)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Geografische Verteilung des Umsatzes</h3>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">USA</div>
+          <div class="geo-pct">~97%</div>
+          <div class="geo-note">Einziger Produktionsmarkt</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Kanada / Übrige</div>
+          <div class="geo-pct">~3%</div>
+          <div class="geo-note">Begrenzte Exporte</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Europa (geplant)</div>
+          <div class="geo-pct">0%</div>
+          <div class="geo-note">R2 Europa-Expansion ab 2027</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">VW-JV (B2B)</div>
+          <div class="geo-pct">~5% Umsatz</div>
+          <div class="geo-note">Global, wächst ab 2027</div>
+        </div>
+      </div>
+
+      <p>Das Wachstumsbild ist zweigeteilt: Der Automotive-Umsatz leidet unter strukturellen Headwinds (Wegfall EV-Steuerkredite, schwächere US-EV-Nachfrage, niedrige Auslieferungszahlen während des Werksumbaus). Das Software &amp; Services-Segment hingegen zeigt mit +222 % einen der stärksten Wachstumsraten im gesamten Automotive-Sektor – getrieben durch die VW-JV-Einnahmen, die ab H2 2024 signifikant angestiegen sind.</p>
+      <p>Das Wachstum ist strukturell real: Die VW-Einnahmen sind vertraglich gesichert (bis $5,8 Mrd. bis 2027), und neue Quellen wie bezahlte Autonomie-Abonnements (geplanter Start April 2026) sowie internationale Expansion mit dem R2 (Europa ab 2027 angekündigt) sind auf der Roadmap. Die Auslieferungserwartungen für 2026 von 62.000–67.000 Fahrzeugen (+47–59 % YoY) sind ambitioniert aber nicht unrealistisch, da die R2-Produktion läuft. Der Score reflektiert echtes Wachstumspotenzial, das jedoch noch stark von der R2-Ramp-Ausführung abhängt.</p>
+      <div class="source">Quellen: Rivian Q4 2025 Earnings Release (12.02.2026); 24/7 Wall St. (April 2026); InsideEVs R2 Production Update (April 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 5: BEWERTUNG -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 3/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kennzahl</th><th>Wert (aktuell)</th><th>Kommentar</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>P/S (TTM)</td><td class="miss">3,55x</td><td>Für verlustmachendes EV-Startup vergleichsweise teuer</td></tr>
+            <tr><td>P/S (FWD 2026)</td><td class="neutral">~2,78x</td><td>Auf Basis $6,9 Mrd Konsens-Umsatz 2026</td></tr>
+            <tr><td>P/E (TTM)</td><td class="miss">n.a. (negativ)</td><td>EPS –$3,65 je Aktie (Verlust)</td></tr>
+            <tr><td>EV/EBITDA</td><td class="miss">n.a. (negativ)</td><td>EBITDA –$2,75 Mrd</td></tr>
+            <tr><td>Marktkapitalisierung</td><td>$19,15 Mrd</td><td>Enterprise Value ~$17,44 Mrd</td></tr>
+            <tr><td>Kurs-Cashbestand</td><td class="neutral">$6,1 Mrd Cash</td><td>32% des Marktwerts in Cash</td></tr>
+            <tr><td>Analystenziel (Median)</td><td>$17,00–$17,74</td><td>+10–15% Upside vom akt. Kurs</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Die Bewertung von Rivian ist für ein verlustmachendes Unternehmen mit $3,65 Mrd. Nettoverlust im Jahr 2025 anspruchsvoll. Das P/S von 3,55x lässt sich nur rechtfertigen, wenn man die Plattform-Optionalität (VW-JV als Technologielizenzgeber) und das R2-Wachstumspotenzial einpreist. Ohne R2-Erfolg fehlt die fundamentale Rechtfertigung für das aktuelle Kursniveau.</p>
+      <p>Der Cashbestand von $6,1 Mrd. (Ende 2025) plus erwartete $2,0 Mrd. aus dem VW-JV im Jahr 2026 (davon $1 Mrd. nach erfolgreichem Wintertest-Meilenstein) ergibt eine Liquiditätsdecke von über drei Jahren bei aktuellem Cashburn. Dies reduziert das Insolvenzrisiko kurzfristig erheblich, rechtfertigt aber keine Premium-Bewertung. Der Score von 3/10 spiegelt die fundamentale Teuerung wider, berücksichtigt aber den nicht-linearen Optionswert der SDV-Plattform.</p>
+      <div class="source">Quellen: StockAnalysis.com Statistics (April 2026); TradingView RIVN (April 2026); TickerNerd Forecast (April 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 6: CASHFLOW & MARGEN -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 4/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kennzahl</th><th>2024</th><th>2025</th><th>Trend</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Gesamtumsatz</td><td>$4,97 Mrd</td><td>$5,39 Mrd</td><td class="beat">+8%</td></tr>
+            <tr><td>Bruttogewinn</td><td>–$1,17 Mrd</td><td>+$144 Mio</td><td class="beat">Erstmals positiv</td></tr>
+            <tr><td>Bruttomarge</td><td>–23,5%</td><td>+2,7%</td><td class="beat">+26pp Verbesserung</td></tr>
+            <tr><td>EBITDA (adj.)</td><td>–$2,75 Mrd</td><td>–$2,0 bis –2,25 Mrd</td><td class="neutral">Verbesserung</td></tr>
+            <tr><td>EBITDA-Marge</td><td>–55%</td><td>–40%</td><td class="neutral">+15pp Verbesserung</td></tr>
+            <tr><td>FCF</td><td>negativ</td><td>negativ (~–$3 Mrd)</td><td class="miss">Stark negativ</td></tr>
+            <tr><td>S&amp;S Bruttomarge</td><td>~35%</td><td>~37%</td><td class="beat">High-margin &amp; wachsend</td></tr>
+            <tr><td>ROE</td><td>n.a.</td><td>–65%</td><td class="miss">Verlustbedingt</td></tr>
+            <tr><td>Debt/Equity</td><td>n.a.</td><td>1,13</td><td class="miss">Erhöht, aber handhabbar</td></tr>
+            <tr><td>Cashbestand</td><td>$7,7 Mrd</td><td>$6,1 Mrd</td><td class="miss">Abbau durch Cashburn</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Die Cashflow-Situation ist das zentrale Risiko der Rivian-These. Der Free Cashflow ist mit schätzungsweise –$3 Mrd. im Jahr 2025 stark negativ, und der Weg zur EBITDA-Profitabilität (Ziel: 2027) erfordert eine erfolgreiche R2-Rampe sowie Skalierung der Softwareeinnahmen. Die gute Nachricht: Der Bruttogewinn wurde 2025 erstmals positiv (+$144 Mio.), und die sequenzielle Verbesserung des EBITDA-Verlusts im Jahresverlauf deutet auf operative Hebelwirkung hin.</p>
+      <p>Das Software-Segment ist der eigentliche Kurstreiber auf der Kapitalqualitätsseite: Mit $576 Mio. Bruttogewinn bei ~37 % Marge und erwarteten +60 % Wachstum in 2026 entwickelt sich ein hochmargiges Nebengeschäft, das die Automotive-Verluste zunehmend kompensiert. CapEx-Guidance für 2026 liegt bei $1,95–2,05 Mrd. – ein signifikanter Anstieg gegenüber 2025, da das R2-Hochlauf und der Georgia-Werksbau Kapital binden. Keine Dividenden; keine Aktienrückkäufe.</p>
+      <div class="source">Quellen: Rivian Q4 2025 Earnings (bike-ev.com, 13.02.2026); DataInsightsMarket (April 2026); TradingView Financials (April 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 7: PEER-VERGLEICH -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich: Tesla · Xiaomi Auto</div>
+      <div class="section-score">Score: 4/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Kennzahl</th>
+              <th>Rivian (RIVN)</th>
+              <th>Tesla (TSLA)</th>
+              <th>Xiaomi Auto (1810.HK)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Marktkapitalisierung</strong></td>
+              <td>$19,2 Mrd</td>
+              <td>$1,4 Bio</td>
+              <td>~$121 Mrd (Gruppe)</td>
+            </tr>
+            <tr>
+              <td><strong>Umsatz (letzte 12M)</strong></td>
+              <td>$5,39 Mrd</td>
+              <td>~$97 Mrd</td>
+              <td>~$62 Mrd (Gruppe)</td>
+            </tr>
+            <tr>
+              <td><strong>Umsatzwachstum</strong></td>
+              <td class="neutral">+8% (2025)</td>
+              <td class="miss">–2% (2025)</td>
+              <td class="beat">+35%+ (Gruppe)</td>
+            </tr>
+            <tr>
+              <td><strong>EV-Bruttomarge</strong></td>
+              <td class="miss">+2,7% (konsolidiert)</td>
+              <td class="neutral">~17%</td>
+              <td class="beat">26,4% (EV-Segment H1 2025)</td>
+            </tr>
+            <tr>
+              <td><strong>P/S (TTM)</strong></td>
+              <td class="miss">3,55x</td>
+              <td class="miss">~14,4x</td>
+              <td class="beat">~1,94x (Gruppe)</td>
+            </tr>
+            <tr>
+              <td><strong>Auslieferungen p.a.</strong></td>
+              <td>42.247 (2025)</td>
+              <td>~1,79 Mio (2024)</td>
+              <td>~200.000+ (2025, wachsend)</td>
+            </tr>
+            <tr>
+              <td><strong>EV-Profitabilität</strong></td>
+              <td class="miss">Negativ (Automotive)</td>
+              <td class="neutral">Positiv, rückläufig</td>
+              <td class="beat">Positiv (seit Q3 2025)</td>
+            </tr>
+            <tr>
+              <td><strong>Software-Plattform</strong></td>
+              <td class="beat">Lizenzierung (VW-JV, offen)</td>
+              <td class="neutral">Geschlossen (FSD intern)</td>
+              <td class="neutral">HyperOS (intern, Ökosystem)</td>
+            </tr>
+            <tr>
+              <td><strong>Marktfokus</strong></td>
+              <td>USA (Premium → Massenmarkt)</td>
+              <td>Global</td>
+              <td>China (Übersee ab 2027)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Der Peer-Vergleich zeigt Rivians ambivalente Position: Tesla ist in Skalierung und Marke klar überlegen, leidet aber unter rückläufigen Auslieferungen und einem astronomischen P/E von ~300x – ein Bewertungssegment, dem Rivian nicht angehört. Xiaomi Auto ist das überzeugendere Wachstumsbeispiel: In nur 19 Monaten nach Marktstart profitabel (Q3 2025: $98 Mio. EV-Gewinn), Bruttomarge von 26,4 % im EV-Segment, und ein Ecosystem-Ansatz (HyperOS), der Kundenbindung durch Smartphone-Integration schafft.</p>
+      <p>Rivians einzige wirkliche Differenzierung gegenüber beiden Peers ist die offene SDV-Plattformstrategie: Weder Tesla noch Xiaomi lizenzieren ihre Software an andere OEMs. Dieser B2B-Ansatz ist strukturell einzigartig – wenn er skaliert, schafft er Recurring Revenue und vermindert die Abhängigkeit von Fahrzeugabsätzen. Allerdings hat Rivian bisher nur einen zahlenden B2B-Kunden (VW-Konzern). Im direkten Fahrzeugvergleich liegt Xiaomi vorne (profitabel, höhere Margen, schnelleres Wachstum), Tesla trotz Abwärtstrend in einer anderen Liga.</p>
+      <div class="source">Quellen: Statista Tesla Valuation (Feb 2026); GuruFocus Xiaomi (Feb 2026); AInvest EV Market Report (Sep 2025); Seeking Alpha Xiaomi EV (Dez 2025)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 8: NEWS & EVENTS -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen (Company-Events)</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Apr 2026 – R2-Produktion gestartet, Mitarbeiter-Auslieferungen beginnen <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">VIN #5 eines R2 wurde auf dem Weg von Normal, IL nach Irvine, CA gesichtet. Employee Delivery Programme läuft. CEO bestätigte Kunden-Auslieferungen noch in Q2 2026 (Frühling/Frühjahr). Quellen: InsideEVs (April 2026), EV (April 2026)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">27. Mär 2026 – VW-Wintertest abgeschlossen, weiteres $1 Mrd Milestone-Investment entsperrt <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">RV Tech beendete erfolgreich mehrmonatige Wintertests in Phoenix und Arjeplog mit Prototypen von VW, Audi und Scout. VW Group bestätigte nächste $1 Mrd-Investition. Quellen: Electrek (27.03.2026); VW Group Press Release (April 2026)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">12. Mär 2026 – Vollständige R2-Lineup-Enthüllung auf SXSW <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">R2 Performance Launch Edition ab $57.990 offiziell bestätigt. Erste Kunden-Auslieferungen für Frühjahr 2026 angekündigt. EPA-Zertifizierung: 328 Meilen Reichweite, 217 kW Ladegeschwindigkeit. Quelle: The Weekly Driver (April 2026)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">07. Apr 2026 – Q1 2026 Auslieferungen: 10.365 Fahrzeuge, US-Verkäufe –26,5% YoY <span class="badge badge-yellow">Gemischt</span></div>
+          <div class="event-text">Reaffirmation der Jahresguidance 62.000–67.000 Einheiten positiv. Aber US-Verkaufsrückgang von 26,5 % beunruhigt; Aktie fiel auf $14,50. Tarif-Unsicherheit belastet. Quelle: 24/7 Wall St. (07.04.2026)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">12. Feb 2026 – Q4 2025 Earnings: Beat, aber Lieferrückgang <span class="badge badge-orange">Neutral-Positiv</span></div>
+          <div class="event-text">EPS –$0,54 vs –$0,69 Konsens. Revenue $1,29 Mrd. Erstmalig positiver Jahres-Bruttogewinn ($144 Mio.). Aktie +21 % pre-market. Quelle: CNBC (12.02.2026)</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche (Sektor-Events)</h3>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">2026 – Wegfall $7.500 Federal EV Tax Credit <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Seit Oktober 2025 kein Federal EV Tax Credit mehr. Dies verteuert alle US-EVs und dämpft Nachfrage, besonders im Massenmarkt – genau dem Segment, in das Rivian mit dem R2 eintreten will. Quelle: 24/7 Wall St. (2026)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Apr 2026 – Trump-Zölle erhöhen Produktionskosten um "mehrere Tausend USD pro Fahrzeug" <span class="badge badge-yellow">Negativ</span></div>
+          <div class="event-text">CFO McDonough bestätigte, dass Zölle die CapEx-Guidance auf $1,95–2,05 Mrd erhöht haben. Rivian produziert in den USA, ist aber auf importierte Komponenten (Batteriezellen etc.) angewiesen. Quellen: WardsAuto (Aug 2025)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">2025 – Xiaomi EV profitabel in 19 Monaten; Wettbewerbsdruck steigt <span class="badge badge-yellow">Beobachten</span></div>
+          <div class="event-text">Xiaomi erreichte EV-Profitabilität im Q3 2025, schneller als Tesla (61 Monate). Allerdings Direktkonkurrenz zu Rivian im US-Markt noch nicht vorhanden (Xiaomi plant Übersee erst 2027). Quelle: Bloomberg via evxl.co (Nov 2025)</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">2026 – US-EV-Markt unter Druck: Nachfrage stagniert nach Auslaufen der Kredite <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">US-EV-Markt kontrahierte 2025 trotz globalem Wachstum. Tesla-Marktanteil fiel auf 42 %, Rivian leidet unter demselben Nachfragerückgang. Marktentwicklung bis 2030 bleibt langfristig positiv (IEA: 30 % CAGR global), kurzfristig belastet. Quelle: Cox Automotive EV Monitor (März 2025)</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – DOE-Darlehen von bis zu $6,6 Mrd für Georgia-Werk <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Rivian hat ein zugesagtes DOE-Darlehen ($6,6 Mrd.) für das Georgia-Werk. Noch keine Mittel abgerufen, da Bau erst im September 2025 begann. Regulatorisches Risiko besteht durch politische Unsicherheit. Quelle: DataInsightsMarket (2026)</div>
+        </div>
+      </div>
+      <div class="source">Quellen: Alle Events mit individuellen Quellenangaben oben; Zusammenfassung: InsideEVs, Electrek, CNBC, VW Group, 24/7 Wall St. (Jan–Apr 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 9: TECHNISCHE ANALYSE -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 4/10</div>
+    </div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom:16px;">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$15,45</div><div class="kpi-sub">12. Apr 2026</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value red">~$18,50</div><div class="kpi-sub">Kurs darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value red">~$17,83</div><div class="kpi-sub">Kurs darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value neutral">~$15,10</div><div class="kpi-sub">Kurs knapp drüber</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value yellow">~35</div><div class="kpi-sub">Near Oversold</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value">$22,69</div><div class="kpi-sub">–32% vom High</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value red">–0,11</div><div class="kpi-sub">Leicht bärisch</div></div>
+      </div>
+
+      <p>RIVN befindet sich in einer mittelfristigen Abwärtsbewegung von seinem 52-Wochen-Hoch bei $22,69 (Dezember 2025) auf aktuell $15,45. Die Aktie handelt unterhalb des SMA20 und SMA50, was technisch als Verkaufssignal gewertet wird. Einzig der SMA200 (~$15,10) bietet derzeit Unterstützung, und der Kurs liegt knapp darüber – ein technisch kritisches Niveau.</p>
+      <p>Der RSI von ~35 signalisiert "near oversold" – dies kann als taktisches Kaufsignal interpretiert werden, wenn das fundamentale Bild sich stabilisiert. Der negative MACD (–0,11) bestätigt jedoch anhaltenden Verkaufsdruck. Der Markt scheint einen möglichen "Retest" des Supports bei ~$12–13 einzupreisen (historische Unterstützungszone aus Q3 2025). Die technische Situation verbessert sich erst dann nachhaltig, wenn RIVN über den SMA50 (~$17,83) zurückklettert.</p>
+      <p>Positiv zu vermerken: Der Kursanstieg von +21 % nach Q4-Earnings (Dezember 2025 Peak $22) zeigt, dass der Markt auf positive Katalysatoren stark reagiert. Der R2-Launch könnte kurzfristig als neuer Katalysator wirken. Kurzfristig dominiert jedoch technischer Verkaufsdruck; die Aktie konsolidiert im Bereich $13–$17 seit Februar 2026.</p>
+      <div class="source">Quellen: Financhill Technical Analysis (Jan 2026); TipRanks Technical Analysis (Apr 2026); TradingView RIVN (Apr 2026); Tickzen (Apr 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 10: RISIKEN & CHANCEN -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Risiko-Score: 4/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Strukturelle Risiken</h3>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ R2-Hochlauf-Risiko (Ausführungsrisiko)</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Existenziell</span></div>
+        </div>
+        <div class="event-text">Rivian muss 2026 die R2-Produktion von 0 auf ~20.000–25.000 Einheiten hochlaufen – "one of the fastest EV launches in US history" (TechCrunch). Historisch hatte Rivian beim R1 erhebliche Anlaufschwierigkeiten. Scheitert der Ramp, drohen negative Marge, Guidanceverfehlung und massive Kurskorrektur. Wahrscheinlichkeit: 30 %.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">💸 Cashburn und Finanzierungsrisiko</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">FCF ~–$3 Mrd. p.a. Der Cashbestand ($6,1 Mrd. + $2 Mrd. VW-JV in 2026) gibt Runway bis ~2028. Danach wäre Kapitalerhöhung nötig – mit massiver Verwässerung für bestehende Aktionäre (Shares outstanding +17 % allein in 2025). Wahrscheinlichkeit einer Kapitalerhöhung bis 2028: >60 %.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🏛️ Regulatorische Risiken: DOE-Darlehen &amp; EV-Credits</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Das DOE-Darlehen von $6,6 Mrd. für Georgia ist politisch exponiert – bei Regierungswechsel oder Prioritätenverschiebung könnte es gefährdet sein. Zudem sind keine Federal EV Credits mehr verfügbar, was Nachfrage direkt beeinträchtigt. Wahrscheinlichkeit Darlehen-Kürzung: 20 %.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🔐 Single-Customer-Risiko im B2B-Plattformgeschäft</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Fast 100 % der S&amp;S-Einnahmen stammen von VW. Falls VW die eigene Softwarekompetenz (z.B. durch die Qualifizierungsprogramme ab Mai 2026) intern aufbaut und das JV nach 2027 schwächt, verliert Rivian seinen wichtigsten Einnahmestrom. Wahrscheinlichkeit: 25 % mittelfristig.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🚗 Tarife &amp; Lieferkette</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Trumps Importzölle erhöhen Komponentenkosten um "mehrere Tausend USD pro Fahrzeug" – besonders Batteriezellen aus Korea (LG). LFP-Zellen werden erst ab 2027 in Arizona lokalisiert (LG-Partnerschaft). Im Jahr 2026 bleibt das Kostenrisiko real.</div>
+      </div>
+
+      <h3>Chancen</h3>
+      <div class="highlight-box">
+        <p><strong>R2 als Wendepunkt:</strong> Positive frühe Medienreviews, erste Kundenlieferungen in Q2 2026. Wenn die Rampe gelingt, skaliert Rivian in ein Marktsegment mit 10x dem Volumen des R1.</p>
+        <p><strong>SDV-Plattform-Lizenzierung über VW hinaus:</strong> CEO Scaringe bestätigte aktiv Gespräche mit weiteren OEMs. Jeder neue Lizenznehmer würde S&amp;S-Umsatz multiplizieren, ohne proportionale Kostenerhöhung.</p>
+        <p><strong>Autonomie-Abonnements:</strong> Ab April 2026 sollen bezahlte Autonomiefunktionen als Subscription Recurring Revenue generieren – analog zu Tesla FSD.</p>
+        <p><strong>DOE-Darlehen &amp; Georgia-Werk:</strong> Wenn das Darlehen gesichert bleibt, kann Rivian bis 2028 auf 200.000+ Einheiten p.a. skalieren – ein Quantensprung in den Economies of Scale.</p>
+      </div>
+
+      <h3>Red Flags</h3>
+      <p>Insider-Verkäufe überwiegen; Shares Outstanding stiegen 2025 um 17 % (starke Verwässerung). Q1 2026: US-Verkäufe –26,5 % YoY trotz Markteinführung des R2 – strukturelle Schwäche im Kernmarkt. R2 Performance startet bei $57.990 (nicht $45.000 wie kommuniziert) – Marketingversprechen vs. Realität.</p>
+      <div class="source">Quellen: InsideEVs (Apr 2026); DataInsightsMarket (2026); 24/7 Wall St. (Apr 2026); StockAnalysis.com (Apr 2026); WardsAuto (Aug 2025)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 11: USER-SPEZIFISCHE ANALYSE – PLATTFORMTHESE -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Plattform-These: Offene SDV-Strategie als funktionierender USP?</div>
+      <div class="section-note">User-spezifische Analyse</div>
+    </div>
+    <div class="section-body">
+      <h3>Fragestellung</h3>
+      <p>Die zentrale User-These lautet: Ist Rivians offene SDV-Plattformstrategie ein realistischer, funktionierender Wettbewerbsvorteil? Diese Frage berührt das Kernnarrativ für RIVN-Investoren – denn ohne Plattform-Skalierung ist Rivian ein teurer, verlustmachender EV-Hersteller. Mit Plattform-Skalierung ist Rivian eine Technologieplattform mit asymmetrischem Upside.</p>
+
+      <h3>Was bereits funktioniert (Evidenz)</h3>
+      <p>Die Evidenz für eine funktionierende USP ist stärker als vielen Marktteilnehmern bewusst. Erstens: Volkswagen, einer der größten Automobilkonzerne der Welt, hat bis zu $5,8 Mrd. committet – kein spekulativer Term Sheet, sondern ein vollständig geschlossenes JV mit 1.500+ Mitarbeitern, abgeschlossenen Wintertests und einem konkreten Serienfahrzeug (VW ID.Every1, Produktionsstart 2027). Zweitens: Die Umsatzrealität untermauert die These – S&amp;S-Umsatz stieg 2025 auf $1,56 Mrd. (+222 %), davon ca. $273 Mio. pro Quartal aus dem JV mit ~40 % Bruttomarge. Das ist kein Papier-USP, sondern echter Cashflow-Beitrag. Drittens: Die Wintertests im April 2026 wurden erfolgreich abgeschlossen, was ein weiteres $1 Mrd.-Milestone-Investment entsperrte – VW zahlt nur bei Zielerreichung.</p>
+
+      <h3>Was noch nicht funktioniert (kritische Analyse)</h3>
+      <p>Die Plattformthese hat jedoch entscheidende Schwachstellen. Das Single-Customer-Risiko ist das gravierendste: 100 % der B2B-Plattformumsätze kommen von VW. Rivian ist damit weniger "offene Plattform" als "exklusiver JV-Partner". CEO Scaringe sprach zwar von weiteren Lizenzinteressenten – aber benannt oder konkretisiert wurde noch kein zweiter OEM-Kunde. Bis das geschieht, ist die "offene Plattform" strategisch korrekt beschrieben aber operativ eine Einzel-Kundenbeziehung. Zweitens: Das Risiko des Know-how-Transfers ist real. Ab Mai 2026 verbringen VW-Softwareingenieure "mehrere Monate" bei RV Tech in Palo Alto. Das ist strategisch sinnvoll für die Integration – öffnet aber langfristig die Frage, ob VW nach 2027 eigene Fähigkeiten aufgebaut hat und das JV schwächt.</p>
+
+      <h3>Fazit zur These &amp; Score-Anpassung</h3>
+      <p>Die offene SDV-Plattformstrategie ist eine echte, aber nicht vollständig bewiesene USP. Der VW-Deal ist real und skaliert messbar. Die Plattform ist technisch validiert (Wintertests bestanden). Die Skalierbarkeit auf weitere OEMs ist glaubwürdig – aber noch nicht materialisiert. Unter Berücksichtigung dieser nuancierten Einschätzung wird der Burggraben-Score von ursprünglich 5/10 auf <strong>6/10</strong> angehoben. Der tatsächliche Plattform-USP-Status wird erst dann klar, wenn ein zweiter zahlender OEM-Kunde öffentlich gemacht wird – das ist der kritische Meilenstein zur vollständigen Validierung der These.</p>
+      <div class="source">Quellen: VW Group Press Release (12.11.2025); Electrek (27.03.2026); CleanTechnica (01.04.2026); Wikipedia RV Tech; WardsAuto (26.08.2025); TipRanks Q4 2025 Earnings Summary</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 12: FAZIT -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit &amp; Investment-These</div>
+      <div class="section-note">Gesamtsynthese</div>
+    </div>
+    <div class="section-body">
+
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 – SDV-Plattform als Technologielizenzierer:</strong> Die VW-Partnerschaft ist kein Marketingtrick, sondern ein industriell validiertes, $5,8 Mrd. schweres Technologieabkommen. S&amp;S-Umsatz explodierte auf $1,56 Mrd. (+222 %) in 2025 – mit ~37 % Bruttomarge. Bei 60 % erwartetem Wachstum in 2026 entwickelt sich ein hochmargiges Recurring-Revenue-Segment, das Rivian strukturell von reinen EV-Herstellern unterscheidet. Der VW-Konzern baut SSP-Plattform für 30 Millionen Fahrzeuge auf Rivians Architektur auf – das ist eine langfristige Lizenzstory.</p>
+          <p><strong>Säule 2 – R2-Launch als Volume-Katalysator:</strong> Der R2 startet mit positiven Erstreviews im Frühjahr 2026. Mit einer Fertigungskapazität von letztlich 155.000 Einheiten p.a. in Normal, IL kann Rivian die Economies of Scale erstmals heben. CEO Scaringe: R2-Produktionskosten sollen weniger als halb so hoch sein wie beim R1. Bei 62.000–67.000 Auslieferungen in 2026 (+53 %) beginnt die operative Hebelwirkung zu greifen – Analyst Consensus sieht EBITDA-Break-Even bis 2027.</p>
+          <p><strong>Säule 3 – Bewertungsrelative Attraktivität:</strong> Bei $15,45 und $6,1 Mrd. Cash (32 % des Marktwerts) plus $2 Mrd. VW-JV-Capital in 2026 zahlt man effektiv $11 Mrd. für die operative Business. Auf Basis des erwarteten 2026-Umsatzes von $6,9 Mrd. entspricht das einem Forward-P/S von 1,6x – für eine Technologieplattform in früher Skalierungsphase kein exorbitantes Niveau.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 – R2-Ramp ist der Alles-Entscheider:</strong> Ohne erfolgreiche R2-Hochlaufkurve fehlt der Umsatzkatalysator für 2026, und Rivian verbrennt weiter ~$3 Mrd. FCF p.a. Der initiale Hochlauf auf 20.000–25.000 Einheiten in sechs Monaten wäre einer der schnellsten in der US-Geschichte. Beim R1-Launch hatte Rivian erhebliche Anlaufprobleme. Sollte die R2-Rampe scheitern oder verzögern, fällt das EBITDA-Break-Even-Ziel auf 2028+, und eine Kapitalerhöhung mit starker Verwässerung wäre fast sicher.</p>
+          <p><strong>Risiko 2 – Single-Customer-B2B-Risiko:</strong> Das bullische "offene Plattform"-Narrativ maskiert eine simple Realität: Rivian hat einen zahlenden Software-B2B-Kunden. VW baut parallel interne Softwarekompetenzen auf. Falls VW das JV nach 2027 nicht verlängert oder abschwächt, kollabiert der S&amp;S-Umsatz – und mit ihm die Bewertungslogik.</p>
+          <p><strong>Risiko 3 – Marktumfeld und Verwässerung:</strong> Der US-EV-Markt ist strukturell belastet (kein Steuerkredit, Tarifdruck, rückläufige Nachfrage Q1 2026: –26,5 % US YoY). Shares outstanding stiegen allein 2025 um 17 %. P/S 3,55x ist für ein verlustmachendes Unternehmen keine günstige Bewertung – fehlt der R2-Durchbruch, folgt eine Neubewertung nach unten.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Das bullische Narrativ ist überzeugender – aber mit einem zentralen Vorbehalt. Die SDV-Plattform ist real und technisch validiert. Das ist keine Hoffnung, sondern messbare Realität: $1,56 Mrd. S&amp;S-Umsatz, $576 Mio. Bruttogewinn, abgeschlossene Wintertests, $1 Mrd. Milestone-Investment entsperrt. Dieser Teil der Investmentthese funktioniert. Was noch nicht funktioniert, ist die R2-Skalierung und der zweite B2B-Kunde. Rivian ist strukturell in einer der interessantesten Positionen im EV-Markt – aber auf einem engen Pfad zur Profitabilität, der wenig Fehler erlaubt.</p>
+      <p>Das Risiko-Ertrags-Verhältnis ist bei $15,45 moderat attraktiv: Cash-adjusted zahlt man effektiv ~$11 Mrd. für die gesamte Business inklusive SDV-Plattform, R2-Optionalität, Amazon-Kundenbeziehung und Georgia-Werk-Option. Das Downside liegt bei ~$11–12 (–25 %, Unterstützung aus SMA200 und historischen Tiefständen), das Upside bei $22–28 (bis +80 %, wenn R2-Ramp und zweiter B2B-Kunde gelingen). Risk/Reward von 1:3 bei positivem Szenario – aber breites Unsicherheitsband.</p>
+      <p>Ich könnte falsch liegen, weil: Der R2-Hochlauf scheitert oder verzögert; VW integriert Rivian-Technologie intern und schwächt das JV; der Gesamtmarkt für US-EVs bleibt länger strukturell schwach als erwartet. Geeignet für Growth-Investoren mit 2–5 Jahre Horizont und hoher Volatilitätstoleranz.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Einschätzung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>0–6 Monate</strong></td><td>R2-Auslieferungsstart, Q1/Q2 Earnings, 2. VW-$1Mrd-Tranche</td><td>US-EV-Nachfrage, Tarife, R2-Ramp-Probleme</td><td><span class="badge badge-yellow">Neutral/Warten</span></td></tr>
+            <tr><td><strong>6–24 Monate</strong></td><td>R2-Volumen H2 2026, EBITDA-Verbesserung, 2. B2B-Lizenzpartner?</td><td>Kapitalerhöhung, R2 Marktakzeptanz, VW-Abhängigkeit</td><td><span class="badge badge-orange">Tranchiert kaufen</span></td></tr>
+            <tr><td><strong>2–5 Jahre</strong></td><td>R3/R3X, Georgia-Werk, SDV-Lizenzen, Autonomie-Abo</td><td>Konkurrenz (Xiaomi USA, Tesla), Tech-Disruption, Cashbedarf</td><td><span class="badge badge-green">Halten / Aufbauen</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>Rivian ist keine klassische EV-Wette mehr – es ist eine Technologieplattformstory mit einem EV-Business als Träger. Die SDV-Lizenzierung an VW ist der entscheidende strukturelle Unterschied zu allen anderen EV-Start-ups. Die $5,8 Mrd.-Partnerschaft ist real, der S&amp;S-Umsatz wächst schnell, und der Cashbestand ist ausreichend für den R2-Hochlauf. Der R2 wird entscheidend sein: Gelingt die Massenmarkt-Penetration, ist Rivian auf dem Weg zur Profitabilität und zu einer nachhaltigen Plattformposition. Scheitert er, droht eine teure Kapitalerhöhung.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$20–25</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–3 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–25%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+45–60%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:2,5</div></div>
+      </div>
+
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>R2-Auslieferungen in Q2/Q3 2026 unter 5.000 Einheiten → Sofort reduzieren (Ramp-Versagen)</li>
+            <li>S&amp;S-Umsatz stagniert oder sinkt YoY in 2026 → VW-JV-Risiko materialisiert sich</li>
+            <li>VW kündigt oder restrukturiert JV-Bedingungen → Komplettausstieg</li>
+            <li>Kapitalerhöhung zu Kursen unter $10 → Verwässerungsrisiko zu hoch</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>R2-Auslieferungen Q3 2026 über 10.000/Quartal → Ramp-Erfolg bestätigt, nachkaufen</li>
+            <li>Zweiter OEM-Lizenznehmer für SDV öffentlich gemacht → Plattform-USP vollständig validiert</li>
+            <li>Kurs unter $12 bei intaktem VW-JV → Attraktives Risk/Reward, kaufen</li>
+            <li>EBITDA-Break-Even in 2027 bestätigt → Position aufbauen</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Growth-Investoren (2–5 Jahre Horizont)</li>
+            <li>Tech-/Plattform-Investoren</li>
+            <li>Contrarian-Investoren bei Rücksetzer unter $12</li>
+            <li>EV-Sektor-Spezialisten</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Value-Investoren (kein positives EBITDA)</li>
+            <li>Income-Investoren (keine Dividende)</li>
+            <li>Risikoaverse Anleger</li>
+            <li>Kurzfristige Trader (technischer Druck)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten</span></td><td>Abwarten auf R2-Ramp-Bestätigung (Q3 2026) und zweiten B2B-Kunden</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>25 % bei $15, weitere 25 % nach positivem Q1 Earnings (30. Apr 2026)</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Kleinen Anker setzen</span></td><td>Risk/Reward 1:2,5 attraktiv; Stop-Loss bei $11</td></tr>
+            <tr><td><strong>Langfristig (3–5 J.)</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>SDV-Plattform-Skalierung ist die langfristige Tech-Story</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SEKTION 11 SCORING MIT INTEGRATION -->
+      <h3>Scoring (inkl. Plattformthese-Adjustment)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kategorie</th><th>Score</th><th>Visualisierung</th><th>Begründung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Geschäftsmodell (gm)</td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Software-first mit echtem B2B-Umsatz, aber noch verlustmachendes Automotive-Segment</td>
+            </tr>
+            <tr>
+              <td>Burggraben (bg)</td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>SDV-Architektur technisch validiert (VW-JV, Wintertests), Upgrade nach S11-Analyse</td>
+            </tr>
+            <tr>
+              <td>Operative Entwicklung (qu)</td>
+              <td>5/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td>
+              <td>3/4 EPS Beats, 4/4 Revenue Beats, erstmalig Jahres-Bruttogewinn – aber Lieferrückgänge</td>
+            </tr>
+            <tr>
+              <td>Wachstum (wa)</td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>S&S +222%, R2-Volumenkatalysator 2026, aber Automotive schrumpfend</td>
+            </tr>
+            <tr>
+              <td>Bewertung (bw)</td>
+              <td>3/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:30%"></div></div><span class="score-num">3</span></div></td>
+              <td>P/S 3,55x für verlustmachendes Unternehmen; nur durch Plattform-Optionalität vertretbar</td>
+            </tr>
+            <tr>
+              <td>Cashflow (cf)</td>
+              <td>4/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td>
+              <td>Erstmalig positiver Bruttogewinn, aber FCF ~–$3 Mrd.; massive Cashburn-Rate</td>
+            </tr>
+            <tr>
+              <td>Risiken (ri, invertiert)</td>
+              <td>4/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td>
+              <td>R2-Ramp-Risiko, Single-Customer, Kapitalerhöhungsrisiko, Tarife</td>
+            </tr>
+            <tr>
+              <td>Technische Analyse (ta)</td>
+              <td>4/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td>
+              <td>Unter SMA20 und SMA50; RSI ~35 near oversold; MACD negativ; knapp über SMA200</td>
+            </tr>
+            <tr>
+              <td>Peer-Vergleich (pe)</td>
+              <td>4/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td>
+              <td>Hinter Tesla (Skalierung) und Xiaomi (Profitabilität) – USP nur in SDV-Lizenzierung</td>
+            </tr>
+            <tr style="background:rgba(255,105,0,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>4,7/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track"><div class="score-bar-fill" style="width:47%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div>
+                  <span class="score-num" style="color:var(--primary);">4,7</span>
+                </div>
+              </td>
+              <td>Unterdurchschnittliches Fundamentalbild mit signifikantem Optionswert auf Plattformskalierung</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="source">Quellen: Alle vorigen Sektionen; Analyse-Datum: 13. April 2026</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 13: OUTLOOK -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Die 3 entscheidenden Events</div>
+      <div class="section-note">Wenn/Dann-Logik</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: R2-Hochlauf-Bestätigung – Q2/Q3 2026 Earnings (30. Apr &amp; ~Aug 2026)</h4>
+        <p>Die R2-Produktion hat begonnen. Die entscheidende Frage ist, ob Rivian die Rampe – eines der schnellsten EV-Launches in US-Geschichte – ohne schwerwiegende Qualitäts- oder Produktionsprobleme schafft. CFO McDonough erwartet "meaningful R2 volume" erst in H2 2026. Der Q2-Earnings-Call (30. April 2026) wird erste Auslieferungszahlen und operative Details liefern; der Q3-Call (ca. August 2026) wird zeigen, ob die Hochlaufkurve trägt.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> R2-Auslieferungen in Q3 2026 über 8.000–10.000 Einheiten liegen (H2 Hochlauf auf Kurs), Automotive-Bruttomarge verbessert sich auf 10 %+, und Jahresguidance 62.000–67.000 wird bestätigt → R2-Ramp ist validiert; R2 wird zum EBITDA-Break-Even-Enabler für 2027. Aktie dürfte 25–40 % steigen. Moderat nachkaufen.<br><br>
+          <strong>Wenn:</strong> R2-Auslieferungen unter 5.000 in Q3 oder signifikante Qualitätsprobleme gemeldet werden → Ramp scheitert wie 2021 beim R1. Guidance-Senkung wahrscheinlich, EBITDA-Target auf 2028+ verschoben. Position reduzieren; EBITDA-Break-Even-Narrativ kollabiert.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>🤝 Event 2: Zweiter SDV-Lizenzpartner – laufendes Jahr 2026/2027</h4>
+        <p>CEO Scaringe hat explizit kommuniziert, Gespräche mit weiteren OEMs über SDV-Lizenzierung zu führen. Aktuell haben 100 % der S&amp;S-Umsätze einen einzigen Kunden (VW-Konzern). Ein zweiter Lizenznehmer – egal ob kleinerer OEM, chinesischer Automobilhersteller oder US-Marke – würde die "offene Plattform"-These von einem strategischen Versprechen zu einer bewiesenen Geschäftsrealität machen.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Ein zweiter zahlender OEM-Lizenzpartner für die SDV-Architektur angekündigt wird → Plattform-USP vollständig validiert. S&S-Umsatzpotenzial auf $3+ Mrd. p.a. in Reichweite. Multiplizierender Effekt auf Bewertung (von EV-Multiple auf Tech-Plattform-Multiple). Dann aggressiv kaufen und Position aufbauen.<br><br>
+          <strong>Wenn:</strong> Bis Ende 2027 kein zweiter Lizenznehmer angekündigt → VW bleibt Einzelkunde. Plattform-USP existiert, aber ist strukturell nicht skalierbar. Bewertungsniveau von $15–18 bleibt das faire Kurs-Band; keine materielle Neubewertung. Halten, aber nicht aufbauen.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>🏛️ Event 3: DOE-Darlehen &amp; Georgia-Werk-Schicksal – Q3/Q4 2026</h4>
+        <p>Das zugesagte DOE-Darlehen von bis zu $6,6 Mrd. für das Georgia-Werk ist ein kritischer Finanzierungspfeiler für Rivians langfristige Produktionsskalierung. Rivian hat noch keinerlei Mittel abgerufen; der Werksbau begann erst im September 2025. Im politischen Umfeld 2026 besteht ein reales Risiko, dass diese Förderung überprüft, reduziert oder gestrichen wird. Eine endgültige Klarheit – positiv oder negativ – wäre ein wesentlicher Katalysator.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> DOE-Darlehen bestätigt bleibt und erste Abrufe für Georgia im H2 2026 erfolgen → Finanzierungssicherheit für 200.000+ Einheiten Kapazität bis 2028. Rivians langfristiger Skalierungspfad ist gesichert. Zusätzlich bullisch für EBITDA-Profitabilität durch Economies of Scale. Positiv für das Investment-Rating.<br><br>
+          <strong>Wenn:</strong> DOE-Darlehen signifikant reduziert oder gestrichen wird → Georgia-Werk verzögert sich auf 2029+. Rivian muss alternative Finanzierung suchen (Kapitalmarkt, weitere VW-Tranchen, Anleihen) – höchstwahrscheinlich verwässernd für Aktionäre. Position reduzieren oder Stop-Loss auf $11 setzen.
+        </div>
+      </div>
+
+      <div class="source">Quellen: Rivian Q4 2025 Earnings Call (12.02.2026); InsideEVs (Apr 2026); EV (Apr 2026); DataInsightsMarket (Apr 2026); WardsAuto (Aug 2025); VW Group (Apr 2026)</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken. Sie stellt keine Anlageberatung, Kaufempfehlung oder Aufforderung zum Kauf oder Verkauf von Wertpapieren dar. Investitionen in Aktien sind mit erheblichen Risiken verbunden, einschließlich des vollständigen Verlusts des eingesetzten Kapitals. Alle Angaben ohne Gewähr; Stichtag der Analyse: 13. April 2026. Bitte konsultieren Sie vor Anlageentscheidungen einen qualifizierten Finanzberater.</div>
+
+</div>
+</body>
+</html>
