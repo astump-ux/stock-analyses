@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOW – Aktienanalyse Canvas v2.2</title>
+  <style>
+:root {
+  --primary: #3b82f6;
+  --primary-dark: #2563eb;
+  --bg: #0f0f12;
+  --bg-card: #1a1a1f;
+  --bg-card2: #22222a;
+  --border: #2e2e38;
+  --text: #e8e8ec;
+  --text-muted: #888898;
+  --text-dim: #555566;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --blue: #3b82f6;
+  --purple: #8b5cf6;
+  --teal: #14b8a6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+.header { background: linear-gradient(135deg, #00081a 0%, #001028 40%, #0f0f12 100%); border-bottom: 1px solid var(--primary); padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; }
+.header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+.header-left h1 span { color: var(--primary); }
+.header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+.header-right { text-align: right; }
+.price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+.price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+.price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+.price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+.price-change.up { background: rgba(34,197,94,0.15); color: var(--green); }
+.nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100; }
+.nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+.main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+.kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+.kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.kpi-value.green { color: var(--green); }
+.kpi-value.red { color: var(--red); }
+.kpi-value.orange { color: var(--primary); }
+.section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+.section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+.section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.section-title { font-size: 16px; font-weight: 700; color: white; }
+.section-score { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+.section-note { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+.section-body { padding: 20px 24px; }
+p { margin-bottom: 12px; color: var(--text); }
+p:last-child { margin-bottom: 0; }
+h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+h3:first-child { margin-top: 0; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(59,130,246,0.04); }
+.beat { color: var(--green); font-weight: 600; }
+.miss { color: var(--red); font-weight: 600; }
+.neutral { color: var(--yellow); font-weight: 600; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+.badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+.badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+.badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+.badge-orange { background: rgba(59,130,246,0.15); color: var(--primary); }
+.event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+.event-item:last-child { border-bottom: none; }
+.event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+.dot-green { background: var(--green); }
+.dot-red { background: var(--red); }
+.dot-yellow { background: var(--yellow); }
+.event-label { font-weight: 600; color: white; }
+.event-text { font-size: 14px; color: var(--text); }
+.risk-item { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+.risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.risk-title { font-weight: 600; color: white; font-size: 14px; }
+.score-bar { display: flex; align-items: center; gap: 10px; }
+.score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #93c5fd); }
+.score-num { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+.bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media(max-width:700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+.bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+.bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+.bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.rating-box { background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(59,130,246,0.04)); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+.rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+.rating-item .val { font-size: 20px; font-weight: 800; color: white; }
+.rating-item .val.buy { color: var(--green); }
+.rating-item .val.hold { color: var(--yellow); }
+.rating-item .val.sell { color: var(--red); }
+.trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media(max-width:700px) { .trigger-grid { grid-template-columns: 1fr; } }
+.trigger-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.trigger-card h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.trigger-card.buy h5 { color: var(--green); }
+.trigger-card.sell h5 { color: var(--red); }
+.trigger-list { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+.trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+.trigger-list li::before { content: "→"; position: absolute; left: 0; }
+.investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+@media(max-width:600px) { .investor-grid { grid-template-columns: 1fr; } }
+.investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+.investor-no { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+.investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-no h5 { color: var(--red); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+.investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+.investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+.geo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+.geo-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.geo-pct { font-size: 20px; font-weight: 700; color: white; }
+.geo-note { font-size: 12px; color: var(--text-muted); }
+.outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+.outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+.outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+.outlook-card .when-then strong { color: var(--primary); }
+.source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+.disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+.pill { display: inline-block; background: rgba(59,130,246,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>ServiceNow <span>NOW</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 27. Februar 2026 · NYSE · Sektor: Enterprise Software</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-blue">Workflow Platform</span>
+      <span class="badge badge-blue">AI Control Tower</span>
+      <span class="badge badge-yellow">Enterprise SaaS</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">~$104</div>
+    <div class="price-meta">Schlusskurs 27.02.2026 · NYSE</div>
+    <div class="price-change down">▼ −29.8% YTD</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">52W: ~$103 – $208.94</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">~$104</div><div class="kpi-sub">NYSE · 27.02.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Marktkapitalisierung</div><div class="kpi-value">~$113 Mrd.</div><div class="kpi-sub">USD</div></div>
+    <div class="kpi-card"><div class="kpi-label">Forward P/E</div><div class="kpi-value orange">~25x</div><div class="kpi-sub">PEG ~1.04</div></div>
+    <div class="kpi-card"><div class="kpi-label">EV/EBITDA</div><div class="kpi-value">~36x</div><div class="kpi-sub">TTM</div></div>
+    <div class="kpi-card"><div class="kpi-label">FCF-Marge</div><div class="kpi-value green">35%</div><div class="kpi-sub">FY2025 · $4.58 Mrd.</div></div>
+    <div class="kpi-card"><div class="kpi-label">Umsatz FY2025</div><div class="kpi-value">$13.28 Mrd.</div><div class="kpi-sub">+21% YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">Non-GAAP Op. Marge</div><div class="kpi-value green">31%</div><div class="kpi-sub">FY2025</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value orange" style="font-size:16px;">29. Apr. 2026</div><div class="kpi-sub">Q1 2026</div></div>
+  </div>
+
+  <!-- SEKTION 1 -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6 Monate</div>
+    </div>
+    <div class="section-body">
+      <p>ServiceNow (gegründet 2003, Hauptsitz Santa Clara, CA) ist der weltweit führende Anbieter einer cloudbasierten Enterprise-Workflow-Plattform – der sogenannten Now Platform. Das Unternehmen ermöglicht es Großunternehmen, sämtliche Unternehmensprozesse – von IT-Service-Management (ITSM) über HR-Workflows bis hin zu Customer-Service- und Security-Operationen – auf einer einheitlichen, KI-gestützten Plattform zu automatisieren und zu orchestrieren. ServiceNow bedient heute über 8.800 Unternehmenskunden weltweit, darunter 85% der Fortune 500.</p>
+      <p>Das Erlösmodell ist mit rund 97% Subscription-Anteil am Gesamtumsatz hochgradig wiederkehrend. In FY2025 erwirtschaftete ServiceNow $12.88 Mrd. aus Subscriptions (+21% YoY) und $414 Mio. aus Professional Services – ein Gesamtumsatz von $13.28 Mrd. Die Kostenstruktur ist asset-light und cloud-native, mit hohen R&amp;D-Ausgaben ($2.96 Mrd. in 2025) und moderatem Capex ($868 Mio. in 2025).</p>
+      <h3>Produktsegmente</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Segment</th><th>ACV-Anteil</th><th>Produkte</th></tr></thead>
+        <tbody>
+          <tr><td>Technology Workflows</td><td>~53%</td><td>ITSM, ITOM, DevOps</td></tr>
+          <tr><td>Core Business Workflows</td><td>~21%</td><td>HR, Finance, Legal, Procurement</td></tr>
+          <tr><td>CRM &amp; Industry Workflows</td><td>~13%</td><td>Customer Service, Field Service, Branchenlösungen</td></tr>
+          <tr><td>Creator Workflows</td><td>~13%</td><td>Low-Code-Entwicklung</td></tr>
+        </tbody>
+      </table></div>
+      <p>Zentrales Wachstumsthema ist die AI-Offensive: Das Produkt Now Assist – ServiceNows Generative-AI-Suite – überschritt in Q4 2025 einen ACV von $600 Mio. (mehr als verdoppelt YoY). CEO Bill McDermott positioniert ServiceNow als 'AI Control Tower for Business Reinvention'. Die Plattform integriert führende LLM-Anbieter wie Anthropic (Claude), OpenAI und Microsoft Copilot – eine Strategie, die ServiceNow zum Orchestrator statt zum Konkurrenten macht.</p>
+      <p>Unit Economics sind attraktiv: Subscription Gross Margin ~82–83%, FCF-Marge 35% in 2025. Die 603 Kunden mit &gt;$5 Mio. ACV (+20% YoY) und eine Renewal Rate von 98% bestätigen die missionskritische Natur der Plattform.</p>
+      <div class="source">Quellen: ServiceNow 10-K FY2025 (28.01.2026); Q4 2025 Earnings Call Transcript (28.01.2026); ServiceNow IR – investor.servicenow.com</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 2 -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Switching Costs (hoch)</h3>
+      <p>ServiceNow ist tief in die IT-Infrastruktur von Großkonzernen eingebettet. Eine Migration erfordert typischerweise mehrjährige Projekte, erhebliche Retraining-Kosten und das Risiko operationaler Unterbrechungen. Die 98%ige Renewal Rate über fünf aufeinanderfolgende Quartale ist der empirische Beweis. Das Workflow-Data-Fabric-Produkt war in 16 der Top-20-Deals in Q4 2025 enthalten – Kunden werden immer tiefer in das Ökosystem eingebunden.</p>
+      <h3>Netzwerkeffekte (mittel)</h3>
+      <p>ServiceNow profitiert von indirekten Netzwerkeffekten: Über 7.000 Partner-Apps im ServiceNow Store und ein breites Implementierungspartner-Ökosystem (Accenture, Deloitte, NTT DATA) machen die Plattform attraktiver für neue Kunden. Direkte Netzwerkeffekte sind schwächer als bei reinen Marketplace-Modellen.</p>
+      <h3>Scale Advantages</h3>
+      <p>Mit $13.3 Mrd. Umsatz und 50.000 Mitarbeitern kann ServiceNow massiv in R&amp;D ($2.96 Mrd. in 2025) und AI-Entwicklung investieren – ein Betrag, den kleinere Wettbewerber wie Camunda nicht annähernd erreichen. Die Kostenstruktur ermöglicht trotzdem 31% Non-GAAP Operating Margin.</p>
+      <h3>Schwachstellen des Burggrabens</h3>
+      <p>Die KI-Revolution stellt das bisherige Verteidigungswerk in Frage. Wenn autonome AI-Agenten von Anthropic, OpenAI oder Microsoft direkt auf Unternehmensdaten zugreifen und Workflows ohne ServiceNow-Frontend orchestrieren können, könnte ein Teil des Seat-basierten Umsatzmodells erodieren. ServiceNow begegnet dieser Gefahr durch eigene AI-Produkte und Partnerschaften mit diesen Anbietern. Ob diese Strategie langfristig trägt, ist die zentrale Investmentfrage.</p>
+      <div class="source">Quellen: Q4 2025 Earnings Call (28.01.2026); Gartner Magic Quadrant BOAT 2025; Peerspot Camunda vs. ServiceNow Report (Sep. 2025)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 3 -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Beat-Ratio: 4/4</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap"><table>
+        <thead><tr><th>Kennzahl</th><th>Q1 2025</th><th>Q2 2025</th><th>Q3 2025</th><th>Q4 2025</th></tr></thead>
+        <tbody>
+          <tr><td>Total Revenue</td><td>$3.09 Mrd.</td><td>$3.13 Mrd.</td><td>$3.35 Mrd.</td><td>$3.57 Mrd.</td></tr>
+          <tr><td>YoY-Wachstum</td><td>+18.5%</td><td>+22.5%</td><td>+20.1%</td><td>+20.7%</td></tr>
+          <tr><td>Subscription Rev.</td><td>$3.005 Mrd.</td><td>$3.11 Mrd.</td><td>$3.299 Mrd.</td><td>$3.466 Mrd.</td></tr>
+          <tr><td>Non-GAAP EPS</td><td>~$0.96*</td><td>~$0.96*</td><td>$0.96</td><td>$0.92</td></tr>
+          <tr><td>Non-GAAP Op. Marge</td><td>~29.5%</td><td>~29.5%</td><td>~30.5%</td><td>31.0%</td></tr>
+          <tr><td>cRPO YoY</td><td>+22%</td><td>+24.5%</td><td>+21%</td><td><span class="beat">+25%</span></td></tr>
+          <tr><td>Beat vs. Konsens</td><td><span class="beat">Beat ✓</span></td><td><span class="beat">Beat ✓</span></td><td><span class="beat">Beat ✓</span></td><td><span class="beat">Beat ✓</span></td></tr>
+          <tr><td>Kursreaktion</td><td class="beat">+5.98%</td><td class="beat">+pos.</td><td class="beat">+pos.</td><td class="miss">−11.43%</td></tr>
+        </tbody>
+      </table></div>
+      <p>ServiceNow hat in allen vier betrachteten Quartalen sowohl beim Umsatz als auch beim EPS die Konsenserwartungen übertroffen. Besonders stark war Q4 2025: Non-GAAP EPS von $0.92 übertrafen den Konsens um 5.84%, die cRPO-Beschleunigung auf +25% YoY und 244 Deals &gt;$1 Mio. NNACV (+40% YoY) signalisieren robuste Nachfragedynamik.</p>
+      <p>Paradoxerweise fiel die Aktie nach Q4 2025 um mehr als 11% nach Börsenschluss. Der Grund: Der Ausblick für 2026 (19.5–20% Sub-Wachstum) verdeutlichte die Verlangsamung gegenüber 2024 (23%), und das JPMorgan-Warnung vor KI-Disruption des SaaS-Modells dominierte die Marktwahrnehmung und löste die 'SaaSpocalypse'-Selloff-Welle aus. <strong>Nächste Quartalsergebnisse: 29. April 2026 (Q1 2026).</strong></p>
+      <p style="font-size:12px;color:var(--text-muted);">* EPS-Werte angepasst für 5-for-1 Stock Split (Dez. 2025)</p>
+      <div class="source">Quellen: ServiceNow IR (investor.servicenow.com, 28.01.2026); Zacks Equity Research; CNBC Earnings Report (28.01.2026); Futurum Research Q4 FY2025</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 4 -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap"><table>
+        <thead><tr><th>Geschäftsjahr</th><th>Umsatz</th><th>YoY-Wachstum</th><th>Sub. Gross Margin</th><th>Non-GAAP Op. Marge</th></tr></thead>
+        <tbody>
+          <tr><td>FY2022</td><td>$7.25 Mrd.</td><td>+~25%</td><td>~82%</td><td>~25%</td></tr>
+          <tr><td>FY2023</td><td>$8.97 Mrd.</td><td>+23.8%</td><td>~83%</td><td>~27%</td></tr>
+          <tr><td>FY2024</td><td>$10.98 Mrd.</td><td>+22.4%</td><td>~83.5%</td><td>~29.5%</td></tr>
+          <tr><td>FY2025</td><td>$13.28 Mrd.</td><td>+21.0%</td><td>~82.7%</td><td>31.0%</td></tr>
+          <tr><td>FY2026E</td><td>$15.5–15.6 Mrd.</td><td>+~20%</td><td>~82%</td><td>~32%</td></tr>
+        </tbody>
+      </table></div>
+      <p>ServiceNow befindet sich in einem klar definierten 'Growth-at-Scale'-Profil: konsistentes Wachstum im Bereich 20–23% p.a. bei einem Umsatzvolumen von inzwischen $13 Mrd. Diese Kombination ist ausgesprochen selten und rechtfertigt eine Premiumbewertung. Das Wachstum ist organisch und qualitativ hochwertig – getrieben durch Expansion bestehender Kunden (85% Fortune 500), neue Workflow-Kategorien und AI-Monetarisierung, nicht durch M&amp;A-Inflation.</p>
+      <h3>Geografische Verteilung (FY2025)</h3>
+      <div class="geo-grid">
+        <div class="geo-card"><div class="geo-region">North America</div><div class="geo-pct">63%</div><div class="geo-note">$8.35 Mrd. · +20.8% YoY</div></div>
+        <div class="geo-card"><div class="geo-region">EMEA</div><div class="geo-pct">26%</div><div class="geo-note">$3.40 Mrd. · +20.0% YoY</div></div>
+        <div class="geo-card"><div class="geo-region">APAC &amp; Other</div><div class="geo-pct">11%</div><div class="geo-note">$1.53 Mrd. · +23.1% YoY</div></div>
+      </div>
+      <p>APAC zeigt mit +23% die höchste Dynamik und das größte Expansionspotenzial. Besonders bemerkenswert: Das globale Regierungsgeschäft (außerhalb USA) wuchs in Q4 2025 um +80% YoY. Die AI-bezogenen Produkte (Now Assist, AI Control Tower, Workflow Data Fabric) sind die Wachstumsbeschleuniger. Now Assist überschritt $600 Mio. ACV mit &gt;100% NNACV-Wachstum YoY. ServiceNow bekräftigt das Ziel, bis 2026 $1 Mrd. AI ACV zu erreichen.</p>
+      <div class="source">Quellen: ServiceNow 10-K FY2025 (Jan. 2026); Bullfincher Revenue by Geography; Investing.com Q4 Slides; Q2 2025 Slides (Jul. 2025)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 5 -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap"><table>
+        <thead><tr><th>Kennzahl</th><th>Aktuell (27.02.26)</th><th>Historisch 5J-Ø</th><th>Sektor Median</th><th>Einschätzung</th></tr></thead>
+        <tbody>
+          <tr><td>TTM P/E (GAAP)</td><td>~62x</td><td>~271x</td><td>~27x</td><td class="beat">Historisch günstig</td></tr>
+          <tr><td>Forward P/E</td><td>~25x</td><td>–</td><td>~22x</td><td class="neutral">Nahe Sektor-Niveau</td></tr>
+          <tr><td>PEG Ratio</td><td>~1.04</td><td>–</td><td>~1.5x</td><td class="beat">Attraktiv &lt;1.5x</td></tr>
+          <tr><td>EV/EBITDA (TTM)</td><td>~36x</td><td>~140x (Med.)</td><td>~12x</td><td class="neutral">Premium gerechtfertigt</td></tr>
+          <tr><td>P/S (TTM)</td><td>~8.5x</td><td>–</td><td>~6.75x</td><td class="neutral">Leichtes Premium</td></tr>
+          <tr><td>EV/FCF</td><td>~22x</td><td>–</td><td>–</td><td class="beat">Günstig für FCF-Qualität</td></tr>
+        </tbody>
+      </table></div>
+      <p>Die Bewertung von ServiceNow hat sich durch den massiven Kursrückgang von ~50% vom Allzeithoch erheblich normalisiert. Das historische 5-Jahres-Durchschnitts-KGV liegt bei ~271x – aktuell notiert die Aktie bei ~62x TTM P/E, was einem Abschlag von ~77% entspricht. Dies ist der günstigste relative Bewertungsmoment seit Jahren.</p>
+      <p>Das Forward P/E von ~25x auf Basis der FY2026-Konsens-EPS-Schätzung (~$20.15) ist für ein Unternehmen mit ~20% Umsatzwachstum, 31–32% Operating Margin und 35–36% FCF-Marge fair bis attraktiv. Das PEG von ~1.04 – unter der Faustregel von 1.0 für faire Bewertung – ist bei einer 'Rule of 55+'-Aktie ungewöhnlich günstig. Dennoch bleibt ServiceNow absolut teuer gegenüber dem Sektor (P/E ~62x vs. ~27x). Seeking Alpha vergibt derzeit ein 'Value Grade: F'.</p>
+      <div class="source">Quellen: StockAnalysis.com Statistiken (Feb. 2026); GuruFocus EV/EBITDA (Feb. 2026); FinanceCharts PE-Ratio History (Feb. 2026); Finviz.com</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 6 -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap"><table>
+        <thead><tr><th>Kennzahl</th><th>FY2023</th><th>FY2024</th><th>FY2025</th><th>FY2026E</th></tr></thead>
+        <tbody>
+          <tr><td>Subscription Gross Margin</td><td>~83%</td><td>~83.5%</td><td>82.7%</td><td>~82%</td></tr>
+          <tr><td>Non-GAAP Op. Marge</td><td>~27%</td><td>~29.5%</td><td>31.0%</td><td class="beat">~32%</td></tr>
+          <tr><td>FCF-Marge</td><td>~28%</td><td>~30%</td><td>35.0%</td><td class="beat">~36%</td></tr>
+          <tr><td>FCF (absolut)</td><td>~$2.5 Mrd.</td><td>~$3.4 Mrd.</td><td>$4.58 Mrd.</td><td>$5.6 Mrd.E</td></tr>
+          <tr><td>Debt/EBITDA</td><td>&lt;1x</td><td>&lt;1x</td><td>~0.4x</td><td>–</td></tr>
+          <tr><td>ROIC</td><td>–</td><td>–</td><td>~17.8%</td><td>–</td></tr>
+        </tbody>
+      </table></div>
+      <p>ServiceNow zeigt eine der stärksten Verbesserungen der Kapitalqualität im Enterprise-Software-Sektor. Die FCF-Marge stieg von ~28% in 2023 auf 35% in 2025 und soll 2026 auf 36% anwachsen – trotz massiver AI-Infrastrukturinvestitionen und drei größerer Akquisitionen (Moveworks $2.85 Mrd., Armis $7.75 Mrd., Veza).</p>
+      <p>Die Bilanz ist exzellent: Cash und Wertpapiere von &gt;$10 Mrd. (Ende 2025), Debt/Equity von nur 0.19. ServiceNow finanziert die Armis-Akquisition ($7.75 Mrd.) vollständig aus dem eigenen Cashflow. Darüber hinaus wurde ein $5 Mrd. Share-Repurchase-Programm aufgestockt, inklusive eines $2 Mrd. Accelerated Share Repurchase (ASR) – ein starkes Confidence-Signal des Managements nahe der 52-Wochen-Tiefs.</p>
+      <div class="source">Quellen: ServiceNow 10-K FY2025; Nasdaq Q4 2025 Earnings Report; StockAnalysis.com Statistiken (Feb. 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 7 -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap"><table>
+        <thead><tr><th>Unternehmen</th><th>Marktk.</th><th>Umsatz TTM</th><th>Rev. Wachstum</th><th>Op. Marge</th><th>FCF-Marge</th><th>Fwd. P/E</th></tr></thead>
+        <tbody>
+          <tr><td><strong>ServiceNow (NOW)</strong></td><td>$113 Mrd.</td><td>$13.3 Mrd.</td><td class="beat">+21%</td><td>31% (nGAAP)</td><td class="beat">35%</td><td>~25x</td></tr>
+          <tr><td>Salesforce (CRM)</td><td>~$220 Mrd.</td><td>~$38 Mrd.</td><td>+9%</td><td>~33%</td><td>~31%</td><td>~22x</td></tr>
+          <tr><td>SAP (SAP)</td><td>~$290 Mrd.</td><td>~$35 Mrd.</td><td>+12%</td><td>~30%</td><td>~22%</td><td>~28x</td></tr>
+          <tr><td>Microsoft (MSFT)</td><td>~$3.1 Brd.</td><td>~$250 Mrd.</td><td>+13%</td><td>~45%</td><td>~40%</td><td>~28x</td></tr>
+          <tr><td>Workday (WDAY)</td><td>~$55 Mrd.</td><td>~$8.5 Mrd.</td><td>+14%</td><td>~23%</td><td>~27%</td><td>~20x</td></tr>
+          <tr><td>Camunda (privat)</td><td>N/V</td><td>~$200 Mio.E</td><td>N/V</td><td>N/V</td><td>N/V</td><td>N/V</td></tr>
+        </tbody>
+      </table></div>
+      <p>ServiceNow wächst deutlich schneller als Salesforce (+21% vs. +9%), hat niedrigere Dependenz von CRM-Märkten und einen stärkeren ITSM-Burggraben. Der leichte Bewertungsaufschlag (Fwd. P/E 25x vs. 22x) ist durch das höhere Wachstum gerechtfertigt. Microsoft ist der gefährlichste Konkurrent mit Azure/Copilot/Teams, gleichzeitig aber der größte Vertriebspartner – eine klassische Koopetitionsstrategie. Camunda operiert auf fundamental anderen Marktebenen (Developer-Tool vs. Enterprise-Plattform) und ist keine direkte Bedrohung auf C-Level-Ebene.</p>
+      <div class="source">Quellen: Stockanalysis.com Peers; 6sense Camunda Market Share; Peerspot Camunda vs. ServiceNow Report (Sep. 2025); Zacks (Feb. 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 8 -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">28.01.2026 – Q4 2025 Earnings Beat <span class="badge badge-green">Positiv</span></div><div class="event-text">Revenue $3.57 Mrd., Sub +21%, cRPO +25%, EPS $0.92. Beat-Ratio 4/4. 244 Deals &gt;$1 Mio. NNACV (+40% YoY). Quelle: ServiceNow IR, 28.01.2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">28.01.2026 – $5 Mrd. Share Buyback + $2 Mrd. ASR <span class="badge badge-green">Positiv</span></div><div class="event-text">Management signalisiert maximales Vertrauen durch Accelerated Share Repurchase nahe 52-Wochen-Tief. Quelle: ServiceNow IR</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">Dez. 2025 – Moveworks-Akquisition abgeschlossen <span class="badge badge-green">Positiv</span></div><div class="event-text">$2.85 Mrd.; AI-native Employee Experience Platform; +100 bps 2026 Revenue-Beitrag erwartet.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Dez. 2025 – Armis-Akquisition angekündigt <span class="badge badge-yellow">Neutral/Watch</span></div><div class="event-text">$7.75 Mrd.; Cybersecurity/IoT-Asset-Intelligence; Abschluss H1 2026 erwartet. Größte Akquisition in ServiceNows Geschichte – Integrationsrisiko beachten.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">Q4 2025 – Now Assist &gt;$600 Mio. ACV (+100% NNACV) <span class="badge badge-green">Positiv</span></div><div class="event-text">AI-Monetarisierung beschleunigt. 35 Deals &gt;$1 Mio. AI Control Tower verdreifachte Volumen sequenziell.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">Q4 2025 – Partnerschaften Anthropic &amp; Microsoft <span class="badge badge-green">Positiv</span></div><div class="event-text">Claude-Integration in Now Platform; tiefe Copilot/Teams-Integration mit Microsoft Agent 365. ServiceNow als Orchestrations-Layer positioniert.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">Jan–Feb 2026 – Aktie −30% YTD (SaaSpocalypse) <span class="badge badge-red">Negativ</span></div><div class="event-text">Kurs ~$104; 50% unter 52W-Hoch. AI-Disruptions-Sentiment dominiert. Quelle: SiliconAngle SaaSpocalypse (27.02.2026)</div></div></div>
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">Feb. 2026 – SaaSpocalypse-Sell-off <span class="badge badge-red">Negativ/Sentiment</span></div><div class="event-text">Auslöser: OpenAIs 'Frontier'-Plattform und Anthropics Claude Cowork Plugins. JPMorgan bekräftigt AI-Agenten-Disruption-These. Gesamter SaaS-Sektor verlor &gt;$1 Brd. Marktkapitalisierung.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">26.02.2026 – Nvidia CEO Jensen Huang stützt ServiceNow <span class="badge badge-green">Positiv</span></div><div class="event-text">Huang erklärt explizit, KI werde Enterprise-Software nicht kannibalisieren; nennt ServiceNow als zentrale Nutznießer-Plattform. Quelle: Nvidia/Finviz</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">Q4 2025 – Gartner Magic Quadrant BOAT <span class="badge badge-green">Positiv</span></div><div class="event-text">ServiceNow als 'Leader' in Business Orchestration and Automation Technologies – neben Microsoft Power Platform, Salesforce und Pega.</div></div></div>
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">2025–2026 – Zinsumfeld &amp; DOGE-Risiko <span class="badge badge-yellow">Gemischt</span></div><div class="event-text">Niedrigeres Zinsumfeld positiv für Wachstumsaktien. DOGE-Prozess belastet US-Federal-Geschäft kurzfristig. Global Government +80% YoY als Ausgleich. Quelle: ServiceNow IR, Fortune.com (10.02.2026)</div></div></div>
+      <div class="source">Quellen: ServiceNow IR (Jan. 2026); Fortune.com (10.02.2026); SiliconAngle SaaSpocalypse (27.02.2026); FinancialContent OpenAI Frontier (23.02.2026); Futurum Research Q4 FY2025</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 9 -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 3/10</div>
+    </div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-bottom:16px;">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">~$104</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value red">Darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value red">Darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value red">Darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14T)</div><div class="kpi-value orange">~28–32</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Hoch</div><div class="kpi-value">$208.94</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value red">Bearisch</div></div>
+      </div>
+      <p>ServiceNow befindet sich in einem technisch stark angeschlagenen Zustand: Die Aktie notiert bei ~$104 und damit 50% unterhalb des 52-Wochen-Hochs von $208.94 (Juli 2025). Sämtliche gleitenden Durchschnitte (SMA 20, 50, 200) zeigen Verkaufssignale – klassische Baisse-Konstellation mit erhöhtem Verkaufsvolumen durch institutionelle Umschichtung.</p>
+      <p>Erste Anzeichen für eine technische Bodenbildung: Der RSI ist in den tief überverkauften Bereich (~28–32) gefallen, was historisch bei ServiceNow oft Umkehrpunkte markiert hat. Positive MACD/Stochastik-Divergenzen werden von einigen Analysten beobachtet. Institutionelle Investoren kauften im Januar 2026 für über $6 Mrd. Anteile – ein Kontraindikator zum negativen Sentiment. Support-Levels: $100 (52W-Tief-Zone), $90 (pre-2025). Resistance: $120–125, $145–150 (SMA 200), $175.</p>
+      <div class="source">Quellen: Finviz.com (Feb. 2026); Zacks 'NOW below 50-day and 200-day MA' (Feb. 2026); MarketBeat 'Oversold and Ready for Rebound' (Feb. 2026); StockAnalysis.com</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 10 -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <h3>9a) Strukturelle &amp; zyklische Risiken</h3>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ AI-Disruption Seat-Model (Hauptrisiko)</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-yellow">Wahrscheinlichkeit: Mittel (3–5 Jahre)</span></div></div><div class="event-text">Falls autonome AI-Agenten Workflows ohne ServiceNow-Frontend orchestrieren, könnte EBITDA-Marge von 31% auf 15–20% fallen. Umsatzrückgang von 10–20% würde Kurs auf $50–70 drücken.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Wettbewerb Microsoft (Teams/Copilot/Power Platform)</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-yellow">Wahrscheinlichkeit: Mittel-Hoch</span></div></div><div class="event-text">Microsoft wächst in ITSM und HR-Automatisierung aggressiv und hat den Vorteil tiefer Integration in den Microsoft-365-Stack (80%+ aller Unternehmen). Gleichzeitig ist Microsoft größter Vertriebspartner – Koopetitionsstrategie.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Bewertungsrisiko (Multiples-Kompression)</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Wahrscheinlichkeit: Mittel</span></div></div><div class="event-text">Weitere −20–30% Kursrisiko bei Wachstumsverlangsamung auf &lt;15%. P/E-Kompression auf 15–20x reifer Software-Unternehmen möglich.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Integrationsrisiko Armis/Moveworks</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-green">Wahrscheinlichkeit: Niedrig</span></div></div><div class="event-text">Op. Marge-Verwässerung ~50 bps in 2026. Armis ($7.75 Mrd.) ist größte Akquisition in ServiceNows Geschichte.</div></div>
+      <h3>9b) AI-Risiko (Kernthema der Investmentfrage)</h3>
+      <p>Das bärische AI-Szenario: Autonome AI-Agenten (OpenAI Frontier, Anthropic Claude Cowork) ersetzen das ServiceNow-Frontend und erodieren den Seat-basierten Umsatz. Das bullische AI-Szenario: ServiceNow wird zum 'AI Control Tower' – dem Orchestrations- und Governance-Layer, der AI-Agenten mit Unternehmens-Workflows, Compliance und Audit-Trails verbindet. Now Assist ACV &gt;$600 Mio. beweist, dass AI Umsatz generiert. Nvidia CEO Jensen Huang bestätigte die bullische Sichtweise (26.02.2026).</p>
+      <h3>9c) Chancen</h3>
+      <p>Vollständige AI-Monetarisierung ($1 Mrd. AI ACV-Ziel 2026), Expansion im öffentlichen Sektor (Global Government +80%), CRM-Marktanteilsgewinn, Armis-Upside im Cybersecurity-Identitätsbereich. Bei erfolgreicher AI-Transition könnte Revenue-Wachstum bei 22–25% stabilisiert werden.</p>
+      <h3>9d) Red Flags &amp; Dealbreaker</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Kategorie</th><th>Signal</th><th>Konsequenz</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-yellow">Red Flag</span></td><td>Renewal Rate fällt unter 96%</td><td>Churn-Warnsignal – Position beobachten</td></tr>
+          <tr><td><span class="badge badge-yellow">Red Flag</span></td><td>AI ACV stagniert &lt;$700 Mio. in Q2 2026</td><td>AI-Monetarisierungs-Thesis gefährdet</td></tr>
+          <tr><td><span class="badge badge-red">Dealbreaker</span></td><td>Fortune-500-Kunden kündigen Großvertrag für AI-natives Tool</td><td>Strukturelle Disruption bestätigt → Verkaufen</td></tr>
+          <tr><td><span class="badge badge-red">Dealbreaker</span></td><td>FY2026 Revenue-Wachstum &lt;15% (organisch)</td><td>Wachstumsmodell gebrochen → Neubewertung</td></tr>
+        </tbody>
+      </table></div>
+      <div class="source">Quellen: Fortune.com (10.02.2026); SiliconAngle SaaSpocalypse (27.02.2026); FinancialContent OpenAI Frontier (23.02.2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 11 -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring-Übersicht</div>
+      <div class="section-score">Ø 6.75/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap"><table>
+        <thead><tr><th>Kategorie</th><th>Score</th><th>Balken</th><th>Begründung</th></tr></thead>
+        <tbody>
+          <tr><td>Geschäftsmodell</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>Asset-light, 97% Subscription, Best-in-class Unit Economics</td></tr>
+          <tr><td>Burggraben</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>Hohe Switching Costs, 98% Renewal; ↓ von 9 (AI-Risiko eingepreist)</td></tr>
+          <tr><td>Operative Entwicklung (4Q)</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>4/4 Beat-Ratio, cRPO-Beschleunigung, AI-Monetarisierung</td></tr>
+          <tr><td>Wachstum</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>~20% Growth-at-Scale, AI ACV +100% YoY, geo. Diversifikation</td></tr>
+          <tr><td>Bewertung</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>PEG 1.04 attraktiv; TTM P/E 62x historisch günstig, abs. noch teuer; ↑ von 4</td></tr>
+          <tr><td>Cashflow &amp; Kapital</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>FCF $4.6 Mrd. (35%), D/E 0.19, starkes ASR-Programm</td></tr>
+          <tr><td>Risiken (invertiert)</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>AI-Disruption real; hoch gewichtetes Strukturrisiko; ↓ von 7</td></tr>
+          <tr><td>Technische Analyse</td><td>3/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:30%"></div></div><span class="score-num">3</span></div></td><td>Klar bearisch; alle MAs auf Verkauf; nahe 52W-Tief; ↓ von 6</td></tr>
+          <tr style="background:rgba(59,130,246,0.08);">
+            <td><strong>Ø Gesamtscore</strong></td><td><strong>6.75/10</strong></td>
+            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:67.5%;background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">6.75</span></div></td>
+            <td>Qualitätsunternehmen in Korrektursituation – langfristig bullisch</td>
+          </tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- SEKTION 12 -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+    </div>
+    <div class="section-body">
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p>Das bullische Narrativ basiert auf drei Säulen. Erstens ist die Profitabilitätswende strukturell: Non-GAAP Operating Margin steigt jährlich um 100–150 bps (31% → 32%), FCF wuchs von $3.4 Mrd. (2024) auf $4.6 Mrd. (2025) – 'Rule of 55+'-Profil bei $13 Mrd. Umsatz einzigartig im Sektor.</p>
+          <p>Zweitens ist die AI-Monetarisierung real: Now Assist ACV &gt;$600 Mio. mit +100% NNACV YoY. Nvidia CEO Jensen Huang nannte ServiceNow explizit als AI-Nutznießer. Partnerschaft mit Anthropic positioniert ServiceNow als Governance-Layer, nicht als Konkurrenten.</p>
+          <p>Drittens ist die Bewertung historisch attraktiv: PEG 1.04, Forward P/E 25x nahe Sektor-Niveau, Institutionelle kauften im Jan. 2026 für $6 Mrd. Anteile. Management signalisierte mit $2 Mrd. ASR beim aktuellen Kurs maximales Vertrauen.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p>Das bärische Narrativ fokussiert auf strukturelles AI-Disruptions-Risiko. OpenAIs 'Frontier'-Plattform mit McKinsey/BCG/Accenture-Partnerschaften baut einen direkten Enterprise-Kanal. Falls Seat-Lizenzen durch API-Credits ersetzt werden – selbst bei 10–15% des Kundenstamms – könnte das Revenue-Wachstum auf &lt;10% fallen und P/E auf 15–20x komprimieren (Kurs $50–70).</p>
+          <p>Zweitens ist die Wachstumsverlangsamung von 23% (2024) auf ~20% (2025) auf 19.5–20% (2026E) ein struktureller Trend. Bei $15+ Mrd. Umsatz ist 20%+ Wachstum schwer zu halten – falls AI-Monetarisierung die organische Verlangsamung nicht kompensiert, ist das P/E-Multiple zu hoch.</p>
+          <p>Drittens: Microsoft ist permanenter Gegenwind. Mit Teams, Power Platform, Copilot in 80%+ aller Unternehmen präsent – eine native Copilot-Workflow-Integration könnte den ITSM-Burggraben direkt angreifen.</p>
+        </div>
+      </div>
+
+      <p><strong>Eigene Einschätzung:</strong> Das bullische Narrativ ist überzeugender, aber es ist kein risikoloser Trade. Die 'SaaSpocalypse'-Hysterie überschätzt die kurzfristige Disruption – Governance, Compliance, Audit-Trails und die Komplexität von Enterprise-Workflows erfordern eine Plattform, und ServiceNow ist diese Plattform. Das mittelfristige AI-Disruptions-Risiko muss aktiv überwacht werden. Risk/Reward: ~−20% Downside (Support $83–90) vs. +70–100% Upside (Zielkurs $140–$180 in 2–3 Jahren). Geeignet für Quality Growth Investoren mit 2–5 Jahres-Horizont. Ich könnte falsch liegen, weil die Geschwindigkeit der AI-Adoption und die strategische Agilität von OpenAI/Anthropic unterschätzt sein könnte.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Horizont</th><th>Empfehlung</th><th>Katalysatoren</th><th>Risiken</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Kurzfristig (0–6 M.)</strong></td><td><span class="badge badge-yellow">NEUTRAL – Abwarten/Erste Tranche</span></td><td>Q1 2026 Earnings (29. Apr.), AI ACV</td><td>Technisch bearisch; Sentiment negativ</td></tr>
+          <tr><td><strong>Mittelfristig (6–24 M.)</strong></td><td><span class="badge badge-green">KAUFEN (gestaffelt)</span></td><td>AI ACV $1+ Mrd., Armis-Integration, Global Gov.</td><td>Wachstumsverlangsamung &lt;18%</td></tr>
+          <tr><td><strong>Langfristig (2–5 J.)</strong></td><td><span class="badge badge-green">KAUFEN &amp; HALTEN</span></td><td>AI-Plattform-Dominanz, FCF &gt;$8 Mrd.</td><td>Strukturelle AI-Disruption</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Kernthese</h3>
+      <p>ServiceNow ist ein Quality-Growth-Compounder mit einzigartiger Plattformstellung in der Enterprise-Workflow-Automatisierung, der durch die 'SaaSpocalypse' in eine historisch attraktive Bewertungszone gedrückt wurde. Die AI-Monetarisierung (Now Assist, AI Control Tower) beweist, dass KI Umsatz generiert statt zerstört. Das $1 Mrd. AI ACV-Ziel für 2026 und die 98% Renewal Rate sind die entscheidenden Beweisstücke für die Investment-These.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val hold">= KAUFEN (langfristig)</div></div>
+        <div class="rating-item"><label>Zielkurs (2–3 Jahre)</label><div class="val">$140 – $180</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–3 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–20%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+70–100%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:3.5–5</div></div>
+      </div>
+
+      <h3>Was falsifiziert die These?</h3>
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Renewal Rate fällt unter 96% → sofort Position beobachten/reduzieren</li>
+            <li>AI ACV stagniert &lt;$700 Mio. in Q2 2026 → Position auf 50% reduzieren</li>
+            <li>Fortune-500-Kunde kündigt Großvertrag für AI-natives Tool → Verkaufen</li>
+            <li>FY2026 organisches Wachstum &lt;15% → Fundamentale Neubewertung</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Aufstocken</h5>
+          <ul class="trigger-list">
+            <li>Now Assist ACV ≥$750 Mio. in Q1 2026 → Nachkaufen, Disruptions-Narrativ verliert Kraft</li>
+            <li>Renewal Rate ≥98% bei Q1 2026 Earnings → Kernposition aufbauen</li>
+            <li>Armis-Integration reibungslos, Marge-Verwässerung ≤50 bps → Langfristige Position halten</li>
+            <li>Financial Analyst Day bestätigt 20%+ Wachstum bis 2027 → Aggressive Aufstockung</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul><li>Quality Growth Investoren</li><li>GARP-Investoren</li><li>Langfristige Tech-Investoren (2–5 Jahre)</li></ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul><li>Value Investoren (absolut teuer)</li><li>Income-Investoren (keine Dividende)</li><li>Kurzfristige Trader (charttechnisch schwach)</li></ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten auf Q1 2026 Earnings (29. Apr.)</span></td><td>AI ACV- und Renewal-Bestätigung abwarten; dann erste Tranche</td></tr>
+          <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen (30%–50%–20%)</span></td><td>1. Tranche ~$100–110; 2. nach Q1; 3. bei $85–90 falls nochmals schwächer</td></tr>
+          <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Kernposition 50–70% jetzt</span></td><td>PEG 1.04, historisch günstig; $2 Mrd. ASR als Unterstützung</td></tr>
+          <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten (3–5 Jahre)</span></td><td>AI-Plattform-Thesis; FCF-Wachstum; Rule-of-55-Profil einzigartig</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- SEKTION 13 -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Die 3 wichtigsten anstehenden Events</div>
+    </div>
+    <div class="section-body">
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q1 2026 Earnings – 29. April 2026 (nach Börsenschluss)</h4>
+        <p>Der mit Abstand wichtigste Termin für das kurz- und mittelfristige Bild. Konsens erwartet EPS ~$0.80–0.92 und Umsatz ~$3.65–3.74 Mrd. Kritische Metriken: (1) Now Assist ACV – auf dem Weg zu $1 Mrd.? (2) Renewal Rate ≥98%? (3) cRPO-Wachstum ≥20%?</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Now Assist ACV ≥$750 Mio. (+25% QoQ), Renewal Rate ≥98% UND Gesamtumsatz im Rahmen der Guidance → AI-Monetarisierungs-Thesis bestätigt. Kurzfristig nachkaufen. Disruptions-Narrativ verliert an Kraft.<br><br>
+          <strong>Wenn:</strong> Now Assist ACV stagniert (&lt;$650 Mio.), Renewal Rate &lt;97% ODER Umsatz verfehlt Guidance → Warnsignal. Position auf 50% reduzieren. Q2 2026 abwarten vor erneuter Aufstockung.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>📊 Event 2: Armis-Akquisitionsabschluss – erwartet H1 2026 (Mai–Jun. 2026)</h4>
+        <p>ServiceNow übernimmt Armis ($7.75 Mrd.) – führender Anbieter von Asset-Intelligence und IoT/OT-Cybersecurity. Größte Akquisition in ServiceNows Geschichte, erweitert TAM erheblich in Richtung Cybersecurity.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Abschluss reibungslos, Marge-Verwässerung ≤50 bps (wie geführt) und erste Cross-Selling-Erfolge AI Control Tower + Armis sichtbar → Positives Signal. Langfristige Position halten.<br><br>
+          <strong>Wenn:</strong> Integrationsherausforderungen belasten Op. Marge &gt;100 bps ODER Abschluss deutlich verzögert (H2 2026) → Kritisches Monitoring. Ggf. Positionsreduktion um 20–30% bis Klarheit besteht.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>📊 Event 3: ServiceNow Financial Analyst Day – angekündigt für 2026</h4>
+        <p>Erstmals eine konkrete mittelfristige (2027–2030) Revenue- und Margin-Guidance. Langfristige AI-Roadmap und Armis-Integration werden im Detail vorgestellt. Dieser Event wird die Investment-These für die nächsten 3–5 Jahre definieren.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Langfristige Guidance bestätigt 20%+ Revenue-Wachstum bis 2027–2028 und FCF-Marge ≥38% für 2028 → Klar bullisches Signal. Aggressive Aufstockung. Kurs-Upside $160–200 in 3 Jahren realistisch.<br><br>
+          <strong>Wenn:</strong> Guidance schwächt auf &lt;17% Wachstum für 2027 ODER Margen-Expansion verlangsamt → Wachstumsstory in Frage gestellt. Fundamentale Neubewertung; Zielkurs senken auf $120–140.
+        </div>
+      </div>
+      <div class="source">Quellen: Investing.com ServiceNow Earnings Dates (Feb. 2026); ServiceNow IR Q4 2025 Report (28.01.2026); TipRanks Earnings Dates; Q4 2025 Earnings Call Transcript (Motley Fool, 28.01.2026)</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung dar. Investitionsentscheidungen sollten auf Basis eigener Recherche und unter Berücksichtigung individueller Risikobereitschaft getroffen werden. Erstellt gemäß Aktienanalyse Canvas v2.2 | Analysedatum: 27. Februar 2026</div>
+
+</div>
+</body>
+</html>
