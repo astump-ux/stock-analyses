@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HubSpot HUBS – Aktienanalyse Canvas v2.2</title>
+<style>
+:root {
+  --primary: #FF7A59;
+  --primary-dark: #ce5a3a;
+  --bg: #0f0f12;
+  --bg-card: #1a1a1f;
+  --bg-card2: #22222a;
+  --border: #2e2e38;
+  --text: #e8e8ec;
+  --text-muted: #888898;
+  --text-dim: #555566;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --blue: #3b82f6;
+  --purple: #8b5cf6;
+  --teal: #14b8a6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+.header { background: linear-gradient(135deg, #2a0e00 0%, #4d1d0a 40%, #0f0f12 100%); border-bottom: 1px solid var(--primary); padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; }
+.header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+.header-left h1 span { color: var(--primary); }
+.header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+.header-right { text-align: right; }
+.price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+.price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+.price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+.price-change.up { background: rgba(34,197,94,0.15); color: var(--green); }
+.price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+.nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100; }
+.nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+.main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+.kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+.kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.kpi-value.green { color: var(--green); }
+.kpi-value.red { color: var(--red); }
+.kpi-value.orange { color: var(--primary); }
+.section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+.section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+.section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.section-title { font-size: 16px; font-weight: 700; color: white; }
+.section-score { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+.section-note { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+.section-body { padding: 20px 24px; }
+p { margin-bottom: 12px; color: var(--text); }
+p:last-child { margin-bottom: 0; }
+h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+h3:first-child { margin-top: 0; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,122,89,0.04); }
+.beat { color: var(--green); font-weight: 600; }
+.miss { color: var(--red); font-weight: 600; }
+.neutral { color: var(--yellow); font-weight: 600; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+.badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+.badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+.badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+.badge-orange { background: rgba(255,122,89,0.15); color: var(--primary); }
+.event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+.event-item:last-child { border-bottom: none; }
+.event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+.dot-green { background: var(--green); }
+.dot-red { background: var(--red); }
+.dot-yellow { background: var(--yellow); }
+.event-label { font-weight: 600; color: white; }
+.event-text { font-size: 14px; color: var(--text); }
+.risk-item { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+.risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.risk-title { font-weight: 600; color: white; font-size: 14px; }
+.score-bar { display: flex; align-items: center; gap: 10px; }
+.score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #ffa78a); }
+.score-num { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+.bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+.bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+.bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+.bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.rating-box { background: linear-gradient(135deg, rgba(255,122,89,0.12), rgba(255,122,89,0.04)); border: 1px solid rgba(255,122,89,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+.rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+.rating-item .val { font-size: 20px; font-weight: 800; color: white; }
+.rating-item .val.buy { color: var(--green); }
+.rating-item .val.hold { color: var(--yellow); }
+.rating-item .val.sell { color: var(--red); }
+.trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+.trigger-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.trigger-card h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.trigger-card.buy h5 { color: var(--green); }
+.trigger-card.sell h5 { color: var(--red); }
+.trigger-list { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+.trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+.trigger-list li::before { content: "→"; position: absolute; left: 0; }
+.investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+@media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+.investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+.investor-no { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+.investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-no h5 { color: var(--red); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+.investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+.investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+.outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+.outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+.outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+.outlook-card .when-then strong { color: var(--primary); }
+.source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+.disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>HubSpot, Inc. <span>HUBS</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 14.05.2026 · NYSE · Sektor: Technology / SMB SaaS</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">Breeze AI</span>
+      <span class="badge badge-blue">SMB CRM</span>
+      <span class="badge badge-yellow">Agentic Platform</span>
+      <span class="badge badge-green">300K Kunden</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">~$485</div>
+    <div class="price-meta">Schätzung post Q1-Crash 14.05.2026</div>
+    <div class="price-change down">▼ –19% intraday (07.05.2026)</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: ~$430 – $880</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card"><div class="kpi-label">Kurs (Est.)</div><div class="kpi-value orange">~$485</div><div class="kpi-sub">post Q1-Crash</div></div>
+    <div class="kpi-card"><div class="kpi-label">Marktkap.</div><div class="kpi-value">~$25B</div><div class="kpi-sub">Mid-Cap SaaS</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/E TTM</div><div class="kpi-value red">~75x</div><div class="kpi-sub">Premium-SaaS</div></div>
+    <div class="kpi-card"><div class="kpi-label">Fwd P/E</div><div class="kpi-value">~50x</div><div class="kpi-sub">moderater post-Crash</div></div>
+    <div class="kpi-card"><div class="kpi-label">Revenue Q1 YoY</div><div class="kpi-value green">+23%</div><div class="kpi-sub">+18% CC</div></div>
+    <div class="kpi-card"><div class="kpi-label">Op-Marge non-GAAP</div><div class="kpi-value green">17.8%</div><div class="kpi-sub">+4pp YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">Kunden</div><div class="kpi-value">299,458</div><div class="kpi-sub">+16% YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">FCF 2026e</div><div class="kpi-value green">~$750M</div><div class="kpi-sub">Guidance</div></div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>SMB-CRM-Plattform mit Multi-Hub-Strategie</h3>
+      <p>HubSpot ist die führende <strong>SMB- und Mid-Market-CRM-Plattform</strong> mit 299.458 zahlenden Kunden weltweit (Q1 2026, +16% YoY). Die Plattform umfasst: <strong>Marketing Hub</strong>, <strong>Sales Hub</strong>, <strong>Service Hub</strong>, <strong>CMS Hub</strong>, <strong>Operations Hub</strong>, <strong>Commerce Hub</strong>. Q1 2026 Revenue: <strong>$881 Mio. (+23% YoY, +18% CC)</strong>. Average Subscription Revenue per Customer: $11.722 (+6% YoY). Geographische Verteilung: 51% USA, 49% International (international wuchs +29% YoY).</p>
+
+      <h3>Strategischer Pivot: Agentic Platform mit Breeze AI</h3>
+      <p>Seit INBOUND 2024 hat HubSpot Breeze AI als zentrale AI-Wette positioniert. Drei Säulen: <strong>Breeze Copilot</strong> (Assistant), <strong>Breeze Agents</strong> (5 spezialisierte AI-Worker: Content, Prospecting, Customer, Knowledge Base, Social Media), <strong>Breeze Intelligence</strong> (Data Enrichment). Q1 2026: <strong>Spring Spotlight mit Outcome-Based Pricing</strong> für Breeze-Agents (Resolution Rate basiert, nicht per Seat). HubSpot öffnet auch die gesamte CRM-Plattform per <strong>vollständigem API-Access</strong> für externe AI-Agents – ein strategischer Bet auf ein "offenes" CRM-Ökosystem.</p>
+
+      <h3>Outcome-Based-Pricing-Shift = Bewertungs-Risiko</h3>
+      <p>Am 07.05.2026 löste die CEO-Ankündigung der Outcome-Based-Pricing-Verlagerung einen <strong>-19% Stock-Crash</strong> aus, obwohl Q1-Earnings stark waren. Investoren befürchten: (1) Outcome-Based-Pricing kannibalisiert Per-Seat-ARPU; (2) Unsicherheit über zukünftige Revenue-Predictability; (3) Konkurrenzdruck von Salesforce Agentforce + Microsoft Copilot wird intensiv. HubSpots Wette: Open-Platform + Outcome-Pricing wird langfristig Marktanteile gewinnen, kurzfristig aber Investoren-Skepsis erzeugen.</p>
+
+      <div class="source">Quellen: HubSpot Q1 2026 8-K (07.05.2026); Earnings Call Transcript (Motley Fool, 07.05.2026); SQ Magazine (Spring 2026); Ad-Hoc-News (14.05.2026); MartechNotes Q1-Preview.</div>
+    </div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben & Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <h3>SMB-Marktführer + Partner-Ökosystem</h3>
+      <p>HubSpot ist <strong>SMB-First</strong> und damit komplementär zu Salesforce (Enterprise-First). Im Mid-Market (50-1000 Mitarbeiter) dominiert HubSpot mit kürzeren Sales-Cycles, einfacherer UX, niedrigeren Implementierungskosten. Partner-Ökosystem ist Kern-Moat: viele der größten Deals werden von HubSpot-Partnern gesourced und co-sold.</p>
+
+      <h3>Multi-Hub-Cross-Sell-Engine</h3>
+      <p>Q1 2026: Larger Deals ($60K+ ARR) wuchsen +64% YoY – starkes Up-Market-Signal. Customer-Cross-Sell-Rate auf 4-5 Hubs hat sich beschleunigt. Multi-Hub-Adoption ist HubSpots wichtigster Wachstumshebel für ARPU.</p>
+
+      <h3>Schwächen & Verwundbarkeiten</h3>
+      <p>(1) <strong>ARPU-Wachstum nur +6%</strong> – deutlich langsamer als Customer-Wachstum (+16%); HubSpot wächst v.a. via neue Kunden, nicht via Expansion; (2) <strong>SMB-Markt-Zyklik</strong>: SMBs sind die ersten Kunden, die in Rezessionen schließen oder kürzen; (3) <strong>Konkurrenz</strong>: Salesforce Starter, Microsoft Dynamics 365 Business Central, Pipedrive, Zoho – alle attackieren HubSpot von verschiedenen Seiten; (4) <strong>Pricing-Modell-Risiko</strong>: Outcome-Based-Pricing-Shift ist unerprobt und könnte ARPU drücken statt steigern.</p>
+
+      <div class="source">Quellen: HubSpot Q1 2026 Earnings Call; SQ Magazine HubSpot Statistics 2026; Alpha-Sense Earnings Analysis.</div>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Beat-Ratio: 4/4</div>
+    </div>
+    <div class="section-body">
+      <p>4/4 Beats, aber Marktreaktion uneinheitlich. Q1 2026 -19% trotz starker Zahlen wegen Pricing-Strategy-Shift.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Quartal</th><th>Revenue</th><th>YoY (CC)</th><th>Non-GAAP EPS</th><th>Op-Marge</th><th>Kunden</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Q2 2025</strong></td><td>$760M</td><td class="beat">+18%</td><td>$2.21</td><td>16.2%</td><td>266K</td><td class="beat">BEAT</td></tr>
+            <tr><td><strong>Q3 2025</strong></td><td>$795M</td><td class="beat">+17%</td><td>$2.45</td><td>16.5%</td><td>278K</td><td class="beat">BEAT</td></tr>
+            <tr><td><strong>Q4 2025</strong></td><td>$832M</td><td class="beat">+18%</td><td>$2.34</td><td>16.0%</td><td>289K</td><td class="beat">BEAT</td></tr>
+            <tr><td><strong>Q1 2026</strong></td><td>$881M</td><td class="beat">+18% (23% reported)</td><td>$2.73</td><td>17.8%</td><td>299K</td><td class="beat">BEAT but -19% Stock</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Q1 2026 Highlights</h3>
+      <p>Revenue $881M (+23% reported, +18% CC). Subscription-Revenue $862.3M (+23%). Non-GAAP Op-Marge 17.8% (+4pp YoY). 10.800 Net Customer Additions in Q1. Larger Deals ($60K+ ARR) +64% YoY. FCF $154M in Q1. <strong>FY26 Guidance angehoben</strong>: Revenue +18% CC, Non-GAAP Op-Marge ~21%, FCF ~$750M. <strong>Markt-Reaktion: -19% am 07.05.2026</strong> wegen Outcome-Based-Pricing-Verlagerungs-Ankündigung.</p>
+
+      <div class="source">Quellen: HUBS Q1 2026 8-K (sec.gov, 07.05.2026); Earnings Call (Motley Fool); 247wallst.com Earnings Trends; alpha-sense.com.</div>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Solides 18% CC-Wachstum, Re-Acceleration durch Breeze AI</h3>
+      <p>HUBS wächst seit 4 Quartalen konstant bei ~+18% CC – stabil im Mid-Cap-SaaS-Segment, aber langsamer als der Hyper-Growth-Modus (+25-30%), in dem HubSpot 2021-2023 war. International (49% Revenue) wächst signifikant schneller (+29% reported) als Domestic (+18% reported) – Geografische Expansion ist Hebel.</p>
+
+      <h3>Wachstumstreiber</h3>
+      <p>(1) <strong>Customer Count +16% YoY</strong>: 10.800 Net Additions in Q1 – stabiles Engine. (2) <strong>ARPU +6%</strong> – moderat, AI-Monetisierung ist noch in der Frühphase. (3) <strong>Multi-Hub-Cross-Sell</strong>: Larger Deals ($60K+) +64% YoY zeigen Up-Market-Erfolg. (4) <strong>Breeze AI-Adoption</strong>: Customer/Prospecting/Data-Agents zeigen "messbare Outcomes" laut CEO, aber Revenue-Beitrag noch nicht offengelegt.</p>
+
+      <h3>Profitabilität: Operating-Leverage funktioniert</h3>
+      <p>Non-GAAP Op-Marge expandierte von 14.0% (Q1'25) auf 17.8% (Q1'26) = +4pp YoY. GAAP Op-Marge auf +3.2% (von -3.8%). FY26 Op-Marge-Ziel: 21%. Margen-Expansion ist klarer Beweis, dass Operating Leverage funktioniert.</p>
+
+      <div class="source">Quellen: HUBS Q1 2026 Press Release (07.05.2026); mlq.ai Earnings Report.</div>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung & Multiples</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Premium-SaaS-Bewertung, post Pricing-Shock entspannter</h3>
+      <p>Nach dem Q1 -19%-Crash handelt HUBS schätzungsweise bei ~$485 (vs. ~$600 vor Earnings), MCap ~$25 Mrd. Forward P/E ~50x (vor Crash ~70x). P/Sales TTM ~7x. Das ist immer noch Premium-SaaS-Bewertung, aber deutlich entspannter als Anfang 2024 (~100x P/E).</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Metrik</th><th>HUBS (heute, Est.)</th><th>5J-Ø</th><th>Einordnung</th></tr></thead>
+          <tbody>
+            <tr><td>P/E TTM (Non-GAAP)</td><td>~50x</td><td>~75x</td><td class="neutral">Unter Schnitt nach Crash</td></tr>
+            <tr><td>Forward P/E (FY26)</td><td>~45x</td><td>—</td><td class="neutral">Premium-SaaS-Range</td></tr>
+            <tr><td>P/Sales TTM</td><td>~7x</td><td>~13x</td><td class="beat">Unter historischem Schnitt</td></tr>
+            <tr><td>EV/EBITDA (Fwd)</td><td>~38x</td><td>~50x</td><td class="neutral">Im Mid-Cap-SaaS-Schnitt</td></tr>
+            <tr><td>PEG (Fwd)</td><td>~2.5x</td><td>—</td><td class="miss">Hoch absolut, OK für SaaS</td></tr>
+            <tr><td>FCF Yield FY26e</td><td>~3%</td><td>~2%</td><td class="beat">Akzeptabel</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Peer-Vergleich (Forward P/E)</h3>
+      <p>HUBS Fwd P/E 45x vs. CRM 22x, NOW 50x, MNDY 80x, TEAM 60x. HUBS ist <strong>in der Mid-Premium-SaaS-Range</strong>. Bei +18% CC-Wachstum und 21% Op-Marge-Ziel ist die Bewertung verteidigbar, aber nicht "günstig".</p>
+
+      <div class="source">Quellen: 24/7 Wall St HUBS Earnings (02/2026); SimplyWall.St (1 Woche alt); eigene Schätzung post Q1-Crash.</div>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen & Kapitalqualität</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Solide FCF-Generierung, niedriger Capex</h3>
+      <p>Q1 2026 FCF $154M. FY26 FCF-Guidance ~$750M (+15% YoY). Capex ~5-6% des Revenue = ~$215M FY26e. Niedriger Capex-Bedarf vs. Hyperscaler. Non-GAAP Op-Marge 17.8% mit 21% Ziel FY26.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Metrik</th><th>FY2024</th><th>FY2025</th><th>FY2026e</th><th>Trend</th></tr></thead>
+          <tbody>
+            <tr><td>Revenue</td><td>$2.6B</td><td>$3.0B</td><td>~$3.6B</td><td class="beat">+18% CC</td></tr>
+            <tr><td>Operating Cashflow</td><td>$540M</td><td>$650M</td><td>~$900M</td><td class="beat">↑↑</td></tr>
+            <tr><td>FCF</td><td>$430M</td><td>$520M</td><td>~$750M</td><td class="beat">↑↑</td></tr>
+            <tr><td>Non-GAAP Op-Margin</td><td>15%</td><td>16%</td><td>21%</td><td class="beat">↑↑</td></tr>
+            <tr><td>GAAP Op-Margin</td><td>-1%</td><td>2%</td><td>~7%</td><td class="beat">↑↑</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Bilanz & Kapitalstruktur</h3>
+      <p>HubSpot hat keine Dividende, kein signifikantes Buyback-Programm. Cash & Investments ~$2 Mrd. Debt minimal. Aggressive Re-Investition in R&D (~25% Revenue) für AI-Capabilities.</p>
+
+      <div class="source">Quellen: HUBS Q1 2026 8-K; alpha-sense.com; eigene Berechnungen.</div>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Unternehmen</th><th>MCap</th><th>Revenue Growth (TTM)</th><th>Op-Marge (Non-GAAP)</th><th>Fwd P/E</th><th>AI-Strategy</th></tr></thead>
+          <tbody>
+            <tr><td><strong>HUBS</strong></td><td>$25B</td><td class="beat">+18% CC</td><td>17.8%</td><td>~45x</td><td>Breeze Agents, Outcome-Pricing</td></tr>
+            <tr><td>CRM (Salesforce)</td><td>$153B</td><td class="neutral">+10%</td><td>34%</td><td>~22x</td><td>Agentforce, $800M ARR</td></tr>
+            <tr><td>MNDY (Monday.com)</td><td>~$15B</td><td class="beat">+30%</td><td>~14%</td><td>~70x</td><td>Monday AI Agents</td></tr>
+            <tr><td>TEAM (Atlassian)</td><td>~$50B</td><td class="beat">+20%</td><td>~22%</td><td>~55x</td><td>Rovo AI</td></tr>
+            <tr><td>ZM (Zoom)</td><td>~$24B</td><td class="miss">+5%</td><td>~38%</td><td>~14x</td><td>Zoom AI Companion</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Qualitative Unterschiede</h3>
+      <p><strong>HUBS vs CRM:</strong> HubSpot ist SMB-Spieler, Salesforce Enterprise-Spieler. HUBS wächst fast 2x schneller (+18% vs +10%), aber CRM hat 2x höhere Margen (34% vs 17.8%). HUBS ist Wachstums-Play, CRM Value-Play.</p>
+      <p><strong>HUBS vs MNDY:</strong> Monday wächst noch schneller (+30%) bei niedrigeren Margen. MNDY-Bewertung ist deutlich teurer (70x). HUBS ist im Vergleich bewertungs-attraktiver pro Wachstumspunkt.</p>
+
+      <div class="source">Quellen: Yahoo Finance Multi-Ticker; macrotrends.net.</div>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News & Events (letzte 3 Monate)</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">07.05.2026 – Q1 2026 BEAT but -19% Stock-Crash <span class="badge badge-red">Sehr Volatil</span></div>
+          <div class="event-text">Revenue $881M (+23% reported, +18% CC), EPS $2.73 (Beat). Aber: -19% Stock-Crash nach CEO-Ankündigung der Outcome-Based-Pricing-Verlagerung. Markt fürchtet ARPU-Kannibalisierung. Quelle: SEC 8-K, ad-hoc-news.de.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">07.05.2026 – FY26-Guidance angehoben <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Revenue-Wachstum +18% CC, Non-GAAP Op-Marge ~21%, FCF ~$750M – alles höher als vorherige Schätzungen. Kunden-Wachstum bestätigt. Quelle: HubSpot Press Release.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">14.04.2026 – Outcome-Based-Pricing für Breeze Agents launched <span class="badge badge-yellow">Strategisch unsicher</span></div>
+          <div class="event-text">Resolution-Rate-basierte Bepreisung für Breeze Customer Agent + Prospecting Agent. Wette: Kunden zahlen nur wenn Agent-Performance liefert. Kannibalisierungs-Risiko für Per-Seat-Lizenzen. Quelle: MartechNotes.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">15.04.2026 – Spring 2026 Spotlight: Breeze Marketplace-Erweiterung <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Webinar mit weiteren Breeze-Marketplace-Erweiterungen, neuen AI-Features. SQ Magazine: Breeze Adoption beschleunigt sich.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Q1 2026 – Open API CRM-Vision <span class="badge badge-green">Strategisch</span></div>
+          <div class="event-text">HubSpot öffnet gesamte CRM-Plattform per Full-API-Access für externe AI-Agents. Strategischer Bet auf "offenes" CRM-Ökosystem vs. Salesforce's geschlossenes Agentforce-Modell.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Q1 2026 – AI-Agent-Konkurrenz intensiviert <span class="badge badge-yellow">Risiko</span></div>
+          <div class="event-text">Salesforce Agentforce, MSFT Copilot, Google Agent Builder konkurrieren um SMB+Mid-Market. HUBS muss sich differenzieren via Open-Platform-Strategie.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Q1 2026 – SMB-IT-Budgets resilient <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Trotz Makro-Unsicherheit bleiben SMB-Software-Ausgaben stabil. HUBS Customer-Wachstum +16% YoY beweist Resilienz.</div>
+        </div>
+      </div>
+
+      <div class="source">Quellen: HubSpot Q1 2026 Earnings (07.05.2026); SEC 8-K; SimplyWall.St; Ad-Hoc-News (14.05.2026); SQ Magazine (05/2026); MartechNotes (05/2026).</div>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 3/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Schwere Korrektur nach Q1 Earnings</h3>
+      <p>HUBS hat von 52W-Hoch ~$880 auf geschätzt ~$485 verloren = -45%. Nach dem -19% Crash am 07.05.2026 ist die Aktie technisch stark angeschlagen. Alle wichtigen MAs liegen deutlich über dem Kurs. Stabilisierung würde Halt über $470-480 erfordern.</p>
+
+      <h3>Levels</h3>
+      <p>Support: $470, $430 (52W-Tief), $400. Resistance: $530 (SMA20), $580 (SMA50), $700+ (SMA200). RSI vermutlich überverkauft (&lt;30) nach -19% Move.</p>
+
+      <div class="source">Quellen: ad-hoc-news.de (14.05.2026); eigene Schätzung.</div>
+    </div>
+  </div>
+
+  <!-- S10 -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken & Chancen</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">💰 Outcome-Based-Pricing-Kannibalisierung</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Wenn Breeze-Agents Per-Seat-Lizenzen ersetzen, könnte ARPU sinken. Markt fürchtet Revenue-Predictability-Verlust. Bisheriges Q1 ARPU-Wachstum nur +6% – schwaches Signal.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🏢 Salesforce + MSFT-Konkurrenz im Mid-Market</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Salesforce Starter, MSFT Dynamics 365 Business Central pushen aggressiv ins Mid-Market. HUBS muss Breeze AI als Differenzierung etablieren.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">📉 SMB-Rezession-Sensitivität</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">SMBs schließen zuerst in Rezessionen. Bei US-Rezession könnten Customer-Adds verlangsamen.</div>
+      </div>
+
+      <h3>Chancen</h3>
+      <p>(1) <strong>Breeze AI-Skalierung</strong>: Wenn Outcome-Pricing-Modell funktioniert, ARPU-Boost auf +12-15% möglich. (2) <strong>International-Expansion</strong>: International wächst +29% reported – 49% des Umsatzes mit weiterem Hebel. (3) <strong>Larger Deals +64%</strong>: Up-Market-Shift bietet ARPU-Premium. (4) <strong>Open API-Platform</strong>: Wenn externe AI-Agents auf HubSpot bauen, kann das zum Netzwerk-Effekt führen.</p>
+
+      <div class="source">Quellen: HubSpot Q1 Earnings; eigene Szenarioanalyse.</div>
+    </div>
+  </div>
+
+  <!-- S11 -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring</div>
+      <div class="section-score">Ø 6.0/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Visual</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td>Geschäftsmodell</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>SMB-Marktführer, Multi-Hub-Cross-Sell, Pricing-Strategy unsicher</td></tr>
+            <tr><td>Burggraben</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Partner-Ökosystem stark, aber Konkurrenz von CRM+MSFT zunimmt</td></tr>
+            <tr><td>Operative Entwicklung (4Q)</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>4/4 Beats, +18% CC stabil, Margen-Expansion +4pp</td></tr>
+            <tr><td>Wachstum</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>+18% CC solide, aber ARPU nur +6%, Wachstum v.a. via neue Kunden</td></tr>
+            <tr><td>Bewertung</td><td><strong>5/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Fwd P/E 45x für Mid-Cap-SaaS noch teuer; Premium-Bewertung</td></tr>
+            <tr><td>Cashflow</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>FCF $750M, niedriger Capex, gesunde Cashflow-Konversion</td></tr>
+            <tr><td>Risiken (invertiert)</td><td><strong>5/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Outcome-Pricing-Kannibalisierungs-Risiko, SMB-Zyklik, Konkurrenz</td></tr>
+            <tr><td>Technische Analyse</td><td><strong>3/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:30%"></div></div><span class="score-num">3</span></div></td><td>-45% von ATH, -19% nach Q1 Earnings, alle MAs Sell</td></tr>
+            <tr style="background:rgba(255,122,89,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>6.1/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track">
+                    <div class="score-bar-fill" style="width:61%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
+                  </div>
+                  <span class="score-num" style="color:var(--primary);">6.1</span>
+                </div>
+              </td>
+              <td>Solides SMB-SaaS-Geschäft, aber Pricing-Unsicherheit dämpft</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- S12 -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+    </div>
+    <div class="section-body">
+
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 – Solides operatives Setup:</strong> Q1 2026 Revenue +18% CC, 299K Kunden (+16%), Larger Deals +64%, Margen +4pp expandiert. Operational-Leverage funktioniert klar.</p>
+          <p><strong>Säule 2 – Breeze AI als Wachstums-Optionalität:</strong> 5 AI-Agents im Markt, Outcome-Pricing-Modell als bold strategischer Move. Wenn erfolgreich, ARPU-Boost auf +12-15% möglich.</p>
+          <p><strong>Säule 3 – Post-Crash-Einstiegsfenster:</strong> -19% nach Q1 öffnet attraktiveres Risk/Reward. Fwd P/E auf 45x von 70x kollabiert.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 – Outcome-Pricing-Strategy-Risk:</strong> Markt fürchtet ARPU-Kannibalisierung. Resolution-Rate-Pricing ist unerprobt im SMB-Markt; Erfolg ungewiss.</p>
+          <p><strong>Risiko 2 – Konkurrenz von oben + unten:</strong> CRM + MSFT pushen ins Mid-Market; Monday + Pipedrive pushen von unten. HUBS könnte Marktanteile verlieren.</p>
+          <p><strong>Risiko 3 – Premium-Bewertung verbleibt:</strong> Selbst nach -45% noch Fwd P/E 45x. Bei SMB-Rezession kein Schutz-Polster.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>HUBS hat starke operative Performance, aber das Outcome-Based-Pricing-Risiko ist real und der Markt strafft die Bewertung deutlich. Bei ~$485 ist die Aktie nach -45% von ATH attraktiver bewertet als 2024/Anfang 2025, aber noch nicht "günstig". Im Vergleich zu MSFT (besseres Risk/Reward) oder META (höheres Wachstum) bietet HUBS aktuell nicht das überzeugendste Setup. Rating: <strong>HALTEN</strong> mit Beobachtung der Breeze-AI-Skalierung in Q2/Q3 2026.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$620–680</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–4 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–15%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+30%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:2</div></div>
+      </div>
+
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger</h5>
+          <ul class="trigger-list">
+            <li>Q2/Q3 2026: ARPU-Wachstum unter +3% → 30% reduzieren</li>
+            <li>Customer-Adds verlangsamen unter 8K/Q → 20% reduzieren</li>
+            <li>Bruch unter $430 → Position halbieren</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger</h5>
+          <ul class="trigger-list">
+            <li>Q2 2026: Breeze-AI-Revenue-Disclosure >5% Revenue → kaufen</li>
+            <li>Outcome-Pricing zeigt klare ARPU-Beschleunigung → aufstocken</li>
+            <li>Rückschlag auf $430-450 → tranchiert nachkaufen</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>SMB-SaaS-Exposure-Investoren</li>
+            <li>AI-Agent-Story-Believers</li>
+            <li>Mid-Cap-Growth</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Value-Investoren (P/E noch hoch)</li>
+            <li>Pricing-Modell-Risiko-Sensible</li>
+            <li>Kurzfristige Trader</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="source">Quellen: Synthese aus allen Sektionen; eigene Risk/Reward-Kalkulation.</div>
+    </div>
+  </div>
+
+  <!-- S13 -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Anstehende Events</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q2 2026 Earnings – Anfang August 2026</h4>
+        <p>Kritische Metriken: (1) ARPU-Trend nach Pricing-Shift, (2) Breeze-Agent-Revenue-Anteil, (3) Customer-Adds-Stabilität, (4) Net Retention Rate.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> ARPU >+8% YoY + Breeze-Revenue klar offengelegt → Relief-Rally +15-20%.<br><br>
+          <strong>Wenn:</strong> ARPU stagniert/sinkt → weiterer Drawdown auf $400-430.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 2: INBOUND 2026 – September 2026</h4>
+        <p>HubSpots Mega-Konferenz; Bühne für Breeze 2.0, neue Hubs, Partner-Updates.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Klare Breeze-Adoption-Metriken + neue AI-Use-Cases → Catalyst-Setup.<br><br>
+          <strong>Wenn:</strong> nur inkrementelle Updates → kein Re-Rating.
+        </div>
+      </div>
+
+      <div class="source">Quellen: HubSpot IR Calendar; INBOUND 2026 Schedule.</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung dar. Stand: 14.05.2026.
+  </div>
+
+</div>
+</body>
+</html>
