@@ -1,298 +1,232 @@
 <!DOCTYPE html>
-<!-- saved from url=(0032)https://msft-analyse.vercel.app/ -->
-<html lang="de"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MSFT – Aktienanalyse Canvas v2.2</title>
-  <style>
-    :root {
-      --primary: #0078D4;
-      --primary-dark: #005a9e;
-      --bg: #0f0f12;
-      --bg-card: #1a1a1f;
-      --bg-card2: #22222a;
-      --border: #2e2e38;
-      --text: #e8e8ec;
-      --text-muted: #888898;
-      --text-dim: #555566;
-      --green: #22c55e;
-      --red: #ef4444;
-      --yellow: #f59e0b;
-      --blue: #3b82f6;
-      --purple: #8b5cf6;
-      --teal: #14b8a6;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7;
-    }
-    .header {
-      background: linear-gradient(135deg, #00081a 0%, #001028 40%, #0f0f12 100%);
-      border-bottom: 1px solid var(--primary);
-      padding: 36px 40px 28px; display: flex; justify-content: space-between;
-      align-items: flex-start; flex-wrap: wrap; gap: 20px;
-    }
-    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
-    .header-left h1 span { color: var(--primary); }
-    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
-    .header-right { text-align: right; }
-    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
-    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
-    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
-    .price-change.up   { background: rgba(34,197,94,0.15); color: var(--green); }
-    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
-    .nav {
-      background: var(--bg-card); border-bottom: 1px solid var(--border);
-      padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
-      position: sticky; top: 0; z-index: 100;
-    }
-    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
-    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
-    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
-    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
-    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
-    .kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-    .kpi-value.green  { color: var(--green); }
-    .kpi-value.red    { color: var(--red); }
-    .kpi-value.orange { color: var(--primary); }
-    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
-    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
-    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .section-title  { font-size: 16px; font-weight: 700; color: white; }
-    .section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
-    .section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
-    .section-body   { padding: 20px 24px; }
-    p { margin-bottom: 12px; color: var(--text); }
-    p:last-child { margin-bottom: 0; }
-    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
-    h3:first-child { margin-top: 0; }
-    .table-wrap { overflow-x: auto; margin: 16px 0; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: rgba(0,120,212,0.04); }
-    .beat    { color: var(--green);  font-weight: 600; }
-    .miss    { color: var(--red);    font-weight: 600; }
-    .neutral { color: var(--yellow); font-weight: 600; }
-    .badge        { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
-    .badge-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
-    .badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
-    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
-    .badge-blue   { background: rgba(59,130,246,0.15); color: var(--blue); }
-    .badge-orange { background: rgba(0,120,212,0.15);  color: var(--primary); }
-    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
-    .event-item:last-child { border-bottom: none; }
-    .event-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
-    .dot-green  { background: var(--green); }
-    .dot-red    { background: var(--red); }
-    .dot-yellow { background: var(--yellow); }
-    .event-label { font-weight: 600; color: white; }
-    .event-text  { font-size: 14px; color: var(--text); }
-    .risk-item   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
-    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .risk-title  { font-weight: 600; color: white; font-size: 14px; }
-    .score-bar       { display: flex; align-items: center; gap: 10px; }
-    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-    .score-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #00b7ff); }
-    .score-num       { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
-    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-    @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
-    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
-    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
-    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .bear-card h4 { color: var(--red);   margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .rating-box { background: linear-gradient(135deg, rgba(0,120,212,0.12), rgba(0,120,212,0.04)); border: 1px solid rgba(0,120,212,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
-    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
-    .rating-item .val  { font-size: 20px; font-weight: 800; color: white; }
-    .rating-item .val.buy  { color: var(--green); }
-    .rating-item .val.hold { color: var(--yellow); }
-    .rating-item .val.sell { color: var(--red); }
-    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
-    @media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
-    .trigger-card      { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
-    .trigger-card h5   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-    .trigger-card.buy  h5 { color: var(--green); }
-    .trigger-card.sell h5 { color: var(--red); }
-    .trigger-list    { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
-    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
-    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
-    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
-    @media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
-    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
-    .investor-no  { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
-    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
-    .investor-no  h5 { color: var(--red);   font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
-    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
-    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
-    .investor-no  li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
-    .geo-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
-    .geo-card   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
-    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .geo-pct    { font-size: 20px; font-weight: 700; color: white; }
-    .geo-note   { font-size: 12px; color: var(--text-muted); }
-    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
-    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
-    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
-    .outlook-card .when-then strong { color: var(--primary); }
-    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
-    .source a { color: var(--text-dim); }
-    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
-    .alert-box { background: rgba(0,120,212,0.08); border: 1px solid rgba(0,120,212,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
-    .divider   { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
-    .pill      { display: inline-block; background: rgba(0,120,212,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
-    .ai-focus-box { background: linear-gradient(135deg, rgba(0,120,212,0.1), rgba(139,92,246,0.08)); border: 1px solid rgba(0,120,212,0.25); border-radius: 10px; padding: 16px 20px; margin: 16px 0; }
-    .ai-focus-box h4 { color: var(--primary); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-    .kpi-grid-mini { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin: 12px 0; }
-  </style>
-<style id="highlight-mengshou-style">
-    .highlight-mengshou-wrap {
-        background: #ff9;
-        cursor: pointer;
-    }
-    .highlight-mengshou-wrap.active {
-        background: #ffb;
-    }
-</style></head>
-<body cz-shortcut-listen="true" data-new-gr-c-s-check-loaded="14.1280.0" data-gr-ext-installed="">
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microsoft MSFT – Aktienanalyse Canvas v2.2</title>
+<style>
+:root {
+  --primary: #00A4EF;
+  --primary-dark: #0078D4;
+  --bg: #0f0f12;
+  --bg-card: #1a1a1f;
+  --bg-card2: #22222a;
+  --border: #2e2e38;
+  --text: #e8e8ec;
+  --text-muted: #888898;
+  --text-dim: #555566;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --blue: #3b82f6;
+  --purple: #8b5cf6;
+  --teal: #14b8a6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+.header { background: linear-gradient(135deg, #001a28 0%, #003555 40%, #0f0f12 100%); border-bottom: 1px solid var(--primary); padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; }
+.header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+.header-left h1 span { color: var(--primary); }
+.header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+.header-right { text-align: right; }
+.price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+.price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+.price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+.price-change.up { background: rgba(34,197,94,0.15); color: var(--green); }
+.price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+.nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100; }
+.nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+.main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+.kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+.kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.kpi-value.green { color: var(--green); }
+.kpi-value.red { color: var(--red); }
+.kpi-value.orange { color: var(--primary); }
+.section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+.section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+.section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.section-title { font-size: 16px; font-weight: 700; color: white; }
+.section-score { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+.section-note { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+.section-body { padding: 20px 24px; }
+p { margin-bottom: 12px; color: var(--text); }
+p:last-child { margin-bottom: 0; }
+h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+h3:first-child { margin-top: 0; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(0,164,239,0.04); }
+.beat { color: var(--green); font-weight: 600; }
+.miss { color: var(--red); font-weight: 600; }
+.neutral { color: var(--yellow); font-weight: 600; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+.badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+.badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+.badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+.badge-orange { background: rgba(0,164,239,0.15); color: var(--primary); }
+.event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+.event-item:last-child { border-bottom: none; }
+.event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+.dot-green { background: var(--green); }
+.dot-red { background: var(--red); }
+.dot-yellow { background: var(--yellow); }
+.event-label { font-weight: 600; color: white; }
+.event-text { font-size: 14px; color: var(--text); }
+.risk-item { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+.risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.risk-title { font-weight: 600; color: white; font-size: 14px; }
+.score-bar { display: flex; align-items: center; gap: 10px; }
+.score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #66cfff); }
+.score-num { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+.bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+.bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+.bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+.bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.rating-box { background: linear-gradient(135deg, rgba(0,164,239,0.12), rgba(0,164,239,0.04)); border: 1px solid rgba(0,164,239,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+.rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+.rating-item .val { font-size: 20px; font-weight: 800; color: white; }
+.rating-item .val.buy { color: var(--green); }
+.rating-item .val.hold { color: var(--yellow); }
+.rating-item .val.sell { color: var(--red); }
+.trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+.trigger-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.trigger-card h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.trigger-card.buy h5 { color: var(--green); }
+.trigger-card.sell h5 { color: var(--red); }
+.trigger-list { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+.trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+.trigger-list li::before { content: "→"; position: absolute; left: 0; }
+.investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+@media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+.investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+.investor-no { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+.investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-no h5 { color: var(--red); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+.investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+.investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+.geo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+.geo-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.geo-pct { font-size: 20px; font-weight: 700; color: white; }
+.geo-note { font-size: 12px; color: var(--text-muted); }
+.outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+.outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+.outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+.outlook-card .when-then strong { color: var(--primary); }
+.source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+.source a { color: var(--text-dim); }
+.disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+.alert-box { background: rgba(0,164,239,0.08); border: 1px solid rgba(0,164,239,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.pill { display: inline-block; background: rgba(0,164,239,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+</style>
+</head>
+<body>
 
-<!-- ═══ HEADER ═══════════════════════════════════════════════════════════ -->
 <div class="header">
   <div class="header-left">
-    <h1>Microsoft <span>MSFT · NASDAQ</span></h1>
-    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 27. März 2026 · NASDAQ · Sektor: Technology / Cloud &amp; AI</div>
+    <h1>Microsoft Corporation <span>MSFT</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 14.05.2026 · NASDAQ · Sektor: Technology / Enterprise Software & Cloud</div>
     <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-      <span class="badge badge-orange">Cloud / Azure</span>
-      <span class="badge badge-blue">AI / Copilot</span>
-      <span class="badge badge-orange">Enterprise Software</span>
-      <span class="badge" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">M365 Ecosystem</span>
+      <span class="badge badge-orange">Azure / AI</span>
+      <span class="badge badge-blue">M365 Copilot</span>
+      <span class="badge badge-yellow">OpenAI</span>
+      <span class="badge badge-green">Maia Silicon</span>
     </div>
   </div>
   <div class="header-right">
-    <div class="price-tag">$400</div>
-    <div class="price-meta">Analysekurs · 27.02.2026 · NASDAQ</div>
-    <div class="price-change down">▼ –18% in 4 Wochen</div>
-    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $381 – $468</div>
+    <div class="price-tag">$404.24</div>
+    <div class="price-meta">Schlusskurs 14.05.2026 · NASDAQ</div>
+    <div class="price-change down">▼ -27% von ATH ($555)</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $356.28 – $555.45</div>
   </div>
 </div>
 
-<!-- ═══ NAV ═══════════════════════════════════════════════════════════════ -->
 <nav class="nav">
-  <a href="https://msft-analyse.vercel.app/#s1">1. Geschäftsmodell</a>
-  <a href="https://msft-analyse.vercel.app/#s2">2. Burggraben</a>
-  <a href="https://msft-analyse.vercel.app/#s3">3. Quartale</a>
-  <a href="https://msft-analyse.vercel.app/#s4">4. Wachstum</a>
-  <a href="https://msft-analyse.vercel.app/#s5">5. Bewertung</a>
-  <a href="https://msft-analyse.vercel.app/#s6">6. Cashflow</a>
-  <a href="https://msft-analyse.vercel.app/#s7">7. Peers</a>
-  <a href="https://msft-analyse.vercel.app/#s8">8. News</a>
-  <a href="https://msft-analyse.vercel.app/#s9">9. Technisch</a>
-  <a href="https://msft-analyse.vercel.app/#s10">10. Risiken</a>
-  <a href="https://msft-analyse.vercel.app/#s11">11. Scoring</a>
-  <a href="https://msft-analyse.vercel.app/#s12">12. Fazit</a>
-  <a href="https://msft-analyse.vercel.app/#s13">13. Outlook</a>
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
 </nav>
 
-<!-- ═══ MAIN ══════════════════════════════════════════════════════════════ -->
 <div class="main">
 
-  <!-- KPI OVERVIEW -->
   <div class="kpi-grid" style="margin-top:24px;">
-    <div class="kpi-card">
-      <div class="kpi-label">Kurs</div>
-      <div class="kpi-value red">$400</div>
-      <div class="kpi-sub">USD · 27.02.2026</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Market Cap</div>
-      <div class="kpi-value">$2,99 Bio.</div>
-      <div class="kpi-sub">USD</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">P/E (TTM)</div>
-      <div class="kpi-value orange">24,5x</div>
-      <div class="kpi-sub">Fwd: 22,4x</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">EV/EBITDA</div>
-      <div class="kpi-value">16,8x</div>
-      <div class="kpi-sub">TTM</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Op. Marge</div>
-      <div class="kpi-value green">47,0%</div>
-      <div class="kpi-sub">Q2 FY2026</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">ROE</div>
-      <div class="kpi-value green">34,4%</div>
-      <div class="kpi-sub">TTM</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Nächste Earnings</div>
-      <div class="kpi-value orange">29. Apr</div>
-      <div class="kpi-sub">Q3 FY2026 est.</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Konsens</div>
-      <div class="kpi-value green">$596</div>
-      <div class="kpi-sub">Ø Kursziel · 57/58 Buy</div>
-    </div>
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$404.24</div><div class="kpi-sub">USD · 14.05.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Marktkap.</div><div class="kpi-value">~$3.0T</div><div class="kpi-sub">Mega-Cap</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/E TTM</div><div class="kpi-value">24.0x</div><div class="kpi-sub">5J-Ø: 31.9x</div></div>
+    <div class="kpi-card"><div class="kpi-label">Fwd P/E</div><div class="kpi-value green">~23x</div><div class="kpi-sub">3J-Tief</div></div>
+    <div class="kpi-card"><div class="kpi-label">Op-Marge</div><div class="kpi-value green">46.3%</div><div class="kpi-sub">höchste in Big-Tech</div></div>
+    <div class="kpi-card"><div class="kpi-label">Azure Growth</div><div class="kpi-value green">+40%</div><div class="kpi-sub">Q3 FY26 reaccel.</div></div>
+    <div class="kpi-card"><div class="kpi-label">Capex 2026e</div><div class="kpi-value red">$190B</div><div class="kpi-sub">+$15B vs. März</div></div>
+    <div class="kpi-card"><div class="kpi-label">RPO</div><div class="kpi-value green">$627B</div><div class="kpi-sub">+99% YoY</div></div>
   </div>
 
-
-  <!-- ═══ S1: GESCHÄFTSMODELL ═══════════════════════════════════════════ -->
+  <!-- S1 -->
   <div class="section" id="s1">
     <div class="section-header">
       <div class="section-number">1</div>
       <div class="section-title">Geschäftsmodell</div>
-      <div class="section-note">Quellen ≤ 9 Monate</div>
+      <div class="section-note">Quellen ≤ 6 Monate</div>
     </div>
     <div class="section-body">
-      <h3>Unternehmensüberblick</h3>
-      <p>Microsoft Corporation (gegr. 1975, CEO Satya Nadella seit 2014) hat sich zum führenden Cloud- und KI-Konzern der Welt entwickelt. Das Unternehmen gliedert sich in drei operative Segmente: <strong>Productivity and Business Processes</strong> (Microsoft 365, LinkedIn, Dynamics 365), <strong>Intelligent Cloud</strong> (Azure, SQL Server, GitHub) sowie <strong>More Personal Computing</strong> (Windows, Xbox, Surface, Bing). Im zweiten Quartal des Geschäftsjahres 2026 erzielte das Intelligent-Cloud-Segment $32,9 Mrd. Umsatz, Productivity and Business Processes $34,1 Mrd.</p>
+      <h3>Drei Segmente: Productivity, Intelligent Cloud, More Personal Computing</h3>
+      <p>Microsoft erwirtschaftete im Q3 FY2026 Umsätze von <strong>$82.9 Mrd. (+18% YoY)</strong>. Die drei berichteten Segmente: <strong>Productivity & Business Processes</strong> ($35.0 Mrd., +13%) – inkl. M365 Commercial + Consumer, Dynamics 365, LinkedIn; <strong>Intelligent Cloud</strong> ($34.7 Mrd., +30%) – inkl. Azure (40% YoY), Server Products, GitHub, Nuance; <strong>More Personal Computing</strong> ($13.2 Mrd., +1%) – inkl. Windows, Surface, Xbox, Search/News-Advertising. Die <strong>Microsoft Cloud</strong>-Metrik (segmentübergreifend) erreichte $54.5 Mrd. (+29%), <strong>RPO $627 Mrd. (+99% YoY)</strong>.</p>
 
-      <h3>Revenue-Streams &amp; Kostenstruktur</h3>
-      <p>Das Geschäftsmodell ist stark auf wiederkehrende Einnahmen ausgerichtet: Über 70 % des Gesamtumsatzes stammen aus Subscription- und nutzungsbasierten Quellen (Microsoft 365, Azure, Dynamics). Azure operiert als Consumption-basiertes Modell – Kunden zahlen für tatsächlich genutzte Rechen-, Speicher- und KI-Kapazitäten. Copilot-Lizenzen (M365 Copilot Add-On: $30/Nutzer/Monat) ergänzen das Geschäftsmodell als Premium-Aufpreisschicht. Mit über 450 Mio. bezahlten M365 Commercial Seats und aktuell 15 Mio. Copilot-Seats eröffnet sich eine enorme ARPU-Ausweitung.</p>
-      <p>Auf der Kostenseite ist Microsoft zunehmend Capex-intensiv: Das Unternehmen investierte allein in H1 FY2026 $72,4 Mrd. in Rechenzentren, GPUs und CPUs – auf Kurs zu ~$80+ Mrd. für das Gesamtjahr. Diese Kosten komprimieren den Free Cashflow kurzfristig, stellen aber laut Management notwendige Investitionen in „Planet-Scale"-KI-Kapazität dar, da die Nachfrage das Angebot weiterhin übersteigt.</p>
+      <h3>Revenue-Streams & Unit Economics</h3>
+      <p>Microsoft ist die <strong>profitabelste Big-Tech-Firma</strong>: Konzern-Op-Marge Q3 FY26 erreichte 46.3% ($38.4 Mrd. Op-Income). Productivity-Segment-Op-Marge: 47%, Intelligent Cloud: 44%, MPC: ~30%. M365 Copilot (Add-On) hat eine geschätzte 85% Bruttomarge (vs. 75% für klassisches M365). Azure ist Hochmargen-Cloud (~45% Op-Marge geschätzt), Office/M365 ist Recurring-Revenue mit hoher Renewal-Rate (>95%). Die AI-Business läuft mit $37 Mrd. ARR (+123% YoY), getrieben durch Azure OpenAI Service, Copilot, und Foundry.</p>
 
-      <h3>Unit Economics / AI-Monetarisierung</h3>
-      <p>Die Unit Economics des KI-Geschäfts werden zunehmend sichtbar: Microsoft Fabric (Daten- und Analytics-Plattform) erreichte eine annualisierte Umsatzrate von $2+ Mrd. mit 60 % YoY-Wachstum. Azure AI-Services steuern ~16 Prozentpunkte zum 39%igen Azure-Wachstum bei – ein erheblicher Teil des Zuwachses kommt direkt aus monetisierten KI-Workloads. Das Unternehmen verfügt über eine der stärksten Plattform-Ökonomien der Technologiebranche.</p>
+      <h3>Strategischer Pivot: OpenAI-Restructuring + Maia-Silicon</h3>
+      <p>Am 27.04.2026 wurde das OpenAI-Agreement <strong>fundamental restrukturiert</strong>: (1) Microsoft-IP-Lizenzierung von OpenAI-Modellen wird <strong>non-exclusive</strong> (vorher exklusiv) bis 2032 verlängert; (2) Microsoft zahlt KEINE Revenue-Share mehr an OpenAI; (3) OpenAI-Revenue-Share an Microsoft (~20%) läuft bis 2030 mit <strong>$38 Mrd. Cap</strong>; (4) Microsoft hält 26.79% OpenAI-Stake (Wert: ~$228 Mrd.). Parallel: Maia 200 AI-Accelerator live in Iowa/Arizona, +30% Tokens/Dollar vs. NVIDIA. Microsoft positioniert sich auf <strong>Multi-Model-Strategie</strong> (OpenAI + Anthropic Claude + Mistral + xAI Grok + Meta Llama + DeepSeek auf Azure).</p>
 
-      <div class="source">Quellen: Microsoft FY26 Q1 &amp; Q2 Press Releases (microsoft.com/investor, 29.10.2025 &amp; 28.01.2026); Futurum Research (futurumgroup.com, 31.10.2025 &amp; 29.01.2026); Microsoft Annual Report 2025</div>
+      <div class="source">Quellen: Microsoft Q3 FY26 8-K (29.04.2026); Q3 FY26 Earnings Call Transcript; SEC FY26 Q3 Filing; TradingKey OpenAI-Restructuring-Analyse (04/2026); Investing.com (12.05.2026).</div>
     </div>
   </div>
 
-
-  <!-- ═══ S2: BURGGRABEN ════════════════════════════════════════════════ -->
+  <!-- S2 -->
   <div class="section" id="s2">
     <div class="section-header">
       <div class="section-number">2</div>
-      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-title">Burggraben & Wettbewerbsvorteile</div>
       <div class="section-score">Score: 9/10</div>
     </div>
     <div class="section-body">
-      <h3>Netzwerkeffekte</h3>
-      <p>Stark ausgeprägt. Microsoft 365 wird wertvoller, je mehr Nutzer es innerhalb eines Unternehmens verwenden – Kollaborationstools (Teams, SharePoint), gemeinsam bearbeitete Dokumente und Copilot-Agents profitieren direkt von der Nutzerdichte. GitHub (26 Mio. Copilot-Nutzer, 100 Mio. Entwickler weltweit) erzeugt seinerseits starke Netzwerkeffekte innerhalb der Entwickler-Community.</p>
+      <h3>Enterprise-Distribution-Moat: M365 + Azure + Active Directory</h3>
+      <p>Microsofts dominante Position kommt aus <strong>tiefer Enterprise-Integration</strong>: 80% der Fortune 500 nutzen M365 Copilot, ~95% der Fortune 500 nutzen Azure für mindestens einen Workload. Active Directory / Entra ID ist die Standard-Identity-Plattform der Enterprise-Welt. Diese Switching-Costs sind extrem hoch – ein Wechsel von M365 zu Google Workspace oder von Azure AD zu Okta dauert für eine 10.000-User-Org Jahre.</p>
 
-      <h3>Switching Costs</h3>
-      <p>Sehr hoch. Die Migrationskosten für Unternehmen (Umschulung, Produktivitätsverluste, Sicherheitskonfiguration, Systemintegration) übersteigen potenzielle Lizenzeinsparungen durch Wettbewerber bei weitem. Dieser Effekt wird durch Microsofts Bundle-Strategie verstärkt: Wer Azure, M365, Defender und Dynamics 365 gemeinsam nutzt, ist tief in das Microsoft-Ökosystem eingebettet. Die FTC untersucht genau diese Bundling-Praktiken – was die Stärke der Marktposition unterstreicht.</p>
+      <h3>Multi-Model-AI-Hub: Azure als Modell-Agnostisches Layer</h3>
+      <p>Q3 FY26 hat MSFT seinen AI-Moat strukturell verstärkt: Azure hostet inzwischen OpenAI + <strong>Anthropic Claude</strong> + xAI Grok + Meta Llama + Mistral + DeepSeek – das macht Azure zur <strong>universellen AI-Modell-Plattform</strong>. Copilot-Seats sprangen von 15M auf <strong>20M (+33% QoQ)</strong>, was die Adoption auf Enterprise-Scale validiert. <strong>RPO $627 Mrd. (+99% YoY)</strong> sind beispiellos – mehr als doppelt so viel wie vor einem Jahr.</p>
 
-      <h3>Brand Power &amp; Scale Advantages</h3>
-      <p>Microsoft ist eine der stärksten Enterprise-Marken der Welt. Das Unternehmen kündigte in Q2 FY2026 Preiserhöhungen für kommerzielle Office-Abonnements an – ein Schritt, den nur wenige Anbieter mit einem so großen Kundenstamm wagen können. Über 90 % der Fortune-500-Unternehmen nutzen M365 Copilot. Microsoft betreibt über 400 Rechenzentren in 70 Regionen weltweit – mehr als jeder andere Cloud-Anbieter. Die Größe erlaubt Einkaufsvorteile bei Hardware, effizienteren Energieeinsatz (Liquid-Cooling, eigene Chips: Maia 200, Cobalt 200) und Investitionen in proprietäre KI-Infrastruktur.</p>
+      <h3>Schwächen & Verwundbarkeiten</h3>
+      <p>Drei Burggraben-Risse: (1) <strong>OpenAI-Abhängigkeit war strukturelles Risiko</strong> – das Restructuring hat das reduziert, aber Microsoft musste $38B-Cap akzeptieren als Preis dafür; (2) <strong>Azure-Wachstum lagged GCP</strong> – Azure +40% (Q3 FY26) ist beeindruckend, aber Google Cloud +63% wächst schneller, MSFT verliert relativ Marktanteile; (3) <strong>Gaming-Schwäche</strong> – Xbox-Hardware -30% YoY in 2 aufeinanderfolgenden Quartalen, Activision-Integration nicht überzeugend monetarisiert.</p>
 
-      <h3>Technologischer Vorsprung (OpenAI-Exklusivität)</h3>
-      <p>Die strategische Partnerschaft mit OpenAI sichert Microsoft Exklusivrechte auf Modell-Vermarktung bis mindestens 2030 und Modell-Designs bis 2032. Azure ist die einzige Plattform, auf der OpenAI-Modelle extern über API bezogen werden können. Darüber hinaus entwickelt Microsoft eigene Modelle (Phi, Orca) sowie eigene KI-Chips. GitHub Copilot ist der mit Abstand marktführende KI-Coding-Assistent. <strong>Schwachstelle:</strong> Die Abhängigkeit von OpenAI stellt ein Konzentrationsrisiko dar – jede Instabilität bei OpenAI könnte die KI-Roadmap stören.</p>
-
-      <div class="source">Quellen: SAMexpert FTC Report (samexpert.com, 22.09.2025); Microsoft Annual Report 2025; Futurum Research (29.01.2026)</div>
+      <div class="source">Quellen: MSFT Q3 FY26 Earnings Call (29.04.2026); TechCrunch OpenAI-Restructuring (27.04.2026); Synergy Research Cloud Market Share Q1 2026; TECHi MSFT Analysis (04/2026).</div>
     </div>
   </div>
 
-
-  <!-- ═══ S3: QUARTALE ══════════════════════════════════════════════════ -->
+  <!-- S3 -->
   <div class="section" id="s3">
     <div class="section-header">
       <div class="section-number">3</div>
@@ -300,70 +234,29 @@
       <div class="section-score">Beat-Ratio: 4/4</div>
     </div>
     <div class="section-body">
+      <p>Vier aufeinanderfolgende Beats mit Azure-Reacceleration im Q3 FY26. MSFT Fiscal Year endet Juni; Q3 FY26 = Kalenderquartal Q1 2026. Nächste Earnings: <strong>Ende Juli 2026 (Q4 FY2026)</strong>.</p>
 
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>Quartal</th>
-              <th>Revenue</th>
-              <th>YoY</th>
-              <th>Non-GAAP EPS</th>
-              <th>Beat/Miss</th>
-              <th>Azure-Wachstum</th>
-              <th>Kursreaktion</th>
-            </tr>
-          </thead>
+          <thead><tr><th>Quartal</th><th>Revenue</th><th>YoY</th><th>EPS (Adj.)</th><th>Konsens</th><th>Azure Growth (CC)</th><th>Op-Marge</th><th>Result</th></tr></thead>
           <tbody>
-            <tr>
-              <td><strong>Q3 FY2025</strong><br><small>Jan–Mrz 2025</small></td>
-              <td>~$70,1 Mrd.</td>
-              <td>+15%</td>
-              <td>~$3,46</td>
-              <td><span class="beat">✓ Beat</span></td>
-              <td>+35% cc</td>
-              <td class="beat">+~2%</td>
-            </tr>
-            <tr>
-              <td><strong>Q4 FY2025</strong><br><small>Apr–Jun 2025</small></td>
-              <td>$76,44 Mrd.</td>
-              <td>+18%</td>
-              <td>$3,65</td>
-              <td><span class="beat">✓ Beat +$0,27</span></td>
-              <td>+39%</td>
-              <td class="beat">+~3%</td>
-            </tr>
-            <tr>
-              <td><strong>Q1 FY2026</strong><br><small>Jul–Sep 2025</small></td>
-              <td>$77,7 Mrd.</td>
-              <td>+18%</td>
-              <td>$4,13</td>
-              <td><span class="beat">✓ Beat +2,8%</span></td>
-              <td>+40% (cc +39%)</td>
-              <td class="beat">+~4%</td>
-            </tr>
-            <tr>
-              <td><strong>Q2 FY2026</strong><br><small>Okt–Dez 2025</small></td>
-              <td>$81,3 Mrd.</td>
-              <td>+17%</td>
-              <td>$4,14</td>
-              <td><span class="beat">✓ Beat +$1B Rev.</span></td>
-              <td>+39% (cc +38%)</td>
-              <td class="miss">–7% (AH)</td>
-            </tr>
+            <tr><td><strong>Q4 FY25 (Apr-Jun'25)</strong></td><td>$76.4B</td><td class="beat">+18%</td><td>$3.65</td><td>$3.37</td><td>+39%</td><td>45.0%</td><td class="beat">BEAT</td></tr>
+            <tr><td><strong>Q1 FY26 (Jul-Sep'25)</strong></td><td>$77.7B</td><td class="beat">+18%</td><td>$3.72</td><td>$3.31</td><td>+40%</td><td>45.5%</td><td class="beat">BEAT</td></tr>
+            <tr><td><strong>Q2 FY26 (Oct-Dec'25)</strong></td><td>$80.4B</td><td class="neutral">+14%</td><td>$3.93</td><td>$3.74</td><td>+39%</td><td>45.8%</td><td class="beat">BEAT*</td></tr>
+            <tr><td><strong>Q3 FY26 (Jan-Mar'26)</strong></td><td>$82.9B</td><td class="beat">+18%</td><td>$4.27</td><td>$4.06</td><td>+39%</td><td>46.3%</td><td class="beat">BEAT</td></tr>
           </tbody>
         </table>
       </div>
+      <p style="font-size:12px; color:var(--text-muted);">* Q2 FY26 Beat, aber Stock -10% nach Bell (Capex-Schock). Azure reacceleration Q3 FY26 von +39% (Q2) auf +40% nominal (39% CC) – nach 2 Quartalen Deceleration. Note: Azure-CC bleibt stabil ~39% – nominaler Boost durch FX.</p>
 
-      <p>Die Beat-Ratio von <strong>4/4 Quartalen</strong> ist ein starkes Signal für operative Verlässlichkeit. Besonders bemerkenswert: trotz rekordhoher Capex-Ausgaben ($37,5 Mrd. in Q2 FY2026, +66 % YoY) übertrifft Microsoft konsistent die Erwartungen. Die negative Kursreaktion nach Q2 FY2026 (-7 % nachbörslich) reflektierte nicht das operative Ergebnis, sondern die Sorge der Investoren um den schwindenden Free Cashflow und die leichte Margenguidance für Q3.</p>
-      <p>CEO Satya Nadella: <em>"We are only at the beginning phases of AI diffusion and already Microsoft has built an AI business that is larger than some of our biggest franchises."</em> CFO Amy Hood wies auf persistente Kapazitätsengpässe hin – Nachfrage übersteigt weiterhin Angebot. Der nächste Quartalsbericht (<strong>Q3 FY2026</strong>) wird voraussichtlich am <strong>29. April 2026</strong> veröffentlicht.</p>
+      <h3>Q3 FY26 Highlights & Management-Statements</h3>
+      <p>Nadella: "<em>AI business surpassed $37 billion annual revenue run rate, up 123% year-over-year</em>" – beispiellose Skalierungsrate. Copilot-Seats >20M (+33% QoQ). Maia 200 Accelerator live mit +30% Tokens/Dollar Performance. Hood: "<em>Capacity constraints loosening</em>" – ein wichtiges Signal für Q4 FY26-Reacceleration. RPO $627 Mrd. (+99% YoY) = Multi-Jahres-Visibility. Q4 Guidance: Azure 39–40% CC, MSFT Cloud +29%, Capex >$40 Mrd. (allein im Quartal), <strong>FY2026 Capex $190 Mrd.</strong> (von $175 Mrd. erhöht, davon $25 Mrd. wegen höherer Memory-Kosten).</p>
 
-      <div class="source">Quellen: Microsoft FY26 Q1 Press Release (29.10.2025); Microsoft FY26 Q2 Press Release (28.01.2026); CNBC (28.01.2026); Futurum Research (31.10.2025 &amp; 29.01.2026)</div>
+      <div class="source">Quellen: MSFT 10-Q Filings FY25/FY26 (sec.gov); Q3 FY26 Earnings Call Transcript (29.04.2026); CNBC (29.04.2026); SEC Form 8-K (29.04.2026).</div>
     </div>
   </div>
 
-
-  <!-- ═══ S4: WACHSTUM ══════════════════════════════════════════════════ -->
+  <!-- S4 -->
   <div class="section" id="s4">
     <div class="section-header">
       <div class="section-number">4</div>
@@ -371,517 +264,360 @@
       <div class="section-score">Score: 8/10</div>
     </div>
     <div class="section-body">
-      <h3>Umsatzentwicklung (FY, per 30. Juni)</h3>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Geschäftsjahr</th><th>Umsatz</th><th>YoY</th><th>Operating Income</th><th>Op. Marge</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>FY2021</td><td>$168,1 Mrd.</td><td>+17,5%</td><td>~$70 Mrd.</td><td>~42%</td></tr>
-            <tr><td>FY2022</td><td>$198,3 Mrd.</td><td>+18,0%</td><td>$83,4 Mrd.</td><td>42,1%</td></tr>
-            <tr><td>FY2023</td><td>$211,9 Mrd.</td><td>+6,9%</td><td>$88,5 Mrd.</td><td>41,8%</td></tr>
-            <tr><td>FY2024</td><td>$245,1 Mrd.</td><td>+15,7%</td><td>$109,4 Mrd.</td><td>44,6%</td></tr>
-            <tr><td>FY2025</td><td>$281,7 Mrd.</td><td>+14,9%</td><td>$128,5 Mrd.</td><td>45,6%</td></tr>
-            <tr><td><strong>TTM (Dez 25)</strong></td><td><strong>$305,5 Mrd.</strong></td><td><strong>+16,7%</strong></td><td>~$142 Mrd.</td><td>~46,5%</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p>Das Wachstum ist strukturell getragen und nicht durch M&amp;A oder Accounting inflationiert. Ausnahme: FY2023 (+6,9 %) reflektiert den Post-COVID-Normalisierungseffekt und Aktivision-Blizzard-Integrationskosten ($75 Mrd. Akquisition). Seit FY2024 hat sich das Wachstum auf einem nachhaltigen 15–18 %-Niveau re-etabliert.</p>
+      <h3>Stabiles +18% Wachstum bei extremer Profitabilität</h3>
+      <p>FY2025 Konzernumsatz: $300B+ (geschätzt); Q3 FY26 zeigt +18% Wachstum – stabiler als AMZN aber langsamer als GOOGL. Reifegrad: <strong>"Growth-at-Massive-Scale mit AI-Boost"</strong>. Was MSFT von Peers unterscheidet: <strong>AI-Run-Rate +123% YoY</strong> ist die höchste in Big-Tech und wächst von einer beachtlichen Basis ($37B).</p>
 
-      <h3>Segmentsplit Q2 FY2026</h3>
+      <h3>Segment-Wachstum (Q3 FY26 YoY)</h3>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr><th>Segment</th><th>Q2 FY26 Umsatz</th><th>YoY</th><th>Wachstumstreiber</th></tr>
-          </thead>
+          <thead><tr><th>Segment</th><th>Revenue Q3 FY26</th><th>YoY</th><th>Op-Marge (gesch.)</th><th>Treiber</th></tr></thead>
           <tbody>
-            <tr><td><strong>Productivity &amp; Business Processes</strong></td><td>$34,1 Mrd.</td><td class="beat">+16%</td><td>M365 Copilot, E5-Upgrades, LinkedIn +11%</td></tr>
-            <tr><td><strong>Intelligent Cloud</strong></td><td>$32,9 Mrd.</td><td class="beat">+29%</td><td>Azure +39%, AI Services +~16 pp</td></tr>
-            <tr><td><strong>More Personal Computing</strong></td><td>$14,3 Mrd.</td><td class="miss">–3%</td><td>Schwache Gaming-Ergebnisse (–9,5%)</td></tr>
+            <tr><td>Productivity & Business Processes</td><td>$35.0B</td><td class="neutral">+13%</td><td>~47%</td><td>M365 Copilot 20M Seats, LinkedIn, Dynamics</td></tr>
+            <tr><td><strong>Intelligent Cloud</strong></td><td><strong>$34.7B</strong></td><td class="beat"><strong>+30%</strong></td><td><strong>~44%</strong></td><td><strong>Azure +40%, GitHub, Nuance</strong></td></tr>
+            <tr><td>More Personal Computing</td><td>$13.2B</td><td class="miss">+1%</td><td>~30%</td><td>Windows OEM stabil, Xbox -30%, Search/Ads</td></tr>
+            <tr><td><em>Microsoft Cloud (segmentübergreifend)</em></td><td>$54.5B</td><td class="beat">+29%</td><td>~46%</td><td>Azure + M365 Comm. + Dynamics + LinkedIn</td></tr>
+            <tr><td><em>AI Business Run-Rate</em></td><td>$37B ARR</td><td class="beat">+123%</td><td>—</td><td>Azure OpenAI, Copilot, Foundry</td></tr>
           </tbody>
         </table>
       </div>
 
       <h3>Geografische Verteilung</h3>
       <div class="geo-grid">
-        <div class="geo-card">
-          <div class="geo-region">USA</div>
-          <div class="geo-pct">~52%</div>
-          <div class="geo-note">Kernmarkt, stable</div>
-        </div>
-        <div class="geo-card">
-          <div class="geo-region">EMEA</div>
-          <div class="geo-pct">~27%</div>
-          <div class="geo-note">EU AI Act Compliance</div>
-        </div>
-        <div class="geo-card">
-          <div class="geo-region">APAC</div>
-          <div class="geo-pct">~13%</div>
-          <div class="geo-note">Wachstumspotenzial</div>
-        </div>
-        <div class="geo-card">
-          <div class="geo-region">LatAm &amp; Sonstige</div>
-          <div class="geo-pct">~8%</div>
-          <div class="geo-note">Emerging Markets</div>
-        </div>
+        <div class="geo-card"><div class="geo-region">USA</div><div class="geo-pct">~51%</div><div class="geo-note">Größter Markt</div></div>
+        <div class="geo-card"><div class="geo-region">EMEA</div><div class="geo-pct">~25%</div><div class="geo-note">DE/UK dominant</div></div>
+        <div class="geo-card"><div class="geo-region">APAC</div><div class="geo-pct">~18%</div><div class="geo-note">Japan, China, Indien wachsend</div></div>
+        <div class="geo-card"><div class="geo-region">LatAm/Andere</div><div class="geo-pct">~6%</div><div class="geo-note">Emerging</div></div>
       </div>
-      <p>Geografisch generiert Microsoft knapp 50 % des Umsatzes außerhalb der USA. Das Unternehmen betreibt Rechenzentren auf allen sechs Kontinenten und hat in Q2 FY2026 neue Kapazitätsankündigungen in sieben Ländern gemacht. Dies reduziert die Abhängigkeit vom US-Markt und bietet natürliche Absicherung gegen regionale Wirtschaftszyklen. <strong>Reifegrad:</strong> Growth-at-Scale – Azure/AI im Hyper-Growth, Kerngeschäft stabil expansiv.</p>
 
-      <div class="source">Quellen: Yahoo Finance Income Statement (27.02.2026); WallStreetZen (27.02.2026); Microsoft Investor Relations</div>
+      <h3>Profitabilität: Industrie-Goldstandard</h3>
+      <p>Q3 FY26 Op-Marge 46.3% – das ist die höchste Profitabilität in Mega-Cap-Tech und übersteigt sogar Apple. Op-Income $38.4 Mrd. (+20% YoY). Net Income $31.8 Mrd. (+23% GAAP). EPS $4.27 (+23%). Trotz $190B Capex bleibt die Operating-Marge auf Rekordniveau – das ist das beste Argument für die Bewertung.</p>
+
+      <div class="source">Quellen: MSFT Q3 FY26 8-K (29.04.2026); FY26 Q3 Press Release (microsoft.com); eigene Berechnungen.</div>
     </div>
   </div>
 
-
-  <!-- ═══ S5: BEWERTUNG ═════════════════════════════════════════════════ -->
+  <!-- S5 -->
   <div class="section" id="s5">
     <div class="section-header">
       <div class="section-number">5</div>
-      <div class="section-title">Bewertung &amp; Multiples</div>
-      <div class="section-score">Score: 7/10</div>
+      <div class="section-title">Bewertung & Multiples</div>
+      <div class="section-score">Score: 8/10</div>
     </div>
     <div class="section-body">
+      <h3>Selten so günstig: P/E 24x ist 22% unter 10J-Schnitt</h3>
+      <p>MSFT ist von Oktober 2025 ATH ($555) auf $404 zurückgefallen (-27%), während Earnings weiter wuchsen. Resultat: <strong>P/E TTM 24.0x</strong> ist <strong>22% unter dem 10-Jahres-Schnitt (30.95x)</strong> und 27% unter dem 3-Jahres-Schnitt (33.05x). Forward P/E ~22–25x – das ist niedriger als zu jedem Zeitpunkt der pre-AI-Rally. <strong>MSFT ist nicht teuer</strong> für seine Profitabilität und sein AI-Setup.</p>
+
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr><th>Metrik</th><th>Aktuell (27.02.26)</th><th>5-Jahres-Ø</th><th>Einordnung</th></tr>
-          </thead>
+          <thead><tr><th>Metrik</th><th>MSFT (heute)</th><th>5J-Ø</th><th>Einordnung</th></tr></thead>
           <tbody>
-            <tr><td><strong>P/E (TTM)</strong></td><td>24,5x</td><td>~33x</td><td><span class="beat">✓ 26% unter hist. Schnitt</span></td></tr>
-            <tr><td><strong>Forward P/E (FY26)</strong></td><td>22,4x</td><td>~30x</td><td><span class="beat">✓ Attraktiv für Wachstumsrate</span></td></tr>
-            <tr><td><strong>PEG-Ratio</strong></td><td>1,57</td><td>~1,5–2,0</td><td><span class="neutral">➡ Fair</span></td></tr>
-            <tr><td><strong>EV/EBITDA (TTM)</strong></td><td>16,8x</td><td>~22x</td><td><span class="beat">✓ Günstig</span></td></tr>
-            <tr><td><strong>P/FCF</strong></td><td>38,7x</td><td>~42x</td><td><span class="neutral">➡ Leicht unter Ø (Capex-Druck)</span></td></tr>
-            <tr><td><strong>P/S (TTM)</strong></td><td>~9,8x</td><td>~12x</td><td><span class="beat">✓ Unter hist. Schnitt</span></td></tr>
-            <tr><td><strong>Dividendenrendite</strong></td><td>~0,82%</td><td>~0,85%</td><td><span class="neutral">➡ Stabil</span></td></tr>
+            <tr><td>P/E TTM</td><td>24.0x</td><td>31.9x</td><td class="beat">25% unter Schnitt</td></tr>
+            <tr><td>Forward P/E (FY27)</td><td>22–25x</td><td>—</td><td class="beat">Historisch günstig</td></tr>
+            <tr><td>P/Sales TTM</td><td>~9.5x</td><td>~11x</td><td class="beat">Unter Schnitt</td></tr>
+            <tr><td>EV/EBITDA (Fwd)</td><td>~17x</td><td>~21x</td><td class="beat">Attraktiv</td></tr>
+            <tr><td>PEG (Fwd)</td><td>~1.2x</td><td>—</td><td class="beat">Wachstumsadjustiert günstig</td></tr>
+            <tr><td>FCF Yield TTM</td><td>~2.5%</td><td>~3.5%</td><td class="neutral">Unter Schnitt (Capex-Druck)</td></tr>
+            <tr><td>Dividende</td><td>0.97%</td><td>—</td><td class="neutral">15J Dividendenwachstum</td></tr>
           </tbody>
         </table>
       </div>
 
-      <p>Die aktuelle Bewertung von Microsoft ist historisch günstig: Das P/E-Ratio (TTM) von ~24,5x liegt rund 26 % unter dem 5-Jahres-Durchschnitt (~33x) und 22 % unter dem 10-Jahres-Schnitt (~31x). In absoluten Zahlen ist ein P/E von 24x für ein Unternehmen, das mit 17–18 % Umsatz wächst, eine bemerkenswert günstige Ausgangsbasis. Das Forward P/E von ~22,4x für ein Unternehmen mit 24 % EPS-Wachstum (FY2026 Konsens: $16,97/Aktie) ist ebenfalls attraktiv.</p>
-      <p>Der PEG von 1,57 signalisiert ein faires Chance-Risiko-Verhältnis. Analysten-Konsens: 57 von 58 Analysten tragen ein Buy- oder Strong-Buy-Rating mit einem Kursziel von durchschnittlich ~$596 (+49 % Aufwärtspotenzial). Goldman Sachs initiierte im Januar 2026 mit einem Buy-Rating und $655 Kursziel.</p>
+      <h3>Peer-Vergleich (Forward P/E)</h3>
+      <p>MSFT Fwd P/E ~23x vs. GOOGL 22x, AMZN 26x, META 25x, AAPL 30x. <strong>MSFT ist im historischen Diskount und Peer-mäßig günstig</strong>. Bei Op-Marge 46% (vs. AMZN 13%, GOOGL 36%) ist das Profitabilitäts-Adjustment massiv im Vorteil von MSFT.</p>
 
-      <div class="source">Quellen: Finviz.com (27.02.2026); fullratio.com (27.02.2026); stockanalysis.com/statistics; gurufocus.com; 247wallst.com (24.02.2026)</div>
+      <h3>Hidden Value: OpenAI-Stake $228B</h3>
+      <p>Microsoft hält 26.79% an OpenAI, das im April 2026 mit $852 Mrd. Post-Money-Valuation bewertet wurde = <strong>$228 Mrd. Stake-Value (=8% der MSFT MCap)</strong>. Falls OpenAI 2026/2027 einen IPO macht und Microsoft Tranchen verkauft, wäre das ein massiver Cashflow-Boost ohne Verwässerung. Wedbush (Dan Ives): Kursziel $625, Goldman: $655, UBS: $650 – Konsens-Zielkurs ~$561 (MarketBeat). Selbst konservativ impliziert das ~40% Upside.</p>
+
+      <div class="source">Quellen: fullratio.com MSFT P/E (13.05.2026); macrotrends.net; Investing.com OpenAI-Valuation-Analyse (12.05.2026); MarketBeat Forecast (14.05.2026); TECHi MSFT (04/2026).</div>
     </div>
   </div>
 
-
-  <!-- ═══ S6: CASHFLOW ══════════════════════════════════════════════════ -->
+  <!-- S6 -->
   <div class="section" id="s6">
     <div class="section-header">
       <div class="section-number">6</div>
-      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
-      <div class="section-score">Score: 6/10</div>
+      <div class="section-title">Cashflow, Margen & Kapitalqualität</div>
+      <div class="section-score">Score: 8/10</div>
     </div>
     <div class="section-body">
+      <h3>Höchste Profitabilität bei massivem Capex</h3>
+      <p>Microsoft generiert mit Abstand die <strong>höchsten absoluten Cashflows in Big-Tech</strong>: Operating Cashflow TTM ~$140B+. FCF TTM Q3 FY26 ~$75B (Schätzung nach $190B FY26-Capex-Guide). Allerdings: Capex eskaliert auf $190B FY2026 ($15B höher als März-Guide, davon $25B durch höhere Memory-Kosten). Q4 FY26 Capex >$40B (allein im Quartal).</p>
+
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr><th>Metrik</th><th>FY2023</th><th>FY2024</th><th>FY2025</th><th>TTM (Dez 25)</th></tr>
-          </thead>
+          <thead><tr><th>Metrik</th><th>FY2024</th><th>FY2025</th><th>FY26e</th><th>Trend</th></tr></thead>
           <tbody>
-            <tr><td><strong>Operating Cash Flow</strong></td><td>$87,6 Mrd.</td><td>$118,5 Mrd.</td><td>$136,2 Mrd.</td><td>~$160 Mrd.</td></tr>
-            <tr><td><strong>Capex</strong></td><td>$28,1 Mrd.</td><td>$44,5 Mrd.</td><td>$64,6 Mrd.</td><td>~$83 Mrd.</td></tr>
-            <tr><td><strong>Free Cash Flow</strong></td><td>$59,5 Mrd.</td><td>$74,1 Mrd.</td><td>$71,6 Mrd.</td><td>~$77 Mrd.*</td></tr>
-            <tr><td><strong>FCF-Marge</strong></td><td>~28%</td><td>~30%</td><td>~25%</td><td>~25%</td></tr>
-            <tr><td><strong>Gross Margin</strong></td><td>68,9%</td><td>69,8%</td><td>68,9%</td><td>~68,6%</td></tr>
-            <tr><td><strong>Operating Margin</strong></td><td>41,8%</td><td>44,6%</td><td>45,6%</td><td>~46,5%</td></tr>
-            <tr><td><strong>Net Margin</strong></td><td>~34,1%</td><td>~35,0%</td><td>~36,2%</td><td>~39,0%</td></tr>
-            <tr><td><strong>ROE / ROIC</strong></td><td>–</td><td>–</td><td>–</td><td>34,4% / 28,8%</td></tr>
-            <tr><td><strong>Debt/Equity</strong></td><td>–</td><td>–</td><td>–</td><td>0,32</td></tr>
+            <tr><td>Operating Cashflow</td><td>$118.5B</td><td>$135B+</td><td>~$165B</td><td class="beat">↑↑</td></tr>
+            <tr><td>Capex</td><td>$56B</td><td>$95B+</td><td>$190B</td><td class="miss">↑↑↑</td></tr>
+            <tr><td>FCF</td><td>$74B</td><td>$60B</td><td>~$30B</td><td class="miss">↓</td></tr>
+            <tr><td>Operating Margin</td><td>44%</td><td>45%</td><td>46%</td><td class="beat">↑</td></tr>
+            <tr><td>Net Income</td><td>$88B</td><td>$110B</td><td>~$130B</td><td class="beat">↑↑</td></tr>
+            <tr><td>ROE</td><td>36%</td><td>38%</td><td>~40%</td><td class="beat">↑</td></tr>
+            <tr><td>ROA</td><td>20%</td><td>21%</td><td>~22%</td><td class="beat">↑</td></tr>
           </tbody>
         </table>
       </div>
-      <p style="font-size:12px;color:var(--text-muted);">*Annualisiert; kurzfristig durch Capex-Peak komprimiert</p>
 
-      <p>Der Operating Cash Flow stieg auf ~$160 Mrd. TTM (+17 % YoY), wurde aber durch massiven Capex-Anstieg (~$83 Mrd. TTM, +29 % YoY) überkompensiert. Der FCF in Q2 FY2026 fiel im Jahresvergleich um 9,3 % auf $5,88 Mrd. – ein Warnsignal auf Quartalsbasis. Langfristig wichtig: ~2/3 der Capex-Ausgaben fließen in kurzlebige Assets (GPUs/CPUs, 2–3 Jahre Abschreibung), sodass die FCF-Kompression strukturell begrenzt ist.</p>
-      <p>Microsoft zahlt seit Jahren steigende Dividenden ($0,83/Aktie/Quartal, ~0,82 % Rendite) und kaufte in Q2 FY2026 insgesamt $12,7 Mrd. eigene Aktien zurück (+32 % YoY). Die Verschuldung ist mit Debt/Equity 0,32 sehr moderat. ROE (34,4 %) und ROIC (28,8 %) signalisieren exzellente Kapitalallokationseffizienz.</p>
+      <h3>Kapitalrückflüsse</h3>
+      <p>Q3 FY26 zurückgegeben: <strong>$10.2 Mrd. an Aktionäre</strong> via Dividenden + Buybacks. 15 Jahre Folge-Dividendenerhöhungen, aktuelle Yield 0.97%. FY2025 Total-Return-to-Shareholders: ~$45 Mrd. Bilanz: Cash & Marketable Securities ~$80 Mrd., Long-Term-Debt ~$45 Mrd. – netto Cash-positive. Debt/Equity ~0.16, extrem konservativ. Plus: $228 Mrd. OpenAI-Stake als Hidden Asset.</p>
 
-      <div class="source">Quellen: Yahoo Finance Cash Flow (27.02.2026); macrotrends.net; stockanalysis.com/statistics; 247wallst.com (24.02.2026)</div>
+      <div class="source">Quellen: MSFT Q3 FY26 Earnings Release; FY25 10-K Filing; SEC Filings; eigene Berechnungen.</div>
     </div>
   </div>
 
-
-  <!-- ═══ S7: PEERS ══════════════════════════════════════════════════════ -->
+  <!-- S7 -->
   <div class="section" id="s7">
     <div class="section-header">
       <div class="section-number">7</div>
       <div class="section-title">Peer-Vergleich</div>
-      <div class="section-score">Score: 7/10</div>
+      <div class="section-score">Score: 8/10</div>
     </div>
     <div class="section-body">
+      <h3>Mega-Cap-Hyperscaler / Enterprise SaaS</h3>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr><th>Kennzahl</th><th>Microsoft (MSFT)</th><th>Alphabet (GOOGL)</th><th>Amazon (AMZN)</th></tr>
-          </thead>
+          <thead><tr><th>Unternehmen</th><th>MCap</th><th>Revenue Growth (TTM)</th><th>Op-Marge</th><th>Fwd P/E</th><th>Cloud-Wachstum</th></tr></thead>
           <tbody>
-            <tr><td><strong>Market Cap</strong></td><td>~$2,99 Bio.</td><td>~$2,1 Bio.</td><td>~$2,4 Bio.</td></tr>
-            <tr><td><strong>Umsatz (TTM)</strong></td><td>$305,5 Mrd.</td><td>~$400 Mrd.</td><td>~$620 Mrd.</td></tr>
-            <tr><td><strong>Rev.-Wachstum YoY</strong></td><td class="beat">~17%</td><td class="beat">~18%</td><td class="neutral">~11%</td></tr>
-            <tr><td><strong>Op. Marge</strong></td><td class="beat">~46,5%</td><td class="neutral">~32%</td><td class="miss">~10% (konsolidiert)</td></tr>
-            <tr><td><strong>Cloud-Wachstum (letztes Q)</strong></td><td>Azure +39%</td><td class="beat">Google Cloud +48%</td><td class="neutral">AWS +24%</td></tr>
-            <tr><td><strong>Cloud-Marktanteil</strong></td><td>21%</td><td>14%</td><td class="beat">28%</td></tr>
-            <tr><td><strong>P/E (TTM)</strong></td><td>24,5x</td><td>~24–27x</td><td>~40x</td></tr>
-            <tr><td><strong>FCF-Marge</strong></td><td>~25%</td><td class="beat">~37%</td><td class="miss">~4%</td></tr>
-            <tr><td><strong>Capex 2026E</strong></td><td>~$80 Mrd.</td><td>$175–185 Mrd.</td><td>~$200 Mrd.</td></tr>
-            <tr><td><strong>Regulierungsrisiko</strong></td><td><span class="badge badge-red">Hoch (FTC aktiv)</span></td><td><span class="badge badge-red">Hoch (antitrust)</span></td><td><span class="badge badge-yellow">Mittel</span></td></tr>
+            <tr><td><strong>MSFT</strong></td><td>$3.0T</td><td class="beat">+18%</td><td class="beat">46%</td><td>~23x</td><td>Azure +40%</td></tr>
+            <tr><td>GOOGL</td><td>$4.86T</td><td class="beat">+18%</td><td>36%</td><td>~22x</td><td>GCP +63%</td></tr>
+            <tr><td>AMZN</td><td>$2.85T</td><td class="neutral">+12%</td><td>13%</td><td>~26x</td><td>AWS +28%</td></tr>
+            <tr><td>ORCL</td><td>~$520B</td><td class="neutral">+9%</td><td>30%</td><td>~25x</td><td>OCI +50%+</td></tr>
+            <tr><td>CRM (Salesforce)</td><td>~$280B</td><td class="miss">+8%</td><td>20%</td><td>~24x</td><td>—</td></tr>
           </tbody>
         </table>
       </div>
 
-      <p>Microsoft schlägt Alphabet beim Operating Leverage (46,5 % vs. 32 %) und bei der Enterprise-Einbettung (Switching Costs, M365 Suite). Alphabet gewinnt beim Google Cloud-Wachstum (Q4 2025: +48 %, höchste Rate der Big Three) und beim FCF (~37 % Marge vs. ~25 %). Amazon (AWS) ist der größte Cloud-Anbieter (28 % Marktanteil), wächst aber langsamer (24 %). Microsofts komparativer Vorteil liegt in der vollständigen KI-Stack-Integration: Von der Infrastruktur (Azure) über Modelle (OpenAI-Partnerschaft) bis zur Endnutzeranwendung (Copilot in M365, GitHub).</p>
-      <p>Alphabet hat im Q4 2025 mit Google Cloud +48 % die Messlatte erhöht und investiert $175–185 Mrd. Capex in 2026. Amazon investiert ~$200 Mrd. Capex. Microsoft liegt bei ~$80 Mrd. – deutlich weniger als die Konkurrenz, was operative Effizienz oder temporäre Kapazitätslücken signalisiert. Management betont: Nachfrage übersteigt weiterhin Angebot.</p>
+      <h3>Qualitative Unterschiede</h3>
+      <p><strong>MSFT vs GOOGL:</strong> GOOGL Cloud wächst schneller (+63% vs +40%), aber MSFT hat die deutlich höhere Op-Marge (46% vs 36%). GOOGL Fwd P/E 22x vs. MSFT 23x – fast identisch, beide sind im günstigen Mega-Cap-AI-Bereich. <strong>MSFT ist die "Profitabilitäts-Wahl", GOOGL die "Wachstums-Wahl"</strong>.</p>
+      <p><strong>MSFT vs AMZN:</strong> Azure +40% schlägt AWS +28%. MSFT Op-Marge 46% schlägt AMZN 13%. MSFT hat höhere Qualität, AMZN hat breitere Optionalität (Retail + AWS + Ads). MSFT bleibt der "Quality-Compounder", AMZN ist der "Diversifizierte-Wachstums-Play".</p>
+      <p><strong>MSFT vs ORCL:</strong> Oracle Cloud (OCI) wächst schneller (~50%+), aber von winziger Basis. ORCL fehlt das Productivity-Layer (kein Office, kein LinkedIn) und ist daher strategisch enger fokussiert. MSFT bleibt strukturell überlegen.</p>
 
-      <div class="source">Quellen: Zacks (sg.finance.yahoo.com, 27.02.2026); Motley Fool (12.02.2026); S&amp;P Global Market Intelligence (25.02.2026); Synergy Research Group</div>
+      <div class="source">Quellen: Yahoo Finance Multi-Ticker (13.05.2026); macrotrends.net; Synergy Research Cloud Q1 2026.</div>
     </div>
   </div>
 
-
-  <!-- ═══ S8: NEWS & EVENTS ══════════════════════════════════════════════ -->
+  <!-- S8 -->
   <div class="section" id="s8">
     <div class="section-header">
       <div class="section-number">8</div>
-      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-title">Aktuelle News & Events (letzte 3 Monate)</div>
       <div class="section-note">Quellen ≤ 3 Monate</div>
     </div>
     <div class="section-body">
 
-      <h3>Ebene 1: Unternehmen (Company-spezifische Events)</h3>
-
-      <div class="event-item">
-        <div class="event-dot dot-yellow"></div>
-        <div>
-          <div class="event-label">28.01.2026 – Q2 FY2026 Earnings <span class="badge badge-yellow">Gemischt</span></div>
-          <div class="event-text">Revenue $81,3 Mrd. (+17%), EPS $4,14 – beides Beat; Aktie -7% AH wegen Capex/Margin-Guidance. Azure +39%, M365 Copilot 15 Mio. Seats. Quelle: CNBC, 28.01.2026</div>
-        </div>
-      </div>
+      <h3>Ebene 1: Unternehmen</h3>
       <div class="event-item">
         <div class="event-dot dot-green"></div>
         <div>
-          <div class="event-label">Jan 2026 – Copilot Adoption: 15 Mio. bezahlte Seats (+160% YoY) <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">DAU +10x YoY, Copilot App DAU +3x YoY. 90% Fortune-500 nutzen M365 Copilot. Quelle: Futurum Research, 29.01.2026</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">Jan 2026 – OpenAI / Anthropic Deals: $625 Mrd. Commercial RPO <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">OpenAI macht ~45% des RPO aus. Anthropic kauft $30 Mrd. Azure-Kapazität (1 GW dediziert). Quelle: Microsoft IR, 28.01.2026</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-red"></div>
-        <div>
-          <div class="event-label">H1 FY2026 – Capex $72,4 Mrd. (+66% YoY), FCF Q2 –9,3% YoY <span class="badge badge-red">Negativ kurzfristig</span></div>
-          <div class="event-text">Auf Kurs zu ~$80–100 Mrd. Capex p.a. FCF-Kompression belastet Kurs. Quelle: Microsoft Press Release, 28.01.2026</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">Jan 2026 – Goldman Sachs Initiation: Buy, Kursziel $655 <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">+37% Upside-Potenzial zum Analysekurs. Katalysatoren: Azure-KI, Copilot Monetarisierung. Quelle: TheFly, 11.01.2026</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">Jan 2026 – Preiserhöhung kommerzielle Office-Abonnements <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">Zeigt Preissetzungsmacht. ARPU-Steigerung strukturell verankert. Quelle: Microsoft IR, Jan 2026</div>
-        </div>
-      </div>
-
-      <h3>Ebene 2: Branche (Sector-spezifische Events)</h3>
-
-      <div class="event-item">
-        <div class="event-dot dot-red"></div>
-        <div>
-          <div class="event-label">Feb 2026 – Google Cloud Q4 2025: +48% YoY <span class="badge badge-red">Negativ (Konkurrenz)</span></div>
-          <div class="event-text">Schnellstes Wachstum der Big Three. Gemini 3 als Treiber. Alphabet plant $175–185 Mrd. Capex 2026. Quelle: Motley Fool, 12.02.2026</div>
+          <div class="event-label">29.04.2026 – Q3 FY26 Blowout: Azure +40%, AI $37B ARR <span class="badge badge-green">Sehr Positiv</span></div>
+          <div class="event-text">Revenue $82.9B (+18% YoY), EPS $4.27 (vs. $4.06 Konsens), Azure +40% (Reacceleration nach 2 Deceleration-Quartalen), AI-Business +123% auf $37B ARR, Copilot-Seats >20M (+33% QoQ), RPO $627B (+99% YoY). Quelle: MSFT 8-K (29.04.2026), CNBC.</div>
         </div>
       </div>
       <div class="event-item">
         <div class="event-dot dot-yellow"></div>
         <div>
-          <div class="event-label">Feb 2026 – AWS Q4 2025: +24% (schnellstes Wachstum seit 13 Quartalen) <span class="badge badge-yellow">Neutral</span></div>
-          <div class="event-text">Amazon plant ~$200 Mrd. Capex 2026. AWS bleibt Marktführer (28%). Quelle: S&amp;P Global MI, 25.02.2026</div>
+          <div class="event-label">27.04.2026 – OpenAI-Agreement-Restructuring (Major Event) <span class="badge badge-yellow">Gemischt</span></div>
+          <div class="event-text">IP-Lizenz von exklusiv auf non-exclusive (bis 2032), keine MSFT-Revenue-Share an OpenAI mehr, OpenAI-Revenue-Share an MSFT mit $38B Cap (bis 2030), MSFT-Stake 26.79% (=$228B Wert). Markt-Reaktion: -5% trotz starker Earnings. Quelle: TradingKey (04/2026), FX Leaders (12.05.2026).</div>
         </div>
       </div>
       <div class="event-item">
         <div class="event-dot dot-red"></div>
         <div>
-          <div class="event-label">Jan 2026 – DeepSeek-Disruption: Effizienz-Modell aus China <span class="badge badge-red">Risiko</span></div>
-          <div class="event-text">Open-Source-Modell hinterfragt Notwendigkeit massiver Infrastruktur-Investments. Kursdruck auf alle AI-Infrastructure-Aktien. Quelle: Various, Jan 2026</div>
+          <div class="event-label">29.04.2026 – Capex 2026 erhöht auf $190B <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">FY2026 Capex von $175B auf $190B angehoben (davon $25B durch höhere Memory-Kosten). Q4 FY26 allein >$40B. Stock -5% nach Bell, danach Erholung. Konzern-FCF unter Druck. Quelle: Earnings Call Transcript (29.04.2026).</div>
         </div>
       </div>
       <div class="event-item">
         <div class="event-dot dot-green"></div>
         <div>
-          <div class="event-label">Okt 2025 – Windows 10 End-of-Life: AI-PC-Refresh-Zyklus startet <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">1+ Mrd. Windows 10 Geräte refresh-pflichtig. Windows 11 + NPU-PCs als Upsell-Chance. Quelle: Neowin, 29.01.2026</div>
+          <div class="event-label">Q1 2026 – Maia 200 AI-Accelerator live <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">MSFTs eigener AI-Chip Maia 200 in Iowa/Arizona-Datacenters deployed. +30% Tokens/Dollar vs. NVIDIA-Latest. Inference-Throughput für Copilot-Modelle +40% verbessert. Reduziert mittelfristig NVIDIA-Abhängigkeit. Quelle: Earnings Call Q3 FY26.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">14.05.2026 – Musk vs. Altman Trial: MSFT $100B+ OpenAI-Investment offengelegt <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Microsoft-Executive-Testimony enthüllte: MSFT hat >$100 Mrd. (nicht $13 Mrd.) im OpenAI-Partnership investiert – inkl. Compute-Verpflichtungen + Cash. Markt-Reaktion: neutral, da bereits eingepreist. Quelle: Sherwood News, TipRanks (14.05.2026).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">05/2026 – MSFT exploring Anthropic + Mistral Partnerships <span class="badge badge-yellow">Strategisch</span></div>
+          <div class="event-text">Reuters-Bericht: MSFT sucht aktiv nach Startup-Partnerschaften "life after OpenAI", inkl. Anthropic + Mistral. Multi-Model-Strategie wird beschleunigt. Quelle: Reuters via Robinhood News (14.05.2026).</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Q1 2026 – Azure verliert Cloud-Marktanteils-Race gegen GCP <span class="badge badge-yellow">Risiko</span></div>
+          <div class="event-text">Azure +40% gut, aber Google Cloud +63%. AWS +28%. Während alle wachsen, holt GCP schneller auf. MSFT-Marktanteil im Cloud ~25% (stabil), aber Wachstumsrate-Gap zu GCP belastet Narrative.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">02/2026 – OpenAI reduzierte Compute-Budget von $1.4T auf $600B <span class="badge badge-yellow">Risiko</span></div>
+          <div class="event-text">OpenAI cut zukünftige Compute-Verpflichtungen, was den Azure-Backlog teilweise in Frage stellte. Restructuring vom 27.04. teilweise Antwort darauf. Quelle: TradingKey (04/2026).</div>
         </div>
       </div>
 
       <h3>Ebene 3: Makro</h3>
-
       <div class="event-item">
         <div class="event-dot dot-red"></div>
         <div>
-          <div class="event-label">Feb 2026 – FTC-Antitrust-Untersuchung beschleunigt <span class="badge badge-red">Risiko</span></div>
-          <div class="event-text">Broad Probe zu AI, Cloud, Copilot, Teams, Bundling. Formale Klage in Trump-Ära unwahrscheinlich, aber nicht ausgeschlossen. Quelle: Bloomberg, 13.02.2026</div>
+          <div class="event-label">Q1 2026 – Memory/Chip-Kosten-Inflation eskaliert <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">$25B von MSFTs $190B-Capex-Erhöhung sind reine Memory-Kosten-Inflation. Belastet Hyperscaler-Margen branchenweit. Quelle: Q3 FY26 Earnings Call.</div>
         </div>
       </div>
       <div class="event-item">
-        <div class="event-dot dot-green"></div>
+        <div class="event-dot dot-yellow"></div>
         <div>
-          <div class="event-label">2025/26 – Trump-Administration: Pro-AI-Schutzpolitik <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">DOJ angewiesen, staatliche AI-Regulierung zu bekämpfen. Günstig für US-Hyperscaler. Quelle: Reuters, 2025</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-red"></div>
-        <div>
-          <div class="event-label">Feb 2026 – MSFT Aktie –18% in 4 Wochen (vs. S&amp;P 500 –1%) <span class="badge badge-red">Negativ kurzfristig</span></div>
-          <div class="event-text">Software-Sektor unter Druck. Technische Schwäche dominiert kurzfristiges Sentiment. Quelle: Zacks, 24.02.2026</div>
+          <div class="event-label">Q1 2026 – Japan/Italy/EU Antitrust-Druck <span class="badge badge-yellow">Risiko</span></div>
+          <div class="event-text">Japan untersucht Azure-Cloud-Praktiken; Italy VAT-Klage gegen LinkedIn; EU prüft potenzielle Anti-Wettbewerbs-Maßnahmen gegen Amazon-OpenAI-Deal. Quelle: TECHi MSFT (04/2026).</div>
         </div>
       </div>
 
-      <div class="source">Quellen: CNBC (28.01.2026); Futurum Research (29.01.2026); Bloomberg (13.02.2026); Zacks (24.02.2026); Neowin (29.01.2026); Computerworld (14.01.2026)</div>
+      <div class="source">Quellen: MSFT Q3 FY26 Earnings (29.04.2026); SEC 8-K (29.04.2026); TradingKey OpenAI-Restructuring (04/2026); FX Leaders (12.05.2026); Investing.com (12.05.2026); Reuters via Robinhood (14.05.2026); TECHi (04/2026).</div>
     </div>
   </div>
 
-
-  <!-- ═══ S9: TECHNISCHE ANALYSE ════════════════════════════════════════ -->
+  <!-- S9 -->
   <div class="section" id="s9">
     <div class="section-header">
       <div class="section-number">9</div>
       <div class="section-title">Technische Analyse</div>
-      <div class="section-score">Score: 3/10</div>
+      <div class="section-score">Score: 4/10</div>
     </div>
     <div class="section-body">
+      <h3>Korrektur-Modus nach ATH-Crash</h3>
+      <p>MSFT hat von Oktober 2025 ATH bei $555 auf aktuell $404 korrigiert (<strong>-27%</strong>), und zeigt seit Q3 FY26 Earnings (-5% intraday) <strong>technische Schwäche</strong>. Der Kurs befindet sich knapp über $400 – ein wichtiges psychologisches und technisches Level. Mehrere Moving Averages clustern um $420–430, was als Resistance fungiert. Analysten (FX Leaders): "Buyers failed to break above MAs on the daily chart and we're seeing a reversal today in after hours with MSFT down to $413, which suggests that MSFT will be heading under $400 again."</p>
 
-      <div class="kpi-grid-mini">
-        <div class="kpi-card">
-          <div class="kpi-label">Kurs</div>
-          <div class="kpi-value red">$400</div>
-          <div class="kpi-sub">27.02.2026</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">SMA 20</div>
-          <div class="kpi-value red">~$405</div>
-          <div class="kpi-sub">🔴 darunter</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">SMA 50</div>
-          <div class="kpi-value red">~$450</div>
-          <div class="kpi-sub">🔴 deutlich darunter</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">SMA 200</div>
-          <div class="kpi-value red">~$487</div>
-          <div class="kpi-sub">🔴 deutlich darunter</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">RSI (14)</div>
-          <div class="kpi-value green">~27–32</div>
-          <div class="kpi-sub">⚠️ überverkauft</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">52W High</div>
-          <div class="kpi-value">$468</div>
-          <div class="kpi-sub">–15% darunter</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">MACD</div>
-          <div class="kpi-value red">~–15,4</div>
-          <div class="kpi-sub">🔴 Bearish</div>
-        </div>
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value">$404.24</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA20</div><div class="kpi-value">~$410</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA50</div><div class="kpi-value">~$425</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA200</div><div class="kpi-value">~$460</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI(14)</div><div class="kpi-value neutral">~45</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value red">$555</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value red">- negativ</div></div>
       </div>
 
-      <h3>Trendeinordnung</h3>
-      <p>Die technische Situation ist klar bärisch: Microsoft befindet sich in einem etablierten Abwärtstrend und notiert deutlich unterhalb aller relevanten gleitenden Durchschnitte (SMA 20, 50 und 200). Das "Death Cross" (SMA 50 unter SMA 200) hat sich formiert und signalisiert anhaltenden Verkaufsdruck. Der RSI liegt mit ~27–32 im überverkauften Bereich – was technische Erholungsrallyes begünstigen kann, aber allein kein Kaufsignal darstellt.</p>
+      <h3>Levels & Setup</h3>
+      <p>Wichtige Support-Levels: <strong>$400 (psychologisch), $385 (lokaler Tief), $356 (52W-Low)</strong>. Resistance: $420–430 (MA-Cluster), $460 (SMA200), $480 (Vorjahres-Konsolidierungs-Top). Volumen-Profil schwach. Technisch <strong>kurzfristig bearish</strong>, mittelfristig bei $400-Hold könnte Mean-Reversion zu $460+ starten. Aber: bei Bruch unter $400 droht weiterer Rückgang auf $360–380.</p>
+      <p>Note: MSFT befindet sich technisch in einer großen Konsolidierungsphase nach +40% YoY-Rally (Mitte-2024 bis Okt-2025). Korrekturen von -25–30% sind in Mega-Caps nicht ungewöhnlich nach starken Rallies.</p>
 
-      <h3>Support / Resistance &amp; Outlook</h3>
-      <p>Die kritische Unterstützungszone liegt bei ~$380–382 (30-Tages-Tief). Ein nachhaltiger Bruch würde den Weg in Richtung $350–360 öffnen. Auf der Oberseite limitiert zunächst der SMA 20 (~$405) weiteren Aufwärtsdrang. Für eine technische Trendwende wäre ein nachhaltiger Schlusskurs über dem SMA 50 (~$450) notwendig. Die Options-Daten (72 % Call-Volume) zeigen bullisches institutionelles Positioning – ein Contrarian-Signal gegen die rein technische Bärenperspektive. Für langfristige Investoren entspricht die aktuelle Preiszone (~$380–420) dem Jahresanfang 2024 – historisch attraktive Einstiegszone bei einer Qualitäts-Franchise.</p>
-
-      <div class="source">Quellen: Altindex.com (05.02.2026); Investing.com (27.02.2026); historicaloptiondata.com (26.02.2026); trendlyne.com (24.02.2026)</div>
+      <div class="source">Quellen: FX Leaders (12.05.2026); Robinhood Live Quote (14.05.2026); Yahoo Finance (14.05.2026).</div>
     </div>
   </div>
 
-
-  <!-- ═══ S10: RISIKEN & CHANCEN ════════════════════════════════════════ -->
+  <!-- S10 -->
   <div class="section" id="s10">
     <div class="section-header">
       <div class="section-number">10</div>
-      <div class="section-title">Risiken &amp; Chancen</div>
-      <div class="section-score">Score: 6/10</div>
+      <div class="section-title">Risiken & Chancen</div>
+      <div class="section-score">Score: 7/10</div>
     </div>
     <div class="section-body">
-
-      <h3>9a) Strukturelle &amp; Zyklische Risiken</h3>
+      <h3>Strukturelle & zyklische Risiken</h3>
 
       <div class="risk-item">
         <div class="risk-header">
-          <div class="risk-title">⚡ Capex-ROI-Risiko: $80+ Mrd./Jahr ohne garantierte Rendite</div>
-          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-yellow">Wahrsch.: Mittel</span></div>
+          <div class="risk-title">💰 Capex-Eskalation $190B + Memory-Kosten-Inflation</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
         </div>
-        <div class="event-text">FCF-Kompression kurzfristig. Falls KI-Infrastruktur durch Effizienzgewinne (DeepSeek) überkapazitiert wird, drohen Abschreibungen. Auswirkung: –5 pp Op. Marge möglich.</div>
-      </div>
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">⚖️ FTC-Antitrust-Untersuchung (Bundling / Cloud / AI)</div>
-          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Wahrsch.: Mittel</span></div>
-        </div>
-        <div class="event-text">Aktive Untersuchung zu Cloud, AI, Teams-Bundling. Mögliche Kosten $1–5 Mrd.; Pricing-Beschränkungen bei Bundling-Strategie.</div>
-      </div>
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">🥊 Wettbewerb: Google Cloud +48%, AWS re-acceleriert</div>
-          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-red">Wahrsch.: Hoch</span></div>
-        </div>
-        <div class="event-text">Azure-Wachstum könnte auf 30–35 % verlangsamen. Google Cloud gewinnt Enterprise-Kunden mit Gemini-Integration und proprietären TPUs.</div>
-      </div>
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">🔗 OpenAI-Abhängigkeit / Stabilität</div>
-          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-green">Wahrsch.: Niedrig</span></div>
-        </div>
-        <div class="event-text">Instabilität bei OpenAI (wie Nov 2023 Führungskrise) könnte AI-Roadmap disruption und Reputationsschaden verursachen.</div>
-      </div>
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">🤖 AI-Kannibalisierung (DeepSeek-Effekt)</div>
-          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Wahrsch.: Mittel</span></div>
-        </div>
-        <div class="event-text">Effiziente Open-Source-Modelle könnten Preisdruck bei AI-Services auslösen und die Notwendigkeit teurer proprietärer Infrastruktur reduzieren.</div>
+        <div class="event-text">Capex 2026 von $175B auf $190B erhöht, davon $25B durch Memory-Kosten-Inflation. FCF eingebrochen von $74B (FY24) auf geschätzte $30B (FY26e). Falls AI-Demand zyklisch nachlässt, drohen Multi-Hundert-Milliarden-Underutilization. Wahrscheinlichkeit: ~15%.</div>
       </div>
 
-      <h3>9b) AI-Risiko &amp; Technologische Disruption (Fokus-Analyse)</h3>
-      <div class="ai-focus-box">
-        <h4>🤖 Bullishes KI-Szenario</h4>
-        <p>Microsoft ist als einziger Hyperscaler vollständig in den KI-Stack vertikal integriert – von Hardware (eigene Maia/Cobalt-Chips) über Infrastruktur (Azure) bis zur Modell-Ebene (OpenAI-Exklusivität) und Anwendungsschicht (Copilot in M365, GitHub, Dynamics). Mit 15 Mio. M365 Copilot Seats bei 450 Mio. Commercial Seats liegt die Penetration erst bei 3,3 % – das Upsell-Potenzial ist enorm. Eine Durchdringung auf 20 % würde ~$32 Mrd. zusätzliche ARR bedeuten.</p>
-      </div>
-      <div class="risk-item" style="border-color:rgba(239,68,68,0.3);">
+      <div class="risk-item">
         <div class="risk-header">
-          <div class="risk-title" style="color:var(--red);">🐻 Bärisches KI-Szenario</div>
+          <div class="risk-title">🤝 OpenAI-Restructuring $38B Cap = strukturelle Begrenzung</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
         </div>
-        <div class="event-text">DeepSeek und ähnliche Open-Source-Modelle reduzieren den Kapitalbedarf für KI-Infrastruktur fundamental. Falls Copilot-Adoption im Mittelstand schleppend verläuft (nur 39 % der Unternehmen berichten laut McKinsey messbarem ROI) und eine günstigere "Copilot Lite"-Version nötig wird, leidet die ARPU-Steigerungsthese.</div>
+        <div class="event-text">$38B Cap auf OpenAI-Revenue-Share bis 2030. IP nicht mehr exklusiv – OpenAI kann jetzt auf AWS/GCP ausweichen. Strategisch reduzierte MSFT-Abhängigkeit, aber auch reduziertes Upside. Wahrscheinlichkeit OpenAI-Multi-Cloud-Pivot: ~70%.</div>
       </div>
 
-      <h3>9c) Chancen</h3>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Chance</th><th>Potenzial</th></tr></thead>
-          <tbody>
-            <tr><td><strong>Copilot-Skalierung:</strong> 3,3% → 20% Penetration bei 450 Mio. Seats = $32 Mrd. ARR-Upside</td><td><span class="badge badge-green">Sehr Hoch</span></td></tr>
-            <tr><td><strong>AI-PC-Superzyklus:</strong> Windows 11 + NPU-PCs ersetzen 1+ Mrd. Windows 10 Geräte</td><td><span class="badge badge-green">Hoch</span></td></tr>
-            <tr><td><strong>Anthropic Azure-Deal:</strong> $30 Mrd. Cloud-Commitments; 1 GW dedizierte Kapazität</td><td><span class="badge badge-green">Hoch</span></td></tr>
-            <tr><td><strong>Azure-Marktanteilsgewinn:</strong> Von 21% auf 25%+ durch KI-Differenzierung</td><td><span class="badge badge-orange">Mittel-Hoch</span></td></tr>
-            <tr><td><strong>Agentische AI / Copilot Studio:</strong> Neue Revenue-Layer durch autonome Agents</td><td><span class="badge badge-green">Sehr Hoch (langfristig)</span></td></tr>
-            <tr><td><strong>Security-Segment:</strong> $20 Mrd. Revenue-Run-Rate; schnell wachsend durch KI-Integration</td><td><span class="badge badge-green">Hoch</span></td></tr>
-          </tbody>
-        </table>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">📉 Azure verliert relativ Marktanteile gegen GCP</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">GCP +63% wächst doppelt so schnell wie Azure +40%. Falls Azure-Wachstum auf 30% verlangsamt während GCP auf 60%+ bleibt, droht strukturelle Marktanteils-Erosion. Wahrscheinlichkeit Azure-Decel auf <35% bis 2027: ~30%.</div>
       </div>
 
-      <h3>9d) Red Flags &amp; Dealbreaker</h3>
-      <p><strong>Red Flags (beobachten):</strong> FCF unter weiterem Capex-Druck; Azure-Wachstum unter 30 % für zwei aufeinanderfolgende Quartale; Copilot-Penetration stagniert unter 5 % Commercial Seats; FTC-Untersuchung eskaliert zu formaler Klage.</p>
-      <p><strong>Dealbreaker (existenzbedrohend):</strong> Keine bekannten existenzbedrohenden Risiken. Microsoft ist mit $24 Mrd. Cash, ~$160 Mrd. Operating Cash Flow und Debt/Equity 0,32 finanziell kerngesund.</p>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚖️ Antitrust-Risiken (Japan, Italy, EU)</div>
+          <div><span class="badge badge-orange">Mittel</span> <span class="badge badge-yellow">Auswirkung: Niedrig–Mittel</span></div>
+        </div>
+        <div class="event-text">Japan-Untersuchung von Azure-Cloud-Praktiken, Italy LinkedIn-VAT, EU-Untersuchung Amazon-OpenAI-Deal könnte indirekt MSFT belasten. Auch: Pentagon-Anthropic-Blacklisting könnte Government-Contracts MSFTs erschweren. Finanziell überschaubar (<2% Op-Income).</div>
+      </div>
 
-      <div class="source">Quellen: Computerworld (14.01.2026); Bloomberg (13.02.2026); Mott Capital Management Q4 2025 Letter; AInvest (22.12.2025)</div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🎮 Gaming-Segment-Schwäche (Xbox -30%)</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Niedrig</span></div>
+        </div>
+        <div class="event-text">Xbox-Hardware -30% YoY in 2 Quartalen, Activision-Integration zeigt nicht erwartete Profitabilität. Gaming-Segment relevant für ~8% des Umsatzes. Nicht existenzbedrohend.</div>
+      </div>
+
+      <h3>AI-Risiko & technologische Disruption</h3>
+      <p>Bullisches AI-Szenario: MSFTs Multi-Model-Strategy (OpenAI + Anthropic + xAI + Llama + DeepSeek auf Azure) macht es zum dominanten Enterprise-AI-Layer. Copilot 20M Seats validieren Enterprise-Adoption. Maia 200 reduziert NVIDIA-Abhängigkeit. Bärisches Szenario: OpenAI-Pivot zu Multi-Cloud (AWS/GCP) reduziert Azure-Volumen; DeepSeek-style Effizienz-Durchbruch macht $190B-Capex überdimensioniert.</p>
+
+      <h3>Chancen</h3>
+      <p>(1) <strong>OpenAI-IPO 2026/2027</strong>: MSFT $228B Stake (8% MCap) – ein erfolgreicher IPO könnte Tranchen-Verkauf ermöglichen, FCF stark boosten ohne Verwässerung; (2) <strong>Copilot-Skalierung auf 50M+ Seats</strong>: Bei aktuellem +33% QoQ-Tempo realistisch in 4–6 Quartalen, +30% M365-Revenue-Uplift möglich (Guggenheim-Schätzung); (3) <strong>Maia-Silicon-Externalisierung</strong>: Falls Maia 200 sich bewährt, könnte MSFT als Chip-Lieferant für Enterprise-AI auftreten; (4) <strong>Multiple-Recovery</strong>: P/E 24x vs. 5J-Schnitt 32x impliziert 33% Upside allein durch Multiple-Expansion.</p>
+
+      <h3>Red Flags & Dealbreaker</h3>
+      <p>Keine Dealbreaker. Red Flag: Falls Q4 FY26 (Juli 2026) Azure-Wachstum unter 35% YoY fällt UND Capex-Story keine Klarheit über FCF-Pfad zeigt, wäre Multiple-Re-Rating auf 18–20x möglich = $300–340 (Downside –17% bis –25%).</p>
+
+      <div class="source">Quellen: MSFT Q3 FY26 Earnings; OpenAI-Restructuring Coverage (04/2026); TECHi MSFT Risk Assessment; eigene Szenarioanalyse.</div>
     </div>
   </div>
 
-
-  <!-- ═══ S11: SCORING ═══════════════════════════════════════════════════ -->
+  <!-- S11 -->
   <div class="section" id="s11">
     <div class="section-header">
       <div class="section-number">11</div>
-      <div class="section-title">Scoring-Übersicht</div>
-      <div class="section-score">Ø 7,0/10</div>
+      <div class="section-title">Scoring</div>
+      <div class="section-score">Ø 7.6/10</div>
     </div>
     <div class="section-body">
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr><th>Kategorie</th><th>Score</th><th>Score-Bar</th><th>Begründung</th></tr>
-          </thead>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Visual</th><th>Begründung</th></tr></thead>
           <tbody>
-            <tr>
-              <td><strong>Geschäftsmodell</strong></td>
-              <td>9/10</td>
-              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
-              <td>Starkes Subscription/Cloud-Modell; vollständige KI-Stack-Integration</td>
-            </tr>
-            <tr>
-              <td><strong>Burggraben</strong></td>
-              <td>9/10</td>
-              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
-              <td>Höchste Switching Costs der Enterprise-Software; OpenAI-Exklusivität bis 2030/32</td>
-            </tr>
-            <tr>
-              <td><strong>Operative Entwicklung (4Q)</strong></td>
-              <td>8/10</td>
-              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
-              <td>4/4 Beats; starkes Azure/Copilot-Momentum; Capex-Sorgen limitieren</td>
-            </tr>
-            <tr>
-              <td><strong>Wachstum</strong></td>
-              <td>8/10</td>
-              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
-              <td>Nachhaltiges 15–18 % Umsatzwachstum; KI-Monetarisierung skaliert</td>
-            </tr>
-            <tr>
-              <td><strong>Bewertung</strong></td>
-              <td>7/10</td>
-              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
-              <td>P/E 24,5x historisch 26 % günstiger; attraktiv für Qualitätswachstum</td>
-            </tr>
-            <tr>
-              <td><strong>Cashflow &amp; Margen</strong></td>
-              <td>6/10</td>
-              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
-              <td>FCF durch Capex-Offensive komprimiert; Op. Marge 47 % hervorragend</td>
-            </tr>
-            <tr>
-              <td><strong>Peer-Vergleich</strong></td>
-              <td>7/10</td>
-              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
-              <td>Führend bei Op. Leverage; Google Cloud wächst aktuell schneller</td>
-            </tr>
-            <tr>
-              <td><strong>Risiken (invertiert)</strong></td>
-              <td>6/10</td>
-              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
-              <td>FTC, DeepSeek, Capex-ROI – moderat, kein Existenzrisiko</td>
-            </tr>
-            <tr>
-              <td><strong>Technische Analyse</strong></td>
-              <td>3/10</td>
-              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:30%"></div></div><span class="score-num">3</span></div></td>
-              <td>Bearish: unter SMA 20/50/200; RSI überverkauft; Death Cross formiert</td>
-            </tr>
-            <tr style="background:rgba(0,120,212,0.08);">
+            <tr><td>Geschäftsmodell</td><td><strong>9/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>Enterprise-AI-Distribution-Layer mit höchster Profitabilität in Big-Tech</td></tr>
+            <tr><td>Burggraben</td><td><strong>9/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>M365 + Azure + Active Directory + Multi-Model AI-Hub + Maia Silicon</td></tr>
+            <tr><td>Operative Entwicklung (4Q)</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>4/4 Beats, Azure Reacceleration auf 40%, AI-ARR $37B (+123%)</td></tr>
+            <tr><td>Wachstum</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>+18% bei $300B+ Basis, RPO +99%, AI-Run-Rate +123%</td></tr>
+            <tr><td>Bewertung</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>P/E 24x = 22% unter 10J-Schnitt. Plus $228B OpenAI Hidden Value</td></tr>
+            <tr><td>Cashflow</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>OCF $165B, Op-Marge 46% (Industrie-Goldstandard), FCF unter Druck aber positiv</td></tr>
+            <tr><td>Risiken (invertiert)</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Capex-Eskalation, OpenAI-Cap, Azure-Marktanteil. Aber: relativ moderate Risiken</td></tr>
+            <tr><td>Technische Analyse</td><td><strong>4/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td><td>-27% von ATH, unter MA-Cluster, $400-Bruchgefahr. Schwächste Big-Tech</td></tr>
+            <tr style="background:rgba(0,164,239,0.08);">
               <td><strong>⌀ Gesamtscore</strong></td>
-              <td><strong>7,0/10</strong></td>
+              <td><strong>7.6/10</strong></td>
               <td>
                 <div class="score-bar">
                   <div class="score-bar-track">
-                    <div class="score-bar-fill" style="width:70%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
+                    <div class="score-bar-fill" style="width:76%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
                   </div>
-                  <span class="score-num" style="color:var(--primary);">7,0</span>
+                  <span class="score-num" style="color:var(--primary);">7.6</span>
                 </div>
               </td>
-              <td>Starkes Fundamental-/Strategie-Profil; technisch schwach – fundamentale Chance für langfristige Investoren</td>
+              <td>Quality-Compounder mit attraktiver Bewertung, aber technisch belastet & Capex-Druck</td>
             </tr>
           </tbody>
         </table>
       </div>
+      <div class="source">Eigene Berechnung basierend auf Sektionen 1–10. Methodik: Canvas v2.2 Scoring.</div>
     </div>
   </div>
 
-
-  <!-- ═══ S12: FAZIT ════════════════════════════════════════════════════ -->
+  <!-- S12 -->
   <div class="section" id="s12">
     <div class="section-header">
       <div class="section-number">12</div>
@@ -892,303 +628,147 @@
       <div class="bull-bear-grid">
         <div class="bull-card">
           <h4>🐂 Das Bullische Narrativ</h4>
-          <p><strong>Säule 1 – KI-Monetarisierung messbar:</strong> Azure AI Services steuern ~16 der 39 Prozentpunkte zum Azure-Wachstum bei (~$20+ Mrd. annualisiert). M365 Copilot mit 15 Mio. Paid Seats (+160 % YoY) und DAU +10x zeigt Gewohnheitsbildung im Enterprise-Segment – Fundament für ein milliardenschweres Recurring-Revenue-Layer.</p>
-          <p><strong>Säule 2 – Historisch günstige Bewertung:</strong> P/E 24,5x bei 24 % EPS-Wachstum (FY2026). 5-Jahres-Ø: 33x. Die Bewertungslücke reflektiert temporäre Capex-Angst, nicht strukturelle Verschlechterung. Commercial RPO $625 Mrd. (+110 % YoY) sichert Revenue-Boden.</p>
-          <p><strong>Säule 3 – Vollständigster KI-Stack:</strong> Hardware (Maia/Cobalt) → Infrastruktur (Azure) → Modell-Exklusivität (OpenAI bis 2032) → Application Layer (Copilot). Flywheel: mehr Azure → bessere Modelle → besseres Copilot → mehr Commitments. PEG 1,57 zeigt faires Risk/Reward.</p>
+          <p><strong>Säule 1 – Azure Reacceleration ist real:</strong> Nach 2 Quartalen Deceleration (Q1: 40% → Q2: 39%) sprang Azure in Q3 FY26 zurück auf <strong>+40% YoY</strong> (39% CC). Capacity Constraints lösen sich. AI-Run-Rate $37B (+123% YoY) ist das schnellste skalierende Geschäft in Big-Tech. RPO $627 Mrd. (+99% YoY) liefert Multi-Jahres-Visibility.</p>
+          <p><strong>Säule 2 – Copilot validiert als Enterprise-Standard:</strong> Paid-Seats von 15M → 20M (+33% QoQ), präsent bei 80% der Fortune 500. ARPU stabil trotz Volumen-Verhandlungen. Guggenheim-Schätzung: Copilot kann bis +30% M365-Revenue-Uplift bei ~100% inkrementellen Margen liefern. Das ist eine multi-Hundert-Milliarden-Opportunity bei 47% Productivity-Op-Marge.</p>
+          <p><strong>Säule 3 – Bewertung im Ausnahme-Diskount + OpenAI-Hidden-Value:</strong> P/E 24x ist 22% unter 10J-Schnitt – seltenes Setup. Plus: $228 Mrd. OpenAI-Stake (8% der MCap) ist im aktuellen Kurs "umsonst" eingepreist. Bei IPO-Tranchen-Verkauf könnte das FCF massiv boosten. Analysten-Konsens-Zielkurs $561 = ~39% Upside.</p>
         </div>
         <div class="bear-card">
           <h4>🐻 Das Bärische Narrativ</h4>
-          <p><strong>Risiko 1 – Capex-ROI ungelöst:</strong> $72,4 Mrd. in H1 FY2026 investiert. FCF Q2 –9,3 % YoY. Falls DeepSeek-ähnliche Effizienzgewinne GPU-Capex schneller wertlos machen als erwartet, drohen Überkapazitäten und Abschreibungen.</p>
-          <p><strong>Risiko 2 – Google Cloud beschleunigt:</strong> +48 % in Q4 2025 ist das schnellste Wachstum der Big Three. Alphabet investiert $175–185 Mrd. Capex 2026 mit proprietären TPUs (4x besser als NVIDIA lt. Alphabet). Azure-Wachstum könnte auf 30–35 % verlangsamen.</p>
-          <p><strong>Risiko 3 – Technisch &amp; Timing:</strong> –18 % in 4 Wochen, unter allen wichtigen MAs, Death Cross formiert. FTC-Klage möglich. P/E 24,5x ist nicht billig, falls Wachstum auf &lt;15 % fällt.</p>
+          <p><strong>Risiko 1 – Capex-Falle + OpenAI-Cap:</strong> $190B FY26-Capex (vs. $175B-Guide vor 3 Monaten) zeigt unkontrollierte Eskalation. OpenAI-Revenue-Cap auf $38B bis 2030 begrenzt strukturell Upside. Falls AI-Demand-Zyklik einsetzt, droht massive Underutilization der gigantischen Infrastruktur-Investments.</p>
+          <p><strong>Risiko 2 – Azure verliert das Wachstums-Rennen:</strong> GCP +63% wächst signifikant schneller. Falls OpenAI strategisch zu AWS/GCP pivotiert (jetzt möglich seit Restructuring), könnte Azure-Wachstum auf <35% zurückgehen. Barclays-Lenschow: "Azure not really accelerating further from here, due to the law of large numbers."</p>
+          <p><strong>Risiko 3 – Technische Schwäche + Multiple-Compression-Risiko:</strong> -27% von ATH, unter allen wichtigen MAs, bei $400-Bruch droht $360–380. P/E 24x ist günstig, aber falls Q4 FY26 enttäuscht (Azure <35%, Copilot-Decel), Multiple-Re-Rating auf 18–20x = Kurs $300–340 möglich.</p>
         </div>
       </div>
 
       <h3>Eigene Einschätzung</h3>
-      <p>Das bullische Narrativ überzeugt strukturell mehr. Die KI-Monetarisierung ist messbar und skaliert – 160 % Wachstum bei M365 Copilot Seats ist kein Zufall. Die historisch günstige Bewertung (P/E 24,5x bei 24 % EPS-Wachstum) schafft eine Sicherheitsmarge, die selbst bei Azure-Verlangsamung den Downside begrenzt. Der Burggraben (Switching Costs in 450 Mio. M365 Seats) ist einer der robustesten aller Technologieunternehmen.</p>
-      <p>Gleichwohl enthält das bärische Narrativ valide Punkte: Capex-ROI-Timing unbekannt, Google Cloud beschleunigt sich, technische Schwäche erzeugt Drawdown-Risiko. Ich könnte falsch liegen, weil: (a) DeepSeek-ähnliche Effizienzgewinne den GPU-Capex schneller wertlos machen; (b) Copilot-Adoption im Mittelstand schleppend verläuft; (c) FTC-Klage zu Pricing-Einschränkungen führt. <strong>Risk/Reward: –15 % Downside</strong> (Test $340–350) vs. <strong>+49 % Upside</strong> (Konsens $596) in 12–24 Monaten.</p>
+      <p>MSFT ist <strong>fundamental der attraktivste Mega-Cap-AI-Compounder</strong> im aktuellen Setup: höchste Profitabilität (46% Op-Marge), beschleunigtes AI-Geschäft ($37B ARR +123%), Multi-Model-Strategie macht Azure zum neutralen AI-Layer, OpenAI-Hidden-Value $228B (8% MCap). Bei P/E 24x ist die Bewertung historisch günstig. ABER: Technisch schwach und kurzfristiges Sentiment negativ wegen Capex-Erhöhung und OpenAI-Restructuring. Risk/Reward bei $404: ~17% Downside (auf $335–360) vs. ~40% Upside (auf $560–620 in 12–18 Monaten falls Azure-Reacceleration anhält + OpenAI-IPO-Story). <strong>Das ist das beste Risk/Reward unter den 7 Mega-Caps</strong> – aber Geduld nötig für 2–3 Quartale.</p>
+      <p>Falsche-Annahmen-Demut: Ich könnte falsch liegen, wenn (a) Azure-Wachstum in Q4 FY26 unter 35% fällt, (b) OpenAI massive Multi-Cloud-Migration startet, (c) Capex 2027 auf >$250B weiter eskaliert ohne FCF-Stabilisierung.</p>
 
       <h3>Zeithorizont-Einschätzung</h3>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Horizont</th><th>Empfehlung</th><th>Katalysatoren</th><th>Risiken</th></tr></thead>
+          <thead><tr><th>Zeithorizont</th><th>Katalysator</th><th>Risiko</th><th>Empfehlung</th></tr></thead>
           <tbody>
-            <tr>
-              <td><strong>Kurzfristig (0–6 M)</strong></td>
-              <td><span class="badge badge-yellow">Neutral / selektiv</span></td>
-              <td>Q3 FY26 Earnings April 26; Copilot-Signal; FTC-Klärung</td>
-              <td>Technische Schwäche; Capex-Schock; Makro Risk-Off</td>
-            </tr>
-            <tr>
-              <td><strong>Mittelfristig (6–24 M)</strong></td>
-              <td><span class="badge badge-green">Kaufen</span></td>
-              <td>Capex-Peak überschritten → FCF-Normalisierung; Copilot 30 Mio.+ Seats</td>
-              <td>Google Cloud Marktanteilsgewinne; FTC-Klage</td>
-            </tr>
-            <tr>
-              <td><strong>Langfristig (2–5 J)</strong></td>
-              <td><span class="badge badge-green">Kaufen (Kernposition)</span></td>
-              <td>Agentische AI als $100 Mrd.-Markt; AI-PC-Superzyklus; ARPU-Ausweitung</td>
-              <td>Technologischer Umbruch; OpenAI-Zerwürfnis</td>
-            </tr>
+            <tr><td><strong>Kurzfristig (0–6M)</strong></td><td>Q4 FY26 Earnings (Juli), OpenAI-IPO-Updates, Build-Konferenz</td><td>Technisch unter MAs, $400-Bruchgefahr</td><td>Aufbau bei $385–400, aggressiv bei $360</td></tr>
+            <tr><td><strong>Mittelfristig (6–24M)</strong></td><td>OpenAI-IPO + Tranchen-Verkauf, Copilot 30M+ Seats, FCF-Erholung</td><td>Capex 2027 ohne FCF-Pfad</td><td>Aufstocken bei klaren Azure-Beats</td></tr>
+            <tr><td><strong>Langfristig (2–5J)</strong></td><td>Enterprise-AI-Konsolidierung, Maia-Skalierung, Multi-Model-Dominanz</td><td>Strukturelle Cloud-Margenkompression</td><td>Kernposition (Compounder-Halten)</td></tr>
           </tbody>
         </table>
       </div>
 
       <h3>Kernthese</h3>
-      <p>Microsoft ist ein strukturell starkes Unternehmen (Burggraben 9/10, konsistente Beats, vollständigster KI-Stack) zu einer historisch günstigen Bewertung (P/E 24,5x vs. 5J-Ø 33x). Die kurzfristige Capex- und Technische-Schwäche stellt für langfristige Quality-Growth-Investoren eine seltene Kaufgelegenheit dar. Das Commercial RPO von $625 Mrd. (+110 % YoY) bietet ausnahmsweise Revenue-Visibilität. Die KI-Monetarisierung ist keine Hype-Geschichte mehr: 15 Mio. Copilot Seats bei 3,3 % Penetration = strukturelles Upside-Fundament.</p>
+      <p>Microsoft bietet aktuell die <strong>beste Kombination aus Quality, Bewertung und AI-Optionalität</strong> in Big-Tech: 46% Op-Marge, P/E 24x (22% unter 10J-Schnitt), Azure Reacceleration auf +40%, AI-Business $37B ARR (+123%), 20M Copilot-Seats, $228B OpenAI-Stake als Hidden Asset. Die jüngste Korrektur (-27% von ATH) und der OpenAI-Restructuring-Schock haben ein attraktives Einstiegsfenster geschaffen. Rating: <strong>KAUFEN</strong> für langfristige Quality-Growth-Investoren, mit Geduld für 2–3 Quartale.</p>
 
       <div class="rating-box">
         <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
-        <div class="rating-item"><label>Zielkurs (12–24M)</label><div class="val">$520–596</div></div>
-        <div class="rating-item"><label>Langfristig (3–5 J)</label><div class="val">$680–800</div></div>
-        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–5 Jahre</div></div>
-        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–15%</div></div>
-        <div class="rating-item"><label>Upside (12–24M)</label><div class="val" style="color:var(--green);">+49%</div></div>
-        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:3,3</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$520–580</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–4 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–17%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+40%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:2.3</div></div>
       </div>
 
-      <h3>Was falsifiziert die These?</h3>
       <div class="trigger-grid">
         <div class="trigger-card sell">
           <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
           <ul class="trigger-list">
-            <li>Azure-Wachstum fällt unter 25 % für zwei aufeinanderfolgende Quartale → Reduzieren / Verkaufen</li>
-            <li>M365 Copilot Seat-Adds wachsen unter 50 % YoY (Q3/Q4 FY26) → Reduzieren</li>
-            <li>FTC reicht formale Klage ein → Risikomanagement: Reduzieren</li>
-            <li>FCF-Marge fällt unter 15 % für zwei Quartale → Stop Loss / Verkaufen</li>
+            <li>Q4 FY26: Azure-Wachstum &lt;35% YoY (von 40%) → 25% reduzieren</li>
+            <li>Bruch unter $385 → Position halbieren bis Reset</li>
+            <li>Capex 2027 angekündigt >$250B ohne FCF-Pfad → 30% reduzieren</li>
+            <li>Copilot-Seats-Adds unter 5M/Quartal → Position halbieren</li>
           </ul>
         </div>
         <div class="trigger-card buy">
           <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
           <ul class="trigger-list">
-            <li>Kurs fällt auf $355–370 (–10% Drawdown) → Tranche nachkaufen</li>
-            <li>Q3 FY26: Copilot Seats &gt;20 Mio. (+35%+ QoQ) bei Azure &gt;35% → Aufstocken</li>
-            <li>Capex-Guidance für FY2027 reduziert sich merklich → Aufstocken</li>
-            <li>FTC-Untersuchung eingestellt → Positiv: halten / ausbauen</li>
+            <li>Rückschlag auf $360–380 → aggressiv nachkaufen</li>
+            <li>Q4 FY26: Azure ≥40% CC + Copilot >25M Seats → aufstocken</li>
+            <li>OpenAI-IPO konkretisiert → Hidden-Value-Trade einsteigen</li>
+            <li>FCF-Erholung auf >$50B TTM → Multiple-Recovery einpreisen</li>
           </ul>
         </div>
       </div>
 
-      <h3>Welcher Anlegertyp passt?</h3>
       <div class="investor-grid">
         <div class="investor-yes">
           <h5>✅ Geeignet für</h5>
           <ul>
-            <li>Quality Growth Investors</li>
-            <li>Value-orientierte Langfristanleger</li>
-            <li>Contrarian Investors</li>
-            <li>Tech-Thema-Investoren (AI, Cloud)</li>
+            <li>Quality-Growth-Investoren</li>
+            <li>Enterprise-AI-Exposure</li>
+            <li>Compounder-Strategien</li>
+            <li>Dividenden + Wachstum (1% Yield + Buybacks)</li>
           </ul>
         </div>
         <div class="investor-no">
           <h5>❌ NICHT geeignet für</h5>
           <ul>
-            <li>Momentum Trader (kurzfristig)</li>
-            <li>Income Investors (Dividende &lt;1%)</li>
-            <li>Konservative ohne Drawdown-Toleranz</li>
-            <li>Short-Term &lt;6 Monate Horizont</li>
+            <li>Kurzfristige Trader (techn. schwach)</li>
+            <li>Hyper-Growth-Fokussiere</li>
+            <li>Hohe Income-Yield-Investoren</li>
+            <li>Markt-Timing-Allergische bei FCF-Druck</li>
           </ul>
         </div>
       </div>
 
-      <h3>Empfohlener Einstieg</h3>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
           <tbody>
-            <tr>
-              <td><strong>Konservativ</strong></td>
-              <td><span class="badge badge-yellow">Warten / Tranchiert</span></td>
-              <td>Erst technische Stabilisierung abwarten (~$380–390, SMA 20-Kreuzung)</td>
-            </tr>
-            <tr>
-              <td><strong>Moderat</strong></td>
-              <td><span class="badge badge-orange">Tranchiert einsteigen</span></td>
-              <td>50% jetzt bei ~$400, 50% nach Q3 FY26 Earnings-Bestätigung (April 2026)</td>
-            </tr>
-            <tr>
-              <td><strong>Aggressiv</strong></td>
-              <td><span class="badge badge-green">Jetzt kaufen</span></td>
-              <td>Risk/Reward 1:3,3 bei aktuellem Kurs; RSI überverkauft als Einstiegssignal</td>
-            </tr>
-            <tr>
-              <td><strong>Langfristig (3–5 J)</strong></td>
-              <td><span class="badge badge-green">Kaufen &amp; Halten</span></td>
-              <td>AI-Wertschöpfungskette + Copilot-Skalierung = strukturelles Wachstumsthema</td>
-            </tr>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>$400 attraktiv, $360 noch besser; P/E 24x = historischer Diskount</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-green">Jetzt 50% + Reste auf Dips</span></td><td>50% jetzt, 50% bei $370 oder nach Q4 FY26 Print</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Multiple-Discount + OpenAI-Stake + AI-Momentum = beste Setup unter Mega-Caps</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen & Halten</span></td><td>Strukturelles Enterprise-AI-Compounding über 5+ Jahre</td></tr>
           </tbody>
         </table>
       </div>
 
-      <div class="source">Quellen: Goldman Sachs Initiation (TheFly, 11.01.2026); Zacks (23.02.2026); 247wallst.com (24.02.2026); Futurum Research (29.01.2026)</div>
+      <div class="source">Quellen: Synthese aus allen vorherigen Sektionen; eigene Risk/Reward-Kalkulation; Wedbush, Goldman Sachs, UBS Konsens-Zielkurse.</div>
     </div>
   </div>
 
-
-  <!-- ═══ S13: OUTLOOK ══════════════════════════════════════════════════ -->
+  <!-- S13 -->
   <div class="section" id="s13">
     <div class="section-header">
       <div class="section-number">13</div>
-      <div class="section-title">Outlook – Die 3 entscheidenden Events</div>
-      <div class="section-note">Konkrete Wenn/Dann-Szenarien</div>
+      <div class="section-title">Outlook – Anstehende Events</div>
     </div>
     <div class="section-body">
 
       <div class="outlook-card">
-        <h4>📊 Event 1: Q3 FY2026 Quartalsergebnisse – voraussichtlich 29. April 2026</h4>
-        <p>Der mit Abstand wichtigste Kurzfrist-Katalysator. Kernfragen: Wächst Azure weiterhin mit 37–40 %? Überschreitet M365 Copilot 20 Mio. bezahlte Seats? Reduziert Microsoft die Capex-Guidance für H2 FY26? Die Antworten auf diese Fragen werden die Richtung für die nächsten 6–12 Monate bestimmen.</p>
+        <h4>📊 Event 1: Q4 FY26 Earnings (Q2 Cal 2026) – Ende Juli 2026</h4>
+        <p>Guidance: Azure +39–40% CC, MSFT Cloud +29%. Kritische Metriken: (1) Bleibt Azure-Wachstum >37% YoY? (2) Wie skaliert Copilot (>25M Seats?)? (3) Wird FY2027-Capex-Range zwischen $200–230B oder höher genannt? (4) Wie entwickelt sich FCF unter $190B-Capex-Last?</p>
         <div class="when-then">
-          <strong>Wenn</strong> Azure ≥37 % wächst UND M365 Copilot Seats ≥18–20 Mio. UND Capex-Guidance für Q4 FY26 sequenziell fällt: Das Capex-ROI-Narrativ entspannt sich, FCF-Normalisierung wird sichtbar → <strong>deutlich aufstocken</strong>; Kurs dürfte in Richtung $440–480 laufen.<br><br>
-          <strong>Wenn</strong> Azure unter 33 % fällt ODER Copilot Seat-Wachstum unter 30 % QoQ ODER Capex-Guidance erneut erhöht wird: Wachstumsverlangsamerungs- und Capex-Angst-Story bestätigt sich → <strong>stark reduzieren</strong>; Kurs könnte auf $330–360 fallen.
+          <strong>Wenn:</strong> Azure ≥39% CC + Copilot >25M Seats + FY2027-Capex-Range &lt;$220B → aggressive Aufstockung, Zielkurs $560–620 in 12 Monaten.<br><br>
+          <strong>Wenn:</strong> Azure &lt;35% CC ODER FY2027-Capex >$250B ohne FCF-Pfad → 25–30% reduzieren, Konsolidierung auf $340–380 wahrscheinlich.
         </div>
       </div>
 
       <div class="outlook-card">
-        <h4>⚖️ Event 2: FTC-Antitrust-Untersuchung – Eskalation oder Einstellung (Q2–Q3 2026)</h4>
-        <p>Die FTC hat laut Bloomberg (13.02.2026) die Untersuchung von Microsofts Cloud, AI und Bundling-Praktiken beschleunigt. In einem Trump-freundlichen Regulierungsumfeld ist eine formale Klage unwahrscheinlich, aber nicht ausgeschlossen. Das Ergebnis beeinflusst die Pricing-Freiheit bei der Bundling-Strategie strukturell.</p>
+        <h4>📊 Event 2: Microsoft Build 2026 + OpenAI-IPO-Updates – Mai/Juni 2026</h4>
+        <p>Build 2026 (Mai 19-22) ist MSFTs Developer-Konferenz; erwartet: Maia 200 Demos, Copilot-Updates, Foundry-Agents. Parallel: OpenAI-IPO-Vorbereitung mit Q3/Q4 2026 als möglicher Listing-Zeitfenster bei $850B+ Valuation. Falls IPO konkretisiert, könnte MSFTs $228B-Stake-Wert öffentlich validiert werden.</p>
         <div class="when-then">
-          <strong>Wenn</strong> die FTC die Untersuchung einstellt ODER keine formale Klage einreicht bis Ende Q2 2026: Regulierungs-Unsicherheitsprämie entfällt → 5–8 % Multiple-Expansion (P/E von 24,5x auf 27–28x) möglich. <strong>Bestehende Positionen halten; keine spezifische Aktion nötig.</strong><br><br>
-          <strong>Wenn</strong> die FTC eine formale Klage wegen Bundling/AI-Monopolisierung einreicht: Kurzfristige Kursreaktion –8 bis –15 % möglich. Langfristig begrenzte Folgen (kein Existenzrisiko), aber Unsicherheitsphase 2–3 Jahre → <strong>Risiko-Tranche 10–20 % reduzieren</strong>; Rest halten.
+          <strong>Wenn:</strong> Maia 200 mit klarer Performance-/Cost-Differenzierung + OpenAI-IPO-Filing in 2H 2026 → +10–15% Re-Rating, Hidden-Value-Trade aktiviert.<br><br>
+          <strong>Wenn:</strong> nur inkrementelle Build-Updates + OpenAI-IPO verschoben auf 2027 → keine Multiple-Expansion, Kurs in Range $390–440.
         </div>
       </div>
 
       <div class="outlook-card">
-        <h4>🤖 Event 3: Copilot ROI-Evidenz – Adoption im Mittelstand (Q2–Q3 2026)</h4>
-        <p>Die McKinsey-Studie zeigt: erst 39 % der Unternehmen berichten messbarem ROI aus KI. Die Copilot-Story ist im Fortune-500-Segment klar. Die entscheidende Frage für das mittelfristige Wachstum: Skaliert es auch im Mittelstand (SMB, Frontline Worker)? 20 % Penetration der 450 Mio. Seats bei $30/User/Monat = ~$32 Mrd. zusätzliche ARR – ein Kurskatalysator in Richtung $700+.</p>
+        <h4>📊 Event 3: Capex 2027 Guidance + Azure FY27 Outlook – August 2026 (Q4 FY26 Call)</h4>
+        <p>Der wichtigste mittelfristige Event: MSFTs FY2027-Capex-Guidance wird in 3 Monaten beim Q4 FY26-Call gegeben. Investoren werden auf jede Zahl >$200B mit Skepsis reagieren. Parallel: FY27 Revenue-Wachstums-Outlook für Azure und AI-Business sollte Klarheit über Skalierungs-Pfad bieten.</p>
         <div class="when-then">
-          <strong>Wenn</strong> Microsoft in Q3 FY2026 Copilot-Seat-Adds von ≥3 Mio. QoQ meldet UND explizit auf SMB-Adoption hinweist: Copilot-Durchdringung expandiert systemisch → <strong>Kernposition ausbauen</strong>; Kursziel $596 (Konsens) mittelfristig erreichbar.<br><br>
-          <strong>Wenn</strong> das Seat-Wachstum auf unter 100 % YoY fällt ODER Preissenkungen notwendig werden ("Copilot Lite" für $15/User): ARPU-Steigerungsthese leidet → <strong>Wachstums-Score auf 6/10 senken</strong>; Kursziel auf $480–520 reduzieren.
+          <strong>Wenn:</strong> FY27-Capex zwischen $200–225B + Azure-FY27-Outlook ≥35% Wachstum + FCF-Wachstum bestätigt → Relief-Rally +10–15%, Kursziel $500+.<br><br>
+          <strong>Wenn:</strong> FY27-Capex >$250B ODER Azure-FY27 &lt;30% Wachstum → strukturelle Bewertungs-Compression, Kurs auf $330–360 möglich.
         </div>
       </div>
 
-      <div class="source">Quellen: Microsoft Investor Relations; Bloomberg (13.02.2026); McKinsey AI Survey (2025); Futurum Research (29.01.2026)</div>
+      <div class="source">Quellen: MSFT IR Calendar; Build 2026 Schedule; OpenAI Public Company Filings; Visible Alpha Konsens-Schätzungen.</div>
     </div>
   </div>
 
-
-  <!-- ═══ DISCLAIMER ════════════════════════════════════════════════════ -->
   <div class="disclaimer">
-    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung, Kaufempfehlung oder Aufforderung zum Handel mit Wertpapieren dar. Alle Angaben ohne Gewähr. Investitionen in Aktien sind mit Risiken verbunden – vergangene Wertentwicklungen sind kein verlässlicher Indikator für zukünftige Ergebnisse. Der Autor übernimmt keine Haftung für Investitionsentscheidungen auf Basis dieser Analyse. Kurs- und Finanzdaten beziehen sich auf den Stand 27. Februar 2026. Bitte konsultieren Sie einen zugelassenen Finanzberater vor Anlageentscheidungen.
+    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung dar. Die enthaltenen Informationen wurden aus öffentlich zugänglichen Quellen zusammengetragen und nach bestem Wissen bewertet. Vergangene Wertentwicklungen sind kein verlässlicher Indikator für zukünftige Ergebnisse. Investitionen in Aktien sind mit erheblichen Risiken verbunden, einschließlich des Totalverlusts. Bitte konsultieren Sie vor Investmententscheidungen einen unabhängigen Finanzberater. Stand: 14.05.2026.
   </div>
 
-</div><!-- /main -->
-
-
-<div class="cgw-ext" data-ext-id="pdnenlnelpdomajfejgapbdpmjkfpjkp"></div><cgw-writer-modal data-wxt-shadow-root="" class="cgw_main_container" id="jw-main-container-id"><template shadowrootmode="open">
-<!-- saved from url=(0032)https://msft-analyse.vercel.app/ -->
-<html><head><style>/* WXT Shadow Root Reset */ body{all:initial;}
-*,:before,:after{--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / .5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / .5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }*,:before,:after{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}:before,:after{--tw-content: ""}html,:host{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji",Segoe UI Symbol,"Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,samp,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dl,dd,h1,h2,h3,h4,h5,h6,hr,figure,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}ol,ul,menu{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}button,[role=button]{cursor:pointer}:disabled{cursor:default}img,svg,video,canvas,audio,iframe,embed,object{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.\!container{width:100%!important}.container{width:100%}@media (min-width: 640px){.\!container{max-width:640px!important}.container{max-width:640px}}@media (min-width: 768px){.\!container{max-width:768px!important}.container{max-width:768px}}@media (min-width: 1024px){.\!container{max-width:1024px!important}.container{max-width:1024px}}@media (min-width: 1280px){.\!container{max-width:1280px!important}.container{max-width:1280px}}@media (min-width: 1536px){.\!container{max-width:1536px!important}.container{max-width:1536px}}.pointer-events-none{pointer-events:none}.pointer-events-auto{pointer-events:auto}.visible{visibility:visible}.invisible{visibility:hidden}.collapse{visibility:collapse}.static{position:static}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{top:0;right:0;bottom:0;left:0}.-bottom-1{bottom:-4px}.-left-1{left:-4px}.-right-1{right:-4px}.-top-\[8px\]{top:-8px}.bottom-0{bottom:0}.bottom-6{bottom:24px}.bottom-\[1px\]{bottom:1px}.end-0{inset-inline-end:0px}.left-0{left:0}.left-0\.5{left:2px}.left-1{left:4px}.right-0{right:0}.right-1\.5{right:6px}.right-10{right:40px}.right-14{right:56px}.right-\[1px\]{right:1px}.top-0{top:0}.top-1\/2{top:50%}.top-11{top:44px}.top-4{top:16px}.isolate{isolation:isolate}.z-50{z-index:50}.z-\[61\]{z-index:61}.z-\[9999985\]{z-index:9999985}.z-\[9999990\]{z-index:9999990}.z-\[9999991\]{z-index:9999991}.z-\[9999992\]{z-index:9999992}.z-\[9999993\]{z-index:9999993}.z-\[9999995\]{z-index:9999995}.z-\[9999996\]{z-index:9999996}.z-\[9999997\]{z-index:9999997}.z-\[9999998\]{z-index:9999998}.z-\[9999999\]{z-index:9999999}.m-0{margin:0}.m-auto{margin:auto}.mx-2{margin-left:8px;margin-right:8px}.mx-6{margin-left:24px;margin-right:24px}.mx-\[1px\]{margin-left:1px;margin-right:1px}.mx-auto{margin-left:auto;margin-right:auto}.my-1\.5{margin-top:6px;margin-bottom:6px}.my-4{margin-top:16px;margin-bottom:16px}.my-\[0\.5px\]{margin-top:.5px;margin-bottom:.5px}.-ml-3{margin-left:-12px}.-ml-3\.5{margin-left:-14px}.mb-1{margin-bottom:4px}.mb-1\.5{margin-bottom:6px}.mb-2{margin-bottom:8px}.mb-3{margin-bottom:12px}.mb-4{margin-bottom:16px}.mb-5{margin-bottom:20px}.mb-\[-7px\]{margin-bottom:-7px}.ml-0\.5{margin-left:2px}.ml-1{margin-left:4px}.ml-1\.5{margin-left:6px}.ml-2{margin-left:8px}.ml-3{margin-left:12px}.ml-\[30px\]{margin-left:30px}.ml-\[3px\]{margin-left:3px}.mr-1{margin-right:4px}.mr-1\.5{margin-right:6px}.mr-2{margin-right:8px}.mr-2\.5{margin-right:10px}.mt-0\.5{margin-top:2px}.mt-1{margin-top:4px}.mt-1\.5{margin-top:6px}.mt-10{margin-top:40px}.mt-2{margin-top:8px}.mt-2\.5{margin-top:10px}.mt-3{margin-top:12px}.mt-4{margin-top:16px}.mt-5{margin-top:20px}.mt-6{margin-top:24px}.mt-7{margin-top:28px}.mt-8{margin-top:32px}.mt-\[-7px\]{margin-top:-7px}.mt-\[12px\]{margin-top:12px}.mt-\[1px\]{margin-top:1px}.mt-\[2\.5px\]{margin-top:2.5px}.mt-\[5px\]{margin-top:5px}.mt-\[9px\]{margin-top:9px}.line-clamp-3{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3}.block{display:block}.inline-block{display:inline-block}.inline{display:inline}.flex{display:flex}.inline-flex{display:inline-flex}.table{display:table}.contents{display:contents}.hidden{display:none}.size-3{width:12px;height:12px}.size-3\.5{width:14px;height:14px}.size-4{width:16px;height:16px}.size-5{width:20px;height:20px}.size-\[13px\]{width:13px;height:13px}.size-\[19px\]{width:19px;height:19px}.h-0{height:0px}.h-1{height:4px}.h-10{height:40px}.h-2{height:8px}.h-2\.5{height:10px}.h-3{height:12px}.h-3\.5{height:14px}.h-4{height:16px}.h-5{height:20px}.h-6{height:24px}.h-\[10px\]{height:10px}.h-\[11px\]{height:11px}.h-\[13px\]{height:13px}.h-\[14px\]{height:14px}.h-\[15px\]{height:15px}.h-\[16px\]{height:16px}.h-\[18px\]{height:18px}.h-\[28px\]{height:28px}.h-full{height:100%}.max-h-40{max-height:160px}.max-h-\[10lh\]{max-height:10lh}.max-h-\[16lh\]{max-height:16lh}.max-h-\[5lh\]{max-height:5lh}.max-h-\[750px\]{max-height:750px}.min-h-\[4lh\]{min-height:4lh}.min-h-\[56px\]{min-height:56px}.min-h-\[6lh\]{min-height:6lh}.w-0{width:0px}.w-1{width:4px}.w-10{width:40px}.w-2{width:8px}.w-2\.5{width:10px}.w-2\/3{width:66.666667%}.w-3{width:12px}.w-3\.5{width:14px}.w-4{width:16px}.w-5{width:20px}.w-64{width:256px}.w-8{width:32px}.w-80{width:320px}.w-\[10px\]{width:10px}.w-\[11px\]{width:11px}.w-\[13px\]{width:13px}.w-\[14px\]{width:14px}.w-\[15px\]{width:15px}.w-\[16px\]{width:16px}.w-\[18px\]{width:18px}.w-\[24px\]{width:24px}.w-\[338px\]{width:338px}.w-\[350px\]{width:350px}.w-\[400px\]{width:400px}.w-\[470px\]{width:470px}.w-\[490px\]{width:490px}.w-\[500px\]{width:500px}.w-fit{width:fit-content}.w-full{width:100%}.w-px{width:1px}.min-w-0{min-width:0px}.min-w-\[470px\]{min-width:470px}.min-w-\[60px\]{min-width:60px}.min-w-\[70px\]{min-width:70px}.max-w-14{max-width:56px}.max-w-32{max-width:128px}.max-w-80{max-width:320px}.max-w-\[200px\]{max-width:200px}.max-w-\[350px\]{max-width:350px}.max-w-\[400px\]{max-width:400px}.max-w-\[600px\]{max-width:600px}.max-w-\[650px\]{max-width:650px}.max-w-\[70px\]{max-width:70px}.max-w-full{max-width:100%}.flex-1{flex:1 1 0%}.flex-shrink{flex-shrink:1}.flex-shrink-0{flex-shrink:0}.shrink{flex-shrink:1}.shrink-0{flex-shrink:0}.flex-grow{flex-grow:1}.flex-grow-0{flex-grow:0}.grow{flex-grow:1}.border-collapse{border-collapse:collapse}.-translate-y-1\/2{--tw-translate-y: -50%;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.translate-x-0{--tw-translate-x: 0px;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.translate-x-3{--tw-translate-x: 12px;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.translate-x-\[10px\]{--tw-translate-x: 10px;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.translate-y-\[calc\(-100\%-10px\)\]{--tw-translate-y: calc(-100% - 10px) ;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}@keyframes spin{to{transform:rotate(360deg)}}.animate-spin{animation:spin 1s linear infinite}.cursor-auto{cursor:auto}.cursor-col-resize{cursor:col-resize}.cursor-default{cursor:default}.cursor-grab{cursor:grab}.cursor-grabbing{cursor:grabbing}.cursor-help{cursor:help}.cursor-nesw-resize{cursor:nesw-resize}.cursor-not-allowed{cursor:not-allowed}.cursor-nwse-resize{cursor:nwse-resize}.cursor-pointer{cursor:pointer}.cursor-row-resize{cursor:row-resize}.select-none{-webkit-user-select:none;user-select:none}.resize-none{resize:none}.resize-y{resize:vertical}.resize{resize:both}.list-decimal{list-style-type:decimal}.list-disc{list-style-type:disc}.flex-row{flex-direction:row}.flex-col{flex-direction:column}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.items-stretch{align-items:stretch}.justify-start{justify-content:flex-start}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-0{gap:0px}.gap-0\.5{gap:2px}.gap-1{gap:4px}.gap-1\.5{gap:6px}.gap-2{gap:8px}.gap-2\.5{gap:10px}.gap-3{gap:12px}.gap-3\.5{gap:14px}.gap-4{gap:16px}.gap-5{gap:20px}.gap-6{gap:24px}.gap-\[1px\]{gap:1px}.gap-\[2px\]{gap:2px}.gap-\[3px\]{gap:3px}.gap-x-2{column-gap:8px}.gap-x-3{column-gap:12px}.gap-x-4{column-gap:16px}.gap-y-1{row-gap:4px}.gap-y-1\.5{row-gap:6px}.gap-y-2{row-gap:8px}.gap-y-3{row-gap:12px}.space-x-1>:not([hidden])~:not([hidden]){--tw-space-x-reverse: 0;margin-right:calc(4px * var(--tw-space-x-reverse));margin-left:calc(4px * calc(1 - var(--tw-space-x-reverse)))}.space-x-1\.5>:not([hidden])~:not([hidden]){--tw-space-x-reverse: 0;margin-right:calc(6px * var(--tw-space-x-reverse));margin-left:calc(6px * calc(1 - var(--tw-space-x-reverse)))}.space-y-1\.5>:not([hidden])~:not([hidden]){--tw-space-y-reverse: 0;margin-top:calc(6px * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(6px * var(--tw-space-y-reverse))}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse: 0;margin-top:calc(8px * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(8px * var(--tw-space-y-reverse))}.space-y-4>:not([hidden])~:not([hidden]){--tw-space-y-reverse: 0;margin-top:calc(16px * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(16px * var(--tw-space-y-reverse))}.self-start{align-self:flex-start}.overflow-auto{overflow:auto}.overflow-hidden{overflow:hidden}.overflow-visible{overflow:visible}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.overflow-x-hidden{overflow-x:hidden}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.whitespace-normal{white-space:normal}.whitespace-nowrap{white-space:nowrap}.whitespace-pre-line{white-space:pre-line}.whitespace-pre-wrap{white-space:pre-wrap}.whitespace-break-spaces{white-space:break-spaces}.break-words{overflow-wrap:break-word}.rounded{border-radius:4px}.rounded-\[18px\]{border-radius:18px}.rounded-\[28px\]{border-radius:28px}.rounded-\[3px\]{border-radius:3px}.rounded-\[4px\]{border-radius:4px}.rounded-\[9999px\],.rounded-full{border-radius:9999px}.rounded-lg{border-radius:8px}.rounded-md{border-radius:6px}.rounded-sm{border-radius:2px}.rounded-xl{border-radius:12px}.rounded-t-md{border-top-left-radius:6px;border-top-right-radius:6px}.rounded-t-none{border-top-left-radius:0;border-top-right-radius:0}.rounded-tr-none{border-top-right-radius:0}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-b-0{border-bottom-width:0px}.border-b-\[8px\]{border-bottom-width:8px}.border-l-\[8px\]{border-left-width:8px}.border-r-\[8px\]{border-right-width:8px}.border-t,.border-t-\[1px\]{border-top-width:1px}.border-\[\#0f1419\]{--tw-border-opacity: 1;border-color:rgb(15 20 25 / var(--tw-border-opacity, 1))}.border-\[\#525252\]{--tw-border-opacity: 1;border-color:rgb(82 82 82 / var(--tw-border-opacity, 1))}.border-\[\#565856\]{--tw-border-opacity: 1;border-color:rgb(86 88 86 / var(--tw-border-opacity, 1))}.border-\[\#666666\]{--tw-border-opacity: 1;border-color:rgb(102 102 102 / var(--tw-border-opacity, 1))}.border-\[\#E0E0E0\]{--tw-border-opacity: 1;border-color:rgb(224 224 224 / var(--tw-border-opacity, 1))}.border-\[\#cfd7df\]{--tw-border-opacity: 1;border-color:rgb(207 215 223 / var(--tw-border-opacity, 1))}.border-\[\#d1d1d1\]{--tw-border-opacity: 1;border-color:rgb(209 209 209 / var(--tw-border-opacity, 1))}.border-\[\#dddddd\]{--tw-border-opacity: 1;border-color:rgb(221 221 221 / var(--tw-border-opacity, 1))}.border-\[\#eff3f4\]{--tw-border-opacity: 1;border-color:rgb(239 243 244 / var(--tw-border-opacity, 1))}.border-blue-300{--tw-border-opacity: 1;border-color:rgb(147 197 253 / var(--tw-border-opacity, 1))}.border-cyan-600{--tw-border-opacity: 1;border-color:rgb(8 145 178 / var(--tw-border-opacity, 1))}.border-neutral-200{--tw-border-opacity: 1;border-color:rgb(229 229 229 / var(--tw-border-opacity, 1))}.border-neutral-300{--tw-border-opacity: 1;border-color:rgb(212 212 212 / var(--tw-border-opacity, 1))}.border-neutral-400{--tw-border-opacity: 1;border-color:rgb(163 163 163 / var(--tw-border-opacity, 1))}.border-neutral-500{--tw-border-opacity: 1;border-color:rgb(115 115 115 / var(--tw-border-opacity, 1))}.border-orange-300{--tw-border-opacity: 1;border-color:rgb(253 186 116 / var(--tw-border-opacity, 1))}.border-orange-900{--tw-border-opacity: 1;border-color:rgb(124 45 18 / var(--tw-border-opacity, 1))}.border-red-200{--tw-border-opacity: 1;border-color:rgb(254 202 202 / var(--tw-border-opacity, 1))}.border-sky-600{--tw-border-opacity: 1;border-color:rgb(2 132 199 / var(--tw-border-opacity, 1))}.border-b-neutral-800{--tw-border-opacity: 1;border-bottom-color:rgb(38 38 38 / var(--tw-border-opacity, 1))}.border-l-transparent{border-left-color:transparent}.border-r-transparent{border-right-color:transparent}.bg-\[\#0f1419\]{--tw-bg-opacity: 1;background-color:rgb(15 20 25 / var(--tw-bg-opacity, 1))}.bg-\[\#1a1d21\]{--tw-bg-opacity: 1;background-color:rgb(26 29 33 / var(--tw-bg-opacity, 1))}.bg-\[\#292929\]{--tw-bg-opacity: 1;background-color:rgb(41 41 41 / var(--tw-bg-opacity, 1))}.bg-\[\#6a6b6c\]{--tw-bg-opacity: 1;background-color:rgb(106 107 108 / var(--tw-bg-opacity, 1))}.bg-\[\#939393\]{--tw-bg-opacity: 1;background-color:rgb(147 147 147 / var(--tw-bg-opacity, 1))}.bg-\[\#eff3f4\]{--tw-bg-opacity: 1;background-color:rgb(239 243 244 / var(--tw-bg-opacity, 1))}.bg-\[rgb\(25\,195\,125\)\]{--tw-bg-opacity: 1;background-color:rgb(25 195 125 / var(--tw-bg-opacity, 1))}.bg-black{--tw-bg-opacity: 1;background-color:rgb(0 0 0 / var(--tw-bg-opacity, 1))}.bg-blue-100{--tw-bg-opacity: 1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.bg-blue-200{--tw-bg-opacity: 1;background-color:rgb(191 219 254 / var(--tw-bg-opacity, 1))}.bg-blue-500{--tw-bg-opacity: 1;background-color:rgb(59 130 246 / var(--tw-bg-opacity, 1))}.bg-emerald-600{--tw-bg-opacity: 1;background-color:rgb(5 150 105 / var(--tw-bg-opacity, 1))}.bg-green-100{--tw-bg-opacity: 1;background-color:rgb(220 252 231 / var(--tw-bg-opacity, 1))}.bg-green-200{--tw-bg-opacity: 1;background-color:rgb(187 247 208 / var(--tw-bg-opacity, 1))}.bg-green-700{--tw-bg-opacity: 1;background-color:rgb(21 128 61 / var(--tw-bg-opacity, 1))}.bg-neutral-100{--tw-bg-opacity: 1;background-color:rgb(245 245 245 / var(--tw-bg-opacity, 1))}.bg-neutral-125{--tw-bg-opacity: 1;background-color:rgb(241 241 241 / var(--tw-bg-opacity, 1))}.bg-neutral-150{--tw-bg-opacity: 1;background-color:rgb(237 237 237 / var(--tw-bg-opacity, 1))}.bg-neutral-175{--tw-bg-opacity: 1;background-color:rgb(233 233 233 / var(--tw-bg-opacity, 1))}.bg-neutral-200{--tw-bg-opacity: 1;background-color:rgb(229 229 229 / var(--tw-bg-opacity, 1))}.bg-neutral-250{--tw-bg-opacity: 1;background-color:rgb(220 220 220 / var(--tw-bg-opacity, 1))}.bg-neutral-300{--tw-bg-opacity: 1;background-color:rgb(212 212 212 / var(--tw-bg-opacity, 1))}.bg-neutral-400{--tw-bg-opacity: 1;background-color:rgb(163 163 163 / var(--tw-bg-opacity, 1))}.bg-neutral-50{--tw-bg-opacity: 1;background-color:rgb(250 250 250 / var(--tw-bg-opacity, 1))}.bg-neutral-800{--tw-bg-opacity: 1;background-color:rgb(38 38 38 / var(--tw-bg-opacity, 1))}.bg-neutral-900{--tw-bg-opacity: 1;background-color:rgb(23 23 23 / var(--tw-bg-opacity, 1))}.bg-orange-100{--tw-bg-opacity: 1;background-color:rgb(255 237 213 / var(--tw-bg-opacity, 1))}.bg-orange-200{--tw-bg-opacity: 1;background-color:rgb(254 215 170 / var(--tw-bg-opacity, 1))}.bg-red-100{--tw-bg-opacity: 1;background-color:rgb(254 226 226 / var(--tw-bg-opacity, 1))}.bg-red-50{--tw-bg-opacity: 1;background-color:rgb(254 242 242 / var(--tw-bg-opacity, 1))}.bg-red-500{--tw-bg-opacity: 1;background-color:rgb(239 68 68 / var(--tw-bg-opacity, 1))}.bg-transparent{background-color:transparent}.bg-white{--tw-bg-opacity: 1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-zinc-800{--tw-bg-opacity: 1;background-color:rgb(39 39 42 / var(--tw-bg-opacity, 1))}.bg-zinc-900{--tw-bg-opacity: 1;background-color:rgb(24 24 27 / var(--tw-bg-opacity, 1))}.bg-opacity-25{--tw-bg-opacity: .25}.bg-gradient-to-b{background-image:linear-gradient(to bottom,var(--tw-gradient-stops))}.bg-gradient-to-br{background-image:linear-gradient(to bottom right,var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right,var(--tw-gradient-stops))}.from-cyan-500{--tw-gradient-from: #06b6d4 var(--tw-gradient-from-position);--tw-gradient-to: rgb(6 182 212 / 0) var(--tw-gradient-to-position);--tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to)}.from-pink-500{--tw-gradient-from: #ec4899 var(--tw-gradient-from-position);--tw-gradient-to: rgb(236 72 153 / 0) var(--tw-gradient-to-position);--tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to)}.from-white{--tw-gradient-from: #fff var(--tw-gradient-from-position);--tw-gradient-to: rgb(255 255 255 / 0) var(--tw-gradient-to-position);--tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to)}.to-\[\#f3f5f7\]{--tw-gradient-to: #f3f5f7 var(--tw-gradient-to-position)}.to-blue-500{--tw-gradient-to: #3b82f6 var(--tw-gradient-to-position)}.to-orange-400{--tw-gradient-to: #fb923c var(--tw-gradient-to-position)}.stroke-current{stroke:currentColor}.stroke-\[10\]{stroke-width:10}.stroke-\[11\]{stroke-width:11}.stroke-\[2\]{stroke-width:2}.stroke-\[40\]{stroke-width:40}.p-0\.5{padding:2px}.p-1{padding:4px}.p-1\.5{padding:6px}.p-2{padding:8px}.p-2\.5{padding:10px}.p-3{padding:12px}.p-4{padding:16px}.p-6{padding:24px}.p-\[1px\]{padding:1px}.p-\[3px\]{padding:3px}.px-1{padding-left:4px;padding-right:4px}.px-1\.5{padding-left:6px;padding-right:6px}.px-2{padding-left:8px;padding-right:8px}.px-2\.5{padding-left:10px;padding-right:10px}.px-3{padding-left:12px;padding-right:12px}.px-4{padding-left:16px;padding-right:16px}.px-6{padding-left:24px;padding-right:24px}.px-\[10px\]{padding-left:10px;padding-right:10px}.px-\[3px\]{padding-left:3px;padding-right:3px}.px-\[7px\]{padding-left:7px;padding-right:7px}.py-0\.5{padding-top:2px;padding-bottom:2px}.py-1{padding-top:4px;padding-bottom:4px}.py-1\.5{padding-top:6px;padding-bottom:6px}.py-2{padding-top:8px;padding-bottom:8px}.py-2\.5{padding-top:10px;padding-bottom:10px}.py-3{padding-top:12px;padding-bottom:12px}.py-4{padding-top:16px;padding-bottom:16px}.py-5{padding-top:20px;padding-bottom:20px}.py-\[1px\]{padding-top:1px;padding-bottom:1px}.py-\[2px\]{padding-top:2px;padding-bottom:2px}.py-\[3px\]{padding-top:3px;padding-bottom:3px}.py-\[5px\]{padding-top:5px;padding-bottom:5px}.py-\[6\.9px\]{padding-top:6.9px;padding-bottom:6.9px}.py-\[7px\]{padding-top:7px;padding-bottom:7px}.py-\[8px\]{padding-top:8px;padding-bottom:8px}.py-px{padding-top:1px;padding-bottom:1px}.pb-1{padding-bottom:4px}.pb-1\.5{padding-bottom:6px}.pb-2{padding-bottom:8px}.pb-2\.5{padding-bottom:10px}.pb-6{padding-bottom:24px}.pl-1\.5{padding-left:6px}.pl-2{padding-left:8px}.pl-5{padding-left:20px}.pr-1{padding-right:4px}.pr-2{padding-right:8px}.pr-2\.5{padding-right:10px}.pr-4{padding-right:16px}.pr-7{padding-right:28px}.pt-2{padding-top:8px}.pt-\[5px\]{padding-top:5px}.text-left{text-align:left}.text-center{text-align:center}.text-start{text-align:start}.align-sub{vertical-align:sub}.text-2xl{font-size:24px;line-height:32px}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-\[12px\]{font-size:12px}.text-\[13px\]{font-size:13px}.text-\[14px\]{font-size:14px}.text-\[15px\]{font-size:15px}.text-\[9px\]{font-size:9px}.text-base{font-size:16px;line-height:24px}.text-lg{font-size:18px;line-height:28px}.text-md{font-size:15px;line-height:22px}.text-sm{font-size:14px;line-height:20px}.text-xl{font-size:20px;line-height:28px}.text-xs{font-size:12px;line-height:16px}.text-xsm{font-size:13px;line-height:18px}.font-bold{font-weight:700}.font-light{font-weight:300}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.lowercase{text-transform:lowercase}.leading-\[1\.2\]{line-height:1.2}.leading-\[1\.4\]{line-height:1.4}.leading-\[1\],.leading-none{line-height:1}.leading-relaxed{line-height:1.625}.tracking-normal{letter-spacing:0em}.tracking-tight{letter-spacing:-.025em}.tracking-wide{letter-spacing:.025em}.text-\[\#000000BF\]{color:#000000bf}.text-\[\#183247\]{--tw-text-opacity: 1;color:rgb(24 50 71 / var(--tw-text-opacity, 1))}.text-\[\#1d1c1d\]{--tw-text-opacity: 1;color:rgb(29 28 29 / var(--tw-text-opacity, 1))}.text-\[\#242424\]{--tw-text-opacity: 1;color:rgb(36 36 36 / var(--tw-text-opacity, 1))}.text-\[\#2558BB\]{--tw-text-opacity: 1;color:rgb(37 88 187 / var(--tw-text-opacity, 1))}.text-\[\#293239\]{--tw-text-opacity: 1;color:rgb(41 50 57 / var(--tw-text-opacity, 1))}.text-\[\#334155\]{--tw-text-opacity: 1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-\[\#525d71\]{--tw-text-opacity: 1;color:rgb(82 93 113 / var(--tw-text-opacity, 1))}.text-\[\#5e93ff\]{--tw-text-opacity: 1;color:rgb(94 147 255 / var(--tw-text-opacity, 1))}.text-\[\#D8DCDE\]{--tw-text-opacity: 1;color:rgb(216 220 222 / var(--tw-text-opacity, 1))}.text-\[\#FFFFFFBF\]{color:#ffffffbf}.text-\[\#d1d2d3\]{--tw-text-opacity: 1;color:rgb(209 210 211 / var(--tw-text-opacity, 1))}.text-\[\#da7a5a\]{--tw-text-opacity: 1;color:rgb(218 122 90 / var(--tw-text-opacity, 1))}.text-\[\#f2f3f4\]{--tw-text-opacity: 1;color:rgb(242 243 244 / var(--tw-text-opacity, 1))}.text-black{--tw-text-opacity: 1;color:rgb(0 0 0 / var(--tw-text-opacity, 1))}.text-blue-500{--tw-text-opacity: 1;color:rgb(59 130 246 / var(--tw-text-opacity, 1))}.text-blue-600{--tw-text-opacity: 1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-blue-700{--tw-text-opacity: 1;color:rgb(29 78 216 / var(--tw-text-opacity, 1))}.text-blue-800{--tw-text-opacity: 1;color:rgb(30 64 175 / var(--tw-text-opacity, 1))}.text-blue-900{--tw-text-opacity: 1;color:rgb(30 58 138 / var(--tw-text-opacity, 1))}.text-cyan-600{--tw-text-opacity: 1;color:rgb(8 145 178 / var(--tw-text-opacity, 1))}.text-emerald-600{--tw-text-opacity: 1;color:rgb(5 150 105 / var(--tw-text-opacity, 1))}.text-green-700{--tw-text-opacity: 1;color:rgb(21 128 61 / var(--tw-text-opacity, 1))}.text-green-800{--tw-text-opacity: 1;color:rgb(22 101 52 / var(--tw-text-opacity, 1))}.text-green-900{--tw-text-opacity: 1;color:rgb(20 83 45 / var(--tw-text-opacity, 1))}.text-indigo-600{--tw-text-opacity: 1;color:rgb(79 70 229 / var(--tw-text-opacity, 1))}.text-neutral-300{--tw-text-opacity: 1;color:rgb(212 212 212 / var(--tw-text-opacity, 1))}.text-neutral-400{--tw-text-opacity: 1;color:rgb(163 163 163 / var(--tw-text-opacity, 1))}.text-neutral-450{--tw-text-opacity: 1;color:rgb(139 139 139 / var(--tw-text-opacity, 1))}.text-neutral-50{--tw-text-opacity: 1;color:rgb(250 250 250 / var(--tw-text-opacity, 1))}.text-neutral-500{--tw-text-opacity: 1;color:rgb(115 115 115 / var(--tw-text-opacity, 1))}.text-neutral-550{--tw-text-opacity: 1;color:rgb(98 98 98 / var(--tw-text-opacity, 1))}.text-neutral-600{--tw-text-opacity: 1;color:rgb(82 82 82 / var(--tw-text-opacity, 1))}.text-neutral-700{--tw-text-opacity: 1;color:rgb(64 64 64 / var(--tw-text-opacity, 1))}.text-neutral-800{--tw-text-opacity: 1;color:rgb(38 38 38 / var(--tw-text-opacity, 1))}.text-neutral-900{--tw-text-opacity: 1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.text-orange-400{--tw-text-opacity: 1;color:rgb(251 146 60 / var(--tw-text-opacity, 1))}.text-orange-500{--tw-text-opacity: 1;color:rgb(249 115 22 / var(--tw-text-opacity, 1))}.text-orange-700{--tw-text-opacity: 1;color:rgb(194 65 12 / var(--tw-text-opacity, 1))}.text-orange-800{--tw-text-opacity: 1;color:rgb(154 52 18 / var(--tw-text-opacity, 1))}.text-orange-900{--tw-text-opacity: 1;color:rgb(124 45 18 / var(--tw-text-opacity, 1))}.text-pink-600{--tw-text-opacity: 1;color:rgb(219 39 119 / var(--tw-text-opacity, 1))}.text-red-500{--tw-text-opacity: 1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.text-red-600{--tw-text-opacity: 1;color:rgb(220 38 38 / var(--tw-text-opacity, 1))}.text-red-700{--tw-text-opacity: 1;color:rgb(185 28 28 / var(--tw-text-opacity, 1))}.text-red-800{--tw-text-opacity: 1;color:rgb(153 27 27 / var(--tw-text-opacity, 1))}.text-sky-500{--tw-text-opacity: 1;color:rgb(14 165 233 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity: 1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-600{--tw-text-opacity: 1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity: 1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-zinc-100{--tw-text-opacity: 1;color:rgb(244 244 245 / var(--tw-text-opacity, 1))}.underline{text-decoration-line:underline}.line-through{text-decoration-line:line-through}.underline-offset-4{text-underline-offset:4px}.underline-offset-6{text-underline-offset:6px}.accent-cyan-600{accent-color:#0891b2}.opacity-0{opacity:0}.opacity-100{opacity:1}.opacity-25{opacity:.25}.opacity-50{opacity:.5}.opacity-90{opacity:.9}.shadow{--tw-shadow: 0 1px 3px 0 rgb(0 0 0 / .1), 0 1px 2px -1px rgb(0 0 0 / .1);--tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000),var(--tw-ring-shadow, 0 0 #0000),var(--tw-shadow)}.shadow-2xl{--tw-shadow: 0 25px 50px -12px rgb(0 0 0 / .25);--tw-shadow-colored: 0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000),var(--tw-ring-shadow, 0 0 #0000),var(--tw-shadow)}.shadow-\[0_2px_4px_rgb\(0\,0\,0\,0\.2\)\]{--tw-shadow: 0 2px 4px rgb(0,0,0,.2);--tw-shadow-colored: 0 2px 4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000),var(--tw-ring-shadow, 0 0 #0000),var(--tw-shadow)}.shadow-lg{--tw-shadow: 0 10px 15px -3px rgb(0 0 0 / .1), 0 4px 6px -4px rgb(0 0 0 / .1);--tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000),var(--tw-ring-shadow, 0 0 #0000),var(--tw-shadow)}.shadow-sm{--tw-shadow: 0 1px 2px 0 rgb(0 0 0 / .05);--tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000),var(--tw-ring-shadow, 0 0 #0000),var(--tw-shadow)}.outline-none{outline:2px solid transparent;outline-offset:2px}.outline{outline-style:solid}.ring-1{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.ring-inset{--tw-ring-inset: inset}.ring-neutral-200{--tw-ring-opacity: 1;--tw-ring-color: rgb(229 229 229 / var(--tw-ring-opacity, 1))}.blur{--tw-blur: blur(8px);filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow{--tw-drop-shadow: drop-shadow(0 1px 2px rgb(0 0 0 / .1)) drop-shadow(0 1px 1px rgb(0 0 0 / .06));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow-2xl{--tw-drop-shadow: drop-shadow(0 25px 25px rgb(0 0 0 / .15));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow-md{--tw-drop-shadow: drop-shadow(0 4px 3px rgb(0 0 0 / .07)) drop-shadow(0 2px 2px rgb(0 0 0 / .06));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow-sm{--tw-drop-shadow: drop-shadow(0 1px 1px rgb(0 0 0 / .05));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur-xs{--tw-backdrop-blur: blur(2px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-colors{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-opacity{transition-property:opacity;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.duration-100{transition-duration:.1s}.duration-150{transition-duration:.15s}.duration-200{transition-duration:.2s}.duration-300{transition-duration:.3s}.ease-in{transition-timing-function:cubic-bezier(.4,0,1,1)}.ease-in-out{transition-timing-function:cubic-bezier(.4,0,.2,1)}.ease-out{transition-timing-function:cubic-bezier(0,0,.2,1)}.truncate{white-space:nowrap;text-overflow:ellipsis;overflow:hidden;overflow:clip;overflow-clip-margin:2px;min-width:0}.\[-webkit-text-security\:disc\]{-webkit-text-security:disc}.\[background-image\:linear-gradient\(to_right\,theme\(colors\.cyan\.500\)\,theme\(colors\.blue\.500\)\)\]{background-image:linear-gradient(to right,#06b6d4,#3b82f6)}.\[background-image\:…\]{background-image:…}.\[border-radius\:inherit\]{border-radius:inherit}.\[field-sizing\:content\]{field-sizing:content}.\[overflow-wrap\:anywhere\]{overflow-wrap:anywhere}.\[padding-inline-start\:25px\]{padding-inline-start:25px}.\[scrollbar-width\:none\]{scrollbar-width:none}.\[stroke-width\:0\.3px\]{stroke-width:.3px}.\[stroke-width\:1\.5px\]{stroke-width:1.5px}.\[stroke-width\:1\.6\]{stroke-width:1.6}.\[stroke-width\:1\.9px\]{stroke-width:1.9px}.\[stroke-width\:10px\]{stroke-width:10px}.\[stroke-width\:16\]{stroke-width:16}.\[stroke-width\:2\.4\]{stroke-width:2.4}.\[stroke-width\:2\.5px\]{stroke-width:2.5px}.\[stroke-width\:2\.7px\]{stroke-width:2.7px}.\[stroke-width\:5px\]{stroke-width:5px}.\[stroke-width\:80\]{stroke-width:80}.\[stroke-width\:8px\]{stroke-width:8px}.codeblocks{counter-reset:sh-line-number}:host{--sh-class: #e3eaf2;--sh-identifier: #c699e3;--sh-sign: #66cccc;--sh-property: #c699e3;--sh-entity: #66cccc;--sh-jsxliterals: #e3eaf2;--sh-string: #91d076;--sh-keyword: #e9ae7e;--sh-comment: #8da1b9}.sh__line:before{counter-increment:sh-line-number 1;content:counter(sh-line-number);margin-right:20px;margin-left:20px;color:#a4a4a4}.custom-scrollbar{scrollbar-color:#a3a3a3 transparent;scrollbar-width:thin}.katex-html{display:none}.placeholder\:text-xsm::placeholder{font-size:13px;line-height:18px}.placeholder\:text-slate-400::placeholder{--tw-text-opacity: 1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.first\:mt-0:first-child{margin-top:0}.last\:mb-0:last-child{margin-bottom:0}.empty\:mb-0:empty{margin-bottom:0}.empty\:mt-0:empty{margin-top:0}.focus-within\:border-sky-600:focus-within{--tw-border-opacity: 1;border-color:rgb(2 132 199 / var(--tw-border-opacity, 1))}.hover\:cursor-nwse-resize:hover{cursor:nwse-resize}.hover\:border-\[\#272c30\]:hover{--tw-border-opacity: 1;border-color:rgb(39 44 48 / var(--tw-border-opacity, 1))}.hover\:border-\[\#d7dbdc\]:hover{--tw-border-opacity: 1;border-color:rgb(215 219 220 / var(--tw-border-opacity, 1))}.hover\:bg-\[\#112655\]:hover{--tw-bg-opacity: 1;background-color:rgb(17 38 85 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#242628\]:hover{--tw-bg-opacity: 1;background-color:rgb(36 38 40 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#272c30\]:hover{--tw-bg-opacity: 1;background-color:rgb(39 44 48 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#2c2d30\]:hover{--tw-bg-opacity: 1;background-color:rgb(44 45 48 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#3d3d3d\]:hover{--tw-bg-opacity: 1;background-color:rgb(61 61 61 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#c5c5c5\]:hover{--tw-bg-opacity: 1;background-color:rgb(197 197 197 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#d7dbdc\]:hover{--tw-bg-opacity: 1;background-color:rgb(215 219 220 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#eaf1ff\]:hover{--tw-bg-opacity: 1;background-color:rgb(234 241 255 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#f0f0f0\]:hover{--tw-bg-opacity: 1;background-color:rgb(240 240 240 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#f3f5f7\]:hover{--tw-bg-opacity: 1;background-color:rgb(243 245 247 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#f8f8f8\]:hover{--tw-bg-opacity: 1;background-color:rgb(248 248 248 / var(--tw-bg-opacity, 1))}.hover\:bg-\[rgba\(140\,140\,140\,0\.1\)\]:hover{background-color:#8c8c8c1a}.hover\:bg-\[rgba\(140\,140\,140\,0\.15\)\]:hover{background-color:#8c8c8c26}.hover\:bg-\[rgba\(31\,115\,183\,0\.08\)\]:hover{background-color:#1f73b714}.hover\:bg-blue-200:hover{--tw-bg-opacity: 1;background-color:rgb(191 219 254 / var(--tw-bg-opacity, 1))}.hover\:bg-blue-600:hover{--tw-bg-opacity: 1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.hover\:bg-emerald-600\/90:hover{background-color:#059669e6}.hover\:bg-green-100:hover{--tw-bg-opacity: 1;background-color:rgb(220 252 231 / var(--tw-bg-opacity, 1))}.hover\:bg-green-200:hover{--tw-bg-opacity: 1;background-color:rgb(187 247 208 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-100:hover{--tw-bg-opacity: 1;background-color:rgb(245 245 245 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-150:hover{--tw-bg-opacity: 1;background-color:rgb(237 237 237 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-175:hover{--tw-bg-opacity: 1;background-color:rgb(233 233 233 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-200:hover{--tw-bg-opacity: 1;background-color:rgb(229 229 229 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-250:hover{--tw-bg-opacity: 1;background-color:rgb(220 220 220 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-300:hover{--tw-bg-opacity: 1;background-color:rgb(212 212 212 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-400:hover{--tw-bg-opacity: 1;background-color:rgb(163 163 163 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-700:hover{--tw-bg-opacity: 1;background-color:rgb(64 64 64 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-800:hover{--tw-bg-opacity: 1;background-color:rgb(38 38 38 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-900\/90:hover{background-color:#171717e6}.hover\:bg-orange-100:hover{--tw-bg-opacity: 1;background-color:rgb(255 237 213 / var(--tw-bg-opacity, 1))}.hover\:bg-orange-200:hover{--tw-bg-opacity: 1;background-color:rgb(254 215 170 / var(--tw-bg-opacity, 1))}.hover\:bg-orange-900:hover{--tw-bg-opacity: 1;background-color:rgb(124 45 18 / var(--tw-bg-opacity, 1))}.hover\:bg-red-100:hover{--tw-bg-opacity: 1;background-color:rgb(254 226 226 / var(--tw-bg-opacity, 1))}.hover\:bg-red-600:hover{--tw-bg-opacity: 1;background-color:rgb(220 38 38 / var(--tw-bg-opacity, 1))}.hover\:bg-white:hover{--tw-bg-opacity: 1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.hover\:bg-zinc-800:hover{--tw-bg-opacity: 1;background-color:rgb(39 39 42 / var(--tw-bg-opacity, 1))}.hover\:bg-gradient-to-bl:hover{background-image:linear-gradient(to bottom left,var(--tw-gradient-stops))}.hover\:bg-none:hover{background-image:none}.hover\:text-\[\#0C3B5E\]:hover{--tw-text-opacity: 1;color:rgb(12 59 94 / var(--tw-text-opacity, 1))}.hover\:text-\[\#1d1c1d\]:hover{--tw-text-opacity: 1;color:rgb(29 28 29 / var(--tw-text-opacity, 1))}.hover\:text-\[\#242424\]:hover{--tw-text-opacity: 1;color:rgb(36 36 36 / var(--tw-text-opacity, 1))}.hover\:text-\[\#96b7fa\]:hover{--tw-text-opacity: 1;color:rgb(150 183 250 / var(--tw-text-opacity, 1))}.hover\:text-\[\#B4D6FA\]:hover{--tw-text-opacity: 1;color:rgb(180 214 250 / var(--tw-text-opacity, 1))}.hover\:text-\[rgba\(0\,0\,0\,0\.9\)\]:hover{color:#000000e6}.hover\:text-\[rgba\(255\,255\,255\,0\.9\)\]:hover{color:#ffffffe6}.hover\:text-black:hover{--tw-text-opacity: 1;color:rgb(0 0 0 / var(--tw-text-opacity, 1))}.hover\:text-blue-800:hover{--tw-text-opacity: 1;color:rgb(30 64 175 / var(--tw-text-opacity, 1))}.hover\:text-blue-900:hover{--tw-text-opacity: 1;color:rgb(30 58 138 / var(--tw-text-opacity, 1))}.hover\:text-green-700:hover{--tw-text-opacity: 1;color:rgb(21 128 61 / var(--tw-text-opacity, 1))}.hover\:text-neutral-100:hover{--tw-text-opacity: 1;color:rgb(245 245 245 / var(--tw-text-opacity, 1))}.hover\:text-neutral-50:hover{--tw-text-opacity: 1;color:rgb(250 250 250 / var(--tw-text-opacity, 1))}.hover\:text-neutral-700:hover{--tw-text-opacity: 1;color:rgb(64 64 64 / var(--tw-text-opacity, 1))}.hover\:text-neutral-800:hover{--tw-text-opacity: 1;color:rgb(38 38 38 / var(--tw-text-opacity, 1))}.hover\:text-neutral-900:hover{--tw-text-opacity: 1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.hover\:text-orange-900:hover{--tw-text-opacity: 1;color:rgb(124 45 18 / var(--tw-text-opacity, 1))}.hover\:text-red-400:hover{--tw-text-opacity: 1;color:rgb(248 113 113 / var(--tw-text-opacity, 1))}.hover\:text-sky-600:hover{--tw-text-opacity: 1;color:rgb(2 132 199 / var(--tw-text-opacity, 1))}.hover\:text-slate-900:hover{--tw-text-opacity: 1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.hover\:text-white:hover{--tw-text-opacity: 1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:underline:hover{text-decoration-line:underline}.hover\:decoration-2:hover{text-decoration-thickness:2px}.hover\:underline-offset-4:hover{text-underline-offset:4px}.hover\:ring-1:hover{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.hover\:ring-\[\#8c919a\]:hover{--tw-ring-opacity: 1;--tw-ring-color: rgb(140 145 154 / var(--tw-ring-opacity, 1))}.hover\:ring-\[\#dadbdd\]:hover{--tw-ring-opacity: 1;--tw-ring-color: rgb(218 219 221 / var(--tw-ring-opacity, 1))}.hover\:drop-shadow-md:hover{--tw-drop-shadow: drop-shadow(0 4px 3px rgb(0 0 0 / .07)) drop-shadow(0 2px 2px rgb(0 0 0 / .06));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.hover\:\[background-image\:linear-gradient\(to_bottom_left\,theme\(colors\.cyan\.500\)\,theme\(colors\.blue\.500\)\)\]:hover{background-image:linear-gradient(to bottom left,#06b6d4,#3b82f6)}.focus\:border-cyan-500:focus{--tw-border-opacity: 1;border-color:rgb(6 182 212 / var(--tw-border-opacity, 1))}.focus\:bg-neutral-150:focus{--tw-bg-opacity: 1;background-color:rgb(237 237 237 / var(--tw-bg-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:outline-cyan-500:focus{outline-color:#06b6d4}.focus\:ring-0:focus{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.focus\:ring-2:focus{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.focus\:ring-4:focus{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(4px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.focus\:ring-blue-500:focus{--tw-ring-opacity: 1;--tw-ring-color: rgb(59 130 246 / var(--tw-ring-opacity, 1))}.focus\:ring-cyan-300:focus{--tw-ring-opacity: 1;--tw-ring-color: rgb(103 232 249 / var(--tw-ring-opacity, 1))}.focus\:ring-cyan-500:focus{--tw-ring-opacity: 1;--tw-ring-color: rgb(6 182 212 / var(--tw-ring-opacity, 1))}.focus\:ring-neutral-500:focus{--tw-ring-opacity: 1;--tw-ring-color: rgb(115 115 115 / var(--tw-ring-opacity, 1))}.focus\:ring-pink-200:focus{--tw-ring-opacity: 1;--tw-ring-color: rgb(251 207 232 / var(--tw-ring-opacity, 1))}.focus-visible\:outline-none:focus-visible{outline:2px solid transparent;outline-offset:2px}.focus-visible\:ring-1:focus-visible{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.focus-visible\:ring-2:focus-visible{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.focus-visible\:ring-blue-300:focus-visible{--tw-ring-opacity: 1;--tw-ring-color: rgb(147 197 253 / var(--tw-ring-opacity, 1))}.active\:cursor-grabbing:active{cursor:grabbing}.active\:bg-neutral-200:active{--tw-bg-opacity: 1;background-color:rgb(229 229 229 / var(--tw-bg-opacity, 1))}.enabled\:hover\:bg-red-100:hover:enabled{--tw-bg-opacity: 1;background-color:rgb(254 226 226 / var(--tw-bg-opacity, 1))}.enabled\:hover\:text-neutral-900:hover:enabled{--tw-text-opacity: 1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.enabled\:hover\:text-red-600:hover:enabled{--tw-text-opacity: 1;color:rgb(220 38 38 / var(--tw-text-opacity, 1))}.disabled\:pointer-events-none:disabled{pointer-events:none}.disabled\:cursor-not-allowed:disabled{cursor:not-allowed}.disabled\:select-none:disabled{-webkit-user-select:none;user-select:none}.disabled\:bg-neutral-100:disabled{--tw-bg-opacity: 1;background-color:rgb(245 245 245 / var(--tw-bg-opacity, 1))}.disabled\:bg-neutral-500:disabled{--tw-bg-opacity: 1;background-color:rgb(115 115 115 / var(--tw-bg-opacity, 1))}.disabled\:bg-orange-900:disabled{--tw-bg-opacity: 1;background-color:rgb(124 45 18 / var(--tw-bg-opacity, 1))}.disabled\:text-neutral-400:disabled{--tw-text-opacity: 1;color:rgb(163 163 163 / var(--tw-text-opacity, 1))}.disabled\:text-white:disabled{--tw-text-opacity: 1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.disabled\:no-underline:disabled{text-decoration-line:none}.disabled\:opacity-50:disabled{opacity:.5}.disabled\:opacity-60:disabled{opacity:.6}.group:hover .group-hover\:border-neutral-400{--tw-border-opacity: 1;border-color:rgb(163 163 163 / var(--tw-border-opacity, 1))}.group:hover .group-hover\:bg-neutral-150{--tw-bg-opacity: 1;background-color:rgb(237 237 237 / var(--tw-bg-opacity, 1))}.group:hover .group-hover\:bg-neutral-200{--tw-bg-opacity: 1;background-color:rgb(229 229 229 / var(--tw-bg-opacity, 1))}.group:hover .group-hover\:text-neutral-700{--tw-text-opacity: 1;color:rgb(64 64 64 / var(--tw-text-opacity, 1))}.group:hover .group-hover\:text-neutral-800{--tw-text-opacity: 1;color:rgb(38 38 38 / var(--tw-text-opacity, 1))}.group:hover .group-hover\:text-neutral-900{--tw-text-opacity: 1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.group:hover .group-hover\:text-red-400{--tw-text-opacity: 1;color:rgb(248 113 113 / var(--tw-text-opacity, 1))}.group:hover .group-hover\:text-red-500{--tw-text-opacity: 1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.group:focus .group-focus\:border-neutral-400{--tw-border-opacity: 1;border-color:rgb(163 163 163 / var(--tw-border-opacity, 1))}.group:focus .group-focus\:bg-neutral-150{--tw-bg-opacity: 1;background-color:rgb(237 237 237 / var(--tw-bg-opacity, 1))}.group:focus .group-focus\:bg-neutral-200{--tw-bg-opacity: 1;background-color:rgb(229 229 229 / var(--tw-bg-opacity, 1))}.group:focus .group-focus\:text-neutral-700{--tw-text-opacity: 1;color:rgb(64 64 64 / var(--tw-text-opacity, 1))}.group:focus .group-focus\:text-neutral-800{--tw-text-opacity: 1;color:rgb(38 38 38 / var(--tw-text-opacity, 1))}.group:focus .group-focus\:text-neutral-900{--tw-text-opacity: 1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.group:focus .group-focus\:text-red-400{--tw-text-opacity: 1;color:rgb(248 113 113 / var(--tw-text-opacity, 1))}.group:focus .group-focus\:text-red-500{--tw-text-opacity: 1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.group[data-selected=true] .group-data-\[selected\=true\]\:bg-neutral-200{--tw-bg-opacity: 1;background-color:rgb(229 229 229 / var(--tw-bg-opacity, 1))}.group[data-selected=true] .group-data-\[selected\=true\]\:text-neutral-900{--tw-text-opacity: 1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.group[data-selected=true] .group-data-\[selected\=true\]\:text-red-500{--tw-text-opacity: 1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}@media (min-width: 400px){.min-\[400px\]\:max-w-\[100px\]{max-width:100px}}@media (min-width: 438px){.min-\[438px\]\:w-\[400px\]{width:400px}}@media (min-width: 550px){.min-\[550px\]\:w-\[470px\]{width:470px}}@media (min-width: 768px){.md\:w-\[600px\]{width:600px}.md\:max-w-fit{max-width:fit-content}}.\[\&\:not\(\:last-child\)\]\:pb-0\.5:not(:last-child){padding-bottom:2px}.\[\&\>div\]\:h-full>div{height:100%}.\[\&\>li\]\:ml-5>li{margin-left:20px}.\[\&_a\]\:underline a{text-decoration-line:underline}</style></head><body style="font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; line-height: 18px; user-select: text; font-weight: normal; letter-spacing: normal; -webkit-font-smoothing: auto;"><div><div class="fixed z-[9999995] flex select-none items-center transition-opacity duration-200 ease-in-out" style="opacity: 0; pointer-events: none;"><div class="cursor-pointer rounded-full p-1"><div class="h-2.5 w-2.5 rounded-full bg-blue-500 shadow-[0_2px_4px_rgb(0,0,0,0.2)]"></div></div></div></div></body></html></template></cgw-writer-modal><button id="cgw_action_btn" tabindex="-1" style="position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;"></button><webhighlights-element-registry elements-count="46"></webhighlights-element-registry><div id="webhighlights-notificationshldjnlbobkdkghfidgoecgmklcemanhm"></div><style id="web-highlights-global-style-variables">:root { --wh-slate-50: #f8fafc;--wh-slate-100: #f1f5f9;--wh-slate-200: #e2e8f0;--wh-slate-300: #cbd5e1;--wh-slate-400: #94a3b8;--wh-slate-500: #64748b;--wh-slate-600: #475569;--wh-slate-700: #334155;--wh-slate-800: #1e293b;--wh-slate-900: #0f172a;--wh-slate-950: #020617;--wh-primary-50: rgb(188, 220, 205);--wh-primary-100: rgb(154, 208, 185);--wh-primary-200: rgb(120, 197, 164);--wh-primary-300: rgb(86, 186, 144);--wh-primary-400: rgb(53, 176, 125);--wh-primary-500: rgb(0, 179, 122);--wh-primary-600: hsl(161, 100%, 33%);--wh-primary-700: hsl(161, 100%, 31%);--wh-primary-800: hsl(161, 100%, 29%);--wh-primary-900: hsl(161, 100%, 25%);--wh-primary-950: hsl(161, 100%, 20%);--wh-secondary-50: hsl(218, 22%, 27%);--wh-secondary-100: hsl(218, 22%, 23%);--wh-secondary-200: hsl(218, 22%, 22%);--wh-secondary-300: hsl(218, 22%, 19%);--wh-secondary-400: hsl(218, 22%, 17%);--wh-secondary-500: hsl(218, 22%, 15%);--wh-secondary-600: hsl(218, 22%, 13%);--wh-secondary-700: hsl(218, 22%, 11%);--wh-secondary-800: hsl(218, 22%, 9%);--wh-secondary-900: hsl(218, 22%, 5%);--wh-secondary-950: hsl(218, 22%, 3%);--wh-gray-50: #f9fafb;--wh-gray-100: #f3f4f6;--wh-gray-200: #e5e7eb;--wh-gray-300: #d1d5db;--wh-gray-400: #9ca3af;--wh-gray-500: #6b7280;--wh-gray-600: #4b5563;--wh-gray-700: #374151;--wh-gray-800: #1f2937;--wh-gray-900: #111827;--wh-gray-950: #030712;--wh-zinc-50: #fafafa;--wh-zinc-100: #f4f4f5;--wh-zinc-200: #e4e4e7;--wh-zinc-300: #d4d4d8;--wh-zinc-400: #a1a1aa;--wh-zinc-500: #71717a;--wh-zinc-600: #52525b;--wh-zinc-700: #3f3f46;--wh-zinc-800: #27272a;--wh-zinc-900: #18181b;--wh-zinc-950: #09090b;--wh-neutral-50: #fafafa;--wh-neutral-100: #f5f5f5;--wh-neutral-200: #e5e5e5;--wh-neutral-300: #d4d4d4;--wh-neutral-400: #a3a3a3;--wh-neutral-500: #737373;--wh-neutral-600: #525252;--wh-neutral-700: #404040;--wh-neutral-800: #262626;--wh-neutral-900: #171717;--wh-neutral-950: #0a0a0a;--wh-stone-50: #fafaf9;--wh-stone-100: #f5f5f4;--wh-stone-200: #e7e5e4;--wh-stone-300: #d6d3d1;--wh-stone-400: #a8a29e;--wh-stone-500: #78716c;--wh-stone-600: #57534e;--wh-stone-700: #44403c;--wh-stone-800: #292524;--wh-stone-900: #1c1917;--wh-stone-950: #0c0a09;--wh-red-50: #fef2f2;--wh-red-100: #fee2e2;--wh-red-200: #fecaca;--wh-red-300: #fca5a5;--wh-red-400: #f87171;--wh-red-500: #ef4444;--wh-red-600: #dc2626;--wh-red-700: #b91c1c;--wh-red-800: #991b1b;--wh-red-900: #7f1d1d;--wh-red-950: #450a0a;--wh-orange-50: #fff7ed;--wh-orange-100: #ffedd5;--wh-orange-200: #fed7aa;--wh-orange-300: #fdba74;--wh-orange-400: #fb923c;--wh-orange-500: #f97316;--wh-orange-600: #ea580c;--wh-orange-700: #c2410c;--wh-orange-800: #9a3412;--wh-orange-900: #7c2d12;--wh-orange-950: #431407;--wh-amber-50: #fffbeb;--wh-amber-100: #fef3c7;--wh-amber-200: #fde68a;--wh-amber-300: #fcd34d;--wh-amber-400: #fbbf24;--wh-amber-500: #f59e0b;--wh-amber-600: #d97706;--wh-amber-700: #b45309;--wh-amber-800: #92400e;--wh-amber-900: #78350f;--wh-amber-950: #451a03;--wh-yellow-50: #fefce8;--wh-yellow-100: #fef9c3;--wh-yellow-200: #fef08a;--wh-yellow-300: #fde047;--wh-yellow-400: #facc15;--wh-yellow-500: #eab308;--wh-yellow-600: #ca8a04;--wh-yellow-700: #a16207;--wh-yellow-800: #854d0e;--wh-yellow-900: #713f12;--wh-yellow-950: #422006;--wh-lime-50: #f7fee7;--wh-lime-100: #ecfccb;--wh-lime-200: #d9f99d;--wh-lime-300: #bef264;--wh-lime-400: #a3e635;--wh-lime-500: #84cc16;--wh-lime-600: #65a30d;--wh-lime-700: #4d7c0f;--wh-lime-800: #3f6212;--wh-lime-900: #365314;--wh-lime-950: #1a2e05;--wh-green-50: #f0fdf4;--wh-green-100: #dcfce7;--wh-green-200: #bbf7d0;--wh-green-300: #86efac;--wh-green-400: #4ade80;--wh-green-500: #22c55e;--wh-green-600: #16a34a;--wh-green-700: #15803d;--wh-green-800: #166534;--wh-green-900: #14532d;--wh-green-950: #052e16;--wh-emerald-50: #ecfdf5;--wh-emerald-100: #d1fae5;--wh-emerald-200: #a7f3d0;--wh-emerald-300: #6ee7b7;--wh-emerald-400: #34d399;--wh-emerald-500: #10b981;--wh-emerald-600: #059669;--wh-emerald-700: #047857;--wh-emerald-800: #065f46;--wh-emerald-900: #064e3b;--wh-emerald-950: #022c22;--wh-teal-50: #f0fdfa;--wh-teal-100: #ccfbf1;--wh-teal-200: #99f6e4;--wh-teal-300: #5eead4;--wh-teal-400: #2dd4bf;--wh-teal-500: #14b8a6;--wh-teal-600: #0d9488;--wh-teal-700: #0f766e;--wh-teal-800: #115e59;--wh-teal-900: #134e4a;--wh-teal-950: #042f2e;--wh-cyan-50: #ecfeff;--wh-cyan-100: #cffafe;--wh-cyan-200: #a5f3fc;--wh-cyan-300: #67e8f9;--wh-cyan-400: #22d3ee;--wh-cyan-500: #06b6d4;--wh-cyan-600: #0891b2;--wh-cyan-700: #0e7490;--wh-cyan-800: #155e75;--wh-cyan-900: #164e63;--wh-cyan-950: #083344;--wh-sky-50: #f0f9ff;--wh-sky-100: #e0f2fe;--wh-sky-200: #bae6fd;--wh-sky-300: #7dd3fc;--wh-sky-400: #38bdf8;--wh-sky-500: #0ea5e9;--wh-sky-600: #0284c7;--wh-sky-700: #0369a1;--wh-sky-800: #075985;--wh-sky-900: #0c4a6e;--wh-sky-950: #082f49;--wh-blue-50: #eff6ff;--wh-blue-100: #dbeafe;--wh-blue-200: #bfdbfe;--wh-blue-300: #93c5fd;--wh-blue-400: #60a5fa;--wh-blue-500: #3b82f6;--wh-blue-600: #2563eb;--wh-blue-700: #1d4ed8;--wh-blue-800: #1e40af;--wh-blue-900: #1e3a8a;--wh-blue-950: #172554;--wh-indigo-50: #eef2ff;--wh-indigo-100: #e0e7ff;--wh-indigo-200: #c7d2fe;--wh-indigo-300: #a5b4fc;--wh-indigo-400: #818cf8;--wh-indigo-500: #6366f1;--wh-indigo-600: #4f46e5;--wh-indigo-700: #4338ca;--wh-indigo-800: #3730a3;--wh-indigo-900: #312e81;--wh-indigo-950: #1e1b4b;--wh-violet-50: #f5f3ff;--wh-violet-100: #ede9fe;--wh-violet-200: #ddd6fe;--wh-violet-300: #c4b5fd;--wh-violet-400: #a78bfa;--wh-violet-500: #8b5cf6;--wh-violet-600: #7c3aed;--wh-violet-700: #6d28d9;--wh-violet-800: #5b21b6;--wh-violet-900: #4c1d95;--wh-violet-950: #2e1065;--wh-purple-50: #faf5ff;--wh-purple-100: #f3e8ff;--wh-purple-200: #e9d5ff;--wh-purple-300: #d8b4fe;--wh-purple-400: #c084fc;--wh-purple-500: #a855f7;--wh-purple-600: #9333ea;--wh-purple-700: #7e22ce;--wh-purple-800: #6b21a8;--wh-purple-900: #581c87;--wh-purple-950: #3b0764;--wh-fuchsia-50: #fdf4ff;--wh-fuchsia-100: #fae8ff;--wh-fuchsia-200: #f5d0fe;--wh-fuchsia-300: #f0abfc;--wh-fuchsia-400: #e879f9;--wh-fuchsia-500: #d946ef;--wh-fuchsia-600: #c026d3;--wh-fuchsia-700: #a21caf;--wh-fuchsia-800: #86198f;--wh-fuchsia-900: #701a75;--wh-fuchsia-950: #4a044e;--wh-pink-50: #fdf2f8;--wh-pink-100: #fce7f3;--wh-pink-200: #fbcfe8;--wh-pink-300: #f9a8d4;--wh-pink-400: #f472b6;--wh-pink-500: #ec4899;--wh-pink-600: #db2777;--wh-pink-700: #be185d;--wh-pink-800: #9d174d;--wh-pink-900: #831843;--wh-pink-950: #500724;--wh-rose-50: #fff1f2;--wh-rose-100: #ffe4e6;--wh-rose-200: #fecdd3;--wh-rose-300: #fda4af;--wh-rose-400: #fb7185;--wh-rose-500: #f43f5e;--wh-rose-600: #e11d48;--wh-rose-700: #be123c;--wh-rose-800: #9f1239;--wh-rose-900: #881337;--wh-rose-950: #4c0519;--wh-primary-color: var(--wh-primary-500);--wh-primary-color-hover: #00a16e;--wh-primary-color-transparent: #00aa7424;--wh-primary-color-transparent-light: #00a8730f;--wh-primary-color-transparent-strong: #00a87340;--wh-primary-color-transparent-stronger: hsla(161, 100%, 33%, 0.5);--wh-primary-color-transparent-strongest: hsla(161, 100%, 33%, 0.75);--wh-primary-light: #53e3a6;--wh-primary-dark: #007f4b;--wh-primary-dark-hover: #017444;--wh-primary-shadow: #00b07841;--wh-primary-shadow-2: #00b07870;--wh-primary-border-color: #c8c8c870;--wh-warning-color: #ff5a1f;--wh-warning-color-light: #feecdc;--wh-ai-primary-decimal: 167, 139, 250;--wh-ai-secondary-decimal  : 147, 51, 234;--wh-ai-accent-decimal: 244, 114, 182;--wh-ai-primary: rgba(var(--wh-ai-primary-decimal), 1);--wh-ai-secondary: rgba(var(--wh-ai-secondary-decimal), 1);--wh-ai-accent: rgba(var(--wh-ai-accent-decimal), 1);--secondary-color: #3d4455;--secondary-color-hover: #3a4052;--secondary-color-transparent: #3d44556b;--secondary-light: #4c556d;--secondary-dark: #252934;--secondary-dark-hover: #191b22;--secondary-dark-transparent: #2e2d2d46;--highlight-color: #92ffaa;--error-color: #d62d4c;--error-color-light: #fde8e8;--error-info: #14854e;--success-color: #0e9f6e;--success-color-light: #def7ec;--font-color: #2f3237;--font-color-light: #626364;--font-color-dark: #252525;--wh-font-family: 'SF Pro Display', 'Inter', ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";--font-family: var(--wh-font-family);--wh-link-color: #1d9bf0;--wh-form-active-color: #3b82f6;--wh-accent-blue: #1f6feb;--BREAKPOINT_XS: 575px;--BREAKPOINT_S: 767px;--BREAKPOINT_M: 991px;--BREAKPOINT_L: 1199px;--BREAKPOINT_XL: 1399px;--BREAKPOINT_XXL: 1699px;--wh-danger-color: var(--wh-red-600);--wh-danger-color-hover: var(--wh-red-700);--wh-font-size: 13px;--wh-blockquote-line-height: 1.3;--wh-breakpoint-xs: 575px;--wh-breakpoint-s: 767px;--wh-breakpoint-m: 991px;--wh-breakpoint-l: 1199px;--wh-breakpoint-xl: 1399px;--wh-breakpoint-xxl: 1699px;--wh-font-size-2xs: 10px;--wh-font-size-xs: 11px;--wh-font-size-s: 12px;--wh-font-size-m: 13px;--wh-font-size-l: 14px;--wh-font-size-xl: 16px;--wh-font-size-2xl: 18px;--wh-font-size-3xl: 20px;--wh-font-size-4xl: 24px;--wh-font-size-5xl: 30px;--wh-font-size-6xl: 36px;--wh-spacing-2xs: 2px;--wh-spacing-xs: 4px;--wh-spacing-s: 8px;--wh-spacing-m: 12px;--wh-spacing-l: 16px;--wh-spacing-xl: 24px;--wh-spacing-2xl: 32px;--wh-spacing-3xl: 48px;--wh-spacing-4xl: 64px;--wh-spacing-5xl: 96px;--wh-border-radius-none: 0px;--wh-border-radius-xs: 2px;--wh-border-radius-s: 4px;--wh-border-radius-m: 6px;--wh-border-radius-l: 8px;--wh-border-radius-xl: 12px;--wh-border-radius-2xl: 16px;--wh-border-radius-3xl: 24px;--wh-border-radius-full: 9999px;--wh-font-weight-light: 300;--wh-font-weight-normal: 400;--wh-font-weight-medium: 500;--wh-font-weight-semibold: 600;--wh-font-weight-bold: 700;--wh-font-weight-extrabold: 800;--wh-line-height-tight: 1.25;--wh-line-height-snug: 1.375;--wh-line-height-normal: 1.5;--wh-line-height-relaxed: 1.625;--wh-line-height-loose: 2;--wh-bg-base: var(--wh-secondary-600);--wh-bg-base-hover: var(--wh-secondary-500);--wh-border-base: var(--wh-secondary-200);--wh-border-base-hover: var(--wh-secondary-100);--wh-border-base-strong: var(--wh-secondary-100);--wh-border-base-strong-hover: var(--wh-secondary-50);--wh-bg-base-hover-strong: var(--wh-secondary-300);--wh-bg-back: var(--wh-secondary-700);--wh-bg-back-strong: var(--wh-secondary-800);--wh-bg-back-strong-hover: var(--wh-secondary-900);--wh-bg-back-hover: var(--wh-secondary-600);--wh-bg-back-hover-strong: var(--wh-secondary-800);--wh-border-back: var(--wh-secondary-100);--wh-border-back-strong: var(--wh-secondary-50);--wh-bg-front: var(--wh-secondary-400);--wh-bg-front-strong: var(--wh-secondary-200);--wh-bg-front-strong-hover: var(--wh-secondary-50);--wh-bg-front-hover: var(--wh-secondary-300);--wh-bg-front-hover-strong: var(--wh-secondary-200);--wh-border-front: hsl(227, 20%, 25%);--wh-border-front-strong: hsl(227, 20%, 35%);--wh-border-front-hover: hsl(227, 20%, 55%);--wh-text-stronger: hsl(0, 0%, 95%);--wh-text-strongest: hsl(0, 0%, 100%);--wh-text-strong: hsl(0, 0%, 90%);--wh-text: hsl(0, 0%, 85%);--wh-text-hover: var(--wh-text-strong);--wh-text-light: hsl(0, 0%, 82%);--wh-text-lighter: hsl(0, 0%, 72%);--wh-text-lightest: hsl(0, 0%, 62%);--wh-border-color: hsla(0, 0%, 100%, 0.15);--wh-border-color-strong: hsla(0, 0%, 100%, 0.25);--wh-note-editor-bg-color: hsl(221, 27%, 17%);--wh-note-editor-bg-color-preview: hsl(221, 27%, 15%);--wh-bg-tags: var(--wh-secondary-300);--wh-bg-tags-hover: var(--wh-secondary-200);--wh-syntax-bg-color: rgba(255, 255, 255, 0.05);--wh-fallback-img-color: var(--wh-secondary-600);--wh-bg-disabled: hsl(220, 22%, 18%);--wh-bg-notification-unread: hsla(161, 100%, 20%, 0.15);--wh-bg-notification-unread-hover: hsla(161, 100%, 20%, 0.05);--wh-subtle-gray: rgb(255, 255, 255, 0.1);--wh-shadow: inset 0 0 0.5px 1px hsla(0, 0%, 100%, 0.1),
-      /* 2. shadow ring 👇 */ 0 0 0 1px hsla(230, 13%, 9%, 0.075),
-      /* 3. multiple soft shadows 👇 */ 0 0.3px 0.4px hsla(230, 13%, 9%, 0.02),
-      0 0.9px 1.5px hsla(230, 13%, 9%, 0.045),
-      0 3.5px 6px hsla(230, 13%, 9%, 0.09);--wh-shadow-primary: var(--wh-primary-500) 0px 0px 0px 1px inset,
-      var(--wh-primary-500) 0px 0px 1px;--wh-skeleton-bg: var(--wh-secondary-300);--wh-skeleton-bg-hover: var(--wh-secondary-200);--wh-skeleton-bg-strong: var(--wh-secondary-200);--wh-skeleton-bg-strong-hover: var(--wh-secondary-100);--wh-shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.3);--wh-shadow-s: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.4);--wh-shadow-m: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);--wh-shadow-l: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);--wh-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);--wh-shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }</style><div id="give-freely-root-hldjnlbobkdkghfidgoecgmklcemanhm" class="give-freely-root" data-extension-id="hldjnlbobkdkghfidgoecgmklcemanhm" data-extension-name="Web Highlights: PDF &amp; Web Highlighter + Notes &amp; AI Summary" style="display: block;"><template shadowrootmode="open"><style>
-  :host {
-    all: initial;
-  }
-
-  .gf-scroll-remove::-webkit-scrollbar {
-    border-radius-bottom-right: 15px;
-  }
-
-  button {
-    cursor: pointer;
-    transition: transform 0.1s ease;
-  }
-
-  button:active {
-    transform: scale(0.98);
-  }
-
-  .give-freely-close-button:hover {
-    opacity: 0.7;
-  }
-
-  input[type="radio"] {
-    margin-right: 8px;
-  }
-
-  hr {
-    border: none;
-    border-top: 1px solid #e5e5e5;
-    margin: 1em 0;
-  }
-
-  dialog::backdrop  {
-    background-color: rgba(180, 180, 180, 0.6);
-  }
-
-  dialog.backdrop-hidden::backdrop  {
-    background-color: transparent;
-  }
-</style><div><div class="gf-app"></div></div></template></div><style id="web-highlights-global-styles">
-  webhighlights-sidebar {
-    --wh-font-size: 13.5px;
-  }
-
-  body.web-highlights-animate {
-    transition: all 300ms linear;
-    transition-property: margin-left, margin-right;
-  }
-
-  body.web-highlights-open {
-    margin-left: 400px !important;
-  }
-
-  web-highlight.webhighlights-highlight {
-    background-color: #92ffaa;
-    cursor: pointer;
-    visibility: visible !important;
-  }
-
-  web-highlight.webhighlights-highlight.webhighlight-with-tags,
-  web-highlight.webhighlights-highlight.webhighlight-with-notes {
-    border-bottom: 2.8px solid gray;
-    border-radius: 0px;
-  }
-
-  web-highlight > *:not(webhighlights-popup-toolbox) {
-    background-color: #92ffaa;
-  }
-
-  webhighlights-popup-toolbox.contains-highlight {
-    transform: translate(-63px, -10px);
-    position: fixed;
-  }
-</style><webhighlights-popup-toolbox><template shadowrootmode="open"><!----><!--?--></template></webhighlights-popup-toolbox><webhighlights-marker><template shadowrootmode="open"><!---->
-      <!--?lit$210099052$-->
-    </template></webhighlights-marker></body><webhighlights-sidebar alignment="left" sidebar-width="400"><template shadowrootmode="open"><!---->
-      <!--?lit$210099052$-->
-            <webhighlights-main-component part="main-component" data-testid="webhighlights-sidebar-MAIN_COMPONENT" style="left: 0px; right: unset;"><template shadowrootmode="open"><!---->
-      <webhighlights-popover data-testid="webhighlights-main-component-POPOVER"><template shadowrootmode="open"><!----><!--?--></template>
-        <!--?lit$210099052$--><!--?-->
-      </webhighlights-popover>
-
-      <!-- Button to toggle side-bar. It hides when animation is active -->
-      <!--?lit$210099052$--><!--?-->
-      <!--?lit$210099052$-->
-    </template></webhighlights-main-component>
-          
-      <!--?lit$210099052$--><!--?-->
-    </template></webhighlights-sidebar><grammarly-desktop-integration data-grammarly-shadow-root="true"><template shadowrootmode="open"><style>
-      div.grammarly-desktop-integration {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
-        -moz-user-select: none;
-        -webkit-user-select: none;
-        -ms-user-select:none;
-        user-select:none;
-      }
-
-      div.grammarly-desktop-integration:before {
-        content: attr(data-content);
-      }
-    </style><div aria-label="grammarly-integration" role="group" tabindex="-1" class="grammarly-desktop-integration" data-content="{&quot;mode&quot;:&quot;full&quot;,&quot;isActive&quot;:true,&quot;isUserDisabled&quot;:false}"></div></template></grammarly-desktop-integration></html>
+</div>
+</body>
+</html>
