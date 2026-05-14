@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salesforce CRM – Aktienanalyse Canvas v2.2</title>
+<style>
+:root {
+  --primary: #00A1E0;
+  --primary-dark: #0078a8;
+  --bg: #0f0f12;
+  --bg-card: #1a1a1f;
+  --bg-card2: #22222a;
+  --border: #2e2e38;
+  --text: #e8e8ec;
+  --text-muted: #888898;
+  --text-dim: #555566;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --blue: #3b82f6;
+  --purple: #8b5cf6;
+  --teal: #14b8a6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+.header { background: linear-gradient(135deg, #001a28 0%, #003a55 40%, #0f0f12 100%); border-bottom: 1px solid var(--primary); padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; }
+.header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+.header-left h1 span { color: var(--primary); }
+.header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+.header-right { text-align: right; }
+.price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+.price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+.price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+.price-change.up { background: rgba(34,197,94,0.15); color: var(--green); }
+.price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+.nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100; }
+.nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+.main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+.kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+.kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.kpi-value.green { color: var(--green); }
+.kpi-value.red { color: var(--red); }
+.kpi-value.orange { color: var(--primary); }
+.section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+.section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+.section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.section-title { font-size: 16px; font-weight: 700; color: white; }
+.section-score { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+.section-note { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+.section-body { padding: 20px 24px; }
+p { margin-bottom: 12px; color: var(--text); }
+p:last-child { margin-bottom: 0; }
+h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+h3:first-child { margin-top: 0; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(0,161,224,0.04); }
+.beat { color: var(--green); font-weight: 600; }
+.miss { color: var(--red); font-weight: 600; }
+.neutral { color: var(--yellow); font-weight: 600; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+.badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+.badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+.badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+.badge-orange { background: rgba(0,161,224,0.15); color: var(--primary); }
+.event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+.event-item:last-child { border-bottom: none; }
+.event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+.dot-green { background: var(--green); }
+.dot-red { background: var(--red); }
+.dot-yellow { background: var(--yellow); }
+.event-label { font-weight: 600; color: white; }
+.event-text { font-size: 14px; color: var(--text); }
+.risk-item { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+.risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.risk-title { font-weight: 600; color: white; font-size: 14px; }
+.score-bar { display: flex; align-items: center; gap: 10px; }
+.score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #66cdf0); }
+.score-num { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+.bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+.bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+.bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+.bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.rating-box { background: linear-gradient(135deg, rgba(0,161,224,0.12), rgba(0,161,224,0.04)); border: 1px solid rgba(0,161,224,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+.rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+.rating-item .val { font-size: 20px; font-weight: 800; color: white; }
+.rating-item .val.buy { color: var(--green); }
+.rating-item .val.hold { color: var(--yellow); }
+.rating-item .val.sell { color: var(--red); }
+.trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+.trigger-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.trigger-card h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.trigger-card.buy h5 { color: var(--green); }
+.trigger-card.sell h5 { color: var(--red); }
+.trigger-list { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+.trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+.trigger-list li::before { content: "→"; position: absolute; left: 0; }
+.investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+@media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+.investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+.investor-no { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+.investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-no h5 { color: var(--red); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+.investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+.investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+.outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+.outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+.outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+.outlook-card .when-then strong { color: var(--primary); }
+.source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+.disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Salesforce, Inc. <span>CRM</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 14.05.2026 · NYSE · Sektor: Technology / Enterprise SaaS</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">Agentforce</span>
+      <span class="badge badge-blue">Data 360</span>
+      <span class="badge badge-yellow">CRM Cloud</span>
+      <span class="badge badge-green">Informatica</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$166.35</div>
+    <div class="price-meta">Schlusskurs 13.05.2026 · NYSE</div>
+    <div class="price-change down">▼ –44% von ATH ($296)</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $163.52 – $296.05</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$166.35</div><div class="kpi-sub">USD · 13.05.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Marktkap.</div><div class="kpi-value">~$153B</div><div class="kpi-sub">Large-Cap</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/E TTM</div><div class="kpi-value">~24x</div><div class="kpi-sub">12M-Ø: 33x</div></div>
+    <div class="kpi-card"><div class="kpi-label">FY27 Revenue Guide</div><div class="kpi-value">$45.8–46.2B</div><div class="kpi-sub">+10–11% YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">Organic Growth</div><div class="kpi-value red">~7–8%</div><div class="kpi-sub">excl. Informatica</div></div>
+    <div class="kpi-card"><div class="kpi-label">Agentforce ARR</div><div class="kpi-value green">$800M</div><div class="kpi-sub">+169% YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">RPO</div><div class="kpi-value green">$72.4B</div><div class="kpi-sub">+14% YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">FCF FY26</div><div class="kpi-value green">$14.4B</div><div class="kpi-sub">+16% YoY</div></div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>CRM-Suite + Agentforce + Data 360</h3>
+      <p>Salesforce ist mit FY2026 Revenue von <strong>$41.5 Mrd. (+10% YoY)</strong> der weltweit dominante CRM-SaaS-Anbieter. Die Plattform deckt: <strong>Sales Cloud</strong> (Lead-Management), <strong>Service Cloud</strong> (Customer Service), <strong>Marketing Cloud</strong> (Campaigns), <strong>Commerce Cloud</strong> (E-Commerce), <strong>Data 360</strong> (CDP/Datenintegration via Snowflake + Informatica-Acquisition), <strong>Tableau</strong> (Analytics), <strong>Slack</strong> (Collaboration), <strong>MuleSoft</strong> (API-Integration). Q4 FY26 Revenue $11.2 Mrd. (+12% YoY) inkl. $399M Informatica-Contribution.</p>
+
+      <h3>Strategischer Pivot: Agentforce als "Operating System for the Agentic Enterprise"</h3>
+      <p>Seit dem Dreamforce-2024-Launch hat Salesforce <strong>Agentforce</strong> als zentrale AI-Wette positioniert: autonome AI-Agenten, die menschliche Arbeit in Customer-Service, Sales, Marketing automatisieren. Q4 FY26 Meilensteine: <strong>Agentforce ARR $800 Mio. (+169% YoY)</strong>, <strong>29.000 Deals seit Launch</strong> (+50% QoQ), <strong>Agentforce + Data 360 ARR $2.9 Mrd. (+200% YoY)</strong> inkl. Informatica. >60% der Q4 Agentforce-Bookings kamen aus Customer-Expansion (Cross-Sell). Salesforce hat in FY26 <strong>19 Billionen Tokens verarbeitet</strong> und <strong>2.4 Mrd. Agentic-Work-Units</strong> ausgeliefert.</p>
+
+      <h3>Geschäftsmodell-Risiko: Wachstumsverlangsamung trotz AI-Hype</h3>
+      <p>Trotz Agentforce-Erfolg verlangsamt sich das <strong>organische Wachstum</strong>: FY26 +10% inkl. Informatica = ~9% organisch; FY27-Guidance von $45.8–46.2B impliziert +10–11% inkl. 3pp Informatica = nur <strong>7–8% organisch</strong>. Das ist deutlich unter MSFT (+18%), GOOGL (+18%), META (+33%), AMZN (+17%). Salesforce ist nicht mehr im "Hyper-Growth"-Modus, sondern im "Mid-Growth-Premium-SaaS"-Modus.</p>
+
+      <div class="source">Quellen: Salesforce Q4 FY26 8-K (25.02.2026); FY26 Earnings Release; CNBC Q4 Coverage (26.02.2026); Salesforce-Investor-Relations.</div>
+    </div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben & Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <h3>CRM-Marktführer mit hohem Switching-Cost</h3>
+      <p>Salesforce ist mit ~30% Marktanteil der unbestrittene CRM-Marktführer (vor MSFT Dynamics ~13%, Oracle ~5%, SAP ~3%). Switching-Costs sind extrem hoch: typische Enterprise-CRM-Implementierungen dauern 12–24 Monate und kosten Millionen. Net Retention Rate (NRR) bleibt >107% – Kunden expandieren historisch ihre Salesforce-Ausgaben. Dies ist klassischer SaaS-Lock-In.</p>
+
+      <h3>Agentforce: AI-Agent-Differenzierung</h3>
+      <p>Während alle SaaS-Player AI-Features einführen, war Salesforce mit Agentforce der <strong>erste Mover auf "Agentic AI" als kommerzielles Produkt</strong>. $800M ARR in 15 Monaten ist eine der schnellsten SaaS-Produkt-Scalings je. Anthropic-Partnership: Salesforce hat eine signifikante Beteiligung an Anthropic (Q4 FY26 +$811M Mark-to-Market-Gain), Claude wird als Agentforce-Backbone genutzt. Das positioniert Salesforce als <strong>Anthropic-Customer + Enterprise-Distributor</strong>.</p>
+
+      <h3>Schwächen & Verwundbarkeiten</h3>
+      <p>(1) <strong>Wachstumsverlangsamung</strong>: Organic-Growth auf 7-8% gefallen; AI-Boom kannibalisiert teilweise klassische Seat-Lizenzen, weil Agenten Mitarbeiter ersetzen können; (2) <strong>MSFT Copilot Konkurrenz</strong>: Microsoft 365 Copilot + Dynamics 365 Copilot wachsen schneller und bedrohen Salesforces Dominanz in Cross-Sell-Kunden; (3) <strong>M&A-Abhängigkeit</strong>: Informatica-Acquisition (~$8B) bringt 3pp FY27-Wachstum; ohne M&A wäre Salesforce strukturell mid-single-digit-grower; (4) <strong>Konsumtions-Modell-Druck</strong>: Agentforce wird per "Agentic Work Unit" (AWU) bepreist, nicht per User – das bedeutet, Salesforce muss sein etabliertes Per-Seat-Modell teilweise umwandeln.</p>
+
+      <div class="source">Quellen: Salesforce Q4 FY26 Earnings Call Transcript (25.02.2026); Synergy Research SaaS Market Share; CNBC; Salesforce Ben Q3 FY26 (12/2025).</div>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Beat-Ratio: 4/4</div>
+    </div>
+    <div class="section-body">
+      <p>Vier Beats, aber Wachstum mid-single-digit organisch. Salesforce Fiscal Year endet Januar; FY26 Q4 = Cal-Q4 2025/Anfang 2026. Nächste Earnings: <strong>Anfang Mai 2026 (Q1 FY27)</strong> – steht unmittelbar bevor.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Quartal</th><th>Revenue</th><th>YoY</th><th>EPS Adj.</th><th>Konsens</th><th>Agentforce ARR</th><th>Op-Marge GAAP</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Q1 FY26 (Feb-Apr'25)</strong></td><td>$9.83B</td><td class="neutral">+8%</td><td>$2.58</td><td>$2.55</td><td>~$30M</td><td>~19%</td><td class="beat">BEAT</td></tr>
+            <tr><td><strong>Q2 FY26 (May-Jul'25)</strong></td><td>$10.24B</td><td class="neutral">+10%</td><td>$2.91</td><td>$2.75</td><td>~$70M</td><td>~20%</td><td class="beat">BEAT</td></tr>
+            <tr><td><strong>Q3 FY26 (Aug-Oct'25)</strong></td><td>$10.27B</td><td class="neutral">+9%</td><td>$2.84</td><td>$2.85</td><td>~$200M (+330%)</td><td>~20%</td><td class="neutral">MIXED</td></tr>
+            <tr><td><strong>Q4 FY26 (Nov'25-Jan'26)</strong></td><td>$11.20B</td><td class="beat">+12%</td><td>$3.81</td><td>$3.05</td><td>$800M (+169%)</td><td>20.1%</td><td class="beat">BEAT</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text-muted);">Q4 FY26 ist die "fastest growth in 2 years" und beinhaltet $399M Informatica-Beitrag (~4pp Boost). Organic Q4 +8% YoY.</p>
+
+      <h3>Q4 FY26 Highlights & FY27-Guidance</h3>
+      <p>Benioff: "Agentic AI is a tailwind for our business." FY26 Total Revenue $41.5 Mrd. (+10% YoY). FCF $14.4 Mrd. (+16%). RPO $72.4 Mrd. (+14% YoY). cRPO $35.1 Mrd. (+16%). <strong>$50 Mrd. neues Buyback-Programm</strong> launched. Dividende auf $0.44/Quartal erhöht (+5.8% YoY). <strong>FY30-Ziel auf $63 Mrd. erhöht</strong> (von $60B+). FY27-Guidance: $45.8–46.2 Mrd. (+10–11% YoY, davon ~3pp Informatica = ~7-8% organisch). Non-GAAP Op-Marge FY26: 34.1% (sehr profitabel).</p>
+
+      <div class="source">Quellen: CRM Q4 FY26 8-K (25.02.2026); SEC; CNBC; investor.salesforce.com; Salesforce Q4 Press Release.</div>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Wachstum unter Big-Tech-Peers; Agentforce als Re-Acceleration-Hoffnung</h3>
+      <p>FY26 Konzernumsatz +10% YoY, FY27 Guidance +10-11% (inkl. M&A). Reifegrad: <strong>"Late-Stage-SaaS mit AI-Re-Acceleration-Versuch"</strong>. Im Vergleich zu MSFT (+18%), GOOGL (+18%), META (+33%) ist Salesforce der langsamste Mega-Cap-Software-Player. Agentforce-ARR von $800M (mit +169% YoY) bietet die Hoffnung, dass das organische Wachstum in FY27 H2 oder FY28 wieder beschleunigt.</p>
+
+      <h3>Segmentübergreifende Wachstumstreiber (Q4 FY26)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Segment</th><th>Revenue Q4 FY26</th><th>YoY</th><th>Treiber</th></tr></thead>
+          <tbody>
+            <tr><td>Subscription & Support</td><td>$10.7B</td><td class="neutral">+13%</td><td>Core CRM, Data Cloud, Slack</td></tr>
+            <tr><td>Professional Services</td><td>~$0.5B</td><td class="miss">flat</td><td>Implementation</td></tr>
+            <tr><td><strong>Agentforce + Data 360 (ARR)</strong></td><td><strong>$2.9B ARR</strong></td><td class="beat"><strong>+200% YoY</strong></td><td><strong>Inkl. $1.1B Informatica + $800M Agentforce</strong></td></tr>
+            <tr><td>Industry-Businesses</td><td>$6.6B ARR (FY26)</td><td class="neutral">+20%</td><td>Financial Services, Healthcare, Public Sector</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Profitabilität: Premium-SaaS</h3>
+      <p>FY26 Non-GAAP Op-Marge 34.1% – am oberen Ende der SaaS-Branche. GAAP Op-Marge 20.1%. OCF $15.0 Mrd. (+15% YoY), FCF $14.4 Mrd. (+16% YoY). Salesforce hat in den letzten 3 Jahren eine massive Effizienz-Transformation durchgeführt (Layoffs 2023, Margin-Expansion-Programm).</p>
+
+      <div class="source">Quellen: CRM Q4 FY26 8-K; Salesforce FY26 Annual Report; eigene Berechnungen.</div>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung & Multiples</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Bewertung am 10-Jahres-Tief</h3>
+      <p>Bei aktuellem Kurs $166 handelt CRM mit <strong>P/E TTM ~24x</strong> (manche Quellen zeigen ~17x bei aggressiverem Earnings-Anpassen) – das ist <strong>28% unter dem 12-Monats-Schnitt (33x)</strong> und am 10-Jahres-Tief. Die Aktie hat <strong>-44% von ATH ($296)</strong> verloren, obwohl Earnings stabil wuchsen. Forward P/E ~22x. Bei FY26 FCF $14.4 Mrd. = <strong>FCF-Yield ~9.4%</strong> bei $153B MCap – das ist außergewöhnlich hoch für SaaS.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Metrik</th><th>CRM (heute)</th><th>5J-Ø</th><th>Einordnung</th></tr></thead>
+          <tbody>
+            <tr><td>P/E TTM</td><td>~24x</td><td>~38x</td><td class="beat">Deutlich unter Schnitt</td></tr>
+            <tr><td>Forward P/E (FY27)</td><td>~22x</td><td>~30x</td><td class="beat">Historisch tief</td></tr>
+            <tr><td>P/Sales TTM</td><td>~3.7x</td><td>~7x</td><td class="beat">Sehr günstig</td></tr>
+            <tr><td>EV/EBITDA (Fwd)</td><td>~14x</td><td>~22x</td><td class="beat">Attraktiv</td></tr>
+            <tr><td>PEG (Fwd)</td><td>~2.0x</td><td>—</td><td class="miss">Hoch wegen niedriger Wachstumsrate</td></tr>
+            <tr><td>FCF Yield TTM</td><td>~9.4%</td><td>~4%</td><td class="beat">Sehr attraktiv</td></tr>
+            <tr><td>Dividende</td><td>~1.1%</td><td>—</td><td class="neutral">Initiated 2024, +5.8% YoY</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Bewertungs-Risiken</h3>
+      <p>Der historische P/E-Diskont reflektiert die Wachstumsverlangsamung. Wenn Agentforce nicht messbare Re-Acceleration in FY28 bringt, könnte sich das niedrige Multiple manifestieren als "Value Trap". PEG ~2x ist nicht günstig, wenn man Wachstum (~10%) anlegt. <strong>Catalyst-Trigger</strong> ist FY27 H2 Organic-Wachstum-Beschleunigung, nicht Multiple-Expansion vorab.</p>
+
+      <div class="source">Quellen: public.com CRM P/E (07.05.2026); macrotrends.net (12.05.2026); lightyear.com (06.05.2026); Robinhood (13.05.2026); eigene Berechnungen.</div>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen & Kapitalqualität</div>
+      <div class="section-score">Score: 9/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Cash-Maschine mit aggressiver Kapitalrückführung</h3>
+      <p>FY26 Operating Cashflow $15.0 Mrd. (+15% YoY), FCF $14.4 Mrd. (+16% YoY). Capex ~$0.6 Mrd. – minimal im Vergleich zu Hyperscalern (MSFT $190B, GOOGL $180-190B). Salesforce ist <strong>SaaS-Pure-Play ohne Infrastruktur-Capex-Druck</strong>. Q4 FY26: <strong>$50 Mrd. neues Buyback-Programm</strong> autorisiert (=33% der MCap!), das ist eines der größten in SaaS-Historie.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Metrik</th><th>FY2024</th><th>FY2025</th><th>FY2026</th><th>Trend</th></tr></thead>
+          <tbody>
+            <tr><td>Operating Cashflow</td><td>$10.2B</td><td>$13.1B</td><td>$15.0B</td><td class="beat">↑↑</td></tr>
+            <tr><td>Capex</td><td>$0.7B</td><td>$0.6B</td><td>$0.6B</td><td class="beat">stabil</td></tr>
+            <tr><td>FCF</td><td>$9.5B</td><td>$12.4B</td><td>$14.4B</td><td class="beat">↑↑</td></tr>
+            <tr><td>Non-GAAP Op-Margin</td><td>30.5%</td><td>32.3%</td><td>34.1%</td><td class="beat">↑</td></tr>
+            <tr><td>GAAP Op-Margin</td><td>14%</td><td>19%</td><td>20.1%</td><td class="beat">↑↑</td></tr>
+            <tr><td>Net Income GAAP</td><td>$4.1B</td><td>$6.2B</td><td>~$7B*</td><td class="beat">↑</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text-muted);">* FY26 inkl. $811M Anthropic Mark-to-Market-Gain.</p>
+
+      <h3>Kapitalrückflüsse & Bilanz</h3>
+      <p>$50 Mrd. neues Buyback-Programm authorized in Q4 FY26 = aggressive Reduktion der Share Count. Quarterly Dividend $0.44 (+5.8% YoY, Yield ~1.1%). Cash & Marketable Securities ~$15 Mrd. (Q4 FY26). Long-Term-Debt ~$10 Mrd. – sehr konservativ. Plus: ~$2-3 Mrd. Anthropic-Stake (Hidden Asset, das bereits +$811M Gain in Q4 lieferte).</p>
+
+      <div class="source">Quellen: CRM Q4 FY26 8-K (25.02.2026); FY26 10-K Filing; CNBC.</div>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Enterprise SaaS / CRM-Plattform</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Unternehmen</th><th>MCap</th><th>Revenue Growth (TTM)</th><th>Non-GAAP Op-Marge</th><th>Fwd P/E</th><th>AI-Position</th></tr></thead>
+          <tbody>
+            <tr><td><strong>CRM</strong></td><td>$153B</td><td class="neutral">+10%</td><td>34%</td><td>~22x</td><td>Agentforce ($800M ARR)</td></tr>
+            <tr><td>MSFT</td><td>$3.0T</td><td class="beat">+18%</td><td>46%</td><td>~23x</td><td>Copilot (20M Seats)</td></tr>
+            <tr><td>ORCL</td><td>~$520B</td><td class="neutral">+9%</td><td>~45%</td><td>~25x</td><td>OCI + Database AI</td></tr>
+            <tr><td>NOW (ServiceNow)</td><td>~$200B</td><td class="beat">+22%</td><td>~30%</td><td>~50x</td><td>Now Assist (AI Agents)</td></tr>
+            <tr><td>HUBS (HubSpot)</td><td>~$30B</td><td class="beat">+18%</td><td>~18%</td><td>~50x</td><td>Breeze AI</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Qualitative Unterschiede</h3>
+      <p><strong>CRM vs MSFT:</strong> MSFT ist strukturell der direkteste Konkurrent für CRM-Workloads (über Dynamics + M365 Copilot). MSFT wächst fast doppelt so schnell (+18% vs +10%), hat höhere Margen (46% vs 34%), und ist gleich teuer bewertet. <strong>Microsoft ist die qualitativ klar bessere Wahl im selben Bewertungsbereich</strong>.</p>
+      <p><strong>CRM vs NOW:</strong> ServiceNow wächst >2x schneller (+22% vs +10%) und handelt mit >2x Premium (Fwd P/E 50x vs 22x). NOW ist die "Pure Growth"-Wahl, CRM die "Value"-Wahl. NOW Agent-AI (Now Assist) ist direkter Konkurrent zu Agentforce.</p>
+      <p><strong>CRM vs HUBS:</strong> HubSpot ist im SMB-Segment dominant; CRM im Enterprise. Komplementär, nicht direkt konkurrierend. HUBS wächst schneller (+18%), aber von kleinerer Basis.</p>
+
+      <div class="source">Quellen: Yahoo Finance Multi-Ticker (13.05.2026); macrotrends.net.</div>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News & Events (letzte 3 Monate)</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">25.02.2026 – Q4 FY26 Record: Agentforce ARR $800M (+169%) <span class="badge badge-green">Sehr Positiv</span></div>
+          <div class="event-text">Revenue $11.2B (+12% YoY, fastest in 2 years), EPS $3.81 (vs. $3.05 Konsens, +25% Beat). Agentforce ARR $800M (+169%), 29.000 Deals (+50% QoQ), Agentforce + Data 360 ARR $2.9B (+200%), RPO $72.4B (+14%). Quelle: SEC 8-K (25.02.2026), CNBC.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">25.02.2026 – $50 Mrd. neues Buyback-Programm <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Authorized $50B Share Repurchase = 33% der aktuellen MCap. Plus Dividenden-Erhöhung $0.44/Quartal (+5.8%). Signal für extreme Kapital-Disziplin. Quelle: Salesforce Press Release (25.02.2026).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">25.02.2026 – FY27 Guidance impliziert nur 7-8% organisches Wachstum <span class="badge badge-yellow">Gemischt</span></div>
+          <div class="event-text">FY27 Revenue-Guide $45.8-46.2B (+10-11% YoY) inkl. ~3pp Informatica-Beitrag = organisch nur 7-8%. Markt sieht das als Verlangsamung. Quelle: Lightyear (06.05.2026), Salesforce IR.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Q4 FY26 – Anthropic-Stake +$811M Mark-to-Market-Gain <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Salesforce hält signifikante Beteiligung an Anthropic (genaue Höhe nicht offengelegt). Q4 FY26 +$811M Gain auf strategischer Beteiligung. Anthropic-Bewertung im 02/2026 auf $730B Post-Money. Hidden Asset wertschöpfend. Quelle: CNBC (26.02.2026).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">04.12.2025 – Q3 FY26 Beat + Agentforce $500M ARR <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Q3: Revenue $10.27B (+9%), Agentforce ARR überschritt $500M (+330% YoY), 9.500 paid Deals (+50% QoQ). FY26-Guidance auf $41.45-41.55B angehoben. Quelle: Salesforce Ben (04.12.2025).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2025 – Informatica-Akquisition geschlossen <span class="badge badge-yellow">Strategisch</span></div>
+          <div class="event-text">Salesforce schloss Informatica-Acquisition (~$8B Deal). Bringt FY27 ~3pp Wachstumsbeitrag, $1.1B Cloud-ARR. Strategisch wichtig für Data 360 + Agentic-AI-Datenpipelines. Aber: hebt organisches Wachstum nicht.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Q1 2026 – AI-Agent-Konkurrenz eskaliert <span class="badge badge-yellow">Risiko</span></div>
+          <div class="event-text">MSFT Copilot Studio, ServiceNow Now Assist, Google Agent Builder, AWS Bedrock Agents – alle konkurrieren direkt mit Agentforce. Während Agentforce momentan im SaaS-CRM-Bereich Standard-Setter ist, ist Marktanteils-Druck unvermeidlich.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Q1 2026 – Enterprise-AI-Spending verlangsamt sich relativ <span class="badge badge-yellow">Risiko</span></div>
+          <div class="event-text">Gartner-Daten Q1 2026: Enterprise-SaaS-Spending wächst nur noch +6-8% YoY, während Cloud-Infrastruktur (Azure, AWS, GCP) +30-60% wächst. Salesforce steht im langsamer wachsenden Sub-Segment.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – Enterprise-IT-Budgets konservativ <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Makro-Unsicherheit (Inflation, Zinsen) drückt Enterprise-Software-Budgets. Salesforce hat 60% Q4-Bookings aus Existing-Customer-Expansion gemeldet (vs. New-Logo-Wachstum) – das ist ein Defensive-Signal.</div>
+        </div>
+      </div>
+
+      <div class="source">Quellen: Salesforce Q4 FY26 Earnings (25.02.2026); SEC 8-K; CNBC; Salesforce Ben (04.12.2025); Lightyear (06.05.2026).</div>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 3/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Schwerer Downtrend, 52W-Tief getestet</h3>
+      <p>CRM hat von ATH $296 (vermutlich Ende 2024) auf $166 verloren = <strong>-44%</strong>. Aktueller Kurs $166.35 ist nahe 52W-Tief ($163.52). Alle wichtigen Moving Averages liegen über dem Kurs – stark bearisher Setup. Bei Bruch unter $163 droht weiterer Rückgang. Mean-Reversion-Potenzial vorhanden, aber Sentiment extrem negativ.</p>
+
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value">$166.35</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA20</div><div class="kpi-value">~$175</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA50</div><div class="kpi-value">~$195</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA200</div><div class="kpi-value">~$245</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI(14)</div><div class="kpi-value neutral">~38</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Tief</div><div class="kpi-value red">$163.52</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Hoch</div><div class="kpi-value">$296.05</div></div>
+      </div>
+
+      <h3>Levels & Setup</h3>
+      <p>Support: <strong>$163 (52W-Low), $150 (psychologisch), $140 (langfristiger Support)</strong>. Resistance: $175 (SMA20), $195 (SMA50), $245 (SMA200). RSI ~38 nähert sich überverkauft. Wenn $163 hält, Mean-Reversion auf $190+ wahrscheinlich. Bei Bruch droht Rückgang auf $140.</p>
+
+      <div class="source">Quellen: Robinhood Live Quote (13.05.2026); 52W-Range Daten; eigene Schätzungen.</div>
+    </div>
+  </div>
+
+  <!-- S10 -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken & Chancen</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Strukturelle & zyklische Risiken</h3>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">📉 Organisches Wachstum verlangsamt auf 7-8%</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">FY27 Guidance impliziert nur 7-8% organisches Wachstum. Wenn Agentforce nicht in FY28 deutlich beschleunigt, droht "Value Trap"-Szenario mit dauerhaftem niedrigem Multiple. Wahrscheinlichkeit Re-Acceleration in FY28: ~50%.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🤖 Agentic-AI-Kannibalisiert eigene Seat-Lizenzen</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Wenn Kunden Agentforce-Agents als Mitarbeiter-Ersatz einsetzen, könnten klassische Per-Seat-Lizenzen schrumpfen. Salesforce monetisiert per AWU (Agentic Work Unit) – die ARPU-Auswirkungen sind unsicher.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🏢 MSFT Copilot + Dynamics Konkurrenz</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Microsoft hat M365 Copilot bei 80% Fortune 500 + Dynamics 365 als günstigere CRM-Alternative. Wenn Cross-Sell-Synergien überzeugen, könnte CRM Marktanteile verlieren. Wahrscheinlichkeit signifikanter Verlust: ~25%.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">💼 Enterprise-IT-Budget-Druck</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Makro-Druck auf IT-Budgets; SaaS-Konsolidierungs-Trend; 60% Q4-Bookings aus Existing-Customer-Expansion vs. New Logos = Defensive-Signal.</div>
+      </div>
+
+      <h3>Chancen</h3>
+      <p>(1) <strong>Agentforce-ARR-Skalierung</strong>: Von $800M auf $2-3 Mrd. in 2 Jahren möglich; das wäre ein erheblicher Boost zu +12-15% organisches Wachstum. (2) <strong>$50B Buyback</strong>: Aggressive Share-Count-Reduktion (>5% p.a.) ist EPS-Treiber unabhängig von Revenue-Growth. (3) <strong>Anthropic-Stake-Wertsteigerung</strong>: Bei OpenAI-Restructuring zu $852B Bew. könnte Anthropic-Bewertung auf $300-400B steigen – Salesforce-Stake könnte Multi-Mrd-Wert erreichen. (4) <strong>FY30-Ziel $63B</strong>: 11% CAGR-Ziel – wenn erreicht, würde Bewertung deutlich höher rechtfertigen.</p>
+
+      <h3>Red Flags & Dealbreaker</h3>
+      <p>Red Flag: Wenn Q1 FY27 (Anfang Mai 2026) Revenue-Wachstum unter 8% YoY fällt UND Agentforce-ARR-Wachstum dramatisch verlangsamt (von +169% auf <70%), wäre das ein klares Signal, dass die AI-Story stalled. Dann droht weitere Multiple-Compression.</p>
+
+      <div class="source">Quellen: Salesforce Q4 FY26 Earnings; Gartner Enterprise-IT-Spending Q1 2026; eigene Szenarioanalyse.</div>
+    </div>
+  </div>
+
+  <!-- S11 -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring</div>
+      <div class="section-score">Ø 6.4/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Visual</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td>Geschäftsmodell</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Marktführer CRM, Agentforce als AI-Erweiterung, aber langsamer als Peers</td></tr>
+            <tr><td>Burggraben</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>30% CRM-Marktanteil, hohe Switching-Costs, Agentforce-First-Mover</td></tr>
+            <tr><td>Operative Entwicklung (4Q)</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>4/4 Beats, Q4 starker Margen-Beat, aber organisches Wachstum mid-single</td></tr>
+            <tr><td>Wachstum</td><td><strong>5/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>+10% inkl. M&A = nur 7-8% organisch. Langsamster Mega-Software-Player</td></tr>
+            <tr><td>Bewertung</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>P/E 24x = 28% unter 12M-Schnitt. FCF-Yield 9.4% exzellent</td></tr>
+            <tr><td>Cashflow</td><td><strong>9/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>FCF $14.4B (+16%), Op-Marge 34%, $50B Buyback, niedriger Capex</td></tr>
+            <tr><td>Risiken (invertiert)</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Wachstumsverlangsamung, MSFT-Konkurrenz, Agentic-Kannibalisierungs-Risiko</td></tr>
+            <tr><td>Technische Analyse</td><td><strong>3/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:30%"></div></div><span class="score-num">3</span></div></td><td>-44% von ATH, am 52W-Tief, alle MAs Sell. Schwächste in Mega-Cap-Software</td></tr>
+            <tr style="background:rgba(0,161,224,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>6.6/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track">
+                    <div class="score-bar-fill" style="width:66%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
+                  </div>
+                  <span class="score-num" style="color:var(--primary);">6.6</span>
+                </div>
+              </td>
+              <td>Value-Play mit FCF-Stärke & Buyback, aber langsames Wachstum & Tech-Schwäche</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Eigene Berechnung basierend auf Sektionen 1–10.</div>
+    </div>
+  </div>
+
+  <!-- S12 -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+    </div>
+    <div class="section-body">
+
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 – Agentforce ist real & monetarisiert:</strong> $800M ARR in 15 Monaten ist eine der schnellsten SaaS-Produkt-Scalings je. +169% YoY, 29.000 Deals, >60% aus Cross-Sell. Salesforce ist klarer First-Mover auf "Agentic AI" und hat Marktstandards gesetzt. Bei $2.9B Agentforce + Data 360 ARR (+200%) ist die Plattform skaliert.</p>
+          <p><strong>Säule 2 – Massive Kapitalrückführung:</strong> $50B Buyback = 33% der MCap! Plus Dividende +5.8% YoY. FCF $14.4B (+16%), FCF-Yield 9.4% – das ist außergewöhnlich für SaaS. Bei niedriger Capex (~$0.6B vs. Hyperscaler-Hunderte-Milliarden) bleibt fast alles Free-Cashflow.</p>
+          <p><strong>Säule 3 – Historischer Bewertungs-Diskount:</strong> P/E 24x ist 28% unter 12M-Schnitt. -44% von ATH. Bei einem Re-Rating auf historisches 5Y-P/E von ~30x = Kurs $200+ (+20%). Plus: Anthropic-Stake als Hidden Asset.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 – Wachstumsverlangsamung:</strong> FY27-Organic-Growth nur 7-8%. Während MSFT/GOOGL/META mit +18-33% wachsen, ist Salesforce der langsamste Mega-Software-Player. Wenn Agentforce sich nicht zur Wachstumsbeschleunigung in FY28 weiterentwickelt, droht "Value Trap".</p>
+          <p><strong>Risiko 2 – MSFT als strategischer Wettbewerber:</strong> M365 Copilot + Dynamics 365 + Power Platform attackieren Salesforce von zwei Seiten gleichzeitig. MSFT wächst doppelt so schnell, ist gleich bewertet, hat höhere Margen.</p>
+          <p><strong>Risiko 3 – Agentic-AI-Selbst-Kannibalisierung:</strong> Wenn Agentforce klassische Per-Seat-Lizenzen ersetzt, könnte ARPU sinken. AWU-Pricing-Modell ist unsicher. Plus: Technische Lage bearisher als alle anderen Mega-Caps – am 52W-Tief.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Salesforce ist ein <strong>klassisches "Quality-Value-with-Catalyst-Optionalität"-Setup</strong>: extreme Kapitalrückführung (Buyback + Dividende), exzellente FCF-Generierung, historischer Bewertungs-Diskount. Aber: das Wachstum ist verlangsamt, und der Markt zweifelt, ob Agentforce ausreicht, um es wieder zu beschleunigen. Bei $166 (am 52W-Tief) ist das Risk/Reward attraktiv: ~10% Downside (auf $145–150) vs. ~30-40% Upside (auf $215–235 in 12-18 Monaten, falls Agentforce-ARR auf $1.5-2B in FY28 skaliert). Das ist <strong>besser als HALTEN, aber kein KAUFEN auf High-Conviction</strong>.</p>
+      <p>Falsche-Annahmen-Demut: Ich könnte falsch liegen, wenn (a) Q1 FY27 Earnings (Anfang Mai 2026) eine deutliche Beschleunigung zeigen, (b) MSFT-Konkurrenz-Druck überschätzt ist, (c) AI-Agent-Kannibalisierung weniger ausgeprägt als befürchtet.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Zeithorizont</th><th>Katalysator</th><th>Risiko</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kurzfristig (0–6M)</strong></td><td>Q1 FY27 Earnings, Dreamforce 2026 (September)</td><td>Technisch am 52W-Tief, weiterer Sell-Off möglich</td><td>Halten, beobachten Q1 FY27 Print</td></tr>
+            <tr><td><strong>Mittelfristig (6–24M)</strong></td><td>Agentforce skaliert auf $1.5B+ ARR, FY28 Re-Acceleration</td><td>MSFT/NOW-Wettbewerb intensiviert</td><td>Aufstocken bei klaren AI-Beats</td></tr>
+            <tr><td><strong>Langfristig (2–5J)</strong></td><td>FY30 $63B-Ziel, Anthropic-Stake-Realisierung</td><td>Strukturelle Disruption durch Agent-AI</td><td>Halten als Value-Play mit Buyback-Engine</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>Salesforce ist ein <strong>Quality-Value-Play mit Agentforce als Wachstums-Optionalität</strong>: hohe FCF-Generierung, aggressive Kapitalrückführung ($50B Buyback), Bewertungs-Diskount. Aber: Strukturelle Wachstumsverlangsamung (+7-8% organisch) und Konkurrenz von MSFT/NOW limitieren das Upside. Bei $166 attraktiv für geduldige Value-Investoren, aber Mega-Cap-AI-Compounder wie MSFT/GOOGL bieten besseres Risk/Reward. Rating: <strong>HALTEN</strong> mit selektivem Kaufen bei weiteren Rückschlägen.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$215–235</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–4 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–13%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+35%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:2.7</div></div>
+      </div>
+
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Q1 FY27: Revenue-Wachstum &lt;8% YoY → 25% reduzieren</li>
+            <li>Agentforce-ARR-Wachstum &lt;70% YoY → 30% reduzieren</li>
+            <li>Bruch unter $150 → Position halbieren</li>
+            <li>Customer-Churn-Spike + NRR &lt;105% → 25% reduzieren</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Rückschlag auf $145–155 → tranchiert nachkaufen</li>
+            <li>Q1 FY27: Revenue >10% YoY + Agentforce >$1B ARR → aufstocken</li>
+            <li>Buyback-Execution sichtbar in Share-Count-Reduktion → Halten</li>
+            <li>FY28-Guidance impliziert >12% organic growth → aggressiv kaufen</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Value-Investoren (P/E 24x, FCF-Yield 9.4%)</li>
+            <li>Income + Buyback-Investoren</li>
+            <li>Enterprise-SaaS-Exposure</li>
+            <li>Geduldige Compounder-Halter</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Growth-Investoren (Wachstum zu langsam)</li>
+            <li>Momentum-Trader (techn. am Tief)</li>
+            <li>Kurzfristige Trader</li>
+            <li>Konkurrenz-Risiko-Sensible (MSFT-Druck)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Beobachten</span></td><td>FCF + Buyback attraktiv, aber Wachstum unsicher; auf Catalyst warten</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>30% jetzt $166, 30% bei $155, 40% bei klaren AI-Beats</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-yellow">Halten, MSFT/META vorziehen</span></td><td>Bessere Risk/Reward-Optionen verfügbar in Big-Tech</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-orange">Kaufen für Buyback-Story</span></td><td>$50B Buyback in 5J = +10% Share-Reduktion p.a. = EPS-Compounding</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="source">Quellen: Synthese aus allen vorherigen Sektionen; eigene Risk/Reward-Kalkulation.</div>
+    </div>
+  </div>
+
+  <!-- S13 -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Anstehende Events</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q1 FY27 Earnings – Ende Mai 2026 (unmittelbar bevor)</h4>
+        <p>Konsens-Erwartung: Revenue ~$9.7-9.9 Mrd. (+8-10% YoY, FX-bereinigt höher). Kritische Metriken: (1) Wie skaliert Agentforce-ARR weiter (von $800M)? (2) Bleibt organisches Wachstum bei 7-8% oder besser? (3) Was sagt das Management zur "H2 FY27 Re-Acceleration"?</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Agentforce-ARR >$1.1B (+50%+ QoQ) + organisches Wachstum bestätigt ≥8% + H2-Re-Acceleration-Outlook → Relief-Rally +10-15%, Zielkurs $215-235.<br><br>
+          <strong>Wenn:</strong> Agentforce-Wachstum verlangsamt deutlich ODER organisches Wachstum &lt;7% → weiterer Sell-Off auf $140-150 möglich.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 2: Dreamforce 2026 – September 2026</h4>
+        <p>Salesforces Mega-Konferenz; typischerweise Bühne für Agentforce-Updates, neue Produkt-Launches, Customer-Stories. Erwartet: Agentforce 2.0, neue Anthropic/OpenAI-Partnerships, Industry-Cloud-Erweiterungen.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Agentforce 2.0 mit klar besseren Capabilities + Enterprise-Adoption-Boost + neuer ARR-Run-Rate $1.5B+ → bullish, Multiple-Re-Rating zurück auf 28-30x möglich.<br><br>
+          <strong>Wenn:</strong> nur inkrementelle Updates + keine klare Marktanteils-Verteidigung gegen MSFT/NOW → kein Catalyst, weitere Konsolidierung.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 3: FY28-Guidance + AI-Monetisierungs-Klarheit – Februar 2027</h4>
+        <p>Q4 FY27 Earnings + FY28 Outlook werden wichtigster mittelfristiger Test. Wenn Salesforce echtes Re-Acceleration zu 12-15% organischem Wachstum zeigen kann, würde das Multiple-Recovery rechtfertigen.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> FY28-Guide impliziert organisches Wachstum >12% → Re-Rating auf P/E 28-30x = Kurs $240-280 möglich.<br><br>
+          <strong>Wenn:</strong> FY28-Guide bleibt bei 8-10% → "Value-Trap"-Setup bestätigt, Kurs Range $150-190.
+        </div>
+      </div>
+
+      <div class="source">Quellen: Salesforce IR Calendar; Dreamforce 2026 Schedule; Visible Alpha Konsens.</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung dar. Die enthaltenen Informationen wurden aus öffentlich zugänglichen Quellen zusammengetragen und nach bestem Wissen bewertet. Vergangene Wertentwicklungen sind kein verlässlicher Indikator für zukünftige Ergebnisse. Investitionen in Aktien sind mit erheblichen Risiken verbunden, einschließlich des Totalverlusts. Bitte konsultieren Sie vor Investmententscheidungen einen unabhängigen Finanzberater. Stand: 14.05.2026.
+  </div>
+
+</div>
+</body>
+</html>
