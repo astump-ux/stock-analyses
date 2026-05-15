@@ -3,27 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Workday WDAY – Aktienanalyse Canvas v2.2</title>
+<title>WDAY – Aktienanalyse Canvas v2.2</title>
 <style>
-:root {
-  --primary: #F38B00;
-  --primary-dark: #c46c00;
-  --bg: #0f0f12;
-  --bg-card: #1a1a1f;
-  --bg-card2: #22222a;
-  --border: #2e2e38;
-  --text: #e8e8ec;
-  --text-muted: #888898;
-  --text-dim: #555566;
-  --green: #22c55e;
-  --red: #ef4444;
-  --yellow: #f59e0b;
-  --blue: #3b82f6;
-  --purple: #8b5cf6;
-}
+:root { --primary: #3b82f6; --primary-dark: #1e40af; --bg: #0f0f12; --bg-card: #1a1a1f; --bg-card2: #22222a; --border: #2e2e38; --text: #e8e8ec; --text-muted: #888898; --text-dim: #555566; --green: #22c55e; --red: #ef4444; --yellow: #f59e0b; --blue: #3b82f6; --purple: #8b5cf6; --teal: #14b8a6; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
-.header { background: linear-gradient(135deg, #2a1700 0%, #4d2a00 40%, #0f0f12 100%); border-bottom: 1px solid var(--primary); padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; }
+.header { background: linear-gradient(135deg, #00081a 0%, #001028 40%, #0f0f12 100%); border-bottom: 1px solid var(--primary); padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; }
 .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
 .header-left h1 span { color: var(--primary); }
 .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
@@ -61,7 +46,7 @@ table { width: 100%; border-collapse: collapse; font-size: 14px; }
 th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
 td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
 tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(243,139,0,0.04); }
+tr:hover td { background: rgba(59,130,246,0.04); }
 .beat { color: var(--green); font-weight: 600; }
 .miss { color: var(--red); font-weight: 600; }
 .neutral { color: var(--yellow); font-weight: 600; }
@@ -70,7 +55,7 @@ tr:hover td { background: rgba(243,139,0,0.04); }
 .badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
 .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
 .badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
-.badge-orange { background: rgba(243,139,0,0.15); color: var(--primary); }
+.badge-orange { background: rgba(59,130,246,0.15); color: var(--primary); }
 .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
 .event-item:last-child { border-bottom: none; }
 .event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
@@ -84,7 +69,7 @@ tr:hover td { background: rgba(243,139,0,0.04); }
 .risk-title { font-weight: 600; color: white; font-size: 14px; }
 .score-bar { display: flex; align-items: center; gap: 10px; }
 .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-.score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #ffb84d); }
+.score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #60a5fa); }
 .score-num { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
 .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
 @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
@@ -92,7 +77,7 @@ tr:hover td { background: rgba(243,139,0,0.04); }
 .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
 .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
 .bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-.rating-box { background: linear-gradient(135deg, rgba(243,139,0,0.12), rgba(243,139,0,0.04)); border: 1px solid rgba(243,139,0,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+.rating-box { background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(59,130,246,0.04)); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
 .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
 .rating-item .val { font-size: 20px; font-weight: 800; color: white; }
 .rating-item .val.buy { color: var(--green); }
@@ -116,32 +101,37 @@ tr:hover td { background: rgba(243,139,0,0.04); }
 .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
 .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
 .investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+.geo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+.geo-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.geo-pct { font-size: 20px; font-weight: 700; color: white; }
+.geo-note { font-size: 12px; color: var(--text-muted); }
 .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
 .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
 .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
 .outlook-card .when-then strong { color: var(--primary); }
 .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
 .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+.alert-box { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
 </style>
 </head>
 <body>
 
 <div class="header">
   <div class="header-left">
-    <h1>Workday, Inc. <span>WDAY</span></h1>
-    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 14.05.2026 · NASDAQ · Sektor: Technology / HCM + FinSoft</div>
+    <h1>Workday <span>WDAY.NASDAQ</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 15. Mai 2026 · NASDAQ · Sektor: Enterprise SaaS / HR / Finance / AI Agents</div>
     <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-      <span class="badge badge-orange">HCM Suite</span>
-      <span class="badge badge-blue">Finance Cloud</span>
-      <span class="badge badge-yellow">AI Agents</span>
-      <span class="badge badge-green">Flex Credits</span>
+      <span class="badge badge-orange">HCM Leader</span>
+      <span class="badge badge-blue">Workday Illuminate AI</span>
+      <span class="badge badge-red">FY27 Guide: nur 12–13%</span>
     </div>
   </div>
   <div class="header-right">
-    <div class="price-tag">$118.62</div>
-    <div class="price-meta">Schlusskurs 12.05.2026 · NASDAQ</div>
-    <div class="price-change down">▼ –61% von ATH ($307)</div>
-    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: ~$117 – $276</div>
+    <div class="price-tag">$216.93</div>
+    <div class="price-meta">Schlusskurs 14.05.2026 · NASDAQ</div>
+    <div class="price-change down">▼ FY27-Guide-Schock</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: ~$200 – $300</div>
   </div>
 </div>
 
@@ -164,17 +154,16 @@ tr:hover td { background: rgba(243,139,0,0.04); }
 <div class="main">
 
   <div class="kpi-grid" style="margin-top:24px;">
-    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$118.62</div><div class="kpi-sub">USD · 12.05.2026</div></div>
-    <div class="kpi-card"><div class="kpi-label">Marktkap.</div><div class="kpi-value">$30.3B</div><div class="kpi-sub">Mid-Cap</div></div>
-    <div class="kpi-card"><div class="kpi-label">P/E TTM</div><div class="kpi-value">~30x</div><div class="kpi-sub">historisch tief</div></div>
-    <div class="kpi-card"><div class="kpi-label">Fwd P/E</div><div class="kpi-value green">~22x</div><div class="kpi-sub">5J-Tief</div></div>
-    <div class="kpi-card"><div class="kpi-label">Revenue FY26</div><div class="kpi-value">$9.55B</div><div class="kpi-sub">+13% YoY</div></div>
-    <div class="kpi-card"><div class="kpi-label">Subscription Q4</div><div class="kpi-value green">+15.7%</div><div class="kpi-sub">YoY</div></div>
-    <div class="kpi-card"><div class="kpi-label">AI ARR</div><div class="kpi-value green">$400M+</div><div class="kpi-sub">Q4 ACV +100% YoY</div></div>
-    <div class="kpi-card"><div class="kpi-label">FY27 Sub-Guide</div><div class="kpi-value neutral">+12–13%</div><div class="kpi-sub">Verlangsamung</div></div>
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value">$216.93</div><div class="kpi-sub">USD · 14.05.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value">~$58.5 Mrd</div><div class="kpi-sub">Large Cap</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/E (TTM)</div><div class="kpi-value">~93x</div><div class="kpi-sub">FWD ~30x</div></div>
+    <div class="kpi-card"><div class="kpi-label">FY26 Umsatz</div><div class="kpi-value">$9.55 Mrd</div><div class="kpi-sub">+13.1% YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">Op-Marge (non-GAAP)</div><div class="kpi-value green">30.6%</div><div class="kpi-sub">Q4 FY26</div></div>
+    <div class="kpi-card"><div class="kpi-label">FCF FY26</div><div class="kpi-value green">$2.76 Mrd</div><div class="kpi-sub">29% Margin</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value orange">27.05.2026</div><div class="kpi-sub">Q1 FY27</div></div>
+    <div class="kpi-card"><div class="kpi-label">FY27 Subs Guide</div><div class="kpi-value red">+12–13%</div><div class="kpi-sub">vs FY26 +14.5%</div></div>
   </div>
 
-  <!-- S1 -->
   <div class="section" id="s1">
     <div class="section-header">
       <div class="section-number">1</div>
@@ -182,359 +171,392 @@ tr:hover td { background: rgba(243,139,0,0.04); }
       <div class="section-note">Quellen ≤ 6 Monate</div>
     </div>
     <div class="section-body">
-      <h3>HCM + Finance Cloud Suite + Agentic AI</h3>
-      <p>Workday ist die führende <strong>Enterprise-Cloud-Suite für Human Capital Management (HCM) und Finance/ERP</strong>. FY2026 (Jan 2026 endend) Total Revenue: <strong>$9.55 Mrd. (+13.1% YoY)</strong>, davon $8.83 Mrd. Subscription (+14.5%). 60%+ der Fortune 500 nutzen Workday HCM. Kerns-Produkte: <strong>Workday HCM</strong>, <strong>Workday Financial Management</strong>, <strong>Workday Adaptive Planning</strong>, <strong>Workday Extend</strong>, sowie zunehmend AI-Agents.</p>
-
-      <h3>Strategischer Pivot: "Chapter 4" mit Aneel Bhusri-Return als CEO</h3>
-      <p>Anfang Februar 2026 kehrte <strong>Mitgründer Aneel Bhusri als CEO zurück</strong> – signalisiert die strategische Bedeutung des AI-Transitions. "Chapter 4" beschreibt den Pivot zur "<strong>Enterprise AI Platform for People, Money, and Agents</strong>". Q4 FY26: über $100M ACV von emerging AI products (+100% YoY), gesamte AI-ARR bei >$400M. Neue Akquisitionen: <strong>Sana</strong> (Enterprise Knowledge Tools) und <strong>Paradox</strong> (Candidate Experience Agent). Neues Pricing-Modell: <strong>Flex Credits</strong> – Kunden zahlen für AI-Work (z.B. processed invoices) statt nur per Seat.</p>
-
-      <h3>Geschäftsmodell-Risiko: AI-Disruptions-Threat</h3>
-      <p>HCM-Markt steht unter strukturellem Druck: AI-Agents könnten klassische HR-/Finance-Mitarbeiter ersetzen, was die "User-Seat-basierte" Bepreisung kannibalisieren würde. Workday-Stock ist seit Februar 2024 ATH ($307) auf $119 gefallen (-61%) – Markt preist signifikantes AI-Disruptions-Risiko ein. Bhusris CEO-Return + Flex-Credits-Modell sind direkte Antworten auf diese Bedrohung.</p>
-
-      <div class="source">Quellen: Workday Q4 FY26 8-K (24.02.2026); SEC Filing; Workday Press Release; Futurum Group Q4 Analysis (27.02.2026); EBC Financial Group (09.04.2026).</div>
+      <p>Workday ist <strong>der globale Marktführer in Cloud-Enterprise-Software für HR (Human Capital Management) und Finance</strong> – die zentrale Plattform für „Managing People, Money, and Agents", wie Workday selbst formuliert. Über 11.000 Großunternehmen weltweit (inkl. ~60% Fortune 500) nutzen Workday HCM, Workday Financial Management, Workday Planning, Workday Adaptive Insights und seit 2025 die Workday AI Agent System (Illuminate Platform).</p>
+      <p>FY26 (endete 31.01.2026) erreichte Workday <strong>$9.55 Mrd Umsatz (+13.1% YoY)</strong>, Subscription Revenue $8.83 Mrd (+14.5%), <strong>Non-GAAP Op-Marge Q4 30.6%</strong> (vs. 26.4% YoY, +420 bps) und Operating Cash Flow $2.94 Mrd (+19.4%). Eingelaufene 12-Monats-Subscription Backlog (cRPO) wuchs +14.5–15.5% in Q1 FY27 Guide.</p>
+      <p>Die Geschäftslogik: Workday verkauft cloud-basierte SaaS-Subscriptions an Enterprise-Kunden mit 3–5-Jahres-Verträgen. Hohe Net Retention (~105–110%), sehr hohe Switching Costs (HCM/Finanz-System ist Mission-Critical), und ein 4-Pillar-Ökosystem (HCM, Finance, Planning, Analytics). Bruttomarge ~85% (sehr hoch). FY26 GAAP Profit $693M (+31.75% YoY) – Workday ist mittlerweile durchgängig profitabel.</p>
+      <p>Strategische Stoßrichtung 2026: <strong>„Enterprise AI Platform"</strong> – Workday positioniert sich aggressiv als KI-Era-Leader für HR + Finance Workflows. Mit Workday Illuminate (Foundation Model trained auf 800B+ Transaktionen) und über 50 AI Agents (Recruiting Agent, Payroll Agent, Performance Agent, etc.) wird Workday zur „Agentic SaaS"-Plattform. CEO Aneel Bhusri ist seit Januar 2026 zurück an der Spitze (vorher Carl Eschenbach übergeben, jetzt CEO-Transition zurück zu Bhusri).</p>
+      <p>Das große operative Problem: <strong>FY27 Subscription Revenue Guidance von nur +12–13%</strong> (vs. FY26 +14.5%) signalisiert Wachstums-Verlangsamung. Markt straft das ab – Aktie fiel –8% AH am 24.02.2026 nach Q4-Bericht, dann weitere –12.8% pre-market am 25.02.</p>
+      <div class="source">Quellen: Workday Q4 FY26 PR (24.02.2026); SEC 8-K Filing; Workday IR Earnings Materials</div>
     </div>
   </div>
 
-  <!-- S2 -->
   <div class="section" id="s2">
     <div class="section-header">
       <div class="section-number">2</div>
-      <div class="section-title">Burggraben & Wettbewerbsvorteile</div>
-      <div class="section-score">Score: 8/10</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 9/10</div>
     </div>
     <div class="section-body">
-      <h3>HCM-Marktführer mit hohem Switching-Cost</h3>
-      <p>Workday ist der unbestrittene <strong>Enterprise-HCM-Marktführer</strong> (>50% Marktanteil im Cloud-HCM-Segment, vor Oracle HCM Cloud, SAP SuccessFactors, ADP Workforce Now). 60%+ der Fortune 500 nutzen Workday HCM. <strong>Gross Revenue Retention Rate 97%</strong> – exzellente Kundenbindung. HCM-Implementierungen dauern 12–24 Monate und kosten $5-50M – Switching-Costs sind extrem hoch.</p>
-
-      <h3>Multi-Modul Cross-Sell: HCM → Finance</h3>
-      <p>Workdays größte Wachstumsopportunität ist die <strong>Finance-Cloud-Cross-Sell-zu-HCM-Kunden</strong>. Während HCM bei 60%+ der Fortune 500 ist, ist Finance erst bei ~15-20%. Bei klassischem ERP gegen Oracle/SAP-Legacy. Multi-Modul-Kunden haben 3-5x höhere ARPU.</p>
-
-      <h3>Schwächen & Verwundbarkeiten</h3>
-      <p>(1) <strong>AI-Disruptions-Threat</strong>: AI-Agents könnten klassische HR-Mitarbeiter ersetzen – das ist Existenzrisiko für Per-Seat-Lizenz-Modell; (2) <strong>Wachstumsverlangsamung</strong>: FY27 Sub-Guide nur +12-13% (von +14.5% in FY26); (3) <strong>MSFT/SAP-Konkurrenz im Mid-Market</strong>: SAP S/4HANA Cloud, Oracle Fusion HCM, MSFT Dynamics HR-Pakete drücken in Workdays Markt; (4) <strong>Bewertungsrisiko</strong>: -61% von ATH zeigt, dass Markt das Geschäftsmodell hinterfragt.</p>
-
-      <div class="source">Quellen: Workday Q4 FY26 Earnings Call; Synergy Research HCM Market Share; Yahoo Finance.</div>
+      <p><strong>Mission-Critical-Switching-Costs als Haupt-Moat.</strong> Workday ist tief in die HR- und Finanz-Prozesse großer Unternehmen integriert. Ein Switching aus HCM oder Finance würde Mitarbeiter-Lifecycle, Payroll, Compliance, Reporting und alle integrierten Prozesse für 6–18 Monate disrupten. Migration-Kosten typisch $10–50M+ pro Großunternehmen. Das resultiert in &gt;95% Gross Retention und ~105–110% Net Retention.</p>
+      <p><strong>Enterprise-Marktanteils-Dominanz.</strong> Workday ist in Gartner Magic Quadrant für „Cloud HCM Suites for 1,000+ Employee Enterprises" 9 Jahre in Folge Leader Top-Right. Marktanteil &gt;50% bei Fortune 500 HCM, ~30% bei Office of CFO. Wenn ein Großunternehmen sich für Cloud-Migration entscheidet, ist Workday Default-Wahl.</p>
+      <p><strong>Daten-Moat für AI.</strong> Workday Illuminate ist auf 800 Mrd Workday-Transaktionen trainiert – einzigartige proprietäre Datenbasis für HR/Finance AI. Konkurrenten wie SAP, Oracle oder Microsoft Dynamics haben kleinere oder fragmentiertere Datenmengen. Das macht Workday-AI-Agents domain-spezifisch besser als generische AI-Tools.</p>
+      <p><strong>Plattform-Effekt mit Partner-Ökosystem.</strong> Mit über 1.000 Implementation-Partnern (Accenture, Deloitte, PwC, Strada), App-Marketplace mit 500+ Apps und Workday Ventures Investments wird Workday zur „Plattform" – nicht nur Software. Das verstärkt Switching Costs weiter.</p>
+      <p><strong>Schwächen im Moat.</strong> Erstens: <strong>Bewertung „priced for perfection"</strong> – jeder Margen- oder Wachstumsslip wird hart bestraft (siehe Q4-Reaktion). Zweitens: <strong>SAP S/4HANA Cloud + Oracle Fusion Cloud</strong> investieren aggressiv und holen technologisch auf, besonders bei Mid-Market. Drittens: <strong>AI-First-Konkurrenz</strong> – neue „AI-Native" HR-Plattformen wie Rippling, Gusto (Mid-Market), und Lattice (Performance) erodieren Workday-Mid-Market-Share.</p>
+      <div class="source">Quellen: Workday Q4 FY26 Earnings Call (24.02.2026); Gartner HCM Magic Quadrant 2025; 24/7 Wall St. Coverage</div>
     </div>
   </div>
 
-  <!-- S3 -->
   <div class="section" id="s3">
     <div class="section-header">
       <div class="section-number">3</div>
       <div class="section-title">Letzte 4 Quartale</div>
-      <div class="section-score">Beat-Ratio: 4/4</div>
+      <div class="section-score">Beat-Ratio: 4/4 (aber)</div>
     </div>
     <div class="section-body">
-      <p>4/4 Beats, aber FY27-Guidance impliziert Wachstumsverlangsamung.</p>
-
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Workday nutzt Fiskaljahr endend 31. Januar. „FY26" = Februar 2025 – Januar 2026. Q4 FY26 wurde am 24.02.2026 gemeldet, Q1 FY27 erscheint am 27.05.2026.</div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Quartal</th><th>Revenue</th><th>YoY</th><th>Subscription YoY</th><th>Non-GAAP EPS</th><th>Op-Marge (Non-GAAP)</th><th>Result</th></tr></thead>
+          <thead><tr><th>Quartal</th><th>Umsatz</th><th>YoY</th><th>Subs Rev YoY</th><th>Non-GAAP EPS</th><th>vs. Konsens</th><th>Marktreaktion</th></tr></thead>
           <tbody>
-            <tr><td><strong>Q1 FY26 (Feb-Apr'25)</strong></td><td>$2.24B</td><td class="neutral">+13%</td><td>+13%</td><td>$2.21</td><td>28%</td><td class="beat">BEAT</td></tr>
-            <tr><td><strong>Q2 FY26 (May-Jul'25)</strong></td><td>$2.35B</td><td class="neutral">+13%</td><td>+14%</td><td>$2.30</td><td>30%</td><td class="beat">BEAT</td></tr>
-            <tr><td><strong>Q3 FY26 (Aug-Oct'25)</strong></td><td>$2.45B</td><td class="neutral">+12%</td><td>+13%</td><td>$2.35</td><td>30%</td><td class="beat">BEAT</td></tr>
-            <tr><td><strong>Q4 FY26 (Nov'25-Jan'26)</strong></td><td>$2.53B</td><td class="beat">+14.5%</td><td>+15.7%</td><td>$2.47</td><td>30.6%</td><td class="beat">BEAT*</td></tr>
+            <tr><td><strong>Q4 FY26</strong><br><span style="font-size:11px;color:var(--text-muted)">End 31.01.26</span></td><td>$2.53B</td><td class="beat">+14.5%</td><td class="beat">+15.7%</td><td>$2.47</td><td class="beat">Beat ($2.32E, +6.5%)</td><td class="miss">–8% AH, –12.8% Premarket (FY27 Guide)</td></tr>
+            <tr><td><strong>Q3 FY26</strong><br><span style="font-size:11px;color:var(--text-muted)">End 31.10.25</span></td><td>$2.45B</td><td class="beat">+13%</td><td class="beat">+15%</td><td>$2.39</td><td class="beat">Beat</td><td class="beat">Positiv</td></tr>
+            <tr><td><strong>Q2 FY26</strong><br><span style="font-size:11px;color:var(--text-muted)">End 31.07.25</span></td><td>$2.32B</td><td class="beat">+13%</td><td class="beat">+14%</td><td>$2.21</td><td class="beat">Beat</td><td class="neutral">Neutral</td></tr>
+            <tr><td><strong>Q1 FY26</strong><br><span style="font-size:11px;color:var(--text-muted)">End 30.04.25</span></td><td>$2.24B</td><td class="beat">+12%</td><td class="beat">+13%</td><td>$1.99</td><td class="beat">Beat</td><td class="beat">Positiv</td></tr>
           </tbody>
         </table>
       </div>
-      <p style="font-size:12px; color:var(--text-muted);">* Q4 FY26 inkl. Paradox + Sana Akquisitionen-Beitrag. Organic Sub +13-14%.</p>
-
-      <h3>Q4 FY26 Highlights</h3>
-      <p>Total Revenue $2.53B (+14.5% YoY). Subscription $2.36B (+15.7%). Non-GAAP Op-Marge 30.6% (+4.2pp YoY). EPS $2.47 vs. Konsens $2.32 (+6.5% Beat). 1.7 Mrd. AI Actions im FY26. <strong>FY27 Subscription-Wachstums-Guidance: +12-13% YoY</strong> – schwächer als FY26. Erweitert FY26 Op-Income auf $721M (7.5% Marge), Operating Cashflow $2.94B (+19% YoY). Bhusri: "Built Workday to bring innovation back to HR and finance – AI gives us the chance to do it all again."</p>
-
-      <div class="source">Quellen: WDAY Q4 FY26 8-K (24.02.2026); SEC; Seeking Alpha (24.02.2026); Futurum Group (27.02.2026); Yahoo Finance.</div>
+      <p><strong>Operative Lesart:</strong> 4/4 Beats, beeindruckende Margen-Expansion (Q4 FY26 Op-Marge non-GAAP 30.6% vs. 26.4% YoY = +420 bps!), FCF FY26 $2.76 Mrd (+15% growth). Aber: <strong>FY27 Guidance war der Schock</strong> – Subscription Revenue $9.925–9.95 Mrd (+12–13%) vs. FY26 +14.5%. Q4 enthielt 1pp einmaligen Sondereffekt durch Government-Kontrakt, was Subs-Revenue auf 15.7% pushte.</p>
+      <p><strong>Wichtigste Q4 FY26 Management-Statements (24.02.2026):</strong> CEO Aneel Bhusri (zurück seit Jan 2026): „Workday is uniquely positioned for the AI agent economy with our trusted enterprise data foundation." CFO Zane Rowe (gerade gewechselt): FY27 Guide reflektiert „prudent posture" inmitten AI-Investitionen und macro-Unsicherheit. Q1 cRPO Wachstum erwartet +14.5–15.5%, FY27 OCF $3.45 Mrd, FCF $3.18 Mrd (+15%), Op-Marge Non-GAAP ~30%.</p>
+      <p><strong>FY27 Guidance-Details:</strong> Subscription Revenue +12–13%, Op-Marge non-GAAP ~30% (stabil), FCF $3.18 Mrd (+15%, FCF-Wachstum schneller als Revenue!), Professional Services Revenue $710M. FY27 Tax Rate 19%. Capex $270M.</p>
+      <div class="source">Quellen: Workday Q4 FY26 PR (24.02.2026); SEC 8-K Filing; Earnings Prepared Remarks PDF; 24/7 Wall St. (25.02.2026)</div>
     </div>
   </div>
 
-  <!-- S4 -->
   <div class="section" id="s4">
     <div class="section-header">
       <div class="section-number">4</div>
       <div class="section-title">Wachstumseinordnung</div>
-      <div class="section-score">Score: 6/10</div>
+      <div class="section-score">Score: 7/10</div>
     </div>
     <div class="section-body">
-      <h3>Stabiles, aber verlangsamendes Wachstum</h3>
-      <p>FY2026 Total Revenue $9.55B (+13.1% YoY). Subscription wuchs +14.5%. FY27 Sub-Guidance: +12-13% – Verlangsamung. Im Vergleich zu Mega-Cap-Software (MSFT +18%, GOOGL +18%, META +33%) ist Workday im langsameren Segment. Allerdings: <strong>AI-ARR-Wachstum +100% YoY auf $400M+</strong> bietet Re-Acceleration-Hoffnung.</p>
-
-      <h3>Wachstumstreiber</h3>
-      <p>(1) <strong>HCM-Cross-Sell-zu-Finance</strong>: Größter Hebel, da Finance-Penetration noch niedrig; (2) <strong>AI-Agent-Adoption</strong>: $100M+ Q4 ACV von emerging AI products (+100% YoY); (3) <strong>International-Expansion</strong>: EMEA und APAC weiterhin unterentwickelt vs. USA-Dominanz; (4) <strong>Akquisitionen</strong>: Sana + Paradox bringen AI-Capabilities und ARR-Beitrag.</p>
-
-      <h3>Profitabilität: Operating-Leverage stark</h3>
-      <p>Non-GAAP Op-Marge Q4 FY26 30.6% (+4.2pp YoY). FY26 GAAP Op-Income $721M (7.5%). Operating Cashflow $2.94 Mrd. (+19.4% YoY). Profitabilitäts-Expansion ist klar trotz AI-Investitionen.</p>
-
-      <div class="source">Quellen: Workday Q4 FY26 8-K; SEC Filing.</div>
+      <p><strong>Revenue-Wachstum letzte 5 Jahre:</strong> FY22 $5.14B → FY23 $6.22B (+21%) → FY24 $7.26B (+17%) → FY25 $8.45B (+16%) → FY26 $9.55B (+13.1%) → FY27e $10.77B (<strong>+12.7%</strong>). Klare Wachstums-Verlangsamungs-Kurve, aber bei deutlich höherer Basis. Mid-Teens Wachstum bei $10 Mrd Revenue ist immer noch sehr respektabel.</p>
+      <h3>Wachstumstreiber FY26</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Treiber</th><th>Beitrag</th><th>Kommentar</th></tr></thead>
+          <tbody>
+            <tr><td>Workday HCM (Core)</td><td>~70% Umsatz</td><td>Globaler Marktführer, &gt;50% Fortune 500</td></tr>
+            <tr><td>Workday Financial Mgmt</td><td>~25% Umsatz</td><td>Schnelleres Wachstum, Office of CFO Penetration</td></tr>
+            <tr><td>Workday Adaptive Insights</td><td>~5% Umsatz</td><td>FP&amp;A Tool, gut wachsend</td></tr>
+            <tr><td>AI Agents (Illuminate)</td><td>Frühphase</td><td>50+ Agents, Vertragsmodell entwickelnt sich</td></tr>
+            <tr><td>International (Q4 +13%)</td><td>~25%</td><td>EMEA + APAC stark wachsend</td></tr>
+            <tr><td>Federal/Government</td><td>~5%</td><td>1pp Sondereffekt Q4 FY26</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Geografische Verteilung Q4 FY26</h3>
+      <div class="geo-grid">
+        <div class="geo-card"><div class="geo-region">USA</div><div class="geo-pct">~75%</div><div class="geo-note">$1.91 Mrd Q4, +15% YoY</div></div>
+        <div class="geo-card"><div class="geo-region">International</div><div class="geo-pct">~25%</div><div class="geo-note">$626M Q4, +13% YoY</div></div>
+      </div>
+      <p><strong>FY27 Outlook (Management):</strong> Subs Revenue +12–13%, Op-Marge ~30% stabil, FCF +15% (schneller als Revenue – starkes Signal). FY27 cRPO Wachstum +14.5–15.5%. Workday vermerkt aggressiv investieren in AI-Agents-Plattform.</p>
+      <p><strong>Wachstums-Catalysts 2026/2027:</strong> (1) AI-Agent-Monetarisierung – Workday adopted „Agent System of Record" Pricing (per Agent ähnlich per Seat); (2) FedRAMP-High Wins (Government Vertical) – April 2026 First PAR Agent für Public Sector; (3) Mid-Market-Expansion via Workday Go (SMB-Lösung); (4) Strada Partnership (April 2026) für Workday Wellness; (5) Continued International Growth.</p>
+      <p><strong>Strukturelle Verlangsamungs-Faktoren:</strong> Tech-Layoff-Welle 2026 (81.747 Tech-Layoffs Q1 2026 – das größte seit 2 Jahren) drückt direkt HCM-Seat-Counts und Net Retention. Workday Wachstumsrate korreliert mit White-Collar-Beschäftigungs-Trends.</p>
+      <div class="source">Quellen: Workday Q4 FY26 PR; SEC 8-K; 24/7 Wall St. (25.02.2026); Stockanalysis WDAY</div>
     </div>
   </div>
 
-  <!-- S5 -->
   <div class="section" id="s5">
     <div class="section-header">
       <div class="section-number">5</div>
-      <div class="section-title">Bewertung & Multiples</div>
-      <div class="section-score">Score: 8/10</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 7/10</div>
     </div>
     <div class="section-body">
-      <h3>Bewertung am 5-Jahres-Tief nach 61%-Crash</h3>
-      <p>Bei $118.62 handelt WDAY mit <strong>P/E TTM ~30x</strong> (vs. 5J-Schnitt ~60x). Forward P/E ~22x. P/Sales TTM ~3.2x (vs. 5J-Schnitt ~8x). EV/EBITDA Fwd ~17x. <strong>Workday ist auf historisches Bewertungs-Tief</strong>, ähnlich wie Cisco oder Oracle Anfang 2000er nach dem Dotcom-Crash. Aber: Bewertungsdiskount reflektiert reales AI-Disruptions-Risiko.</p>
-
+      <p>WDAY handelt bei $216.93 mit signifikantem Discount zum 52W-Hoch (~$300, –28%) nach FY27-Guide-Reaktion. Bewertung ist nicht mehr „priced for perfection", aber auch nicht günstig.</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Metrik</th><th>WDAY (heute)</th><th>5J-Ø</th><th>Einordnung</th></tr></thead>
+          <thead><tr><th>Kennzahl</th><th>WDAY Aktuell</th><th>5J-Schnitt</th><th>Peers (NOW/CRM)</th><th>Bewertung</th></tr></thead>
           <tbody>
-            <tr><td>P/E TTM</td><td>~30x</td><td>~60x</td><td class="beat">50% unter Schnitt</td></tr>
-            <tr><td>Forward P/E (FY28)</td><td>~22x</td><td>~40x</td><td class="beat">Historisch tief</td></tr>
-            <tr><td>P/Sales TTM</td><td>~3.2x</td><td>~8x</td><td class="beat">Sehr günstig</td></tr>
-            <tr><td>EV/EBITDA (Fwd)</td><td>~17x</td><td>~28x</td><td class="beat">Attraktiv</td></tr>
-            <tr><td>PEG (Fwd)</td><td>~1.8x</td><td>—</td><td class="neutral">Akzeptabel</td></tr>
-            <tr><td>FCF Yield TTM</td><td>~7%</td><td>~3%</td><td class="beat">Exzellent</td></tr>
+            <tr><td>P/E (TTM)</td><td>~93x</td><td>~120x</td><td>NOW ~90x / CRM ~30x</td><td class="neutral">Hoch (aber profitabel)</td></tr>
+            <tr><td>P/E FWD (FY27)</td><td>~30x</td><td>~55x</td><td>NOW ~52x</td><td class="beat">Attraktiv</td></tr>
+            <tr><td>EV/Sales FWD</td><td>~5.5x</td><td>~10x</td><td>NOW ~14x / CRM ~7x</td><td class="beat">Tief</td></tr>
+            <tr><td>EV/EBITDA FWD</td><td>~18x</td><td>~35x</td><td>NOW ~45x</td><td class="beat">Sehr tief</td></tr>
+            <tr><td>P/FCF FWD</td><td>~18x</td><td>~30x</td><td>NOW ~50x</td><td class="beat">Sehr attraktiv</td></tr>
+            <tr><td>PEG</td><td>~2.0</td><td>~3.0</td><td>NOW ~2.5</td><td class="beat">Günstig</td></tr>
+            <tr><td>Rule of 40</td><td>~43%</td><td>~45%</td><td>NOW ~50%</td><td class="beat">Über Schwelle</td></tr>
           </tbody>
         </table>
       </div>
-
-      <h3>Peer-Vergleich</h3>
-      <p>WDAY Fwd P/E 22x vs. CRM 22x, MSFT 23x, ORCL 25x, ADP 26x. <strong>WDAY ist bewertungs-attraktiv für Quality-SaaS</strong>, aber AI-Risiko ist klar eingepreist. Bei +13% Wachstum + 30% Op-Marge + Bewertung am 5J-Tief = potenzielles Value-Setup.</p>
-
-      <div class="source">Quellen: Stocktitan (12.05.2026); EBC Financial Group (09.04.2026); Morningstar; eigene Berechnungen.</div>
+      <p><strong>Analystenkonsens (Stand 14.05.2026):</strong> 34 Analysten, Avg PT $202.5 – $208 (slight discount zum aktuellen Kurs!). TickerNerd Median PT $280 (29.1% Upside) basierend auf 51 Analysten. Spread: $115–326. 31 Buy / 12 Hold / 0 Sell. Piper Sandler Brent Bracelin Most Conservative bei $230.</p>
+      <p><strong>Eigene Bewertung:</strong> Bei FY27 Non-GAAP EPS ~$8.50–9.00 und P/E 28–32x (Quality SaaS Compounder): Fair Value $250–280. Bei Margen-Expansion auf 32% und FY28 Wachstum-Reacceleration auf 14% = Multiple-Expansion auf 35x = $320. Bei strukturell schwachem +10% Wachstum P/E auf 22x = $190 Floor. <strong>Upside: +15% bis +50% (12–24M), Downside: –12%.</strong></p>
+      <p><strong>Wichtige Bewertungs-Faktoren:</strong> Workday ist „dauerhaft" profitabel (GAAP $693M FY26 Profit) – Bewertung über FCF (P/FCF 18x) zeigt eigentlich attraktive Compounder. P/E TTM 93x ist nur deshalb hoch, weil GAAP-Marge erst kürzlich expandiert.</p>
+      <div class="source">Quellen: TickerNerd WDAY (Mai 2026); Stockanalysis WDAY; Public.com Forecast; MarketBeat Forecast; TradingView Analyst Aggregate</div>
     </div>
   </div>
 
-  <!-- S6 -->
   <div class="section" id="s6">
     <div class="section-header">
       <div class="section-number">6</div>
-      <div class="section-title">Cashflow, Margen & Kapitalqualität</div>
-      <div class="section-score">Score: 8/10</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 9/10</div>
     </div>
     <div class="section-body">
-      <h3>Starke Cashflow-Generierung, FCF-Yield 7%</h3>
-      <p>FY2026 Operating Cashflow $2.94 Mrd. (+19.4% YoY). FY26 FCF geschätzt ~$2.1 Mrd. (Capex ~$0.8 Mrd.). FCF-Yield auf MCap $30B = <strong>~7%</strong> – exzellent für Enterprise-SaaS. Bilanz: ~$8 Mrd. Cash & Investments, Debt minimal.</p>
-
+      <p><strong>Cashflow:</strong> FY26 Operating Cash Flow $2.94 Mrd (+19.4% YoY!), FCF $2.76 Mrd (29% Margin, +15% Wachstum). FY27 Guide: OCF $3.45 Mrd, FCF $3.18 Mrd (+15% YoY). Bilanz: ~$8 Mrd Cash &amp; Investments, ~$3 Mrd Convertibles. Net Cash Positiv.</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Metrik</th><th>FY2024</th><th>FY2025</th><th>FY2026</th><th>Trend</th></tr></thead>
+          <thead><tr><th>Kennzahl</th><th>FY24</th><th>FY25</th><th>FY26</th><th>FY27 Guide</th><th>Trend</th></tr></thead>
           <tbody>
-            <tr><td>Revenue</td><td>$7.3B</td><td>$8.4B</td><td>$9.55B</td><td class="beat">+13%</td></tr>
-            <tr><td>Operating Cashflow</td><td>$2.0B</td><td>$2.46B</td><td>$2.94B</td><td class="beat">↑↑</td></tr>
-            <tr><td>Non-GAAP Op-Margin</td><td>23%</td><td>26%</td><td>~28%</td><td class="beat">↑↑</td></tr>
-            <tr><td>GAAP Op-Margin</td><td>1%</td><td>5%</td><td>7.5%</td><td class="beat">↑↑</td></tr>
-            <tr><td>FCF</td><td>$1.7B</td><td>$2.0B</td><td>$2.1B</td><td class="beat">↑</td></tr>
+            <tr><td>Bruttomarge (non-GAAP)</td><td>~85%</td><td>~85%</td><td>~85%</td><td>~85%</td><td class="neutral">Stabil hoch</td></tr>
+            <tr><td>Operating Margin (non-GAAP)</td><td>~25%</td><td>~26%</td><td>30.6% Q4</td><td>~30%</td><td class="beat">Stark expandiert</td></tr>
+            <tr><td>GAAP Op-Marge</td><td>~3%</td><td>~5%</td><td>7.5%</td><td>~8%</td><td class="beat">Stetig steigend</td></tr>
+            <tr><td>FCF Margin</td><td>~25%</td><td>~28%</td><td>29%</td><td>~30%</td><td class="beat">Steigend</td></tr>
+            <tr><td>GAAP Net Income</td><td>$1.38B</td><td>$526M</td><td>$693M</td><td>~$800M</td><td class="beat">Profitabel</td></tr>
+            <tr><td>Rule of 40</td><td>~45%</td><td>~44%</td><td>~43%</td><td>~43%</td><td class="beat">Über Schwelle</td></tr>
+            <tr><td>Stock-Based Comp / Rev</td><td>~25%</td><td>~22%</td><td>~20%</td><td>~18%</td><td class="beat">Sinkend</td></tr>
           </tbody>
         </table>
       </div>
-
-      <h3>Bilanz & Kapitalrückführung</h3>
-      <p>Workday hat keine Dividende, aber aktives Buyback-Programm. ~$8B Cash, niedrige Debt. Aggressive R&D-Investitionen für AI-Capabilities (Paradox, Sana Akquisitionen).</p>
-
-      <div class="source">Quellen: WDAY Q4 FY26 8-K; eigene Berechnungen.</div>
+      <p><strong>Bilanz / Kapitalrückführung:</strong> $7+ Mrd Cash, signifikante Konvertible-Bonds (~$3 Mrd zur Refinanzierung 2027). Keine Dividende. Workday hat im FY26 erstes Buyback-Programm autorisiert ($1 Mrd) und teilweise exekutiert. Stock-Based Comp signifikant aber sinkend – wichtige Margen-Lever.</p>
+      <p><strong>Wichtigste Bedenken:</strong> Stock-Based Comp ist immer noch hoch (~20% of Revenue) – das ist GAAP-Margen-Drücker. Workday muss SBC-Disziplin behalten. Convertible-Refinanzierung 2027 in Higher-Rate-Umgebung könnte teurer werden.</p>
+      <p><strong>Lesart:</strong> Exzellente operative Cashflow-Generierung, beschleunigte Margen-Expansion, durchgängig profitabel. Bilanz ist Best-in-Class für SaaS-Compounder. FCF $2.76 Mrd zeigt Quality of Earnings.</p>
+      <div class="source">Quellen: Workday Q4 FY26 PR (24.02.2026); SEC 8-K; Stockanalysis WDAY Financials</div>
     </div>
   </div>
 
-  <!-- S7 -->
   <div class="section" id="s7">
     <div class="section-header">
       <div class="section-number">7</div>
       <div class="section-title">Peer-Vergleich</div>
-      <div class="section-score">Score: 7/10</div>
+      <div class="section-score">Score: 8/10</div>
     </div>
     <div class="section-body">
+      <p>Peers: ServiceNow (NOW), Salesforce (CRM), SAP (SAP), Oracle (ORCL), Datadog/Snowflake (Enterprise SaaS), Microsoft Dynamics (MSFT).</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Unternehmen</th><th>MCap</th><th>Revenue Growth</th><th>Non-GAAP Op-Marge</th><th>Fwd P/E</th><th>AI-Strategy</th></tr></thead>
+          <thead><tr><th>Unternehmen</th><th>Rev Growth</th><th>Op-Marge</th><th>FWD P/E</th><th>Market Cap</th><th>Kommentar</th></tr></thead>
           <tbody>
-            <tr><td><strong>WDAY</strong></td><td>$30B</td><td class="neutral">+13%</td><td>30%</td><td>~22x</td><td>Agentic AI + Flex Credits</td></tr>
-            <tr><td>CRM (Salesforce)</td><td>$153B</td><td class="neutral">+10%</td><td>34%</td><td>~22x</td><td>Agentforce ($800M ARR)</td></tr>
-            <tr><td>ORCL</td><td>$520B</td><td class="neutral">+9%</td><td>~45%</td><td>~25x</td><td>OCI + Database AI</td></tr>
-            <tr><td>ADP</td><td>~$120B</td><td class="neutral">+7%</td><td>~26%</td><td>~26x</td><td>Lyric AI Assistant</td></tr>
-            <tr><td>PAYC (Paycom)</td><td>~$13B</td><td class="neutral">+10%</td><td>~37%</td><td>~17x</td><td>BETI AI</td></tr>
+            <tr><td><strong>WDAY</strong></td><td>+13% / +13%e</td><td>30%</td><td>~30x</td><td>$58B</td><td>HCM-Leader, Plattform-Effekt, AI-Agents-Pivot</td></tr>
+            <tr><td>ServiceNow (NOW)</td><td>+22%</td><td>~30%</td><td>~52x</td><td>$180B</td><td>ITSM-Leader, Premium-Bewertung, AI-Workflows</td></tr>
+            <tr><td>Salesforce (CRM)</td><td>+10%</td><td>~33%</td><td>~24x</td><td>$245B</td><td>CRM-Riese, Agentforce AI-Pivot</td></tr>
+            <tr><td>SAP (SAP)</td><td>+12%</td><td>~25%</td><td>~22x</td><td>$240B</td><td>S/4HANA Cloud Migration, Workday-Konkurrent</td></tr>
+            <tr><td>Oracle (ORCL)</td><td>+8%</td><td>~30%</td><td>~25x</td><td>$450B</td><td>Fusion Cloud, OCI, schwächeres Wachstum</td></tr>
+            <tr><td>Snowflake (SNOW)</td><td>+27%</td><td>~7%</td><td>~140x</td><td>$70B</td><td>Data Platform, hohe Bewertung trotz Wachstum</td></tr>
           </tbody>
         </table>
       </div>
-
-      <h3>Qualitative Unterschiede</h3>
-      <p><strong>WDAY vs CRM:</strong> Vergleichbares Profil: ähnliches Wachstum (+13% vs +10%), Op-Marge (30% vs 34%), Fwd P/E (22x). CRM hat aggressivere Kapitalrückführung ($50B Buyback), WDAY hat den HCM-Marktführer-Status. Beides sind aktuell "Value-Plays mit AI-Optionalität".</p>
-      <p><strong>WDAY vs ADP:</strong> ADP ist HCM-Outsourcing-Spieler (Payroll-Processing), WDAY HCM-Software-Spieler. ADP ist defensiver, langsamer-wachsend; WDAY ist aggressiver positioniert mit AI-Pivot.</p>
-
-      <div class="source">Quellen: Yahoo Finance Multi-Ticker; Stocktitan.</div>
+      <p><strong>Qualitative Einordnung:</strong> Workday ist <strong>der günstigste Quality-SaaS-Compounder mit 30% Op-Marge</strong> in seiner Peer-Gruppe. ServiceNow ist Premium-Bewerted (P/E 52x) bei schnellerem Wachstum, aber Workday ist „günstig wie Salesforce" trotz besserem Wachstum (+13% vs CRM +10%). SAP und Oracle sind günstiger, aber wachsen langsamer und sind nicht Best-of-Breed in HCM.</p>
+      <p><strong>Marktpositionierung 2026:</strong> Workday dominiert „Cloud-Native HCM für Large Enterprise" (&gt;50% Fortune 500). SAP versucht S/4HANA-Migration zu beschleunigen, kommt aber technologisch zu kurz. Oracle Fusion HCM ist ernsthafte Konkurrenz im Government/Federal-Vertical. <strong>Workday Best-in-Class HCM, etwas hinter NOW im Workflow-Premium-Multiple.</strong></p>
+      <div class="source">Quellen: TickerNerd; eigene Peer-Berechnung; Stockanalysis Peers</div>
     </div>
   </div>
 
-  <!-- S8 -->
   <div class="section" id="s8">
     <div class="section-header">
       <div class="section-number">8</div>
-      <div class="section-title">Aktuelle News & Events (letzte 3 Monate)</div>
-      <div class="section-note">Quellen ≤ 3 Monate</div>
+      <div class="section-title">Aktuelle News &amp; Events (letzte 3 Monate)</div>
+      <div class="section-note">Stand: 15.05.2026</div>
     </div>
     <div class="section-body">
 
       <h3>Ebene 1: Unternehmen</h3>
       <div class="event-item">
-        <div class="event-dot dot-green"></div>
+        <div class="event-dot dot-yellow"></div>
         <div>
-          <div class="event-label">24.02.2026 – Q4 FY26 Beat: $2.53B Revenue (+14.5%) <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">Revenue $2.53B (+14.5%), Subscription $2.36B (+15.7%), EPS $2.47 vs. Konsens $2.32. AI ARR >$400M, Q4 AI ACV >$100M (+100% YoY). Non-GAAP Op-Marge 30.6% (+4.2pp YoY). Quelle: SEC 8-K.</div>
+          <div class="event-label">01.05.2026 – Q1 FY27 Earnings Datum: 27. Mai 2026 <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Workday wird Q1 FY27 Ergebnisse am 27. Mai 2026 nach Börsenschluss veröffentlichen. Erster Test nach FY27-Guide-Schock. Quelle: Workday IR.</div>
         </div>
       </div>
       <div class="event-item">
-        <div class="event-dot dot-red"></div>
+        <div class="event-dot dot-green"></div>
         <div>
-          <div class="event-label">24.02.2026 – FY27 Guidance impliziert Verlangsamung <span class="badge badge-red">Negativ</span></div>
-          <div class="event-text">FY27 Subscription-Wachstums-Guide: +12-13% YoY (von +14.5% in FY26). Markt reagierte negativ. Sub-Backlog-Wachstum dämpft. Quelle: Seeking Alpha (24.02.2026).</div>
+          <div class="event-label">April 2026 – Strada Partnership (Workday Wellness) <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Strada wird Workday Wellness Partner. Erweitert Mitarbeiter-Wellness-Ökosystem. Quelle: Workday IR Newsroom.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">April 2026 – PAR Agent für Public Sector launched <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Workday Agent reduziert Performance &amp; Accountability Review Cycle Times um bis zu 60% für Government-Kunden. „Fiscal Stewardship and Taxpayer Value". Federal Vertical Wachstumshebel. Quelle: Workday PR.</div>
         </div>
       </div>
       <div class="event-item">
         <div class="event-dot dot-yellow"></div>
         <div>
-          <div class="event-label">02/2026 – Aneel Bhusri kehrt als CEO zurück <span class="badge badge-yellow">Strategisch</span></div>
-          <div class="event-text">Mitgründer + bisheriger Executive Chairman übernimmt CEO-Rolle für "Chapter 4" - AI-Era-Transition. Signalisiert strategische Dringlichkeit. Quelle: Workday Press Release (04.02.2026).</div>
+          <div class="event-label">April 2026 – Tech-Layoff-Welle 81.747 Q1 2026 <span class="badge badge-red">Negativ (Sektor)</span></div>
+          <div class="event-text">Q1 2026 81.747 Tech-Layoffs – höchste Quartal-Layoff-Zahl seit 2 Jahren. Direkter Druck auf Workday HCM-Seat-Counts und Net Retention. Quelle: Industry-Tracking via Workday IR News.</div>
         </div>
       </div>
       <div class="event-item">
         <div class="event-dot dot-green"></div>
         <div>
-          <div class="event-label">Q4 FY26 – Sana + Paradox Akquisitionen <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">Sana = Enterprise Knowledge Tools (AI-Layer für Workday-Data); Paradox = Conversational AI für Candidate-Experience. Beide integriert mit AI-Capabilities-Beitrag. Quelle: Stocktitan.</div>
+          <div class="event-label">26.03.2026 – Annual Stockholder Meeting <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">2026 Annual Meeting of Stockholders. Bhusri reaffirmiert AI-Agent-Strategie. Quelle: Workday PR (26.03.2026).</div>
         </div>
       </div>
       <div class="event-item">
-        <div class="event-dot dot-green"></div>
+        <div class="event-dot dot-yellow"></div>
         <div>
-          <div class="event-label">Q4 FY26 – Flex Credits Pricing-Modell launched <span class="badge badge-green">Strategisch wichtig</span></div>
-          <div class="event-text">Customers können für AI-Work (z.B. processed invoices, candidate screening) bezahlen statt per Seat. Antwort auf AI-Disruption-Risiko. Wenn erfolgreich, ARPU-Boost trotz Seat-Erosion. Quelle: Chronicle Journal (24.02.2026).</div>
+          <div class="event-label">März 2026 – New Workday Foundation Initiative <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">$150.000 in Seed Funding + AI Skills Training + Free Claude AI Credit Access für Small Business Owners. Brand-Building, kein Revenue-Effekt. Quelle: Workday IR.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">März 2026 – Per-Seat-Pricing-Modell unter Druck (AI-Era) <span class="badge badge-yellow">Gemischt</span></div>
+          <div class="event-text">ServiceNow, SAP und Workday ziehen „neue Linien um Kundendaten" gegen externe AI-Agents, da Per-Seat-Pricing-Modell durch AI-Agents erodiert. Strategische Repositionierung notwendig. Workday-Antwort: „Agent System of Record"-Pricing. Quelle: Industry-Analyse via Stockanalysis.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">24.02.2026 – Q4 FY26: Beat, aber FY27 Guide Schock <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Beat: Rev $2.53B (+14.5%), Non-GAAP EPS $2.47 vs $2.32E. Op-Marge 30.6% (+420 bps YoY!). ABER: <strong>FY27 Subscription Guide nur +12-13%</strong> vs FY26 +14.5%. Aktie –8% AH, –12.8% Premarket 25.02. Schwache Guidance Hauptproblem. Quelle: Workday IR PR (24.02.2026); 24/7 Wall St.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Januar 2026 – CEO-Transition: Aneel Bhusri zurück <span class="badge badge-yellow">Neutral-Mild Negativ</span></div>
+          <div class="event-text">CEO-Wechsel: Aneel Bhusri (Co-Founder, war 2021–2025 Executive Chairman) übernimmt CEO-Rolle wieder, Carl Eschenbach (vorher CEO 2023–2026) tritt zurück. Markt-Interpretation: Strategie braucht „Founder-Touch" in AI-Era, aber CEO-Wechsel ist immer Risiko-Faktor. Quelle: Workday SEC Filing Januar 2026.</div>
         </div>
       </div>
 
       <h3>Ebene 2: Branche</h3>
       <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – AI-Agents disruptiveren Per-Seat-Pricing <span class="badge badge-yellow">Gemischt</span></div>
+          <div class="event-text">Salesforce Agentforce, ServiceNow Now Assist, Workday Illuminate – alle bewegen sich von Per-Seat zu Per-Agent / Outcome-Pricing. Branche-weiter strategischer Shift mit unsicherem Revenue-Impact. Quelle: Industry Coverage 2026.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">2026 – Cloud-Migration Tail-Wind <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">SAP-On-Premise-Kunden migrieren zu Cloud (SAP S/4HANA Cloud oder Workday). Strukturelle Wachstums-Opportunity für Cloud-Native-Anbieter wie Workday.</div>
+        </div>
+      </div>
+      <div class="event-item">
         <div class="event-dot dot-red"></div>
         <div>
-          <div class="event-label">Q1 2026 – AI-Disruption-Bedenken belasten HCM-Sektor <span class="badge badge-red">Risiko</span></div>
-          <div class="event-text">Markt fürchtet, dass AI-Agents HR-/Finance-Mitarbeiter ersetzen → niedrigerer Bedarf an Per-Seat-Lizenzen. WDAY -61% von ATH, kein Big-Tech-Player hat so viel verloren. Quelle: EBC Financial Group (09.04.2026).</div>
+          <div class="event-label">2026 – Mid-Market AI-First Konkurrenz (Rippling, Lattice) <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Rippling, Gusto, Lattice gewinnen Mid-Market HCM/HRIS-Marktanteile mit AI-First-Lösungen. Workday in Mid-Market-Segment unter Druck.</div>
         </div>
       </div>
 
       <h3>Ebene 3: Makro</h3>
       <div class="event-item">
-        <div class="event-dot dot-yellow"></div>
+        <div class="event-dot dot-red"></div>
         <div>
-          <div class="event-label">2026 – Enterprise-IT-Budgets selektiv <span class="badge badge-yellow">Neutral</span></div>
-          <div class="event-text">Enterprise-Software-Budgets bevorzugen AI-Cloud-Infrastructure über klassisches SaaS. WDAY in unattraktivere Bucket positioniert.</div>
+          <div class="event-label">2026 – Tech-Layoff-Welle drückt HCM Seat-Counts <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">81.747 Tech-Layoffs Q1 2026 (höchste seit 2 Jahren). Direktverbindung zu Workday HCM Net Retention. Drückt Wachstum strukturell.</div>
         </div>
       </div>
-
-      <div class="source">Quellen: Workday Q4 FY26 Earnings (24.02.2026); SEC 8-K; Seeking Alpha; Futurum Group; EBC Financial Group; Chronicle Journal.</div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – Macro-Unsicherheit (Tariffs, Slow-Growth-USA)</div>
+          <div class="event-text">Macro-Sorgen drücken Enterprise-IT-Budgets. Workday-Guidance reflektiert „prudent posture" wegen Macro-Unsicherheit.</div>
+        </div>
+      </div>
+      <div class="source">Quellen: Workday IR PR (Feb–Mai 2026); SEC Filings; 24/7 Wall St.; Stockanalysis WDAY; Industry Coverage</div>
     </div>
   </div>
 
-  <!-- S9 -->
   <div class="section" id="s9">
     <div class="section-header">
       <div class="section-number">9</div>
       <div class="section-title">Technische Analyse</div>
-      <div class="section-score">Score: 2/10</div>
-    </div>
-    <div class="section-body">
-      <h3>Extreme Schwäche: -61% von ATH, Tests 52W-Tief</h3>
-      <p>WDAY ist seit Februar 2024 ATH ($307) auf $118 abgestürzt = -61%. 52W-Range: ~$117 – $276. Aktueller Kurs nahe 52W-Tief. Alle wichtigen MAs weit über dem Kurs. Schwächste Big-Software-Performance in 2026.</p>
-
-      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));">
-        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value">$118.62</div></div>
-        <div class="kpi-card"><div class="kpi-label">SMA20</div><div class="kpi-value">~$125</div></div>
-        <div class="kpi-card"><div class="kpi-label">SMA50</div><div class="kpi-value">~$140</div></div>
-        <div class="kpi-card"><div class="kpi-label">SMA200</div><div class="kpi-value">~$190</div></div>
-        <div class="kpi-card"><div class="kpi-label">RSI(14)</div><div class="kpi-value miss">~35</div></div>
-        <div class="kpi-card"><div class="kpi-label">52W-Tief</div><div class="kpi-value red">~$117</div></div>
-        <div class="kpi-card"><div class="kpi-label">52W-Hoch</div><div class="kpi-value">~$276</div></div>
-      </div>
-
-      <h3>Setup</h3>
-      <p>Support: $117 (52W-Tief), $110, $100 (psychologisch). Resistance: $130, $145 (SMA50), $190 (SMA200). RSI ~35 nähert sich überverkauft. Falls $117 hält, Mean-Reversion auf $150+ möglich. Sonst weiter abwärts auf $100.</p>
-
-      <div class="source">Quellen: Stocktitan (12.05.2026); EBC Financial Group (09.04.2026); eigene Schätzungen.</div>
-    </div>
-  </div>
-
-  <!-- S10 -->
-  <div class="section" id="s10">
-    <div class="section-header">
-      <div class="section-number">10</div>
-      <div class="section-title">Risiken & Chancen</div>
       <div class="section-score">Score: 5/10</div>
     </div>
     <div class="section-body">
-
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">🤖 AI-Disruption: Seat-Lizenz-Kannibalisierung</div>
-          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
-        </div>
-        <div class="event-text">Größtes strukturelles Risiko. Falls AI-Agents 20-30% der HR-/Finance-Mitarbeiter ersetzen, Per-Seat-Revenue sinkt. Flex-Credits-Modell adressiert das, aber unerprobt. Wahrscheinlichkeit signifikanter Disruption: ~40%.</div>
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom:16px;">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value">$216.93</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value">~$218</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value">~$225</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value">~$245</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI</div><div class="kpi-value">~48</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W High</div><div class="kpi-value">~$300</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W Low</div><div class="kpi-value">~$200</div></div>
       </div>
-
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">📉 Wachstumsverlangsamung</div>
-          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
-        </div>
-        <div class="event-text">FY27 +12-13% Sub-Guide vs. FY26 +14.5%. Wenn AI-ARR nicht ausreichend Re-Acceleration bringt, droht weitere Multiple-Compression.</div>
-      </div>
-
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">🏢 SAP/Oracle/MSFT Konkurrenz</div>
-          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
-        </div>
-        <div class="event-text">SAP S/4HANA Cloud + Oracle Fusion + MSFT Dynamics drücken in HCM/Finance. Workdays Marktführerschaft strukturell unter Druck.</div>
-      </div>
-
-      <h3>Chancen</h3>
-      <p>(1) <strong>AI-ARR-Skalierung</strong>: $400M ARR jetzt +100% YoY – wenn auf $1.5-2B in 2-3 Jahren skalierbar, signifikanter Wachstumsbeitrag. (2) <strong>Bewertungs-Diskount</strong>: -61% von ATH, P/E 30x = signifikantes Mean-Reversion-Potenzial. (3) <strong>Bhusri-Comeback</strong>: Gründer-CEO-Returns haben historisch Aktien-Performance-Boost gebracht. (4) <strong>Finance-Cloud-Cross-Sell</strong>: Penetration nur ~20% bei Fortune-500-HCM-Kunden = $5B+ Opportunität.</p>
-
-      <div class="source">Quellen: Workday Q4 FY26 Earnings; EBC Financial Analysis; eigene Szenarioanalyse.</div>
+      <p><strong>Aktueller Trend:</strong> Seitwärts/abwärts. Kurs –28% vom 52W-Hoch (~$300), aber stabilisiert in $215–225-Range nach Q4-Reaktion. YTD ca. –15% bis –20%.</p>
+      <p><strong>Support/Resistance:</strong> Starker Support bei $200 (52W-Tief, psychologisch). Resistance bei $225 (SMA 50), $245 (SMA 200, kritischer Trend-Marker), $280 (TickerNerd Median PT). Bei Breakout über $245 → Trendwende.</p>
+      <p><strong>Momentum:</strong> RSI ~48 neutral. Volumen-Profile zeigt Akkumulation in $215–220-Range nach Q4-Capitulation. Cup-and-Handle möglich bei stabiler $215-Basis.</p>
+      <p><strong>Lesart:</strong> Charttechnisch keine klare Richtung. Q1 FY27 Earnings am 27.05.2026 ist nächster Major Catalyst. Bei „Beat &amp; FY27-Guide-Up" Ausbruch über $245 wahrscheinlich. Bei „Miss" Test von $200. Für aggressive Käufer attraktive $200–215-Akkumulationszone, aber Earnings-Volatilität tolerieren.</p>
+      <div class="source">Quellen: Yahoo Finance WDAY; TradingView Analyst-Aggregate; eigene Chart-Lesart</div>
     </div>
   </div>
 
-  <!-- S11 -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 7/10 (invertiert)</div>
+    </div>
+    <div class="section-body">
+      <h3>Strukturelle Risiken</h3>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Tech-Layoff-Welle drückt HCM Net Retention</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel-Hoch</span></div>
+        </div>
+        <div class="event-text">81.747 Q1 2026 Tech-Layoffs sind direkte Reduktion von Workday HCM-Seats. Bei anhaltender Layoff-Welle (200.000+ Layoffs 2026) könnte Net Retention von 105–110% auf &lt;100% fallen. Wahrscheinlichkeit: 45%, Auswirkung: 1–2pp Wachstumsverlangsamung.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Per-Seat-Pricing-Modell-Disruption durch AI-Agents</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch (langfristig)</span></div>
+        </div>
+        <div class="event-text">AI-Agents erodieren Per-Seat-Pricing-Logik. Workday muss „Agent System of Record"-Modell schnell etablieren – aber wenn AI-Agents 30–50% der White-Collar-Arbeit übernehmen, schrumpft HCM-Seat-Markt strukturell um 20–30%. Wahrscheinlichkeit: 35%, langfristig 3–5J Effekt.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Margen-Expansion-Pause wegen AI-Investments</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">FY27 Op-Marge Guide ~30% (flat) trotz starker Q4-Marge. Wenn Margen-Expansion in FY28 nicht zurückkehrt, fehlt EPS-Wachstums-Hebel. Wahrscheinlichkeit: 40%.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ SAP/Oracle holen technologisch auf</div>
+          <div><span class="badge badge-yellow">Niedrig–Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">SAP S/4HANA Cloud + Oracle Fusion Cloud werden technologisch besser. Workday-Premium-Pricing könnte unter Druck. Wahrscheinlichkeit: 30%.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ CEO-Wechsel (Bhusri zurück) Execution-Risiko</div>
+          <div><span class="badge badge-yellow">Niedrig–Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">CEO-Wechsel von Eschenbach zurück zu Bhusri (Januar 2026) kann Strategie-Wechsel implizieren. Bhusri ist erfahrener Founder, aber Markt-Reaktion gemischt. Wahrscheinlichkeit: 20%.</div>
+      </div>
+      <h3>Chancen</h3>
+      <p>(1) AI-Agents-Monetarisierung als neuer Revenue-Stream (50+ Agents). (2) FedRAMP-High Federal Wins. (3) Mid-Market via Workday Go. (4) International Expansion (25% Revenue, schnellstes Wachstum). (5) Buyback aggressiver nutzen bei tiefem Kurs.</p>
+      <h3>Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags:</strong> 5 Jahre kontinuierliche Wachstums-Verlangsamung, Tech-Layoff-Sorge, Per-Seat-Pricing-Disruption. <strong>Dealbreaker:</strong> Q1 FY27 Revenue Miss + erneuter FY27-Guide-Down → strukturelle Wachstums-Story tot, Position auflösen.</p>
+      <div class="source">Quellen: Public.com Analyst Coverage; Industry Tech-Layoff-Tracking; eigene Synthese</div>
+    </div>
+  </div>
+
   <div class="section" id="s11">
     <div class="section-header">
       <div class="section-number">11</div>
       <div class="section-title">Scoring</div>
-      <div class="section-score">Ø 6.0/10</div>
+      <div class="section-score">⌀ 7.4/10</div>
     </div>
     <div class="section-body">
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Kategorie</th><th>Score</th><th>Visual</th><th>Begründung</th></tr></thead>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Score-Bar</th><th>Begründung</th></tr></thead>
           <tbody>
-            <tr><td>Geschäftsmodell</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>HCM-Marktführer + Finance-Cross-Sell, aber Per-Seat-Modell unter AI-Druck</td></tr>
-            <tr><td>Burggraben</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>50%+ Cloud-HCM-Marktanteil, 97% GRR, hohe Switching-Costs</td></tr>
-            <tr><td>Operative Entwicklung (4Q)</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>4/4 Beats, Sub-Wachstum stabil 13-16%, Margen-Expansion +4pp</td></tr>
-            <tr><td>Wachstum</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>+13% FY26 → +12-13% FY27 = Verlangsamung. AI-ARR +100% Hoffnung</td></tr>
-            <tr><td>Bewertung</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>P/E 30x am 5J-Tief (vs. 60x Schnitt). FCF-Yield 7%</td></tr>
-            <tr><td>Cashflow</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>OCF $2.94B (+19%), Op-Marge 30%, FCF-Yield exzellent</td></tr>
-            <tr><td>Risiken (invertiert)</td><td><strong>5/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>AI-Disruption Tail-Risk hoch, Konkurrenz, Wachstumsverlangsamung</td></tr>
-            <tr><td>Technische Analyse</td><td><strong>2/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:20%"></div></div><span class="score-num">2</span></div></td><td>-61% von ATH, am 52W-Tief, alle MAs Sell. Schwächste Big-Software</td></tr>
-            <tr style="background:rgba(243,139,0,0.08);">
-              <td><strong>⌀ Gesamtscore</strong></td>
-              <td><strong>6.4/10</strong></td>
-              <td>
-                <div class="score-bar">
-                  <div class="score-bar-track">
-                    <div class="score-bar-fill" style="width:64%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
-                  </div>
-                  <span class="score-num" style="color:var(--primary);">6.4</span>
-                </div>
-              </td>
-              <td>Quality-Value-Play am 5J-Tief, aber AI-Disruptions-Risiko real</td>
-            </tr>
+            <tr><td>Geschäftsmodell</td><td>9/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>HCM-Global-Leader, Mission-Critical, &gt;50% Fortune 500</td></tr>
+            <tr><td>Burggraben</td><td>9/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>Sehr hohe Switching Costs, Daten-Moat für AI, Plattform-Effekt</td></tr>
+            <tr><td>Operative Entwicklung (4Q)</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>4/4 Beats, +420 bps Margen-Expansion, aber FY27 Guide schwach</td></tr>
+            <tr><td>Wachstum</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>+13% FY26, +13%e FY27 – solide aber verlangsamend</td></tr>
+            <tr><td>Bewertung</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>FWD P/E 30x, P/FCF 18x – attraktiv für Quality SaaS</td></tr>
+            <tr><td>Cashflow</td><td>9/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>$2.76B FCF, 29% Margin, durchgängig profitabel</td></tr>
+            <tr><td>Risiken (invertiert)</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Tech-Layoff-Druck, Per-Seat-Disruption real</td></tr>
+            <tr><td>Technische Analyse</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Seitwärts, unter SMA 200, Earnings-Catalyst 27.05.</td></tr>
+            <tr style="background:rgba(59,130,246,0.08);"><td><strong>⌀ Gesamtscore</strong></td><td><strong>7.4/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:74%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">7.4</span></div></td><td>Quality SaaS Compounder zu attraktiver Bewertung</td></tr>
           </tbody>
         </table>
       </div>
     </div>
   </div>
 
-  <!-- S12 -->
   <div class="section" id="s12">
     <div class="section-header">
       <div class="section-number">12</div>
@@ -545,74 +567,89 @@ tr:hover td { background: rgba(243,139,0,0.04); }
       <div class="bull-bear-grid">
         <div class="bull-card">
           <h4>🐂 Das Bullische Narrativ</h4>
-          <p><strong>Säule 1 – Bewertungs-Reset:</strong> P/E 30x = 50% unter 5J-Schnitt, FCF-Yield 7%, P/S 3.2x = 60% unter Schnitt. Wenn Workday +13% Wachstum hält + 30% Op-Marge ausweitet, ist die Bewertung am 5J-Tief unangemessen.</p>
-          <p><strong>Säule 2 – Bhusri-Comeback + AI-Strategie:</strong> Gründer-CEO-Return signalisiert strategische Dringlichkeit. AI-ARR $400M+ (+100% YoY), Flex Credits Pricing-Modell, Sana + Paradox-Akquisitionen zeigen aggressive Reaktion auf AI-Disruption-Threat.</p>
-          <p><strong>Säule 3 – Strukturelle Marktführerschaft:</strong> 50%+ Cloud-HCM-Marktanteil, 97% Gross-Revenue-Retention, Fortune 500 deeply embedded. Finance-Cloud-Cross-Sell-Pipeline noch früh – signifikantes Wachstumspotenzial.</p>
+          <p><strong>Säule 1: Quality SaaS Compounder zu Value-Bewertung.</strong> FWD P/E 30x bei 30% Op-Marge, P/FCF 18x bei $2.76B FCF, Rule of 40 = 43%. Margen-Expansion +420 bps YoY in Q4 ist außergewöhnlich. Bei FY28 Wachstums-Reacceleration auf +14% Multiple-Re-Rating auf 35x P/E = +30% Upside.</p>
+          <p><strong>Säule 2: AI-Agent-Moat durch Daten-Vorsprung.</strong> Workday Illuminate trainiert auf 800 Mrd Workday-Transaktionen – einzigartige proprietäre Datenbasis für HR/Finance AI. 50+ AI-Agents bereits launched. Wenn „Agent System of Record"-Modell etabliert wird, könnte Workday $1–2 Mrd inkrementelles ARR in FY28–FY30 erschließen.</p>
+          <p><strong>Säule 3: Strukturelle Marktposition + Switching Costs.</strong> &gt;50% Fortune 500 HCM-Marktanteil. Migration-Kosten typisch $10–50M+. Net Retention 105–110%. Strukturelle Defensiv-Position macht Workday wie ein „SaaS-Utility" – langsamer Wachser, aber sehr stabil.</p>
         </div>
         <div class="bear-card">
           <h4>🐻 Das Bärische Narrativ</h4>
-          <p><strong>Risiko 1 – AI-Disruptions-Tail-Risk:</strong> Wenn AI-Agents 20-30% der HR-/Finance-Mitarbeiter ersetzen, Per-Seat-Lizenz-Revenue erodiert. Markt preist das bereits mit -61% Crash ein – aber wenn Realität schlimmer, weitere Downside.</p>
-          <p><strong>Risiko 2 – Wachstumsverlangsamung bestätigt:</strong> FY27 +12-13% von +14.5% (FY26). Wenn AI-ARR-Re-Acceleration nicht zündet, droht weitere Decel. Konkurrenz von MSFT/SAP/Oracle intensiviert.</p>
-          <p><strong>Risiko 3 – Technische Schwäche:</strong> Am 52W-Tief, alle MAs Sell. Bei Bruch unter $117 droht weitere Korrektur auf $100. Catalysts noch unklar.</p>
+          <p><strong>Risiko 1: Tech-Layoff-Welle erodiert HCM-Basis.</strong> 81.747 Q1 2026 Tech-Layoffs sind direkte Net-Retention-Drücker. Wenn 2026 200.000+ Tech-Layoffs erreicht werden, fällt Net Retention auf &lt;100% – das wäre Wachstums-Killer.</p>
+          <p><strong>Risiko 2: Per-Seat-Pricing-Disruption durch AI.</strong> Wenn AI-Agents 30–50% der White-Collar-Arbeit übernehmen, schrumpft HCM-Seat-Markt strukturell um 20–30% in 3–5J. Workday-„Agent System of Record"-Modell ist Notwehr-Strategie, deren Erfolg unsicher ist.</p>
+          <p><strong>Risiko 3: SAP/Oracle Cloud-Migration holt auf.</strong> SAP S/4HANA Cloud + Oracle Fusion Cloud werden technologisch besser. Workday-Premium-Pricing könnte unter Druck. Bei Multi-Cloud-Era-Trend zugunsten von Hyperscaler-eigenen-HCM-Lösungen weiterer Druck.</p>
         </div>
       </div>
 
       <h3>Eigene Einschätzung</h3>
-      <p>WDAY ist ein klassisches <strong>"Quality-Value-Recovery"-Setup</strong>: HCM-Marktführer, FCF-Yield 7%, P/E 50% unter Schnitt, aber signifikantes AI-Disruptions-Tail-Risk. Bhusris CEO-Return + Flex-Credits + AI-Akquisitionen sind richtige strategische Antworten, aber Markt zweifelt, ob es ausreicht. Bei $118 (am 52W-Tief) ist Risk/Reward attraktiv: ~15% Downside (auf $100) vs. ~30% Upside (auf $150-170 in 12-18 Monaten falls AI-ARR auf $1B+ skaliert). Rating: <strong>HALTEN / Selektives Kaufen</strong> für Value-Investoren mit Geduld.</p>
+      <p>Workday ist 2026 ein hochwertiger Quality-SaaS-Compounder zu unterdurchschnittlicher Bewertung. Q4 FY26 zeigte exzellente operative Ausführung (Beat, +420 bps Op-Marge Expansion, $2.76B FCF). Aber FY27 Guide reflektiert ehrliche Macro-Sorgen, nicht strukturelle Schwäche. Die –28% Kursreaktion vom 52W-Hoch ist Overreaction – fundamentale Story bleibt intakt.</p>
+      <p>Das bullische Narrativ überzeugt mehr als das bärische: Bei P/FCF 18x ist Workday günstiger als SAP, Oracle und definitely NOW – obwohl Workday in HCM dominanter und in Margen-Expansion stärker ist. Risk/Reward ist asymmetrisch nach oben (+30% Upside bei FY28 Reacceleration vs. –12% Downside bei weiterem Macro-Druck).</p>
+      <p>Risk/Reward: –12% Downside ($190 Test) vs. +30% Upside ($280 Median PT). Verhältnis 1:2.5 – attraktiv für Quality-orientierte Investoren.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <p><strong>Kurzfristig (0–6 Monate):</strong> Q1 FY27 Earnings 27.05.2026 ist nächster Trigger. Bei „In-Line" Konsolidierung $215–230, bei „Beat &amp; Guide Up" Breakout zu $245+. Aktive: Position aufbauen oder Earnings abwarten.<br>
+      <strong>Mittelfristig (6–24 Monate):</strong> AI-Agent-Monetarisierung entscheidet. Wenn FY28 Subs Revenue +14–15% reaccelerates → Multiple-Re-Rating auf 35x P/E = $300+.<br>
+      <strong>Langfristig (2–5 Jahre):</strong> Strukturelle HCM-Marktposition stabil. Workday wird $15B+ Run-Rate erreichen mit ~32% Op-Marge → EPS $12–14, P/E 28x = $350–400.</p>
+
+      <h3>Kernthese</h3>
+      <p>Workday ist Quality SaaS Compounder zu attraktiver Bewertung (FWD P/E 30x, P/FCF 18x) mit Best-in-Class HCM-Position und exzellenter Cashflow-Generierung ($2.76B FCF FY26). FY27-Guide-Schwäche reflektiert Macro-Sorgen, nicht strukturelle Probleme. AI-Agent-Monetarisierung ist nächster Wachstumshebel. Risk/Reward 1:2.5 attraktiv für Quality-Investoren mit 12–24M Horizont.</p>
 
       <div class="rating-box">
-        <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN</div></div>
-        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$155–175</div></div>
-        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–4 Jahre</div></div>
-        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–15%</div></div>
-        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+35%</div></div>
-        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:2.3</div></div>
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$270–290</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">12–24 Monate</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–12%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+30%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val buy">1:2.5</div></div>
       </div>
 
+      <h3>Was falsifiziert die These?</h3>
       <div class="trigger-grid">
         <div class="trigger-card sell">
-          <h5>🔴 Bearish Trigger</h5>
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
           <ul class="trigger-list">
-            <li>Q1 FY27: Sub-Wachstum &lt;11% YoY → 30% reduzieren</li>
-            <li>Bruch unter $117 → Position halbieren</li>
-            <li>AI-ACV-Wachstum verlangsamt &lt;60% YoY → 25% reduzieren</li>
+            <li>Q1 FY27 Subs Rev Miss UND FY27-Guide-Down → strukturelle Schwäche</li>
+            <li>Net Retention &lt;100% in 2 Quartalen → Tech-Layoff-Effekt strukturell</li>
+            <li>Op-Marge fällt unter 28% → Margen-Story tot</li>
+            <li>Kurs unter $190 + neue Tiefstände → technischer Stopp</li>
           </ul>
         </div>
         <div class="trigger-card buy">
-          <h5>🟢 Bullish Trigger</h5>
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
           <ul class="trigger-list">
-            <li>Q1 FY27: AI-ACV-Wachstum >100% + Sub >13% → aufstocken</li>
-            <li>Mean-Reversion-Setup über $130 → tranchiert kaufen</li>
-            <li>FY28-Guidance impliziert Re-Acceleration → aggressiv kaufen</li>
+            <li>Q1 FY27 Beat &gt;2% UND FY27-Guide UP → Re-Acceleration</li>
+            <li>AI-Agent-Revenue &gt;$100M ARR Announcement</li>
+            <li>Kurs durchbricht SMA 200 ($245) → technische Trendwende</li>
+            <li>Major Federal Government-Deal &gt;$50M Win</li>
           </ul>
         </div>
       </div>
 
+      <h3>Welcher Anlegertyp passt?</h3>
       <div class="investor-grid">
         <div class="investor-yes">
           <h5>✅ Geeignet für</h5>
-          <ul>
-            <li>Value-Investoren (Bewertung am 5J-Tief)</li>
-            <li>Contrarian-Investoren</li>
-            <li>FCF-Yield-Sucher</li>
-            <li>Quality-at-Reasonable-Price</li>
-          </ul>
+          <ul><li>Quality SaaS Compounder Investoren</li><li>GARP-Strategien (Growth at Reasonable Price)</li><li>Buy-and-Hold mit 3–5J Horizont</li><li>SaaS-Sektor-Allocator</li></ul>
         </div>
         <div class="investor-no">
           <h5>❌ NICHT geeignet für</h5>
-          <ul>
-            <li>Growth-Investoren (verlangsamendes Wachstum)</li>
-            <li>Momentum-Trader (am Tief)</li>
-            <li>AI-Disruption-Risk-Sensible</li>
-          </ul>
+          <ul><li>Hyper-Growth-Investoren (Snowflake besser)</li><li>Income-Investoren (keine Dividende)</li><li>Kurzfrist-Trader (Earnings-Volatilität)</li><li>Deep-Value (Multi-Cloud-Plays günstiger)</li></ul>
         </div>
       </div>
 
-      <div class="source">Quellen: Synthese aus allen Sektionen; eigene Risk/Reward-Kalkulation.</div>
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Q1 FY27 Earnings (27.05.) abwarten</span></td><td>Binärer Catalyst-Event</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert (50% jetzt, 50% nach Earnings)</span></td><td>Akkumulationszone $215–225 attraktiv</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Quality-Compounder bei Bewertungstief</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Akkumulieren</span></td><td>Strukturelle HCM-Position 5J-Compound</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- S13 -->
   <div class="section" id="s13">
     <div class="section-header">
       <div class="section-number">13</div>
@@ -621,31 +658,36 @@ tr:hover td { background: rgba(243,139,0,0.04); }
     <div class="section-body">
 
       <div class="outlook-card">
-        <h4>📊 Event 1: Q1 FY27 Earnings – Ende Mai 2026</h4>
-        <p>Erste Bewährungsprobe für FY27-Outlook. Kritische Metriken: (1) Sub-Wachstum tatsächlich 12-13% wie geguidet? (2) AI-ACV-Wachstum hält >100% YoY? (3) Bhusri Strategy-Updates für "Chapter 4"?</p>
+        <h4>📊 Event 1: Q1 FY27 Earnings – 27. Mai 2026</h4>
+        <p>Erstes Quartal nach FY27-Guide-Schock. Konsens Q1: Revenue ~$2.30B (+13%), EPS ~$2.20, cRPO +14.5–15.5%. Markt achtet auf: (a) Net Retention (Tech-Layoff-Effekt), (b) AI-Agent-Adoption-Metriken, (c) FY27-Guide-Update (UP/UNCHANGED/DOWN), (d) Government/Federal Vertical Pipeline.</p>
         <div class="when-then">
-          <strong>Wenn:</strong> Sub-Wachstum ≥13% + AI-ACV-Wachstum >100% → Relief-Rally +10-15%, Mean-Reversion-Trade aktiviert.<br><br>
-          <strong>Wenn:</strong> Sub-Wachstum &lt;11% ODER AI-Decel → weiterer Drawdown auf $100.
+          <strong>Wenn:</strong> Revenue Beat &gt;2% UND FY27-Guide UP (Subs auf +13–14%) UND Net Retention stabil &gt;105% → Aktie +15% schnell, Trendwende zu $250+.<br><br>
+          <strong>Wenn:</strong> Revenue in-line ODER FY27-Guide-Down (auf +11–12%) → Aktie –10% bis –15%, Test von $190.
         </div>
       </div>
 
       <div class="outlook-card">
-        <h4>📊 Event 2: Workday Rising 2026 – Herbst 2026</h4>
-        <p>Jährliche Kundenkonferenz; Bühne für neue Agentic-Solutions, Flex-Credits-Roadmap, Customer-Stories.</p>
+        <h4>📊 Event 2: AI-Agent-Monetarisierung Milestones (2H 2026)</h4>
+        <p>Workday Illuminate Plattform + 50+ AI-Agents brauchen sichtbare Revenue-Beiträge. Management müsste bis Q3 FY27 (Nov 2026) konkrete „Agent System of Record"-Pricing-Modelle und mindestens $100M AI-ARR-Beitrag kommunizieren.</p>
         <div class="when-then">
-          <strong>Wenn:</strong> Klare Flex-Credits-Adoption-Metriken + neue AI-Capabilities → Catalyst-Setup.<br><br>
-          <strong>Wenn:</strong> nur inkrementelle Updates → kein Re-Rating.
+          <strong>Wenn:</strong> Bis Q3 FY27 sichtbare AI-Agent-ARR &gt;$100M UND „Agent System of Record"-Pricing für Top-Customer-Wins → Multiple-Re-Rating auf 35x P/E, Kursziel $310.<br><br>
+          <strong>Wenn:</strong> AI-Agent-Adoption bleibt „Pipeline only" ohne ARR-Beiträge → Bärisches AI-Disruption-Narrativ verfestigt sich, Multiple-Compression auf 25x P/E = $200.
         </div>
       </div>
 
-      <div class="source">Quellen: Workday IR Calendar; Workday Rising 2026.</div>
+      <div class="outlook-card">
+        <h4>📊 Event 3: Tech-Labor-Market-Recovery (Wenn/Wann)</h4>
+        <p>Workday-Wachstum korreliert direkt mit White-Collar-Beschäftigung. Q1 2026 81.747 Tech-Layoffs war Schreckens-Signal. Wenn 2H 2026 Tech-Hiring zurückkommt (Q3 Tech-Hiring &gt;Layoffs), Workday-Net-Retention sollte zurück auf 105–110%.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> 2H 2026 sichtbare Tech-Hiring-Recovery (BLS-Tech-Employment +2% YoY) UND Workday Net Retention zurück &gt;108% → Wachstums-Reacceleration, Bullen-These bestätigt.<br><br>
+          <strong>Wenn:</strong> Tech-Layoff-Welle setzt sich fort (2026 &gt;200.000 Layoffs) → Strukturelle HCM-Schrumpfung, Multiple-Compression länger anhaltend.
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <div class="disclaimer">
-    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung dar. Stand: 14.05.2026.
-  </div>
-
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung oder Aufforderung zum Kauf/Verkauf dar. Alle Angaben basieren auf öffentlich verfügbaren Quellen mit Stand 15.05.2026 und sind nach bestem Wissen erstellt, ohne Gewähr auf Vollständigkeit oder Richtigkeit. Investitionen in Aktien sind mit Risiken bis zum Totalverlust verbunden.</div>
 </div>
 </body>
 </html>

@@ -1,869 +1,605 @@
 <!DOCTYPE html>
-<!-- saved from url=(0032)https://okta-analyse.vercel.app/ -->
-<html lang="de"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OKTA – Aktienanalyse Canvas v2.2</title>
-  <style>
-    :root {
-      --primary: #3b82f6;
-      --primary-dark: #1d4ed8;
-      --bg: #0f0f12;
-      --bg-card: #1a1a1f;
-      --bg-card2: #22222a;
-      --border: #2e2e38;
-      --text: #e8e8ec;
-      --text-muted: #888898;
-      --text-dim: #555566;
-      --green: #22c55e;
-      --red: #ef4444;
-      --yellow: #f59e0b;
-      --blue: #3b82f6;
-      --purple: #8b5cf6;
-      --teal: #14b8a6;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
-    .header {
-      background: linear-gradient(135deg, #00081a 0%, #001028 40%, #0f0f12 100%);
-      border-bottom: 1px solid var(--primary);
-      padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;
-    }
-    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
-    .header-left h1 span { color: var(--primary); }
-    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
-    .header-right { text-align: right; }
-    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
-    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
-    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
-    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
-    .price-change.up   { background: rgba(34,197,94,0.15);  color: var(--green); }
-    .nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100; }
-    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
-    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
-    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
-    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
-    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
-    .kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-    .kpi-value.green  { color: var(--green); }
-    .kpi-value.red    { color: var(--red); }
-    .kpi-value.blue   { color: var(--blue); }
-    .kpi-value.yellow { color: var(--yellow); }
-    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
-    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
-    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .section-title  { font-size: 16px; font-weight: 700; color: white; }
-    .section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
-    .section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
-    .section-body   { padding: 20px 24px; }
-    p { margin-bottom: 12px; color: var(--text); }
-    p:last-child { margin-bottom: 0; }
-    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
-    h3:first-child { margin-top: 0; }
-    .table-wrap { overflow-x: auto; margin: 16px 0; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: rgba(59,130,246,0.04); }
-    .beat    { color: var(--green);  font-weight: 600; }
-    .miss    { color: var(--red);    font-weight: 600; }
-    .neutral { color: var(--yellow); font-weight: 600; }
-    .badge        { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
-    .badge-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
-    .badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
-    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
-    .badge-blue   { background: rgba(59,130,246,0.15); color: var(--blue); }
-    .badge-orange { background: rgba(59,130,246,0.15); color: var(--blue); }
-    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
-    .event-item:last-child { border-bottom: none; }
-    .event-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
-    .dot-green  { background: var(--green); }
-    .dot-red    { background: var(--red); }
-    .dot-yellow { background: var(--yellow); }
-    .dot-blue   { background: var(--blue); }
-    .event-label { font-weight: 600; color: white; }
-    .event-text  { font-size: 14px; color: var(--text); }
-    .risk-item   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
-    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px; }
-    .risk-title  { font-weight: 600; color: white; font-size: 14px; }
-    .score-bar       { display: flex; align-items: center; gap: 10px; }
-    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-    .score-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #60a5fa); }
-    .score-num       { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
-    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-    @media(max-width:700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
-    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
-    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
-    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .bear-card h4 { color: var(--red);   margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .bull-card p, .bear-card p { font-size: 14px; }
-    .rating-box { background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(59,130,246,0.04)); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
-    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
-    .rating-item .val  { font-size: 20px; font-weight: 800; color: white; }
-    .rating-item .val.buy  { color: var(--green); }
-    .rating-item .val.hold { color: var(--yellow); }
-    .rating-item .val.sell { color: var(--red); }
-    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
-    @media(max-width:700px) { .trigger-grid { grid-template-columns: 1fr; } }
-    .trigger-card      { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
-    .trigger-card h5   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-    .trigger-card.buy  h5 { color: var(--green); }
-    .trigger-card.sell h5 { color: var(--red); }
-    .trigger-list    { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
-    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
-    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
-    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
-    @media(max-width:600px) { .investor-grid { grid-template-columns: 1fr; } }
-    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
-    .investor-no  { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
-    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
-    .investor-no  h5 { color: var(--red);   font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
-    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
-    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
-    .investor-no  li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
-    .geo-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
-    .geo-card   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
-    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .geo-pct    { font-size: 20px; font-weight: 700; color: white; }
-    .geo-note   { font-size: 12px; color: var(--text-muted); }
-    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
-    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
-    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
-    .outlook-card .when-then strong { color: var(--primary); }
-    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
-    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
-    .alert-box { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
-    .divider   { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
-    .pill      { display: inline-block; background: rgba(59,130,246,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
-    .ai-focus-box { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.25); border-left: 4px solid var(--red); border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 16px 0; }
-    .ai-focus-box h4 { color: var(--red); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-    .own-view-box { background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.25); border-left: 4px solid var(--blue); border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 16px 0; }
-    .own-view-box h4 { color: var(--blue); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-  </style>
-<style id="highlight-mengshou-style">
-    .highlight-mengshou-wrap {
-        background: #ff9;
-        cursor: pointer;
-    }
-    .highlight-mengshou-wrap.active {
-        background: #ffb;
-    }
-</style></head>
-<body cz-shortcut-listen="true" data-new-gr-c-s-check-loaded="14.1280.0" data-gr-ext-installed="">
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OKTA – Aktienanalyse Canvas v2.2</title>
+<style>
+:root { --primary: #3b82f6; --primary-dark: #1e40af; --bg: #0f0f12; --bg-card: #1a1a1f; --bg-card2: #22222a; --border: #2e2e38; --text: #e8e8ec; --text-muted: #888898; --text-dim: #555566; --green: #22c55e; --red: #ef4444; --yellow: #f59e0b; --blue: #3b82f6; --purple: #8b5cf6; --teal: #14b8a6; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+.header { background: linear-gradient(135deg, #00081a 0%, #001028 40%, #0f0f12 100%); border-bottom: 1px solid var(--primary); padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; }
+.header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+.header-left h1 span { color: var(--primary); }
+.header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+.header-right { text-align: right; }
+.price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+.price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+.price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+.price-change.up { background: rgba(34,197,94,0.15); color: var(--green); }
+.price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+.nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100; }
+.nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+.main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+.kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+.kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.kpi-value.green { color: var(--green); }
+.kpi-value.red { color: var(--red); }
+.kpi-value.orange { color: var(--primary); }
+.section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+.section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+.section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.section-title { font-size: 16px; font-weight: 700; color: white; }
+.section-score { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+.section-note { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+.section-body { padding: 20px 24px; }
+p { margin-bottom: 12px; color: var(--text); }
+p:last-child { margin-bottom: 0; }
+h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+h3:first-child { margin-top: 0; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(59,130,246,0.04); }
+.beat { color: var(--green); font-weight: 600; }
+.miss { color: var(--red); font-weight: 600; }
+.neutral { color: var(--yellow); font-weight: 600; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+.badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+.badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+.badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+.badge-orange { background: rgba(59,130,246,0.15); color: var(--primary); }
+.event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+.event-item:last-child { border-bottom: none; }
+.event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+.dot-green { background: var(--green); }
+.dot-red { background: var(--red); }
+.dot-yellow { background: var(--yellow); }
+.event-label { font-weight: 600; color: white; }
+.event-text { font-size: 14px; color: var(--text); }
+.risk-item { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+.risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.risk-title { font-weight: 600; color: white; font-size: 14px; }
+.score-bar { display: flex; align-items: center; gap: 10px; }
+.score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #60a5fa); }
+.score-num { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+.bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+.bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+.bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+.bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.rating-box { background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(59,130,246,0.04)); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+.rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+.rating-item .val { font-size: 20px; font-weight: 800; color: white; }
+.rating-item .val.buy { color: var(--green); }
+.rating-item .val.hold { color: var(--yellow); }
+.rating-item .val.sell { color: var(--red); }
+.trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+.trigger-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.trigger-card h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.trigger-card.buy h5 { color: var(--green); }
+.trigger-card.sell h5 { color: var(--red); }
+.trigger-list { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+.trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+.trigger-list li::before { content: "→"; position: absolute; left: 0; }
+.investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+@media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+.investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+.investor-no { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+.investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-no h5 { color: var(--red); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+.investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+.investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+.geo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+.geo-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.geo-pct { font-size: 20px; font-weight: 700; color: white; }
+.geo-note { font-size: 12px; color: var(--text-muted); }
+.outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+.outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+.outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+.outlook-card .when-then strong { color: var(--primary); }
+.source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+.disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+.alert-box { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+</style>
+</head>
+<body>
 
-<!-- HEADER -->
 <div class="header">
   <div class="header-left">
-    <h1>Okta, Inc. <span>OKTA · NASDAQ</span></h1>
-    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 27. Februar 2026 · Sektor: Cybersecurity / IAM · Spezialfokus: AI-Disruption &amp; Moat</div>
+    <h1>Okta <span>OKTA.NASDAQ</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 15. Mai 2026 · NASDAQ · Sektor: Cybersecurity / Identity Management</div>
     <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-      <span class="badge badge-blue">Identity &amp; Access Mgmt.</span>
-      <span class="badge badge-blue">Auth0 / CIAM</span>
-      <span class="badge badge-yellow">Growth-at-Scale</span>
-      <span class="badge badge-red">AI-Disruption Watch</span>
+      <span class="badge badge-orange">Identity Cloud</span>
+      <span class="badge badge-blue">Auth0 for AI Agents</span>
+      <span class="badge badge-red">FY27 Guide: nur 9%</span>
     </div>
   </div>
   <div class="header-right">
-    <div class="price-tag">$75–80</div>
-    <div class="price-meta">Schlusskurs 27. Feb. 2026 · NASDAQ</div>
-    <div class="price-change down">▼ –20% YTD 2026</div>
-    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $71 – $115</div>
+    <div class="price-tag">$78.82</div>
+    <div class="price-meta">Schlusskurs 14.05.2026 · NASDAQ</div>
+    <div class="price-change down">▼ –38% 52W-Hoch</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $62.66 – $127.57</div>
   </div>
 </div>
 
-<!-- NAV -->
 <nav class="nav">
-  <a href="https://okta-analyse.vercel.app/#s1">1. Geschäftsmodell</a>
-  <a href="https://okta-analyse.vercel.app/#s2">2. Burggraben</a>
-  <a href="https://okta-analyse.vercel.app/#s3">3. Quartale</a>
-  <a href="https://okta-analyse.vercel.app/#s4">4. Wachstum</a>
-  <a href="https://okta-analyse.vercel.app/#s5">5. Bewertung</a>
-  <a href="https://okta-analyse.vercel.app/#s6">6. Cashflow</a>
-  <a href="https://okta-analyse.vercel.app/#s7">7. Peers</a>
-  <a href="https://okta-analyse.vercel.app/#s8">8. News</a>
-  <a href="https://okta-analyse.vercel.app/#s9">9. Technisch</a>
-  <a href="https://okta-analyse.vercel.app/#s10">10. Risiken</a>
-  <a href="https://okta-analyse.vercel.app/#s11">11. Scoring</a>
-  <a href="https://okta-analyse.vercel.app/#s12">12. Fazit</a>
-  <a href="https://okta-analyse.vercel.app/#s13">13. Outlook</a>
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
 </nav>
 
 <div class="main">
 
-  <!-- KPI OVERVIEW -->
   <div class="kpi-grid" style="margin-top:24px;">
-    <div class="kpi-card">
-      <div class="kpi-label">Kurs</div>
-      <div class="kpi-value red">~$77</div>
-      <div class="kpi-sub">USD · 27. Feb. 2026</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Marktkapitalisierung</div>
-      <div class="kpi-value">~$13–15 Mrd.</div>
-      <div class="kpi-sub">USD</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Fwd P/E (non-GAAP)</div>
-      <div class="kpi-value green">~21–25x</div>
-      <div class="kpi-sub">Günstig vs. Peers</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">EV / FCF</div>
-      <div class="kpi-value green">~12x</div>
-      <div class="kpi-sub">Sehr attraktiv</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">FCF-Marge</div>
-      <div class="kpi-value green">28%</div>
-      <div class="kpi-sub">FY2025 · $730 Mio. FCF</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Rev.-Wachstum</div>
-      <div class="kpi-value yellow">+9–10%</div>
-      <div class="kpi-sub">FY2026 Guidance</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">NRR</div>
-      <div class="kpi-value yellow">106%</div>
-      <div class="kpi-sub">Q3 FY2026 (↓ vs. 120%+)</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Nächste Earnings</div>
-      <div class="kpi-value blue">4. März</div>
-      <div class="kpi-sub">Q4 FY2026 · After Close</div>
-    </div>
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">$78.82</div><div class="kpi-sub">USD · 14.05.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value">~$13.8 Mrd</div><div class="kpi-sub">Mid Cap</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/E FWD</div><div class="kpi-value">~22x</div><div class="kpi-sub">FY27e</div></div>
+    <div class="kpi-card"><div class="kpi-label">FY26 Umsatz</div><div class="kpi-value">$2.92 Mrd</div><div class="kpi-sub">+11.8% YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">RPO</div><div class="kpi-value">$4.83 Mrd</div><div class="kpi-sub">+15% YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">Op-Marge (non-GAAP)</div><div class="kpi-value green">26%</div><div class="kpi-sub">FY26</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value orange">28.05.2026</div><div class="kpi-sub">Q1 FY27</div></div>
+    <div class="kpi-card"><div class="kpi-label">FY27 Guide</div><div class="kpi-value red">+9%</div><div class="kpi-sub">Hauptproblem</div></div>
   </div>
 
-  <!-- S1: GESCHÄFTSMODELL -->
   <div class="section" id="s1">
     <div class="section-header">
       <div class="section-number">1</div>
       <div class="section-title">Geschäftsmodell</div>
-      <div class="section-note">Quellen ≤ 9 Monate</div>
+      <div class="section-note">Quellen ≤ 6 Monate</div>
     </div>
     <div class="section-body">
-      <p>Okta, Inc. wurde 2009 von Todd McKinnon und Frederic Kerrest gegründet und ist heute der weltweit führende <strong>unabhängige Anbieter von Identity and Access Management (IAM)</strong>. Das Unternehmen positioniert sich als neutraler Identity Partner für Unternehmen aller Größen – eine bewusste Abgrenzung zur Ecosystem-gebundenen Konkurrenz wie Microsoft. Der Kern des Geschäftsmodells ist eine Cloud-native SaaS-Plattform, die Mitarbeitern, Kunden und zunehmend auch KI-Agenten sicheren Zugang zu digitalen Ressourcen ermöglicht.</p>
-
-      <p>Okta operiert mit zwei strategisch getrennten Plattformen: der <strong>Okta Workforce Identity Cloud</strong> für den Enterprise-Bereich (primär CIOs und CISOs) und der <strong>Auth0 Customer Identity Cloud</strong> für Entwickler (CIAM). Erstere umfasst Kernprodukte wie Single Sign-On (SSO), Adaptive Multi-Factor Authentication (MFA), Universal Directory, Lifecycle Management, Okta Identity Governance (OIG) und Privileged Access Management (PAM). Diese Go-to-Market-Spezialisierung wurde in FY2026 neu implementiert und zeigt messbare Wirkung.</p>
-
-      <p>Das Umsatzmodell ist primär <strong>abonnementbasiert</strong> – über 97% des Gesamtumsatzes entfallen auf wiederkehrende Subscription-Einnahmen ($2,556 Mrd. von $2,610 Mrd. Gesamtumsatz in FY2025). Die Kostenstruktur ist Asset-Light: Okta hält keine physische Infrastruktur, sondern bezieht Cloud-Kapazitäten von AWS, Azure und GCP. Dies ermöglicht hohe Bruttomargen (~77%) und einen FCF von $730 Mio. (28% FCF-Marge) in FY2025. Die Preisgestaltung erfolgt per User / per Monat mit steigenden Preisen für Enterprise-Pakete.</p>
-
-      <p>Mit über <strong>19.000 Unternehmenskunden</strong> und <strong>7.000+ vorgefertigten App-Integrationen</strong> (Okta Integration Network, OIN) hat Okta ein dichtes Ökosystem aufgebaut. Über 5.000 Kunden haben einen Annual Contract Value (ACV) von mehr als $100.000 – eine wichtige Enterprise-Reifekennzahl. Der Reifegrad hat sich verändert: von Hyper-Growth zu <em>Growth-at-Scale</em> mit wachsendem Profitabilitätsfokus.</p>
-
-      <div class="source">Quellen: Okta 10-K FY2025; Q3 FY2026 Earnings Call (Dez. 2025); Okta Investor Relations; Simply Wall St. (Feb. 2026)</div>
+      <p>Okta ist der führende unabhängige Identity-Management-Anbieter mit zwei Hauptprodukten: <strong>Okta Workforce Identity</strong> (für Mitarbeiter – Single Sign-On, Adaptive MFA, Lifecycle Management, Privileged Access) und <strong>Auth0 Customer Identity</strong> (CIAM – Login-Infrastruktur, Authentifizierung für Endkunden-Apps von Entwicklern). Auf Basis der „Okta Identity Cloud" werden mehr als 18.000 Apps in über 14.000 Enterprise-Kunden geschützt, darunter Siemens, Zurich, Standard Life und ein Großteil des Fortune 500.</p>
+      <p>FY26 (endete 31.01.2026) erreichte Okta <strong>$2.92 Mrd Umsatz (+12% YoY)</strong>, Subscription Revenue $2.86 Mrd (+12%), <strong>Non-GAAP Operating Margin 26%</strong> (vs. 22% in FY25) und einen Cash-Bestand von <strong>$2.55 Mrd</strong>. Im März 2026 wurde ein $1 Mrd Buyback-Programm autorisiert, davon bereits 875.000 Aktien für $79M zurückgekauft.</p>
+      <p>Das Geschäftsmodell ist subskriptionsbasiertes SaaS mit hoher Bruttomarge (~76%) und exzellentem Cashflow-Profil – FY26 FCF-Marge 30%. Die strategische Stoßrichtung 2026: Identity als <strong>„Control Plane für AI-Agents"</strong>. Mit den Launches von <strong>Auth0 for AI Agents</strong> (GA) und <strong>Okta for AI Agents</strong> (Early Access) positioniert sich Okta als zentrale Identity-Schicht für die agentic-AI-Era. CEO Todd McKinnon (Co-Founder, seit 2009) argumentiert, AI-Agent-Identitäten könnten Multi-Year-Upside zum Kerngeschäft werden.</p>
+      <p>Das große operative Problem: <strong>FY27 Revenue Guidance von nur +9%</strong> (vs. FY26 +12%, FY25 +15%, FY24 +22%) signalisiert struktureller Wachstumsverlangsamung. Markt straft Okta dafür ab – Aktie –38% vom 52W-Hoch.</p>
+      <div class="source">Quellen: Okta Q4 FY26 PR (04.03.2026); Earnings Call Transcript Q4 FY26 (Alpha Spread); Okta IR Newsroom</div>
     </div>
   </div>
 
-  <!-- S2: BURGGRABEN -->
   <div class="section" id="s2">
     <div class="section-header">
       <div class="section-number">2</div>
       <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
-      <div class="section-score">Score: 6/10</div>
+      <div class="section-score">Score: 7/10</div>
     </div>
     <div class="section-body">
-      <h3>Neutralitäts-Moat</h3>
-      <p>Das wichtigste Alleinstellungsmerkmal ist Oktas <strong>Neutralität als unabhängiger Identity Provider</strong>. In Multi-Cloud-Umgebungen – heute Standard in Enterprise-IT – bevorzugen CISOs einen Vendor ohne Präferenz für AWS, Azure oder GCP. Microsoft Entra ID bietet zwar Kostenvorteil für M365-Kunden, schafft aber Vendor-Lock-in. Okta verbindet nahtlos über 7.000 Apps und wird von Gartner regelmäßig als <strong>Leader im Magic Quadrant für Access Management</strong> geführt. Diese Neutralitäts-Positionierung ist in heterogenen IT-Umgebungen kaum reproduzierbar.</p>
-
-      <h3>Switching Costs &amp; Kundenbindung</h3>
-      <p>Ein Wechsel des Identity Providers erfordert die Rekonfiguration aller verbundenen Applikationen, eine tiefe Integration in HR-Systeme und Directory-Services sowie Mitarbeiterschulungen – hohe operative Kosten für den Kunden. Dies spiegelt sich in einer <strong>Net Revenue Retention Rate (NRR) von 106%</strong> (Q3 FY2026) wider. Die NRR ist zwar rückläufig (historisch 120%+), aber immer noch positiv – bestehende Kunden kaufen netto mehr.</p>
-
-      <h3>Technologie &amp; Ökosystem</h3>
-      <p>Okta besitzt tiefes Fachwissen in Identity Security, aufgebaut in über 15 Jahren Cloud-nativer Entwicklung. Die neue Strategie der <strong>„Identity Security Fabric"</strong> – eine Architektur für menschliche, maschinelle und KI-Agenten-Identitäten in einem Framework – ist ein ambitionierter Schritt ins AI-Zeitalter. Mit Auth0 for AI Agents und dem PAM-Modul adressiert Okta eine wachsende Governance-Lücke: 91% der Unternehmen nutzen bereits KI-Agenten, aber nur 10% haben eine Governance-Strategie.</p>
-
-      <h3>Schwachstellen</h3>
-      <p>Die wesentliche Schwachstelle ist der <strong>Microsoft-Komplex</strong>: Entra ID wird für viele M365-Kunden kostenlos mitgeliefert. In homogenen Microsoft-Umgebungen ist Okta schwer zu rechtfertigen. Zudem hat ein schwerwiegender Sicherheitsvorfall aus 2023 (Lapsus$-Gruppe) Oktas Reputation temporär beschädigt. Die Aufarbeitung war professionell, aber das Vertrauen muss weiter bestätigt werden.</p>
-
-      <p>Score-Begründung: Neutralitäts-Moat und hohe Switching Costs sind solid. Rückläufige NRR, Microsoft-Druck und ungeklärtes AI-Disruptions-Risiko begrenzen den Score auf 6/10.</p>
-      <div class="source">Quellen: Gartner Magic Quadrant IAM 2024; Okta Q3 FY2026 Earnings Call; Okta Newsroom Sep. 2025 (Identity Security Fabric); Computer Weekly Nov. 2025</div>
+      <p><strong>Independence als USP.</strong> Okta positioniert sich als „der einzige unabhängige Identity-Partner" – im Gegensatz zu Microsoft Entra ID (Teil von Microsoft 365/Azure-Ecosystem) und CyberArk (jetzt Teil von Palo Alto Networks). Diese Neutralität ist ein echter Moat für Multi-Cloud/Multi-Vendor-Kunden, die kein Vendor-Lock-in wollen. McKinnon: „We're switzerland of identity".</p>
+      <p><strong>Hochwertige Enterprise-Basis.</strong> Q4 FY26 brachte Record Total Contract Value von $1.3 Mrd, Annual Contract Value über $3 Mrd. Top-Deals wurden mit Channel-Partners (GSIs, AWS Marketplace) abgeschlossen. Okta hat hohe Switching Costs – ein Identity-Provider-Wechsel würde Mitarbeiter- und Kunden-Authentifizierung in tausenden integrierten Apps brechen. Net Retention historisch ~120% (rückläufig).</p>
+      <p><strong>Auth0 (CIAM) als zweite Säule.</strong> Auth0 (akquiriert 2021 für $6.5B) ist der CIAM-Standard für Entwickler und führt die Identitäts-Schicht für Web-/Mobile-/IoT-Apps. Mit Auth0 for AI Agents (Launch FY26) wird Okta zur „Identity-Schicht für agentische Apps". Wenn Generative AI Apps zur Standard-Architektur werden, ist Auth0 strategisch positioniert.</p>
+      <p><strong>Schwächen im Moat.</strong> Erstens: <strong>Microsoft Entra ID ist „kostenlos"</strong> in Microsoft 365 E5 inkludiert – ein massiver Pricing-Druck auf Workforce Identity. Mid-Market verliert Okta strukturell an Microsoft. Zweitens: <strong>Plattform-Konsolidierer (PANW + CyberArk, CrowdStrike, Zscaler)</strong> bauen Identity-Capabilities in ihre Sec-Plattformen ein – Okta wird zunehmend „Best-of-Breed-Insel" in Plattform-Welt. Drittens: <strong>2022/2023 Security Breaches</strong> (HAR-File-Diebstahl, Lapsus$) haben Brand-Reputation beschädigt, obwohl operativ inzwischen behoben.</p>
+      <div class="source">Quellen: Okta Q4 FY26 Earnings Call (04.03.2026); Public.com Analyst-Aggregate; Futurum Group Coverage (06.03.2026)</div>
     </div>
   </div>
 
-  <!-- S3: QUARTALE -->
   <div class="section" id="s3">
     <div class="section-header">
       <div class="section-number">3</div>
       <div class="section-title">Letzte 4 Quartale</div>
-      <div class="section-score">Beat-Ratio: 4/4</div>
+      <div class="section-score">Beat-Ratio: 4/4 (aber)</div>
     </div>
     <div class="section-body">
-      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Oktas Geschäftsjahr endet am 31. Januar. Finviz.com war zum Analysezeitpunkt nicht direkt abrufbar. Alle Kennzahlen stammen von Stockanalysis.com, Yahoo Finance und der Okta IR (Stand: 27. Feb. 2026). Nächste Quartalsergebnisse: <strong>Q4 FY2026 am 4. März 2026</strong> (nach US-Börsenschluss).</div>
-
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Okta nutzt Fiskaljahr endend 31. Januar. „FY26" = Februar 2025 – Januar 2026. Q4 FY26 wurde am 04.03.2026 gemeldet, Q1 FY27 erscheint am 28.05.2026.</div>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>Kennzahl</th>
-              <th>Q4 FY2025 (Jan '25)</th>
-              <th>Q1 FY2026 (Apr '25)</th>
-              <th>Q2 FY2026 (Jul '25)</th>
-              <th>Q3 FY2026 (Okt '25)</th>
-              <th>Trend</th>
-            </tr>
-          </thead>
+          <thead><tr><th>Quartal</th><th>Umsatz</th><th>YoY</th><th>Non-GAAP EPS</th><th>vs. Konsens</th><th>cRPO</th><th>Marktreaktion</th></tr></thead>
           <tbody>
-            <tr><td><strong>Revenue (Mio. $)</strong></td><td>682</td><td>688</td><td>728</td><td>742</td><td class="beat">↗ Steigend</td></tr>
-            <tr><td><strong>YoY Wachstum</strong></td><td>+13%</td><td>+12%</td><td>+12.7%</td><td>+11.6%</td><td class="neutral">↘ Leicht sinkend</td></tr>
-            <tr><td><strong>non-GAAP EPS ($)</strong></td><td>0.78</td><td>~0.75</td><td>~0.72</td><td>0.82</td><td class="beat">↗ Beat-Trend</td></tr>
-            <tr><td><strong>GAAP EPS ($)</strong></td><td>0.13</td><td>~0.25</td><td>0.37</td><td>~0.40+</td><td class="beat">↗ Profitabel</td></tr>
-            <tr><td><strong>cRPO Wachstum</strong></td><td>+15%</td><td>+14%</td><td>~+12%</td><td>+13%</td><td>→ Stabil 12–15%</td></tr>
-            <tr><td><strong>non-GAAP Op.Marge</strong></td><td>25%</td><td>25%</td><td>~22%</td><td>24%</td><td class="beat">↗ Expansion</td></tr>
-            <tr><td><strong>Beat / Miss Konsens</strong></td><td><span class="badge badge-green">BEAT +5.4%</span></td><td><span class="badge badge-green">BEAT</span></td><td><span class="badge badge-green">BEAT</span></td><td><span class="badge badge-green">BEAT</span></td><td class="beat">4/4 Beats</td></tr>
-            <tr><td><strong>Kurs am Earnings-Tag</strong></td><td class="beat">+5–8%</td><td class="beat">+positiv</td><td class="beat">+positiv</td><td class="beat">+5.5% folgetag</td><td></td></tr>
+            <tr><td><strong>Q4 FY26</strong><br><span style="font-size:11px;color:var(--text-muted)">End 31.01.26</span></td><td>$761M</td><td class="beat">+11%</td><td>$0.90</td><td class="beat">Beat ($0.85E, +6%)</td><td class="beat">$2.51B (+12%)</td><td class="miss">–0.74% AH (Guide-Schock)</td></tr>
+            <tr><td><strong>Q3 FY26</strong><br><span style="font-size:11px;color:var(--text-muted)">End 31.10.25</span></td><td>$728M</td><td class="beat">+13%</td><td>$0.91</td><td class="beat">Beat</td><td class="beat">$2.40B</td><td class="neutral">Neutral</td></tr>
+            <tr><td><strong>Q2 FY26</strong><br><span style="font-size:11px;color:var(--text-muted)">End 31.07.25</span></td><td>$728M</td><td class="beat">+13%</td><td>$0.91</td><td class="beat">Beat</td><td class="beat">$2.35B</td><td class="beat">Positiv</td></tr>
+            <tr><td><strong>Q1 FY26</strong><br><span style="font-size:11px;color:var(--text-muted)">End 30.04.25</span></td><td>$688M</td><td class="beat">+12%</td><td>$0.86</td><td class="beat">Beat</td><td class="beat">$2.24B</td><td class="beat">Positiv</td></tr>
           </tbody>
         </table>
       </div>
-
-      <p>Das Management guided konservativ und übertrifft konsistent. CEO Todd McKinnon betonte in jedem Quartal die Stärke des Identity-Markts und Oktas AI-Relevanz. In Q2 FY2026 entfernte CFO Brett Tighe explizit makroökonomische Risikopuffer aus der Guidance – ein positives Signal. Die jüngste Kurskorrektur im Februar 2026 (–9.2% am 20. Feb., –6.4% am 23. Feb.) wurde durch Anthropics Claude Security Tool-Ankündigung ausgelöst, <em>nicht durch operative Fundamentaldaten</em>.</p>
-
-      <div class="source">Quellen: Okta IR News Releases Q4 FY2025 (März 2025), Q1–Q3 FY2026 (Juni–Dez. 2025); Barchart (Feb. 2026); Stockanalysis.com</div>
+      <p><strong>Operative Lesart:</strong> 4/4 Beats, aber das Wachstum ist nicht zurückgekehrt. <strong>Umsatzwachstum stabilisiert sich bei 11–13%</strong> – meilenweit weg von 25–40% Wachstum 2021/2022. Q4 FY26 brachte zwar Beat ($761M vs $749E, $0.90 vs $0.85E), aber FY27 Revenue Guidance nur +9% war der Schock.</p>
+      <p><strong>Wichtigste Q4 FY26 Management-Statements (04.03.2026):</strong> CEO McKinnon: „AI agents are a new identity type and represent a large strategic opportunity." CFO Tighe: FY27 Guide reflektiert „prudent macro stance and investments in AI-era products". Op-Marge expandierte 190 bps YoY auf 26.5% in Q4. $1 Mrd Buyback announced, $79M davon bereits exekutiert. Free Cash Flow Margin Q4 33.2% (down 840 bps YoY wegen Timing).</p>
+      <p><strong>FY27 Guidance-Details (Schock-Punkt):</strong> Q1 FY27 Revenue +9%, Q1 cRPO +10%, Q1 Op-Marge 23–24% (Compression!). FY27 Total: +9% Revenue, Op-Marge 25–26%, FCF-Margin 27–28% (Compression von 30%!). Diese „Margin-Compression-Year-After-Year-Story" ist genau das, was Wall Street fürchtet.</p>
+      <div class="source">Quellen: Okta Q4 FY26 8-K (SEC, 04.03.2026); Investing.com Earnings Call Transcript (04.03.2026); Futurum Group (06.03.2026); CNBC OKTA Earnings (04.03.2026)</div>
     </div>
   </div>
 
-  <!-- S4: WACHSTUM -->
   <div class="section" id="s4">
     <div class="section-header">
       <div class="section-number">4</div>
       <div class="section-title">Wachstumseinordnung</div>
-      <div class="section-score">Score: 6/10</div>
+      <div class="section-score">Score: 5/10</div>
     </div>
     <div class="section-body">
-      <h3>Revenue-Entwicklung: Von Hyper-Growth zu Growth-at-Scale</h3>
-
+      <p><strong>Revenue-Wachstum letzte 5 Jahre:</strong> FY22 $1.30B → FY23 $1.86B (+43%) → FY24 $2.26B (+22%) → FY25 $2.61B (+15%) → FY26 $2.92B (+12%) → FY27e $3.18B (<strong>+9%</strong>). Das ist eine dramatische Verlangsamungs-Kurve. Im selben Zeitraum ist Identity-Markt explodiert (Gartner schätzt +15–20% Marktwachstum) – Okta verliert Marktanteile.</p>
+      <h3>Wachstumstreiber FY26</h3>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr><th>Geschäftsjahr</th><th>Umsatz (Mrd. $)</th><th>YoY Wachstum</th><th>non-GAAP Op.Marge</th><th>FCF-Marge</th></tr>
-          </thead>
+          <thead><tr><th>Treiber</th><th>Beitrag FY26</th><th>Kommentar</th></tr></thead>
           <tbody>
-            <tr><td>FY2023</td><td>$1,858</td><td>~37%</td><td>~5–8%</td><td>~10–12%</td></tr>
-            <tr><td>FY2024</td><td>$2,263</td><td>+22%</td><td>~14%</td><td>~23%</td></tr>
-            <tr><td>FY2025</td><td>$2,610</td><td>+15%</td><td>22%</td><td>28%</td></tr>
-            <tr style="background:rgba(59,130,246,0.06)"><td><strong>FY2026 (Guidance)</strong></td><td><strong>~$2,85–2,86</strong></td><td class="neutral"><strong>+9–10%</strong></td><td class="beat"><strong>~25%</strong></td><td class="beat"><strong>~28%+</strong></td></tr>
+            <tr><td>Workforce Identity (Core)</td><td>~$1.8 Mrd</td><td>Strukturell unter Druck durch Microsoft Entra ID</td></tr>
+            <tr><td>Auth0 (CIAM)</td><td>~$1.0 Mrd</td><td>Schneller wachsend, AI-Agents-Pivot</td></tr>
+            <tr><td>Identity Security (Federal)</td><td>~$200M</td><td>FedRAMP High, Department of Defense Wins</td></tr>
+            <tr><td>Large Customers</td><td>Record $1.3B TCV in Q4</td><td>Land &amp; Expand bei Top-Kunden</td></tr>
+            <tr><td>Auth0 for AI Agents (Neu)</td><td>Early deals nur</td><td>Financial Services + Global Services Provider</td></tr>
           </tbody>
         </table>
       </div>
-
-      <p>Der Wachstumsrückgang von 37% (FY2023) auf 9–10% (FY2026 Guidance) ist der zentrale Diskussionspunkt. Er erklärt sich aus drei Faktoren: Erstens, organischer Reifungsprozess nach der Hyper-Growth-Phase. Zweitens, Nachfragerückgang nach der COVID-Remote-Work-Welle. Drittens, GTM-Reorganisation in FY2026, die kurzfristig Vertriebsproduktivität kostet. Das positive Gegenstück: die <strong>Non-GAAP Operating Margin stieg von ~8% auf 22%</strong> – ein massiver Effizienzgewinn. Der operative Hebel (Grossmargen ~77% bei steigenden Umsätzen) ist real und strukturell.</p>
-
-      <h3>Geografische Verteilung</h3>
+      <h3>Geografische Verteilung (geschätzt)</h3>
       <div class="geo-grid">
-        <div class="geo-card">
-          <div class="geo-region">Nordamerika</div>
-          <div class="geo-pct">~65–70%</div>
-          <div class="geo-note">Stärkster Markt, US Federal als Top-Segment</div>
-        </div>
-        <div class="geo-card">
-          <div class="geo-region">EMEA</div>
-          <div class="geo-pct">~20–25%</div>
-          <div class="geo-note">Unterentwickelter IAM-Markt – Wachstumspotenzial</div>
-        </div>
-        <div class="geo-card">
-          <div class="geo-region">APAC</div>
-          <div class="geo-pct">~5–10%</div>
-          <div class="geo-note">Früh, aber strukturelles Wachstumssegment</div>
-        </div>
+        <div class="geo-card"><div class="geo-region">USA</div><div class="geo-pct">~75%</div><div class="geo-note">Hauptmarkt, reife Penetration</div></div>
+        <div class="geo-card"><div class="geo-region">International</div><div class="geo-pct">~25%</div><div class="geo-note">Wachstumsregion</div></div>
       </div>
-
-      <h3>Neues Wachstumssegment: Non-Human Identity (NHI)</h3>
-      <p>Das potenziell bedeutendste neue Segment ist die <strong>Non-Human Identity (NHI) Governance</strong> – Absicherung von KI-Agenten und Service Accounts. Okta hat mit Auth0 for AI Agents eine frühe Positionierung vorgenommen. Dieser Markt ist heute noch klein, könnte bis 2027–2028 aber ein Material-Revenue-Segment werden. Score-Begründung: Zweistelliges Revenue-Wachstum, aber strukturelle Verlangsamung. Profitabilitätssprung positiv. NHI als Wachstumsoption noch nicht in Zahlen.</p>
-
-      <div class="source">Quellen: Okta 10-K FY2025; Q4 FY2025 &amp; Q1–Q3 FY2026 Earnings Reports; Okta Newsroom Sep. 2025</div>
+      <p><strong>FY27 Outlook (Management-Guide):</strong> Revenue +9% YoY, Op-Marge 25–26% (Kompression von 26%), FCF-Margin 27–28% (Kompression von 30%). Q1 FY27 (28.05.2026) wird zeigen, ob das die neue Realität ist oder ob Beat &amp; Raise zurückkommt.</p>
+      <p><strong>Wachstums-Catalysts 2026/2027:</strong> (1) AI-Agent-Identity (Auth0 for AI Agents – noch keine wesentlichen Revenue-Beiträge), (2) Federal/Regulated Verticals (FedRAMP High), (3) Large Customer Land &amp; Expand, (4) Identity Security Products (PAM, ITDR).</p>
+      <p><strong>Strukturelle Verlangsamungs-Faktoren:</strong> Markt-Penetration in Mid-Market schwächer als erwartet, Microsoft Entra ID gewinnt aggressiv, Plattform-Konsolidierung (PANW + CyberArk) bedroht Workforce Identity, Mature Customer Cohorts.</p>
+      <div class="source">Quellen: Okta FY26 10-K via SEC; Q4 FY26 Earnings Call Guidance; Public.com Analyst-Aggregate; WallStreetZen</div>
     </div>
   </div>
 
-  <!-- S5: BEWERTUNG -->
   <div class="section" id="s5">
     <div class="section-header">
       <div class="section-number">5</div>
       <div class="section-title">Bewertung &amp; Multiples</div>
-      <div class="section-score">Score: 7/10</div>
+      <div class="section-score">Score: 8/10</div>
     </div>
     <div class="section-body">
-      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Da Okta primär über NASDAQ gehandelt wird, aber Finviz.com zum Analysezeitpunkt nicht direkt abrufbar war, stammen alle Kennzahlen von Stockanalysis.com, Yahoo Finance, Chartmill und Alpha Spread (Stand: 19.–27. Feb. 2026).</div>
-
+      <p>Nach –38%-Kursverfall vom 52W-Hoch ($127.57) handelt OKTA bei $78.82 mit signifikantem Discount. Aktien-Multiples sind sehr attraktiv geworden, aber das spiegelt die Wachstumssorgen wider.</p>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr><th>Kennzahl</th><th>Aktuell (Feb. 2026)</th><th>5J-Histor. Avg.</th><th>Peers Median</th><th>Einschätzung</th></tr>
-          </thead>
+          <thead><tr><th>Kennzahl</th><th>OKTA Aktuell</th><th>5J-Schnitt</th><th>Peers (CRWD/CYBR)</th><th>Bewertung</th></tr></thead>
           <tbody>
-            <tr><td><strong>P/E (TTM, GAAP)</strong></td><td>~70–80x</td><td>~486x (Verlustphase)</td><td>50–80x</td><td class="beat">Deutlich günstiger als Historie</td></tr>
-            <tr><td><strong>P/E (Fwd, non-GAAP)</strong></td><td>~21–25x</td><td>N/A (früher Verlust)</td><td>~60–80x</td><td class="beat">Sehr attraktiv vs. Peers</td></tr>
-            <tr><td><strong>EV / EBITDA</strong></td><td>~53x</td><td>N/A</td><td>60–100x</td><td class="beat">Günstiger als Peers</td></tr>
-            <tr><td><strong>EV / FCF</strong></td><td>~12x</td><td>N/A</td><td>25–50x</td><td class="beat">Sehr attraktiv</td></tr>
-            <tr><td><strong>P/S (TTM)</strong></td><td>~4.7–5x</td><td>~12–15x (Spitze)</td><td>8–15x</td><td class="beat">Historisch günstig</td></tr>
-            <tr><td><strong>PEG-Ratio</strong></td><td>~1.2x</td><td>N/A</td><td>2–4x</td><td class="beat">Fair bis günstig</td></tr>
-            <tr><td><strong>Marktkapitalisierung</strong></td><td>~$13–15 Mrd.</td><td>Spitze &gt;$40 Mrd.</td><td>–</td><td class="beat">Stark komprimiert</td></tr>
+            <tr><td>P/E (TTM)</td><td>~58x</td><td>n/a (Losses)</td><td>CRWD ~95x</td><td class="neutral">Hoch (aber Wachstum 9%)</td></tr>
+            <tr><td>P/E FWD (FY27)</td><td>~22x</td><td>~45x</td><td>CRWD ~80x</td><td class="beat">Sehr attraktiv</td></tr>
+            <tr><td>EV/Sales FWD</td><td>~3.6x</td><td>~9x</td><td>CRWD ~20x</td><td class="beat">Tief</td></tr>
+            <tr><td>EV/EBITDA FWD</td><td>~13x</td><td>~30x</td><td>CRWD ~50x</td><td class="beat">Sehr tief</td></tr>
+            <tr><td>P/FCF FWD</td><td>~16x</td><td>~30x</td><td>CRWD ~50x</td><td class="beat">Sehr attraktiv</td></tr>
+            <tr><td>GF Value™</td><td>$103.12</td><td>n/a</td><td>n/a</td><td class="beat">23.6% undervalued</td></tr>
+            <tr><td>Rule of 40</td><td>~35%</td><td>~40%</td><td>CRWD ~50%</td><td class="miss">Unter Schwelle</td></tr>
           </tbody>
         </table>
       </div>
-
-      <p>Die Bewertung ist das überzeugendste Argument für Okta. Ein Forward P/E von 21–25x für ein Unternehmen mit 26% FCF-Marge und GAAP-Profitabilität ist günstig – insbesondere verglichen mit CrowdStrike (Fwd P/E 80x+) oder Palo Alto (Fwd P/E 50–60x). Das EV/FCF von ~12x ist für ein schuldenfreies, Asset-Light SaaS-Unternehmen außerordentlich attraktiv. Alpha Spread berechnet den intrinsischen Wert (Base Case) auf <strong>$89/Aktie</strong> – was gegenüber ~$75–77 ein Upside von ca. 16% impliziert, ohne AI-Optionalität. Das einzige Bewertungsrisiko: Wenn Revenue-Wachstum unter 8% fällt, ist P/E 21–25x nicht mehr billig.</p>
-
-      <div class="source">Quellen: Stockanalysis.com (Feb. 2026); Chartmill FA-Rating (Feb. 2026); Alpha Spread OKTA (Feb. 2026); Multiples.vc (19. Feb. 2026); Yahoo Finance Key Statistics</div>
+      <p><strong>Analystenkonsens (Stand 14.05.2026):</strong> 34 Analysten, Buy-Konsens. Avg PT $99.95–102.62 (~+25–30% Upside). Barclays $93 (vom 14.05.2026, Overweight), KeyBanc $95, BTIG Buy. Spread: $75–140. Wallstreet Zen 22 Analysten Median $111.36. 11/22 Strong Buy.</p>
+      <p><strong>Eigene Bewertung:</strong> Bei FY27 EPS ~$3.50 und P/E 25–28x (Quality-SaaS-Compounder mit 9% Wachstum aber 27% Op-Marge): Fair Value $90–100. Bei wieder beschleunigtem Wachstum (FY28 +12–13%) Multiple-Expansion auf 30x P/E = $115. Bei strukturell schwachem Wachstum (FY28 +7%) P/E auf 18x = $63 Floor. <strong>Upside: +15% bis +40%, Downside: –20%.</strong></p>
+      <div class="source">Quellen: GuruFocus OKTA (14.05.2026); Public.com Forecast; MarketBeat Forecast; WallStreetZen; Barclays Note via Yahoo Finance</div>
     </div>
   </div>
 
-  <!-- S6: CASHFLOW -->
   <div class="section" id="s6">
     <div class="section-header">
       <div class="section-number">6</div>
       <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
-      <div class="section-score">Score: 7/10</div>
+      <div class="section-score">Score: 8/10</div>
     </div>
     <div class="section-body">
+      <p><strong>Cashflow:</strong> FY26 FCF-Marge 30%, FCF ~$880M. Op-Cashflow Q4 $258M (34% of Revenue). Cash &amp; Investments $2.55 Mrd, signifikant höher als Schulden (~$1.0 Mrd Convertibles 2028).</p>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr><th>Kennzahl</th><th>FY2025 (Jan '25)</th><th>FY2024 (Jan '24)</th><th>Trend</th></tr>
-          </thead>
+          <thead><tr><th>Kennzahl</th><th>FY24</th><th>FY25</th><th>FY26</th><th>FY27 Guide</th><th>Trend</th></tr></thead>
           <tbody>
-            <tr><td><strong>Free Cash Flow (Mio. $)</strong></td><td class="beat">$730</td><td>~$520</td><td class="beat">↗ +40% YoY</td></tr>
-            <tr><td><strong>FCF-Marge</strong></td><td class="beat">28%</td><td>~23%</td><td class="beat">↗ +5 pp</td></tr>
-            <tr><td><strong>Gross Margin</strong></td><td>~76–77%</td><td>~76%</td><td>→ Stabil</td></tr>
-            <tr><td><strong>non-GAAP Op.Marge</strong></td><td class="beat">22%</td><td>14%</td><td class="beat">↗ +8 pp</td></tr>
-            <tr><td><strong>GAAP Net Income</strong></td><td class="beat">$28 Mio.</td><td>–$355 Mio.</td><td class="beat">↗ Wendepunkt!</td></tr>
-            <tr><td><strong>Cash &amp; Investments</strong></td><td class="beat">$2,52 Mrd.</td><td>~$2,3 Mrd.</td><td class="beat">↗ Stark</td></tr>
-            <tr><td><strong>Verschuldung (Net)</strong></td><td class="beat">Praktisch null</td><td>Schuldenfrei</td><td class="beat">→ Exzellent</td></tr>
-            <tr><td><strong>ROE (GAAP)</strong></td><td>~2.96%</td><td>negativ</td><td class="beat">↗ Verbessert</td></tr>
-            <tr><td><strong>Altman Z-Score</strong></td><td class="beat">4.02 (gesund)</td><td>N/A</td><td class="beat">Kein Bankrott-Risiko</td></tr>
-            <tr><td><strong>Aktienrückkauf</strong></td><td class="beat">$1 Mrd. autorisiert (Jan. 2026)</td><td>–</td><td class="beat">~7% der Mkt Cap</td></tr>
+            <tr><td>Bruttomarge (non-GAAP)</td><td>~76%</td><td>~77%</td><td>~78%</td><td>~78%</td><td class="beat">Steigend</td></tr>
+            <tr><td>Operating Margin (non-GAAP)</td><td>~13%</td><td>~22%</td><td>~26%</td><td>25–26%</td><td class="miss">Stagnation in FY27</td></tr>
+            <tr><td>GAAP Op-Marge</td><td>negativ</td><td>1%</td><td>5%</td><td>~5%</td><td class="beat">Erstmals stabil positiv</td></tr>
+            <tr><td>FCF Margin</td><td>~21%</td><td>~26%</td><td>30%</td><td>27–28%</td><td class="miss">Kompression FY27</td></tr>
+            <tr><td>GAAP Net Income</td><td>negativ</td><td>$28M</td><td>$235M</td><td>~$250M</td><td class="beat">Profitabel</td></tr>
+            <tr><td>Rule of 40</td><td>~37%</td><td>~37%</td><td>~42%</td><td>~35%</td><td class="miss">Verlangsamung</td></tr>
           </tbody>
         </table>
       </div>
-
-      <p>Die FCF-Konversionsrate (FCF / Non-GAAP Net Income) liegt über 100% – die Cashflows übersteigen die ausgewiesenen Non-GAAP-Gewinne. Das ist ein starkes Zeichen für Earnings-Qualität. Das Unternehmen ist praktisch schuldenfrei und sitzt auf über $2,5 Mrd. liquiden Mitteln. Der genehmigte $1-Mrd.-Rückkauf (~7% der Market Cap) ist ein klares Vertrauenssignal des Vorstands. Einziger Schwachpunkt: die hohe Stock-Based Compensation (SBC), die den GAAP-Gewinn von Non-GAAP deutlich trennt. Die Aktienanzahl stieg um 8.46% YoY – die Rückkaufprogramm-Rationale ist daher dringend.</p>
-
-      <div class="source">Quellen: Okta 10-K FY2025; DCFmodeling.com (Nov. 2025); Stockanalysis.com Statistics; Financial Content (Jan. 2026 – Buyback News)</div>
+      <p><strong>Bilanz / Kapitalrückführung:</strong> $2.55 Mrd Cash &amp; Investments. $1 Mrd Buyback-Programm im März 2026 announced – erster Buyback in Okta-Geschichte! Das signalisiert: Management glaubt, dass die Aktie unterbewertet ist, und ist bereit Capital zurückzuführen statt nur in M&amp;A zu investieren. Buyback bei aktuellem Kurs würde 12.7M Aktien retire (~7% der Float).</p>
+      <p><strong>Wichtigste Bedenken:</strong> FY27 Margen-Kompression ist real (von 26% auf 25–26% Op-Marge, von 30% auf 27–28% FCF). Management argumentiert: „Investments in AI-era products". Markt fragt: „Wann zahlt sich das aus?" – wenn FY28-Wachstum nicht beschleunigt, sieht es nach „Margen-Compression-ohne-Wachstums-Beschleunigung" aus.</p>
+      <p><strong>Lesart:</strong> Solides Cashflow-Profil, erste GAAP-Profit-Stabilität, $1B Buyback ist Catalyst – aber Margen-Kompression FY27 ist Sorge. Quality-Bilanz, aber Wachstums-Diziplin lässt nach.</p>
+      <div class="source">Quellen: Okta Q4 FY26 PR (04.03.2026); Investing.com FY26 Slides; SEC 10-K Filing FY26</div>
     </div>
   </div>
 
-  <!-- S7: PEER-VERGLEICH -->
   <div class="section" id="s7">
     <div class="section-header">
       <div class="section-number">7</div>
       <div class="section-title">Peer-Vergleich</div>
-      <div class="section-score">Score: 5/10</div>
+      <div class="section-score">Score: 6/10</div>
     </div>
     <div class="section-body">
+      <p>Peers: Microsoft Entra ID (Teil von MSFT), CyberArk/Idira (Teil von PANW), SailPoint (SAIL), Ping Identity (privat seit 2022), Okta vs. AWS Cognito.</p>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr><th>Unternehmen</th><th>Mkt Cap</th><th>Rev.-Wachstum</th><th>Gross Marge</th><th>Fwd P/E</th><th>FCF-Marge</th><th>Stärke</th></tr>
-          </thead>
+          <thead><tr><th>Unternehmen</th><th>Rev Growth</th><th>Op-Marge</th><th>FWD P/E</th><th>Market Cap</th><th>Kommentar</th></tr></thead>
           <tbody>
-            <tr style="background:rgba(59,130,246,0.06)">
-              <td><strong>Okta (OKTA)</strong></td><td>~$13–15 Mrd.</td>
-              <td class="neutral">~12% YoY</td><td>~77%</td>
-              <td class="beat">~21–25x</td><td class="beat">~26%</td>
-              <td>Günstigste Bewertung</td>
-            </tr>
-            <tr>
-              <td>CrowdStrike (CRWD)</td><td>~$117 Mrd.</td>
-              <td class="beat">~21% YoY</td><td>~78%</td>
-              <td class="miss">~80x+</td><td class="beat">~30–33%</td>
-              <td>Stärkstes Wachstum</td>
-            </tr>
-            <tr>
-              <td>Palo Alto (PANW)</td><td>~$135 Mrd.</td>
-              <td>~14–15% YoY</td><td>~76%</td>
-              <td class="miss">~50–60x</td><td class="beat">~35%</td>
-              <td>Platformization-Strategie</td>
-            </tr>
-            <tr>
-              <td>Zscaler (ZS)</td><td>~$25–30 Mrd.</td>
-              <td class="beat">~23% YoY</td><td>~77%</td>
-              <td class="miss">~60–70x</td><td>~25%</td>
-              <td>Zero-Trust-Leader</td>
-            </tr>
-            <tr>
-              <td>Microsoft Entra (MSFT)</td><td>~$3 Bio. (gesamt)</td>
-              <td>Bundled / N/A</td><td>N/A</td><td>N/A</td><td>N/A</td>
-              <td>Größte Distributionsmacht</td>
-            </tr>
-            <tr>
-              <td>SailPoint (SAIL)</td><td>~$12 Mrd.</td>
-              <td class="beat">~20% YoY</td><td>~75%</td>
-              <td class="miss">~60x</td><td>~15%</td>
-              <td>IGA-Spezialist (direkter Konkurrent)</td>
-            </tr>
+            <tr><td><strong>OKTA</strong></td><td>+12% / +9%e</td><td>26%</td><td>~22x</td><td>$13.8B</td><td>Independent Identity Leader, Wachstums-Verlangsamung</td></tr>
+            <tr><td>Microsoft Entra ID</td><td>n/a (innerhalb MSFT)</td><td>n/a</td><td>n/a (MSFT ~30x)</td><td>n/a</td><td>„Kostenlos" in M365 E5, Mid-Market-Dominanz</td></tr>
+            <tr><td>PANW CyberArk (Identity)</td><td>+~25%</td><td>n/a</td><td>n/a (PANW ~50x)</td><td>n/a (Teil $193B)</td><td>Privileged Access Mgmt, Plattform-Bundle</td></tr>
+            <tr><td>SailPoint (SAIL)</td><td>+~30%</td><td>~15%</td><td>~42x</td><td>~$11B</td><td>Identity Governance, kleiner aber wachsender Player</td></tr>
+            <tr><td>CrowdStrike (CRWD)</td><td>+25%</td><td>~24%</td><td>~80x</td><td>$120B</td><td>EDR + Identity, Falcon-Plattform-Player</td></tr>
+            <tr><td>Cloudflare Identity</td><td>+30% (gesamt)</td><td>~12%</td><td>~85x</td><td>$60B</td><td>Edge-Identity, Zero Trust Network Access</td></tr>
           </tbody>
         </table>
       </div>
-
-      <p><strong>Qualitative Einordnung:</strong> CrowdStrike ist fundamental stärker positioniert mit ~21% Wachstum und massivem ARR-Wachstum ($3,8 Mrd., +32% YoY) – aber 5–8x teurer bewertet. Palo Alto ist der direkteste Plattform-Wettbewerber: Die Cortex-Plattform bietet zunehmend IAM-ähnliche Funktionen; CISOs könnten Identitätslösungen im Bundle kaufen. Oktas Vorteil: Die IAM-Tiefe und Neutralität wird von PANW noch nicht erreicht. Microsoft Entra ID ist die gefährlichste strukturelle Bedrohung – kostenlos für M365-Kunden. SailPoint ist der direkteste Konkurrent im Identity Governance (IGA)-Segment mit ~20% YoY-Wachstum – ein reales Marktanteilsrisiko in dieser Nische.</p>
-
-      <p>Fazit: Okta ist günstiger bewertet als alle Peers, wächst aber am langsamsten. Der Neutralitäts-Moat ist echter Vorteil gegenüber PANW und MSFT. Die niedrigste Marktkapitalisierung im Vergleich (ex. SailPoint) spiegelt die Bewertungskorrektur und Wachstumsskepsis wider.</p>
-
-      <div class="source">Quellen: BankofAmerica Research (Dez. 2025); AskTraders Peer Comparison (Mai 2025); Tickeron OKTA vs. PANW (Feb. 2026); Koalagains ZS Analysis (Okt. 2025)</div>
+      <p><strong>Qualitative Einordnung:</strong> Okta ist der „letzte unabhängige Pure-Play-Identity-Leader". Microsoft Entra ID ist der dominante Mid-Market-Player, weil „kostenlos". SailPoint ist im Identity Governance schneller wachsend (Public-Listing 2025). PANW-CyberArk (Identity) profitiert vom Plattform-Effekt. <strong>Okta-Bewertung ist günstigst in Peer-Gruppe, aber Wachstum auch schwächst.</strong></p>
+      <p><strong>Marktposition 2026:</strong> Okta dominiert weiterhin „Top-of-the-Pyramid" – große Multi-Cloud-Enterprise-Kunden, die Vendor-Neutralität wollen. Aber in Mid-Market verliert Okta strukturell Marktanteile an Microsoft. Identity-Market wächst +15–20% YoY (Gartner) – Okta wächst +9–12%, also schrumpft strukturell relativ.</p>
+      <div class="source">Quellen: Public.com Peers; WallStreetZen; eigene Peer-Berechnung; Gartner IAM Magic Quadrant 2025</div>
     </div>
   </div>
 
-  <!-- S8: NEWS -->
   <div class="section" id="s8">
     <div class="section-header">
       <div class="section-number">8</div>
-      <div class="section-title">Aktuelle News &amp; Events</div>
-      <div class="section-note">Quellen ≤ 3 Monate</div>
+      <div class="section-title">Aktuelle News &amp; Events (letzte 3 Monate)</div>
+      <div class="section-note">Stand: 15.05.2026</div>
     </div>
     <div class="section-body">
-      <h3>Ebene 1: Unternehmen</h3>
 
+      <h3>Ebene 1: Unternehmen</h3>
       <div class="event-item">
         <div class="event-dot dot-green"></div>
         <div>
-          <div class="event-label">Dez. 2025 – Q3 FY2026 Earnings Beat <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">Revenue $742 Mio. (+11.6% YoY), non-GAAP EPS $0.82 (beat $0.75), cRPO +13%, erstmals &gt;5.000 Kunden mit $100k+ ACV. Kurs +5.5% am Folgetag. Quelle: Okta IR, Dez. 2025.</div>
+          <div class="event-label">14.05.2026 – Barclays PT $93 (von $90), Overweight <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Barclays-Analyst Saket Kalia behält Overweight und erhöht PT von $90 auf $93 (vor Earnings 28.05.). Spiegelt verbesserte Erwartungen wider. Quelle: GuruFocus (14.05.2026).</div>
         </div>
       </div>
       <div class="event-item">
         <div class="event-dot dot-green"></div>
         <div>
-          <div class="event-label">Jan. 2026 – $1 Mrd. Aktienrückkauf autorisiert <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">Board genehmigt erstes großes Rückkaufprogramm (~7% der Market Cap). Starkes Signal des Managements über wahrgenommene Unterbewertung. Quelle: Financial Content, Jan. 2026.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">Sep. 2025 – Identity Security Fabric &amp; Auth0 for AI Agents <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">Launch neuer Agentic-AI-Funktionalität auf Oktane 2025 in Las Vegas. Positionierung als Governance-Layer für KI-Agenten. Quelle: Okta Newsroom, Sep. 2025.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">Jan. 2025 – AWS Strategic Collaboration Agreement <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">$1 Mrd. Aggregat-Umsatz über AWS Marketplace über 4 Jahre vereinbart. 25+ Produkt-Integrationen. Quelle: Okta IR, Jan. 2025.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-red"></div>
-        <div>
-          <div class="event-label">Feb. 2026 – AI-Panik-Sell-off <span class="badge badge-red">Negativ</span></div>
-          <div class="event-text">–9.2% am 20. Feb. und –6.4% am 23. Feb. nach Anthropics Claude Security Tool-Ankündigung. Kurs –20% YTD 2026. Bank of America: Überreaktion des Markts. Quelle: Barchart, Feb. 2026.</div>
+          <div class="event-label">01.05.2026 – Q1 FY27 Earnings angekündigt für 28.05.2026 <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Okta wird Q1 FY27 Ergebnisse am 28. Mai 2026 nach Börsenschluss veröffentlichen. Erster Test des AI-Agent-Identity-Pivots. Quelle: Okta IR.</div>
         </div>
       </div>
       <div class="event-item">
         <div class="event-dot dot-yellow"></div>
         <div>
-          <div class="event-label">Laufend – NRR-Rückgang <span class="badge badge-yellow">Neutral / Watch</span></div>
-          <div class="event-text">Dollar-Based NRR auf 106% gesunken (historisch 120%+). Immer noch positiv (Net Expansion), aber der Trend ist kritisch zu beobachten. Quelle: Okta Q3 FY2026 Earnings.</div>
+          <div class="event-label">22.04.2026 – Planned Transition Chief Legal Officer <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Okta kündigt planned transition of Chief Legal Officer. Standard-Personal-Wechsel, kein Big-Deal. Quelle: TipRanks (22.04.2026).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">25.04.2026 – BTIG Reiterates Buy after Anthropic Mythos Pullback <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">BTIG argumentiert „cybersecurity selloff is completely wrong" nach Anthropic Mythos AI-Model-Sorgen. Reiterates Buy auf OKTA. Quelle: TipRanks (27.03.2026 + 25.04.2026 Updates).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">27.03.2026 – Anthropic Mythos AI sinkt Cybersec-Sektor inkl. OKTA <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Anthropic Mythos AI-Model-Sorgen drückten gesamten Cybersec-Sektor. OKTA fiel auf $77.16 (vom $87.26 am 13.02.2026 = –11.6% in unter einem Monat). Inzwischen leichte Erholung. Quelle: stockanalysis.com.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">04.03.2026 – Q4 FY26: Beat, aber FY27 Guide Schock <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Beat (Rev $761M vs $749E, EPS $0.90 vs $0.85E), Record TCV $1.3B Q4. ABER: <strong>FY27 Revenue Guide nur +9%</strong> (vs FY26 +12%), Margen-Kompression. Auch Auth0 for AI Agents + Okta for AI Agents Launch. CEO McKinnon: „AI agents are a new identity type". $1B Buyback announced. Aktie –0.74% AH, danach weiter unter Druck. Quelle: Okta IR; CNBC (04.03.2026); Alpha Spread.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">März 2026 – $1 Mrd Share Repurchase Program <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Erstmaliges Buyback-Programm in Okta-Geschichte. $1 Mrd autorisiert, $79M davon bereits exekutiert (875.000 Aktien bei ~$90 Schnitt). Signal: Management glaubt Aktie unterbewertet. Quelle: Q4 FY26 Earnings Call.</div>
         </div>
       </div>
 
       <h3>Ebene 2: Branche</h3>
-
       <div class="event-item">
         <div class="event-dot dot-green"></div>
         <div>
-          <div class="event-label">Sep. 2025 – Cybersecurity-Budgets wachsen massiv <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">Morgan Stanley CISO-Umfrage: Cybersecurity-Ausgaben sollen 50% schneller wachsen als Gesamt-IT-Ausgaben. IAM ist eine der Top-Kategorien. Quelle: Morgan Stanley, Sep. 2025.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">2025–2026 – Agentic AI treibt Identity-Nachfrage <span class="badge badge-green">Positiv (strukturell)</span></div>
-          <div class="event-text">91% der Unternehmen setzen bereits KI-Agenten ein, aber nur 10% haben eine Governance-Strategie. Strukturelles Marktproblem, für das Okta eine Lösung anbietet. Quelle: Okta / diverse Marktstudien.</div>
+          <div class="event-label">2026 – AI Agents als „4th Identity Type" <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Industry-Konsens: AI-Agents sind neue Identity-Klasse neben Human, Service Accounts, Machine. Multi-Year-Identity-Security-Wachstumsthema. Okta + CyberArk-Identity-Pivot beide profitieren. Quelle: Futurum Group Q4 FY26 Analysis.</div>
         </div>
       </div>
       <div class="event-item">
         <div class="event-dot dot-red"></div>
         <div>
-          <div class="event-label">Laufend – Microsoft Entra ID-Expansion <span class="badge badge-red">Negativ</span></div>
-          <div class="event-text">Microsoft baut Entra kontinuierlich aus mit Entra Permissions Management und Identity Governance. Preissensitive M365-Kunden könnten wechseln. Quelle: Computer Weekly, Nov. 2025.</div>
+          <div class="event-label">2026 – PANW + CyberArk Plattform-Konsolidierung <span class="badge badge-red">Negativ (für OKTA)</span></div>
+          <div class="event-text">PANW-CyberArk Akquisition (Feb 2026, $25B) und neue Identity-Plattform Idira (12.05.2026) sind direkte Konkurrenz zu OKTA, besonders bei Multi-Pillar-PANW-Kunden. Quelle: PANW PR.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">2026 – Microsoft Entra ID dominiert Mid-Market <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Microsoft Entra ID gewinnt strukturell Mid-Market-Marktanteile durch M365-E5-Bundle. Okta unter Pricing-Druck. Quelle: Public.com Analyst Coverage.</div>
         </div>
       </div>
 
       <h3>Ebene 3: Makro</h3>
-
       <div class="event-item">
-        <div class="event-dot dot-green"></div>
+        <div class="event-dot dot-yellow"></div>
         <div>
-          <div class="event-label">2025–2026 – Regulierung verschärft sich <span class="badge badge-green">Positiv für IAM</span></div>
-          <div class="event-text">SEC-Offenlegungspflichten für Breaches (4 Werktage) und EU AI Act treiben IAM-Compliance-Budgets. Quelle: SEC Rule (2023 wirksam); EU AI Act (Mitte 2025).</div>
+          <div class="event-label">2026 – Cybersec-Sektor-Rotation</div>
+          <div class="event-text">YTD-Rotation Cybersec gemischt: Plattform-Konsolidierer (PANW, CRWD) outperformen Pure-Plays (OKTA, ZS). Anthropic Mythos AI-Model-Sorgen drückten Sektor im März, mittlerweile Erholung. Quelle: TipRanks Cybersec-Coverage.</div>
         </div>
       </div>
       <div class="event-item">
         <div class="event-dot dot-yellow"></div>
         <div>
-          <div class="event-label">Feb. 2026 – US-Fed-Zinspolitik <span class="badge badge-yellow">Neutral</span></div>
-          <div class="event-text">Fed bei ~4.25–4.5%. Kein direktes Risiko für Oktas Geschäftsmodell, aber ein Faktor für Growth-Multiple-Bewertung. Zinssenkungserwartungen stützen Bewertungen. Quelle: Fed, Feb. 2026.</div>
+          <div class="event-label">2026 – Federal Spending Identity priorisiert</div>
+          <div class="event-text">FedRAMP High + DoD Identity Mandate sind Tailwinds für Okta. Aber: Bewertungseffekt klein, da Government-Revenue nur ~7%.</div>
         </div>
       </div>
-
-      <div class="source">Quellen: Barchart (Feb. 2026); Financial Content (Jan. 2026); Okta Newsroom (Sep. 2025); Computer Weekly (Nov. 2025); Morgan Stanley CISO Survey (Sep. 2025)</div>
+      <div class="source">Quellen: GuruFocus OKTA (14.05.2026); Okta IR; TipRanks; CNBC; Investing.com; Futurum Group</div>
     </div>
   </div>
 
-  <!-- S9: TECHNISCH -->
   <div class="section" id="s9">
     <div class="section-header">
       <div class="section-number">9</div>
       <div class="section-title">Technische Analyse</div>
-      <div class="section-score">Score: 4/10</div>
+      <div class="section-score">Score: 5/10</div>
     </div>
     <div class="section-body">
-      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); margin-bottom:16px;">
-        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">~$77</div><div class="kpi-sub">27. Feb. 2026</div></div>
-        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value red">Darunter</div><div class="kpi-sub">Bearish</div></div>
-        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value red">~$90–95</div><div class="kpi-sub">Kurs weit drunter</div></div>
-        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value red">~$100–105</div><div class="kpi-sub">Kurs weit drunter</div></div>
-        <div class="kpi-card"><div class="kpi-label">RSI</div><div class="kpi-value yellow">~30–40</div><div class="kpi-sub">Überverkauft</div></div>
-        <div class="kpi-card"><div class="kpi-label">52W High</div><div class="kpi-value">$115</div><div class="kpi-sub">–33% vom High</div></div>
-        <div class="kpi-card"><div class="kpi-label">52W Low</div><div class="kpi-value red">~$71</div><div class="kpi-sub">Kurs nahe Tief!</div></div>
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom:16px;">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value">$78.82</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value">~$80</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value">~$82</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value">~$94</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI</div><div class="kpi-value">~45</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W High</div><div class="kpi-value">$127.57</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W Low</div><div class="kpi-value">$62.66</div></div>
       </div>
-
-      <p>Die technische Situation für OKTA ist zum Analysezeitpunkt (27. Feb. 2026) <strong>klar angeschlagen</strong>. Die Aktie befindet sich in einem Abwärtstrend und liegt unterhalb aller relevanten Moving Averages. Der Sell-off durch den Anthropic-Claude-Security-Tool-News ist technisch schwer zu reparieren: –9.2% (20. Feb.) und –6.4% (23. Feb.) in kurzer Folge hinterlassen technische Narben. Die Aktie nähert sich dem 52-Wochen-Tief (~$71) – ein kritischer Support.</p>
-
-      <p><strong>Support-Level:</strong> $70–75 (52W-Tief-Bereich). Unterschreitet die Aktie $70 nachhaltig, könnten Stop-Loss-Verkäufe weiteren Druck erzeugen. <strong>Resistance:</strong> SMA 50 bei ~$90–95 ist das erste technische Ziel einer Erholung; SMA 200 bei ~$100–105 ist das mittelfristige Erholungsziel. <strong>Beta von 0.77</strong> signalisiert geringere Volatilität als der Gesamtmarkt. Short Interest bei ~4.3% (7.6 Mio. Aktien) ist moderat – kein klassisches Short-Squeeze-Setup, aber auch kein übermäßiges Leerverkäufer-Druck. Das RSI nahe überverkauft-Territory deutet auf eine mögliche technische Bouncing-Bewegung hin – für Langfrist-Investoren eine potenzielle Einstiegsgelegenheit.</p>
-
-      <div class="source">Quellen: Stockanalysis.com Statistics (Feb. 2026); Barchart News (Feb. 2026); CoinCodex Technical Analysis (Dez. 2025); Chartmill (Feb. 2026)</div>
+      <p><strong>Aktueller Trend:</strong> Seitwärts/leicht abwärts. Kurs ist –38% vom 52W-Hoch ($127.57 im November 2025), aber +26% über 52W-Tief ($62.66). YTD ist die Aktie –17%, der breiteren Software-Sektor relativ unterperformt.</p>
+      <p><strong>Support/Resistance:</strong> Starker Support bei $75 (Mai-Tief), darunter $70 und $62.66 (52W-Low). Resistance bei $85 (SMA 50), $94 (SMA 200, kritischer Trend-Marker), $100 (psychologisch).</p>
+      <p><strong>Momentum:</strong> RSI ~45 neutral. Stockscan: 5 Buy / 8 Sell / 4 Neutral Signale → „Moderate Sell". GuruFocus GF Score 76–78 (solid).</p>
+      <p><strong>Lesart:</strong> Charttechnisch keine klare Richtung. Q1 FY27 Earnings am 28.05. wird entscheidender Catalyst. Bei „Beat &amp; Raise" könnte Kurs über $94 (SMA 200) ausbrechen → Trend-Wende. Bei weiterem Guide-Down → Test von $70 wahrscheinlich. Für aggressive Käufer attraktiver Einstiegsbereich, kurz vor Earnings aber riskant.</p>
+      <div class="source">Quellen: StockScan OKTA (Mai 2026); GuruFocus GF Score; eToro Trend-Indicator; Yahoo Finance</div>
     </div>
   </div>
 
-  <!-- S10: RISIKEN -->
   <div class="section" id="s10">
     <div class="section-header">
       <div class="section-number">10</div>
       <div class="section-title">Risiken &amp; Chancen</div>
-      <div class="section-score">Score: 5/10</div>
+      <div class="section-score">Score: 6/10 (invertiert)</div>
     </div>
     <div class="section-body">
       <h3>Strukturelle Risiken</h3>
-
       <div class="risk-item">
         <div class="risk-header">
-          <div class="risk-title">⚡ Microsoft-Wettbewerb (Entra ID)</div>
-          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-yellow">Auswirkung: Hoch</span></div>
+          <div class="risk-title">⚡ Microsoft Entra ID drückt aufs Mid-Market-Pricing</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-red">Auswirkung: Hoch</span></div>
         </div>
-        <div class="event-text">Microsoft Entra ID ist für M365-Kunden kostenlos oder sehr günstig. Microsoft investiert massiv in Entra-Erweiterungen. Wenn Okta 10% seiner Enterprise-Kunden verliert → ~$130 Mio. Umsatzverlust (~5%). Wahrscheinlichkeit: mittel (vor allem bei homogenen Microsoft-Stacks).</div>
+        <div class="event-text">Microsoft Entra ID in M365 E5 inkludiert = effektiv „kostenlos" für ~80% der Mid-Market-Kunden. Okta verliert strukturell Workforce-Identity-Marktanteile. Wenn Workforce-Wachstum auf &lt;+5% YoY fällt, ist langfristige Wachstums-Story tot. Wahrscheinlichkeit: 55%, Auswirkung: 5–8pp Wachstumsverlangsamung in 2–3 Jahren.</div>
       </div>
-
       <div class="risk-item">
         <div class="risk-header">
-          <div class="risk-title">⚡ Wachstumsverlangsamung unter 8%</div>
-          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Hoch</span></div>
+          <div class="risk-title">⚡ Plattform-Konsolidierung (PANW + CyberArk)</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel-Hoch</span></div>
         </div>
-        <div class="event-text">Revenue-Wachstum von 37% (FY2023) auf 9–10% (FY2026) ist dramatisch. Bei weiterer Verlangsamung unter 7–8% wird aktuelle Bewertung (Fwd P/E 21–25x) problematisch. Wahrscheinlichkeit: 20–30% – GTM-Reorganisation und AI-Katalysatoren wirken gegenläufig.</div>
+        <div class="event-text">PANW-CyberArk-Akquisition + Idira-Launch (12.05.2026) sind direkter Druck auf Okta's Independence-Argument. Multi-Pillar-PANW-Kunden konsolidieren zu Idira. Wahrscheinlichkeit: 50%, Effekt 24M: 2–4pp Marktanteilsverlust.</div>
       </div>
-
       <div class="risk-item">
         <div class="risk-header">
-          <div class="risk-title">⚡ NRR-Erosion unter 100%</div>
-          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-red">Auswirkung: Sehr hoch</span></div>
+          <div class="risk-title">⚡ AI-Agent-Identity-Pivot zahlt sich nicht aus</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
         </div>
-        <div class="event-text">NRR von 106% (historisch 120%+) ist rückläufig. Bei Net Churn (&lt;100%) wird die Investment-These fundamental beschädigt. Wahrscheinlichkeit: niedrig aktuell, aber zu beobachten.</div>
+        <div class="event-text">Wenn Auth0 for AI Agents + Okta for AI Agents bis FY28 keine wesentlichen Revenue-Beiträge (&gt;$100M ARR) generieren, fehlt der Wachstums-Catalyst. Wahrscheinlichkeit: 40%, Effekt: Multiple-Compression auf 15x P/E = $55 Floor.</div>
       </div>
-
       <div class="risk-item">
         <div class="risk-header">
-          <div class="risk-title">⚡ Erneuter Sicherheitsvorfall</div>
-          <div><span class="badge badge-yellow">Niedrig</span> <span class="badge badge-red">Auswirkung: Existenziell für Vertrauen</span></div>
+          <div class="risk-title">⚡ Margen-Kompression FY27 setzt sich fort</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
         </div>
-        <div class="event-text">Nach dem Breach von 2023 (Lapsus$) ist Okta technisch verbessert. Ein erneuter schwerwiegender Vorfall würde das Vertrauen in ein Unternehmen, das Sicherheit als Kernprodukt verkauft, nachhaltig erschüttern. Wahrscheinlichkeit: niedrig, aber Auswirkung: sehr hoch.</div>
+        <div class="event-text">FY27 Guide: Op-Marge 25–26% (von 26%), FCF 27–28% (von 30%). Wenn diese Trends FY28 anhalten, „Margen-Compression-without-Growth-Acceleration"-Story → Mid-Single-Digit Multiple. Wahrscheinlichkeit: 35%.</div>
       </div>
-
-      <h3>AI-Disruptions-Risiko &amp; Chance (Spezialfokus)</h3>
-      <div class="ai-focus-box">
-        <h4>🤖 AI-Disruptions-Analyse (User-Spezialfokus)</h4>
-        <p><strong>Bärisches AI-Szenario:</strong> KI könnte Identity-Management-Workflows automatisieren und zu einem Commodity-Produkt machen. Wenn Microsoft oder CrowdStrike AI-native IAM-Lösungen bauen, könnten Kunden zu Konsolidierungslösungen wechseln. Bank of America Analysten (Feb. 2026) betonen jedoch: KI fehlt die End-to-End-Visibility, Compliance-Tiefe und Reliability für umfassende IAM-Use-Cases.</p>
-        <p><strong>Bullisches AI-Szenario:</strong> Agentic AI ist für Okta kein Risiko, sondern ein Treiber. Jeder KI-Agent braucht eine digitale Identität, Zugriffsrechte und Audit-Trails. Auth0 for AI Agents und Non-Human Identity positionieren Okta als unverzichtbaren Layer in AI-Enterprise-Deployments. 91% der Unternehmen nutzen KI-Agenten, nur 10% haben Governance – das ist der adressierbare Markt von morgen.</p>
-        <p><strong>Eigene Einschätzung:</strong> Das AI-Disruptions-Risiko für Oktas Kerngeschäft ist GERING bis MITTEL auf 3–5-Jahres-Horizont. Identität erfordert Compliance, Audit-Trails, regulatorische Anforderungen und Tausende App-Integrationen. Die Marktreaktion im Feb. 2026 war <em>übertrieben</em>.</p>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Security Breach (Reputational Risk)</div>
+          <div><span class="badge badge-yellow">Niedrig</span> <span class="badge badge-red">Auswirkung: Sehr Hoch</span></div>
+        </div>
+        <div class="event-text">2022/2023 Breaches (HAR-File, Lapsus$) bereits hinter sich. Aber ein neuer Major Breach würde Brand-Trust irreparabel beschädigen. Wahrscheinlichkeit: 10% in 24M.</div>
       </div>
-
       <h3>Chancen</h3>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div><div class="event-label">Agentic AI / Non-Human Identity</div>
-        <div class="event-text">Potenziell $2–5 Mrd. neuer TAM bis 2028. Okta mit Auth0 for AI Agents als erster Identity Layer für autonome KI-Systeme früh positioniert.</div></div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div><div class="event-label">Privileged Access Management (PAM)</div>
-        <div class="event-text">$3+ Mrd. Markt mit doppelstelligem Wachstum. Oktas PAM-Angebot mit dem Enterprise-Vertrieb gut zu skalieren.</div></div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div><div class="event-label">Identity Governance (OIG)</div>
-        <div class="event-text">Direkte SailPoint-Alternative innerhalb der Okta-Plattform. Cross-Selling zu 19.000+ bestehenden Kunden möglich.</div></div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div><div class="event-label">US Federal / Public Sector</div>
-        <div class="event-text">Top-10-Deals enthalten regelmäßig US-Behörden inkl. DoD. Friend-Shoring und US-Regulierung treiben IAM-Budgets überproportional.</div></div>
-      </div>
-
+      <p>(1) AI-Agent-Identity als Multi-Year-Hebel. (2) $1B Buyback = ~7% Float-Reduktion bei aktuellem Kurs. (3) Federal/DoD-Wachstumsmarkt mit FedRAMP High. (4) Underbewertet (GF Value $103 vs. Kurs $78). (5) Mögliche M&amp;A-Target (Plattform-Konsolidierer könnten Okta akquirieren – CRWD oder Cloudflare denkbar).</p>
       <h3>Red Flags &amp; Dealbreaker</h3>
-      <p><strong>Red Flags (beobachten):</strong> NRR unter 100% (Net Churn); Revenue-Wachstum unter 7%; weiterer erheblicher Sicherheitsvorfall.</p>
-      <p><strong>Dealbreaker (derzeit nicht vorhanden):</strong> Keine existenzbedrohenden Risiken identifiziert. Kein unkontrollierbarer Schuldenberg, keine Regulierungsklage mit Existenz-Bedrohung.</p>
-
-      <div class="source">Quellen: Bank of America Research (Feb. 2026); Barchart (Feb. 2026); Financial Content (Jan. 2026); Computer Weekly (Nov. 2025); Okta Newsroom (Sep. 2025)</div>
+      <p><strong>Red Flags:</strong> Wachstums-Verlangsamung 5 Jahre in Folge, Margen-Kompression FY27, RPO-Wachstum verlangsamt sich. <strong>Dealbreaker:</strong> Q1 FY27 Revenue Miss + erneuter FY27-Guide-Down → strukturelle Wachstumsthese tot, Position auflösen.</p>
+      <div class="source">Quellen: Public.com Analyst Coverage; eigene Synthese; Stockanalysis OKTA News-Feed</div>
     </div>
   </div>
 
-  <!-- S11: SCORING -->
   <div class="section" id="s11">
     <div class="section-header">
       <div class="section-number">11</div>
-      <div class="section-title">Scoring &amp; User-Spezifische Analyse</div>
-      <div class="section-note">Stand: 27. Feb. 2026</div>
+      <div class="section-title">Scoring</div>
+      <div class="section-score">⌀ 6.4/10</div>
     </div>
     <div class="section-body">
-      <h3>Gesamtscoring Canvas v2.2</h3>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr><th>Kategorie</th><th style="width:160px">Score</th><th>Begründung</th></tr>
-          </thead>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Score-Bar</th><th>Begründung</th></tr></thead>
           <tbody>
-            <tr>
-              <td>Geschäftsmodell</td>
-              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
-              <td>Asset-light SaaS, klare Revenue-Streams, starke Bindung über 7.000+ Integrationen. Wachstumsverlangsamung drückt Score leicht.</td>
-            </tr>
-            <tr>
-              <td>Burggraben</td>
-              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
-              <td>Neutralitäts-Moat und Switching Costs solid. AI-Disruptions-Risiko und Microsoft-Druck begrenzen Score.</td>
-            </tr>
-            <tr>
-              <td>Operative Entw. (4Q)</td>
-              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
-              <td>4/4 Quartale Beat. GAAP-Profitabilität erreicht. Leichte Revenue-Verlangsamung; cRPO stabil 12–15%.</td>
-            </tr>
-            <tr>
-              <td>Wachstum</td>
-              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
-              <td>Vergangenheit stark (15% FY2025), Prognose FY2026 nur 9–10%. NHI als Option, aber noch nicht sichtbar.</td>
-            </tr>
-            <tr>
-              <td>Bewertung</td>
-              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
-              <td>Fwd P/E ~21–25x und EV/FCF ~12x deutlich günstiger als alle Peers. Sell-off-Einstiegschance.</td>
-            </tr>
-            <tr>
-              <td>Cashflow &amp; Margen</td>
-              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
-              <td>FCF $730 Mio. (28%), schuldenfrei, $2,5 Mrd. Cash, GAAP-Profitabilität. Hohe SBC drückt Score leicht.</td>
-            </tr>
-            <tr>
-              <td>Risiken (invertiert)</td>
-              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%; background:linear-gradient(90deg,var(--yellow),#fb923c)"></div></div><span class="score-num" style="color:var(--yellow)">5</span></div></td>
-              <td>Microsoft-Wettbewerb hoch, NRR rückläufig, AI-Verunsicherung. Keine Dealbreaker. Mittleres Risikoprofil.</td>
-            </tr>
-            <tr>
-              <td>Technische Analyse</td>
-              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%; background:linear-gradient(90deg,var(--red),#f97316)"></div></div><span class="score-num" style="color:var(--red)">4</span></div></td>
-              <td>Kurs –20% YTD, unter allen MAs, nahe 52W-Low. RSI überverkauft als einziger positiver Faktor.</td>
-            </tr>
-            <tr style="background:rgba(59,130,246,0.08)">
-              <td><strong>Ø Gesamtscore</strong></td>
-              <td>
-                <div class="score-bar">
-                  <div class="score-bar-track">
-                    <div class="score-bar-fill" style="width:61%; background:linear-gradient(90deg,var(--primary),#fbbf24);"></div>
-                  </div>
-                  <span class="score-num" style="color:var(--primary)">6.1</span>
-                </div>
-              </td>
-              <td>Solide Fundamentalgeschichte mit erhöhtem Risikoprofil. Attraktive Bewertung nach Sell-off. Qualität vorhanden, Gegenwind real.</td>
-            </tr>
+            <tr><td>Geschäftsmodell</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Independent Identity Leader, hochwertige Enterprise-Basis</td></tr>
+            <tr><td>Burggraben</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Switching Costs, aber MSFT-Pricing-Druck und PANW-Konsolidierung</td></tr>
+            <tr><td>Operative Entwicklung (4Q)</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>4/4 Beats, aber kontinuierliche Wachstums-Verlangsamung</td></tr>
+            <tr><td>Wachstum</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Nur +9% FY27 Guide, weit unter Markt (+15-20%)</td></tr>
+            <tr><td>Bewertung</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>FWD P/E 22x, EV/Sales 3.6x – signifikanter Discount</td></tr>
+            <tr><td>Cashflow</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>30% FCF FY26, $2.55B Cash, $1B Buyback authorized</td></tr>
+            <tr><td>Risiken (invertiert)</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>MSFT-Druck strukturell real, AI-Pivot ungewiss</td></tr>
+            <tr><td>Technische Analyse</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Seitwärts, unter SMA 200, Earnings-Catalyst 28.05.</td></tr>
+            <tr style="background:rgba(59,130,246,0.08);"><td><strong>⌀ Gesamtscore</strong></td><td><strong>6.4/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:64%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">6.4</span></div></td><td>Deep-Value-mit-Margen-und-Wachstum-Sorgen</td></tr>
           </tbody>
         </table>
       </div>
-
-      <h3>User-Spezifische Analyse: AI-Disruption &amp; Moat</h3>
-      <p>Die Kernfrage des Users lautet: Wie real ist das AI-Disruptions-Risiko, und wie stark ist der Moat? Die operative Analyse zeigt: Die Bewertungskorrektur (–20% YTD) ist primär sentiment-getrieben, nicht fundamental begründet. Vier konsekutive Earnings-Beats und die Profitabilitätswende widersprechen der AI-Apokalypse-These.</p>
-
-      <div class="own-view-box">
-        <h4>🔬 Konsistenz-Check &amp; Score-Adjustierung</h4>
-        <p>Das OIN (7.000+ Integrationen) ist ein echter struktureller Burggraben – nicht schnell replizierbar. Die hohen Switching Costs erklären NRR von 106% trotz Verlangsamung. KI verstärkt den Okta-Moat eher als ihn zu untergraben: Mehr KI-Agenten = mehr Identitäten = mehr Okta-Bedarf. Nach tiefgehender Analyse: Burggraben-Score bleibt bei <strong>6/10</strong> (kein Upgrade, da Microsoft-Risiko real). Bewertungs-Score bei <strong>7/10</strong> (Sell-off schafft attraktiven Einstieg). Keine Anpassung der Kernthese notwendig.</p>
-      </div>
-
-      <div class="source">Quellen: Bank of America Analyst Note (Feb. 2026); Barchart AI Analysis (Feb. 2026); Okta Newsroom / Oktane 2025; Computer Weekly CEO Interview (Nov. 2025)</div>
     </div>
   </div>
 
-  <!-- S12: FAZIT -->
   <div class="section" id="s12">
     <div class="section-header">
       <div class="section-number">12</div>
       <div class="section-title">Fazit – Investment-These</div>
-      <div class="section-note">Gesamtsynthese</div>
     </div>
     <div class="section-body">
 
       <div class="bull-bear-grid">
         <div class="bull-card">
           <h4>🐂 Das Bullische Narrativ</h4>
-          <p><strong>Säule 1 – Strukturelle Profitabilitätswende:</strong> FCF stieg auf $730 Mio. (28% FCF-Marge), GAAP-Profitabilität erstmals erreicht ($28 Mio. Net Income FY2025), Non-GAAP Op.Marge +8 pp auf 22% in einem Jahr. Dieser Hebel ist strukturell, nicht zyklisch. Operativer Cashflow von $750 Mio. (29% Marge) übersteigt Non-GAAP-Gewinn – das Zeichen echter Earnings-Qualität.</p>
-          <p><strong>Säule 2 – Bewertung nach Sell-off außergewöhnlich attraktiv:</strong> Forward P/E von 21–25x und EV/FCF von ~12x für ein schuldenfreies, GAAP-profitables SaaS-Unternehmen mit 26% FCF-Marge. Das sind 5–8x günstigere Multiples als bei direkten Peers. $1 Mrd. Rückkaufprogramm (~7% der Mkt Cap) signalisiert Überzeugung des Managements.</p>
-          <p><strong>Säule 3 – AI ist Chance, keine Bedrohung:</strong> Jeder KI-Agent braucht eine digitale Identität und Governance. 91% Nutzung, nur 10% Governance – das ist Oktas adressierbarer Markt. Auth0 for AI Agents und NHI-Strategie sind frühe, strukturell richtige Positionierungen. Bank of America: KI kann IAM-Plattformen nicht ersetzen.</p>
+          <p><strong>Säule 1: Bewertungs-Anomalie.</strong> FWD P/E 22x, EV/Sales 3.6x bei 26% Op-Marge und 30% FCF-Marge. Das ist „Quality SaaS auf Value-Niveau". GF Value $103 implies +30% Upside. Mit $1B Buyback (~7% Float-Reduktion) wird Bewertungs-Multiplikator weiter Druck reduziert.</p>
+          <p><strong>Säule 2: AI-Agent-Identity als Multi-Year-Hebel.</strong> Auth0 for AI Agents + Okta for AI Agents adressieren das Identity-Problem für agentic-AI – ein noch undefinierter Markt mit massivem TAM. Wenn nur 10% der AI-Apps Okta nutzen, +$500M ARR möglich (= 17% Boost auf Subscription Rev).</p>
+          <p><strong>Säule 3: M&amp;A-Target oder Catalyst.</strong> Mit $13.8B Market Cap, deep-discount-Bewertung und unique Identity-Asset ist Okta potentielles Akquisitions-Ziel für CRWD, Cloudflare, oder Cisco. Premium-Multiple bei 30–40% Take-Out-Prämie = $100–110.</p>
         </div>
         <div class="bear-card">
           <h4>🐻 Das Bärische Narrativ</h4>
-          <p><strong>Risiko 1 – Dramatische Wachstumsverlangsamung:</strong> Von 37% (FY2023) auf 9–10% (FY2026 Guidance). NRR sinkend von 120%+ auf 106%. Falls NRR unter 100% fällt → Net Churn → Investmentthese fundamental beschädigt. Falls Wachstum unter 7–8% fällt → Aktuelle Bewertung nicht mehr gerechtfertigt.</p>
-          <p><strong>Risiko 2 – Microsoft-Strukturbedrohung:</strong> Entra ID kostenlos für M365-Kunden. Microsoft investiert aggressiv in genau die Premium-IAM-Segmente, in denen Okta wächst. Wenn Okta 10% Enterprise-Kunden verliert → ~$130 Mio. Umsatz weniger, signifikante Margenauswirkungen. SailPoint wächst schneller (~20%) im IGA-Nischensegment.</p>
-          <p><strong>Risiko 3 – Technische Schwäche und Timing:</strong> Kurs –20% YTD, unter allen MAs, nahe 52W-Low. Wenn Q4 FY2026 enttäuscht oder Guidance für FY2027 schwach ausfällt, könnte Kurs auf $65–70 fallen (-10–15% weiteres Downside). Momentum-Signal klar negativ.</p>
+          <p><strong>Risiko 1: Microsoft Entra ID Free-Bundling.</strong> Workforce Identity = strukturell unter Druck. Wenn Workforce-Wachstum auf &lt;+5% YoY fällt (aktuell ~+10%), ist Story tot. Multiple-Compression auf 15x P/E = $55 Floor (–30%).</p>
+          <p><strong>Risiko 2: FY27 Guide +9% nur Anfang einer Compression-Story.</strong> FY28 Guide könnte +6–8% sein. „Mature-SaaS-Mid-Single-Digit-Grower" verdient nur 12–15x P/E = $45–60 Floor.</p>
+          <p><strong>Risiko 3: AI-Pivot bleibt PR-Story.</strong> Auth0 for AI Agents hat nur „early deals" – wenn bis FY28 keine $50M+ ARR, ist Wachstums-Catalyst tot. Anthropic Mythos-Pullback zeigt Marktreaktion auf AI-Sorgen.</p>
         </div>
       </div>
 
       <h3>Eigene Einschätzung</h3>
-      <div class="own-view-box">
-        <h4>⚖️ Abwägung &amp; persönliches Urteil</h4>
-        <p>Das bullische Narrativ ist überzeugender, aber der Abstand ist kleiner als die attraktive Bewertung suggeriert. Die Profitabilitätswende ist strukturell (nicht zyklisch), die Bewertung nach dem Sell-off ist attraktiv (Fwd P/E 21–25x, EV/FCF 12x) und das AI-Disruptions-Narrativ ist fundamental falsch – KI erhöht den IAM-Bedarf, ersetzt ihn nicht. Ich könnte falsch liegen, falls: (a) Microsoft Entra aggressiver in der Pricing-Strategie wird und Kunden massenhaft wechseln, (b) das Revenue-Wachstum strukturell unter 7% fällt, oder (c) ein weiterer schwerwiegender Sicherheitsvorfall das Vertrauen erschüttert.</p>
-        <p>Risk/Reward: <strong>–15–20% Downside</strong> (technische Unterstützung $65–70, falls Q4 enttäuscht) vs. <strong>+70–120% Upside</strong> (Zielkurs $130–170 in 3–5 Jahren). Geeignet für Quality Growth Investoren mit 2–5 Jahres-Horizont und Toleranz für Volatilität.</p>
-      </div>
+      <p>Okta ist eine klassische „Cheap-but-Cheap-for-a-Reason"-Story. Bewertung ist objektiv attraktiv (FWD P/E 22x, GF Value Discount 23.6%), aber Wachstums-Verlangsamung von +43% (FY23) auf +9% (FY27e) ist beunruhigend. Microsoft-Druck ist real, PANW-Konsolidierung beschleunigt sich. AI-Agent-Identity ist plausibler Catalyst, aber unsicher in Timing und Größe.</p>
+      <p>Risk/Reward bei $78.82 ist asymmetrisch nach oben (+25–40% Upside vs. –20% Downside, R/R 1:1.5–2). Aber: Q1 FY27 Earnings am 28.05.2026 sind binärer Event-Catalyst. Bei „Beat &amp; Raise" Aktie könnte über $94 (SMA 200) ausbrechen → +20% schnell. Bei „Miss &amp; Guide-Down" → $65 Test.</p>
+      <p>Risk/Reward: –20% Downside ($63 Test) vs. +30% Upside ($100). Verhältnis 1:1.5. Attraktiv für Value-orientierte Investoren mit 12–24M Horizont.</p>
 
       <h3>Zeithorizont-Einschätzung</h3>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Horizont</th><th>Einschätzung</th><th>Katalysatoren</th><th>Risiken</th></tr></thead>
-          <tbody>
-            <tr><td><strong>Kurzfristig (0–6M)</strong></td><td><span class="badge badge-yellow">Neutral / Vorsichtig</span></td><td>Q4 FY2026 Earnings (4. März), möglicher Beat</td><td>Schwache Guidance FY2027; weiterer Sell-off</td></tr>
-            <tr><td><strong>Mittelfristig (6–24M)</strong></td><td><span class="badge badge-green">Positiv</span></td><td>AI-Segment sichtbar im Revenue, GTM-Wirkung, NRR-Stabilisierung</td><td>Microsoft-Expansion, NRR &lt;100%</td></tr>
-            <tr><td><strong>Langfristig (2–5 Jahre)</strong></td><td><span class="badge badge-green">Bullisch</span></td><td>NHI/Agentic AI als Material-Revenue-Segment, Marktführer IAM</td><td>Strukturelle Disruption (aktuell unwahrscheinlich)</td></tr>
-          </tbody>
-        </table>
-      </div>
+      <p><strong>Kurzfristig (0–6 Monate):</strong> Q1 FY27 Earnings 28.05.2026 ist DER Event. Aktive Trader: Pre-Earnings Position bei $78 mit Stopp $72, oder Earnings abwarten.<br>
+      <strong>Mittelfristig (6–24 Monate):</strong> AI-Agent-Identity Adoption entscheidet. Wenn FY28 Wachstum auf +12–13% reaccelerates → Multiple-Re-Rating auf 28x = $115.<br>
+      <strong>Langfristig (2–5 Jahre):</strong> Strukturelle Wachstums-Story stabil. Wenn Okta Independence beibehält → $130–150 in 5J. Wenn akquiriert → 30% Premium = $100–110.</p>
 
       <h3>Kernthese</h3>
-      <p>Okta ist ein fundamental gesundes, profitables SaaS-Unternehmen, das nach einer Wachstumsverlangsamung und einem AI-Panik-Sell-off zu einem für den Sektor attraktiven Preis gehandelt wird. Die AI-Disruptions-Angst ist übertrieben – Identität ist kein Legacy-Segment, sondern die Grundlage aller digitalen Interaktionen, die im AI-Zeitalter komplexer, nicht einfacher werden. Der Moat ist real (Neutralität, 7.000+ Integrationen, hohe Switching Costs), auch wenn Microsoft herausfordert. Das Unternehmen hat Profitabilität unter Beweis gestellt und kauft eigene Aktien zurück.</p>
+      <p>Okta ist Deep-Value-Investment mit binärem Q1 FY27 Catalyst (28.05.2026). Bewertung sehr attraktiv (FWD P/E 22x, GF Value $103), $1B Buyback positiv, AI-Agent-Identity-Pivot strategisch sinnvoll. Aber: Microsoft-Druck strukturell real, FY27 Guide signalisiert weitere Verlangsamung. R/R 1:1.5 attraktiv für Value-Investoren mit Geduld.</p>
 
       <div class="rating-box">
-        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
-        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$100–115</div></div>
-        <div class="rating-item"><label>Zielkurs (3–5 Jahre)</label><div class="val">$130–170</div></div>
-        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–5 Jahre</div></div>
-        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red)">–15–20%</div></div>
-        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green)">+70–120%</div></div>
-        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:4–6</div></div>
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN (Value)</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$95–105</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">12–24 Monate</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–20%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+30%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val buy">1:1.5</div></div>
       </div>
 
       <h3>Was falsifiziert die These?</h3>
       <div class="trigger-grid">
         <div class="trigger-card sell">
-          <h5>🔴 Bearish Trigger → Reduzieren / Verkaufen</h5>
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
           <ul class="trigger-list">
-            <li>Q4 FY2026 Miss UND FY2027 Guidance &lt;8% Wachstum → Position 50% reduzieren</li>
-            <li>NRR fällt unter 100% (Net Churn) → Fundamental-These beschädigt → Verkaufen</li>
-            <li>Weiterer schwerwiegender Sicherheitsvorfall → Sofort überprüfen, wahrscheinlich Verkaufen</li>
-            <li>Revenue-Wachstum strukturell unter 7% für 2+ Quartale</li>
+            <li>Q1 FY27 Revenue Miss UND FY27-Guide-Down → Position halbieren</li>
+            <li>Workforce-Wachstum &lt;+5% YoY in 2 Quartalen → strukturelle Story tot</li>
+            <li>Kurs unter $70 + neue Tiefstände → technischer Stopp</li>
+            <li>Major Security Breach → Brand-Trust-Verlust</li>
           </ul>
         </div>
         <div class="trigger-card buy">
           <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
           <ul class="trigger-list">
-            <li>Q4 FY2026 Beat + FY2027 Guidance &gt;12% Wachstum → Vollposition aufbauen</li>
-            <li>NHI/AI-Revenue erstmals als Material-Segment erwähnt (&gt;$50 Mio.) → Nachkaufen</li>
-            <li>NRR stabilisiert oder steigt auf &gt;108–110% → Expansion bestätigt</li>
-            <li>Kurs unter $70 bei unveränderter Fundamentallage → Nachkaufen</li>
+            <li>Q1 FY27 Beat &amp; FY27-Guide-Up → Re-Acceleration-Signal</li>
+            <li>Auth0 for AI Agents &gt;$50M ARR Announcement</li>
+            <li>Kurs durchbricht SMA 200 ($94) → technische Trendwende</li>
+            <li>M&amp;A-Spekulationen (CRWD / Cloudflare / Cisco)</li>
           </ul>
         </div>
       </div>
@@ -872,21 +608,11 @@
       <div class="investor-grid">
         <div class="investor-yes">
           <h5>✅ Geeignet für</h5>
-          <ul>
-            <li>Quality Growth Investoren</li>
-            <li>Tech-affine Langfrist-Investoren</li>
-            <li>Contrarian (nach Sell-off)</li>
-            <li>Horizont 2–5 Jahre</li>
-          </ul>
+          <ul><li>Deep-Value-Tech-Investoren</li><li>Special-Situation-Trader (Earnings-Catalyst)</li><li>Contrarian-Plays</li><li>Patient-Capital mit 2–3J-Horizont</li></ul>
         </div>
         <div class="investor-no">
           <h5>❌ NICHT geeignet für</h5>
-          <ul>
-            <li>Income Investoren (keine Dividende)</li>
-            <li>Kurzfristige Trader (negatives Momentum)</li>
-            <li>Konservative Investoren</li>
-            <li>Value-Investoren (GAAP P/E &gt;70x)</li>
-          </ul>
+          <ul><li>Hyper-Growth-Investoren (Wachstum schwach)</li><li>Income-Investoren (keine Dividende)</li><li>Momentum-Trader (kein klarer Trend)</li><li>Plattform-Compounder-Strategie (PANW besser)</li></ul>
         </div>
       </div>
 
@@ -895,179 +621,54 @@
         <table>
           <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
           <tbody>
-            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / Tranchiert</span></td><td>Q4 FY2026 (4. März) abwarten. Bei Beat + guter Guidance: 1/3 Position. Ziel: Wachstumsstabilisierung bestätigen.</td></tr>
-            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-blue">Tranchiert einsteigen</span></td><td>1/3 jetzt bei ~$77, 1/3 nach Q4-Earnings, 1/3 nach NRR-Stabilisierung.</td></tr>
-            <tr><td><strong>Aggressiv / Growth</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Post-AI-Panik-Sell-off attraktiv. EV/FCF 12x bei 26% FCF-Marge. Risk/Reward 1:4–6 akzeptabel.</td></tr>
-            <tr><td><strong>Langfristig (3–5 Jahre)</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>Identität ist Pflicht-Infrastruktur im AI-Zeitalter. Neutraler IAM-Standard mit 19.000+ Kunden.</td></tr>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Q1 FY27 Earnings (28.05.) abwarten</span></td><td>Binärer Event – nach Reaktion entscheiden</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert (33% jetzt, 67% nach Earnings)</span></td><td>Position aufbauen, Stopp $72</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Pre-Earnings Long</span></td><td>R/R attraktiv, Volatilität tolerieren</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Akkumulieren</span></td><td>Deep-Value + AI-Pivot-Optionalität</td></tr>
           </tbody>
         </table>
       </div>
-      <div class="source">Quellen: Gesamtsynthese Sektionen 1–11 · Analysedatum: 27. Februar 2026</div>
     </div>
   </div>
 
-  <!-- S13: OUTLOOK -->
   <div class="section" id="s13">
     <div class="section-header">
       <div class="section-number">13</div>
-      <div class="section-title">Outlook – Wenn/Dann-Analyse</div>
-      <div class="section-note">3 entscheidende Events</div>
+      <div class="section-title">Outlook – Anstehende Events</div>
     </div>
     <div class="section-body">
 
       <div class="outlook-card">
-        <h4>📊 Event 1: Q4 FY2026 Earnings – 4. März 2026 (unmittelbar bevorstehend!)</h4>
-        <p>Das mit Abstand wichtigste kurzfristige Event. Analysten erwarten Revenue ~$678–695 Mio. (Guidance: $678–680 Mio.), non-GAAP EPS ~$0.76–0.77. Die kritische Variable ist die <strong>FY2027-Revenue-Guidance</strong> – hier entscheidet sich, ob die Wachstumsverlangsamung transitional oder strukturell ist.</p>
+        <h4>📊 Event 1: Q1 FY27 Earnings – 28. Mai 2026 (Binärer Catalyst!)</h4>
+        <p>Erste vollständige Quartalsergebnisse nach FY27-Guide-Schock. Konsens Q1 FY27: Revenue ~$751M (+9%), EPS ~$0.83. Markt achtet auf: (a) Revenue Beat (&gt;1% wäre positiv), (b) FY27-Guide-Anpassung (UP/UNCHANGED/DOWN), (c) cRPO-Wachstum (Forward-Visibility), (d) Auth0 for AI Agents Adoption-Metriken.</p>
         <div class="when-then">
-          <strong>Wenn:</strong> Q4 Revenue Beat (&gt;$685 Mio.) UND FY2027-Guidance &gt;12% Wachstum → Sofort Vollposition aufbauen. GTM-Reorganisation greift, AI-Rückenwind messbar, Wachstum re-akzeleriert. Kursziel 3–6 Monate: $100–115. AI-Disruptions-These weitgehend widerlegt.<br><br>
-          <strong>Wenn:</strong> Q4 Beat + FY2027-Guidance 9–11% → Kurs +5–10% kurzfristig, danach range-bound $80–95. Keine Erhöhung, kein Abbau der Position – weitere Datenpunkte abwarten.<br><br>
-          <strong>Wenn:</strong> Q4 Miss ODER FY2027-Guidance &lt;8% → Sofort Positions-Reduktion um 50%. Verlangsamung strukturell, aktuelle Bewertung nicht mehr gerechtfertigt. Neues Kursziel unter $65.
+          <strong>Wenn:</strong> Revenue Beat &gt;2% UND FY27-Guide UP (Revenue auf +10–11%) UND AI-Agent-Identity-Adoption-Metriken positiv → Aktie +15–20% schnell, Trendwende, Multiple-Re-Rating auf 25–28x = $100+.<br><br>
+          <strong>Wenn:</strong> Revenue Miss ODER FY27-Guide-Down (auf +7–8%) → Aktie –15% bis –20%, Test von $65, „structural decline confirmed", Position halbieren.
         </div>
       </div>
 
       <div class="outlook-card">
-        <h4>📊 Event 2: Sichtbarkeit AI/NHI Revenue – Q1–Q2 FY2027 (Mai–Sep. 2026)</h4>
-        <p>Okta bewirbt Agentic AI und Non-Human Identity seit Mitte 2025 aktiv. Da AI-Agent-Funktionalitäten bereits ausgerollt werden, sollten bis Q1–Q2 FY2027 erste messbare Beiträge erkennbar sein. Dies ist der entscheidende Test, ob das AI-Narrativ Substanz hat oder Marketing bleibt.</p>
+        <h4>📊 Event 2: AI-Agent-Identity Adoption Milestones (2H 2026)</h4>
+        <p>Auth0 for AI Agents (GA in Q4 FY26) und Okta for AI Agents (Early Access) brauchen sichtbaren Adoption-Track-Record bis Q3/Q4 FY27. Management müsste $50M+ ARR-Beitrag oder 100+ Enterprise-Customer-Wins kommunizieren.</p>
         <div class="when-then">
-          <strong>Wenn:</strong> AI-bezogene Umsätze oder NHI-Expansion erstmals als Material-Revenue-Stream erwähnt werden (&gt;$20–30 Mio. Segment oder &gt;20% YoY Auth0 mit AI-Attribution) → Bullisches Signal für langfristigen Wachstumstreiber. Re-Rating Richtung $120–140 wahrscheinlich. Vollposition aufstocken.<br><br>
-          <strong>Wenn:</strong> Nach 4 Quartalen AI-Positionierung kein materieller Beitrag aus NHI/Agentic AI → AI-Narrativ ist Marketing, kein Revenue. Bewertungs-Risiko steigt. Positions-Reduktion evaluieren, falls gleichzeitig Gesamtwachstum unter 8%.
+          <strong>Wenn:</strong> Bis Q3 FY27 (November 2026) sichtbarer AI-Agent-Identity-ARR &gt;$50M UND prominente Customer-Wins (z.B. AI-Native Unicorns) → Multiple-Re-Rating auf 30x P/E, Kursziel $120.<br><br>
+          <strong>Wenn:</strong> Q3 FY27 ohne wesentliche AI-Adoption-Daten ODER mit „Pipeline only"-Statements → AI-Pivot tot, Multiple-Compression auf 17x P/E = $60.
         </div>
       </div>
 
       <div class="outlook-card">
-        <h4>📊 Event 3: NRR-Stabilisierung oder weiterer Rückgang – laufend (Q4 FY2026, Q1 FY2027)</h4>
-        <p>Die Net Revenue Retention Rate (NRR) von 106% (historisch 120%+) ist ein kritischer Gesundheitsindikator für das Subscription-Geschäft. Die Richtung entscheidet, ob Cross-Selling und GTM-Reorganisation greifen oder ob strukturelle Kundenerosion stattfindet.</p>
+        <h4>📊 Event 3: M&amp;A-Spekulationen / Strategic Alternatives (2026–2027)</h4>
+        <p>Bei anhaltender Wachstums-Verlangsamung könnten Activist-Investoren oder Plattform-Konsolidierer (CrowdStrike, Cloudflare, Cisco, sogar Apollo / KKR) Interesse anmelden. Okta mit $13.8B Market Cap und unique Identity-Asset ist M&amp;A-attraktiv.</p>
         <div class="when-then">
-          <strong>Wenn:</strong> NRR in Q4 FY2026 oder Q1 FY2027 bei 106–108% stabilisiert oder auf 110%+ steigt → GTM-Spezialisierung funktioniert, Expansion-Revenue beschleunigt. Positives Signal für den Investmentcase. Kein Handlungsbedarf, aber Bestätigung für Langfrist-Halten. Mittelfristiges Kursziel $100–115 intakt.<br><br>
-          <strong>Wenn:</strong> NRR weiter sinkt auf &lt;103% oder unter 100% (Net Churn) → Fundamental-These gefährdet. Kunden expandieren nicht mehr, Abwanderung übersteigt Expansion. Position sofort um 75% reduzieren und neu bewerten. Bei Net Churn: sofortiger vollständiger Exit. Zielkurs-Revision auf &lt;$60.
+          <strong>Wenn:</strong> Activist-Investor (z.B. Elliott, Starboard) baut Position auf ODER Akquisitions-Spekulation in Bloomberg/Reuters → Aktie +20–30% bei Take-Out-Prämie auf $100–110.<br><br>
+          <strong>Wenn:</strong> Management bleibt unabhängig UND ohne Wachstums-Beschleunigung → langsamer Wert-Verfall auf $60–70-Range über 12M.
         </div>
       </div>
 
-      <div class="source">Quellen: Okta Q3 FY2026 Earnings (Dez. 2025); Barchart AI Analysis (Feb. 2026); Mizuho, Truist, KeyBanc Analyst Ratings (Feb. 2026); Okta IR | Nächstes Update nach Q4 FY2026 Earnings, 4. März 2026</div>
     </div>
   </div>
 
-  <div class="disclaimer">
-    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung dar. Alle Angaben ohne Gewähr. Investitionen in Wertpapiere sind mit Risiken verbunden, die bis zum Totalverlust führen können. Bitte konsultieren Sie vor Anlageentscheidungen einen qualifizierten Finanzberater. Analysedatum: 27. Februar 2026 · Aktienanalyse Canvas v2.2 · Okta, Inc. (OKTA · NASDAQ)
-  </div>
-
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung oder Aufforderung zum Kauf/Verkauf dar. Alle Angaben basieren auf öffentlich verfügbaren Quellen mit Stand 15.05.2026 und sind nach bestem Wissen erstellt, ohne Gewähr auf Vollständigkeit oder Richtigkeit. Investitionen in Aktien sind mit Risiken bis zum Totalverlust verbunden.</div>
 </div>
-
-
-<div class="cgw-ext" data-ext-id="pdnenlnelpdomajfejgapbdpmjkfpjkp"></div><cgw-writer-modal data-wxt-shadow-root="" class="cgw_main_container" id="jw-main-container-id"><template shadowrootmode="open">
-<!-- saved from url=(0032)https://okta-analyse.vercel.app/ -->
-<html><head><style>/* WXT Shadow Root Reset */ body{all:initial;}
-*,:before,:after{--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / .5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / .5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }*,:before,:after{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}:before,:after{--tw-content: ""}html,:host{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji",Segoe UI Symbol,"Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,samp,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dl,dd,h1,h2,h3,h4,h5,h6,hr,figure,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}ol,ul,menu{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}button,[role=button]{cursor:pointer}:disabled{cursor:default}img,svg,video,canvas,audio,iframe,embed,object{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.\!container{width:100%!important}.container{width:100%}@media (min-width: 640px){.\!container{max-width:640px!important}.container{max-width:640px}}@media (min-width: 768px){.\!container{max-width:768px!important}.container{max-width:768px}}@media (min-width: 1024px){.\!container{max-width:1024px!important}.container{max-width:1024px}}@media (min-width: 1280px){.\!container{max-width:1280px!important}.container{max-width:1280px}}@media (min-width: 1536px){.\!container{max-width:1536px!important}.container{max-width:1536px}}.pointer-events-none{pointer-events:none}.pointer-events-auto{pointer-events:auto}.visible{visibility:visible}.invisible{visibility:hidden}.collapse{visibility:collapse}.static{position:static}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{top:0;right:0;bottom:0;left:0}.-bottom-1{bottom:-4px}.-left-1{left:-4px}.-right-1{right:-4px}.-top-\[8px\]{top:-8px}.bottom-0{bottom:0}.bottom-6{bottom:24px}.bottom-\[1px\]{bottom:1px}.end-0{inset-inline-end:0px}.left-0{left:0}.left-0\.5{left:2px}.left-1{left:4px}.right-0{right:0}.right-1\.5{right:6px}.right-10{right:40px}.right-14{right:56px}.right-\[1px\]{right:1px}.top-0{top:0}.top-1\/2{top:50%}.top-11{top:44px}.top-4{top:16px}.isolate{isolation:isolate}.z-50{z-index:50}.z-\[61\]{z-index:61}.z-\[9999985\]{z-index:9999985}.z-\[9999990\]{z-index:9999990}.z-\[9999991\]{z-index:9999991}.z-\[9999992\]{z-index:9999992}.z-\[9999993\]{z-index:9999993}.z-\[9999995\]{z-index:9999995}.z-\[9999996\]{z-index:9999996}.z-\[9999997\]{z-index:9999997}.z-\[9999998\]{z-index:9999998}.z-\[9999999\]{z-index:9999999}.m-0{margin:0}.m-auto{margin:auto}.mx-2{margin-left:8px;margin-right:8px}.mx-6{margin-left:24px;margin-right:24px}.mx-\[1px\]{margin-left:1px;margin-right:1px}.mx-auto{margin-left:auto;margin-right:auto}.my-1\.5{margin-top:6px;margin-bottom:6px}.my-4{margin-top:16px;margin-bottom:16px}.my-\[0\.5px\]{margin-top:.5px;margin-bottom:.5px}.-ml-3{margin-left:-12px}.-ml-3\.5{margin-left:-14px}.mb-1{margin-bottom:4px}.mb-1\.5{margin-bottom:6px}.mb-2{margin-bottom:8px}.mb-3{margin-bottom:12px}.mb-4{margin-bottom:16px}.mb-5{margin-bottom:20px}.mb-\[-7px\]{margin-bottom:-7px}.ml-0\.5{margin-left:2px}.ml-1{margin-left:4px}.ml-1\.5{margin-left:6px}.ml-2{margin-left:8px}.ml-3{margin-left:12px}.ml-\[30px\]{margin-left:30px}.ml-\[3px\]{margin-left:3px}.mr-1{margin-right:4px}.mr-1\.5{margin-right:6px}.mr-2{margin-right:8px}.mr-2\.5{margin-right:10px}.mt-0\.5{margin-top:2px}.mt-1{margin-top:4px}.mt-1\.5{margin-top:6px}.mt-10{margin-top:40px}.mt-2{margin-top:8px}.mt-2\.5{margin-top:10px}.mt-3{margin-top:12px}.mt-4{margin-top:16px}.mt-5{margin-top:20px}.mt-6{margin-top:24px}.mt-7{margin-top:28px}.mt-8{margin-top:32px}.mt-\[-7px\]{margin-top:-7px}.mt-\[12px\]{margin-top:12px}.mt-\[1px\]{margin-top:1px}.mt-\[2\.5px\]{margin-top:2.5px}.mt-\[5px\]{margin-top:5px}.mt-\[9px\]{margin-top:9px}.line-clamp-3{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3}.block{display:block}.inline-block{display:inline-block}.inline{display:inline}.flex{display:flex}.inline-flex{display:inline-flex}.table{display:table}.contents{display:contents}.hidden{display:none}.size-3{width:12px;height:12px}.size-3\.5{width:14px;height:14px}.size-4{width:16px;height:16px}.size-5{width:20px;height:20px}.size-\[13px\]{width:13px;height:13px}.size-\[19px\]{width:19px;height:19px}.h-0{height:0px}.h-1{height:4px}.h-10{height:40px}.h-2{height:8px}.h-2\.5{height:10px}.h-3{height:12px}.h-3\.5{height:14px}.h-4{height:16px}.h-5{height:20px}.h-6{height:24px}.h-\[10px\]{height:10px}.h-\[11px\]{height:11px}.h-\[13px\]{height:13px}.h-\[14px\]{height:14px}.h-\[15px\]{height:15px}.h-\[16px\]{height:16px}.h-\[18px\]{height:18px}.h-\[28px\]{height:28px}.h-full{height:100%}.max-h-40{max-height:160px}.max-h-\[10lh\]{max-height:10lh}.max-h-\[16lh\]{max-height:16lh}.max-h-\[5lh\]{max-height:5lh}.max-h-\[750px\]{max-height:750px}.min-h-\[4lh\]{min-height:4lh}.min-h-\[56px\]{min-height:56px}.min-h-\[6lh\]{min-height:6lh}.w-0{width:0px}.w-1{width:4px}.w-10{width:40px}.w-2{width:8px}.w-2\.5{width:10px}.w-2\/3{width:66.666667%}.w-3{width:12px}.w-3\.5{width:14px}.w-4{width:16px}.w-5{width:20px}.w-64{width:256px}.w-8{width:32px}.w-80{width:320px}.w-\[10px\]{width:10px}.w-\[11px\]{width:11px}.w-\[13px\]{width:13px}.w-\[14px\]{width:14px}.w-\[15px\]{width:15px}.w-\[16px\]{width:16px}.w-\[18px\]{width:18px}.w-\[24px\]{width:24px}.w-\[338px\]{width:338px}.w-\[350px\]{width:350px}.w-\[400px\]{width:400px}.w-\[470px\]{width:470px}.w-\[490px\]{width:490px}.w-\[500px\]{width:500px}.w-fit{width:fit-content}.w-full{width:100%}.w-px{width:1px}.min-w-0{min-width:0px}.min-w-\[470px\]{min-width:470px}.min-w-\[60px\]{min-width:60px}.min-w-\[70px\]{min-width:70px}.max-w-14{max-width:56px}.max-w-32{max-width:128px}.max-w-80{max-width:320px}.max-w-\[200px\]{max-width:200px}.max-w-\[350px\]{max-width:350px}.max-w-\[400px\]{max-width:400px}.max-w-\[600px\]{max-width:600px}.max-w-\[650px\]{max-width:650px}.max-w-\[70px\]{max-width:70px}.max-w-full{max-width:100%}.flex-1{flex:1 1 0%}.flex-shrink{flex-shrink:1}.flex-shrink-0{flex-shrink:0}.shrink{flex-shrink:1}.shrink-0{flex-shrink:0}.flex-grow{flex-grow:1}.flex-grow-0{flex-grow:0}.grow{flex-grow:1}.border-collapse{border-collapse:collapse}.-translate-y-1\/2{--tw-translate-y: -50%;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.translate-x-0{--tw-translate-x: 0px;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.translate-x-3{--tw-translate-x: 12px;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.translate-x-\[10px\]{--tw-translate-x: 10px;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.translate-y-\[calc\(-100\%-10px\)\]{--tw-translate-y: calc(-100% - 10px) ;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}@keyframes spin{to{transform:rotate(360deg)}}.animate-spin{animation:spin 1s linear infinite}.cursor-auto{cursor:auto}.cursor-col-resize{cursor:col-resize}.cursor-default{cursor:default}.cursor-grab{cursor:grab}.cursor-grabbing{cursor:grabbing}.cursor-help{cursor:help}.cursor-nesw-resize{cursor:nesw-resize}.cursor-not-allowed{cursor:not-allowed}.cursor-nwse-resize{cursor:nwse-resize}.cursor-pointer{cursor:pointer}.cursor-row-resize{cursor:row-resize}.select-none{-webkit-user-select:none;user-select:none}.resize-none{resize:none}.resize-y{resize:vertical}.resize{resize:both}.list-decimal{list-style-type:decimal}.list-disc{list-style-type:disc}.flex-row{flex-direction:row}.flex-col{flex-direction:column}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.items-stretch{align-items:stretch}.justify-start{justify-content:flex-start}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-0{gap:0px}.gap-0\.5{gap:2px}.gap-1{gap:4px}.gap-1\.5{gap:6px}.gap-2{gap:8px}.gap-2\.5{gap:10px}.gap-3{gap:12px}.gap-3\.5{gap:14px}.gap-4{gap:16px}.gap-5{gap:20px}.gap-6{gap:24px}.gap-\[1px\]{gap:1px}.gap-\[2px\]{gap:2px}.gap-\[3px\]{gap:3px}.gap-x-2{column-gap:8px}.gap-x-3{column-gap:12px}.gap-x-4{column-gap:16px}.gap-y-1{row-gap:4px}.gap-y-1\.5{row-gap:6px}.gap-y-2{row-gap:8px}.gap-y-3{row-gap:12px}.space-x-1>:not([hidden])~:not([hidden]){--tw-space-x-reverse: 0;margin-right:calc(4px * var(--tw-space-x-reverse));margin-left:calc(4px * calc(1 - var(--tw-space-x-reverse)))}.space-x-1\.5>:not([hidden])~:not([hidden]){--tw-space-x-reverse: 0;margin-right:calc(6px * var(--tw-space-x-reverse));margin-left:calc(6px * calc(1 - var(--tw-space-x-reverse)))}.space-y-1\.5>:not([hidden])~:not([hidden]){--tw-space-y-reverse: 0;margin-top:calc(6px * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(6px * var(--tw-space-y-reverse))}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse: 0;margin-top:calc(8px * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(8px * var(--tw-space-y-reverse))}.space-y-4>:not([hidden])~:not([hidden]){--tw-space-y-reverse: 0;margin-top:calc(16px * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(16px * var(--tw-space-y-reverse))}.self-start{align-self:flex-start}.overflow-auto{overflow:auto}.overflow-hidden{overflow:hidden}.overflow-visible{overflow:visible}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.overflow-x-hidden{overflow-x:hidden}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.whitespace-normal{white-space:normal}.whitespace-nowrap{white-space:nowrap}.whitespace-pre-line{white-space:pre-line}.whitespace-pre-wrap{white-space:pre-wrap}.whitespace-break-spaces{white-space:break-spaces}.break-words{overflow-wrap:break-word}.rounded{border-radius:4px}.rounded-\[18px\]{border-radius:18px}.rounded-\[28px\]{border-radius:28px}.rounded-\[3px\]{border-radius:3px}.rounded-\[4px\]{border-radius:4px}.rounded-\[9999px\],.rounded-full{border-radius:9999px}.rounded-lg{border-radius:8px}.rounded-md{border-radius:6px}.rounded-sm{border-radius:2px}.rounded-xl{border-radius:12px}.rounded-t-md{border-top-left-radius:6px;border-top-right-radius:6px}.rounded-t-none{border-top-left-radius:0;border-top-right-radius:0}.rounded-tr-none{border-top-right-radius:0}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-b-0{border-bottom-width:0px}.border-b-\[8px\]{border-bottom-width:8px}.border-l-\[8px\]{border-left-width:8px}.border-r-\[8px\]{border-right-width:8px}.border-t,.border-t-\[1px\]{border-top-width:1px}.border-\[\#0f1419\]{--tw-border-opacity: 1;border-color:rgb(15 20 25 / var(--tw-border-opacity, 1))}.border-\[\#525252\]{--tw-border-opacity: 1;border-color:rgb(82 82 82 / var(--tw-border-opacity, 1))}.border-\[\#565856\]{--tw-border-opacity: 1;border-color:rgb(86 88 86 / var(--tw-border-opacity, 1))}.border-\[\#666666\]{--tw-border-opacity: 1;border-color:rgb(102 102 102 / var(--tw-border-opacity, 1))}.border-\[\#E0E0E0\]{--tw-border-opacity: 1;border-color:rgb(224 224 224 / var(--tw-border-opacity, 1))}.border-\[\#cfd7df\]{--tw-border-opacity: 1;border-color:rgb(207 215 223 / var(--tw-border-opacity, 1))}.border-\[\#d1d1d1\]{--tw-border-opacity: 1;border-color:rgb(209 209 209 / var(--tw-border-opacity, 1))}.border-\[\#dddddd\]{--tw-border-opacity: 1;border-color:rgb(221 221 221 / var(--tw-border-opacity, 1))}.border-\[\#eff3f4\]{--tw-border-opacity: 1;border-color:rgb(239 243 244 / var(--tw-border-opacity, 1))}.border-blue-300{--tw-border-opacity: 1;border-color:rgb(147 197 253 / var(--tw-border-opacity, 1))}.border-cyan-600{--tw-border-opacity: 1;border-color:rgb(8 145 178 / var(--tw-border-opacity, 1))}.border-neutral-200{--tw-border-opacity: 1;border-color:rgb(229 229 229 / var(--tw-border-opacity, 1))}.border-neutral-300{--tw-border-opacity: 1;border-color:rgb(212 212 212 / var(--tw-border-opacity, 1))}.border-neutral-400{--tw-border-opacity: 1;border-color:rgb(163 163 163 / var(--tw-border-opacity, 1))}.border-neutral-500{--tw-border-opacity: 1;border-color:rgb(115 115 115 / var(--tw-border-opacity, 1))}.border-orange-300{--tw-border-opacity: 1;border-color:rgb(253 186 116 / var(--tw-border-opacity, 1))}.border-orange-900{--tw-border-opacity: 1;border-color:rgb(124 45 18 / var(--tw-border-opacity, 1))}.border-red-200{--tw-border-opacity: 1;border-color:rgb(254 202 202 / var(--tw-border-opacity, 1))}.border-sky-600{--tw-border-opacity: 1;border-color:rgb(2 132 199 / var(--tw-border-opacity, 1))}.border-b-neutral-800{--tw-border-opacity: 1;border-bottom-color:rgb(38 38 38 / var(--tw-border-opacity, 1))}.border-l-transparent{border-left-color:transparent}.border-r-transparent{border-right-color:transparent}.bg-\[\#0f1419\]{--tw-bg-opacity: 1;background-color:rgb(15 20 25 / var(--tw-bg-opacity, 1))}.bg-\[\#1a1d21\]{--tw-bg-opacity: 1;background-color:rgb(26 29 33 / var(--tw-bg-opacity, 1))}.bg-\[\#292929\]{--tw-bg-opacity: 1;background-color:rgb(41 41 41 / var(--tw-bg-opacity, 1))}.bg-\[\#6a6b6c\]{--tw-bg-opacity: 1;background-color:rgb(106 107 108 / var(--tw-bg-opacity, 1))}.bg-\[\#939393\]{--tw-bg-opacity: 1;background-color:rgb(147 147 147 / var(--tw-bg-opacity, 1))}.bg-\[\#eff3f4\]{--tw-bg-opacity: 1;background-color:rgb(239 243 244 / var(--tw-bg-opacity, 1))}.bg-\[rgb\(25\,195\,125\)\]{--tw-bg-opacity: 1;background-color:rgb(25 195 125 / var(--tw-bg-opacity, 1))}.bg-black{--tw-bg-opacity: 1;background-color:rgb(0 0 0 / var(--tw-bg-opacity, 1))}.bg-blue-100{--tw-bg-opacity: 1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.bg-blue-200{--tw-bg-opacity: 1;background-color:rgb(191 219 254 / var(--tw-bg-opacity, 1))}.bg-blue-500{--tw-bg-opacity: 1;background-color:rgb(59 130 246 / var(--tw-bg-opacity, 1))}.bg-emerald-600{--tw-bg-opacity: 1;background-color:rgb(5 150 105 / var(--tw-bg-opacity, 1))}.bg-green-100{--tw-bg-opacity: 1;background-color:rgb(220 252 231 / var(--tw-bg-opacity, 1))}.bg-green-200{--tw-bg-opacity: 1;background-color:rgb(187 247 208 / var(--tw-bg-opacity, 1))}.bg-green-700{--tw-bg-opacity: 1;background-color:rgb(21 128 61 / var(--tw-bg-opacity, 1))}.bg-neutral-100{--tw-bg-opacity: 1;background-color:rgb(245 245 245 / var(--tw-bg-opacity, 1))}.bg-neutral-125{--tw-bg-opacity: 1;background-color:rgb(241 241 241 / var(--tw-bg-opacity, 1))}.bg-neutral-150{--tw-bg-opacity: 1;background-color:rgb(237 237 237 / var(--tw-bg-opacity, 1))}.bg-neutral-175{--tw-bg-opacity: 1;background-color:rgb(233 233 233 / var(--tw-bg-opacity, 1))}.bg-neutral-200{--tw-bg-opacity: 1;background-color:rgb(229 229 229 / var(--tw-bg-opacity, 1))}.bg-neutral-250{--tw-bg-opacity: 1;background-color:rgb(220 220 220 / var(--tw-bg-opacity, 1))}.bg-neutral-300{--tw-bg-opacity: 1;background-color:rgb(212 212 212 / var(--tw-bg-opacity, 1))}.bg-neutral-400{--tw-bg-opacity: 1;background-color:rgb(163 163 163 / var(--tw-bg-opacity, 1))}.bg-neutral-50{--tw-bg-opacity: 1;background-color:rgb(250 250 250 / var(--tw-bg-opacity, 1))}.bg-neutral-800{--tw-bg-opacity: 1;background-color:rgb(38 38 38 / var(--tw-bg-opacity, 1))}.bg-neutral-900{--tw-bg-opacity: 1;background-color:rgb(23 23 23 / var(--tw-bg-opacity, 1))}.bg-orange-100{--tw-bg-opacity: 1;background-color:rgb(255 237 213 / var(--tw-bg-opacity, 1))}.bg-orange-200{--tw-bg-opacity: 1;background-color:rgb(254 215 170 / var(--tw-bg-opacity, 1))}.bg-red-100{--tw-bg-opacity: 1;background-color:rgb(254 226 226 / var(--tw-bg-opacity, 1))}.bg-red-50{--tw-bg-opacity: 1;background-color:rgb(254 242 242 / var(--tw-bg-opacity, 1))}.bg-red-500{--tw-bg-opacity: 1;background-color:rgb(239 68 68 / var(--tw-bg-opacity, 1))}.bg-transparent{background-color:transparent}.bg-white{--tw-bg-opacity: 1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-zinc-800{--tw-bg-opacity: 1;background-color:rgb(39 39 42 / var(--tw-bg-opacity, 1))}.bg-zinc-900{--tw-bg-opacity: 1;background-color:rgb(24 24 27 / var(--tw-bg-opacity, 1))}.bg-opacity-25{--tw-bg-opacity: .25}.bg-gradient-to-b{background-image:linear-gradient(to bottom,var(--tw-gradient-stops))}.bg-gradient-to-br{background-image:linear-gradient(to bottom right,var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right,var(--tw-gradient-stops))}.from-cyan-500{--tw-gradient-from: #06b6d4 var(--tw-gradient-from-position);--tw-gradient-to: rgb(6 182 212 / 0) var(--tw-gradient-to-position);--tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to)}.from-pink-500{--tw-gradient-from: #ec4899 var(--tw-gradient-from-position);--tw-gradient-to: rgb(236 72 153 / 0) var(--tw-gradient-to-position);--tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to)}.from-white{--tw-gradient-from: #fff var(--tw-gradient-from-position);--tw-gradient-to: rgb(255 255 255 / 0) var(--tw-gradient-to-position);--tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to)}.to-\[\#f3f5f7\]{--tw-gradient-to: #f3f5f7 var(--tw-gradient-to-position)}.to-blue-500{--tw-gradient-to: #3b82f6 var(--tw-gradient-to-position)}.to-orange-400{--tw-gradient-to: #fb923c var(--tw-gradient-to-position)}.stroke-current{stroke:currentColor}.stroke-\[10\]{stroke-width:10}.stroke-\[11\]{stroke-width:11}.stroke-\[2\]{stroke-width:2}.stroke-\[40\]{stroke-width:40}.p-0\.5{padding:2px}.p-1{padding:4px}.p-1\.5{padding:6px}.p-2{padding:8px}.p-2\.5{padding:10px}.p-3{padding:12px}.p-4{padding:16px}.p-6{padding:24px}.p-\[1px\]{padding:1px}.p-\[3px\]{padding:3px}.px-1{padding-left:4px;padding-right:4px}.px-1\.5{padding-left:6px;padding-right:6px}.px-2{padding-left:8px;padding-right:8px}.px-2\.5{padding-left:10px;padding-right:10px}.px-3{padding-left:12px;padding-right:12px}.px-4{padding-left:16px;padding-right:16px}.px-6{padding-left:24px;padding-right:24px}.px-\[10px\]{padding-left:10px;padding-right:10px}.px-\[3px\]{padding-left:3px;padding-right:3px}.px-\[7px\]{padding-left:7px;padding-right:7px}.py-0\.5{padding-top:2px;padding-bottom:2px}.py-1{padding-top:4px;padding-bottom:4px}.py-1\.5{padding-top:6px;padding-bottom:6px}.py-2{padding-top:8px;padding-bottom:8px}.py-2\.5{padding-top:10px;padding-bottom:10px}.py-3{padding-top:12px;padding-bottom:12px}.py-4{padding-top:16px;padding-bottom:16px}.py-5{padding-top:20px;padding-bottom:20px}.py-\[1px\]{padding-top:1px;padding-bottom:1px}.py-\[2px\]{padding-top:2px;padding-bottom:2px}.py-\[3px\]{padding-top:3px;padding-bottom:3px}.py-\[5px\]{padding-top:5px;padding-bottom:5px}.py-\[6\.9px\]{padding-top:6.9px;padding-bottom:6.9px}.py-\[7px\]{padding-top:7px;padding-bottom:7px}.py-\[8px\]{padding-top:8px;padding-bottom:8px}.py-px{padding-top:1px;padding-bottom:1px}.pb-1{padding-bottom:4px}.pb-1\.5{padding-bottom:6px}.pb-2{padding-bottom:8px}.pb-2\.5{padding-bottom:10px}.pb-6{padding-bottom:24px}.pl-1\.5{padding-left:6px}.pl-2{padding-left:8px}.pl-5{padding-left:20px}.pr-1{padding-right:4px}.pr-2{padding-right:8px}.pr-2\.5{padding-right:10px}.pr-4{padding-right:16px}.pr-7{padding-right:28px}.pt-2{padding-top:8px}.pt-\[5px\]{padding-top:5px}.text-left{text-align:left}.text-center{text-align:center}.text-start{text-align:start}.align-sub{vertical-align:sub}.text-2xl{font-size:24px;line-height:32px}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-\[12px\]{font-size:12px}.text-\[13px\]{font-size:13px}.text-\[14px\]{font-size:14px}.text-\[15px\]{font-size:15px}.text-\[9px\]{font-size:9px}.text-base{font-size:16px;line-height:24px}.text-lg{font-size:18px;line-height:28px}.text-md{font-size:15px;line-height:22px}.text-sm{font-size:14px;line-height:20px}.text-xl{font-size:20px;line-height:28px}.text-xs{font-size:12px;line-height:16px}.text-xsm{font-size:13px;line-height:18px}.font-bold{font-weight:700}.font-light{font-weight:300}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.lowercase{text-transform:lowercase}.leading-\[1\.2\]{line-height:1.2}.leading-\[1\.4\]{line-height:1.4}.leading-\[1\],.leading-none{line-height:1}.leading-relaxed{line-height:1.625}.tracking-normal{letter-spacing:0em}.tracking-tight{letter-spacing:-.025em}.tracking-wide{letter-spacing:.025em}.text-\[\#000000BF\]{color:#000000bf}.text-\[\#183247\]{--tw-text-opacity: 1;color:rgb(24 50 71 / var(--tw-text-opacity, 1))}.text-\[\#1d1c1d\]{--tw-text-opacity: 1;color:rgb(29 28 29 / var(--tw-text-opacity, 1))}.text-\[\#242424\]{--tw-text-opacity: 1;color:rgb(36 36 36 / var(--tw-text-opacity, 1))}.text-\[\#2558BB\]{--tw-text-opacity: 1;color:rgb(37 88 187 / var(--tw-text-opacity, 1))}.text-\[\#293239\]{--tw-text-opacity: 1;color:rgb(41 50 57 / var(--tw-text-opacity, 1))}.text-\[\#334155\]{--tw-text-opacity: 1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-\[\#525d71\]{--tw-text-opacity: 1;color:rgb(82 93 113 / var(--tw-text-opacity, 1))}.text-\[\#5e93ff\]{--tw-text-opacity: 1;color:rgb(94 147 255 / var(--tw-text-opacity, 1))}.text-\[\#D8DCDE\]{--tw-text-opacity: 1;color:rgb(216 220 222 / var(--tw-text-opacity, 1))}.text-\[\#FFFFFFBF\]{color:#ffffffbf}.text-\[\#d1d2d3\]{--tw-text-opacity: 1;color:rgb(209 210 211 / var(--tw-text-opacity, 1))}.text-\[\#da7a5a\]{--tw-text-opacity: 1;color:rgb(218 122 90 / var(--tw-text-opacity, 1))}.text-\[\#f2f3f4\]{--tw-text-opacity: 1;color:rgb(242 243 244 / var(--tw-text-opacity, 1))}.text-black{--tw-text-opacity: 1;color:rgb(0 0 0 / var(--tw-text-opacity, 1))}.text-blue-500{--tw-text-opacity: 1;color:rgb(59 130 246 / var(--tw-text-opacity, 1))}.text-blue-600{--tw-text-opacity: 1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-blue-700{--tw-text-opacity: 1;color:rgb(29 78 216 / var(--tw-text-opacity, 1))}.text-blue-800{--tw-text-opacity: 1;color:rgb(30 64 175 / var(--tw-text-opacity, 1))}.text-blue-900{--tw-text-opacity: 1;color:rgb(30 58 138 / var(--tw-text-opacity, 1))}.text-cyan-600{--tw-text-opacity: 1;color:rgb(8 145 178 / var(--tw-text-opacity, 1))}.text-emerald-600{--tw-text-opacity: 1;color:rgb(5 150 105 / var(--tw-text-opacity, 1))}.text-green-700{--tw-text-opacity: 1;color:rgb(21 128 61 / var(--tw-text-opacity, 1))}.text-green-800{--tw-text-opacity: 1;color:rgb(22 101 52 / var(--tw-text-opacity, 1))}.text-green-900{--tw-text-opacity: 1;color:rgb(20 83 45 / var(--tw-text-opacity, 1))}.text-indigo-600{--tw-text-opacity: 1;color:rgb(79 70 229 / var(--tw-text-opacity, 1))}.text-neutral-300{--tw-text-opacity: 1;color:rgb(212 212 212 / var(--tw-text-opacity, 1))}.text-neutral-400{--tw-text-opacity: 1;color:rgb(163 163 163 / var(--tw-text-opacity, 1))}.text-neutral-450{--tw-text-opacity: 1;color:rgb(139 139 139 / var(--tw-text-opacity, 1))}.text-neutral-50{--tw-text-opacity: 1;color:rgb(250 250 250 / var(--tw-text-opacity, 1))}.text-neutral-500{--tw-text-opacity: 1;color:rgb(115 115 115 / var(--tw-text-opacity, 1))}.text-neutral-550{--tw-text-opacity: 1;color:rgb(98 98 98 / var(--tw-text-opacity, 1))}.text-neutral-600{--tw-text-opacity: 1;color:rgb(82 82 82 / var(--tw-text-opacity, 1))}.text-neutral-700{--tw-text-opacity: 1;color:rgb(64 64 64 / var(--tw-text-opacity, 1))}.text-neutral-800{--tw-text-opacity: 1;color:rgb(38 38 38 / var(--tw-text-opacity, 1))}.text-neutral-900{--tw-text-opacity: 1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.text-orange-400{--tw-text-opacity: 1;color:rgb(251 146 60 / var(--tw-text-opacity, 1))}.text-orange-500{--tw-text-opacity: 1;color:rgb(249 115 22 / var(--tw-text-opacity, 1))}.text-orange-700{--tw-text-opacity: 1;color:rgb(194 65 12 / var(--tw-text-opacity, 1))}.text-orange-800{--tw-text-opacity: 1;color:rgb(154 52 18 / var(--tw-text-opacity, 1))}.text-orange-900{--tw-text-opacity: 1;color:rgb(124 45 18 / var(--tw-text-opacity, 1))}.text-pink-600{--tw-text-opacity: 1;color:rgb(219 39 119 / var(--tw-text-opacity, 1))}.text-red-500{--tw-text-opacity: 1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.text-red-600{--tw-text-opacity: 1;color:rgb(220 38 38 / var(--tw-text-opacity, 1))}.text-red-700{--tw-text-opacity: 1;color:rgb(185 28 28 / var(--tw-text-opacity, 1))}.text-red-800{--tw-text-opacity: 1;color:rgb(153 27 27 / var(--tw-text-opacity, 1))}.text-sky-500{--tw-text-opacity: 1;color:rgb(14 165 233 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity: 1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-600{--tw-text-opacity: 1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity: 1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-zinc-100{--tw-text-opacity: 1;color:rgb(244 244 245 / var(--tw-text-opacity, 1))}.underline{text-decoration-line:underline}.line-through{text-decoration-line:line-through}.underline-offset-4{text-underline-offset:4px}.underline-offset-6{text-underline-offset:6px}.accent-cyan-600{accent-color:#0891b2}.opacity-0{opacity:0}.opacity-100{opacity:1}.opacity-25{opacity:.25}.opacity-50{opacity:.5}.opacity-90{opacity:.9}.shadow{--tw-shadow: 0 1px 3px 0 rgb(0 0 0 / .1), 0 1px 2px -1px rgb(0 0 0 / .1);--tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000),var(--tw-ring-shadow, 0 0 #0000),var(--tw-shadow)}.shadow-2xl{--tw-shadow: 0 25px 50px -12px rgb(0 0 0 / .25);--tw-shadow-colored: 0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000),var(--tw-ring-shadow, 0 0 #0000),var(--tw-shadow)}.shadow-\[0_2px_4px_rgb\(0\,0\,0\,0\.2\)\]{--tw-shadow: 0 2px 4px rgb(0,0,0,.2);--tw-shadow-colored: 0 2px 4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000),var(--tw-ring-shadow, 0 0 #0000),var(--tw-shadow)}.shadow-lg{--tw-shadow: 0 10px 15px -3px rgb(0 0 0 / .1), 0 4px 6px -4px rgb(0 0 0 / .1);--tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000),var(--tw-ring-shadow, 0 0 #0000),var(--tw-shadow)}.shadow-sm{--tw-shadow: 0 1px 2px 0 rgb(0 0 0 / .05);--tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000),var(--tw-ring-shadow, 0 0 #0000),var(--tw-shadow)}.outline-none{outline:2px solid transparent;outline-offset:2px}.outline{outline-style:solid}.ring-1{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.ring-inset{--tw-ring-inset: inset}.ring-neutral-200{--tw-ring-opacity: 1;--tw-ring-color: rgb(229 229 229 / var(--tw-ring-opacity, 1))}.blur{--tw-blur: blur(8px);filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow{--tw-drop-shadow: drop-shadow(0 1px 2px rgb(0 0 0 / .1)) drop-shadow(0 1px 1px rgb(0 0 0 / .06));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow-2xl{--tw-drop-shadow: drop-shadow(0 25px 25px rgb(0 0 0 / .15));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow-md{--tw-drop-shadow: drop-shadow(0 4px 3px rgb(0 0 0 / .07)) drop-shadow(0 2px 2px rgb(0 0 0 / .06));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow-sm{--tw-drop-shadow: drop-shadow(0 1px 1px rgb(0 0 0 / .05));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur-xs{--tw-backdrop-blur: blur(2px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-colors{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-opacity{transition-property:opacity;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.duration-100{transition-duration:.1s}.duration-150{transition-duration:.15s}.duration-200{transition-duration:.2s}.duration-300{transition-duration:.3s}.ease-in{transition-timing-function:cubic-bezier(.4,0,1,1)}.ease-in-out{transition-timing-function:cubic-bezier(.4,0,.2,1)}.ease-out{transition-timing-function:cubic-bezier(0,0,.2,1)}.truncate{white-space:nowrap;text-overflow:ellipsis;overflow:hidden;overflow:clip;overflow-clip-margin:2px;min-width:0}.\[-webkit-text-security\:disc\]{-webkit-text-security:disc}.\[background-image\:linear-gradient\(to_right\,theme\(colors\.cyan\.500\)\,theme\(colors\.blue\.500\)\)\]{background-image:linear-gradient(to right,#06b6d4,#3b82f6)}.\[background-image\:…\]{background-image:…}.\[border-radius\:inherit\]{border-radius:inherit}.\[field-sizing\:content\]{field-sizing:content}.\[overflow-wrap\:anywhere\]{overflow-wrap:anywhere}.\[padding-inline-start\:25px\]{padding-inline-start:25px}.\[scrollbar-width\:none\]{scrollbar-width:none}.\[stroke-width\:0\.3px\]{stroke-width:.3px}.\[stroke-width\:1\.5px\]{stroke-width:1.5px}.\[stroke-width\:1\.6\]{stroke-width:1.6}.\[stroke-width\:1\.9px\]{stroke-width:1.9px}.\[stroke-width\:10px\]{stroke-width:10px}.\[stroke-width\:16\]{stroke-width:16}.\[stroke-width\:2\.4\]{stroke-width:2.4}.\[stroke-width\:2\.5px\]{stroke-width:2.5px}.\[stroke-width\:2\.7px\]{stroke-width:2.7px}.\[stroke-width\:5px\]{stroke-width:5px}.\[stroke-width\:80\]{stroke-width:80}.\[stroke-width\:8px\]{stroke-width:8px}.codeblocks{counter-reset:sh-line-number}:host{--sh-class: #e3eaf2;--sh-identifier: #c699e3;--sh-sign: #66cccc;--sh-property: #c699e3;--sh-entity: #66cccc;--sh-jsxliterals: #e3eaf2;--sh-string: #91d076;--sh-keyword: #e9ae7e;--sh-comment: #8da1b9}.sh__line:before{counter-increment:sh-line-number 1;content:counter(sh-line-number);margin-right:20px;margin-left:20px;color:#a4a4a4}.custom-scrollbar{scrollbar-color:#a3a3a3 transparent;scrollbar-width:thin}.katex-html{display:none}.placeholder\:text-xsm::placeholder{font-size:13px;line-height:18px}.placeholder\:text-slate-400::placeholder{--tw-text-opacity: 1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.first\:mt-0:first-child{margin-top:0}.last\:mb-0:last-child{margin-bottom:0}.empty\:mb-0:empty{margin-bottom:0}.empty\:mt-0:empty{margin-top:0}.focus-within\:border-sky-600:focus-within{--tw-border-opacity: 1;border-color:rgb(2 132 199 / var(--tw-border-opacity, 1))}.hover\:cursor-nwse-resize:hover{cursor:nwse-resize}.hover\:border-\[\#272c30\]:hover{--tw-border-opacity: 1;border-color:rgb(39 44 48 / var(--tw-border-opacity, 1))}.hover\:border-\[\#d7dbdc\]:hover{--tw-border-opacity: 1;border-color:rgb(215 219 220 / var(--tw-border-opacity, 1))}.hover\:bg-\[\#112655\]:hover{--tw-bg-opacity: 1;background-color:rgb(17 38 85 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#242628\]:hover{--tw-bg-opacity: 1;background-color:rgb(36 38 40 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#272c30\]:hover{--tw-bg-opacity: 1;background-color:rgb(39 44 48 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#2c2d30\]:hover{--tw-bg-opacity: 1;background-color:rgb(44 45 48 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#3d3d3d\]:hover{--tw-bg-opacity: 1;background-color:rgb(61 61 61 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#c5c5c5\]:hover{--tw-bg-opacity: 1;background-color:rgb(197 197 197 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#d7dbdc\]:hover{--tw-bg-opacity: 1;background-color:rgb(215 219 220 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#eaf1ff\]:hover{--tw-bg-opacity: 1;background-color:rgb(234 241 255 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#f0f0f0\]:hover{--tw-bg-opacity: 1;background-color:rgb(240 240 240 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#f3f5f7\]:hover{--tw-bg-opacity: 1;background-color:rgb(243 245 247 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#f8f8f8\]:hover{--tw-bg-opacity: 1;background-color:rgb(248 248 248 / var(--tw-bg-opacity, 1))}.hover\:bg-\[rgba\(140\,140\,140\,0\.1\)\]:hover{background-color:#8c8c8c1a}.hover\:bg-\[rgba\(140\,140\,140\,0\.15\)\]:hover{background-color:#8c8c8c26}.hover\:bg-\[rgba\(31\,115\,183\,0\.08\)\]:hover{background-color:#1f73b714}.hover\:bg-blue-200:hover{--tw-bg-opacity: 1;background-color:rgb(191 219 254 / var(--tw-bg-opacity, 1))}.hover\:bg-blue-600:hover{--tw-bg-opacity: 1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.hover\:bg-emerald-600\/90:hover{background-color:#059669e6}.hover\:bg-green-100:hover{--tw-bg-opacity: 1;background-color:rgb(220 252 231 / var(--tw-bg-opacity, 1))}.hover\:bg-green-200:hover{--tw-bg-opacity: 1;background-color:rgb(187 247 208 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-100:hover{--tw-bg-opacity: 1;background-color:rgb(245 245 245 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-150:hover{--tw-bg-opacity: 1;background-color:rgb(237 237 237 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-175:hover{--tw-bg-opacity: 1;background-color:rgb(233 233 233 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-200:hover{--tw-bg-opacity: 1;background-color:rgb(229 229 229 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-250:hover{--tw-bg-opacity: 1;background-color:rgb(220 220 220 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-300:hover{--tw-bg-opacity: 1;background-color:rgb(212 212 212 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-400:hover{--tw-bg-opacity: 1;background-color:rgb(163 163 163 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-700:hover{--tw-bg-opacity: 1;background-color:rgb(64 64 64 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-800:hover{--tw-bg-opacity: 1;background-color:rgb(38 38 38 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-900\/90:hover{background-color:#171717e6}.hover\:bg-orange-100:hover{--tw-bg-opacity: 1;background-color:rgb(255 237 213 / var(--tw-bg-opacity, 1))}.hover\:bg-orange-200:hover{--tw-bg-opacity: 1;background-color:rgb(254 215 170 / var(--tw-bg-opacity, 1))}.hover\:bg-orange-900:hover{--tw-bg-opacity: 1;background-color:rgb(124 45 18 / var(--tw-bg-opacity, 1))}.hover\:bg-red-100:hover{--tw-bg-opacity: 1;background-color:rgb(254 226 226 / var(--tw-bg-opacity, 1))}.hover\:bg-red-600:hover{--tw-bg-opacity: 1;background-color:rgb(220 38 38 / var(--tw-bg-opacity, 1))}.hover\:bg-white:hover{--tw-bg-opacity: 1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.hover\:bg-zinc-800:hover{--tw-bg-opacity: 1;background-color:rgb(39 39 42 / var(--tw-bg-opacity, 1))}.hover\:bg-gradient-to-bl:hover{background-image:linear-gradient(to bottom left,var(--tw-gradient-stops))}.hover\:bg-none:hover{background-image:none}.hover\:text-\[\#0C3B5E\]:hover{--tw-text-opacity: 1;color:rgb(12 59 94 / var(--tw-text-opacity, 1))}.hover\:text-\[\#1d1c1d\]:hover{--tw-text-opacity: 1;color:rgb(29 28 29 / var(--tw-text-opacity, 1))}.hover\:text-\[\#242424\]:hover{--tw-text-opacity: 1;color:rgb(36 36 36 / var(--tw-text-opacity, 1))}.hover\:text-\[\#96b7fa\]:hover{--tw-text-opacity: 1;color:rgb(150 183 250 / var(--tw-text-opacity, 1))}.hover\:text-\[\#B4D6FA\]:hover{--tw-text-opacity: 1;color:rgb(180 214 250 / var(--tw-text-opacity, 1))}.hover\:text-\[rgba\(0\,0\,0\,0\.9\)\]:hover{color:#000000e6}.hover\:text-\[rgba\(255\,255\,255\,0\.9\)\]:hover{color:#ffffffe6}.hover\:text-black:hover{--tw-text-opacity: 1;color:rgb(0 0 0 / var(--tw-text-opacity, 1))}.hover\:text-blue-800:hover{--tw-text-opacity: 1;color:rgb(30 64 175 / var(--tw-text-opacity, 1))}.hover\:text-blue-900:hover{--tw-text-opacity: 1;color:rgb(30 58 138 / var(--tw-text-opacity, 1))}.hover\:text-green-700:hover{--tw-text-opacity: 1;color:rgb(21 128 61 / var(--tw-text-opacity, 1))}.hover\:text-neutral-100:hover{--tw-text-opacity: 1;color:rgb(245 245 245 / var(--tw-text-opacity, 1))}.hover\:text-neutral-50:hover{--tw-text-opacity: 1;color:rgb(250 250 250 / var(--tw-text-opacity, 1))}.hover\:text-neutral-700:hover{--tw-text-opacity: 1;color:rgb(64 64 64 / var(--tw-text-opacity, 1))}.hover\:text-neutral-800:hover{--tw-text-opacity: 1;color:rgb(38 38 38 / var(--tw-text-opacity, 1))}.hover\:text-neutral-900:hover{--tw-text-opacity: 1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.hover\:text-orange-900:hover{--tw-text-opacity: 1;color:rgb(124 45 18 / var(--tw-text-opacity, 1))}.hover\:text-red-400:hover{--tw-text-opacity: 1;color:rgb(248 113 113 / var(--tw-text-opacity, 1))}.hover\:text-sky-600:hover{--tw-text-opacity: 1;color:rgb(2 132 199 / var(--tw-text-opacity, 1))}.hover\:text-slate-900:hover{--tw-text-opacity: 1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.hover\:text-white:hover{--tw-text-opacity: 1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:underline:hover{text-decoration-line:underline}.hover\:decoration-2:hover{text-decoration-thickness:2px}.hover\:underline-offset-4:hover{text-underline-offset:4px}.hover\:ring-1:hover{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.hover\:ring-\[\#8c919a\]:hover{--tw-ring-opacity: 1;--tw-ring-color: rgb(140 145 154 / var(--tw-ring-opacity, 1))}.hover\:ring-\[\#dadbdd\]:hover{--tw-ring-opacity: 1;--tw-ring-color: rgb(218 219 221 / var(--tw-ring-opacity, 1))}.hover\:drop-shadow-md:hover{--tw-drop-shadow: drop-shadow(0 4px 3px rgb(0 0 0 / .07)) drop-shadow(0 2px 2px rgb(0 0 0 / .06));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.hover\:\[background-image\:linear-gradient\(to_bottom_left\,theme\(colors\.cyan\.500\)\,theme\(colors\.blue\.500\)\)\]:hover{background-image:linear-gradient(to bottom left,#06b6d4,#3b82f6)}.focus\:border-cyan-500:focus{--tw-border-opacity: 1;border-color:rgb(6 182 212 / var(--tw-border-opacity, 1))}.focus\:bg-neutral-150:focus{--tw-bg-opacity: 1;background-color:rgb(237 237 237 / var(--tw-bg-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:outline-cyan-500:focus{outline-color:#06b6d4}.focus\:ring-0:focus{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.focus\:ring-2:focus{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.focus\:ring-4:focus{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(4px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.focus\:ring-blue-500:focus{--tw-ring-opacity: 1;--tw-ring-color: rgb(59 130 246 / var(--tw-ring-opacity, 1))}.focus\:ring-cyan-300:focus{--tw-ring-opacity: 1;--tw-ring-color: rgb(103 232 249 / var(--tw-ring-opacity, 1))}.focus\:ring-cyan-500:focus{--tw-ring-opacity: 1;--tw-ring-color: rgb(6 182 212 / var(--tw-ring-opacity, 1))}.focus\:ring-neutral-500:focus{--tw-ring-opacity: 1;--tw-ring-color: rgb(115 115 115 / var(--tw-ring-opacity, 1))}.focus\:ring-pink-200:focus{--tw-ring-opacity: 1;--tw-ring-color: rgb(251 207 232 / var(--tw-ring-opacity, 1))}.focus-visible\:outline-none:focus-visible{outline:2px solid transparent;outline-offset:2px}.focus-visible\:ring-1:focus-visible{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.focus-visible\:ring-2:focus-visible{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.focus-visible\:ring-blue-300:focus-visible{--tw-ring-opacity: 1;--tw-ring-color: rgb(147 197 253 / var(--tw-ring-opacity, 1))}.active\:cursor-grabbing:active{cursor:grabbing}.active\:bg-neutral-200:active{--tw-bg-opacity: 1;background-color:rgb(229 229 229 / var(--tw-bg-opacity, 1))}.enabled\:hover\:bg-red-100:hover:enabled{--tw-bg-opacity: 1;background-color:rgb(254 226 226 / var(--tw-bg-opacity, 1))}.enabled\:hover\:text-neutral-900:hover:enabled{--tw-text-opacity: 1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.enabled\:hover\:text-red-600:hover:enabled{--tw-text-opacity: 1;color:rgb(220 38 38 / var(--tw-text-opacity, 1))}.disabled\:pointer-events-none:disabled{pointer-events:none}.disabled\:cursor-not-allowed:disabled{cursor:not-allowed}.disabled\:select-none:disabled{-webkit-user-select:none;user-select:none}.disabled\:bg-neutral-100:disabled{--tw-bg-opacity: 1;background-color:rgb(245 245 245 / var(--tw-bg-opacity, 1))}.disabled\:bg-neutral-500:disabled{--tw-bg-opacity: 1;background-color:rgb(115 115 115 / var(--tw-bg-opacity, 1))}.disabled\:bg-orange-900:disabled{--tw-bg-opacity: 1;background-color:rgb(124 45 18 / var(--tw-bg-opacity, 1))}.disabled\:text-neutral-400:disabled{--tw-text-opacity: 1;color:rgb(163 163 163 / var(--tw-text-opacity, 1))}.disabled\:text-white:disabled{--tw-text-opacity: 1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.disabled\:no-underline:disabled{text-decoration-line:none}.disabled\:opacity-50:disabled{opacity:.5}.disabled\:opacity-60:disabled{opacity:.6}.group:hover .group-hover\:border-neutral-400{--tw-border-opacity: 1;border-color:rgb(163 163 163 / var(--tw-border-opacity, 1))}.group:hover .group-hover\:bg-neutral-150{--tw-bg-opacity: 1;background-color:rgb(237 237 237 / var(--tw-bg-opacity, 1))}.group:hover .group-hover\:bg-neutral-200{--tw-bg-opacity: 1;background-color:rgb(229 229 229 / var(--tw-bg-opacity, 1))}.group:hover .group-hover\:text-neutral-700{--tw-text-opacity: 1;color:rgb(64 64 64 / var(--tw-text-opacity, 1))}.group:hover .group-hover\:text-neutral-800{--tw-text-opacity: 1;color:rgb(38 38 38 / var(--tw-text-opacity, 1))}.group:hover .group-hover\:text-neutral-900{--tw-text-opacity: 1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.group:hover .group-hover\:text-red-400{--tw-text-opacity: 1;color:rgb(248 113 113 / var(--tw-text-opacity, 1))}.group:hover .group-hover\:text-red-500{--tw-text-opacity: 1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.group:focus .group-focus\:border-neutral-400{--tw-border-opacity: 1;border-color:rgb(163 163 163 / var(--tw-border-opacity, 1))}.group:focus .group-focus\:bg-neutral-150{--tw-bg-opacity: 1;background-color:rgb(237 237 237 / var(--tw-bg-opacity, 1))}.group:focus .group-focus\:bg-neutral-200{--tw-bg-opacity: 1;background-color:rgb(229 229 229 / var(--tw-bg-opacity, 1))}.group:focus .group-focus\:text-neutral-700{--tw-text-opacity: 1;color:rgb(64 64 64 / var(--tw-text-opacity, 1))}.group:focus .group-focus\:text-neutral-800{--tw-text-opacity: 1;color:rgb(38 38 38 / var(--tw-text-opacity, 1))}.group:focus .group-focus\:text-neutral-900{--tw-text-opacity: 1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.group:focus .group-focus\:text-red-400{--tw-text-opacity: 1;color:rgb(248 113 113 / var(--tw-text-opacity, 1))}.group:focus .group-focus\:text-red-500{--tw-text-opacity: 1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.group[data-selected=true] .group-data-\[selected\=true\]\:bg-neutral-200{--tw-bg-opacity: 1;background-color:rgb(229 229 229 / var(--tw-bg-opacity, 1))}.group[data-selected=true] .group-data-\[selected\=true\]\:text-neutral-900{--tw-text-opacity: 1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.group[data-selected=true] .group-data-\[selected\=true\]\:text-red-500{--tw-text-opacity: 1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}@media (min-width: 400px){.min-\[400px\]\:max-w-\[100px\]{max-width:100px}}@media (min-width: 438px){.min-\[438px\]\:w-\[400px\]{width:400px}}@media (min-width: 550px){.min-\[550px\]\:w-\[470px\]{width:470px}}@media (min-width: 768px){.md\:w-\[600px\]{width:600px}.md\:max-w-fit{max-width:fit-content}}.\[\&\:not\(\:last-child\)\]\:pb-0\.5:not(:last-child){padding-bottom:2px}.\[\&\>div\]\:h-full>div{height:100%}.\[\&\>li\]\:ml-5>li{margin-left:20px}.\[\&_a\]\:underline a{text-decoration-line:underline}</style></head><body style="font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; line-height: 18px; user-select: text; font-weight: normal; letter-spacing: normal; -webkit-font-smoothing: auto;"><div><div class="fixed z-[9999995] flex select-none items-center transition-opacity duration-200 ease-in-out" style="opacity: 0; pointer-events: none;"><div class="cursor-pointer rounded-full p-1"><div class="h-2.5 w-2.5 rounded-full bg-blue-500 shadow-[0_2px_4px_rgb(0,0,0,0.2)]"></div></div></div></div></body></html></template></cgw-writer-modal><button id="cgw_action_btn" tabindex="-1" style="position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;"></button><webhighlights-element-registry elements-count="46"></webhighlights-element-registry><div id="webhighlights-notificationshldjnlbobkdkghfidgoecgmklcemanhm"></div><style id="web-highlights-global-style-variables">:root { --wh-slate-50: #f8fafc;--wh-slate-100: #f1f5f9;--wh-slate-200: #e2e8f0;--wh-slate-300: #cbd5e1;--wh-slate-400: #94a3b8;--wh-slate-500: #64748b;--wh-slate-600: #475569;--wh-slate-700: #334155;--wh-slate-800: #1e293b;--wh-slate-900: #0f172a;--wh-slate-950: #020617;--wh-primary-50: rgb(188, 220, 205);--wh-primary-100: rgb(154, 208, 185);--wh-primary-200: rgb(120, 197, 164);--wh-primary-300: rgb(86, 186, 144);--wh-primary-400: rgb(53, 176, 125);--wh-primary-500: rgb(0, 179, 122);--wh-primary-600: hsl(161, 100%, 33%);--wh-primary-700: hsl(161, 100%, 31%);--wh-primary-800: hsl(161, 100%, 29%);--wh-primary-900: hsl(161, 100%, 25%);--wh-primary-950: hsl(161, 100%, 20%);--wh-secondary-50: hsl(218, 22%, 27%);--wh-secondary-100: hsl(218, 22%, 23%);--wh-secondary-200: hsl(218, 22%, 22%);--wh-secondary-300: hsl(218, 22%, 19%);--wh-secondary-400: hsl(218, 22%, 17%);--wh-secondary-500: hsl(218, 22%, 15%);--wh-secondary-600: hsl(218, 22%, 13%);--wh-secondary-700: hsl(218, 22%, 11%);--wh-secondary-800: hsl(218, 22%, 9%);--wh-secondary-900: hsl(218, 22%, 5%);--wh-secondary-950: hsl(218, 22%, 3%);--wh-gray-50: #f9fafb;--wh-gray-100: #f3f4f6;--wh-gray-200: #e5e7eb;--wh-gray-300: #d1d5db;--wh-gray-400: #9ca3af;--wh-gray-500: #6b7280;--wh-gray-600: #4b5563;--wh-gray-700: #374151;--wh-gray-800: #1f2937;--wh-gray-900: #111827;--wh-gray-950: #030712;--wh-zinc-50: #fafafa;--wh-zinc-100: #f4f4f5;--wh-zinc-200: #e4e4e7;--wh-zinc-300: #d4d4d8;--wh-zinc-400: #a1a1aa;--wh-zinc-500: #71717a;--wh-zinc-600: #52525b;--wh-zinc-700: #3f3f46;--wh-zinc-800: #27272a;--wh-zinc-900: #18181b;--wh-zinc-950: #09090b;--wh-neutral-50: #fafafa;--wh-neutral-100: #f5f5f5;--wh-neutral-200: #e5e5e5;--wh-neutral-300: #d4d4d4;--wh-neutral-400: #a3a3a3;--wh-neutral-500: #737373;--wh-neutral-600: #525252;--wh-neutral-700: #404040;--wh-neutral-800: #262626;--wh-neutral-900: #171717;--wh-neutral-950: #0a0a0a;--wh-stone-50: #fafaf9;--wh-stone-100: #f5f5f4;--wh-stone-200: #e7e5e4;--wh-stone-300: #d6d3d1;--wh-stone-400: #a8a29e;--wh-stone-500: #78716c;--wh-stone-600: #57534e;--wh-stone-700: #44403c;--wh-stone-800: #292524;--wh-stone-900: #1c1917;--wh-stone-950: #0c0a09;--wh-red-50: #fef2f2;--wh-red-100: #fee2e2;--wh-red-200: #fecaca;--wh-red-300: #fca5a5;--wh-red-400: #f87171;--wh-red-500: #ef4444;--wh-red-600: #dc2626;--wh-red-700: #b91c1c;--wh-red-800: #991b1b;--wh-red-900: #7f1d1d;--wh-red-950: #450a0a;--wh-orange-50: #fff7ed;--wh-orange-100: #ffedd5;--wh-orange-200: #fed7aa;--wh-orange-300: #fdba74;--wh-orange-400: #fb923c;--wh-orange-500: #f97316;--wh-orange-600: #ea580c;--wh-orange-700: #c2410c;--wh-orange-800: #9a3412;--wh-orange-900: #7c2d12;--wh-orange-950: #431407;--wh-amber-50: #fffbeb;--wh-amber-100: #fef3c7;--wh-amber-200: #fde68a;--wh-amber-300: #fcd34d;--wh-amber-400: #fbbf24;--wh-amber-500: #f59e0b;--wh-amber-600: #d97706;--wh-amber-700: #b45309;--wh-amber-800: #92400e;--wh-amber-900: #78350f;--wh-amber-950: #451a03;--wh-yellow-50: #fefce8;--wh-yellow-100: #fef9c3;--wh-yellow-200: #fef08a;--wh-yellow-300: #fde047;--wh-yellow-400: #facc15;--wh-yellow-500: #eab308;--wh-yellow-600: #ca8a04;--wh-yellow-700: #a16207;--wh-yellow-800: #854d0e;--wh-yellow-900: #713f12;--wh-yellow-950: #422006;--wh-lime-50: #f7fee7;--wh-lime-100: #ecfccb;--wh-lime-200: #d9f99d;--wh-lime-300: #bef264;--wh-lime-400: #a3e635;--wh-lime-500: #84cc16;--wh-lime-600: #65a30d;--wh-lime-700: #4d7c0f;--wh-lime-800: #3f6212;--wh-lime-900: #365314;--wh-lime-950: #1a2e05;--wh-green-50: #f0fdf4;--wh-green-100: #dcfce7;--wh-green-200: #bbf7d0;--wh-green-300: #86efac;--wh-green-400: #4ade80;--wh-green-500: #22c55e;--wh-green-600: #16a34a;--wh-green-700: #15803d;--wh-green-800: #166534;--wh-green-900: #14532d;--wh-green-950: #052e16;--wh-emerald-50: #ecfdf5;--wh-emerald-100: #d1fae5;--wh-emerald-200: #a7f3d0;--wh-emerald-300: #6ee7b7;--wh-emerald-400: #34d399;--wh-emerald-500: #10b981;--wh-emerald-600: #059669;--wh-emerald-700: #047857;--wh-emerald-800: #065f46;--wh-emerald-900: #064e3b;--wh-emerald-950: #022c22;--wh-teal-50: #f0fdfa;--wh-teal-100: #ccfbf1;--wh-teal-200: #99f6e4;--wh-teal-300: #5eead4;--wh-teal-400: #2dd4bf;--wh-teal-500: #14b8a6;--wh-teal-600: #0d9488;--wh-teal-700: #0f766e;--wh-teal-800: #115e59;--wh-teal-900: #134e4a;--wh-teal-950: #042f2e;--wh-cyan-50: #ecfeff;--wh-cyan-100: #cffafe;--wh-cyan-200: #a5f3fc;--wh-cyan-300: #67e8f9;--wh-cyan-400: #22d3ee;--wh-cyan-500: #06b6d4;--wh-cyan-600: #0891b2;--wh-cyan-700: #0e7490;--wh-cyan-800: #155e75;--wh-cyan-900: #164e63;--wh-cyan-950: #083344;--wh-sky-50: #f0f9ff;--wh-sky-100: #e0f2fe;--wh-sky-200: #bae6fd;--wh-sky-300: #7dd3fc;--wh-sky-400: #38bdf8;--wh-sky-500: #0ea5e9;--wh-sky-600: #0284c7;--wh-sky-700: #0369a1;--wh-sky-800: #075985;--wh-sky-900: #0c4a6e;--wh-sky-950: #082f49;--wh-blue-50: #eff6ff;--wh-blue-100: #dbeafe;--wh-blue-200: #bfdbfe;--wh-blue-300: #93c5fd;--wh-blue-400: #60a5fa;--wh-blue-500: #3b82f6;--wh-blue-600: #2563eb;--wh-blue-700: #1d4ed8;--wh-blue-800: #1e40af;--wh-blue-900: #1e3a8a;--wh-blue-950: #172554;--wh-indigo-50: #eef2ff;--wh-indigo-100: #e0e7ff;--wh-indigo-200: #c7d2fe;--wh-indigo-300: #a5b4fc;--wh-indigo-400: #818cf8;--wh-indigo-500: #6366f1;--wh-indigo-600: #4f46e5;--wh-indigo-700: #4338ca;--wh-indigo-800: #3730a3;--wh-indigo-900: #312e81;--wh-indigo-950: #1e1b4b;--wh-violet-50: #f5f3ff;--wh-violet-100: #ede9fe;--wh-violet-200: #ddd6fe;--wh-violet-300: #c4b5fd;--wh-violet-400: #a78bfa;--wh-violet-500: #8b5cf6;--wh-violet-600: #7c3aed;--wh-violet-700: #6d28d9;--wh-violet-800: #5b21b6;--wh-violet-900: #4c1d95;--wh-violet-950: #2e1065;--wh-purple-50: #faf5ff;--wh-purple-100: #f3e8ff;--wh-purple-200: #e9d5ff;--wh-purple-300: #d8b4fe;--wh-purple-400: #c084fc;--wh-purple-500: #a855f7;--wh-purple-600: #9333ea;--wh-purple-700: #7e22ce;--wh-purple-800: #6b21a8;--wh-purple-900: #581c87;--wh-purple-950: #3b0764;--wh-fuchsia-50: #fdf4ff;--wh-fuchsia-100: #fae8ff;--wh-fuchsia-200: #f5d0fe;--wh-fuchsia-300: #f0abfc;--wh-fuchsia-400: #e879f9;--wh-fuchsia-500: #d946ef;--wh-fuchsia-600: #c026d3;--wh-fuchsia-700: #a21caf;--wh-fuchsia-800: #86198f;--wh-fuchsia-900: #701a75;--wh-fuchsia-950: #4a044e;--wh-pink-50: #fdf2f8;--wh-pink-100: #fce7f3;--wh-pink-200: #fbcfe8;--wh-pink-300: #f9a8d4;--wh-pink-400: #f472b6;--wh-pink-500: #ec4899;--wh-pink-600: #db2777;--wh-pink-700: #be185d;--wh-pink-800: #9d174d;--wh-pink-900: #831843;--wh-pink-950: #500724;--wh-rose-50: #fff1f2;--wh-rose-100: #ffe4e6;--wh-rose-200: #fecdd3;--wh-rose-300: #fda4af;--wh-rose-400: #fb7185;--wh-rose-500: #f43f5e;--wh-rose-600: #e11d48;--wh-rose-700: #be123c;--wh-rose-800: #9f1239;--wh-rose-900: #881337;--wh-rose-950: #4c0519;--wh-primary-color: var(--wh-primary-500);--wh-primary-color-hover: #00a16e;--wh-primary-color-transparent: #00aa7424;--wh-primary-color-transparent-light: #00a8730f;--wh-primary-color-transparent-strong: #00a87340;--wh-primary-color-transparent-stronger: hsla(161, 100%, 33%, 0.5);--wh-primary-color-transparent-strongest: hsla(161, 100%, 33%, 0.75);--wh-primary-light: #53e3a6;--wh-primary-dark: #007f4b;--wh-primary-dark-hover: #017444;--wh-primary-shadow: #00b07841;--wh-primary-shadow-2: #00b07870;--wh-primary-border-color: #c8c8c870;--wh-warning-color: #ff5a1f;--wh-warning-color-light: #feecdc;--wh-ai-primary-decimal: 167, 139, 250;--wh-ai-secondary-decimal  : 147, 51, 234;--wh-ai-accent-decimal: 244, 114, 182;--wh-ai-primary: rgba(var(--wh-ai-primary-decimal), 1);--wh-ai-secondary: rgba(var(--wh-ai-secondary-decimal), 1);--wh-ai-accent: rgba(var(--wh-ai-accent-decimal), 1);--secondary-color: #3d4455;--secondary-color-hover: #3a4052;--secondary-color-transparent: #3d44556b;--secondary-light: #4c556d;--secondary-dark: #252934;--secondary-dark-hover: #191b22;--secondary-dark-transparent: #2e2d2d46;--highlight-color: #92ffaa;--error-color: #d62d4c;--error-color-light: #fde8e8;--error-info: #14854e;--success-color: #0e9f6e;--success-color-light: #def7ec;--font-color: #2f3237;--font-color-light: #626364;--font-color-dark: #252525;--wh-font-family: 'SF Pro Display', 'Inter', ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";--font-family: var(--wh-font-family);--wh-link-color: #1d9bf0;--wh-form-active-color: #3b82f6;--wh-accent-blue: #1f6feb;--BREAKPOINT_XS: 575px;--BREAKPOINT_S: 767px;--BREAKPOINT_M: 991px;--BREAKPOINT_L: 1199px;--BREAKPOINT_XL: 1399px;--BREAKPOINT_XXL: 1699px;--wh-danger-color: var(--wh-red-600);--wh-danger-color-hover: var(--wh-red-700);--wh-font-size: 13px;--wh-blockquote-line-height: 1.3;--wh-breakpoint-xs: 575px;--wh-breakpoint-s: 767px;--wh-breakpoint-m: 991px;--wh-breakpoint-l: 1199px;--wh-breakpoint-xl: 1399px;--wh-breakpoint-xxl: 1699px;--wh-font-size-2xs: 10px;--wh-font-size-xs: 11px;--wh-font-size-s: 12px;--wh-font-size-m: 13px;--wh-font-size-l: 14px;--wh-font-size-xl: 16px;--wh-font-size-2xl: 18px;--wh-font-size-3xl: 20px;--wh-font-size-4xl: 24px;--wh-font-size-5xl: 30px;--wh-font-size-6xl: 36px;--wh-spacing-2xs: 2px;--wh-spacing-xs: 4px;--wh-spacing-s: 8px;--wh-spacing-m: 12px;--wh-spacing-l: 16px;--wh-spacing-xl: 24px;--wh-spacing-2xl: 32px;--wh-spacing-3xl: 48px;--wh-spacing-4xl: 64px;--wh-spacing-5xl: 96px;--wh-border-radius-none: 0px;--wh-border-radius-xs: 2px;--wh-border-radius-s: 4px;--wh-border-radius-m: 6px;--wh-border-radius-l: 8px;--wh-border-radius-xl: 12px;--wh-border-radius-2xl: 16px;--wh-border-radius-3xl: 24px;--wh-border-radius-full: 9999px;--wh-font-weight-light: 300;--wh-font-weight-normal: 400;--wh-font-weight-medium: 500;--wh-font-weight-semibold: 600;--wh-font-weight-bold: 700;--wh-font-weight-extrabold: 800;--wh-line-height-tight: 1.25;--wh-line-height-snug: 1.375;--wh-line-height-normal: 1.5;--wh-line-height-relaxed: 1.625;--wh-line-height-loose: 2;--wh-bg-base: var(--wh-secondary-600);--wh-bg-base-hover: var(--wh-secondary-500);--wh-border-base: var(--wh-secondary-200);--wh-border-base-hover: var(--wh-secondary-100);--wh-border-base-strong: var(--wh-secondary-100);--wh-border-base-strong-hover: var(--wh-secondary-50);--wh-bg-base-hover-strong: var(--wh-secondary-300);--wh-bg-back: var(--wh-secondary-700);--wh-bg-back-strong: var(--wh-secondary-800);--wh-bg-back-strong-hover: var(--wh-secondary-900);--wh-bg-back-hover: var(--wh-secondary-600);--wh-bg-back-hover-strong: var(--wh-secondary-800);--wh-border-back: var(--wh-secondary-100);--wh-border-back-strong: var(--wh-secondary-50);--wh-bg-front: var(--wh-secondary-400);--wh-bg-front-strong: var(--wh-secondary-200);--wh-bg-front-strong-hover: var(--wh-secondary-50);--wh-bg-front-hover: var(--wh-secondary-300);--wh-bg-front-hover-strong: var(--wh-secondary-200);--wh-border-front: hsl(227, 20%, 25%);--wh-border-front-strong: hsl(227, 20%, 35%);--wh-border-front-hover: hsl(227, 20%, 55%);--wh-text-stronger: hsl(0, 0%, 95%);--wh-text-strongest: hsl(0, 0%, 100%);--wh-text-strong: hsl(0, 0%, 90%);--wh-text: hsl(0, 0%, 85%);--wh-text-hover: var(--wh-text-strong);--wh-text-light: hsl(0, 0%, 82%);--wh-text-lighter: hsl(0, 0%, 72%);--wh-text-lightest: hsl(0, 0%, 62%);--wh-border-color: hsla(0, 0%, 100%, 0.15);--wh-border-color-strong: hsla(0, 0%, 100%, 0.25);--wh-note-editor-bg-color: hsl(221, 27%, 17%);--wh-note-editor-bg-color-preview: hsl(221, 27%, 15%);--wh-bg-tags: var(--wh-secondary-300);--wh-bg-tags-hover: var(--wh-secondary-200);--wh-syntax-bg-color: rgba(255, 255, 255, 0.05);--wh-fallback-img-color: var(--wh-secondary-600);--wh-bg-disabled: hsl(220, 22%, 18%);--wh-bg-notification-unread: hsla(161, 100%, 20%, 0.15);--wh-bg-notification-unread-hover: hsla(161, 100%, 20%, 0.05);--wh-subtle-gray: rgb(255, 255, 255, 0.1);--wh-shadow: inset 0 0 0.5px 1px hsla(0, 0%, 100%, 0.1),
-      /* 2. shadow ring 👇 */ 0 0 0 1px hsla(230, 13%, 9%, 0.075),
-      /* 3. multiple soft shadows 👇 */ 0 0.3px 0.4px hsla(230, 13%, 9%, 0.02),
-      0 0.9px 1.5px hsla(230, 13%, 9%, 0.045),
-      0 3.5px 6px hsla(230, 13%, 9%, 0.09);--wh-shadow-primary: var(--wh-primary-500) 0px 0px 0px 1px inset,
-      var(--wh-primary-500) 0px 0px 1px;--wh-skeleton-bg: var(--wh-secondary-300);--wh-skeleton-bg-hover: var(--wh-secondary-200);--wh-skeleton-bg-strong: var(--wh-secondary-200);--wh-skeleton-bg-strong-hover: var(--wh-secondary-100);--wh-shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.3);--wh-shadow-s: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.4);--wh-shadow-m: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);--wh-shadow-l: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);--wh-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);--wh-shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }</style><div id="give-freely-root-hldjnlbobkdkghfidgoecgmklcemanhm" class="give-freely-root" data-extension-id="hldjnlbobkdkghfidgoecgmklcemanhm" data-extension-name="Web Highlights: PDF &amp; Web Highlighter + Notes &amp; AI Summary" style="display: block;"><template shadowrootmode="open"><style>
-  :host {
-    all: initial;
-  }
-
-  .gf-scroll-remove::-webkit-scrollbar {
-    border-radius-bottom-right: 15px;
-  }
-
-  button {
-    cursor: pointer;
-    transition: transform 0.1s ease;
-  }
-
-  button:active {
-    transform: scale(0.98);
-  }
-
-  .give-freely-close-button:hover {
-    opacity: 0.7;
-  }
-
-  input[type="radio"] {
-    margin-right: 8px;
-  }
-
-  hr {
-    border: none;
-    border-top: 1px solid #e5e5e5;
-    margin: 1em 0;
-  }
-
-  dialog::backdrop  {
-    background-color: rgba(180, 180, 180, 0.6);
-  }
-
-  dialog.backdrop-hidden::backdrop  {
-    background-color: transparent;
-  }
-</style><div><div class="gf-app"></div></div></template></div><style id="web-highlights-global-styles">
-  webhighlights-sidebar {
-    --wh-font-size: 13.5px;
-  }
-
-  body.web-highlights-animate {
-    transition: all 300ms linear;
-    transition-property: margin-left, margin-right;
-  }
-
-  body.web-highlights-open {
-    margin-left: 400px !important;
-  }
-
-  web-highlight.webhighlights-highlight {
-    background-color: #92ffaa;
-    cursor: pointer;
-    visibility: visible !important;
-  }
-
-  web-highlight.webhighlights-highlight.webhighlight-with-tags,
-  web-highlight.webhighlights-highlight.webhighlight-with-notes {
-    border-bottom: 2.8px solid gray;
-    border-radius: 0px;
-  }
-
-  web-highlight > *:not(webhighlights-popup-toolbox) {
-    background-color: #92ffaa;
-  }
-
-  webhighlights-popup-toolbox.contains-highlight {
-    transform: translate(-63px, -10px);
-    position: fixed;
-  }
-</style><webhighlights-popup-toolbox><template shadowrootmode="open"><!----><!--?--></template></webhighlights-popup-toolbox><webhighlights-marker><template shadowrootmode="open"><!---->
-      <!--?lit$371068946$-->
-    </template></webhighlights-marker></body><webhighlights-sidebar alignment="left" sidebar-width="400"><template shadowrootmode="open"><!---->
-      <!--?lit$371068946$-->
-            <webhighlights-main-component part="main-component" data-testid="webhighlights-sidebar-MAIN_COMPONENT" style="left: 0px; right: unset;"><template shadowrootmode="open"><!---->
-      <webhighlights-popover data-testid="webhighlights-main-component-POPOVER"><template shadowrootmode="open"><!----><!--?--></template>
-        <!--?lit$371068946$--><!--?-->
-      </webhighlights-popover>
-
-      <!-- Button to toggle side-bar. It hides when animation is active -->
-      <!--?lit$371068946$--><!--?-->
-      <!--?lit$371068946$-->
-    </template></webhighlights-main-component>
-          
-      <!--?lit$371068946$--><!--?-->
-    </template></webhighlights-sidebar><grammarly-desktop-integration data-grammarly-shadow-root="true"><template shadowrootmode="open"><style>
-      div.grammarly-desktop-integration {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
-        -moz-user-select: none;
-        -webkit-user-select: none;
-        -ms-user-select:none;
-        user-select:none;
-      }
-
-      div.grammarly-desktop-integration:before {
-        content: attr(data-content);
-      }
-    </style><div aria-label="grammarly-integration" role="group" tabindex="-1" class="grammarly-desktop-integration" data-content="{&quot;mode&quot;:&quot;full&quot;,&quot;isActive&quot;:true,&quot;isUserDisabled&quot;:false}"></div></template></grammarly-desktop-integration></html>
+</body>
+</html>
