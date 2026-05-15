@@ -71,7 +71,7 @@ tr:hover td { background: rgba(59,130,246,0.04); }
 .badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
 .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
 .badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
-.badge-orange { background: rgba(255,105,0,0.15); color: var(--primary); }
+.badge-orange { background: rgba(59,130,246,0.15); color: var(--primary); }
 .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
 .event-item:last-child { border-bottom: none; }
 .event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
@@ -139,18 +139,18 @@ tr:hover td { background: rgba(59,130,246,0.04); }
 <div class="header">
   <div class="header-left">
     <h1>Veeva Systems <span>VEEV.NYSE</span></h1>
-    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 15.05.2026 · NYSE · Sektor: Healthcare Software (Life Sciences SaaS)</div>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 15. Mai 2026 · NYSE · Sektor: Healthcare IT / Life-Sciences-SaaS</div>
     <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-      <span class="badge badge-blue">Life Sciences Cloud</span>
-      <span class="badge badge-orange">Vault CRM Migration</span>
-      <span class="badge badge-green">S&amp;P 500 (07.05.26)</span>
+      <span class="badge badge-orange">Life-Sciences-Cloud</span>
+      <span class="badge badge-blue">Vertical SaaS</span>
+      <span class="badge badge-green">S&amp;P 500 (seit 07.05.2026)</span>
     </div>
   </div>
   <div class="header-right">
-    <div class="price-tag">$157</div>
-    <div class="price-meta">Kurs ca. 14.05.2026 · NYSE</div>
-    <div class="price-change down">▼ –31% YTD</div>
-    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $148 – $295</div>
+    <div class="price-tag">$156.88</div>
+    <div class="price-meta">Schlusskurs 14.05.2026 · NYSE</div>
+    <div class="price-change down">▼ –33% YTD</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $148.05 – $310.50</div>
   </div>
 </div>
 
@@ -173,17 +173,16 @@ tr:hover td { background: rgba(59,130,246,0.04); }
 <div class="main">
 
   <div class="kpi-grid" style="margin-top:24px;">
-    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">$157</div><div class="kpi-sub">USD · 14.05.26</div></div>
-    <div class="kpi-card"><div class="kpi-label">Marktkap.</div><div class="kpi-value">$25,7 Mrd.</div><div class="kpi-sub">163M Aktien</div></div>
-    <div class="kpi-card"><div class="kpi-label">P/E TTM</div><div class="kpi-value">~29x</div><div class="kpi-sub">Fwd: ~20x</div></div>
-    <div class="kpi-card"><div class="kpi-label">P/Sales Fwd</div><div class="kpi-value orange">7,2x</div><div class="kpi-sub">5J-Median: 12x</div></div>
-    <div class="kpi-card"><div class="kpi-label">Op. Marge nGAAP</div><div class="kpi-value green">44,9%</div><div class="kpi-sub">FY26</div></div>
-    <div class="kpi-card"><div class="kpi-label">Revenue Wachstum</div><div class="kpi-value green">+16%</div><div class="kpi-sub">FY26 YoY</div></div>
-    <div class="kpi-card"><div class="kpi-label">Next Earnings</div><div class="kpi-value orange">03.06.26</div><div class="kpi-sub">Q1 FY27</div></div>
-    <div class="kpi-card"><div class="kpi-label">Analystenkonsens</div><div class="kpi-value">Buy</div><div class="kpi-sub">Ø Target $274</div></div>
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">$156.88</div><div class="kpi-sub">USD · 14.05.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value">$25.5 Mrd</div><div class="kpi-sub">Mid Cap (S&amp;P 500)</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/E (TTM)</div><div class="kpi-value">~29x</div><div class="kpi-sub">FWD ~22x</div></div>
+    <div class="kpi-card"><div class="kpi-label">FY26 Umsatz</div><div class="kpi-value">$3.20 Mrd</div><div class="kpi-sub">+16% YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">Op-Marge (non-GAAP)</div><div class="kpi-value green">44.9%</div><div class="kpi-sub">FY26</div></div>
+    <div class="kpi-card"><div class="kpi-label">FCF Margin</div><div class="kpi-value green">~42%</div><div class="kpi-sub">FY26</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value orange">03.06.2026</div><div class="kpi-sub">Q1 FY27</div></div>
+    <div class="kpi-card"><div class="kpi-label">Cash &amp; Investments</div><div class="kpi-value">$6.6 Mrd</div><div class="kpi-sub">Schuldenfrei</div></div>
   </div>
 
-  <!-- ====== SEKTION 1: GESCHÄFTSMODELL ====== -->
   <div class="section" id="s1">
     <div class="section-header">
       <div class="section-number">1</div>
@@ -191,18 +190,14 @@ tr:hover td { background: rgba(59,130,246,0.04); }
       <div class="section-note">Quellen ≤ 6 Monate</div>
     </div>
     <div class="section-body">
-      <h3>Was Veeva verkauft</h3>
-      <p>Veeva Systems ist der dominierende vertikale SaaS-Anbieter für die globale Life-Sciences-Industrie (Pharma, Biotech, MedTech, Consumer Health). Das Unternehmen verkauft eine umfassende „Industry Cloud" entlang der gesamten Wertschöpfungskette: Veeva <strong>Development Cloud</strong> (Vault Clinical, Clinical Data Management, Safety, RIM, Quality – also alle R&amp;D-Workflows von der Studienplanung bis zur regulatorischen Zulassung), Veeva <strong>Commercial Cloud</strong> (Vault CRM für Pharma-Sales-Reps, PromoMats für regulierte Marketing-Inhalte, Crossix für Patientendaten-Analytik) und Veeva <strong>Data Cloud</strong> (OpenData, Link, Compass – Stammdaten und Patientendaten).</p>
-      <p>Die Geschäftsstruktur ist eine klassische SaaS-Architektur mit zwei Segmenten: <strong>Subscription Services</strong> machten im Q3 FY26 84% des Umsatzes aus (siehe Sektion 3), <strong>Professional Services</strong> die restlichen 16% (Implementierung, Beratung). Die Subscription-Komponente generiert hochmargige, wiederkehrende Umsätze mit mehrjährigen Verträgen und sehr hoher Net Revenue Retention.</p>
-      <h3>Kundensegmente &amp; Reichweite</h3>
-      <p>Veeva bedient 1.477 Kunden weltweit (Stand FY26), von Mega-Pharma (Pfizer, Merck, Novartis, GSK, Bayer, Boehringer Ingelheim, Eli Lilly, Sanofi) über Mid-Cap-Biotech bis zu kleinen Start-ups. Mit dem Programm <strong>Veeva Basics</strong> hat das Unternehmen im FY26 die Reichweite auch in das SMB-Segment ausgedehnt (100 Kunden Ende Q3 FY26). Das Geschäftsmodell ist „Asset-Light" – kaum CapEx (FY26: $29M), hochskaliert mit ca. 7.930 Mitarbeitern. Veeva ist seit 2021 eine <strong>Public Benefit Corporation</strong>, was Bilanztreue zur Life-Sciences-Mission verbindet, aber auch Flexibilität bei Kapitalrückführungen einschränkt.</p>
-      <h3>Strategischer Pivot 2025/26: Vom Salesforce-Partner zum Plattform-Independent</h3>
-      <p>Der zentrale strukturelle Wandel der letzten 12 Monate: Veeva hat im September 2025 die 15-jährige Partnerschaft mit Salesforce beendet und migriert sein CRM-Geschäft auf die eigene Vault-Plattform. Die meisten Migrationen laufen 2026–2029, End-of-Support für das alte Veeva-CRM wurde auf Dezember 2029 vorgezogen. Das macht Veeva erstmals zu einer komplett vertikal integrierten Plattform – aber öffnet auch das Tor für Salesforce-Konkurrenz (siehe Sektion 7 und 10).</p>
-      <div class="source">Quellen: Veeva Q3 &amp; Q4 FY26 Earnings Releases (20.11.25 / 04.03.26); IntuitionLabs Vault CRM Migration Roadmap (07.03.26); Veeva IR ir.veeva.com</div>
+      <p>Veeva Systems ist der führende Anbieter von Cloud-Software, Daten und Beratungsleistungen speziell für die globale Life-Sciences-Branche (Pharma, Biotech, Medtech, CDMO). Das Unternehmen bedient mit Stand FY26 rund 1.550 Kunden – von kleinen Biotech-Startups bis zu allen Top-20-Pharmakonzernen wie Bayer, Eli Lilly, Novartis, Roche und Novo Nordisk. Die Plattform deckt zwei Hauptbereiche ab: <strong>Commercial Cloud</strong> (Vertrieb &amp; Marketing – CRM, Medical, PromoMats, Crossix Analytics) und <strong>Development Cloud / R&amp;D</strong> (Vault-Suite für klinische Studien, Regulatory, Quality, Safety, Pharmacovigilance).</p>
+      <p>Das Umsatzmodell ist klassisch SaaS-subskriptionsbasiert: FY26 erreichte der Subscription-Umsatz $2.684 Mrd (84% des Gesamtumsatzes von $3.195 Mrd), während Professional Services $511 Mio (16%) ausmachten. Die Subscription-Segmente teilen sich zu rund 47% in Commercial Solutions (FY26 Guidance: $1.252 Mrd) und 53% in R&amp;D Solutions (Guidance: $1.420 Mrd) auf – wobei R&amp;D Solutions strukturell schneller wachsen.</p>
+      <p>Die Kostenstruktur ist „Asset-Light" und hochprofitabel: Bruttomargen von ~75%, Non-GAAP Operating Margin von <strong>44.9%</strong> in FY26 (vs. 43.5% im Vorjahr) und FCF-Margins über 40%. Unit Economics sind exzellent: Average ARR pro Top-20-Kunde liegt im zweistelligen Millionenbereich, Net Revenue Retention historisch &gt;110%. Der Kapitalbedarf bleibt minimal – $6.6 Mrd Cash &amp; Investments stehen einem schuldenfreien Unternehmen gegenüber. Veeva zahlt keine Dividende, hat aber im Januar 2026 erstmals einen Aktienrückkauf über $2 Mrd autorisiert.</p>
+      <p>CEO Peter Gassner (Mitgründer, im Amt seit 2007) hat ein klares Langfrist-Target ausgegeben: $6 Mrd Umsatz-Run-Rate bis 2030. Das impliziert ein CAGR von ~13–14% in den kommenden vier Jahren.</p>
+      <div class="source">Quellen: Veeva Q4 FY26 Earnings Release (04.03.2026); Q3 FY26 Earnings Prepared Remarks (20.11.2025); IntuitionLabs Long-Term Analysis (Jan 2026)</div>
     </div>
   </div>
 
-  <!-- ====== SEKTION 2: BURGGRABEN ====== -->
   <div class="section" id="s2">
     <div class="section-header">
       <div class="section-number">2</div>
@@ -210,19 +205,14 @@ tr:hover td { background: rgba(59,130,246,0.04); }
       <div class="section-score">Score: 8/10</div>
     </div>
     <div class="section-body">
-      <h3>Switching Costs – sehr hoch, aber genau jetzt unter Bewährungsprobe</h3>
-      <p>Veevas Burggraben war historisch primär ein „Sunk-Cost-Moat": Pharma-Unternehmen haben über Jahre validierte (FDA/EMA-zertifizierte) Implementierungen aufgebaut, Standard-Operating-Procedures, Mitarbeitertrainings und tiefe Datenintegrationen. Ein Wechsel kostet typischerweise 18–36 Monate Projektzeit, hohe Kosten für Revalidierung (IQ/OQ/PQ-Zyklen) sowie regulatorisches Risiko. Doch genau dieser Moat wird jetzt getestet – allerdings nicht von außen, sondern von <em>innen</em>: Die eigene Migration von Veeva CRM auf Vault CRM hat ironischerweise vielen Top-20-Pharmas einen natürlichen Anlass gegeben, alternative CRM-Anbieter zu evaluieren.</p>
-      <h3>Industriespezifische Tiefe – der eigentliche Moat</h3>
-      <p>Veevas tatsächlicher struktureller Vorteil liegt in der vertikalen Spezialisierung. Salesforce Life Sciences Cloud (in Partnerschaft mit IQVIA) und IQVIA OCE sind funktional ähnlich, aber Veeva ist die einzige Plattform, die <strong>R&amp;D, Commercial, Quality und Data</strong> auf einer einzigen Datenstruktur (Vault Documents) verbindet. Für ein integriertes Pharma-Unternehmen, das z.B. die Submission-Daten aus Clinical mit Promotion-Materialien in PromoMats verknüpfen muss, ist diese End-to-End-Integration ein nachhaltiger Vorteil. 14 der Top-20-Pharmas wollen laut Veeva-Management auf Vault CRM migrieren, 6 evaluieren Alternativen – diese Quote ist die wichtigste Kennzahl für den Burggraben in den nächsten 24 Monaten.</p>
-      <h3>Netzwerkeffekte &amp; Datenvorteile</h3>
-      <p>Schwach bis mittel. Crossix (Patientendaten-Analytik) und OpenData/Link bieten netzwerk-ähnliche Datenvorteile – je mehr Kunden, desto reichhaltiger die Referenzdaten. Aber im CRM-Kerngeschäft existieren keine echten Netzwerkeffekte. Brand &amp; Pricing Power: hoch in der Pharma-Industrie, da Veeva als „Standard" gilt; ein neuer CFO eines Pharma-Unternehmens muss Veeva nicht rechtfertigen.</p>
-      <h3>Kritische Schwachstellen</h3>
-      <p>Erstens: Salesforce hat Anfang 2026 ca. 40–70 Life-Sciences-Cloud-Kunden gewonnen, darunter mindestens einen großen Veeva-Kunden, der zurückwechselte. Das ist die erste konkret messbare Erosion des Moats. Zweitens: Ein Top-20-Kunde ist im Q3 FY26 für EDC (Electronic Data Capture) zu einem anderen Anbieter (vermutlich Medidata) zurückgewechselt – Veeva-Management bezeichnete das als Einzelfall, der Markt war aber alarmiert. Drittens: Die Migration auf Vault CRM ist komplex, custom Code wird nicht migriert – das schafft <em>negative</em> Switching Costs gegen Veeva.</p>
-      <div class="source">Quellen: Veeva Q3 FY26 Earnings Call Transcript Seeking Alpha (20.11.25); IntuitionLabs Vault CRM Migration Roadmap (07.03.26); Clarkston Consulting Vault vs. Salesforce CRM (15.09.25)</div>
+      <p><strong>Vertikale Spezialisierung als Hauptmoat.</strong> Veeva ist der unangefochtene De-facto-Standard für Life-Sciences-Cloud-Software – ein Markt, der durch GxP-Regulierung (FDA, EMA), 21 CFR Part 11, GDPR-Sensitivität und tiefes Branchenwissen über Pipeline-Phasen, klinische Trials und Compliance-Workflows extrem hohe Eintrittsbarrieren aufweist. Generalistische Anbieter wie Salesforce, Microsoft Dynamics oder Oracle können diese Domain-Tiefe nicht ohne Jahre an Investitionen replizieren.</p>
+      <p><strong>Hohe Switching Costs.</strong> Kunden setzen Veeva-Systeme über mehrere Geschäftsbereiche hinweg ein – Commercial CRM, klinische Studienführung, Regulatory Submissions, Quality Management. Eine Migration weg von Veeva würde GxP-validierte Datenmigrationen, Re-Validierung, Schulungen und potentielle FDA-Inspektionsrisiken bedeuten. Das ist der Grund, warum die FY26-Net-Retention historisch bei &gt;110% liegt und keine signifikanten Top-20-Kundenabwanderungen zu beobachten sind.</p>
+      <p><strong>Plattform-Unabhängigkeit (neuer Moat).</strong> Die größte strategische Veränderung der letzten Jahre: Veeva migriert das CRM vom Salesforce-Tech-Stack auf die eigene Vault-Plattform. Stand März 2026 sind <strong>140+ Vault-CRM-Kunden live</strong>, inklusive Top-20-Biopharma in USA, Europa und Japan. Im April 2026 kamen Großverträge mit <strong>Novo Nordisk International</strong> und <strong>Roche Pharmaceuticals</strong> dazu. Die End-of-Support für Legacy-Veeva-CRM wurde von September 2030 auf Dezember 2029 vorgezogen – Veeva drückt aufs Tempo. Wenn diese Migration gelingt, hat Veeva einen Burggraben zweiter Ordnung gebaut: Es ist nicht mehr von Salesforce abhängig und kann Margen erweitern (keine Salesforce-Lizenzkosten mehr).</p>
+      <p><strong>Schwachstellen / Risse im Moat.</strong> Erstens: <strong>Salesforce Life Sciences Cloud</strong> (gelauncht 2024) ist mittlerweile in Top-20-Pharmakonzernen sichtbar als ernstzunehmende Alternative – Salesforce hat den Non-Compete mit Veeva auslaufen lassen und greift gezielt an. Zweitens: Die Vault-CRM-Migration ist operativ riskant – jeder Kundenverlust während der Umstellung wäre teuer. Drittens: AI-native Wettbewerber könnten in Spezialnischen (z.B. Clinical Operations, MedAffairs) Druck aufbauen.</p>
+      <div class="source">Quellen: Veeva Q4 FY26 Earnings Release (04.03.2026); Motley Fool „3 Reasons to Buy" (04.05.2026); Yahoo Finance „How VEEV Narrative is Shifting" (10.04.2026)</div>
     </div>
   </div>
 
-  <!-- ====== SEKTION 3: QUARTALE ====== -->
   <div class="section" id="s3">
     <div class="section-header">
       <div class="section-number">3</div>
@@ -230,27 +220,24 @@ tr:hover td { background: rgba(59,130,246,0.04); }
       <div class="section-score">Beat-Ratio: 4/4</div>
     </div>
     <div class="section-body">
-      <p>Veevas Geschäftsjahr (Fiscal Year) endet jeweils am 31. Januar. Q4 FY26 wurde am 04.03.2026 berichtet. Das nächste Earnings (Q1 FY27, Quartal endet 30.04.26) wird am <strong>03.06.2026</strong> erwartet.</p>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Quartal</th><th>Revenue</th><th>YoY</th><th>Subscription Rev</th><th>nGAAP EPS</th><th>Beat/Miss</th><th>Marktreaktion</th></tr></thead>
-        <tbody>
-          <tr><td><strong>Q4 FY26 (Jan 26)</strong></td><td>$836,0M</td><td><span class="beat">+16%</span></td><td>$707,7M (+16%)</td><td>$2,06</td><td><span class="beat">Beat (Rev +3,1%, EPS +6,7%)</span></td><td>+10% After-Hours, dann Konsolidierung</td></tr>
-          <tr><td><strong>Q3 FY26 (Okt 25)</strong></td><td>$811,2M</td><td><span class="beat">+16%</span></td><td>$682,5M (+17,5%)</td><td>$2,04</td><td><span class="beat">Beat (Rev +2,4%, EPS +4,6%)</span></td><td>-0,9% intraday, +0,7% AH</td></tr>
-          <tr><td><strong>Q2 FY26 (Jul 25)</strong></td><td>$777M</td><td><span class="beat">+15%</span></td><td>$651M (+17%)</td><td>$1,93</td><td><span class="beat">Beat</span></td><td>positiv</td></tr>
-          <tr><td><strong>Q1 FY26 (Apr 25)</strong></td><td>$760M</td><td><span class="beat">+16%</span></td><td>$643M (+19%)</td><td>$1,97</td><td><span class="beat">Beat</span></td><td>positiv</td></tr>
-        </tbody>
-      </table></div>
-      <h3>Kommentare zu Q4 FY26 (04.03.2026)</h3>
-      <p>Q4 schloss das Geschäftsjahr stark ab: Gesamtumsatz $836M (vs. Konsens $811M), Subscription $707,7M (+16% YoY), nGAAP-Operating-Income $366,5M (+19% YoY, Marge 43,8%). Volljahres-FY26-Umsatz $3,195 Mrd. (+16%) deutlich über der initialen FY26-Guidance von 11% – starkes Outperformance gegenüber den eigenen Erwartungen. Die <strong>FY27-Guidance</strong> ($3,585–3,600 Mrd., +12,5–12,7%) liegt aber unter den 16% des Vorjahres und signalisiert eine spürbare Verlangsamung. nGAAP-Op-Marge soll 2026 bei ca. 44% bleiben.</p>
-      <h3>Kommentare zu Q3 FY26 (20.11.2025)</h3>
-      <p>Q3 lieferte $811M (+16%), Subscription $682,5M (+17,5%). Operating Cashflow YTD bei $1,3 Mrd. (vs. $1,0 Mrd. Vorjahr). Strategischer Knackpunkt: 14 von 20 Top-Kunden migrieren auf Vault CRM, 6 wählen Alternativen. Management spielte die Auswirkung herunter („minimal short-term impact"), die Aktie reagierte aber verhalten skeptisch. CFO bestätigte: CRM macht nur noch ca. 20% des Gesamtumsatzes aus (vs. 25% vor zwei Jahren) – Geschäft wird breiter.</p>
-      <h3>Q1 FY27 Guidance (issued 04.03.26)</h3>
-      <p>$855–858M Revenue (+12,5% YoY), nGAAP Op-Income $378–381M, nGAAP EPS $2,13–2,14. Erstmals wird die Wachstumsdynamik auf 12% statt 16% gedrosselt – das ist ein zentraler Datenpunkt für die Bewertungsdiskussion (Sektion 5/12).</p>
-      <div class="source">Quellen: Veeva Q3 FY26 Earnings Release (20.11.25); Veeva Q4 FY26 Earnings Release (04.03.26, ir.veeva.com); Motley Fool Q4 Transcript (04.03.26); Investing.com Q4 Slides (04.03.26)</div>
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Veeva nutzt Fiskaljahr endend 31. Januar. „FY26" = Februar 2025 – Januar 2026. Nächste Earnings (Q1 FY27) am 03.06.2026.</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Quartal</th><th>Umsatz</th><th>YoY</th><th>Non-GAAP EPS</th><th>vs. Konsens</th><th>Op-Marge</th><th>Marktreaktion</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Q4 FY26</strong><br><span style="font-size:11px;color:var(--text-muted)">End 31.01.26</span></td><td>$836.0M</td><td class="beat">+16%</td><td>$2.06</td><td class="beat">Beat ($1.92E, +7%)</td><td>44.9%</td><td class="beat">+10% AH, dann –20% in 4W</td></tr>
+            <tr><td><strong>Q3 FY26</strong><br><span style="font-size:11px;color:var(--text-muted)">End 31.10.25</span></td><td>$811.2M</td><td class="beat">+16%</td><td>$2.04</td><td class="beat">Beat ($1.95E, +5%)</td><td>45.0%</td><td class="neutral">–1% (Software-Rotation)</td></tr>
+            <tr><td><strong>Q2 FY26</strong><br><span style="font-size:11px;color:var(--text-muted)">End 31.07.25</span></td><td>$786M</td><td class="beat">+15%</td><td>$1.95</td><td class="beat">Beat (+4%)</td><td>~44%</td><td class="beat">Positiv</td></tr>
+            <tr><td><strong>Q1 FY26</strong><br><span style="font-size:11px;color:var(--text-muted)">End 30.04.25</span></td><td>$759M</td><td class="beat">+17%</td><td>$1.97</td><td class="beat">Beat (+9%)</td><td>~43.5%</td><td class="beat">Positiv</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Operative Lesart:</strong> Veeva hat in allen vier Quartalen Konsens beim Umsatz um 2–4% und beim EPS um 4–13% übertroffen – durchgehend konservatives Guidance-Verhalten. Die Subscription-Wachstumsrate beschleunigte sich leicht auf 17% YoY in Q3 (vs. 16% in Q4). Bei der Q4-Berichterstattung am 04.03.2026 stieg der Kurs zunächst +10% AH, fiel aber in den Wochen danach um ~20%, weil Analysten (Barclays $305→$250, RBC $330→$275, Truist $275→$262) Kursziele wegen FY27-Guidance ($3.585–3.6B = nur 12% YoY-Wachstum) und Salesforce-Wettbewerbsbedenken reduzierten.</p>
+      <p><strong>Wichtigste Management-Statements (Q4-Call, 04.03.2026):</strong> CEO Gassner: „The agentic transformation underway represents a substantial opportunity for Veeva and life sciences" – starker Push auf Veeva AI / Agentic Capabilities. CFO Van Wagener bestätigte $6B-Run-Rate-Ziel für 2030. Vault CRM: nahezu 140 Kunden live, mehrere Top-20-Konzerne in USA/Europa/Japan.</p>
+      <div class="source">Quellen: Veeva IR Releases Q1–Q4 FY26; Zacks Earnings Coverage; FinancialContent Q4 Deep Dive (05.03.2026)</div>
     </div>
   </div>
 
-  <!-- ====== SEKTION 4: WACHSTUM ====== -->
   <div class="section" id="s4">
     <div class="section-header">
       <div class="section-number">4</div>
@@ -258,32 +245,33 @@ tr:hover td { background: rgba(59,130,246,0.04); }
       <div class="section-score">Score: 7/10</div>
     </div>
     <div class="section-body">
-      <h3>Multi-Year-Trajectory</h3>
-      <p>Veeva ist im Übergang von Hyper-Growth zu Growth-at-Scale: 5J-Revenue-CAGR liegt bei ca. 18%, aber die Trajektorie verlangsamt sich strukturell. FY24: $2,36 Mrd. (+10%) → FY25: $2,75 Mrd. (+16%) → FY26: $3,195 Mrd. (+16%) → FY27 Guidance: $3,59 Mrd. (+12,5%). Management hat das ambitionierte Ziel von <strong>$6 Mrd. Revenue-Run-Rate bis 2030</strong> bestätigt – das impliziert 13–14% CAGR über vier Jahre. Realistisch erreichbar, aber abhängig von erfolgreichen Vault-CRM-Migrationen und der Akzeptanz von Veeva AI.</p>
-      <h3>Segmentwachstum (FY26)</h3>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Segment</th><th>FY26 Revenue</th><th>YoY Growth</th><th>FY27e</th></tr></thead>
-        <tbody>
-          <tr><td>R&amp;D Solutions (Subscription)</td><td>~$1,42 Mrd.</td><td>+18%</td><td>weiterhin führendes Wachstum</td></tr>
-          <tr><td>Commercial Solutions (Subscription)</td><td>~$1,25 Mrd.</td><td>+15%</td><td>Vault CRM-Migration Tailwind</td></tr>
-          <tr><td>Professional Services</td><td>$502M</td><td>+9%</td><td>stabil-niedrig</td></tr>
-        </tbody>
-      </table></div>
-      <p>Ein wichtiges strukturelles Signal: <strong>R&amp;D Solutions (Vault Clinical, Safety, Quality, RIM) überholten 2026 erstmals das Commercial-Segment</strong>. Das ist bullish – R&amp;D ist klebriger, regulatorisch geschützter und weniger CRM-Wettbewerbsdruck-exponiert.</p>
-      <h3>Geografische Verteilung (geschätzt FY26)</h3>
-      <div class="geo-grid">
-        <div class="geo-card"><div class="geo-region">Nordamerika</div><div class="geo-pct">~62%</div><div class="geo-note">Reifer Markt</div></div>
-        <div class="geo-card"><div class="geo-region">EMEA</div><div class="geo-pct">~24%</div><div class="geo-note">Stabile Expansion</div></div>
-        <div class="geo-card"><div class="geo-region">APAC</div><div class="geo-pct">~12%</div><div class="geo-note">Wachstum verlangsamt durch China-Regulierung</div></div>
-        <div class="geo-card"><div class="geo-region">LATAM/Other</div><div class="geo-pct">~2%</div><div class="geo-note">Niche</div></div>
+      <p><strong>Revenue-Wachstum letzte 5 Jahre:</strong> FY22 $1.85B → FY23 $2.16B (+16%) → FY24 $2.36B (+9%) → FY25 $2.75B (+17%) → FY26 $3.20B (+16%) → FY27 Guidance: $3.59B (<strong>+12%</strong>). Veeva ist klar im Übergang von Hyper-Growth zu „Growth-at-Scale" – die FY27-Guidance impliziert die niedrigste Wachstumsrate seit dem IPO 2013.</p>
+      <h3>Segment-Wachstum FY26</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Segment</th><th>FY26 Umsatz</th><th>YoY</th><th>Kommentar</th></tr></thead>
+          <tbody>
+            <tr><td>Commercial Solutions Subscription</td><td>~$1.21B</td><td>~14%</td><td>Mature; Vault-CRM-Migration als Treiber, Crossix als „Breakout"</td></tr>
+            <tr><td>R&amp;D Solutions Subscription</td><td>~$1.41B</td><td>~19%</td><td>Wachstumsmotor; Quality Cloud +28 Kunden Q3, Safety mit 3. Top-20-Biopharma Go-live</td></tr>
+            <tr><td>Subscription Total</td><td>$2.684B</td><td>+17%</td><td>84% des Gesamtumsatzes</td></tr>
+            <tr><td>Professional Services</td><td>$511M</td><td>+14%</td><td>Begünstigt durch CRM-Migrationsaktivität</td></tr>
+          </tbody>
+        </table>
       </div>
-      <h3>Wachstumstreiber &amp; -bremsen</h3>
-      <p>Treiber: (1) Veeva AI Agents (Launch Dezember 2025) – Cross-Sell-Potenzial in alle bestehenden Module; (2) Veeva Basics – SMB-Biotech-Adoption (100 Kunden in &lt;1 Jahr); (3) Vault CRM-Migrationen – preisliche Re-Negotiation als Hebel; (4) Crossix – breakout year laut Q4-Call. Bremsen: (1) Top-20-Kunden, die NICHT migrieren (geschätzt 30% Kundenabwanderung im CRM-Segment); (2) Salesforce Life Sciences Cloud mit 40–70 Wins; (3) China-Markt durch Data-Residency-Vorschriften gebremst; (4) Pharma-CapEx-Druck durch IRA-Preisregulierung. Netto: Wachstum verschiebt sich strukturell von der hohen 15–18%-Range in den unteren Teens (12–14%).</p>
-      <div class="source">Quellen: Veeva Q4 FY26 Earnings Release &amp; Investor Presentation (04.03.26); Veeva FY27-Guidance; IntuitionLabs Long-Term Investment Analysis (12.01.26)</div>
+      <h3>Geografische Verteilung</h3>
+      <div class="geo-grid">
+        <div class="geo-card"><div class="geo-region">Nordamerika</div><div class="geo-pct">~58%</div><div class="geo-note">Mature; Top-20-Pharma installed</div></div>
+        <div class="geo-card"><div class="geo-region">Europa (EMEA)</div><div class="geo-pct">~28%</div><div class="geo-note">Wachstum durch Vault-CRM-Migration</div></div>
+        <div class="geo-card"><div class="geo-region">Asien-Pazifik</div><div class="geo-pct">~12%</div><div class="geo-note">Japan starkes Wachstum, China stabil</div></div>
+        <div class="geo-card"><div class="geo-region">Lateinamerika</div><div class="geo-pct">~2%</div><div class="geo-note">Kleine Basis, kein Fokus</div></div>
+      </div>
+      <h3>Reifegrad &amp; Profitabilitätshebel</h3>
+      <p>Profitabilität wächst schneller als Umsatz: Op-Marge FY25 43.5% → FY26 44.9% (+140 bps), Operating Income FY26 +33% YoY auf $916M. Net Income FY26 $908.9M (+27%). Das ist klassisches operatives Leverage – aber das Wachstum verlangsamt sich strukturell, da der Commercial-CRM-Markt (Top-20-Pharma) bereits weitgehend penetriert ist.</p>
+      <p><strong>Wachstumstreiber für FY27–FY30:</strong> (1) Vault-CRM-Migration weitere 60+ Kunden auf 200-Ziel, (2) Quality Cloud Expansion (CDMOs als neuer TAM), (3) Veeva AI / Agentic Apps (Launch 2026), (4) Medtech/Consumer-Products-Vertikalen, (5) Safety/RTSM bei Top-20-Biopharma.</p>
+      <div class="source">Quellen: Veeva Q4 FY26 PR (04.03.2026); Q3 Earnings Prepared Remarks (20.11.2025); Substack ChopwoodCarrywater Pitch (Apr 2026)</div>
     </div>
   </div>
 
-  <!-- ====== SEKTION 5: BEWERTUNG ====== -->
   <div class="section" id="s5">
     <div class="section-header">
       <div class="section-number">5</div>
@@ -291,29 +279,27 @@ tr:hover td { background: rgba(59,130,246,0.04); }
       <div class="section-score">Score: 8/10</div>
     </div>
     <div class="section-body">
-      <h3>Multiples (Stand 14.05.2026)</h3>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Metrik</th><th>VEEV aktuell</th><th>5J-Median</th><th>Industrie-Ø</th><th>Einordnung</th></tr></thead>
-        <tbody>
-          <tr><td>P/E TTM</td><td>~29x</td><td>43x</td><td>~38x (SaaS-Peers)</td><td><span class="beat">Deutlich unter eigener Historie</span></td></tr>
-          <tr><td>P/E Forward</td><td>~20x</td><td>30x</td><td>~28x</td><td><span class="beat">Attraktiv für Quality-Compounder</span></td></tr>
-          <tr><td>P/Sales Forward</td><td>7,2x</td><td>12,4x</td><td>3,5x</td><td><span class="neutral">Premium ggü. Sektor, Discount ggü. Historie</span></td></tr>
-          <tr><td>PEG</td><td>1,04</td><td>1,5x</td><td>1,8x</td><td><span class="beat">Sehr fair bei 12–14% Wachstum</span></td></tr>
-          <tr><td>EV/EBITDA</td><td>~22x</td><td>30x</td><td>~25x</td><td><span class="beat">Unter Historie</span></td></tr>
-          <tr><td>EV/FCF</td><td>~16x</td><td>26x</td><td>~22x</td><td><span class="beat">Attraktiv</span></td></tr>
-        </tbody>
-      </table></div>
-      <h3>Historische Bewertungsperspektive</h3>
-      <p>VEEV trade bei ca. $157 mit einer Marktkapitalisierung von $25,7 Mrd. – ein dramatischer Discount zum 52W-Hoch ($295) und ein Multi-Jahres-Tief beim P/Sales-Multiple. Vor 12 Monaten handelte die Aktie noch zu 12,4x P/Sales – heute zu 7,2x. Das ist eine <strong>Halbierung des Multiples</strong> bei gleichbleibend hoher Geschäftsqualität (44,9% Op-Marge, 16% Wachstum). Der Markt preist ein, dass das Wachstum nachhaltig in den niedrigen Teens bleibt und der Salesforce-Wettbewerb materiell Marktanteile kostet.</p>
-      <h3>Analystenkonsens &amp; Streuung</h3>
-      <p>30 Analysten: Durchschnittliches 12M-Kursziel <strong>$274</strong> (Range $176–$350) – impliziert +74% Upside vom aktuellen Kurs. Aber die Streuung ist hoch und richtungsabhängig: Citi (10.04.26) downgrade auf Neutral, Target $176 (knapp über aktuellem Kurs). Goldman Sachs Sell mit $215 (13.01.26). Stifel Buy $245, Piper Sandler Overweight $285, Morgan Stanley Equal-Weight $215. Die Mehrheit (21 von 25) hat „Buy/Overweight", aber die Skepsis hat sich strukturell ausgebreitet seit März 2026.</p>
-      <h3>Eigenes Bewertungsfazit</h3>
-      <p>Bei aktuellem Kurs $157, 20x Forward-EPS ($8,10 FY26-EPS, FY27-EPS ca. $8,60–8,80) und PEG 1,04 ist VEEV mathematisch <em>günstig</em> für ein Quality-Compounder mit 44%+ Op-Marge und Industrie-Cloud-Position. Das Bewertungs-Reset war bereits beträchtlich – das Downside-Risiko ist begrenzt, wenn FY27-Guidance gehalten wird. Score 8/10 reflektiert: erstmals seit Jahren ist VEEV ein Value-Play <em>und</em> Quality-Play gleichzeitig.</p>
-      <div class="source">Quellen: stockanalysis.com Statistics (15.05.26); TradingView VEEV Forward P/S (02.03.26); Henry Fund Peer Benchmarking (Apr 2026); Citi Downgrade Note (10.04.26); Public.com Analyst Consensus (08.05.26)</div>
+      <p>Nach dem 33%-YTD-Kurseinbruch handelt VEEV bei $156.88 auf signifikant niedrigeren Multiples als historisch üblich. Das ist eines der besten Bewertungsfenster der letzten 5 Jahre.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>Aktuell</th><th>5J-Schnitt</th><th>Bewertung</th></tr></thead>
+          <tbody>
+            <tr><td>P/E (TTM)</td><td>~29x</td><td>~55x</td><td class="beat">Deutlicher Discount</td></tr>
+            <tr><td>P/E FWD</td><td>~22x</td><td>~38x</td><td class="beat">Sehr attraktiv für Quality-SaaS</td></tr>
+            <tr><td>EV/EBITDA FWD</td><td>~17x</td><td>~28x</td><td class="beat">Tief</td></tr>
+            <tr><td>P/Sales (FWD)</td><td>~7x</td><td>~14x</td><td class="beat">Halbiert vs. Schnitt</td></tr>
+            <tr><td>P/FCF</td><td>~21x</td><td>~32x</td><td class="beat">Attraktiv</td></tr>
+            <tr><td>PEG (FWD)</td><td>~1.8</td><td>~2.5</td><td class="neutral">Fair (12% Wachstum, 22x P/E)</td></tr>
+            <tr><td>Cash/Market Cap</td><td>~26%</td><td>~15%</td><td class="beat">Sehr starke Bilanz</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Analystenkonsens (Stand 14.05.2026):</strong> 21 Analysten, Buy-Rating, Median-Kursziel ~$275 (75% Upside). Morningstar Fair Value: $270.93. Aber: Mehrere Häuser haben Kursziele in den Wochen nach Q4 reduziert (Barclays $305→$250, RBC $330→$275, Truist $275→$262). Das Sentiment ist zweigeteilt: Bull-Case sieht GARP-Opportunity, Bear-Case fürchtet Salesforce-Disruption.</p>
+      <p><strong>Eigene Bewertung:</strong> Bei FY27-EPS-Guidance ~$8.65 und P/E 22x liegt der „faire Wert" rein multiplebasiert bei ca. $190. Mit Premium für Quality-SaaS-Charakteristika (44.9% Op-Marge, $6.6B Cash, 12% Wachstum, S&amp;P 500 Aufnahme) sind $200–230 vertretbar – also <strong>+27% bis +47% Upside</strong> auf 12–18M.</p>
+      <div class="source">Quellen: Stocktitan Q4 Coverage; Public.com Analyst Forecast (08.05.2026); Morningstar Fair Value (Mai 2026); Yahoo Finance (14.05.2026)</div>
     </div>
   </div>
 
-  <!-- ====== SEKTION 6: CASHFLOW ====== -->
   <div class="section" id="s6">
     <div class="section-header">
       <div class="section-number">6</div>
@@ -321,27 +307,26 @@ tr:hover td { background: rgba(59,130,246,0.04); }
       <div class="section-score">Score: 9/10</div>
     </div>
     <div class="section-body">
-      <h3>Cashflow &amp; Margen-Profil (FY26)</h3>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Kennzahl</th><th>FY26</th><th>FY25</th><th>Trend</th></tr></thead>
-        <tbody>
-          <tr><td>Revenue</td><td>$3,195 Mrd.</td><td>$2,748 Mrd.</td><td><span class="beat">+16%</span></td></tr>
-          <tr><td>nGAAP Operating Income</td><td>$1,434 Mrd.</td><td>$1,156 Mrd.</td><td><span class="beat">+24%</span></td></tr>
-          <tr><td>nGAAP Op-Marge</td><td>44,9%</td><td>42,1%</td><td><span class="beat">+280 bps</span></td></tr>
-          <tr><td>Operating Cashflow (9M YTD Q3)</td><td>$1,30 Mrd.</td><td>$1,00 Mrd.</td><td><span class="beat">+30%</span></td></tr>
-          <tr><td>GAAP EPS (FY)</td><td>$5,44</td><td>$4,32</td><td><span class="beat">+26%</span></td></tr>
-          <tr><td>nGAAP EPS (FY)</td><td>$8,10</td><td>$6,60</td><td><span class="beat">+23%</span></td></tr>
-        </tbody>
-      </table></div>
-      <h3>Bilanz &amp; Kapitalqualität</h3>
-      <p>Veeva hatte Ende Q3 FY26 (31.10.25) eine Bilanzfestung: <strong>$1,66 Mrd. Cash &amp; Equivalents + $4,97 Mrd. kurzfristige Investments = $6,63 Mrd. Liquidität</strong>, praktisch <strong>keine Schulden</strong>. Capex liegt mit $29M auf Rekordniveau – aber selbst dieser Wert ist asset-light (&lt;1% des Umsatzes). FCF-Konversion liegt strukturell bei &gt;90% des Net Income, weil DSOs niedrig und Subscription-Vorauszahlungen hoch sind. ROE/ROIC zweistellig im hohen Bereich (Henry Fund: höhere Op-Marge und Cash-Konversion als alle Peers).</p>
-      <h3>Kapitalrückführung</h3>
-      <p>Veeva zahlt <strong>keine Dividende</strong> und hat historisch nur sehr opportunistisch zurückgekauft. Q4 FY26-Call: keine konkrete Buyback-Erhöhung trotz Cash-Hoch und niedrigem Aktienkurs – das ist eine Schwachstelle der Kapitalallokation. Bei P/E ~20x und $6,6 Mrd. Cash wäre ein aggressives Buyback-Programm hochgradig wertsteigernd, aber Management bevorzugt offenbar M&amp;A-Optionalität (Ostro-Akquisition 10.03.26). Score 9/10 reflektiert: operative Cash-Generation ist Weltklasse, Kapitalallokation aber nicht aggressive genug für das gesunkene Multiple.</p>
-      <div class="source">Quellen: Veeva Q4 FY26 Earnings Release (04.03.26); Veeva Q3 FY26 10-Q Balance Sheet (20.11.25); Henry Fund VEEV Spring 2026 Report</div>
+      <p><strong>Cashflow:</strong> FY26 Non-GAAP Cash Flow from Operations ~$1.335 Mrd (~42% Margin) – einer der höchsten FCF-Margins im SaaS-Bereich überhaupt. FCF-Konversionsrate (FCF/Net Income) ~1.47 – Earnings sind „echt" und sogar konservativ ausgewiesen, da FCF höher liegt als Net Income.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>FY24</th><th>FY25</th><th>FY26</th><th>Trend</th></tr></thead>
+          <tbody>
+            <tr><td>Bruttomarge (non-GAAP)</td><td>~74%</td><td>~75%</td><td>~75%</td><td class="neutral">Stabil</td></tr>
+            <tr><td>Operating Margin (non-GAAP)</td><td>~40%</td><td>43.5%</td><td>44.9%</td><td class="beat">+490 bps in 2 Jahren</td></tr>
+            <tr><td>Net Margin</td><td>~22%</td><td>~26%</td><td>~28%</td><td class="beat">Expanding</td></tr>
+            <tr><td>FCF Margin</td><td>~38%</td><td>~40%</td><td>~42%</td><td class="beat">Industry-leading</td></tr>
+            <tr><td>ROE</td><td>~13%</td><td>~14%</td><td>~14%</td><td class="neutral">Stabil (Bilanz cash-heavy)</td></tr>
+            <tr><td>Capex-Intensität</td><td>&lt;1%</td><td>&lt;1%</td><td>&lt;1%</td><td class="beat">Asset-Light</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Bilanz / Kapitalrückführung:</strong> $6.6 Mrd Cash &amp; Investments, schuldenfrei (Debt/EBITDA = 0). Current Ratio ~4.9. Im Januar 2026 erstmals $2 Mrd Aktienrückkauf autorisiert – das ist signifikant, weil Veeva traditionell zurückhaltend bei Buybacks war und das Management damit Vertrauen in den aktuellen Kurs signalisiert. Keine Dividende; Kapital wird primär in R&amp;D (~25% des Umsatzes) und kleinere Tuck-in-Akquisitionen reinvestiert.</p>
+      <p><strong>Lesart:</strong> Das ist eine der höchsten Kapitalqualitäten im gesamten Software-Universum. Bei 44.9% Op-Marge und 42% FCF-Marge ist Veeva quasi ein Kapitalrückführungs-Compounder mit eingebautem Wachstum.</p>
+      <div class="source">Quellen: Veeva FY26 Earnings Release (04.03.2026); Timothy Sykes Newsletter (03.05.2026); Motley Fool S&amp;P-500-Analyse (04.05.2026)</div>
     </div>
   </div>
 
-  <!-- ====== SEKTION 7: PEER-VERGLEICH ====== -->
   <div class="section" id="s7">
     <div class="section-header">
       <div class="section-number">7</div>
@@ -349,82 +334,67 @@ tr:hover td { background: rgba(59,130,246,0.04); }
       <div class="section-score">Score: 8/10</div>
     </div>
     <div class="section-body">
-      <p>Peer-Gruppe übernommen aus der bestehenden Analyse: <strong>IQVIA, Salesforce (CRM), Schrödinger (SDGR), Doximity (DOCS)</strong> sowie Workday als breiter SaaS-Vergleich.</p>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Unternehmen</th><th>Marktkap.</th><th>Revenue Growth</th><th>Op-Marge nGAAP</th><th>P/E Fwd</th><th>P/Sales Fwd</th><th>FCF-Konversion</th></tr></thead>
-        <tbody>
-          <tr><td><strong>Veeva (VEEV)</strong></td><td>$25,7 Mrd.</td><td><span class="beat">+16%</span></td><td><span class="beat">44,9%</span></td><td>~20x</td><td>7,2x</td><td>&gt;90%</td></tr>
-          <tr><td>IQVIA (IQV)</td><td>~$30 Mrd.</td><td>+4%</td><td>~22%</td><td>~14x</td><td>1,8x</td><td>~85%</td></tr>
-          <tr><td>Salesforce (CRM)</td><td>~$240 Mrd.</td><td>+9%</td><td>~33%</td><td>~22x</td><td>3,9x</td><td>~95%</td></tr>
-          <tr><td>Schrödinger (SDGR)</td><td>~$2 Mrd.</td><td>+8%</td><td>negativ</td><td>n.a.</td><td>2,8x</td><td>negativ</td></tr>
-          <tr><td>Workday (WDAY)</td><td>~$60 Mrd.</td><td>+13%</td><td>~25%</td><td>~26x</td><td>5,5x</td><td>~80%</td></tr>
-        </tbody>
-      </table></div>
-      <h3>Strategische Unterschiede</h3>
-      <p>VEEV vs. IQV: IQVIA ist eher Daten- und CRO-Services-fokussiert (Real-World-Evidence, Studiendurchführung), nicht primär Software. IQV wächst nur 4% mit 22% Op-Marge – Veeva ist 4x schneller wachstumsstark mit doppelter Marge, rechtfertigt also klar das höhere Multiple. Die Partnerschaft Salesforce-IQVIA für Life Sciences Cloud schafft aber Wettbewerbsdruck.</p>
-      <p>VEEV vs. CRM: Salesforce ist 10x größer, aber generalistisch. In Life Sciences hat Salesforce Anfang 2026 ca. 40–70 Kunden gewonnen – das ist materiell, aber kein „Veeva-Killer". Salesforce muss erst noch beweisen, dass es die regulatorische Tiefe (FDA 21 CFR Part 11, GxP-Validierung) konkurrenzfähig liefern kann.</p>
-      <p>VEEV vs. SDGR: Schrödinger ist Computational Drug Discovery – komplementär, kein direkter Konkurrent. SDGR-Multiple (2,8x P/S) zeigt: der Markt diskriminiert hart zwischen profitablen SaaS (VEEV) und unprofitablem Forschungs-SaaS (SDGR).</p>
-      <p>VEEV vs. WDAY: Workday wächst ähnlich (13%), hat aber niedrigere Op-Marge (25%) und höheres Multiple (26x Fwd P/E vs. VEEV 20x). Werden hier ähnliche Bewertungs-Standards angelegt, sollte VEEV bei 22–24x Fwd P/E handeln, also $190–210. Das ist ein wichtiges Bewertungsargument.</p>
-      <div class="source">Quellen: stockanalysis.com Peer-Daten (14.05.26); TradingView Comparable Valuation (Feb 26); Henry Fund Peer Benchmarking (Apr 26)</div>
+      <p>Peers: IQVIA (CRO/Daten), Salesforce (CRM/Life Sciences Cloud), Oracle (Healthcare Cloud), Certara (Modellierung), Schrödinger (Drug Discovery Software).</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Unternehmen</th><th>Rev Growth</th><th>Op-Marge</th><th>FWD P/E</th><th>Market Cap</th><th>Kommentar</th></tr></thead>
+          <tbody>
+            <tr><td><strong>VEEV</strong></td><td>+16% / +12%e</td><td class="beat">44.9%</td><td>~22x</td><td>$25.5B</td><td>Best-in-Class Margen, mature Growth</td></tr>
+            <tr><td>IQVIA (IQV)</td><td>+5%</td><td>~16%</td><td>~13x</td><td>~$25B</td><td>Eher Services, niedrigere Margen</td></tr>
+            <tr><td>Salesforce (CRM)</td><td>+9%</td><td>~22%</td><td>~24x</td><td>$260B</td><td>Generalist, Life Sciences Cloud junge Erweiterung</td></tr>
+            <tr><td>Certara (CERT)</td><td>~8%</td><td>~13%</td><td>~22x</td><td>~$1.7B</td><td>Drug-Modeling-Nische</td></tr>
+            <tr><td>Schrödinger (SDGR)</td><td>+15%</td><td>negativ</td><td>n/a</td><td>~$1.7B</td><td>Discovery/AI, noch defizitär</td></tr>
+            <tr><td>Doximity (DOCS)</td><td>+12%</td><td>~40%</td><td>~28x</td><td>~$10B</td><td>HCP-Network, kein direkter Wettbewerber</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Qualitative Einordnung:</strong> Veeva hat die mit Abstand höchste Op-Marge der Peer-Gruppe und ist gleichzeitig der einzige reine Vertical-SaaS-Player mit Life-Sciences-Tiefe. Salesforce ist trotz größerem Mutterkonzern in der Domain-Spezialisierung Veeva unterlegen, hat aber die Distributionsmacht und das Sales-Engine. IQVIA ist eher ein Services/Daten-Hybrid mit deutlich niedrigeren Margen. Veeva verdient klar eine Premium-Bewertung, der aktuelle Discount auf 22x FWD ist historisch ungewöhnlich tief.</p>
+      <p><strong>Marktanteile:</strong> Veeva CRM hat im Top-20-Pharma-Segment einen Marktanteil von &gt;75% (gemessen an installierter Basis). Salesforce schätzt eigenes Ziel auf 15–20% in 3–5 Jahren – realistisch ist eine Erosion auf 60–65% für Veeva, was Bewertungs-Druck rechtfertigt, aber kein existenzielles Risiko bedeutet.</p>
+      <div class="source">Quellen: IntuitionLabs VEEV Analysis (Jan 2026); Public.com Forecast (Mai 2026); Eigene Peer-Berechnung</div>
     </div>
   </div>
 
-  <!-- ====== SEKTION 8: NEWS ====== -->
   <div class="section" id="s8">
     <div class="section-header">
       <div class="section-number">8</div>
-      <div class="section-title">Aktuelle News &amp; Events (Feb–Mai 2026)</div>
-      <div class="section-note">Quellen ≤ 3 Monate</div>
+      <div class="section-title">Aktuelle News &amp; Events (letzte 3 Monate)</div>
+      <div class="section-note">Stand: 15.05.2026</div>
     </div>
     <div class="section-body">
       <h3>Ebene 1: Unternehmen</h3>
       <div class="event-item">
         <div class="event-dot dot-green"></div>
         <div>
-          <div class="event-label">07.05.2026 – Aufnahme in S&amp;P 500 <span class="badge badge-green">Sehr positiv</span></div>
-          <div class="event-text">VEEV ersetzt Coterra Energy (CTRA) im S&amp;P 500. Aktie sprang +10% auf $172,50 nach Ankündigung (30.04.). Erzwingt passive Inflows von ETFs, langfristig stabilisierend für Bewertungsmultiple. Quelle: TipRanks 30.04.26.</div>
+          <div class="event-label">07.05.2026 – S&amp;P 500 Aufnahme <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Veeva ersetzt Coterra Energy im S&amp;P 500. Index-Inclusion löste +10% Kurs-Pop am 30.04. aus. Strukturelle Käufer-Nachfrage durch passive Fonds. Quelle: CNBC, 30.04.2026.</div>
         </div>
       </div>
       <div class="event-item">
         <div class="event-dot dot-green"></div>
         <div>
-          <div class="event-label">11.05.2026 – Smith+Nephew Quality-Cloud-Deal <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">Großer MedTech-Konzern unifiziert Quality Management auf Veeva Vault. Zeigt: Quality Cloud expandiert über Pharma hinaus in MedTech. Quelle: Veeva PR 11.05.26.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">04.03.2026 – Q4 FY26 Earnings Beat <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">Revenue $836M (+16% YoY) beat $811M Konsens. nGAAP EPS $2,06 beat $1,93. FY27-Guidance $3,585–3,600 Mrd. über Konsens. Aktie +10% AH. Quelle: Veeva Q4-Release ir.veeva.com.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">10.03.2026 – Akquisition Ostro (AI Brand Engagement) <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">Veeva übernimmt Ostro – AI-driven Patient/Doctor-Engagement-Plattform. Erste materielle AI-Akquisition. Stärkt Crossix-Ökosystem. Preis nicht offiziell, geschätzt 9-stellig. Quelle: Veeva PR 10.03.26.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-red"></div>
-        <div>
-          <div class="event-label">10.04.2026 – Citi-Downgrade auf Neutral <span class="badge badge-red">Negativ</span></div>
-          <div class="event-text">Citi (Tyler Radke) downgrade Buy→Neutral, Target $176 (von $291, -40%). Begründung: „lack of catalysts" + Software-Sektor-Skepsis wegen AI-Disruption. Aktie -4% intraday. Quelle: TipRanks/Benzinga 10.04.26.</div>
+          <div class="event-label">28.04.2026 – Novo Nordisk International &amp; Roche wählen Vault CRM <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Zwei Großverträge mit Top-20-Pharma für globalen Commercial-Rollout, Fokus AI-enabled CRM und Next-Gen Customer Engagement. Quelle: Stocktitan (08.05.2026).</div>
         </div>
       </div>
       <div class="event-item">
         <div class="event-dot dot-yellow"></div>
         <div>
-          <div class="event-label">20.04.2026 – Wechsel General Counsel <span class="badge badge-yellow">Neutral</span></div>
-          <div class="event-text">Geplante Transition des General Counsel angekündigt. Normalfluktuation, keine Krise. Quelle: TipRanks 20.04.26.</div>
+          <div class="event-label">20.04.2026 – General Counsel Transition <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Planmäßiger Übergang des General Counsel angekündigt. Keine operativen Implikationen, aber Indikator für Org-Veränderungen. Quelle: TipRanks (20.04.2026).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">04.03.2026 – Q4 FY26 Earnings: Beat, aber FY27 Guidance enttäuscht <span class="badge badge-red">Negativ (verzögert)</span></div>
+          <div class="event-text">Q4 Beat ($836M Umsatz, $2.06 EPS), aber FY27-Guidance $3.585–3.6B (+12%) implizierte die niedrigste Wachstumsrate seit IPO. Kurs +10% AH, dann –20% in 4 Wochen. Mehrere Analysten-Downgrades. Quelle: Veeva IR, 04.03.2026; Trefis Analysis.</div>
         </div>
       </div>
       <div class="event-item">
         <div class="event-dot dot-green"></div>
         <div>
-          <div class="event-label">Frühling 2026 – Veeva Basics erreicht 100 Kunden <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">SMB-Biotech-Lösung gewinnt schnell Adoption. Erweitert die Reichweite über Top-1000-Pharma hinaus. Quelle: Q3 FY26 Earnings Call (20.11.25, Updates Q4).</div>
+          <div class="event-label">Januar 2026 – $2 Mrd Aktienrückkauf-Programm <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Erstes signifikantes Buyback-Programm in Veevas Geschichte. Signal: Management hält Aktie für unterbewertet. Quelle: Motley Fool (04.05.2026).</div>
         </div>
       </div>
 
@@ -432,52 +402,37 @@ tr:hover td { background: rgba(59,130,246,0.04); }
       <div class="event-item">
         <div class="event-dot dot-red"></div>
         <div>
-          <div class="event-label">Q1 2026 – Salesforce Life Sciences Cloud gewinnt 40–70 Kunden <span class="badge badge-red">Negativ</span></div>
-          <div class="event-text">Salesforce (Partner: IQVIA) hat seit Launch Sep 2025 zwischen 40 (Veeva Disclosure Q3) und 70 (IntuitionLabs März 26) Life-Sciences-Kunden gewonnen, darunter ein großer Veeva-Kunde, der zurückwechselte. Materielle, aber begrenzte Erosion. Quelle: Veeva Q3 FY26 Call; IntuitionLabs CRM-Migration-Roadmap 07.03.26.</div>
+          <div class="event-label">Q1 2026 – Salesforce Life Sciences Cloud gewinnt Top-20-Wins <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Salesforce hat den Non-Compete mit Veeva auslaufen lassen und greift aktiv im Top-20-Segment an. Mehrere Pharma-Konzerne pilotieren Salesforce-CRM-Alternativen. Quelle: Yahoo Finance, 10.04.2026.</div>
         </div>
       </div>
       <div class="event-item">
         <div class="event-dot dot-yellow"></div>
         <div>
-          <div class="event-label">Q1 2026 – RegASK Partnership <span class="badge badge-yellow">Neutral-Positiv</span></div>
-          <div class="event-text">RegASK (Agentic-AI für regulatorische Intelligenz) partnert mit Veeva. Erweitert Vault RIM-Ökosystem um AI-Funktionalität. Eher symbolisch als materiell. Quelle: BusinessWire März 26.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-yellow"></div>
-        <div>
-          <div class="event-label">2026 – Vault CRM-Migration in Beschleunigungsphase <span class="badge badge-yellow">Neutral-Positiv</span></div>
-          <div class="event-text">Ende Q4 FY26: ca. 125–140 Kunden live auf Vault CRM (vs. 115 Anfang Q4). Migration läuft on track, größte Welle 2026–2027. End-of-Support für Veeva CRM auf Dez 2029 vorgezogen. Quelle: IntuitionLabs Roadmap 07.03.26.</div>
+          <div class="event-label">2026 – AI-Disruption in Healthcare-IT</div>
+          <div class="event-text">Generelle Befürchtung, dass agentische AI traditionelles SaaS-CRM/Workflow-Software entwertet. Veeva positioniert sich mit Veeva AI Suite (Launch 2026) als Antwort, aber Marktskepsis bleibt. Quelle: CNBC (30.04.2026).</div>
         </div>
       </div>
 
       <h3>Ebene 3: Makro</h3>
       <div class="event-item">
-        <div class="event-dot dot-red"></div>
+        <div class="event-dot dot-yellow"></div>
         <div>
-          <div class="event-label">Q1 2026 – Software-Sektor-Rotation negativ <span class="badge badge-red">Negativ</span></div>
-          <div class="event-text">Application-Software-Sektor underperformed 2026 deutlich; Citi cuttete sechs Software-Namen einschließlich VEEV mit AI-Durability-Sorgen. Sektor-Compression der Multiples verstärkt VEEV-Druck. Quelle: Citi Research Note 10.04.26.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-red"></div>
-        <div>
-          <div class="event-label">Laufend 2026 – Inflation Reduction Act (IRA) Druck auf Pharma-CapEx <span class="badge badge-red">Negativ</span></div>
-          <div class="event-text">Drug-Pricing-Negotiations zwingen Pharma-Konzerne zu Effizienzgewinnen und Cost-Discipline. Mittelfristig pro Veeva (Effizienz-Tools nachgefragt), kurzfristig contra (IT-Budgets eingefroren). Quelle: FinancialContent 05.03.26.</div>
+          <div class="event-label">2026 – Software-Sektor-Rotation</div>
+          <div class="event-text">Investoren rotieren YTD aus Cloud-Software in AI-Hardware/Hyperscaler. iShares Expanded Tech-Software ETF (IGV) underperformt S&amp;P 500 um ca. 25 pp YTD. Quelle: stockanalysis.com.</div>
         </div>
       </div>
       <div class="event-item">
         <div class="event-dot dot-yellow"></div>
         <div>
-          <div class="event-label">2026 – Precision Medicine &amp; Decentralized Trials Boom <span class="badge badge-yellow">Neutral-Positiv</span></div>
-          <div class="event-text">Precision-Medicine-Trend benötigt komplexere Daten-Management-Strukturen. Dekentralized Trials (DCT) treiben Veeva Clinical Cloud-Adoption. Strukturell positiv für R&amp;D-Segment. Quelle: FinancialContent 05.03.26.</div>
+          <div class="event-label">2026 – Pharma-IT-Budgets unter Druck</div>
+          <div class="event-text">Trump-Administration Tariffs auf Pharma-Importe und Drug-Pricing-Reform setzen Pharma-Margen unter Druck. Mittelbar könnte das IT-Budgets verlangsamen – Veeva als „mission-critical" weniger betroffen, aber nicht immun.</div>
         </div>
       </div>
-      <div class="source">Quellen: Veeva IR PR-Feed (Feb–Mai 26); TipRanks Analyst Ratings (Apr 26); IntuitionLabs Industry Reports (Feb–Mar 26); Reuters/Bloomberg via Tickeron (Mai 26)</div>
+      <div class="source">Quellen: CNBC (30.04.2026); Yahoo Finance VEEV-Coverage; Motley Fool; Stocktitan; eigene Synthese</div>
     </div>
   </div>
 
-  <!-- ====== SEKTION 9: TECHNISCHE ANALYSE ====== -->
   <div class="section" id="s9">
     <div class="section-header">
       <div class="section-number">9</div>
@@ -485,212 +440,137 @@ tr:hover td { background: rgba(59,130,246,0.04); }
       <div class="section-score">Score: 5/10</div>
     </div>
     <div class="section-body">
-      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));">
-        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">$157</div></div>
-        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value">~$162</div></div>
-        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value">~$168</div></div>
-        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value">~$210</div></div>
-        <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value neutral">~42</div></div>
-        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value">$295</div></div>
-        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value red">Negativ</div></div>
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom:16px;">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value">$156.88</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value">~$166</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value">~$170</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value">~$215</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI</div><div class="kpi-value">~54</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W High</div><div class="kpi-value">$310.50</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W Low</div><div class="kpi-value">$148.05</div></div>
       </div>
-      <h3>Trend &amp; Setup</h3>
-      <p>Klar bärischer Trend seit Dezember 2025. Kurs ist von $295 (52W-Hoch) auf $148 (52W-Tief Ende April 2026) gefallen – das ist ein Drawdown von -50%. Die Aktie handelt unter SMA20, SMA50 und vor allem deutlich unter dem SMA200 (~$210). Alle Moving Averages liegen in absteigender Reihenfolge (SMA20 &lt; SMA50 &lt; SMA200) – klassisches „Death Cross"-Setup, kein Trendwechsel-Signal.</p>
-      <h3>S&amp;P 500-Pop und Reaktion</h3>
-      <p>Die Aufnahme in den S&amp;P 500 (Ankündigung 30.04.) ließ den Kurs kurzfristig auf $172,50 springen – aber der Pop wurde innerhalb von 2 Wochen wieder vollständig abverkauft. Das ist technisch ein bärisches Signal: Wenn selbst ein positives strukturelles Event nicht zu Trendumkehr führt, fehlt institutionelles Interesse jenseits passiver Flows.</p>
-      <h3>Support &amp; Resistance</h3>
-      <p>Wichtige Levels: Support bei $148 (52W-Tief, getestet), darunter $135 (psychologisch). Resistance bei $172 (S&amp;P-500-Pop-High), $185 (Earnings-Pop März), $210 (SMA200). RSI 42 zeigt: weder überkauft noch überverkauft – es fehlt ein Boden-Bildungs-Signal. Für eine technische Bottom-Bestätigung müsste der Kurs $172 nachhaltig durchbrechen und SMA50 zurückgewinnen.</p>
-      <h3>Volumen</h3>
-      <p>Volumen war zur S&amp;P-500-Ankündigung erhöht, sonst durchschnittlich. Kein institutioneller Akkumulations-Footprint sichtbar.</p>
-      <p>Score 5/10: kurzfristig klar bärisch (alle MAs absteigend, Kurs unter allen), mittelfristig überverkauft mit potenziellem Boden bei $148–155, langfristig (12+ Monate) Mean-Reversion-Potenzial bei fundamentalem Trigger.</p>
-      <div class="source">Quellen: TradingView VEEV Daily Chart (14.05.26); Finviz quote/VEEV (Mai 26); Trefis Analyse 01.05.26</div>
+      <p><strong>Aktueller Trend:</strong> Seitwärts/leicht abwärts. Kurs hat einen massiven Downtrend seit November 2025 ($310 auf $148) durchgemacht und stabilisiert sich seit S&amp;P-500-Aufnahme (07.05.2026) bei $150–170. Unter SMA 50 und massiv unter SMA 200 (–27%).</p>
+      <p><strong>Support/Resistance:</strong> Starker Support bei $148–152 (52W-Tief + S&amp;P-Inclusion-Boden). Resistance bei $172 (SMA 50, S&amp;P-Pop-High) und $190–200 (psychologisch + April-Highs).</p>
+      <p><strong>Momentum:</strong> RSI ~54 neutral. STOCH/STOCHRSI neutral. CCI(14) bei ~72 leicht überkauft auf kurzer Frist (Bounce nach S&amp;P-Inclusion). Volumen am S&amp;P-Aufnahme-Tag deutlich erhöht (3x Durchschnitt).</p>
+      <p><strong>Lesart:</strong> Klassische Bodenbildungs-Phase. Die Aktie ist kurzfristig „fair value" auf 30J-Multiple, langfristiger Downtrend gebrochen. Aber: Solange Kurs unter SMA 200 ($215), kein technisches Kaufsignal. Für langfristige Investoren attraktiver Einstiegsbereich, für Trader noch zu früh.</p>
+      <div class="source">Quellen: StockScan VEEV Technical (Mai 2026); TradingView VEEV; Robinhood Quote (14.05.2026)</div>
     </div>
   </div>
 
-  <!-- ====== SEKTION 10: RISIKEN ====== -->
   <div class="section" id="s10">
     <div class="section-header">
       <div class="section-number">10</div>
       <div class="section-title">Risiken &amp; Chancen</div>
-      <div class="section-score">Score: 7/10</div>
+      <div class="section-score">Score: 7/10 (invertiert)</div>
     </div>
     <div class="section-body">
       <h3>Strukturelle Risiken</h3>
       <div class="risk-item">
         <div class="risk-header">
-          <div class="risk-title">⚡ Salesforce Life Sciences Cloud – Wettbewerbsverlust im CRM</div>
+          <div class="risk-title">⚡ Salesforce Life Sciences Cloud disruptiert Top-20-CRM</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Salesforce hat 2024 Non-Compete auslaufen lassen und greift aktiv im Top-20-Pharma-Segment an. Wenn 3–5 Top-20-Kunden über die nächsten 24 Monate wechseln, könnten ~5–8% Commercial-Umsatz wegfallen ($60–100M). Op-Marge könnte um 100–150 bps fallen. Wahrscheinlichkeit: 30–40%.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Wachstumsverlangsamung &amp; Multiple-Compression</div>
           <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
         </div>
-        <div class="event-text">Salesforce mit IQVIA-Partnerschaft gewann seit Sep 2025 40–70 Life-Sciences-Kunden, mindestens einer war ein großer Veeva-Bestandskunde. Falls die Erosion auf 25–30% der Top-50-Pharmas eskaliert, würden ca. $300–500M ARR über 2026–2028 fehlen (ca. 8–12% des CRM-Umsatzes oder 2–3% des Gesamt-CRM-Tarifs). Wahrscheinlichkeit: 40% für moderate Erosion, 15% für schwere Erosion.</div>
+        <div class="event-text">FY27-Guidance (+12%) ist die niedrigste Wachstumsrate seit IPO. Wenn FY28 weiter auf &lt;10% fällt, könnte Multiple auf 15x FWD P/E komprimieren = Kurs ~$130. Wahrscheinlichkeit: 25%.</div>
       </div>
       <div class="risk-item">
         <div class="risk-header">
-          <div class="risk-title">⚡ Vault CRM-Migrations-Risiko (Eigen-disruption)</div>
-          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+          <div class="risk-title">⚡ Agentic AI ersetzt traditionelle Workflow-SaaS</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch (langfristig)</span></div>
         </div>
-        <div class="event-text">Veeva migriert eigene Bestandskunden vom alten Salesforce-basierten CRM auf Vault CRM. Custom Code wird NICHT migriert – Kunden müssen Drittintegrationen selbst neuentwickeln. Komplexität schafft Churn-Risiko (geschätzt 5–10% der Top-20 wechseln). End-of-Support Dez 2029 erzwingt Entscheidungsfenster. Wahrscheinlichkeit von Disruption: 35%.</div>
+        <div class="event-text">Wenn agentische AI (z.B. Anthropic Claude, OpenAI o4) klinische Daten direkt verarbeiten kann ohne Veeva-CRM/Vault als Mittler, schrumpft TAM. Mittelfristig (3–5 Jahre) ein Risiko, kurz-/mittelfristig durch Compliance-Anforderungen abgemildert. Wahrscheinlichkeit (signifikanter Effekt bis 2030): 20–30%.</div>
       </div>
       <div class="risk-item">
         <div class="risk-header">
-          <div class="risk-title">⚡ AI-Disruption / Agentic AI bedroht Sales-Rep-Modell</div>
-          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-red">Auswirkung: Hoch</span></div>
+          <div class="risk-title">⚡ Pharma-Industrie-Druck durch Drug-Pricing-Reform &amp; Tariffs</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Niedrig–Mittel</span></div>
         </div>
-        <div class="event-text">Das Vault-CRM-Geschäftsmodell basiert auf Pharma-Sales-Reps, die Ärzte besuchen. Wenn AI-Agents zunehmend direkt mit medizinischen Fachkreisen kommunizieren (RegASK, Ostro), könnte die Anzahl der CRM-Lizenzen langfristig schrumpfen. Citi hat diese Sorge explizit im April-Downgrade erwähnt. Mittelfristig pro Veeva (eigene AI-Agents), langfristig (5+ Jahre) Strukturrisiko. Wahrscheinlichkeit: 30% für materielle Auswirkung in 5 Jahren.</div>
+        <div class="event-text">Trump-Tariffs auf Pharma + IRA Drug Pricing könnten Pharma-Margen unter Druck setzen → längere IT-Sales-Cycles. Veeva als „mission-critical" relativ resilient. Wahrscheinlichkeit (Wirkung auf Umsatz): 40%, Effekt: –2 bis –4% Wachstum.</div>
       </div>
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">⚡ China-Marktrisiko / Data Residency</div>
-          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Niedrig-Mittel</span></div>
-        </div>
-        <div class="event-text">Chinas Datenschutzgesetze (PIPL, DSL) und lokale Konkurrenz bremsen Veeva. China ist Subset von APAC (~12% Umsatz), aber war Wachstumstreiber. Ohne China weiteres Wachstum in APAC schwierig. Wahrscheinlichkeit: 60% für anhaltende Schwäche.</div>
-      </div>
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">⚡ Verlangsamung des Topline-Wachstums in den niedrigen Teens</div>
-          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
-        </div>
-        <div class="event-text">FY27-Guidance impliziert 12,5% Wachstum, deutlich unter 16% in FY26. Wenn $6 Mrd. Run-Rate-Ziel 2030 verfehlt wird (also Wachstum unter 13% CAGR), würde das Multiple weiter komprimieren auf 17–18x Fwd P/E (entspricht ca. $135–145). Wahrscheinlichkeit für Guidance-Verfehlung: 25%.</div>
-      </div>
+      <h3>AI-Risiko (spezifisch)</h3>
+      <p><strong>Bullisches Szenario:</strong> Veeva integriert AI in Vault &amp; CRM, „Veeva AI Suite" (Launch 2026) wird zum Add-on-Revenue mit hohen Margen. Veeva nutzt Domain-Daten als Moat – AI ohne validierte Life-Sciences-Daten ist nutzlos.</p>
+      <p><strong>Bärisches Szenario:</strong> Agentic AI ersetzt CRM-Frontend; Pharma-Konzerne bauen eigene AI-Layer auf AWS/Azure mit Generika-Vault-Alternativen. Veeva wird zum „Datenlieferanten" reduziert, Margen schmelzen.</p>
       <h3>Chancen</h3>
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">💎 Veeva AI Agents – Up-Sell-Hebel über alle Module</div>
-          <div><span class="badge badge-green">Hoch</span> <span class="badge badge-green">Auswirkung: Hoch</span></div>
-        </div>
-        <div class="event-text">Launch Dezember 2025, Roll-out durch 2026 in Commercial, Safety, Quality, Clinical. Wenn Veeva AI auch nur 5% Preis-Uplift pro Kunde erreicht, sind das +$150M ARR ohne neue Kunden. Bullish, falls Kunden-Akzeptanz sich bestätigt.</div>
-      </div>
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">💎 Crossix Breakout</div>
-          <div><span class="badge badge-green">Mittel-Hoch</span> <span class="badge badge-green">Auswirkung: Mittel</span></div>
-        </div>
-        <div class="event-text">Crossix (Patientendaten-Analytik) hatte laut Q4-Call ein „breakout year". Wenn dieses Segment auf 15% Umsatz-Anteil wächst, schafft das eine zweite Wachstumssäule jenseits CRM/Clinical.</div>
-      </div>
+      <p>(1) Vault-CRM-Migration weitere 60+ Kunden → höhere Margen (keine Salesforce-Lizenz). (2) Medtech &amp; Consumer Products als neue Vertikalen. (3) Quality Cloud Expansion bei CDMOs. (4) M&amp;A mit $6.6B Cash. (5) Crossix Audiences/Measurement als „breakout year".</p>
       <h3>Red Flags &amp; Dealbreaker</h3>
-      <p>Red Flags: (1) Erste Bestandskunden-Abwanderung im EDC/CRM-Segment (Q3 FY26). (2) Citi-Downgrade mit drastischer Target-Kürzung. (3) Aktien-Performance-Mismatch zu Fundamentals. Keine echten Dealbreaker – Veeva bleibt profitabel, schuldenfrei und marktführend.</p>
-      <div class="source">Quellen: Veeva Q3 &amp; Q4 FY26 Earnings Calls; Citi Downgrade Research Note (10.04.26); FinancialContent Industry Analysis (05.03.26); IntuitionLabs Vault/Salesforce Comparison (16.02.26)</div>
+      <p><strong>Red Flags:</strong> Wachstumsverlangsamung in Commercial Solutions; FY27-Guidance konservativ aber niedrig. <strong>Dealbreaker (würde Position kosten):</strong> 2+ Top-10-Pharma wechseln offen zu Salesforce → strukturelle Moat-Erosion sichtbar.</p>
+      <div class="source">Quellen: Yahoo Finance Narrative (10.04.2026); Trefis (Mai 2026); IntuitionLabs (Jan 2026); eigene Risk-Synthese</div>
     </div>
   </div>
 
-  <!-- ====== SEKTION 11: SCORING ====== -->
   <div class="section" id="s11">
     <div class="section-header">
       <div class="section-number">11</div>
-      <div class="section-title">Scoring &amp; Bewertungsmatrix</div>
-      <div class="section-score">Ø 7,4/10</div>
+      <div class="section-title">Scoring</div>
+      <div class="section-score">⌀ 7.4/10</div>
     </div>
     <div class="section-body">
-      <div class="table-wrap"><table>
-        <thead><tr><th>Kategorie</th><th>Score</th><th>Visualisierung</th><th>Begründung</th></tr></thead>
-        <tbody>
-          <tr>
-            <td>Geschäftsmodell</td><td>8/10</td>
-            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
-            <td>Klare Vertical-SaaS-Dominanz, hochmargig, breit diversifiziert über R&amp;D/Commercial/Quality</td>
-          </tr>
-          <tr>
-            <td>Burggraben</td><td>8/10</td>
-            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
-            <td>Hoch durch Switching Costs und vertikale Tiefe; geschwächt durch Salesforce-Wettbewerb; -1 ggü. historischen 9</td>
-          </tr>
-          <tr>
-            <td>Operative Entwicklung (4Q)</td><td>8/10</td>
-            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
-            <td>Beat-Ratio 4/4, FY26 Wachstum +16% (deutlich über 11% initialer Guidance), Margenexpansion</td>
-          </tr>
-          <tr>
-            <td>Wachstum</td><td>7/10</td>
-            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
-            <td>Verlangsamung von 16% auf 12,5% (FY27-Guidance), aber $6 Mrd. 2030-Ziel intakt; R&amp;D überholt CRM</td>
-          </tr>
-          <tr>
-            <td>Bewertung</td><td>8/10</td>
-            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
-            <td>Multiple-Reset (P/Sales 7,2x vs. 12,4x 5J-Median, PEG 1,04, P/E Fwd 20x); attraktiv für Quality-Compounder</td>
-          </tr>
-          <tr>
-            <td>Cashflow &amp; Kapitalqualität</td><td>9/10</td>
-            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
-            <td>$6,6 Mrd. Liquidität, schuldenfrei, 44,9% Op-Marge, &gt;90% FCF-Konversion; nur Kapitalallokation -1</td>
-          </tr>
-          <tr>
-            <td>Risiken (invertiert)</td><td>7/10</td>
-            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
-            <td>Salesforce-Wettbewerb &amp; AI-Disruption greifbar, aber nicht existenziell; -1 ggü. historisch 8</td>
-          </tr>
-          <tr>
-            <td>Technische Analyse</td><td>5/10</td>
-            <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td>
-            <td>Bärischer Trend, unter allen MAs, Death-Cross-Setup; nahe 52W-Tief, aber kein Boden bestätigt</td>
-          </tr>
-          <tr style="background:rgba(59,130,246,0.08);">
-            <td><strong>⌀ Gesamtscore</strong></td>
-            <td><strong>7,4/10</strong></td>
-            <td>
-              <div class="score-bar">
-                <div class="score-bar-track">
-                  <div class="score-bar-fill" style="width:74%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
-                </div>
-                <span class="score-num" style="color:var(--primary);">7,4</span>
-              </div>
-            </td>
-            <td>Solides Quality-Compound mit zyklischer Multiple-Kompression; Risk/Reward asymmetrisch positiv</td>
-          </tr>
-        </tbody>
-      </table></div>
-      <div class="source">Quellen: Eigene Score-Kalibrierung basierend auf Sektionen 1–10; vs. v1.0 (Sep 2025): Burggraben -1, Risiken -1, Bewertung +2, Technik -2</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Score-Bar</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td>Geschäftsmodell</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>Vertical SaaS, dominant, 1.550 Kunden, Top-20 voll penetriert</td></tr>
+            <tr><td>Burggraben</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>Hohe Switching Costs, GxP-Validierung, Vault-CRM macht unabhängig</td></tr>
+            <tr><td>Operative Entwicklung (4Q)</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>4/4 Beats, 16% YoY konstant, Margen-Expansion</td></tr>
+            <tr><td>Wachstum</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Solid +16% FY26, aber FY27 Guidance auf +12% (niedrigste seit IPO)</td></tr>
+            <tr><td>Bewertung</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>FWD P/E 22x vs. 5J-Schnitt 38x – signifikanter Discount</td></tr>
+            <tr><td>Cashflow</td><td>9/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>42% FCF Margin, $6.6B Cash, schuldenfrei, $2B Buyback</td></tr>
+            <tr><td>Risiken (invertiert)</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Salesforce-Konkurrenz real, aber existenzbedrohend nur in 5%-Szenario</td></tr>
+            <tr><td>Technische Analyse</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Unter SMA 50/200, aber Bodenbildung; S&amp;P-Inclusion stabilisiert</td></tr>
+            <tr style="background:rgba(59,130,246,0.08);"><td><strong>⌀ Gesamtscore</strong></td><td><strong>7.4/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:74%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">7.4</span></div></td><td>Quality-SaaS auf Discount, aber Wachstums-De-Rating gerechtfertigt</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- ====== SEKTION 12: FAZIT ====== -->
   <div class="section" id="s12">
     <div class="section-header">
       <div class="section-number">12</div>
       <div class="section-title">Fazit – Investment-These</div>
-      <div class="section-score">Rating: KAUFEN</div>
     </div>
     <div class="section-body">
-
       <div class="bull-bear-grid">
         <div class="bull-card">
           <h4>🐂 Das Bullische Narrativ</h4>
-          <p><strong>Säule 1 – Multiple-Reset bei intakter Qualität:</strong> Forward-P/E von 20x bei 44,9% Op-Marge und 12,5% Wachstum ist mathematisch günstig. PEG 1,04 zeigt ein faires Wachstum-zu-Bewertung-Verhältnis. Historischer Median-P/E lag bei 30x – eine Mean-Reversion auf 25x Fwd P/E bei FY27-EPS $8,80 implizit $220, also +40% Upside. Das ist konservativ, da andere SaaS-Peers (Workday 26x) bei niedrigeren Margen handeln.</p>
-          <p><strong>Säule 2 – R&amp;D Cloud als zweite Wachstumssäule:</strong> Veeva R&amp;D-Solutions wuchsen FY26 mit +18% und überholten erstmals Commercial. Diese Vertikale ist deutlich klebriger (FDA-validierte Studien-Workflows, mehrjährige Klinik-Verträge), weniger CRM-Wettbewerbsdruck-exponiert und hat strukturellen Rückenwind durch Precision Medicine und Decentralized Trials. Wenn R&amp;D weiterhin +15–18% wächst, kompensiert es eine ggf. langsamere CRM-Entwicklung.</p>
-          <p><strong>Säule 3 – S&amp;P 500 + Veeva AI als 2026 Katalysatoren:</strong> Aufnahme in S&amp;P 500 (07.05.) schafft strukturelle Passive-Flow-Nachfrage von geschätzten $500M+ ETF-Inflows. Veeva AI Agents (Launch Dez 25, Rollout 2026) bieten echten ARR-Hebel: bei 5% Preis-Uplift = +$150M ARR. Kombination aus mechanischer Bewertungs-Unterstützung und operativem Upside-Trigger ist asymmetrisch positiv.</p>
+          <p><strong>Säule 1: Bewertungs-Reset.</strong> Veeva handelt bei 22x FWD P/E – tiefster Wert seit 2018 und 42% Discount zum 5J-Schnitt. Bei FY27 EPS-Guidance von $8.65 und Multiple-Reversion auf 28–30x ergibt sich Kursziel $240–260 (+55%/+65%). Die S&amp;P-500-Inclusion bringt strukturelle Käufer-Nachfrage.</p>
+          <p><strong>Säule 2: Vault-CRM-Migration als zweite Wachstums-Welle.</strong> 140+ Kunden live (von 0 vor 3 Jahren), 200-Kunden-Ziel in Sicht, Roche und Novo Nordisk International bestätigen Top-20-Akzeptanz. Jede Migration erhöht ARR pro Kunde um 30–40% und entkoppelt Veeva von Salesforce-Lizenzkosten → Op-Marge kann auf 46–48% steigen.</p>
+          <p><strong>Säule 3: Bilanz-Festung &amp; Kapitalrückführung.</strong> $6.6 Mrd Cash (26% der Market Cap), schuldenfrei, FCF-Margin 42%, $2 Mrd Buyback im Januar 2026. Das ist Quality-Compounder-Qualität. Selbst im Bear-Case bleibt Veeva profitabel und FCF-stark.</p>
         </div>
         <div class="bear-card">
           <h4>🐻 Das Bärische Narrativ</h4>
-          <p><strong>Risiko 1 – Wachstumsverlangsamung ist real, nicht zyklisch:</strong> FY27-Guidance impliziert 12,5%, weiteres Decay auf 10% bis 2028 möglich. Bei 10% Wachstum wäre selbst 20x Fwd P/E nicht günstig (PEG würde auf 2,0 steigen). Salesforce Life Sciences Cloud-Wins (40–70 Kunden) sind nicht mehr ignorierbar – wenn die nächsten Quartale weitere Top-20-Defektionen zeigen, kollabiert die These „Veevas Moat ist unangreifbar".</p>
-          <p><strong>Risiko 2 – AI-Disruption des Sales-Rep-Modells:</strong> Citi (10.04.26) hat explizit „AI-Durability-Sorgen" als Downgrade-Grund genannt. Die strukturelle Frage: Wenn AI-Agents zunehmend direkt mit Ärzten interagieren (Ostro, RegASK), schrumpft die Anzahl der Pharma-Sales-Reps – und damit die CRM-Lizenzen. Veevas eigene AI ist Verteidigung, aber bietet kaum struktureller Mehr-ARR-Hebel als die Konkurrenz.</p>
-          <p><strong>Risiko 3 – Eigen-Disruption Vault CRM-Migration:</strong> Der Migrations-Prozess ist eine 4-jährige Bewährungsprobe für den Moat. Custom-Code wird nicht migriert – Pharma-IT-Abteilungen müssen ohnehin re-implementieren. Wenn sie ohnehin re-implementieren, warum nicht gleich auf Salesforce wechseln? 6 der Top-20-Kunden haben das bereits entschieden – wenn weitere 4 folgen, sinkt die Top-20-Retention von 70% auf 50%. Bei P/E 20x ist das nicht eingepreist.</p>
+          <p><strong>Risiko 1: Salesforce greift Top-20-CRM an.</strong> Salesforce Life Sciences Cloud ist 2026 in mehreren Top-20-Pharma im Pilot. Wenn 3–5 Großkunden über die nächsten 24 Monate wechseln, fallen $60–100M Commercial-Umsatz weg. Multiple könnte auf 15–18x P/E komprimieren = Kurs $130–145 (–8% bis –17%).</p>
+          <p><strong>Risiko 2: Wachstumsverlangsamung struktureller Natur.</strong> FY27-Guidance +12% ist die niedrigste seit IPO 2013. Top-20-Pharma-Markt ist gesättigt. Neue Wachstumstreiber (Medtech, Consumer, AI) sind unbewiesen. Wenn FY28 auf &lt;10% fällt, ist Veeva ein „Mature SaaS" – Multiples nähern sich Oracle/SAP-Niveau (12–15x P/E).</p>
+          <p><strong>Risiko 3: Agentic AI als langfristige Disruption.</strong> Wenn agentische AI (3–5 Jahre Horizont) direkt mit klinischen Daten arbeiten kann, schrumpft Veevas TAM. Pharma-Konzerne bauen eigene AI-Layer mit Anthropic/OpenAI – Veeva wird zur Commodity. Bear-Case-Kursziel 2028: $100–120.</p>
         </div>
       </div>
 
-      <h3>Eigene Einschätzung (ausgewogen)</h3>
-      <p>Das bullische Narrativ ist <em>strukturell überzeugender</em>, aber das bärische Narrativ ist die ehrlichere Risk-Off-Sicht. Veeva bleibt die mit Abstand wettbewerbsfähigste Life-Sciences-Cloud-Plattform: 44,9% Op-Marge, $6,6 Mrd. Cash, 1.477 Kunden, R&amp;D-Vertikale am Wachsen. Die Salesforce-Konkurrenz ist real, aber nicht existenziell – bei einer Top-20-Retention von 14/20 (70%) bleibt Veeva eindeutig Marktführer.</p>
-      <p>Die zentrale Frage ist nicht „Verliert Veeva den CRM-Markt?", sondern „Wie schnell verschiebt sich der Mix von CRM (20% Umsatz, +15%) zu R&amp;D + Quality (45% Umsatz, +18%)?" – wenn dieser Mix-Shift gelingt, ist die Verlangsamung auf 12,5% ein zyklisches Tief, kein neuer Trend. Das Multiple-Reset von 12,4x auf 7,2x P/Sales hat bereits einen großen Teil des „CRM-Verlust-Risikos" eingepreist.</p>
-      <p>Risk/Reward bei $157: -15% Downside (Support $135, falls FY27-Guidance verfehlt) vs. +40–60% Upside (Mean-Reversion auf 25x P/E Fwd = $220, Bull Case Veeva AI breakout = $260). Risk/Reward 1:3 bis 1:4, asymmetrisch positiv für Quality-Growth-Investoren mit 2–3 Jahres-Horizont.</p>
+      <h3>Eigene Einschätzung</h3>
+      <p>Das bullische Narrativ überzeugt mich stärker als das bärische, mit einigen Caveats. Die Bewertung ist objektiv attraktiv: 22x FWD P/E für ein Unternehmen mit 44.9% Op-Marge, $6.6B Cash und marktbeherrschender Position ist historisch eine Ausnahme-Opportunity. Die S&amp;P-500-Aufnahme stabilisiert das Sentiment und bringt strukturelle Käufer.</p>
+      <p>Aber: Das bärische Argument zur Wachstumsverlangsamung ist real und sollte nicht weggeredet werden. +12% FY27 ist nicht +20% wie 2021. Veeva ist 2026 ein Quality-Compounder, kein Hyper-Grower mehr. Das rechtfertigt einen niedrigeren Multiple als historisch – aber 22x ist überreagiert.</p>
+      <p>Risk/Reward: –10% Downside (Support $140) vs. +55% Upside (Kursziel $240 in 12–18M). Geeignet für GARP/Quality-Investoren mit 2–4 Jahres-Horizont.</p>
 
-      <h3>Zeithorizont-Einordnung</h3>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Einschätzung</th></tr></thead>
-        <tbody>
-          <tr><td><strong>0–6 Monate</strong></td><td>Q1 FY27 Earnings (03.06.26), S&amp;P 500-Inflows, Veeva AI-Adoption-Signale</td><td>Citi-Style Sentiment-Schwäche, fehlender Trend-Reversal</td><td>Volatil, eher seitwärts bis $170–180</td></tr>
-          <tr><td><strong>6–24 Monate</strong></td><td>R&amp;D-Cloud-Wachstum, Vault CRM-Migrations-Erfolge, Crossix-Scaling</td><td>Salesforce-Wins-Beschleunigung, AI-Disruption-Sorgen</td><td>Aufwärts-Bias auf $200–240</td></tr>
-          <tr><td><strong>2–5 Jahre</strong></td><td>$6 Mrd. Run-Rate 2030, Veeva-AI-Marktdurchdringung, weitere M&amp;A</td><td>Strukturelle Margenkompression durch AI/Wettbewerb</td><td>Wahrscheinlich $280–340 bei Plan-Erreichung</td></tr>
-        </tbody>
-      </table></div>
+      <h3>Zeithorizont-Einschätzung</h3>
+      <p><strong>Kurzfristig (0–6 Monate):</strong> Volatilität bleibt. Q1 FY27 Earnings am 03.06.2026 ist der nächste Trigger. Bei „in-line"-Ergebnis stabilisiert sich Kurs $150–175. Konservativ: Warten.<br>
+      <strong>Mittelfristig (6–24 Monate):</strong> Vault-CRM-Migration-Progress und FY28-Guidance entscheiden. Bei +15% FY28-Guidance Rückkehr zu $220–250. Moderat: Tranchiert einsteigen.<br>
+      <strong>Langfristig (2–5 Jahre):</strong> Wenn $6B-2030-Run-Rate-Ziel erreicht wird, ist EPS ~$12 → bei 22x P/E = $264. Aggressiv: Kaufen &amp; Halten.</p>
 
       <h3>Kernthese</h3>
-      <p>Veeva ist nach 30% Korrektur seit Jahreswechsel in einer Zone, wo Bewertung und Geschäftsqualität erstmals seit Jahren konvergieren. Der Markt preist ein, dass Salesforce-Wettbewerb die Wachstumsdynamik strukturell auf niedrige Teens drückt. Diese Sicht ist plausibel, aber das Risk/Reward bei P/E Fwd 20x und PEG 1,04 ist klar asymmetrisch zugunsten Long-Positionierung – unter der Annahme, dass die R&amp;D-Vertikale kompensiert und Veeva AI sich als ARR-Hebel materialisiert. <strong>Rating: KAUFEN (tranchiert)</strong>.</p>
+      <p>Veeva ist 2026 ein Quality-SaaS-Compounder mit temporärer Bewertungs-Anomalie. Marktbeherrschende Position in Life-Sciences-Cloud, beste Operating Margins der Peer-Gruppe, $6.6B Cash-Fortress, $2B Buyback und S&amp;P-500-Inclusion auf der Pro-Seite – gegenüber realer Salesforce-Konkurrenz und strukturell verlangsamtem Wachstum auf der Contra-Seite. Bei 22x FWD P/E ist das Risk/Reward attraktiv für 2–5 Jahres-Investoren.</p>
 
       <div class="rating-box">
         <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
-        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$200–240</div></div>
-        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–3 Jahre</div></div>
-        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–15%</div></div>
-        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+40 bis +60%</div></div>
-        <div class="rating-item"><label>Risk/Reward</label><div class="val buy">1:3 bis 1:4</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$220–250</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–4 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–10%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+55%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val buy">1:5.5</div></div>
       </div>
 
       <h3>Was falsifiziert die These?</h3>
@@ -698,19 +578,19 @@ tr:hover td { background: rgba(59,130,246,0.04); }
         <div class="trigger-card sell">
           <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
           <ul class="trigger-list">
-            <li>Q1 FY27 (03.06.26): Revenue-Miss oder Guidance-Senkung &lt;12% → reduzieren</li>
-            <li>2+ weitere Top-20-Pharma-Defektionen zu Salesforce gemeldet → Position halbieren</li>
-            <li>FY27 Op-Marge fällt unter 42% (Massiver Wettbewerbsdruck-Indikator) → verkaufen</li>
-            <li>Veeva AI Adoption-Quote nach 6M unter 20% der Top-100-Kunden → Erwartungen senken</li>
+            <li>2+ Top-10-Pharma kündigen offen Wechsel zu Salesforce → sofort verkaufen</li>
+            <li>FY28-Guidance fällt unter +10% YoY → Position halbieren</li>
+            <li>Op-Marge fällt unter 42% in zwei Quartalen → Risk-off</li>
+            <li>Kurs unter $140 + neue Tiefststände → Stopp</li>
           </ul>
         </div>
         <div class="trigger-card buy">
           <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
           <ul class="trigger-list">
-            <li>Q1 FY27 Revenue Beat &gt;3% UND Guidance-Anhebung → tranchiert nachkaufen</li>
-            <li>Veeva AI ARR-Disclosure &gt;$100M in 2026 → strukturelles AI-Multiple-Argument</li>
-            <li>Top-20 Vault-CRM-Quote steigt von 14/20 auf 16/20 → Salesforce-Bedrohung neutralisiert</li>
-            <li>Kurs durchbricht SMA200 bei $210 mit Volumen → technischer Trendwechsel</li>
+            <li>Vault-CRM-Kunden &gt;180 in nächsten 2 Quartalen → nachkaufen</li>
+            <li>Q1/Q2 FY27 Guidance-Raise zu +14% oder höher → aufstocken</li>
+            <li>Veeva AI Suite mit messbarer ARR-Beitrag → Position aufbauen</li>
+            <li>Kurs durchbricht SMA 200 ($215) → Trend-Bestätigung</li>
           </ul>
         </div>
       </div>
@@ -719,84 +599,63 @@ tr:hover td { background: rgba(59,130,246,0.04); }
       <div class="investor-grid">
         <div class="investor-yes">
           <h5>✅ Geeignet für</h5>
-          <ul>
-            <li>Quality Growth Investoren (Buffett-Style Compounder)</li>
-            <li>Contrarian-Investoren (Multiple-Reset-Käufer)</li>
-            <li>Healthcare/Tech-Spezialisten mit Sektor-Expertise</li>
-            <li>Langfrist-Anleger mit 2–5 Jahres-Horizont</li>
-          </ul>
+          <ul><li>Quality-Growth-Investoren</li><li>GARP (Growth at Reasonable Price)</li><li>Langfrist-Compounder-Strategien</li><li>Contrarian-Investoren (S&amp;P-Inclusion-Plays)</li></ul>
         </div>
         <div class="investor-no">
           <h5>❌ NICHT geeignet für</h5>
-          <ul>
-            <li>Income-Investoren (keine Dividende, kaum Buybacks)</li>
-            <li>Kurzfrist-Trader (technisch bärisch, kein Boden-Signal)</li>
-            <li>Deep-Value-Investoren (bei 7,2x P/Sales noch Premium)</li>
-            <li>Momentum-Investoren (Death-Cross-Setup)</li>
-          </ul>
+          <ul><li>Reine Value-Investoren (P/E 22x kein Bargain)</li><li>Income-Investoren (keine Dividende)</li><li>Kurzfrist-Trader (technisch noch im Abwärtstrend)</li><li>Hyper-Growth-Investoren (Wachstum verlangsamt)</li></ul>
         </div>
       </div>
 
       <h3>Empfohlener Einstieg</h3>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
-        <tbody>
-          <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten auf Q1 FY27 (03.06.26)</span></td><td>Earnings als Klarheits-Katalysator abwarten, dann positionieren</td></tr>
-          <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranche 1 jetzt (40%), Tranche 2 nach Q1-Bestätigung (60%)</span></td><td>Risk/Reward 1:3 rechtfertigt Einstieg unter $165</td></tr>
-          <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt voll positionieren</span></td><td>Multiple-Reset abgeschlossen, S&amp;P-500-Pop ausverkauft = Einstiegsfenster</td></tr>
-          <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten zum $6 Mrd. 2030-Ziel</span></td><td>Veeva bleibt strukturell Marktführer in Life-Sciences-Cloud; 13–14% CAGR realistisch</td></tr>
-        </tbody>
-      </table></div>
-      <div class="source">Quellen: Synthese aller Sektionen; eigene Bewertungsmodelle; Veeva FY27-Guidance; Analystenkonsens (Public.com, MarketBeat 14.05.26)</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / Q1 FY27 abwarten</span></td><td>Trigger 03.06.2026 (Earnings); Volatilität noch hoch</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>33% jetzt, 33% nach Q1, 33% nach Q2 FY27</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Bewertung historisch tief, S&amp;P-Inclusion-Boden</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>$6B-Run-Rate-2030-Ziel impliziert ~14% CAGR</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- ====== SEKTION 13: OUTLOOK ====== -->
   <div class="section" id="s13">
     <div class="section-header">
       <div class="section-number">13</div>
-      <div class="section-title">Outlook – Wenn/Dann-Trigger</div>
-      <div class="section-note">3 wichtigste Events 2026</div>
+      <div class="section-title">Outlook – Anstehende Events</div>
     </div>
     <div class="section-body">
-
       <div class="outlook-card">
         <h4>📊 Event 1: Q1 FY27 Earnings – 03. Juni 2026</h4>
-        <p>Erstes Q-Earnings nach der drastischen Wachstumsverlangsamung-Guidance (12,5%). Markt wird ganz spezifisch auf drei Datenpunkte schauen: (a) Subscription-Revenue-Wachstum (muss &gt;14% sein, um Beschleunigungs-Narrativ zu stützen), (b) Anzahl der Vault CRM-Migrations-Updates (Erwartung: 150+ Kunden live), (c) Veeva AI-Adoption-Metrik (erste belastbare ARR-Indikation).</p>
+        <p>Erste Quartalsergebnisse unter neuer Wachstumsphase (+12%-Guidance). Markt achtet auf: (a) Konsens-EPS $2.13, Revenue $855–858M; (b) Q2-Guidance; (c) Vault-CRM-Kunden-Update (Ziel: &gt;150 live); (d) Veeva AI Suite Adoption-Metriken; (e) FX-Tailwinds.</p>
         <div class="when-then">
-          <strong>Wenn:</strong> Revenue &gt; $865M (Beat &gt;1%), Subscription &gt; +14%, FY27-Guidance-Anhebung auf &gt;$3,6 Mrd. → nachkaufen, Multiple-Reset-These bestätigt, technisch Re-Test SMA50 ($168) wahrscheinlich.<br><br>
-          <strong>Wenn:</strong> Revenue im Guidance-Mittelpunkt ($855–858M), keine Guidance-Anhebung, weitere Salesforce-Defektionen erwähnt → Position halten, abwarten auf Q2-Bestätigung.<br><br>
-          <strong>Wenn:</strong> Revenue-Miss &lt;$850M oder FY27-Guidance gesenkt → Position um 50% reduzieren, Kurs würde wahrscheinlich auf $135–140 fallen.
+          <strong>Wenn:</strong> Revenue &gt;$860M (Beat 0.5%+) UND Vault-CRM-Kunden &gt;150 → AI-Hebel und Wachstum bestätigt, kurzfristig Long aufstocken bis $200.<br><br>
+          <strong>Wenn:</strong> Revenue &lt;$852M (Miss) ODER Q2 Guidance flach/sinkend → strukturelle Wachstumssorgen, Position reduzieren auf Watch-Status.
         </div>
       </div>
-
       <div class="outlook-card">
-        <h4>📊 Event 2: Veeva AI Adoption-Disclosure – Q3 FY27 (vsl. November 2026)</h4>
-        <p>Ein Jahr nach Launch der Veeva AI Agents (Dez 2025) sollte konkrete ARR-Belastbarkeit messbar sein. Management hat in Q3 FY26 angedeutet, dass „AI Agents deployed across commercial, safety, quality, clinical by end of 2026". Das ist der entscheidende Datenpunkt für die langfristige AI-Disruption-These: Kann Veeva selbst der AI-Disruptor seines Vertical sein, oder wird es disrupted?</p>
+        <h4>📊 Event 2: Vault-CRM-Migration-Pace im 2H FY27</h4>
+        <p>Bis Ende FY27 (Januar 2027) Ziel von 200 Vault-CRM-Kunden. Bei aktuellem Tempo (140 in März 2026, Roche/Novo Nordisk International im April) realistisch. Diese Migrationen bringen ARR-Uplift +30–40% pro Kunde und entkoppeln Veeva von Salesforce-Lizenzgebühren.</p>
         <div class="when-then">
-          <strong>Wenn:</strong> Veeva diskloses &gt; $100M Veeva-AI-ARR oder &gt;30% Adoption in Top-100-Kunden → strukturelles Multiple-Upgrade möglich, AI-Bär-Argument widerlegt, Kursziel-Range auf $250–300 anheben.<br><br>
-          <strong>Wenn:</strong> AI-ARR &lt;$50M oder Adoption &lt;15% → Citi-Bear-Case bestätigt, Multiple bleibt bei 18–20x Fwd P/E, Kursziel-Range $170–200.
+          <strong>Wenn:</strong> &gt;180 Vault-CRM-Kunden bis Q3 FY27 (Nov 2026) UND 2+ Top-10-Pharma neu live → Moat-Stärkung bestätigt, Position aufbauen Richtung Zielkurs $250+.<br><br>
+          <strong>Wenn:</strong> &lt;160 Vault-CRM-Kunden bis Q3 FY27 ODER Top-10-Kunde wechselt offen zu Salesforce → Moat-Erosion akut, Position halbieren.
         </div>
       </div>
-
       <div class="outlook-card">
-        <h4>📊 Event 3: Vault CRM Top-20-Migrations-Status – fortlaufend 2026/27</h4>
-        <p>Veeva-Management hat kommuniziert: 14/20 Top-Kunden migrieren auf Vault CRM, 6 wählen Alternativen (vor allem Salesforce Life Sciences Cloud). Diese Quote ist die wichtigste Burggraben-Kennzahl. Jeder Quartalsbericht 2026/27 muss diese Zahl explizit oder implizit bestätigen oder revidieren. Salesforce hat 40–70 Kunden seit Sep 2025 – wenn dieser Trend fortsetzt, sind weitere Veeva-Defektionen wahrscheinlich.</p>
+        <h4>📊 Event 3: Veeva AI Suite Launch &amp; Monetarisierung (2H 2026)</h4>
+        <p>CEO Gassner hat „agentic transformation" als zentralen Wachstumshebel positioniert. Die Veeva AI Apps sollen in 2026 für verschiedene Vault- und CRM-Anwendungen ausgerollt werden. Entscheidend: Add-on-Pricing-Modell mit messbarer ARR-Beitrag.</p>
         <div class="when-then">
-          <strong>Wenn:</strong> Top-20-Migrations-Quote steigt auf 16/20 oder höher → Burggraben strukturell intakt, Salesforce-Bedrohung neutralisiert, Multiple-Re-Rating auf 22–25x Fwd P/E plausibel.<br><br>
-          <strong>Wenn:</strong> Top-20-Quote fällt auf &lt;12/20 ODER ein weiterer Top-10-Pharma defektiert öffentlich → Burggraben-Erosion strukturell bestätigt, weitere 15–20% Multiple-Kompression möglich, Kursziel auf $130–150 anpassen.
+          <strong>Wenn:</strong> Veeva AI mit klarem Add-on-Pricing UND erste $50M+ ARR-Pipeline bis Ende 2026 → AI-Bear-Narrativ widerlegt, Multiple-Re-Rating auf 26–28x P/E möglich = Kurs $240+.<br><br>
+          <strong>Wenn:</strong> Veeva AI bleibt „included feature" ohne separate Monetarisierung → AI-Disruption-Sorgen bleiben, Multiple bleibt komprimiert bei 20–22x P/E.
         </div>
       </div>
-
-      <div class="source">Quellen: Veeva Q3 &amp; Q4 FY26 Earnings Calls; Veeva-IR-Kalender (03.06.26 Q1 FY27); IntuitionLabs CRM-Migrations-Roadmap (07.03.26); Citi Downgrade Research (10.04.26)</div>
     </div>
   </div>
 
-  <div class="disclaimer">
-    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung, kein Angebot zum Kauf oder Verkauf von Wertpapieren und keine Empfehlung im Sinne einer regulierten Anlageberatung dar. Die enthaltenen Einschätzungen, Kursziele und Szenarien basieren auf öffentlich verfügbaren Informationen mit Stand 15.05.2026 und können sich jederzeit ändern. Investitionen in Aktien sind mit Risiken verbunden, einschließlich des Totalverlusts. Die historische Performance ist kein Indikator für zukünftige Ergebnisse. Bitte konsultieren Sie einen lizenzierten Finanzberater, bevor Sie Anlageentscheidungen treffen.
-  </div>
-
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung oder Aufforderung zum Kauf/Verkauf dar. Alle Angaben basieren auf öffentlich verfügbaren Quellen mit Stand 15.05.2026 und sind nach bestem Wissen erstellt, ohne Gewähr auf Vollständigkeit oder Richtigkeit. Investitionen in Aktien sind mit Risiken bis zum Totalverlust verbunden.</div>
 </div>
-
 </body>
 </html>

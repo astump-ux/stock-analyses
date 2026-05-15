@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DT – Aktienanalyse Canvas v2.2</title>
+<style>
+:root { --primary: #3b82f6; --primary-dark: #1e40af; --bg: #0f0f12; --bg-card: #1a1a1f; --bg-card2: #22222a; --border: #2e2e38; --text: #e8e8ec; --text-muted: #888898; --text-dim: #555566; --green: #22c55e; --red: #ef4444; --yellow: #f59e0b; --blue: #3b82f6; --purple: #8b5cf6; --teal: #14b8a6; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+.header { background: linear-gradient(135deg, #00081a 0%, #001028 40%, #0f0f12 100%); border-bottom: 1px solid var(--primary); padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; }
+.header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+.header-left h1 span { color: var(--primary); }
+.header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+.header-right { text-align: right; }
+.price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+.price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+.price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+.price-change.up { background: rgba(34,197,94,0.15); color: var(--green); }
+.price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+.nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100; }
+.nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+.main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+.kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+.kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.kpi-value.green { color: var(--green); }
+.kpi-value.red { color: var(--red); }
+.kpi-value.orange { color: var(--primary); }
+.section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+.section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+.section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.section-title { font-size: 16px; font-weight: 700; color: white; }
+.section-score { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+.section-note { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+.section-body { padding: 20px 24px; }
+p { margin-bottom: 12px; color: var(--text); }
+p:last-child { margin-bottom: 0; }
+h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+h3:first-child { margin-top: 0; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(59,130,246,0.04); }
+.beat { color: var(--green); font-weight: 600; }
+.miss { color: var(--red); font-weight: 600; }
+.neutral { color: var(--yellow); font-weight: 600; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+.badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+.badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+.badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+.badge-orange { background: rgba(59,130,246,0.15); color: var(--primary); }
+.event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+.event-item:last-child { border-bottom: none; }
+.event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+.dot-green { background: var(--green); }
+.dot-red { background: var(--red); }
+.dot-yellow { background: var(--yellow); }
+.event-label { font-weight: 600; color: white; }
+.event-text { font-size: 14px; color: var(--text); }
+.risk-item { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+.risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.risk-title { font-weight: 600; color: white; font-size: 14px; }
+.score-bar { display: flex; align-items: center; gap: 10px; }
+.score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #60a5fa); }
+.score-num { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+.bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+.bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+.bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+.bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.rating-box { background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(59,130,246,0.04)); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+.rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+.rating-item .val { font-size: 20px; font-weight: 800; color: white; }
+.rating-item .val.buy { color: var(--green); }
+.rating-item .val.hold { color: var(--yellow); }
+.rating-item .val.sell { color: var(--red); }
+.trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+.trigger-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.trigger-card h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.trigger-card.buy h5 { color: var(--green); }
+.trigger-card.sell h5 { color: var(--red); }
+.trigger-list { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+.trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+.trigger-list li::before { content: "→"; position: absolute; left: 0; }
+.investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+@media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+.investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+.investor-no { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+.investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-no h5 { color: var(--red); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+.investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+.investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+.geo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+.geo-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.geo-pct { font-size: 20px; font-weight: 700; color: white; }
+.geo-note { font-size: 12px; color: var(--text-muted); }
+.outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+.outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+.outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+.outlook-card .when-then strong { color: var(--primary); }
+.source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+.disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+.alert-box { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Dynatrace <span>DT.NYSE</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 15. Mai 2026 · NYSE · Sektor: Software / AI-Observability</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">AI-Observability</span>
+      <span class="badge badge-blue">Enterprise SaaS</span>
+      <span class="badge badge-red">Starboard Activist (Mai 2026)</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$34.73</div>
+    <div class="price-meta">Schlusskurs 14.05.2026 · NYSE</div>
+    <div class="price-change down">▼ –14% Woche · –26% 6M</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: ~$33 – $60</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">$34.73</div><div class="kpi-sub">USD · 14.05.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value">~$10.5 Mrd</div><div class="kpi-sub">Mid Cap</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/E FWD</div><div class="kpi-value">~21x</div><div class="kpi-sub">TTM ~24x</div></div>
+    <div class="kpi-card"><div class="kpi-label">ARR</div><div class="kpi-value">$2.05 Mrd</div><div class="kpi-sub">+16% YoY (cc)</div></div>
+    <div class="kpi-card"><div class="kpi-label">Op-Marge (non-GAAP)</div><div class="kpi-value green">29%</div><div class="kpi-sub">FY26</div></div>
+    <div class="kpi-card"><div class="kpi-label">FCF Margin</div><div class="kpi-value green">~26%</div><div class="kpi-sub">FY26</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value orange">Aug 2026</div><div class="kpi-sub">Q1 FY27</div></div>
+    <div class="kpi-card"><div class="kpi-label">Buyback</div><div class="kpi-value">$1.0 Mrd</div><div class="kpi-sub">Feb 2026 autorisiert</div></div>
+  </div>
+
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6 Monate</div>
+    </div>
+    <div class="section-body">
+      <p>Dynatrace ist eine führende AI-Observability-Plattform für Enterprises, die komplexe Multi-Cloud-Umgebungen, Microservices, Kubernetes-Workloads und Anwendungen in Echtzeit überwacht, analysiert und automatisch optimiert. Die Plattform vereint Infrastructure Observability, Application Performance Monitoring (APM), Log Management, Digital Experience, Application Security, AI Observability und Business Analytics – also den kompletten „Tech-Stack einer modernen Anwendung" unter einem Dach.</p>
+      <p>Das Geschäftsmodell ist subskriptionsbasiertes SaaS mit Konsumptions-Komponenten. Q4 FY26 (Ende 31.03.2026) erreichte Dynatrace <strong>$2.05 Mrd ARR</strong> (+16% YoY in Konstanter Währung – 4. konsekutives Quartal mit dieser Rate), Total Revenue FY26 ca. $2.01 Mrd. Das DPS-Modell (Dynatrace Platform Subscription) ist mittlerweile bei <strong>75% der ARR</strong> und <strong>60% der Kunden</strong> angekommen – DPS-Kunden zeigen ~2x höhere Adoption- und Consumption-Raten als Legacy-Subscriber.</p>
+      <p>Die Kostenstruktur ist asset-light und hochprofitabel: Bruttomargen ~82%, Non-GAAP Operating Margin 29% in FY26, FCF-Marge ~26%. Bilanz solide: schuldenfrei, $1+ Mrd Cash, $1 Mrd Buyback-Programm im Februar 2026 autorisiert (zusätzlich zum gerade abgeschlossenen $500M-Programm). Dynatrace hat ~4.700 Enterprise-Kunden, durchschnittliche ARR pro Kunde ~$500k (Ziel mittelfristig $1M+), historisch bedient man Großunternehmen mit &gt;$1 Mrd Umsatz.</p>
+      <p>CEO Rick McConnell (seit 2021) und CFO James Benson haben für FY27 stabile Mid-Teens-Wachstum bei wachsenden Margen kommuniziert. Strategische Stoßrichtung: „Autonomous Observability" – AI-Agents übernehmen Diagnose und Remediation von Performance-Problemen.</p>
+      <div class="source">Quellen: Dynatrace Q4 FY26 PR (13.05.2026); Q3 FY26 Earnings Call Transcript (09.02.2026); Motley Fool Q4 Coverage (13.05.2026)</div>
+    </div>
+  </div>
+
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <p><strong>Deterministische + Agentic AI als Kerntechnologie.</strong> Dynatraces Davis-AI-Engine (kausale + prädiktive AI) liefert deterministische Root-Cause-Analysen statt nur statistischer Heuristiken. Das ist ein technischer Differenziator zu Datadog (eher statistische ML-Ansätze) und macht Dynatrace bei mission-kritischen Enterprise-Workloads stärker. Mit Dynatrace Intelligence (Launch Q3 FY26) und domain-specific AI agents wurde das Portfolio in Richtung „autonomous operations" erweitert.</p>
+      <p><strong>End-to-End-Platform-Effekt.</strong> Dynatrace verkauft kein Tool, sondern eine Plattform: Monitoring, Logs, Security, BizOps in einem System mit einheitlichem Data Lake. Das ist ein Switching-Cost-Moat – Kunden, die mehrere Module nutzen (DPS-Modell: 75% ARR), würden bei einem Wechsel mehrere Tools ersetzen müssen.</p>
+      <p><strong>Top-Down-Enterprise-Fokus.</strong> Dynatrace dominiert das „Top-down"-Enterprise-Segment (CIO/CISO-Käufer, Compliance-getrieben), während Datadog im „Bottom-up"-Segment (Developer-led) führt. Beide Strategien sind valide, aber Dynatrace ist bei sehr großen, regulierten Unternehmen (Finanzdienstleister, Regierungen, Healthcare) der Standard.</p>
+      <p><strong>Schwächen im Moat.</strong> Erstens: <strong>Datadog</strong> wächst schneller (~25%) und ist nun ca. 50% größer. Datadog hat das schnellere Product-Velocity-Tempo und besseres Developer-Branding. Zweitens: Cisco-Splunk-Merger ($28 Mrd) schafft einen Mega-Konkurrenten mit überlegener Vertriebsmacht – Dynatrace muss in 2026/2027 Marktanteile verteidigen. Drittens: SG&amp;A-Ineffizienz (47% vs. Datadog 36% laut Starboard) impliziert, dass der vermeintliche Plattform-Moat nicht voll in Pricing-Power und Wachstum umgesetzt wird.</p>
+      <div class="source">Quellen: Dynatrace Q4 FY26 PR (13.05.2026); Disruption Banking Starboard-Coverage (05.05.2026); FinancialContent Observability Wars (Feb 2026)</div>
+    </div>
+  </div>
+
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Beat-Ratio: 4/4 (aber)</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Dynatrace nutzt Fiskaljahr endend 31. März. „FY26" = April 2025 – März 2026. Q4 FY26 wurde am 13.05.2026 gemeldet.</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Quartal</th><th>Umsatz</th><th>YoY</th><th>Non-GAAP EPS</th><th>vs. Konsens</th><th>Net New ARR</th><th>Marktreaktion</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Q4 FY26</strong><br><span style="font-size:11px;color:var(--text-muted)">End 31.03.26</span></td><td>$532M</td><td class="beat">+18% cc</td><td>$0.41</td><td class="beat">Beat ($0.39E)</td><td class="neutral">$81M (12% YoY)</td><td class="miss">–13% AH (13.05.26)</td></tr>
+            <tr><td><strong>Q3 FY26</strong><br><span style="font-size:11px;color:var(--text-muted)">End 31.12.25</span></td><td>$515M</td><td class="beat">+18% cc</td><td>$0.44</td><td class="beat">Beat ($0.34E, +29%)</td><td class="beat">$75M (11% YoY)</td><td class="beat">+8% AH (09.02.26)</td></tr>
+            <tr><td><strong>Q2 FY26</strong><br><span style="font-size:11px;color:var(--text-muted)">End 30.09.25</span></td><td>$485M</td><td class="beat">+17% cc</td><td>$0.37</td><td class="beat">Beat</td><td class="beat">$72M</td><td class="neutral">Neutral</td></tr>
+            <tr><td><strong>Q1 FY26</strong><br><span style="font-size:11px;color:var(--text-muted)">End 30.06.25</span></td><td>$478M</td><td class="beat">+16% cc</td><td>$0.41</td><td class="beat">Beat</td><td class="neutral">$49M (Mid-Single)</td><td class="neutral">Schwacher Net New ARR</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Operative Lesart:</strong> Dynatrace hat alle 4 Quartale beim Umsatz und EPS übertroffen – konsistente Beats, aber knappere Margen als Datadog (+25% Wachstum). <strong>Drei aufeinanderfolgende Quartale mit double-digit Net New ARR Growth (11–12% YoY)</strong> ist ein wichtiges Comeback-Signal nach schwächeren Q1-Werten ($49M Net New ARR Q1, dann $72M / $75M / $81M).</p>
+      <p><strong>Q4-Kontroverse (13.05.2026, gerade berichtet):</strong> Beat bei Umsatz und EPS, aber Aktie –13% AH. Grund: Net New ARR $81M kam zwar oberhalb der Guidance, aber relativ zu Datadog (das gerade beschleunigtes Wachstum gemeldet hatte) als „mildly disappointing" wahrgenommen. KeyBanc senkte PT von $52 auf $47, Canaccord von $50 auf $46, Morgan Stanley von $43 auf $40, Guggenheim downgrade auf Neutral. BMO sieht aber „undervalued bei aktuellem Niveau" (82% Gross Margin, 18% Wachstum).</p>
+      <p><strong>Wichtigste Q4-Management-Statements (13.05.2026):</strong> McConnell: „surpassed $2 billion in ARR... in an AI-first world, observability has become mission critical to a vastly higher percentage of workloads." Record 22 Deals mit Annual Contract Value &gt;$1M (9 davon neue Logos), Average Land Size &gt;$200k, 126 neue Logos in Q4 (New Logo ARR +43%). Log-Management-Consumption &gt;$100M annualisiert (+100% YoY).</p>
+      <div class="source">Quellen: Dynatrace IR Releases Q1–Q4 FY26; Motley Fool Q4 Transcript (13.05.2026); Investing.com BMO Coverage (13.05.2026)</div>
+    </div>
+  </div>
+
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <p><strong>Revenue-Wachstum letzte 5 Jahre:</strong> FY22 $929M → FY23 $1.16B (+25%) → FY24 $1.43B (+23%) → FY25 $1.70B (+19%) → FY26 $2.01B (+18%). Klare Wachstumsverlangsamung von 25% auf 18%, aber bei deutlich gestiegener Basis und mit konsistenten Mid-Teens-Werten. Net New ARR FY26 $277M (+12% YoY).</p>
+      <h3>Wachstumstreiber FY26</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Treiber</th><th>Beitrag</th><th>Kommentar</th></tr></thead>
+          <tbody>
+            <tr><td>Logs Management Consumption</td><td>$100M+ ARR (+100% YoY)</td><td>Fastest-growing Produktkategorie; Q4-Wert: 22 Deals &gt;$1M ACV</td></tr>
+            <tr><td>DPS-Migration</td><td>75% ARR / 60% Customers</td><td>DPS-Kunden mit 2x höherer Consumption-Rate</td></tr>
+            <tr><td>New Logo Wins</td><td>126 in Q4 (+43% ARR)</td><td>$200k+ Average Land Size, ~$160k Trailing 12M Average</td></tr>
+            <tr><td>Bindplane Acquisition</td><td>Open-Source Telemetry</td><td>April 2026, baut Logs-Pipeline aus</td></tr>
+            <tr><td>Cloud Native Integrations</td><td>AWS, Azure, GCP</td><td>AWS Public Sector Partner of the Year LATAM (Dez 2025)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Geografische Verteilung (geschätzt)</h3>
+      <div class="geo-grid">
+        <div class="geo-card"><div class="geo-region">Americas</div><div class="geo-pct">~60%</div><div class="geo-note">Hauptmarkt; großzügig FY26</div></div>
+        <div class="geo-card"><div class="geo-region">EMEA</div><div class="geo-pct">~30%</div><div class="geo-note">Stabiles Wachstum</div></div>
+        <div class="geo-card"><div class="geo-region">APAC</div><div class="geo-pct">~10%</div><div class="geo-note">Kleinere Basis, höchstes Wachstum</div></div>
+      </div>
+      <p><strong>FY27 Outlook:</strong> Mid-Teens-Wachstum erwartet (ca. +14–16%), Op-Marge stabil bei 28–29%. Wachstumstreiber: (1) AI-Observability (Dynatrace Intelligence), (2) DPS-Migration weitere ~25% der ARR, (3) Logs &amp; Security, (4) Bindplane-Integration, (5) Postman-Partnership für AI-API-Observability.</p>
+      <p><strong>Vergleich:</strong> Dynatrace wächst +18%, Datadog ~25%, Splunk-Cisco zusammen ~$5B Umsatz mit niedrigerem Wachstum. Dynatrace ist nicht die schnellste Story, aber bei höherer Profitabilität als Datadog (Op-Marge 29% vs. ~26%).</p>
+      <div class="source">Quellen: Dynatrace Q4 FY26 PR (13.05.2026); Motley Fool Earnings Transcript; Insider Monkey Q4 Call</div>
+    </div>
+  </div>
+
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <p>Nach dem 26%-6M-Kurseinbruch handelt DT bei $34.73 mit signifikantem Discount sowohl zur eigenen Historie als auch zu Datadog. Das ist die Kernthese der Starboard-Position (Anfang Mai 2026): „Bewertungs-Gap zu Datadog ist nicht durch Fundamentaldaten gerechtfertigt".</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>DT Aktuell</th><th>Datadog</th><th>5J-Schnitt DT</th><th>Bewertung</th></tr></thead>
+          <tbody>
+            <tr><td>P/E (TTM)</td><td>~24x</td><td>~85x</td><td>~38x</td><td class="beat">Tief</td></tr>
+            <tr><td>P/E FWD</td><td>~21x</td><td>~55x</td><td>~32x</td><td class="beat">Attraktiv</td></tr>
+            <tr><td>EV/Sales FWD</td><td>~5x</td><td>~9x</td><td>~8x</td><td class="beat">Halbiert vs. Schnitt</td></tr>
+            <tr><td>EV/EBITDA FWD</td><td>~14x</td><td>~32x</td><td>~22x</td><td class="beat">Tief</td></tr>
+            <tr><td>P/FCF</td><td>~20x</td><td>~50x</td><td>~28x</td><td class="beat">Sehr attraktiv</td></tr>
+            <tr><td>PEG</td><td>~1.2</td><td>~2.2</td><td>~1.8</td><td class="beat">Sehr günstig</td></tr>
+            <tr><td>Rule of 40</td><td>~47%</td><td>~50%</td><td>~45%</td><td class="beat">Über Schwelle</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Analystenkonsens (Stand 14.05.2026):</strong> 45 Analysten, Avg PT $48.82 (~+40% Upside, aber nach Q4 Downgrades sinkend). Buy-Konsens. Goldman Sachs hat im Q4 die Coverage mit Buy initiiert wegen AI-Observability-Position. Konkrete Ziele: BMO senkt PT, KeyBanc $47, Canaccord $46, Morgan Stanley $40 (EW), Guggenheim Neutral. Simply Wall St Fair Value $47.84.</p>
+      <p><strong>Starboard-Bewertungs-These (Mai 2026):</strong> Datadog handelt bei 9x Sales vs. DT 5x Sales – Gap rechtfertigt nicht durch operative Differenz. Mit 11pp SG&amp;A-Reduktion ($75M Annual Savings) und Margen-Expansion könnte DT $2.5 Mrd Capital innerhalb 3 Jahren zurückführen. Fair Value laut Starboard impliziert $50–60 (+45% bis +75%).</p>
+      <p><strong>Eigene Bewertung:</strong> Bei FY27 EPS ~$1.85–1.95 und P/E 22x liegt Multiplebasis-Fair-Value bei ca. $42. Mit Starboard-Catalysts und Margen-Expansion sind $48–55 realistisch (12–18M). Bei +14% Wachstum und 32% Op-Marge wäre auch $60 möglich. <strong>Upside: +35% bis +75%</strong>.</p>
+      <div class="source">Quellen: Disruption Banking Starboard (05.05.2026); Investing.com BMO (13.05.2026); ChartMill DT Profile; Simply Wall St</div>
+    </div>
+  </div>
+
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <p><strong>Cashflow:</strong> FY26 FCF-Marge ~26%, FCF ~$525M. Net Income FY26 GAAP $250M (+33% YoY). Cash &amp; Investments ~$1.4 Mrd, schuldenfrei. Mid-Term-Ziel: 28–30% FCF-Marge.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>FY24</th><th>FY25</th><th>FY26</th><th>Trend</th></tr></thead>
+          <tbody>
+            <tr><td>Bruttomarge (non-GAAP)</td><td>~82%</td><td>~82%</td><td>~82%</td><td class="neutral">Stabil hoch</td></tr>
+            <tr><td>Operating Margin (non-GAAP)</td><td>27%</td><td>28%</td><td>29%</td><td class="beat">Langsam expandierend</td></tr>
+            <tr><td>GAAP Op-Marge</td><td>~7%</td><td>~10%</td><td>~12%</td><td class="beat">Stetig steigend</td></tr>
+            <tr><td>FCF Margin</td><td>~24%</td><td>~25%</td><td>~26%</td><td class="beat">Steigend</td></tr>
+            <tr><td>Rule of 40</td><td>49%</td><td>47%</td><td>47%</td><td class="beat">Über Schwelle</td></tr>
+            <tr><td>SG&amp;A / Revenue</td><td>~48%</td><td>~47%</td><td>~47%</td><td class="miss">Stagniert (Starboard-Kritik)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Bilanz / Kapitalrückführung:</strong> $1+ Mrd Cash, schuldenfrei. Im Februar 2026 wurde $1 Mrd Buyback-Programm autorisiert (zusätzlich zum $500M-Programm, das im Q4 FY26 abgeschlossen wurde). In Q4 wurden $224M für 5.9M Aktien @ $37.71 Durchschnittspreis zurückgekauft (+40% vs. Q3-Niveau). Das ist aktive Kapitalrückführung auf attraktivem Niveau.</p>
+      <p><strong>Starboard-Kritikpunkt:</strong> SG&amp;A-Ausgaben mit 47% vs. Datadog 36% – 11 Prozentpunkte Ineffizienz, die laut Starboard für $75M jährliche Einsparungen Potenzial bietet. Wenn diese realisiert würden, könnte Op-Marge auf 32–34% springen und Bewertungs-Multiple weiter steigen.</p>
+      <p><strong>Lesart:</strong> Solide aber nicht außergewöhnliche Profitabilität. Margen-Expansion ist langsam (1% pro Jahr), Starboard hat valide Punkte zur SG&amp;A-Effizienz. Die Bilanz ist Best-in-Class für Mid-Cap-SaaS.</p>
+      <div class="source">Quellen: Dynatrace Q4 FY26 PR (13.05.2026); Starboard Value Letter (Mai 2026); Disruption Banking</div>
+    </div>
+  </div>
+
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <p>Peers: Datadog (DDOG), Splunk (jetzt Cisco-Tochter), Elastic (ESTC), New Relic (privat seit 2023), Cloudflare-Logs (NET), AppDynamics (Cisco), Honeycomb (private).</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Unternehmen</th><th>Rev Growth</th><th>Op-Marge</th><th>FWD P/E</th><th>Market Cap</th><th>Kommentar</th></tr></thead>
+          <tbody>
+            <tr><td><strong>DT</strong></td><td>+18% / +14%e</td><td>29%</td><td>~21x</td><td>$10.5B</td><td>Enterprise-Focus, AI-Observability, Activist-Catalyst</td></tr>
+            <tr><td>Datadog (DDOG)</td><td>+25%</td><td>~26%</td><td>~55x</td><td>~$45B</td><td>Bottom-up Developer-led, schnelleres Wachstum, Premium-Bewertung</td></tr>
+            <tr><td>Cisco-Splunk</td><td>~5–8%</td><td>~25%</td><td>~16x</td><td>n/a (Teil von $CSCO)</td><td>$28B Akquisition 2024, Integration-Fatigue, Mega-Konkurrent</td></tr>
+            <tr><td>Elastic (ESTC)</td><td>+18%</td><td>~17%</td><td>~28x</td><td>~$11B</td><td>Stark in Search/Logs, schwächere Margen</td></tr>
+            <tr><td>Cloudflare (NET)</td><td>+30%</td><td>~12%</td><td>~85x</td><td>~$60B</td><td>Logs/Workers, primary CDN, sekundär Observability</td></tr>
+            <tr><td>New Relic (privat)</td><td>n/a</td><td>n/a</td><td>n/a</td><td>$6.5B PE</td><td>Seit 2023 privat, Mid-Market-Player</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Qualitative Einordnung:</strong> Dynatrace ist der mit Abstand günstigste Player in der Peer-Gruppe bei vergleichbarer Profitabilität wie Datadog. Datadog hat das schnellere Wachstum (+25% vs +18%), bessere Developer-Beziehung, aber 2.6x höhere Bewertung. Cisco-Splunk ist der „Goliath" mit Vertriebsmacht, aber Integration-Risiken. Elastic ist günstig aber mit niedrigeren Margen. Dynatrace ist GARP-Play in einem überwiegend Premium-bewerteten Sektor.</p>
+      <p><strong>Marktpositionierung 2026:</strong> Gartner Magic Quadrant Observability Platforms: Dynatrace und Datadog regelmäßig „Leaders Top-Right". Dynatrace dominiert Top-100-Enterprise-Segment (Banken, Versicherer, Tier-1-Telcos), Datadog gewinnt bei „Tech-forward"-Unternehmen (Streamings, FinTech, AI-Native). Die Märkte überlappen, aber Disruption ist weniger ein „Winner-takes-all"-Szenario.</p>
+      <div class="source">Quellen: Disruption Banking (05.05.2026); Simply Wall St; eigene Peer-Berechnung</div>
+    </div>
+  </div>
+
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events (letzte 3 Monate)</div>
+      <div class="section-note">Stand: 15.05.2026</div>
+    </div>
+    <div class="section-body">
+
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">13.05.2026 – Q4 FY26 Earnings: Beat, aber Kurs –13% AH <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Beat bei Umsatz ($532M vs $521M E) und EPS ($0.41 vs $0.39E), Net New ARR $81M oberhalb Guidance. Aber relativ zu Datadog (+25% Wachstum) als „mildly disappointing". Mehrere Analysten-Downgrades: KeyBanc $52→$47, Canaccord $50→$46, Morgan Stanley $43→$40, Guggenheim downgrade zu Neutral. Quelle: Investing.com (13.05.2026).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Anfang Mai 2026 – Starboard Value Activist Position <span class="badge badge-green">Positiv (Catalyst)</span></div>
+          <div class="event-text">Starboard Value (Peter Feld) hat Position in DT aufgebaut und Letter veröffentlicht. Kritik: 11pp SG&amp;A-Gap zu Datadog ($75M Einsparpotenzial), fordert Margen-Verbesserung. Erwartet $2.5B Kapitalrückführung in 3 Jahren. Aktie +8% am Bekanntgabe-Tag. Quelle: Disruption Banking (05.05.2026).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">08.04.2026 – Bindplane Akquisition <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Definitive Agreement zum Erwerb von Bindplane (Open-Standards-Telemetry-Pipeline). Plus Minderheits-Stake an observIQ von Edison Partners. Erweitert Logs/AI-Observability-Position. Closing erwartet später im April 2026. Keine wesentliche FY27-Impact. Quelle: Simply Wall St.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">12.03.2026 – Postman-Partnership erweitert <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Postman Agent Mode mit Dynatrace MCP-Server-Integration: Real-Time Observability für AI-assisted API-Workflows. Strategische Positionierung für agentische AI-Ära. Quelle: Dynatrace IR.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">09.02.2026 – Q3 FY26 Earnings: Strong Beat <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Surpassed High End of Guidance: Rev $515M (+18% cc), EPS $0.44 vs $0.34E (Beat +29%). ARR $1.97B (+16%), Net New ARR $75M (+11% YoY, 3. Konsek. Doppel-Digit-Quartal). $1B Buyback autorisiert. +8% am Tag der Berichterstattung. Quelle: Stocktitan; Motley Fool.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Februar 2026 – Dynatrace Intelligence Launch <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Major Platform Innovation: Dynatrace Intelligence (deterministische + agentische AI) und domain-spezifische AI agents bei Perform 2026 Conference. Strategischer Pivot zu „autonomous observability". Quelle: FinancialContent (10.02.2026).</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – Observability als „kritische Infrastruktur" der AI-Ära <span class="badge badge-yellow">Neutral-Positiv</span></div>
+          <div class="event-text">Mit autonomen AI-Agents in Production wird System-Reliability geschäftskritisch („AI decision-level failures"). Bullisch für die ganze Observability-Branche, aber Datadog profitiert aktuell stärker. Quelle: Disruption Banking.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">2026 – Cisco-Splunk Integration drückt aufs Tempo <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Cisco beschleunigt Splunk-Integration ins Cisco-Portfolio (SecOps, Identity). Mega-Konkurrent in Enterprise. Aber Cisco-Splunk-Kunden zeigen „Integration Fatigue" – Chance für Dynatrace bei modernen Alternativen. Quelle: FinancialContent.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – Software-Sektor-Rotation &amp; SaaSpocalypse-Fears</div>
+          <div class="event-text">YTD-Rotation aus Cloud-Software in AI-Hardware/Hyperscaler. Anfang Mai 2026 erste Anzeichen, dass die „SaaSpocalypse"-Verkaufswelle einbricht (Investoren sehen SaaS zunehmend als AI-Beneficiaries). Quelle: Stocktitan.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – FX-Tailwinds für FY27</div>
+          <div class="event-text">$10M ARR und $15M Revenue FX-Tailwind FY27 vs. konstanter Währung (basierend auf 30.04. Wechselkursen). Hilft Reportable Numbers ohne fundamentale Verbesserung. Quelle: Dynatrace Q4 FY26 PR.</div>
+        </div>
+      </div>
+      <div class="source">Quellen: Disruption Banking (05.05.2026); Investing.com (13.05.2026); Stocktitan; Motley Fool; Dynatrace IR</div>
+    </div>
+  </div>
+
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 4/10</div>
+    </div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom:16px;">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value">$34.73</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value">~$40</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value">~$42</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value">~$49</div></div>
+        <div class="kpi-card"><div class="kpi-label">PE Ratio</div><div class="kpi-value">24x</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W High</div><div class="kpi-value">~$60</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W Low</div><div class="kpi-value">~$33</div></div>
+      </div>
+      <p><strong>Aktueller Trend:</strong> Massiver Downtrend. Kurs ist seit Q4 Earnings (13.05.2026) bei –14% Wochenverlust. Über die letzten 6 Monate –26%, YTD –17%. Aktie unter allen relevanten Moving Averages.</p>
+      <p><strong>Support/Resistance:</strong> Starker Support bei $33 (52W-Tief). Falls dieser bricht, könnte Kurs auf $28–30 fallen (2024-Tiefs). Resistance bei $40 (SMA 20), $42 (SMA 50, Starboard-Pop-Niveau), $49 (SMA 200).</p>
+      <p><strong>Momentum:</strong> Stark überverkauft auf kurzer Frist nach Q4-Reaktion. RSI vermutlich &lt;30 (Oversold). ChartMill Technical Rating 5/10.</p>
+      <p><strong>Lesart:</strong> Klassische „Capitulation"-Phase nach Q4. Kurzfristig hohe Wahrscheinlichkeit eines technischen Bounces auf $38–42. Aber: Solange Kurs unter SMA 50 keine echte Trendwende. Für aggressive Käufer attraktiver Einstiegsbereich, für trendfolgende Strategien noch zu früh.</p>
+      <div class="source">Quellen: ChartMill DT Profile (Mai 2026); Yahoo Finance DT News (15.05.2026); Robinhood</div>
+    </div>
+  </div>
+
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 6/10 (invertiert)</div>
+    </div>
+    <div class="section-body">
+      <h3>Strukturelle Risiken</h3>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Datadog gewinnt strukturelle Marktanteile</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Datadog wächst seit Jahren ~7pp schneller als Dynatrace und ist bei „AI-native" und Developer-led-Unternehmen klar bevorzugt. Wenn das anhält, schrumpft DTs relative Marktanteil in Mid-Market und Tech-forward Segmenten. Wahrscheinlichkeit: 60%, Auswirkung: 2–4pp Wachstum-Differenz, struktureller Multiple-Discount bleibt.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Cisco-Splunk Mega-Konkurrent</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">$28 Mrd Cisco-Splunk-Akquisition schafft Goliath mit überlegener Vertriebsmacht in Enterprise (DTs Kernmarkt). Wenn Integration gelingt, könnte DT Top-10-Kunden verlieren. Aktuell aber „Integration Fatigue" als Chance. Wahrscheinlichkeit: 40%, Effekt 24M: 1–2pp Wachstums-Verlangsamung.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Wachstumsverlangsamung unter 15%</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">FY26 +18%, FY27 Guidance +14–16%. Wenn FY28 unter 12% fällt, ist DT „Mature SaaS" – Multiple-Compression auf 14–16x P/E = Kurs $26–30. Wahrscheinlichkeit: 30%.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Starboard-Plan scheitert</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Wenn Management Starboard-Empfehlungen ablehnt und SG&amp;A-Effizienz bleibt bei 47%, fehlt der Margen-Catalyst. Kurs würde unter $32 testen. Wahrscheinlichkeit: 30% (Management hat in Reaktion bereits gesagt „committed to acting in best interest of shareholders").</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ AI-Hyperscaler bauen eigene Observability</div>
+          <div><span class="badge badge-yellow">Niedrig–Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch (langfristig)</span></div>
+        </div>
+        <div class="event-text">Wenn AWS CloudWatch, Azure Monitor und Google Cloud Operations Suite zu vollwertigen Observability-Plattformen werden, wird Drittanbieter-Software entwertet. Langfristiges Risiko, kurzfristig durch Multi-Cloud-Trend abgemildert.</div>
+      </div>
+      <h3>Chancen</h3>
+      <p>(1) Starboard-Catalyst: $75M jährliche SG&amp;A-Einsparungen → Op-Marge auf 32–34% → Multiple-Expansion. (2) Logs-Boom &gt;$100M ARR mit 100% Wachstum. (3) Dynatrace Intelligence + agentic AI als neuer Wachstumshebel. (4) Bindplane-Integration. (5) AI-Driven Workloads brauchen massiv mehr Observability.</p>
+      <h3>Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags:</strong> Net New ARR Q1 FY26 nur $49M (Mid-Single-Digit YoY-Wachstum). Q4 Reaktion bedenklich. <strong>Dealbreaker:</strong> Net New ARR fällt 2 Quartale in Folge unter 5% YoY-Wachstum → strukturelle Verlangsamung bestätigt.</p>
+      <div class="source">Quellen: Disruption Banking Starboard (05.05.2026); FinancialContent; Investing.com; eigene Synthese</div>
+    </div>
+  </div>
+
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring</div>
+      <div class="section-score">⌀ 6.9/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Score-Bar</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td>Geschäftsmodell</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>End-to-End Plattform, AI-Observability, mission-critical für Enterprise</td></tr>
+            <tr><td>Burggraben</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Switching Costs, Davis-AI, aber Datadog gewinnt strukturelle Anteile</td></tr>
+            <tr><td>Operative Entwicklung (4Q)</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>4/4 Beats, 3 Quartale 11–12% Net New ARR, aber Q4-Wahrnehmung schwach</td></tr>
+            <tr><td>Wachstum</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>+18% FY26, +14–16% FY27e – solide aber langsamer als Datadog</td></tr>
+            <tr><td>Bewertung</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>FWD P/E 21x, 5x Sales – signifikanter Discount zu Datadog</td></tr>
+            <tr><td>Cashflow</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>26% FCF, 29% Op-Marge, $1.4B Cash, $1B Buyback</td></tr>
+            <tr><td>Risiken (invertiert)</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Datadog-Druck real, Cisco-Splunk-Konkurrenz, SG&amp;A-Ineffizienz</td></tr>
+            <tr><td>Technische Analyse</td><td>4/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td><td>Massiv überverkauft, unter allen SMAs, aber kein Boden bestätigt</td></tr>
+            <tr style="background:rgba(59,130,246,0.08);"><td><strong>⌀ Gesamtscore</strong></td><td><strong>6.9/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:69%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">6.9</span></div></td><td>GARP-Play in Premium-Sektor mit Activist-Catalyst</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+    </div>
+    <div class="section-body">
+
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1: Activist-Catalyst.</strong> Starboard Value hat im Mai 2026 Position aufgebaut und drückt aktiv für Margen-Verbesserung. Mit 11pp SG&amp;A-Reduktion (kommerzielle Effizienz wie Datadog) könnten $75M jährlich freigesetzt werden – das wäre +400 bps Op-Marge auf 33%. Multiple könnte auf 28x P/E expandieren = Kurs $55+.</p>
+          <p><strong>Säule 2: Bewertungs-Anomalie.</strong> DT handelt bei 5x Sales vs. Datadog 9x – aber operative Differenz ist nicht 80%. FCF-Marge nahezu identisch, Wachstum 7pp hinten, aber Profitabilität gleich. Mean Reversion + Aktivisten-Druck = signifikantes Upside-Potenzial.</p>
+          <p><strong>Säule 3: Logs &amp; AI als Wachstumstreiber.</strong> Logs-Consumption $100M+ ARR mit +100% YoY ist explosionsartig. AI-Driven Workloads brauchen Observability mehr denn je. Bindplane + Postman + Dynatrace Intelligence positionieren DT für den nächsten Zyklus.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1: Wachstums-Gap zu Datadog wird strukturell.</strong> DT wächst +18%, Datadog +25% – 7pp Differenz seit Jahren. Wenn das anhält, verliert DT Marktanteil und der Discount bleibt gerechtfertigt. Bear-Case-Kurs: $28–30 (P/E 18x).</p>
+          <p><strong>Risiko 2: Q4-Net New ARR signalisiert Plateau.</strong> $81M war zwar über Guidance, aber relativ zu Datadog enttäuschend. KeyBanc, Canaccord, Morgan Stanley und Guggenheim haben Targets/Ratings gesenkt. Bei weiterer Verlangsamung in Q1 FY27 kein Catalyst.</p>
+          <p><strong>Risiko 3: Cisco-Splunk + AWS-eigene Observability langfristig.</strong> Mega-Konkurrenten (Cisco-Splunk $28B) und Hyperscaler-eigene Lösungen (CloudWatch, Azure Monitor) drücken Pricing-Power. Multi-Cloud-Trend hilft DT kurzfristig, aber langfristig könnten Hyperscaler Marktanteile gewinnen.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Risk/Reward bei $34.73 ist asymmetrisch nach oben. Die Aktie ist nach Q4 überverkauft, der Activist-Catalyst ist real und die Bewertung absurd günstig vs. Datadog. Bei einem +25% Bounce auf $43 (zurück zum SMA 50) ist Upside klar; bei +50% Realisierung des Starboard-Plans auf $52–55 sogar +50–60%.</p>
+      <p>Aber: Der bärische Punkt zur Wachstumsverlangsamung relativ zu Datadog ist valide. DT ist nicht „so gut wie Datadog mit Discount" – DT ist „langsamer als Datadog, aber günstiger". Das ist eine Mean-Reversion-Wette, keine Quality-Compounder-Wette.</p>
+      <p>Risk/Reward: –15% Downside ($30 wenn $33-Support bricht) vs. +50% Upside ($52–55 bei Starboard-Realisierung). Verhältnis 1:3.5 – attraktiv für Special-Situation-Investoren.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <p><strong>Kurzfristig (0–6 Monate):</strong> Bounce vom Q4-Capitulation-Niveau erwartet. Q1 FY27 Earnings (August 2026) ist nächster Trigger. Aktive Trader: Long mit Stopp $30.<br>
+      <strong>Mittelfristig (6–24 Monate):</strong> Starboard-Plan-Realisierung entscheidet. Bei sichtbaren Cost-Cuts und Margen-Expansion in 2 Quartalen Multiple-Re-Rating auf 26–28x P/E.<br>
+      <strong>Langfristig (2–5 Jahre):</strong> Strukturelle Frage – kann DT mit Datadog wachstumsmäßig mithalten? Wenn ja, $70+ in 5J; wenn nein, $35–45 Range.</p>
+
+      <h3>Kernthese</h3>
+      <p>Dynatrace ist eine Mean-Reversion-Special-Situation mit Activist-Catalyst. Die Bewertung ist 2.6x günstiger als Datadog bei nur 7pp Wachstumsdifferenz – das ist eine quantifizierbare Anomalie. Starboard hat einen klaren Operating-Plan und das Management hat in der Reaktion Reform-Bereitschaft signalisiert. Risk/Reward 1:3.5 bei $34.73, geeignet für Investoren mit 12–24M Horizont und Tolerance für Volatilität.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN (spekulativ)</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$48–55</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">12–24 Monate</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–15%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+50%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val buy">1:3.5</div></div>
+      </div>
+
+      <h3>Was falsifiziert die These?</h3>
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Net New ARR Q1 FY27 &lt;$50M (Verlangsamung &lt;5% YoY) → Stopp</li>
+            <li>Management lehnt Starboard-Plan öffentlich ab → Catalyst weg, Position halbieren</li>
+            <li>Top-Kunde wechselt zu Datadog oder Splunk → Risk-off</li>
+            <li>Kurs unter $30 + neue Tiefstände → technischer Stopp</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>SG&amp;A-Reduktion-Announcement (Cost-Cut-Plan) → Catalyst-Realisierung</li>
+            <li>Net New ARR &gt;$90M in Q1 FY27 → Reakzeleration</li>
+            <li>Logs-ARR &gt;$200M annualisiert → AI-Wachstumshebel bestätigt</li>
+            <li>Kurs durchbricht SMA 50 ($42) → technische Trendwende</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Welcher Anlegertyp passt?</h3>
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul><li>Special-Situation / Activist-Plays</li><li>Mean-Reversion-Investoren</li><li>GARP / Contrarian-Strategien</li><li>Volatilitäts-tolerante Mid-Cap-Tech</li></ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul><li>Reine Hyper-Growth-Investoren (Datadog besser)</li><li>Income-Investoren (keine Dividende)</li><li>Quality-Compounder (Wachstum nicht best-in-class)</li><li>Langfrist-Buy-and-Hold (struktureller Wettbewerb)</li></ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten</span></td><td>Q1 FY27 Earnings (Aug 2026) abwarten</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert (50% jetzt)</span></td><td>Capitulation-Niveau attraktiv, Stopp $30</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Activist-Catalyst, oversold, bestes Risk/Reward</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-yellow">Vorsicht / lieber DDOG</span></td><td>Für Buy-and-Hold ist Datadog besser positioniert</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Anstehende Events</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Starboard Engagement &amp; Operating-Plan-Realisierung (Q2/Q3 2026)</h4>
+        <p>Starboard fordert konkrete SG&amp;A-Reduktion ($75M annual savings, 11pp Effizienz-Gap zu Datadog schließen). Erwartung: Investor Day oder Capital Markets Day in 2H 2026 mit konkretem Cost-Cut-Plan. Wenn das passiert, ist Op-Marge-Expansion auf 32–34% in 18M realistisch.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Management announciert formal Cost-Cut-Programm UND erste Margen-Verbesserung in Q2 FY27 sichtbar → Multiple-Re-Rating auf 26x P/E, Kursziel $52+.<br><br>
+          <strong>Wenn:</strong> Management bleibt vage UND Starboard-Druck verpufft → Catalyst weg, Position halbieren bei $40 Bounce.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 2: Q1 FY27 Earnings – August 2026 (geschätzt)</h4>
+        <p>Erstes Quartal nach Q4-Capitulation. Konsens-Erwartungen werden in Wochen reset. Markt achtet auf: (a) Net New ARR &gt;$50M (Saisonalität – Q1 typisch schwach), (b) Q2-Guidance, (c) FY27-ARR-Wachstum-Bestätigung, (d) Starboard-Reaktion vom Management.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Net New ARR &gt;$60M UND Q2 Guidance bestätigt FY27-Wachstum (+14–16%) → Boden bei $33 hält, Bounce auf $42+ wahrscheinlich.<br><br>
+          <strong>Wenn:</strong> Net New ARR &lt;$45M (Saisonalität schlimmer als erwartet) → strukturelle Verlangsamung, Position auflösen.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 3: AI-Observability-Marktanteilsentwicklung (Gartner MQ 2026)</h4>
+        <p>Im 2H 2026 wird Gartner ein aktualisiertes Magic Quadrant für Observability Platforms veröffentlichen. Dynatrace und Datadog kämpfen um „Leader Top-Right". DTs Position bei AI-native Observability (Davis AI + Dynatrace Intelligence) gegen Datadogs Logs + AI Suite.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Gartner bestätigt DT als #1 oder #2 Leader UND mit besserem „Ability to Execute"-Score als Datadog → Bull-Case-Bestätigung, Multiple-Expansion.<br><br>
+          <strong>Wenn:</strong> Datadog überholt DT klar in „Ability to Execute" → strukturelle Marktanteils-Verschiebung sichtbar, langfristiges Bearish-Signal.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung oder Aufforderung zum Kauf/Verkauf dar. Alle Angaben basieren auf öffentlich verfügbaren Quellen mit Stand 15.05.2026 und sind nach bestem Wissen erstellt, ohne Gewähr auf Vollständigkeit oder Richtigkeit. Investitionen in Aktien sind mit Risiken bis zum Totalverlust verbunden.</div>
+</div>
+</body>
+</html>
