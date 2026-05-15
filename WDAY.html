@@ -1,1040 +1,651 @@
 <!DOCTYPE html>
-<!-- saved from url=(0032)https://wday-analyse.vercel.app/ -->
-<html lang="de"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WDAY – Aktienanalyse Canvas v2.2</title>
-  <style>
-    :root {
-      --primary: #3b82f6;
-      --primary-dark: #2563eb;
-      --bg: #0f0f12;
-      --bg-card: #1a1a1f;
-      --bg-card2: #22222a;
-      --border: #2e2e38;
-      --text: #e8e8ec;
-      --text-muted: #888898;
-      --text-dim: #555566;
-      --green: #22c55e;
-      --red: #ef4444;
-      --yellow: #f59e0b;
-      --blue: #3b82f6;
-      --purple: #8b5cf6;
-      --teal: #14b8a6;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7;
-    }
-    .header {
-      background: linear-gradient(135deg, #00081a 0%, #001028 40%, #0f0f12 100%);
-      border-bottom: 1px solid var(--primary);
-      padding: 36px 40px 28px; display: flex; justify-content: space-between;
-      align-items: flex-start; flex-wrap: wrap; gap: 20px;
-    }
-    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
-    .header-left h1 span { color: var(--primary); }
-    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
-    .header-right { text-align: right; }
-    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
-    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
-    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
-    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
-    .price-change.up { background: rgba(34,197,94,0.15); color: var(--green); }
-    .nav {
-      background: var(--bg-card); border-bottom: 1px solid var(--border);
-      padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
-      position: sticky; top: 0; z-index: 100;
-    }
-    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
-    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
-    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
-    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
-    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
-    .kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-    .kpi-value.green  { color: var(--green); }
-    .kpi-value.red    { color: var(--red); }
-    .kpi-value.orange { color: var(--primary); }
-    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
-    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
-    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .section-title  { font-size: 16px; font-weight: 700; color: white; }
-    .section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
-    .section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
-    .section-body   { padding: 20px 24px; }
-    p { margin-bottom: 12px; color: var(--text); }
-    p:last-child { margin-bottom: 0; }
-    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
-    h3:first-child { margin-top: 0; }
-    .table-wrap { overflow-x: auto; margin: 16px 0; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: rgba(59,130,246,0.04); }
-    .beat    { color: var(--green);  font-weight: 600; }
-    .miss    { color: var(--red);    font-weight: 600; }
-    .neutral { color: var(--yellow); font-weight: 600; }
-    .badge        { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
-    .badge-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
-    .badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
-    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
-    .badge-blue   { background: rgba(59,130,246,0.15); color: var(--blue); }
-    .badge-orange { background: rgba(59,130,246,0.15); color: var(--primary); }
-    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
-    .event-item:last-child { border-bottom: none; }
-    .event-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
-    .dot-green  { background: var(--green); }
-    .dot-red    { background: var(--red); }
-    .dot-yellow { background: var(--yellow); }
-    .event-label { font-weight: 600; color: white; }
-    .event-text  { font-size: 14px; color: var(--text); }
-    .risk-item   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
-    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .risk-title  { font-weight: 600; color: white; font-size: 14px; }
-    .score-bar       { display: flex; align-items: center; gap: 10px; }
-    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-    .score-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #60a5fa); }
-    .score-num       { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
-    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-    @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
-    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
-    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
-    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .bear-card h4 { color: var(--red);   margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .rating-box { background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(59,130,246,0.04)); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
-    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
-    .rating-item .val  { font-size: 20px; font-weight: 800; color: white; }
-    .rating-item .val.buy  { color: var(--green); }
-    .rating-item .val.hold { color: var(--yellow); }
-    .rating-item .val.sell { color: var(--red); }
-    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
-    @media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
-    .trigger-card      { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
-    .trigger-card h5   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-    .trigger-card.buy  h5 { color: var(--green); }
-    .trigger-card.sell h5 { color: var(--red); }
-    .trigger-list    { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
-    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
-    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
-    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
-    @media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
-    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
-    .investor-no  { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
-    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
-    .investor-no  h5 { color: var(--red);   font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
-    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
-    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
-    .investor-no  li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
-    .geo-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
-    .geo-card   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
-    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .geo-pct    { font-size: 20px; font-weight: 700; color: white; }
-    .geo-note   { font-size: 12px; color: var(--text-muted); }
-    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
-    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
-    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
-    .outlook-card .when-then strong { color: var(--primary); }
-    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
-    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
-    .alert-box { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
-    .divider   { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
-    .pill      { display: inline-block; background: rgba(59,130,246,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
-    .migration-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 16px 0; }
-    .migration-table th { background: rgba(59,130,246,0.15); color: var(--primary); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; border-bottom: 1px solid var(--border); }
-    .migration-table td { padding: 9px 12px; border-bottom: 1px solid rgba(46,46,56,0.4); }
-    .migration-table tr:last-child td { border-bottom: none; font-weight: 700; background: rgba(59,130,246,0.06); }
-  </style>
-<style id="highlight-mengshou-style">
-    .highlight-mengshou-wrap {
-        background: #ff9;
-        cursor: pointer;
-    }
-    .highlight-mengshou-wrap.active {
-        background: #ffb;
-    }
-</style></head>
-<body cz-shortcut-listen="true" data-new-gr-c-s-check-loaded="14.1280.0" data-gr-ext-installed="">
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workday WDAY – Aktienanalyse Canvas v2.2</title>
+<style>
+:root {
+  --primary: #F38B00;
+  --primary-dark: #c46c00;
+  --bg: #0f0f12;
+  --bg-card: #1a1a1f;
+  --bg-card2: #22222a;
+  --border: #2e2e38;
+  --text: #e8e8ec;
+  --text-muted: #888898;
+  --text-dim: #555566;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --blue: #3b82f6;
+  --purple: #8b5cf6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+.header { background: linear-gradient(135deg, #2a1700 0%, #4d2a00 40%, #0f0f12 100%); border-bottom: 1px solid var(--primary); padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; }
+.header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+.header-left h1 span { color: var(--primary); }
+.header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+.header-right { text-align: right; }
+.price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+.price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+.price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+.price-change.up { background: rgba(34,197,94,0.15); color: var(--green); }
+.price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+.nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100; }
+.nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+.main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+.kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+.kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.kpi-value.green { color: var(--green); }
+.kpi-value.red { color: var(--red); }
+.kpi-value.orange { color: var(--primary); }
+.section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+.section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+.section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.section-title { font-size: 16px; font-weight: 700; color: white; }
+.section-score { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+.section-note { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+.section-body { padding: 20px 24px; }
+p { margin-bottom: 12px; color: var(--text); }
+p:last-child { margin-bottom: 0; }
+h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+h3:first-child { margin-top: 0; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(243,139,0,0.04); }
+.beat { color: var(--green); font-weight: 600; }
+.miss { color: var(--red); font-weight: 600; }
+.neutral { color: var(--yellow); font-weight: 600; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+.badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+.badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+.badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+.badge-orange { background: rgba(243,139,0,0.15); color: var(--primary); }
+.event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+.event-item:last-child { border-bottom: none; }
+.event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+.dot-green { background: var(--green); }
+.dot-red { background: var(--red); }
+.dot-yellow { background: var(--yellow); }
+.event-label { font-weight: 600; color: white; }
+.event-text { font-size: 14px; color: var(--text); }
+.risk-item { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+.risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.risk-title { font-weight: 600; color: white; font-size: 14px; }
+.score-bar { display: flex; align-items: center; gap: 10px; }
+.score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #ffb84d); }
+.score-num { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+.bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+.bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+.bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+.bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.rating-box { background: linear-gradient(135deg, rgba(243,139,0,0.12), rgba(243,139,0,0.04)); border: 1px solid rgba(243,139,0,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+.rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+.rating-item .val { font-size: 20px; font-weight: 800; color: white; }
+.rating-item .val.buy { color: var(--green); }
+.rating-item .val.hold { color: var(--yellow); }
+.rating-item .val.sell { color: var(--red); }
+.trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+.trigger-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.trigger-card h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.trigger-card.buy h5 { color: var(--green); }
+.trigger-card.sell h5 { color: var(--red); }
+.trigger-list { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+.trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+.trigger-list li::before { content: "→"; position: absolute; left: 0; }
+.investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+@media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+.investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+.investor-no { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+.investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-no h5 { color: var(--red); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+.investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+.investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+.outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+.outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+.outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+.outlook-card .when-then strong { color: var(--primary); }
+.source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+.disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+</style>
+</head>
+<body>
 
-  <!-- HEADER -->
-  <div class="header">
-    <div class="header-left">
-      <h1>Workday, Inc. <span>WDAY · NASDAQ</span></h1>
-      <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 27. Februar 2026 · NASDAQ · Sektor: Enterprise Software / HCM+FM</div>
-      <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-        <span class="badge badge-blue">HCM Software</span>
-        <span class="badge badge-orange">Financial Management</span>
-        <span class="badge badge-green">AI Platform</span>
-        <span class="badge badge-yellow">Mid-to-Large Enterprise</span>
-      </div>
+<div class="header">
+  <div class="header-left">
+    <h1>Workday, Inc. <span>WDAY</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 14.05.2026 · NASDAQ · Sektor: Technology / HCM + FinSoft</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">HCM Suite</span>
+      <span class="badge badge-blue">Finance Cloud</span>
+      <span class="badge badge-yellow">AI Agents</span>
+      <span class="badge badge-green">Flex Credits</span>
     </div>
-    <div class="header-right">
-      <div class="price-tag">$130 USD</div>
-      <div class="price-meta">Schlusskurs 27.02.2026 · NASDAQ</div>
-      <div class="price-change down">▼ –53% vom 52W-Hoch ($276)</div>
-      <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $117,76 – $276,00</div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$118.62</div>
+    <div class="price-meta">Schlusskurs 12.05.2026 · NASDAQ</div>
+    <div class="price-change down">▼ –61% von ATH ($307)</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: ~$117 – $276</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$118.62</div><div class="kpi-sub">USD · 12.05.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Marktkap.</div><div class="kpi-value">$30.3B</div><div class="kpi-sub">Mid-Cap</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/E TTM</div><div class="kpi-value">~30x</div><div class="kpi-sub">historisch tief</div></div>
+    <div class="kpi-card"><div class="kpi-label">Fwd P/E</div><div class="kpi-value green">~22x</div><div class="kpi-sub">5J-Tief</div></div>
+    <div class="kpi-card"><div class="kpi-label">Revenue FY26</div><div class="kpi-value">$9.55B</div><div class="kpi-sub">+13% YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">Subscription Q4</div><div class="kpi-value green">+15.7%</div><div class="kpi-sub">YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">AI ARR</div><div class="kpi-value green">$400M+</div><div class="kpi-sub">Q4 ACV +100% YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">FY27 Sub-Guide</div><div class="kpi-value neutral">+12–13%</div><div class="kpi-sub">Verlangsamung</div></div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>HCM + Finance Cloud Suite + Agentic AI</h3>
+      <p>Workday ist die führende <strong>Enterprise-Cloud-Suite für Human Capital Management (HCM) und Finance/ERP</strong>. FY2026 (Jan 2026 endend) Total Revenue: <strong>$9.55 Mrd. (+13.1% YoY)</strong>, davon $8.83 Mrd. Subscription (+14.5%). 60%+ der Fortune 500 nutzen Workday HCM. Kerns-Produkte: <strong>Workday HCM</strong>, <strong>Workday Financial Management</strong>, <strong>Workday Adaptive Planning</strong>, <strong>Workday Extend</strong>, sowie zunehmend AI-Agents.</p>
+
+      <h3>Strategischer Pivot: "Chapter 4" mit Aneel Bhusri-Return als CEO</h3>
+      <p>Anfang Februar 2026 kehrte <strong>Mitgründer Aneel Bhusri als CEO zurück</strong> – signalisiert die strategische Bedeutung des AI-Transitions. "Chapter 4" beschreibt den Pivot zur "<strong>Enterprise AI Platform for People, Money, and Agents</strong>". Q4 FY26: über $100M ACV von emerging AI products (+100% YoY), gesamte AI-ARR bei >$400M. Neue Akquisitionen: <strong>Sana</strong> (Enterprise Knowledge Tools) und <strong>Paradox</strong> (Candidate Experience Agent). Neues Pricing-Modell: <strong>Flex Credits</strong> – Kunden zahlen für AI-Work (z.B. processed invoices) statt nur per Seat.</p>
+
+      <h3>Geschäftsmodell-Risiko: AI-Disruptions-Threat</h3>
+      <p>HCM-Markt steht unter strukturellem Druck: AI-Agents könnten klassische HR-/Finance-Mitarbeiter ersetzen, was die "User-Seat-basierte" Bepreisung kannibalisieren würde. Workday-Stock ist seit Februar 2024 ATH ($307) auf $119 gefallen (-61%) – Markt preist signifikantes AI-Disruptions-Risiko ein. Bhusris CEO-Return + Flex-Credits-Modell sind direkte Antworten auf diese Bedrohung.</p>
+
+      <div class="source">Quellen: Workday Q4 FY26 8-K (24.02.2026); SEC Filing; Workday Press Release; Futurum Group Q4 Analysis (27.02.2026); EBC Financial Group (09.04.2026).</div>
     </div>
   </div>
 
-  <!-- NAV -->
-  <nav class="nav">
-    <a href="https://wday-analyse.vercel.app/#s1">1. Geschäftsmodell</a>
-    <a href="https://wday-analyse.vercel.app/#s2">2. Burggraben</a>
-    <a href="https://wday-analyse.vercel.app/#s3">3. Quartale</a>
-    <a href="https://wday-analyse.vercel.app/#s4">4. Wachstum</a>
-    <a href="https://wday-analyse.vercel.app/#s5">5. Bewertung</a>
-    <a href="https://wday-analyse.vercel.app/#s6">6. Cashflow</a>
-    <a href="https://wday-analyse.vercel.app/#s7">7. Peers</a>
-    <a href="https://wday-analyse.vercel.app/#s8">8. News</a>
-    <a href="https://wday-analyse.vercel.app/#s9">9. Technisch</a>
-    <a href="https://wday-analyse.vercel.app/#s10">10. Risiken</a>
-    <a href="https://wday-analyse.vercel.app/#s11">11. AI-Migration</a>
-    <a href="https://wday-analyse.vercel.app/#s12">12. Fazit</a>
-    <a href="https://wday-analyse.vercel.app/#s13">13. Outlook</a>
-  </nav>
-
-  <div class="main">
-
-    <!-- KPI OVERVIEW -->
-    <div class="kpi-grid" style="margin-top:24px;">
-      <div class="kpi-card">
-        <div class="kpi-label">Kurs</div>
-        <div class="kpi-value red">$130</div>
-        <div class="kpi-sub">USD · 27.02.2026</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Market Cap</div>
-        <div class="kpi-value">~$34 Mrd.</div>
-        <div class="kpi-sub">NASDAQ</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">P/E FWD (FY27)</div>
-        <div class="kpi-value green">~12x</div>
-        <div class="kpi-sub">Hist. Median: ~35x</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">EV/FCF</div>
-        <div class="kpi-value green">~12x</div>
-        <div class="kpi-sub">Hist. Median: ~40x</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">FCF FY2026</div>
-        <div class="kpi-value green">$2,78 Mrd.</div>
-        <div class="kpi-sub">+26,9% YoY</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Sub-Rev. FY26</div>
-        <div class="kpi-value">$8,84 Mrd.</div>
-        <div class="kpi-sub">+15% YoY</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Nächste Earnings</div>
-        <div class="kpi-value orange">Mai 2026</div>
-        <div class="kpi-sub">Q1 FY2027</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Konsens Zielkurs</div>
-        <div class="kpi-value">$202</div>
-        <div class="kpi-sub">+55% Upside</div>
-      </div>
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben & Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 8/10</div>
     </div>
+    <div class="section-body">
+      <h3>HCM-Marktführer mit hohem Switching-Cost</h3>
+      <p>Workday ist der unbestrittene <strong>Enterprise-HCM-Marktführer</strong> (>50% Marktanteil im Cloud-HCM-Segment, vor Oracle HCM Cloud, SAP SuccessFactors, ADP Workforce Now). 60%+ der Fortune 500 nutzen Workday HCM. <strong>Gross Revenue Retention Rate 97%</strong> – exzellente Kundenbindung. HCM-Implementierungen dauern 12–24 Monate und kosten $5-50M – Switching-Costs sind extrem hoch.</p>
 
-    <!-- ===== SEKTION 1 ===== -->
-    <div class="section" id="s1">
-      <div class="section-header">
-        <div class="section-number">1</div>
-        <div class="section-title">Geschäftsmodell</div>
-        <div class="section-note">Quellen ≤ 6 Monate</div>
-      </div>
-      <div class="section-body">
-        <p>Workday wurde 2005 von Dave Duffield und Aneel Bhusri gegründet – beiden PeopleSoft-Veteranen – mit der Vision, Enterprise-Software radikal zu modernisieren. Das Unternehmen positioniert sich heute als die führende Cloud-native Plattform für Human Capital Management (HCM) und Financial Management (FM) für Großunternehmen und hat sich selbst neu als <span class="pill">AI Platform for managing people, money, and agents</span> definiert.</p>
-        <p>Das Kernprodukt teilt sich in zwei Hauptsäulen auf: <strong>Workday HCM</strong> umfasst die gesamte Employee Lifecycle – von Recruiting (Paradox, HiredScore), Onboarding, Payroll, Talentmanagement, Workforce Planning bis hin zu People Analytics. <strong>Workday Financial Management</strong> deckt die vollständige Finance-Funktion ab: General Ledger, Accounts Payable/Receivable, Financial Close, Budgeting und Forecasting (über Workday Adaptive Planning) sowie Spend Management. Beide Suiten teilen ein einziges Datenmodell, was Workdays zentrales Differenzierungsmerkmal gegenüber fragmentierten Legacy-Lösungen darstellt.</p>
-        <p>Die Revenue-Struktur ist stark subscription-basiert und damit hoch planbar. Im FY2026 entfielen rund <strong>93%</strong> der Gesamterlöse auf Subscription-Umsätze ($8,844 Mrd.), nur ~7% auf Professional Services ($707 Mio.). Der totale Backlog beläuft sich auf <strong>$28,1 Mrd.</strong> (+12% YoY), der 12-Monats-Backlog auf $8,833 Mrd. (+15,8%), was hohe Visibilität für zukünftige Umsätze schafft. Durchschnittliche Vertragslaufzeiten betragen 2–3 Jahre. Workday bedient über <strong>11.500 Kunden</strong> weltweit, darunter mehr als 65% der Fortune 500.</p>
-        <p>Das <strong>AI-Pivoting</strong> ist strategisch zentral: Mit Workday Illuminate hat das Unternehmen seine nächste Produktgeneration definiert – ein System aus AI Agents (Payroll Agent, Financial Close Agent, Self-Service Agent etc.), das traditionelle regelbasierte Workflows durch agentenbasierte, adaptive Prozesse ersetzt. Die Einführung von <span class="pill">Flex Credits</span> ermöglicht ein usage-based Billing für AI-Features, was einen neuen Revenue-Stream neben dem traditionellen Seat-basierten Modell eröffnet. Im Q4 FY2026 generierte Workday über $100 Mio. neuen ACV aus KI-Produkten, mit &gt;100% YoY-Wachstum und einem ARR von über $400 Mio. aus AI-Lösungen.</p>
-        <div class="source">Quellen: Workday Q4 FY2026 Earnings Release (investor.workday.com, 24.02.2026); Workday Q4 FY2026 Prepared Remarks; Workday.com IR</div>
-      </div>
+      <h3>Multi-Modul Cross-Sell: HCM → Finance</h3>
+      <p>Workdays größte Wachstumsopportunität ist die <strong>Finance-Cloud-Cross-Sell-zu-HCM-Kunden</strong>. Während HCM bei 60%+ der Fortune 500 ist, ist Finance erst bei ~15-20%. Bei klassischem ERP gegen Oracle/SAP-Legacy. Multi-Modul-Kunden haben 3-5x höhere ARPU.</p>
+
+      <h3>Schwächen & Verwundbarkeiten</h3>
+      <p>(1) <strong>AI-Disruptions-Threat</strong>: AI-Agents könnten klassische HR-Mitarbeiter ersetzen – das ist Existenzrisiko für Per-Seat-Lizenz-Modell; (2) <strong>Wachstumsverlangsamung</strong>: FY27 Sub-Guide nur +12-13% (von +14.5% in FY26); (3) <strong>MSFT/SAP-Konkurrenz im Mid-Market</strong>: SAP S/4HANA Cloud, Oracle Fusion HCM, MSFT Dynamics HR-Pakete drücken in Workdays Markt; (4) <strong>Bewertungsrisiko</strong>: -61% von ATH zeigt, dass Markt das Geschäftsmodell hinterfragt.</p>
+
+      <div class="source">Quellen: Workday Q4 FY26 Earnings Call; Synergy Research HCM Market Share; Yahoo Finance.</div>
     </div>
+  </div>
 
-    <!-- ===== SEKTION 2 ===== -->
-    <div class="section" id="s2">
-      <div class="section-header">
-        <div class="section-number">2</div>
-        <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
-        <div class="section-score">Score: 6/10</div>
-      </div>
-      <div class="section-body">
-        <p>Workdays Wettbewerbsvorteile sind real, aber im Kontext der KI-Revolution differenzierter zu bewerten als in den Vorjahren. Der stärkste Burggrabenbaustein ist das <strong>einheitliche Datenmodell</strong>: Workday betreibt eine Cloud-Architektur mit einem konsistenten Datenschema, das HR- und Finance-Transaktionen in Echtzeit verknüpft. Dies ermöglicht Cross-Modul-Analysen (z.B. Workforce-Kosten gegen Budget), die bei fragmentierten SAP/Oracle-Implementierungen Monate dauern.</p>
-        <p>Die <strong>Switching Costs</strong> sind historisch sehr hoch. Eine vollständige Workday-Implementierung dauert typischerweise 6–18 Monate, kostet sechsstellig bis siebenstellig in Beraterhonoraren und führt zu tiefer organisatorischer Verflechtung (Payroll, Compliance, Benefits). Ein Workday-Kunde, der wechseln möchte, muss nicht nur Daten migrieren, sondern auch Workflows, Approvals, Integrationen und Customizations neu aufbauen. Hier liegt jedoch auch die zentrale Schwachstelle: AI-gestützte Migrationswerkzeuge reduzieren diesen Aufwand systematisch – mehr dazu in Sektion 11.</p>
-        <p><strong>Netzwerkeffekte</strong> bestehen bei Workday nur indirekt: Die Datenhistorie eines Unternehmens (Employee Records, Payroll Runs, Financial Closes) steigt über die Jahre und verbessert die AI-Modellqualität für genau diesen Kunden. Das ist ein Lock-in der Datenebene. Das neue Marketplace-Ökosystem (600+ Partner-Integrationen) stärkt diese Dimension. Workdays <strong>Brand Power</strong> ist im Enterprise-Segment stark – als 4-facher Gartner Magic Quadrant Leader 2025 (Cloud HCM, Cloud ERP Finance, Cloud ERP Service Industries, Financial Planning) genießt das Unternehmen institutionelles Vertrauen bei CIOs und CFOs.</p>
-        <p>Kritisch zu bewerten ist der technologische Vorsprung: Workday war einst deutlich führend als cloud-native Alternative zu On-Premise-SAP/Oracle. Dieser Vorteil ist heute kleiner, da SAP (S/4HANA Cloud) und Oracle (Fusion Cloud) ihrerseits cloud-native Produkte anbieten. Zudem entstehen AI-native Wettbewerber (Rippling, Personio, neue Entrants), die ohne Legacy-Ballast schneller innovieren können. Das schwächt den Burggraben am unteren Ende des Markts.</p>
-        <div class="source">Quellen: Gartner Magic Quadrant Reports 2025; Workday Rising EMEA Nov 2025 (ComputerWeekly); Siit.io Workday Competitive Analysis</div>
-      </div>
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Beat-Ratio: 4/4</div>
     </div>
+    <div class="section-body">
+      <p>4/4 Beats, aber FY27-Guidance impliziert Wachstumsverlangsamung.</p>
 
-    <!-- ===== SEKTION 3 ===== -->
-    <div class="section" id="s3">
-      <div class="section-header">
-        <div class="section-number">3</div>
-        <div class="section-title">Letzte 4 Quartale (FY2026)</div>
-        <div class="section-score">Beat-Ratio: 4/4</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Quartal</th><th>Revenue</th><th>YoY</th><th>Subscription YoY</th><th>Non-GAAP EPS</th><th>Op-Marge (Non-GAAP)</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Q1 FY26 (Feb-Apr'25)</strong></td><td>$2.24B</td><td class="neutral">+13%</td><td>+13%</td><td>$2.21</td><td>28%</td><td class="beat">BEAT</td></tr>
+            <tr><td><strong>Q2 FY26 (May-Jul'25)</strong></td><td>$2.35B</td><td class="neutral">+13%</td><td>+14%</td><td>$2.30</td><td>30%</td><td class="beat">BEAT</td></tr>
+            <tr><td><strong>Q3 FY26 (Aug-Oct'25)</strong></td><td>$2.45B</td><td class="neutral">+12%</td><td>+13%</td><td>$2.35</td><td>30%</td><td class="beat">BEAT</td></tr>
+            <tr><td><strong>Q4 FY26 (Nov'25-Jan'26)</strong></td><td>$2.53B</td><td class="beat">+14.5%</td><td>+15.7%</td><td>$2.47</td><td>30.6%</td><td class="beat">BEAT*</td></tr>
+          </tbody>
+        </table>
       </div>
-      <div class="section-body">
-        <div class="alert-box">⚠️ <strong>Hinweis:</strong> Workdays Geschäftsjahr endet am 31. Januar. Die vier dargestellten Quartale sind Q1–Q4 FY2026 (Februar 2025 – Januar 2026). Nächste Quartalsergebnisse (Q1 FY2027): voraussichtlich <strong>Mai 2026</strong>. Daten aus Workday IR und finviz.com (Stand 27.02.2026).</div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Metrik</th>
-                <th>Q1 FY26 (Apr '25)</th>
-                <th>Q2 FY26 (Aug '25)</th>
-                <th>Q3 FY26 (Nov '25)</th>
-                <th>Q4 FY26 (Feb '26)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Total Revenue ($Mrd.)</td><td>2,225</td><td>2,348</td><td>2,432</td><td>2,532</td></tr>
-              <tr><td>YoY Wachstum</td><td>+15,8%</td><td>+12,6%</td><td>+12,6%</td><td>+14,5%</td></tr>
-              <tr><td>Subscription Revenue ($Mrd.)</td><td>2,058</td><td>2,163</td><td>2,244</td><td>2,360</td></tr>
-              <tr><td>Sub. Revenue YoY</td><td>+17%</td><td>+17%</td><td>+15%</td><td>+15,7%</td></tr>
-              <tr><td>Non-GAAP EPS</td><td>$1,99</td><td>$2,21</td><td>$2,26</td><td>$2,47</td></tr>
-              <tr><td>EPS vs. Konsens</td><td><span class="beat">Beat +$0,14</span></td><td><span class="beat">Beat +$0,09</span></td><td><span class="beat">Beat +$0,07</span></td><td><span class="beat">Beat +$0,15</span></td></tr>
-              <tr><td>Non-GAAP Op. Margin</td><td>25,0%</td><td>25,2%</td><td>28,5%</td><td>30,6%</td></tr>
-              <tr><td>12M-Backlog ($Mrd.)</td><td>~7,5</td><td>~7,9</td><td>8,21</td><td>8,833</td></tr>
-              <tr><td>Marktreaktion</td><td><span class="neutral">Neutral</span></td><td><span class="miss">–8% (Guidance)</span></td><td><span class="neutral">Neutral</span></td><td><span class="miss">–10% (Guidance)</span></td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p>Trotz konsistenter operativer Überperformance (4/4 EPS-Beats) fiel die Aktie nach Q2 und Q4 FY2026 durch enttäuschende Guidance. Besonders markant: Q4 FY2026 – obwohl EPS ($2,47 vs. $2,32 Konsens) und Revenue ($2,532 Mrd. vs. $2,52 Mrd. erwartet) übertrafen, gab Workday FY2027 Subscription-Revenue-Guidance von $9,925–9,950 Mrd. aus, was 12–13% Wachstum impliziert und leicht unter dem Konsens lag. Die Aktie fiel –9 bis –13% im Nachhandel.</p>
-        <p>Die wichtigsten Management-Statements aus Q4 FY2026 (CEO Aneel Bhusri nach Rückkehr am 09.02.2026): <em>"We built Workday to bring innovation back to the worlds of HR and finance, and AI gives us the chance to do it all again."</em> FCF wuchs +26,86% auf $2,777 Mrd. Non-GAAP Operating Margin expandierte um 420 Basispunkte. AI-ACV &gt;$100 Mio./Quartal, ARR aus AI-Produkten nun &gt;$400 Mio.</p>
-        <div class="source">Quellen: Workday Q4 FY2026 Earnings Release (investor.workday.com, 24.02.2026); Q3 FY2026 Prepared Remarks (25.11.2025); 247wallst.com (25.02.2026)</div>
-      </div>
+      <p style="font-size:12px; color:var(--text-muted);">* Q4 FY26 inkl. Paradox + Sana Akquisitionen-Beitrag. Organic Sub +13-14%.</p>
+
+      <h3>Q4 FY26 Highlights</h3>
+      <p>Total Revenue $2.53B (+14.5% YoY). Subscription $2.36B (+15.7%). Non-GAAP Op-Marge 30.6% (+4.2pp YoY). EPS $2.47 vs. Konsens $2.32 (+6.5% Beat). 1.7 Mrd. AI Actions im FY26. <strong>FY27 Subscription-Wachstums-Guidance: +12-13% YoY</strong> – schwächer als FY26. Erweitert FY26 Op-Income auf $721M (7.5% Marge), Operating Cashflow $2.94B (+19% YoY). Bhusri: "Built Workday to bring innovation back to HR and finance – AI gives us the chance to do it all again."</p>
+
+      <div class="source">Quellen: WDAY Q4 FY26 8-K (24.02.2026); SEC; Seeking Alpha (24.02.2026); Futurum Group (27.02.2026); Yahoo Finance.</div>
     </div>
+  </div>
 
-    <!-- ===== SEKTION 4 ===== -->
-    <div class="section" id="s4">
-      <div class="section-header">
-        <div class="section-number">4</div>
-        <div class="section-title">Wachstumseinordnung</div>
-        <div class="section-score">Score: 6/10</div>
-      </div>
-      <div class="section-body">
-        <p>Workday befindet sich im Übergang von 'Hyper-Growth' zu 'Growth-at-Scale'. Das Unternehmen wuchs von $6,6 Mrd. Umsatz (FY2023) auf $9,55 Mrd. (FY2026), was ein konsistentes Wachstum von 13–17% p.a. zeigt. Die Guidance für FY2027 impliziert jedoch eine weitere Deceleration auf 12–13%, was Anleger beunruhigt. Das Wachstum ist als 'echt' zu bewerten: Es wird nicht durch M&amp;A inflationiert. Die Profitabilitätsverbesserung ist strukturell – Non-GAAP Operating Margin stieg von ~22% in FY2023 auf 30,6% im Q4 FY2026.</p>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Jahr</th><th>Umsatz ($Mrd.)</th><th>YoY Wachstum</th><th>Sub. Wachstum</th><th>Non-GAAP Op. Margin</th></tr></thead>
-            <tbody>
-              <tr><td>FY2023</td><td>6,61</td><td>+18,7%</td><td>+21%</td><td>~22%</td></tr>
-              <tr><td>FY2024</td><td>7,26</td><td>+9,9%</td><td>+22%</td><td>~24%</td></tr>
-              <tr><td>FY2025</td><td>8,45</td><td>+16,4%</td><td>+17%</td><td>~25%</td></tr>
-              <tr><td>FY2026</td><td>9,55</td><td>+13,1%</td><td>+15%</td><td>28,3%</td></tr>
-              <tr><td><strong>FY2027E</strong></td><td><strong>~10,8</strong></td><td><strong>~12–13%</strong></td><td><strong>~13%</strong></td><td><strong>~28–29%</strong></td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3>Geografische Verteilung (FY2026)</h3>
-        <div class="geo-grid">
-          <div class="geo-card">
-            <div class="geo-region">USA</div>
-            <div class="geo-pct">75%</div>
-            <div class="geo-note">$7,18 Mrd. · +13% YoY</div>
-          </div>
-          <div class="geo-card">
-            <div class="geo-region">International</div>
-            <div class="geo-pct">25%</div>
-            <div class="geo-note">$2,37 Mrd. · +13% YoY</div>
-          </div>
-          <div class="geo-card">
-            <div class="geo-region">EMEA (Wachstumsmotor)</div>
-            <div class="geo-pct">~15%</div>
-            <div class="geo-note">EU Sovereign Cloud, Dubai Büro, +Bayer/ING-Wins</div>
-          </div>
-          <div class="geo-card">
-            <div class="geo-region">APAC &amp; Japan</div>
-            <div class="geo-pct">~10%</div>
-            <div class="geo-note">Gezielter Ausbau ASEAN &amp; Japan</div>
-          </div>
-        </div>
-        <p>Das AI-Segment ($400 Mio. ARR, &gt;100% YoY) ist erst in der Entstehungsphase und bietet strukturelles Upside. Das Risiko: Verlangsamung des Seat-basierten Wachstums durch AI-Disruption des headcount-abhängigen Geschäftsmodells. Die Internationalisierung ist ein struktureller Wachstumsmotor mit klarem Ziel, mittelfristig 30–35% des Revenue zu erreichen.</p>
-        <div class="source">Quellen: Workday FY2026/FY2025 Annual Reports; Q3/Q4 FY2026 Prepared Remarks (investor.workday.com); Stockanalysis.com</div>
-      </div>
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 6/10</div>
     </div>
+    <div class="section-body">
+      <h3>Stabiles, aber verlangsamendes Wachstum</h3>
+      <p>FY2026 Total Revenue $9.55B (+13.1% YoY). Subscription wuchs +14.5%. FY27 Sub-Guidance: +12-13% – Verlangsamung. Im Vergleich zu Mega-Cap-Software (MSFT +18%, GOOGL +18%, META +33%) ist Workday im langsameren Segment. Allerdings: <strong>AI-ARR-Wachstum +100% YoY auf $400M+</strong> bietet Re-Acceleration-Hoffnung.</p>
 
-    <!-- ===== SEKTION 5 ===== -->
-    <div class="section" id="s5">
-      <div class="section-header">
-        <div class="section-number">5</div>
-        <div class="section-title">Bewertung &amp; Multiples</div>
-        <div class="section-score">Score: 7/10</div>
-      </div>
-      <div class="section-body">
-        <div class="alert-box">⚠️ <strong>Datenbasis:</strong> Alle Kennzahlen von finviz.com, stockanalysis.com und gurufocus.com (Stand 27.02.2026). Quellen ≤ 3 Monate.</div>
-        <p>Nach dem massiven Kursrückgang von ~$276 (52-Wochen-Hoch) auf ~$130 (Stand 27.02.2026, nahe 52-Wochen-Tief von $117,76) hat sich die Bewertung erheblich komprimiert. Der Forward P/E von ~12x (basierend auf FY2027E Non-GAAP EPS von ~$10,00) ist historisch günstig für ein Unternehmen mit Workdays Qualitätsprofil. Das PEG-Ratio von ~0,50 signalisiert, dass die Aktie gemessen am Wachstum attraktiv bewertet ist.</p>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Multiple</th><th>Aktuell (27.02.26)</th><th>5J-Median</th><th>Sektor-Median</th><th>Bewertung</th></tr></thead>
-            <tbody>
-              <tr><td>P/E TTM</td><td>~54x</td><td>~100x</td><td>~22x</td><td><span class="neutral">Erschwinglich vs. Hist.</span></td></tr>
-              <tr><td>P/E FWD (FY27)</td><td>~12x</td><td>~35x</td><td>~18x</td><td><span class="beat">GÜNSTIG</span></td></tr>
-              <tr><td>PEG Ratio</td><td>~0,50</td><td>~1,5x</td><td>~1,0x</td><td><span class="beat">GÜNSTIG</span></td></tr>
-              <tr><td>EV/EBITDA TTM</td><td>~23x</td><td>~45x</td><td>~11x</td><td><span class="neutral">Fair</span></td></tr>
-              <tr><td>P/S TTM</td><td>~3,6x</td><td>~9x</td><td>~5x</td><td><span class="beat">GÜNSTIG</span></td></tr>
-              <tr><td>EV/FCF</td><td>~12x</td><td>~40x</td><td>~20x</td><td><span class="beat">GÜNSTIG</span></td></tr>
-              <tr><td>Market Cap</td><td>~$34 Mrd.</td><td>–</td><td>–</td><td>–</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p>Der Forward P/E von ~12x muss im Kontext gesehen werden: Die GAAP-Gewinne sind durch Stock-Based Compensation (SBC ~$1,5–2 Mrd./Jahr) stark belastet. Non-GAAP EPS FY2027E liegt bei ~$10,00, GAAP EPS deutlich darunter (~$2,50). Analysten-Konsens für den 12-Monats-Zielkurs liegt bei <strong>$202</strong> (Bandbreite $125–$280). Bullishe Stimmen: Guggenheim Buy $275, Loop Capital $280. Jüngste Downgrades: Jefferies Hold $150, Piper Sandler Neutral $135, DA Davidson $125. Goldman Sachs Neutral $206, BMO Outperform $182.</p>
-        <div class="source">Quellen: stockanalysis.com/stocks/wday/statistics (27.02.2026); defenseworld.net Analystenziele (27.02.2026); gurufocus.com EV/EBITDA</div>
-      </div>
+      <h3>Wachstumstreiber</h3>
+      <p>(1) <strong>HCM-Cross-Sell-zu-Finance</strong>: Größter Hebel, da Finance-Penetration noch niedrig; (2) <strong>AI-Agent-Adoption</strong>: $100M+ Q4 ACV von emerging AI products (+100% YoY); (3) <strong>International-Expansion</strong>: EMEA und APAC weiterhin unterentwickelt vs. USA-Dominanz; (4) <strong>Akquisitionen</strong>: Sana + Paradox bringen AI-Capabilities und ARR-Beitrag.</p>
+
+      <h3>Profitabilität: Operating-Leverage stark</h3>
+      <p>Non-GAAP Op-Marge Q4 FY26 30.6% (+4.2pp YoY). FY26 GAAP Op-Income $721M (7.5%). Operating Cashflow $2.94 Mrd. (+19.4% YoY). Profitabilitäts-Expansion ist klar trotz AI-Investitionen.</p>
+
+      <div class="source">Quellen: Workday Q4 FY26 8-K; SEC Filing.</div>
     </div>
+  </div>
 
-    <!-- ===== SEKTION 6 ===== -->
-    <div class="section" id="s6">
-      <div class="section-header">
-        <div class="section-number">6</div>
-        <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
-        <div class="section-score">Score: 8/10</div>
-      </div>
-      <div class="section-body">
-        <p>Workdays Cash-Generierung ist der stärkste Qualitätsbeweis des Geschäftsmodells. Der Free Cash Flow (FCF) stieg in FY2026 um <strong>+26,86% auf $2,777 Mrd.</strong> (FY2025: ~$2,19 Mrd.). Das ergibt eine FCF-Marge von ~29% auf Gesamtumsatz, was für ein ~$9,5-Mrd.-Umsatzunternehmen bemerkenswert ist. Die FCF-Konversionsrate (FCF/EBITDA) liegt bei &gt;100%, was auf hohe Earnings-Qualität hindeutet – die ausgewiesenen Gewinne sind 'echt'.</p>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Metrik</th><th>FY2024</th><th>FY2025</th><th>FY2026</th><th>Trend</th></tr></thead>
-            <tbody>
-              <tr><td>Gross Margin</td><td>~76%</td><td>~76%</td><td>~77%</td><td>➡ Stabil-leicht steigend</td></tr>
-              <tr><td>Non-GAAP Op. Margin</td><td>~24%</td><td>~25%</td><td>28,3%</td><td>📈 Stark steigend</td></tr>
-              <tr><td>GAAP Net Margin</td><td>~4%</td><td>~7%</td><td>~7,3%</td><td>➡ Verbessernd</td></tr>
-              <tr><td>FCF ($Mrd.)</td><td>~1,62</td><td>~2,19</td><td>2,777</td><td>📈 +26,9% YoY</td></tr>
-              <tr><td>ROE</td><td>~6%</td><td>~7%</td><td>13,4%</td><td>📈 Stark verbessernd</td></tr>
-              <tr><td>Debt/Equity</td><td>–</td><td>–</td><td>0,38</td><td>✅ Konservativ</td></tr>
-              <tr><td>Cash &amp; Securities</td><td>–</td><td>–</td><td>$6,8 Mrd.</td><td>✅ Starke Bilanz</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p>Die Bilanz ist solide: $6,8 Mrd. Cash &amp; Marketable Securities, Debt/Equity 0,38x. Share Buybacks sind aggressiv: $1,4 Mrd. in den ersten drei Quartalen FY2026, mit geplanten zusätzlich $3,6 Mrd. bis Ende FY2027 ($5 Mrd. gesamt). Das zeigt Management-Confidence in die Unterbewertung. Stock-Based Compensation ist mit ~$1,5–2 Mrd./Jahr die größte Diskrepanz zwischen GAAP und Non-GAAP und muss berücksichtigt werden.</p>
-        <div class="source">Quellen: Workday Q4 FY2026 Earnings Release (24.02.2026); stockanalysis.com/wday/statistics; Q3 FY2026 Prepared Remarks</div>
-      </div>
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung & Multiples</div>
+      <div class="section-score">Score: 8/10</div>
     </div>
+    <div class="section-body">
+      <h3>Bewertung am 5-Jahres-Tief nach 61%-Crash</h3>
+      <p>Bei $118.62 handelt WDAY mit <strong>P/E TTM ~30x</strong> (vs. 5J-Schnitt ~60x). Forward P/E ~22x. P/Sales TTM ~3.2x (vs. 5J-Schnitt ~8x). EV/EBITDA Fwd ~17x. <strong>Workday ist auf historisches Bewertungs-Tief</strong>, ähnlich wie Cisco oder Oracle Anfang 2000er nach dem Dotcom-Crash. Aber: Bewertungsdiskount reflektiert reales AI-Disruptions-Risiko.</p>
 
-    <!-- ===== SEKTION 7 ===== -->
-    <div class="section" id="s7">
-      <div class="section-header">
-        <div class="section-number">7</div>
-        <div class="section-title">Peer-Vergleich</div>
-        <div class="section-score">Score: 6/10</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Metrik</th><th>WDAY (heute)</th><th>5J-Ø</th><th>Einordnung</th></tr></thead>
+          <tbody>
+            <tr><td>P/E TTM</td><td>~30x</td><td>~60x</td><td class="beat">50% unter Schnitt</td></tr>
+            <tr><td>Forward P/E (FY28)</td><td>~22x</td><td>~40x</td><td class="beat">Historisch tief</td></tr>
+            <tr><td>P/Sales TTM</td><td>~3.2x</td><td>~8x</td><td class="beat">Sehr günstig</td></tr>
+            <tr><td>EV/EBITDA (Fwd)</td><td>~17x</td><td>~28x</td><td class="beat">Attraktiv</td></tr>
+            <tr><td>PEG (Fwd)</td><td>~1.8x</td><td>—</td><td class="neutral">Akzeptabel</td></tr>
+            <tr><td>FCF Yield TTM</td><td>~7%</td><td>~3%</td><td class="beat">Exzellent</td></tr>
+          </tbody>
+        </table>
       </div>
-      <div class="section-body">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Unternehmen</th><th>Market Cap</th><th>Rev. FY26E</th><th>Rev. Wachstum</th><th>Op. Margin</th><th>P/E FWD</th><th>EV/EBITDA</th></tr></thead>
-            <tbody>
-              <tr style="background:rgba(59,130,246,0.06)"><td><strong>Workday (WDAY)</strong></td><td>~$34 Mrd.</td><td>$9,55 Mrd.</td><td>+13%</td><td>~28% (n-GAAP)</td><td>~12x</td><td>~23x</td></tr>
-              <tr><td>SAP SE</td><td>~$284 Mrd.</td><td>$41,6 Mrd.</td><td>+13%</td><td>~28% (n-IFRS)</td><td>~29x</td><td>~18x</td></tr>
-              <tr><td>ServiceNow (NOW)</td><td>~$109 Mrd.</td><td>$13,3 Mrd.</td><td>+21%</td><td>~28%</td><td>~25x</td><td>~37x</td></tr>
-              <tr><td>Oracle (ORCL)</td><td>~$380 Mrd.</td><td>~$60 Mrd.</td><td>~+10%</td><td>~45%</td><td>~25x</td><td>~22x</td></tr>
-              <tr><td>Personio (privat)</td><td>~$8 Mrd.</td><td>~$0,4 Mrd.</td><td>&gt;50%</td><td>negativ</td><td>n/a</td><td>n/a</td></tr>
-              <tr><td>Rippling (privat)</td><td>~$14 Mrd.</td><td>~$0,3 Mrd.</td><td>&gt;80%</td><td>negativ</td><td>n/a</td><td>n/a</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p>Workday ist der günstigste unter den Qualitäts-Enterprise-Software-Peers. Gegenüber SAP ist Workday deutlich günstiger bewertet (P/E FWD ~12x vs. ~29x), obwohl beide ähnliche Wachstumsraten (~13% Revenue YoY) aufweisen. SAP genießt Premium-Bewertung durch seine breiteren ERP-Kapazitäten (Supply Chain, Manufacturing, CRM) und stärkere Netzwerkeffekte im SAP-Ecosystem.</p>
-        <p>Gegenüber ServiceNow ist Workday billiger trotz ähnlicher Margenprofile – ServiceNow wächst mit ~21% YoY schneller und hat den AI-Pivot überzeugender kommuniziert. Oracle ist breiter aufgestellt (Cloud Infrastructure), was es widerstandsfähiger gegen HCM-spezifische Disruption macht. Personio (KMU, 50–500 MA) und Rippling (~$14 Mrd. Valuation, AI-nativ, HR+IT) sind keine direkten Enterprise-Wettbewerber, zeigen aber die Bedrohung von unten im Mid-Market.</p>
-        <div class="source">Quellen: stockanalysis.com/sap, /now (27.02.2026); SAP FY2025 Annual Results (Jan 2026); ServiceNow Q4 2025 Earnings</div>
-      </div>
+
+      <h3>Peer-Vergleich</h3>
+      <p>WDAY Fwd P/E 22x vs. CRM 22x, MSFT 23x, ORCL 25x, ADP 26x. <strong>WDAY ist bewertungs-attraktiv für Quality-SaaS</strong>, aber AI-Risiko ist klar eingepreist. Bei +13% Wachstum + 30% Op-Marge + Bewertung am 5J-Tief = potenzielles Value-Setup.</p>
+
+      <div class="source">Quellen: Stocktitan (12.05.2026); EBC Financial Group (09.04.2026); Morningstar; eigene Berechnungen.</div>
     </div>
+  </div>
 
-    <!-- ===== SEKTION 8 ===== -->
-    <div class="section" id="s8">
-      <div class="section-header">
-        <div class="section-number">8</div>
-        <div class="section-title">Aktuelle News &amp; Events</div>
-        <div class="section-note">Quellen ≤ 3 Monate</div>
-      </div>
-      <div class="section-body">
-        <h3>Ebene 1: Unternehmen</h3>
-        <div class="event-item">
-          <div class="event-dot dot-yellow"></div>
-          <div>
-            <div class="event-label">24.02.2026 – Q4 FY2026 Earnings <span class="badge badge-yellow">Gemischt</span></div>
-            <div class="event-text">EPS-Beat ($2,47 vs. $2,32), Revenue-Beat ($2,532 Mrd. vs. $2,52 Mrd. erwartet), jedoch FY2027-Guidance enttäuschte mit 12–13% Subscription-Wachstum. Aktie –9 bis –13% im Nachhandel. Quelle: investor.workday.com, 24.02.2026</div>
-          </div>
-        </div>
-        <div class="event-item">
-          <div class="event-dot dot-yellow"></div>
-          <div>
-            <div class="event-label">09.02.2026 – CEO-Rückkehr: Aneel Bhusri übernimmt <span class="badge badge-yellow">Neutral/Leicht Positiv</span></div>
-            <div class="event-text">Carl Eschenbach tritt als CEO ab; Gründer Bhusri übernimmt erneut. Zeigt 'product-first'-Priorität für die AI-Ära. Mitten in der Transformationsphase erhöht CEO-Wechsel kurzfristig das Ausführungsrisiko. Quelle: financialcontent.com, 24.02.2026</div>
-          </div>
-        </div>
-        <div class="event-item">
-          <div class="event-dot dot-green"></div>
-          <div>
-            <div class="event-label">Feb 2026 – Workday Agent System of Record GA <span class="badge badge-green">Positiv</span></div>
-            <div class="event-text">Neue Plattform zum Management aller AI Agents im Unternehmen. Strategisch wichtig für AI-Monetarisierung als neues hochmarginiges SaaS-Layer. AI ARR &gt;$400 Mio. mit &gt;100% YoY-Wachstum. Quelle: futurumgroup.com, 27.02.2026</div>
-          </div>
-        </div>
-        <div class="event-item">
-          <div class="event-dot dot-green"></div>
-          <div>
-            <div class="event-label">Q4 FY2026 – Akquisition Pipedream <span class="badge badge-green">Positiv</span></div>
-            <div class="event-text">Workflow-Automatisierungsplattform. Stärkt Agentic AI Fähigkeiten und Workday-Ecosystem für Entwickler. Quelle: Workday Prepared Remarks Q4 FY2026</div>
-          </div>
-        </div>
-        <div class="event-item">
-          <div class="event-dot dot-green"></div>
-          <div>
-            <div class="event-label">Q3 FY2026 – $5 Mrd. Buyback-Programm angekündigt <span class="badge badge-green">Positiv</span></div>
-            <div class="event-text">Aggressives Rückkaufprogramm entspricht ~15% aller ausstehenden Aktien zu aktuellen Kursen. Starkes Signal des Managements für Unterbewertung. Quelle: Workday Q3 FY2026 Press Release</div>
-          </div>
-        </div>
-
-        <h3>Ebene 2: Branche</h3>
-        <div class="event-item">
-          <div class="event-dot dot-red"></div>
-          <div>
-            <div class="event-label">2025/2026 – SAP: AI Joule Agents General Availability <span class="badge badge-red">Negativ für WDAY</span></div>
-            <div class="event-text">SAP rüstet aggressiv AI auf – Joule Agents für Payroll, Finance und Supply Chain in der GA-Phase. SAP behält eigene ECC-Kunden stärker im Ecosystem, was Workdays SAP-Migration-Opportunity begrenzt. Quelle: erp.today NRF2026</div>
-          </div>
-        </div>
-        <div class="event-item">
-          <div class="event-dot dot-red"></div>
-          <div>
-            <div class="event-label">2025/2026 – AI-native ERP-Migrations-Tools reduzieren Switching Costs <span class="badge badge-red">Negativ</span></div>
-            <div class="event-text">Tools wie LeverX DataLark, HCLTech DMT und Informatica IDMC senken ERP-Migrationskostenbarrieren um 40–50%. Schlüsselrisiko für Workdays historischen Lock-in-Burggraben. Detailanalyse in Sektion 11.</div>
-          </div>
-        </div>
-        <div class="event-item">
-          <div class="event-dot dot-yellow"></div>
-          <div>
-            <div class="event-label">2026 – EU Sovereign Cloud &amp; Dubai Office-Eröffnung <span class="badge badge-blue">Neutral/Positiv</span></div>
-            <div class="event-text">Datenschutzkonformes Angebot für EMEA-Kunden stärkt internationale Expansion. Neue Wins: Bayer, ING Bank, Tandem Bank. Quelle: Workday EMEA Announcements 2025/2026</div>
-          </div>
-        </div>
-
-        <h3>Ebene 3: Makro</h3>
-        <div class="event-item">
-          <div class="event-dot dot-red"></div>
-          <div>
-            <div class="event-label">2025/2026 – 'SaaSpocalypse': KI-Angst drückt Enterprise-SW-Sektor <span class="badge badge-red">Negativ</span></div>
-            <div class="event-text">Adobe, Salesforce, ServiceNow, Workday alle unter Druck. Genereller Bewertungsdruck auf Seat-basierte SaaS-Modelle durch AI-Disruptions-Angst trifft WDAY besonders stark. Quelle: financialcontent.com (25.02.2026)</div>
-          </div>
-        </div>
-        <div class="event-item">
-          <div class="event-dot dot-red"></div>
-          <div>
-            <div class="event-label">2025/2026 – Unternehmen reduzieren Headcount durch AI <span class="badge badge-red">Negativ für Seat-Modell</span></div>
-            <div class="event-text">Falls AI Human Capital Management reduziert, sinkt Nachfrage nach HR-Seat-Lizenzen strukturell. Management erwähnte 'moderated customer headcount growth' als Headwind in Q4-Earnings-Call. Quelle: Workday Q4 FY2026 Earnings Call</div>
-          </div>
-        </div>
-        <div class="source">Quellen: Workday Q4 FY2026 Earnings Call; financialcontent.com (24.–25.02.2026); futurumgroup.com (27.02.2026); erp.today; Workday IR</div>
-      </div>
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen & Kapitalqualität</div>
+      <div class="section-score">Score: 8/10</div>
     </div>
+    <div class="section-body">
+      <h3>Starke Cashflow-Generierung, FCF-Yield 7%</h3>
+      <p>FY2026 Operating Cashflow $2.94 Mrd. (+19.4% YoY). FY26 FCF geschätzt ~$2.1 Mrd. (Capex ~$0.8 Mrd.). FCF-Yield auf MCap $30B = <strong>~7%</strong> – exzellent für Enterprise-SaaS. Bilanz: ~$8 Mrd. Cash & Investments, Debt minimal.</p>
 
-    <!-- ===== SEKTION 9 ===== -->
-    <div class="section" id="s9">
-      <div class="section-header">
-        <div class="section-number">9</div>
-        <div class="section-title">Technische Analyse</div>
-        <div class="section-score">Score: 3/10</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Metrik</th><th>FY2024</th><th>FY2025</th><th>FY2026</th><th>Trend</th></tr></thead>
+          <tbody>
+            <tr><td>Revenue</td><td>$7.3B</td><td>$8.4B</td><td>$9.55B</td><td class="beat">+13%</td></tr>
+            <tr><td>Operating Cashflow</td><td>$2.0B</td><td>$2.46B</td><td>$2.94B</td><td class="beat">↑↑</td></tr>
+            <tr><td>Non-GAAP Op-Margin</td><td>23%</td><td>26%</td><td>~28%</td><td class="beat">↑↑</td></tr>
+            <tr><td>GAAP Op-Margin</td><td>1%</td><td>5%</td><td>7.5%</td><td class="beat">↑↑</td></tr>
+            <tr><td>FCF</td><td>$1.7B</td><td>$2.0B</td><td>$2.1B</td><td class="beat">↑</td></tr>
+          </tbody>
+        </table>
       </div>
-      <div class="section-body">
-        <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom:20px;">
-          <div class="kpi-card">
-            <div class="kpi-label">Kurs</div>
-            <div class="kpi-value red">~$130</div>
-            <div class="kpi-sub">27.02.2026</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">SMA 20</div>
-            <div class="kpi-value red">~$155</div>
-            <div class="kpi-sub">Kurs UNTER SMA20</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">SMA 50</div>
-            <div class="kpi-value red">$181</div>
-            <div class="kpi-sub">–28% unter SMA50</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">SMA 200</div>
-            <div class="kpi-value red">$212</div>
-            <div class="kpi-sub">–39% unter SMA200</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">CCI (14)</div>
-            <div class="kpi-value green">~–270</div>
-            <div class="kpi-sub">Extrem überverkauft</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">52W-High</div>
-            <div class="kpi-value">$276,00</div>
-            <div class="kpi-sub">Aktie bei 47%</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">52W-Low</div>
-            <div class="kpi-value red">$117,76</div>
-            <div class="kpi-sub">Getestet 25.02.26</div>
-          </div>
-        </div>
-        <p>Die technische Situation von WDAY ist zum Analysezeitpunkt (27.02.2026) eindeutig bärisch. Die Aktie notiert bei ~$130 und hat in den letzten 52 Wochen mehr als die Hälfte ihres Wertes verloren (–53%). Das 52-Wochen-Tief von $117,76 wurde unmittelbar nach den Q4-Earnings am 25.02.2026 infolge des –10% Tageseinbruchs getestet.</p>
-        <p><strong>Support-Levels:</strong> Das unmittelbare technische Support-Level liegt am 52-Wochen-Tief von $117,76. Darunter gibt es wenig historischen Support bis ~$100. <strong>Resistance:</strong> Der SMA50 bei ~$181 und der SMA200 bei ~$212 sind die nächsten bedeutenden Widerstände. Der CCI-Wert von ca. –270 (extreme Überverkauft-Zone) und das Post-Earnings-Volumen signalisieren institutionellen Ausverkauf. Für kurzfristige Trader: eindeutig negatives Bild. Für langfristige Investoren kann die extreme Überverkauft-Zone als konträres Signal gewertet werden – aber nur bei fundamentaler Überzeugung.</p>
-        <div class="source">Quellen: macrotrends.net WDAY Stock Price History; defenseworld.net (27.02.2026); stockscan.io/WDAY CCI-Daten</div>
-      </div>
+
+      <h3>Bilanz & Kapitalrückführung</h3>
+      <p>Workday hat keine Dividende, aber aktives Buyback-Programm. ~$8B Cash, niedrige Debt. Aggressive R&D-Investitionen für AI-Capabilities (Paradox, Sana Akquisitionen).</p>
+
+      <div class="source">Quellen: WDAY Q4 FY26 8-K; eigene Berechnungen.</div>
     </div>
+  </div>
 
-    <!-- ===== SEKTION 10 ===== -->
-    <div class="section" id="s10">
-      <div class="section-header">
-        <div class="section-number">10</div>
-        <div class="section-title">Risiken &amp; Chancen</div>
-        <div class="section-score">Score: 6/10</div>
-      </div>
-      <div class="section-body">
-        <h3>9a) Strukturelle &amp; zyklische Risiken</h3>
-        <div class="risk-item">
-          <div class="risk-header">
-            <div class="risk-title">⚡ AI-Disruption des Seat-Modells</div>
-            <div><span class="badge badge-red">Hoch</span> <span class="badge badge-yellow">Zeithorizont: 3–5 Jahre</span></div>
-          </div>
-          <div class="event-text">AI-Agents automatisieren HR-/Finance-Arbeitsschritte → Unternehmen benötigen weniger HCM-Seats. Falls Net Revenue Retention unter 100% fällt, ist selbst Forward P/E 12x nicht billig. Finanzielle Auswirkung: Revenue-Wachstum fällt auf &lt;8%, massive Bewertungsrevision notwendig.</div>
-        </div>
-        <div class="risk-item">
-          <div class="risk-header">
-            <div class="risk-title">🔀 Reduzierte Switching Costs durch AI-Migration-Tools</div>
-            <div><span class="badge badge-red">Hoch</span> <span class="badge badge-yellow">Auswirkung: Mittel-Hoch</span></div>
-          </div>
-          <div class="event-text">AI-Tools (DataLark, DMT, Informatica) reduzieren ERP-Migrationskosten um 40–50%. Churn Rate könnte steigen, besonders im Mid-Market. Detailanalyse mit Quantifizierung in Sektion 11.</div>
-        </div>
-        <div class="risk-item">
-          <div class="risk-header">
-            <div class="risk-title">📉 Wachstumsdeceleration auf 12–13% (FY27 Guidance)</div>
-            <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-red">Wahrscheinlichkeit: Hoch</span></div>
-          </div>
-          <div class="event-text">Guidance liegt unter Konsenserwartungen. Falls AI-Monetarisierung nicht schnell genug skaliert, könnten 12-13% nicht zu halten sein. Anhaltender Bewertungsdruck auf die Aktie.</div>
-        </div>
-        <div class="risk-item">
-          <div class="risk-header">
-            <div class="risk-title">🏢 SAP/Oracle rüsten AI aggressiv auf</div>
-            <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Wahrscheinlichkeit: Hoch</span></div>
-          </div>
-          <div class="event-text">SAP Joule Agents, Oracle Fusion AI – beide Wettbewerber behalten Bestandskunden effektiver. SAP gewinnt potenziell &gt;70% der ECC-Migrations-Kunden für S/4HANA Cloud statt an Workday zu verlieren.</div>
-        </div>
-
-        <h3>9b) AI-Risiko &amp; Disruption (Kern der User-Fragestellung)</h3>
-        <p>Workday ist einem <strong>zweiseitigen AI-Risiko</strong> ausgesetzt: Das Substitutionsrisiko (AI reduziert HR-Headcount → weniger Seats) und das Migrationsrisiko (AI senkt Switching Costs). Beide Risiken sind real, aber mit mittlerem Zeithorizont (3–7 Jahre). Die vollständige quantitative Analyse findet sich in Sektion 11.</p>
-
-        <h3>9c) Chancen</h3>
-        <div class="event-item">
-          <div class="event-dot dot-green"></div>
-          <div><div class="event-label">AI-Monetarisierung: ARR &gt;$400 Mio., &gt;100% YoY – bei Beibehaltung &gt;$800 Mio. in 12M</div></div>
-        </div>
-        <div class="event-item">
-          <div class="event-dot dot-green"></div>
-          <div><div class="event-label">SAP ECC End-of-Support 2027 – Migration-Wave: Millionen SAP-Kunden müssen migrieren, Workday ist Alternative</div></div>
-        </div>
-        <div class="event-item">
-          <div class="event-dot dot-green"></div>
-          <div><div class="event-label">International-Expansion: 25% Anteil mit klarem Upside auf 30–35%; EU Sovereign Cloud erschließt EMEA</div></div>
-        </div>
-        <div class="event-item">
-          <div class="event-dot dot-green"></div>
-          <div><div class="event-label">Agent System of Record: Potenziell neues hochmarginiges SaaS-Layer zum Management aller AI Agents</div></div>
-        </div>
-        <div class="event-item">
-          <div class="event-dot dot-green"></div>
-          <div><div class="event-label">$5 Mrd. Buyback: ~15% der Marktkapitalisierung wird zurückgekauft – starke EPS-Unterstützung</div></div>
-        </div>
-
-        <h3>9d) Red Flags &amp; Dealbreaker</h3>
-        <p><strong>Red Flags:</strong> Guidance-Deceleration auf 12–13%; Aktienkurs –53% in 12M; CEO-Wechsel in AI-Transformationsphase; Analyst-Downgrade-Welle (Jefferies, Piper Sandler, DA Davidson).</p>
-        <p><strong>Dealbreaker (existenzbedrohend):</strong> Derzeit KEINE. Workday hat $6,8 Mrd. Cash, kaum Schulden, $2,8 Mrd. FCF und &gt;$28 Mrd. Backlog. Potentieller Dealbreaker: Net Revenue Retention nachhaltig unter 90% – aktuell nicht sichtbar.</p>
-        <div class="source">Quellen: Workday Q4/Q3 FY2026 Earnings Calls; financialcontent.com 'SaaSpocalypse' (25.02.2026); theplanetgroup.com Future of Work Trends 2026</div>
-      </div>
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 7/10</div>
     </div>
-
-    <!-- ===== SEKTION 11: SCORING ===== -->
-    <div class="section" id="scoring">
-      <div class="section-header">
-        <div class="section-number" style="background:var(--bg-card2); color:var(--primary); border:1px solid var(--primary);">⌀</div>
-        <div class="section-title">Scoring-Übersicht</div>
-        <div class="section-score">Ø Gesamtscore: 6,3/10</div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Unternehmen</th><th>MCap</th><th>Revenue Growth</th><th>Non-GAAP Op-Marge</th><th>Fwd P/E</th><th>AI-Strategy</th></tr></thead>
+          <tbody>
+            <tr><td><strong>WDAY</strong></td><td>$30B</td><td class="neutral">+13%</td><td>30%</td><td>~22x</td><td>Agentic AI + Flex Credits</td></tr>
+            <tr><td>CRM (Salesforce)</td><td>$153B</td><td class="neutral">+10%</td><td>34%</td><td>~22x</td><td>Agentforce ($800M ARR)</td></tr>
+            <tr><td>ORCL</td><td>$520B</td><td class="neutral">+9%</td><td>~45%</td><td>~25x</td><td>OCI + Database AI</td></tr>
+            <tr><td>ADP</td><td>~$120B</td><td class="neutral">+7%</td><td>~26%</td><td>~26x</td><td>Lyric AI Assistant</td></tr>
+            <tr><td>PAYC (Paycom)</td><td>~$13B</td><td class="neutral">+10%</td><td>~37%</td><td>~17x</td><td>BETI AI</td></tr>
+          </tbody>
+        </table>
       </div>
-      <div class="section-body">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Kategorie</th><th>Score</th><th>Score-Bar</th><th>Begründung</th></tr></thead>
-            <tbody>
-              <tr><td>Geschäftsmodell</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Starke Recurring Revenue, AI-Pivot glaubwürdig, HCM+FM-Synergie einzigartig</td></tr>
-              <tr><td>Burggraben</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Hohe Switching Costs, aber AI-Migration unter Druck; cloud-native Vorsprung erodiert</td></tr>
-              <tr><td>Operative Entwicklung (4Q)</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>4/4 EPS-Beats, starke Margenerweiterung, FCF +27% YoY; Guidance schwächlich</td></tr>
-              <tr><td>Wachstum</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Solid aber decelerierend (13%→12%); AI-Segment als Wildcard mit echtem Upside</td></tr>
-              <tr><td>Bewertung</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Forward P/E ~12x, PEG 0,50 – auf historischem Tief; attraktiv für LT-Investoren</td></tr>
-              <tr><td>Cashflow &amp; Margen</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>FCF $2,8 Mrd. (+27%), Marge 30%+, starke Bilanz ($6,8 Mrd. Cash), Buybacks</td></tr>
-              <tr><td>Risiken (invertiert)</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>AI-Disruption und Migration-Risk real; kein Existenzrisiko; Makro-Headwinds</td></tr>
-              <tr><td>Technische Analyse</td><td>3/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:30%; background:var(--red)"></div></div><span class="score-num" style="color:var(--red)">3</span></div></td><td>Stark bärisch: –53% 52W, unter SMA50 (–28%), SMA200 (–39%); kein technischer Boden</td></tr>
-              <tr style="background:rgba(59,130,246,0.08)">
-                <td><strong>⌀ Gesamtscore</strong></td>
-                <td><strong>6,3/10</strong></td>
-                <td>
-                  <div class="score-bar">
-                    <div class="score-bar-track">
-                      <div class="score-bar-fill" style="width:63%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
-                    </div>
-                    <span class="score-num" style="color:var(--primary);">6,3</span>
+
+      <h3>Qualitative Unterschiede</h3>
+      <p><strong>WDAY vs CRM:</strong> Vergleichbares Profil: ähnliches Wachstum (+13% vs +10%), Op-Marge (30% vs 34%), Fwd P/E (22x). CRM hat aggressivere Kapitalrückführung ($50B Buyback), WDAY hat den HCM-Marktführer-Status. Beides sind aktuell "Value-Plays mit AI-Optionalität".</p>
+      <p><strong>WDAY vs ADP:</strong> ADP ist HCM-Outsourcing-Spieler (Payroll-Processing), WDAY HCM-Software-Spieler. ADP ist defensiver, langsamer-wachsend; WDAY ist aggressiver positioniert mit AI-Pivot.</p>
+
+      <div class="source">Quellen: Yahoo Finance Multi-Ticker; Stocktitan.</div>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News & Events (letzte 3 Monate)</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">24.02.2026 – Q4 FY26 Beat: $2.53B Revenue (+14.5%) <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Revenue $2.53B (+14.5%), Subscription $2.36B (+15.7%), EPS $2.47 vs. Konsens $2.32. AI ARR >$400M, Q4 AI ACV >$100M (+100% YoY). Non-GAAP Op-Marge 30.6% (+4.2pp YoY). Quelle: SEC 8-K.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">24.02.2026 – FY27 Guidance impliziert Verlangsamung <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">FY27 Subscription-Wachstums-Guide: +12-13% YoY (von +14.5% in FY26). Markt reagierte negativ. Sub-Backlog-Wachstum dämpft. Quelle: Seeking Alpha (24.02.2026).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">02/2026 – Aneel Bhusri kehrt als CEO zurück <span class="badge badge-yellow">Strategisch</span></div>
+          <div class="event-text">Mitgründer + bisheriger Executive Chairman übernimmt CEO-Rolle für "Chapter 4" - AI-Era-Transition. Signalisiert strategische Dringlichkeit. Quelle: Workday Press Release (04.02.2026).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Q4 FY26 – Sana + Paradox Akquisitionen <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Sana = Enterprise Knowledge Tools (AI-Layer für Workday-Data); Paradox = Conversational AI für Candidate-Experience. Beide integriert mit AI-Capabilities-Beitrag. Quelle: Stocktitan.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Q4 FY26 – Flex Credits Pricing-Modell launched <span class="badge badge-green">Strategisch wichtig</span></div>
+          <div class="event-text">Customers können für AI-Work (z.B. processed invoices, candidate screening) bezahlen statt per Seat. Antwort auf AI-Disruption-Risiko. Wenn erfolgreich, ARPU-Boost trotz Seat-Erosion. Quelle: Chronicle Journal (24.02.2026).</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Q1 2026 – AI-Disruption-Bedenken belasten HCM-Sektor <span class="badge badge-red">Risiko</span></div>
+          <div class="event-text">Markt fürchtet, dass AI-Agents HR-/Finance-Mitarbeiter ersetzen → niedrigerer Bedarf an Per-Seat-Lizenzen. WDAY -61% von ATH, kein Big-Tech-Player hat so viel verloren. Quelle: EBC Financial Group (09.04.2026).</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – Enterprise-IT-Budgets selektiv <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Enterprise-Software-Budgets bevorzugen AI-Cloud-Infrastructure über klassisches SaaS. WDAY in unattraktivere Bucket positioniert.</div>
+        </div>
+      </div>
+
+      <div class="source">Quellen: Workday Q4 FY26 Earnings (24.02.2026); SEC 8-K; Seeking Alpha; Futurum Group; EBC Financial Group; Chronicle Journal.</div>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 2/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Extreme Schwäche: -61% von ATH, Tests 52W-Tief</h3>
+      <p>WDAY ist seit Februar 2024 ATH ($307) auf $118 abgestürzt = -61%. 52W-Range: ~$117 – $276. Aktueller Kurs nahe 52W-Tief. Alle wichtigen MAs weit über dem Kurs. Schwächste Big-Software-Performance in 2026.</p>
+
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value">$118.62</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA20</div><div class="kpi-value">~$125</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA50</div><div class="kpi-value">~$140</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA200</div><div class="kpi-value">~$190</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI(14)</div><div class="kpi-value miss">~35</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Tief</div><div class="kpi-value red">~$117</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Hoch</div><div class="kpi-value">~$276</div></div>
+      </div>
+
+      <h3>Setup</h3>
+      <p>Support: $117 (52W-Tief), $110, $100 (psychologisch). Resistance: $130, $145 (SMA50), $190 (SMA200). RSI ~35 nähert sich überverkauft. Falls $117 hält, Mean-Reversion auf $150+ möglich. Sonst weiter abwärts auf $100.</p>
+
+      <div class="source">Quellen: Stocktitan (12.05.2026); EBC Financial Group (09.04.2026); eigene Schätzungen.</div>
+    </div>
+  </div>
+
+  <!-- S10 -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken & Chancen</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🤖 AI-Disruption: Seat-Lizenz-Kannibalisierung</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Größtes strukturelles Risiko. Falls AI-Agents 20-30% der HR-/Finance-Mitarbeiter ersetzen, Per-Seat-Revenue sinkt. Flex-Credits-Modell adressiert das, aber unerprobt. Wahrscheinlichkeit signifikanter Disruption: ~40%.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">📉 Wachstumsverlangsamung</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">FY27 +12-13% Sub-Guide vs. FY26 +14.5%. Wenn AI-ARR nicht ausreichend Re-Acceleration bringt, droht weitere Multiple-Compression.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🏢 SAP/Oracle/MSFT Konkurrenz</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">SAP S/4HANA Cloud + Oracle Fusion + MSFT Dynamics drücken in HCM/Finance. Workdays Marktführerschaft strukturell unter Druck.</div>
+      </div>
+
+      <h3>Chancen</h3>
+      <p>(1) <strong>AI-ARR-Skalierung</strong>: $400M ARR jetzt +100% YoY – wenn auf $1.5-2B in 2-3 Jahren skalierbar, signifikanter Wachstumsbeitrag. (2) <strong>Bewertungs-Diskount</strong>: -61% von ATH, P/E 30x = signifikantes Mean-Reversion-Potenzial. (3) <strong>Bhusri-Comeback</strong>: Gründer-CEO-Returns haben historisch Aktien-Performance-Boost gebracht. (4) <strong>Finance-Cloud-Cross-Sell</strong>: Penetration nur ~20% bei Fortune-500-HCM-Kunden = $5B+ Opportunität.</p>
+
+      <div class="source">Quellen: Workday Q4 FY26 Earnings; EBC Financial Analysis; eigene Szenarioanalyse.</div>
+    </div>
+  </div>
+
+  <!-- S11 -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring</div>
+      <div class="section-score">Ø 6.0/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Visual</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td>Geschäftsmodell</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>HCM-Marktführer + Finance-Cross-Sell, aber Per-Seat-Modell unter AI-Druck</td></tr>
+            <tr><td>Burggraben</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>50%+ Cloud-HCM-Marktanteil, 97% GRR, hohe Switching-Costs</td></tr>
+            <tr><td>Operative Entwicklung (4Q)</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>4/4 Beats, Sub-Wachstum stabil 13-16%, Margen-Expansion +4pp</td></tr>
+            <tr><td>Wachstum</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>+13% FY26 → +12-13% FY27 = Verlangsamung. AI-ARR +100% Hoffnung</td></tr>
+            <tr><td>Bewertung</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>P/E 30x am 5J-Tief (vs. 60x Schnitt). FCF-Yield 7%</td></tr>
+            <tr><td>Cashflow</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>OCF $2.94B (+19%), Op-Marge 30%, FCF-Yield exzellent</td></tr>
+            <tr><td>Risiken (invertiert)</td><td><strong>5/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>AI-Disruption Tail-Risk hoch, Konkurrenz, Wachstumsverlangsamung</td></tr>
+            <tr><td>Technische Analyse</td><td><strong>2/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:20%"></div></div><span class="score-num">2</span></div></td><td>-61% von ATH, am 52W-Tief, alle MAs Sell. Schwächste Big-Software</td></tr>
+            <tr style="background:rgba(243,139,0,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>6.4/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track">
+                    <div class="score-bar-fill" style="width:64%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
                   </div>
-                </td>
-                <td>Qualitätsunternehmen in struktureller Transformationsphase, hohe kurzfristige Unsicherheit</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                  <span class="score-num" style="color:var(--primary);">6.4</span>
+                </div>
+              </td>
+              <td>Quality-Value-Play am 5J-Tief, aber AI-Disruptions-Risiko real</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
+  </div>
 
-    <!-- ===== SEKTION 11: USER-SPEZIFISCHE ANALYSE ===== -->
-    <div class="section" id="s11">
-      <div class="section-header">
-        <div class="section-number">11</div>
-        <div class="section-title">User-Spezifische Analyse: AI-erleichterte Migrationen</div>
-        <div class="section-note">Kernfragestellung</div>
-      </div>
-      <div class="section-body">
-        <div class="alert-box">🔬 <strong>Kernfrage:</strong> Sind AI-gestützte ERP/HCM-Migrationen (analog zu COBOL/Mainframe) eher Chance oder Risiko für Workday? Quantitative Bewertung der Migrationskostenveränderung und Nettobilanz.</div>
-
-        <h3>1. Die technische Realität: Was AI-Migrations-Tools heute leisten</h3>
-        <p>Aktuelle AI-gestützte Migrations-Tools (LeverX DataLark für SAP S/4HANA, HCLTechs DMT für Microsoft Dynamics, Informatica IDMC) leisten heute bereits: automatisiertes Datenmapping mit KI-basierter Feldzuordnung, AI-gestützte Datenbereinigung, automatisierte Schema-Transformation und Validierung, sowie natürlichsprachliche Interfaces für Konfiguration. Nach Branchenberichten reduzieren diese Tools die Datenmigrations-Vorbereitungszeit um <strong>30–40%</strong> und verbessern die Datenqualität um 50%.</p>
-
-        <h3>2. Quantifizierung: Wie verändert AI die Workday Switching Costs?</h3>
-        <div class="table-wrap">
-          <table class="migration-table">
-            <thead><tr><th>Migrationskomponente</th><th>Kosten Heute</th><th>Kosten mit AI (Est.)</th><th>Reduktion</th><th>Lock-in Impact</th></tr></thead>
-            <tbody>
-              <tr><td>Datenmigration &amp; -mapping</td><td>$500k–2 Mio.</td><td>$250–800k</td><td>~40–60%</td><td><span class="badge badge-red">HOCH</span></td></tr>
-              <tr><td>Business Process Reengineering</td><td>$500k–3 Mio.</td><td>$300k–1,5 Mio.</td><td>~40%</td><td><span class="badge badge-yellow">MITTEL</span></td></tr>
-              <tr><td>Systemintegration/API-Arbeit</td><td>$200k–1 Mio.</td><td>$100–400k</td><td>~50%</td><td><span class="badge badge-red">HOCH</span></td></tr>
-              <tr><td>Change Management/Training</td><td>$200k–500k</td><td>$150–350k</td><td>~20%</td><td><span class="badge badge-green">NIEDRIG</span></td></tr>
-              <tr><td>Parallelbetrieb/Testing</td><td>$100k–500k</td><td>$80–300k</td><td>~30%</td><td><span class="badge badge-yellow">MITTEL</span></td></tr>
-              <tr><td><strong>GESAMT (Mittelunternehmen)</strong></td><td><strong>$1,5–7 Mio.</strong></td><td><strong>$0,9–3,4 Mio.</strong></td><td><strong>~40–50%</strong></td><td><span class="badge badge-red">SIGNIFIKANT</span></td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p>AI reduziert Migrationskosten für ein typisches Workday-Mid-Market-Kundenunternehmen (2.000–10.000 Mitarbeiter) von ~$2–5 Mio. auf geschätzt ~$1–3 Mio. Das ist substanziell, aber nicht dramatisch. Die verbleibenden Kosten (Schulungen, Change Management, Business-Disruption, institutionelles Wissen) sind schwer durch AI zu ersetzen. Die ROI-Schwelle für einen Wechsel sinkt von 3–5 Jahren auf 2–3 Jahre – bedeutsam, aber kein triviales Ereignis.</p>
-
-        <h3>3. Die COBOL-Analogie – Was passt, was nicht</h3>
-        <p>Die Analogie zum COBOL/Mainframe-Effekt ist aufschlussreich, aber nur <strong>teilweise</strong> zutreffend. Bei COBOL/Mainframe haben AI-Tools die Code-Migration auf Java/Python dramatisch beschleunigt – Projekte, die früher 3–5 Jahre dauerten, werden in 6–18 Monaten abgeschlossen. Für ERP/HCM-Migrationen gilt Ähnliches für den Datentransfer-Teil. Der entscheidende Unterschied: Bei COBOL geht es primär um Code und Daten. Bei ERP/HCM geht es zusätzlich um Business Processes, Genehmigungsworkflows, Compliance-Anpassungen, Payroll-Konfigurationen und institutionelles Wissen. Diese 'weichen' Komponenten lassen sich durch AI kaum automatisieren. AI vereinfacht ERP/HCM-Migrationen <em>bedeutsam</em>, aber nie auf das Niveau einer COBOL-Code-Konvertierung.</p>
-
-        <h3>4. Das Chancen-Szenario: AI-Migration VON SAP ZU Workday</h3>
-        <p>Die User-These hat eine oft übersehene Kehrseite: Dieselbe AI-Migrationstechnologie, die Workday-Kunden leichter abwandern lässt, macht es auch leichter für SAP-On-Premise-Kunden, zu Workday zu wechseln. Dieser Effekt ist <strong>größer</strong>, weil SAP ECC den mit Abstand größten Migrations-TAM darstellt: SAP stellt ECC-Mainstream-Support bis <strong>2027</strong> ein, was Zehntausende Unternehmen zu einem erzwungenen Cloud-Migrations-Entscheid zwingt.</p>
-
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Szenario</th><th>Adressierbarer Markt</th><th>AI-Impact</th><th>Zeithorizont</th><th>Nettobewertung</th></tr></thead>
-            <tbody>
-              <tr><td><strong>SAP ECC → Workday (HCM+FM)</strong></td><td>~$15–25 Mrd. TAM</td><td>Migration 40% günstiger</td><td>2025–2030</td><td><span class="beat">CHANCE: +$1–3 Mrd. ARR möglich</span></td></tr>
-              <tr><td>Workday → SAP S/4HANA</td><td>&lt;$2 Mrd. TAM</td><td>Migration 40% günstiger</td><td>2025–2030</td><td><span class="neutral">GERINGES RISIKO (SAP meist aufwändiger)</span></td></tr>
-              <tr><td>Workday → Personio/Rippling</td><td>&lt;$500 Mio. TAM</td><td>Migration viel einfacher</td><td>2025–2028</td><td><span class="miss">RISIKO: Mid-Market Churn möglich</span></td></tr>
-              <tr><td>SAP ECC → Rippling/Personio</td><td>&lt;$1 Mrd. TAM</td><td>Migration einfacher</td><td>2025–2028</td><td><span class="neutral">Neutral für WDAY</span></td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3>5. Gesamtbewertung: Chance oder Risiko?</h3>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Dimension</th><th>Chance (+)</th><th>Risiko (–)</th><th>Nettobewertung</th></tr></thead>
-            <tbody>
-              <tr><td>SAP/Oracle → Workday Migrationen</td><td><span class="beat">Hoch</span></td><td>–</td><td><span class="badge badge-green">NETTO: CHANCE</span></td></tr>
-              <tr><td>Workday → Personio/Rippling (Mid-Market)</td><td>–</td><td><span class="miss">Mittel</span></td><td><span class="badge badge-red">NETTO: RISIKO</span></td></tr>
-              <tr><td>Workday → SAP S/4HANA</td><td>–</td><td><span class="neutral">Niedrig</span></td><td><span class="badge badge-yellow">NETTO: GERINGES RISIKO</span></td></tr>
-              <tr><td>AI als Produktdifferenzierung (Illuminate)</td><td><span class="beat">Hoch</span></td><td>–</td><td><span class="badge badge-green">NETTO: CHANCE</span></td></tr>
-              <tr><td>Seat-Modell Disruption durch AI (LT)</td><td>–</td><td><span class="miss">Mittel-Hoch</span></td><td><span class="badge badge-red">NETTO: RISIKO (3–7J Horizont)</span></td></tr>
-              <tr style="background:rgba(59,130,246,0.06)"><td><strong>GESAMTBEWERTUNG</strong></td><td><strong>2 große Chancen</strong></td><td><strong>3 mittlere Risiken</strong></td><td><strong>Leicht negativ auf 3–5J; Chance überwiegt auf 5–10J</strong></td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p><strong>Fazit Sektion 11:</strong> Die Netto-Migrations-Bilanz ist kurzfristig (1–3 Jahre) leicht positiv für Workday, weil die SAP-ECC-Migration-Opportunity den Mid-Market-Churn überwiegt. Langfristig (3–7 Jahre) ist das Seat-Modell-Erosionsrisiko echter und nicht trivial. Workday hat mit Flex Credits und Agent System of Record die richtigen strategischen Antworten in Entwicklung – die entscheidende Frage ist die Ausführungsgeschwindigkeit.</p>
-        <div class="source">Quellen: CIO.com 'AI is revolutionizing ERP migration' (Nov 2024); erpsoftwareblog.com HCLTech DMT (Dez 2025); Concentrus.com Migration Tools 2026 (Feb 2026); appinventiv.com AI in ERP (Nov 2025); Siit.io Workday Alternatives</div>
-      </div>
+  <!-- S12 -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
     </div>
+    <div class="section-body">
 
-    <!-- ===== SEKTION 12: FAZIT ===== -->
-    <div class="section" id="s12">
-      <div class="section-header">
-        <div class="section-number">12</div>
-        <div class="section-title">Fazit – Investment-These</div>
-        <div class="section-note">Vollständige Synthese</div>
-      </div>
-      <div class="section-body">
-
-        <div class="bull-bear-grid">
-          <div class="bull-card">
-            <h4>🐂 Das Bullische Narrativ</h4>
-            <p><strong>Säule 1 – Profitabilitätstransformation:</strong> Non-GAAP Operating Margin stieg von ~22% (FY2023) auf 30,6% (Q4 FY2026) – operative Hebelwirkung, nicht durch Einmaleffekte. FCF $2,777 Mrd. (+27% YoY). Mit EV/FCF ~12x zahlt man historisch niedrige Preise für diese Cash-Generierung. $5 Mrd. Buyback (=~15% der Marktkapitalisierung) signalisiert Management-Conviction.</p>
-            <p><strong>Säule 2 – AI-Monetarisierung skaliert:</strong> AI ARR &gt;$400 Mio. (+100% YoY). R1-Release März 2026 bringt 5 neue Agents in GA. Flex Credits entkoppeln Revenue vom Headcount-Modell. Falls AI-ARR 80–100% p.a. wächst, könnte AI allein bis FY2028 einen ARR von $1,5–2 Mrd. erreichen – das würde Gesamtwachstum auf 15–17% reaccelerate.</p>
-            <p><strong>Säule 3 – Bewertung auf historischem Tief:</strong> Forward P/E ~12x, PEG 0,50, EV/FCF 12x – günstiger als viele Value-Titel trotz zweistelligem Wachstum. Analystenkonsens $202 (+55% Upside). Zudem: SAP-ECC-Migration-Wave 2026–2027 bietet reale, quantifizierbare TAM-Chance von $15–25 Mrd.</p>
-          </div>
-          <div class="bear-card">
-            <h4>🐻 Das Bärische Narrativ</h4>
-            <p><strong>Risiko 1 – Seat-Modell strukturell bedroht:</strong> AI automatisiert HR/Finance-Arbeitsschritte → weniger benötigte Workday-Seats. Management hat selbst 'moderiertes Headcount-Wachstum' als Headwind genannt. Falls NRR unter 100% fällt, sind 12x FWD P/E nicht billig. Das Flex-Credit-Modell muss sich erst im großen Maßstab beweisen.</p>
-            <p><strong>Risiko 2 – AI-Migration erodiert Lock-in:</strong> Switching Costs fallen von $2–5 Mio. auf ~$1–3 Mio. (–40–50%). Im Mid-Market (Zielwachstumssegment von Workday 2026!) sind schnell deploybare Alternativen wie Rippling (2–6 Wochen Implementierung, AI-nativ) nun attraktive Optionen. 5–10% jährlicher Mid-Market-Churn wäre ein struktureller Revenue-Leak.</p>
-            <p><strong>Risiko 3 – Technisches Momentum und Timing:</strong> Aktie –53% in 52 Wochen, weit unter allen MAs, gerade auf 52-Wochen-Tief. Analyst-Downgrade-Welle. Konservative FY2027-Guidance signalisiert, dass Management selbst keine baldige Trendwende sieht. 'Never catch a falling knife' – ohne AI-Bestätigung in Q1 FY2027 fehlt der Katalysator.</p>
-          </div>
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 – Bewertungs-Reset:</strong> P/E 30x = 50% unter 5J-Schnitt, FCF-Yield 7%, P/S 3.2x = 60% unter Schnitt. Wenn Workday +13% Wachstum hält + 30% Op-Marge ausweitet, ist die Bewertung am 5J-Tief unangemessen.</p>
+          <p><strong>Säule 2 – Bhusri-Comeback + AI-Strategie:</strong> Gründer-CEO-Return signalisiert strategische Dringlichkeit. AI-ARR $400M+ (+100% YoY), Flex Credits Pricing-Modell, Sana + Paradox-Akquisitionen zeigen aggressive Reaktion auf AI-Disruption-Threat.</p>
+          <p><strong>Säule 3 – Strukturelle Marktführerschaft:</strong> 50%+ Cloud-HCM-Marktanteil, 97% Gross-Revenue-Retention, Fortune 500 deeply embedded. Finance-Cloud-Cross-Sell-Pipeline noch früh – signifikantes Wachstumspotenzial.</p>
         </div>
-
-        <h3>Eigene Einschätzung</h3>
-        <p>Das bullische Narrativ ist langfristig überzeugender, aber das bärische enthält valide Kurzfristrisiken. Die entscheidende Frage ist das <strong>Timing</strong>: Wird Workday die AI-Monetarisierung schnell genug skalieren, um die verlangsamte Seat-basierte Wachstumsdynamik zu kompensieren? Die ersten Anzeichen sind positiv ($400 Mio. AI-ARR, &gt;100% Wachstum), aber der Markt erwartet Bestätigung in 4–6 Quartalen, nicht 2–3.</p>
-        <p>Das AI-Migrations-Risiko ist real, aber für die mittelfristige Investment-These (12–24 Monate) überschaubar: Die Netto-Migrations-Bilanz ist kurzfristig leicht positiv für Workday (mehr SAP-Kunden kommen als Workday-Kunden abwandern). Das langfristige Seat-Modell-Erosionsrisiko ist echter, aber Workday hat mit Flex Credits, Agent System of Record und usage-based Billing die richtigen strukturellen Antworten. Die Qualität des Unternehmens (FCF, Backlog $28 Mrd., Margen) ist unbestritten – es ist ein temporäres Vertrauensproblem, kein fundamentales Strukturproblem. <em>Ich könnte falsch liegen, weil die AI-Disruption des HR-Markts schneller kommt als antizipiert oder weil die SAP-Migration-Opportunity stärker an S/4HANA verloren geht als erwartet.</em></p>
-
-        <h3>Zeithorizont-Einschätzung</h3>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
-            <tbody>
-              <tr><td><strong>Kurzfristig (0–6M)</strong></td><td>Q1 FY2027 Earnings Mai 2026 – AI-ARR-Bestätigung</td><td>Technischer Gegenwind; keine Trendwende ohne Guidance-Verbesserung</td><td><span class="badge badge-yellow">Warten / Erste Tranche $117–$125</span></td></tr>
-              <tr><td><strong>Mittelfristig (6–24M)</strong></td><td>AI-ARR &gt;$800 Mio.; FY2028-Guidance mit Reacceleration 15%+</td><td>Makro-Abschwächung; SAP AI konkurriert stärker</td><td><span class="badge badge-orange">Kaufen bei AI-Bestätigung</span></td></tr>
-              <tr><td><strong>Langfristig (2–5J)</strong></td><td>AI-native Transformation; International 30%+; Flex Credits skalieren</td><td>AI-native Disruptoren langfristig nicht ausschließbar</td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3>Kernthese</h3>
-        <p>Workday ist ein Qualitätsunternehmen mit exzellentem Cash Flow ($2,8 Mrd. FCF), starkem Backlog ($28 Mrd.), strukturell verbesserter Profitabilität und einer glaubwürdigen AI-Strategie, das sich in einer Phase der Vertrauenskrise befindet. Die Bewertung auf historischem Tief (Forward P/E ~12x, PEG 0,50) spiegelt die AI-Disruptions-Angst über. Der entscheidende Test: <strong>Q1 FY2027 (Mai 2026)</strong> – zeigt Workday AI-ARR über $600 Mio. und Subscription-Wachstum, das die 12–13%-Guidance schlägt, ist dies ein klares Kaufsignal. Risk/Reward: –10% Downside ($117) vs. +50% Upside ($195) in 24 Monaten.</p>
-
-        <div class="rating-box">
-          <div class="rating-item"><label>Rating</label><div class="val hold">⚠️ HALTEN</div></div>
-          <div class="rating-item"><label>→ Bei AI-Bestätigung</label><div class="val buy">✓ KAUFEN</div></div>
-          <div class="rating-item"><label>Zielkurs (2J)</label><div class="val">$165–$195 USD</div></div>
-          <div class="rating-item"><label>Zeithorizont</label><div class="val">2–5 Jahre</div></div>
-          <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–10% ($117)</div></div>
-          <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+50% ($195)</div></div>
-          <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:5</div></div>
-        </div>
-
-        <h3>Falsifikation der These</h3>
-        <div class="trigger-grid">
-          <div class="trigger-card sell">
-            <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
-            <ul class="trigger-list">
-              <li>AI-ARR wächst in Q1 FY2027 auf unter $500 Mio. (weniger als +25% QoQ von $400 Mio.) → AI-Monetarisierung stagniert</li>
-              <li>Net Revenue Retention fällt unter 100% → struktureller Kundenchurn bestätigt</li>
-              <li>FY2028-Subscription-Guidance unter 10% → strukturelle Verlangsamung bestätigt</li>
-              <li>Analyst-Konsens-Zielkurs fällt unter $130 → breiter Vertrauensverlust</li>
-            </ul>
-          </div>
-          <div class="trigger-card buy">
-            <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
-            <ul class="trigger-list">
-              <li>AI-ARR &gt;$700 Mio. in Q2 FY2027 (August 2026) und Guidance-Upgrade → AI skaliert schneller als antizipiert</li>
-              <li>Großer SAP-ECC-Migrationsdeal (&gt;$50 Mio. ACV) → Migration-Opportunity-These bestätigt</li>
-              <li>FY2028-Guidance impliziert 15%+ Revenue-Wachstum → Reacceleration bestätigt</li>
-              <li>Kurs fällt auf $117–$120 (52W-Tief) bei intakten Fundamentaldaten → Value-Einstieg</li>
-            </ul>
-          </div>
-        </div>
-
-        <h3>Welcher Anlegertyp passt?</h3>
-        <div class="investor-grid">
-          <div class="investor-yes">
-            <h5>✅ Geeignet für</h5>
-            <ul>
-              <li>Quality Growth Investors (2–5J Horizont)</li>
-              <li>Contrarian Investors (extreme Unterbewertung vs. Hist.)</li>
-              <li>Tech-affine Langfrist-Investoren</li>
-              <li>AI-Themen-Investoren mit Geduld</li>
-            </ul>
-          </div>
-          <div class="investor-no">
-            <h5>❌ NICHT geeignet für</h5>
-            <ul>
-              <li>Income Investors (keine Dividende)</li>
-              <li>Value-Tiefe-Investoren (SBC hoch)</li>
-              <li>Kurzfristige Trader (technisch negativ)</li>
-              <li>Momentum-Strategien (klarer Downtrend)</li>
-            </ul>
-          </div>
-        </div>
-
-        <h3>Empfohlener Einstieg</h3>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
-            <tbody>
-              <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten – Q1 FY27 abwarten</span></td><td>Erst bei Guidance-Bestätigung einsteigen; technisch kein Boden in Sicht</td></tr>
-              <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">20% jetzt, Rest nach Q1-Earnings</span></td><td>Bewertung attraktiv; AI-Bestätigung als Katalysator für Restposition</td></tr>
-              <tr><td><strong>Aggressiv / Konträr</strong></td><td><span class="badge badge-green">Jetzt kaufen ($125–$135)</span></td><td>Historisch günstige Bewertung; extrem überverkauft; Buyback-Support</td></tr>
-              <tr><td><strong>Langfristig (3–5J)</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>Qualitätsunternehmen mit strukturellem AI-Upside und starkem FCF</td></tr>
-            </tbody>
-          </table>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 – AI-Disruptions-Tail-Risk:</strong> Wenn AI-Agents 20-30% der HR-/Finance-Mitarbeiter ersetzen, Per-Seat-Lizenz-Revenue erodiert. Markt preist das bereits mit -61% Crash ein – aber wenn Realität schlimmer, weitere Downside.</p>
+          <p><strong>Risiko 2 – Wachstumsverlangsamung bestätigt:</strong> FY27 +12-13% von +14.5% (FY26). Wenn AI-ARR-Re-Acceleration nicht zündet, droht weitere Decel. Konkurrenz von MSFT/SAP/Oracle intensiviert.</p>
+          <p><strong>Risiko 3 – Technische Schwäche:</strong> Am 52W-Tief, alle MAs Sell. Bei Bruch unter $117 droht weitere Korrektur auf $100. Catalysts noch unklar.</p>
         </div>
       </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>WDAY ist ein klassisches <strong>"Quality-Value-Recovery"-Setup</strong>: HCM-Marktführer, FCF-Yield 7%, P/E 50% unter Schnitt, aber signifikantes AI-Disruptions-Tail-Risk. Bhusris CEO-Return + Flex-Credits + AI-Akquisitionen sind richtige strategische Antworten, aber Markt zweifelt, ob es ausreicht. Bei $118 (am 52W-Tief) ist Risk/Reward attraktiv: ~15% Downside (auf $100) vs. ~30% Upside (auf $150-170 in 12-18 Monaten falls AI-ARR auf $1B+ skaliert). Rating: <strong>HALTEN / Selektives Kaufen</strong> für Value-Investoren mit Geduld.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$155–175</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–4 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–15%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+35%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:2.3</div></div>
+      </div>
+
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger</h5>
+          <ul class="trigger-list">
+            <li>Q1 FY27: Sub-Wachstum &lt;11% YoY → 30% reduzieren</li>
+            <li>Bruch unter $117 → Position halbieren</li>
+            <li>AI-ACV-Wachstum verlangsamt &lt;60% YoY → 25% reduzieren</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger</h5>
+          <ul class="trigger-list">
+            <li>Q1 FY27: AI-ACV-Wachstum >100% + Sub >13% → aufstocken</li>
+            <li>Mean-Reversion-Setup über $130 → tranchiert kaufen</li>
+            <li>FY28-Guidance impliziert Re-Acceleration → aggressiv kaufen</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Value-Investoren (Bewertung am 5J-Tief)</li>
+            <li>Contrarian-Investoren</li>
+            <li>FCF-Yield-Sucher</li>
+            <li>Quality-at-Reasonable-Price</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Growth-Investoren (verlangsamendes Wachstum)</li>
+            <li>Momentum-Trader (am Tief)</li>
+            <li>AI-Disruption-Risk-Sensible</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="source">Quellen: Synthese aus allen Sektionen; eigene Risk/Reward-Kalkulation.</div>
     </div>
+  </div>
 
-    <!-- ===== SEKTION 13: OUTLOOK ===== -->
-    <div class="section" id="s13">
-      <div class="section-header">
-        <div class="section-number">13</div>
-        <div class="section-title">Outlook – Die 3 wichtigsten anstehenden Events</div>
-        <div class="section-note">Wenn / Dann</div>
-      </div>
-      <div class="section-body">
-
-        <div class="outlook-card">
-          <h4>📊 Event 1: Q1 FY2027 Quartalsergebnisse – voraussichtlich Mai 2026</h4>
-          <p>Das mit Abstand wichtigste anstehende Ereignis. Der Markt wartet auf die erste echte Bestätigung, ob die AI-Monetarisierung die proklamierte Wachstumskurve hält. Besonderes Augenmerk: AI-ARR-Entwicklung (Ausgangsbasis $400 Mio.) und Subscription-Revenue vs. Guidance.</p>
-          <div class="when-then">
-            <strong>Wenn:</strong> AI-ARR &gt;$600 Mio. (+50% QoQ von $400 Mio.) UND Subscription Revenue wächst schneller als FY27-Guidance impliziert → AI-Momentum bestätigt. Sofortiger Kauf einer zweiten Tranche. Zielkurs $180–$200 kurzfristig realistisch.<br><br>
-            <strong>Wenn:</strong> AI-ARR &lt;$450 Mio. ODER Subscription-Guidance erneut gesenkt ODER Net Revenue Retention &lt;100% → Strukturelle Wachstumsprobleme bestätigt. Position reduzieren auf maximale 50%. Zielkurs $100–$120 wird realistisch.
-          </div>
-        </div>
-
-        <div class="outlook-card">
-          <h4>🤖 Event 2: Workday R1-Release &amp; AI-Agent-Adoption (März–Juni 2026)</h4>
-          <p>Im März 2026 bringt Workday fünf neue AI-Agents in General Availability: Self-Service, Planning, Deployment, Payroll und Business Process Optimize Agent. Dies ist der erste große AI-Product-Drop unter dem zurückgekehrten Gründer-CEO Aneel Bhusri und testet die produktseitige Ausführungskompetenz.</p>
-          <div class="when-then">
-            <strong>Wenn:</strong> &gt;1.000 Kunden aktivieren AI-Agents in den ersten 60 Tagen; messbare Case-Volume-Reduktion (&gt;30%) in ersten Case Studies bestätigt; positive Analyst-Event-Reaktionen auf Demos → Produktvalidierung stärkt mittelfristige These. Erste Tranche kaufen bzw. halten.<br><br>
-            <strong>Wenn:</strong> AI-Agent-Launch verzögert sich; Kunden-Feedback negativ (Zuverlässigkeit, Genauigkeit); keine überzeugenden ROI-Daten in ersten Customer-Case-Studies → Technologische Ausführungsrisiken manifestieren sich. Keine Position ausbauen bis Q1-Earnings-Bestätigung.
-          </div>
-        </div>
-
-        <div class="outlook-card">
-          <h4>🏢 Event 3: SAP ECC End-of-Support 2027 – Migration-Wave Decision-Point (2026–2027)</h4>
-          <p>SAP stellt den Mainstream-Support für SAP ECC bis 2027 ein. Dies zwingt Zehntausende Unternehmen weltweit zu einem Migrations-Entscheid: SAP S/4HANA Cloud oder Alternativ-ERP (inkl. Workday). AI-gestützte Migrations-Tools machen diesen Wechsel erstmals wirtschaftlich attraktiver als je zuvor. Die Intensität dieser Migration-Wave in 2026–2027 ist der wichtigste externe Wachstumskatalysator für Workday.</p>
-          <div class="when-then">
-            <strong>Wenn:</strong> Workday gewinnt &gt;20% der SAP-ECC-Migrations-Deals in EMEA und ≥15% in USA; ein Großdeal &gt;$50 Mio. ACV mit ehemals SAP-Kunden wird kommuniziert → Migration-Opportunity-These bestätigt. Mittelfristige Wachstumsreacceleration realistisch. Langfristposition ausbauen.<br><br>
-            <strong>Wenn:</strong> SAP gewinnt &gt;70% der eigenen ECC-Migrations-Kunden für S/4HANA Cloud; gleichzeitig verliert Workday Mid-Market-Kunden (&lt;2.500 MA) an Personio/Rippling → Strukturelle Wettbewerbsverschiebung zu Ungunsten Workdays. Position nicht ausbauen; Exit-Szenario für 24 Monate vorbereiten.
-          </div>
-        </div>
-
-        <div class="source">Quellen: investor.workday.com; stockanalysis.com; defenseworld.net; 247wallst.com; futurumgroup.com; erp.today; cloudwars.com; cio.com; erpsoftwareblog.com; SAP Investor Relations 2025; Gartner Magic Quadrant 2025. Stand aller Quellen: maximal 3 Monate vor Analysedatum 27.02.2026.</div>
-      </div>
+  <!-- S13 -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Anstehende Events</div>
     </div>
+    <div class="section-body">
 
-    <!-- DISCLAIMER -->
-    <div class="disclaimer">
-      ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung, Kaufempfehlung oder Aufforderung zum Kauf oder Verkauf von Wertpapieren dar. Alle Angaben ohne Gewähr. Investitionen in Aktien sind mit Risiken verbunden, einschließlich des Totalverlusts des eingesetzten Kapitals. Der Autor übernimmt keine Haftung für Entscheidungen, die auf Basis dieser Analyse getroffen werden. Stand der Analyse: 27. Februar 2026.
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q1 FY27 Earnings – Ende Mai 2026</h4>
+        <p>Erste Bewährungsprobe für FY27-Outlook. Kritische Metriken: (1) Sub-Wachstum tatsächlich 12-13% wie geguidet? (2) AI-ACV-Wachstum hält >100% YoY? (3) Bhusri Strategy-Updates für "Chapter 4"?</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Sub-Wachstum ≥13% + AI-ACV-Wachstum >100% → Relief-Rally +10-15%, Mean-Reversion-Trade aktiviert.<br><br>
+          <strong>Wenn:</strong> Sub-Wachstum &lt;11% ODER AI-Decel → weiterer Drawdown auf $100.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 2: Workday Rising 2026 – Herbst 2026</h4>
+        <p>Jährliche Kundenkonferenz; Bühne für neue Agentic-Solutions, Flex-Credits-Roadmap, Customer-Stories.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Klare Flex-Credits-Adoption-Metriken + neue AI-Capabilities → Catalyst-Setup.<br><br>
+          <strong>Wenn:</strong> nur inkrementelle Updates → kein Re-Rating.
+        </div>
+      </div>
+
+      <div class="source">Quellen: Workday IR Calendar; Workday Rising 2026.</div>
     </div>
+  </div>
 
-  </div><!-- /main -->
+  <div class="disclaimer">
+    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung dar. Stand: 14.05.2026.
+  </div>
 
-
-
-<div class="cgw-ext" data-ext-id="pdnenlnelpdomajfejgapbdpmjkfpjkp"></div><cgw-writer-modal data-wxt-shadow-root="" class="cgw_main_container" id="jw-main-container-id"><template shadowrootmode="open">
-<!-- saved from url=(0032)https://wday-analyse.vercel.app/ -->
-<html><head><style>/* WXT Shadow Root Reset */ body{all:initial;}
-*,:before,:after{--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / .5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x: 0;--tw-border-spacing-y: 0;--tw-translate-x: 0;--tw-translate-y: 0;--tw-rotate: 0;--tw-skew-x: 0;--tw-skew-y: 0;--tw-scale-x: 1;--tw-scale-y: 1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness: proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width: 0px;--tw-ring-offset-color: #fff;--tw-ring-color: rgb(59 130 246 / .5);--tw-ring-offset-shadow: 0 0 #0000;--tw-ring-shadow: 0 0 #0000;--tw-shadow: 0 0 #0000;--tw-shadow-colored: 0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }*,:before,:after{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}:before,:after{--tw-content: ""}html,:host{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji",Segoe UI Symbol,"Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,samp,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dl,dd,h1,h2,h3,h4,h5,h6,hr,figure,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}ol,ul,menu{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}button,[role=button]{cursor:pointer}:disabled{cursor:default}img,svg,video,canvas,audio,iframe,embed,object{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.\!container{width:100%!important}.container{width:100%}@media (min-width: 640px){.\!container{max-width:640px!important}.container{max-width:640px}}@media (min-width: 768px){.\!container{max-width:768px!important}.container{max-width:768px}}@media (min-width: 1024px){.\!container{max-width:1024px!important}.container{max-width:1024px}}@media (min-width: 1280px){.\!container{max-width:1280px!important}.container{max-width:1280px}}@media (min-width: 1536px){.\!container{max-width:1536px!important}.container{max-width:1536px}}.pointer-events-none{pointer-events:none}.pointer-events-auto{pointer-events:auto}.visible{visibility:visible}.invisible{visibility:hidden}.collapse{visibility:collapse}.static{position:static}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{top:0;right:0;bottom:0;left:0}.-bottom-1{bottom:-4px}.-left-1{left:-4px}.-right-1{right:-4px}.-top-\[8px\]{top:-8px}.bottom-0{bottom:0}.bottom-6{bottom:24px}.bottom-\[1px\]{bottom:1px}.end-0{inset-inline-end:0px}.left-0{left:0}.left-0\.5{left:2px}.left-1{left:4px}.right-0{right:0}.right-1\.5{right:6px}.right-10{right:40px}.right-14{right:56px}.right-\[1px\]{right:1px}.top-0{top:0}.top-1\/2{top:50%}.top-11{top:44px}.top-4{top:16px}.isolate{isolation:isolate}.z-50{z-index:50}.z-\[61\]{z-index:61}.z-\[9999985\]{z-index:9999985}.z-\[9999990\]{z-index:9999990}.z-\[9999991\]{z-index:9999991}.z-\[9999992\]{z-index:9999992}.z-\[9999993\]{z-index:9999993}.z-\[9999995\]{z-index:9999995}.z-\[9999996\]{z-index:9999996}.z-\[9999997\]{z-index:9999997}.z-\[9999998\]{z-index:9999998}.z-\[9999999\]{z-index:9999999}.m-0{margin:0}.m-auto{margin:auto}.mx-2{margin-left:8px;margin-right:8px}.mx-6{margin-left:24px;margin-right:24px}.mx-\[1px\]{margin-left:1px;margin-right:1px}.mx-auto{margin-left:auto;margin-right:auto}.my-1\.5{margin-top:6px;margin-bottom:6px}.my-4{margin-top:16px;margin-bottom:16px}.my-\[0\.5px\]{margin-top:.5px;margin-bottom:.5px}.-ml-3{margin-left:-12px}.-ml-3\.5{margin-left:-14px}.mb-1{margin-bottom:4px}.mb-1\.5{margin-bottom:6px}.mb-2{margin-bottom:8px}.mb-3{margin-bottom:12px}.mb-4{margin-bottom:16px}.mb-5{margin-bottom:20px}.mb-\[-7px\]{margin-bottom:-7px}.ml-0\.5{margin-left:2px}.ml-1{margin-left:4px}.ml-1\.5{margin-left:6px}.ml-2{margin-left:8px}.ml-3{margin-left:12px}.ml-\[30px\]{margin-left:30px}.ml-\[3px\]{margin-left:3px}.mr-1{margin-right:4px}.mr-1\.5{margin-right:6px}.mr-2{margin-right:8px}.mr-2\.5{margin-right:10px}.mt-0\.5{margin-top:2px}.mt-1{margin-top:4px}.mt-1\.5{margin-top:6px}.mt-10{margin-top:40px}.mt-2{margin-top:8px}.mt-2\.5{margin-top:10px}.mt-3{margin-top:12px}.mt-4{margin-top:16px}.mt-5{margin-top:20px}.mt-6{margin-top:24px}.mt-7{margin-top:28px}.mt-8{margin-top:32px}.mt-\[-7px\]{margin-top:-7px}.mt-\[12px\]{margin-top:12px}.mt-\[1px\]{margin-top:1px}.mt-\[2\.5px\]{margin-top:2.5px}.mt-\[5px\]{margin-top:5px}.mt-\[9px\]{margin-top:9px}.line-clamp-3{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3}.block{display:block}.inline-block{display:inline-block}.inline{display:inline}.flex{display:flex}.inline-flex{display:inline-flex}.table{display:table}.contents{display:contents}.hidden{display:none}.size-3{width:12px;height:12px}.size-3\.5{width:14px;height:14px}.size-4{width:16px;height:16px}.size-5{width:20px;height:20px}.size-\[13px\]{width:13px;height:13px}.size-\[19px\]{width:19px;height:19px}.h-0{height:0px}.h-1{height:4px}.h-10{height:40px}.h-2{height:8px}.h-2\.5{height:10px}.h-3{height:12px}.h-3\.5{height:14px}.h-4{height:16px}.h-5{height:20px}.h-6{height:24px}.h-\[10px\]{height:10px}.h-\[11px\]{height:11px}.h-\[13px\]{height:13px}.h-\[14px\]{height:14px}.h-\[15px\]{height:15px}.h-\[16px\]{height:16px}.h-\[18px\]{height:18px}.h-\[28px\]{height:28px}.h-full{height:100%}.max-h-40{max-height:160px}.max-h-\[10lh\]{max-height:10lh}.max-h-\[16lh\]{max-height:16lh}.max-h-\[5lh\]{max-height:5lh}.max-h-\[750px\]{max-height:750px}.min-h-\[4lh\]{min-height:4lh}.min-h-\[56px\]{min-height:56px}.min-h-\[6lh\]{min-height:6lh}.w-0{width:0px}.w-1{width:4px}.w-10{width:40px}.w-2{width:8px}.w-2\.5{width:10px}.w-2\/3{width:66.666667%}.w-3{width:12px}.w-3\.5{width:14px}.w-4{width:16px}.w-5{width:20px}.w-64{width:256px}.w-8{width:32px}.w-80{width:320px}.w-\[10px\]{width:10px}.w-\[11px\]{width:11px}.w-\[13px\]{width:13px}.w-\[14px\]{width:14px}.w-\[15px\]{width:15px}.w-\[16px\]{width:16px}.w-\[18px\]{width:18px}.w-\[24px\]{width:24px}.w-\[338px\]{width:338px}.w-\[350px\]{width:350px}.w-\[400px\]{width:400px}.w-\[470px\]{width:470px}.w-\[490px\]{width:490px}.w-\[500px\]{width:500px}.w-fit{width:fit-content}.w-full{width:100%}.w-px{width:1px}.min-w-0{min-width:0px}.min-w-\[470px\]{min-width:470px}.min-w-\[60px\]{min-width:60px}.min-w-\[70px\]{min-width:70px}.max-w-14{max-width:56px}.max-w-32{max-width:128px}.max-w-80{max-width:320px}.max-w-\[200px\]{max-width:200px}.max-w-\[350px\]{max-width:350px}.max-w-\[400px\]{max-width:400px}.max-w-\[600px\]{max-width:600px}.max-w-\[650px\]{max-width:650px}.max-w-\[70px\]{max-width:70px}.max-w-full{max-width:100%}.flex-1{flex:1 1 0%}.flex-shrink{flex-shrink:1}.flex-shrink-0{flex-shrink:0}.shrink{flex-shrink:1}.shrink-0{flex-shrink:0}.flex-grow{flex-grow:1}.flex-grow-0{flex-grow:0}.grow{flex-grow:1}.border-collapse{border-collapse:collapse}.-translate-y-1\/2{--tw-translate-y: -50%;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.translate-x-0{--tw-translate-x: 0px;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.translate-x-3{--tw-translate-x: 12px;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.translate-x-\[10px\]{--tw-translate-x: 10px;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.translate-y-\[calc\(-100\%-10px\)\]{--tw-translate-y: calc(-100% - 10px) ;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}@keyframes spin{to{transform:rotate(360deg)}}.animate-spin{animation:spin 1s linear infinite}.cursor-auto{cursor:auto}.cursor-col-resize{cursor:col-resize}.cursor-default{cursor:default}.cursor-grab{cursor:grab}.cursor-grabbing{cursor:grabbing}.cursor-help{cursor:help}.cursor-nesw-resize{cursor:nesw-resize}.cursor-not-allowed{cursor:not-allowed}.cursor-nwse-resize{cursor:nwse-resize}.cursor-pointer{cursor:pointer}.cursor-row-resize{cursor:row-resize}.select-none{-webkit-user-select:none;user-select:none}.resize-none{resize:none}.resize-y{resize:vertical}.resize{resize:both}.list-decimal{list-style-type:decimal}.list-disc{list-style-type:disc}.flex-row{flex-direction:row}.flex-col{flex-direction:column}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.items-stretch{align-items:stretch}.justify-start{justify-content:flex-start}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-0{gap:0px}.gap-0\.5{gap:2px}.gap-1{gap:4px}.gap-1\.5{gap:6px}.gap-2{gap:8px}.gap-2\.5{gap:10px}.gap-3{gap:12px}.gap-3\.5{gap:14px}.gap-4{gap:16px}.gap-5{gap:20px}.gap-6{gap:24px}.gap-\[1px\]{gap:1px}.gap-\[2px\]{gap:2px}.gap-\[3px\]{gap:3px}.gap-x-2{column-gap:8px}.gap-x-3{column-gap:12px}.gap-x-4{column-gap:16px}.gap-y-1{row-gap:4px}.gap-y-1\.5{row-gap:6px}.gap-y-2{row-gap:8px}.gap-y-3{row-gap:12px}.space-x-1>:not([hidden])~:not([hidden]){--tw-space-x-reverse: 0;margin-right:calc(4px * var(--tw-space-x-reverse));margin-left:calc(4px * calc(1 - var(--tw-space-x-reverse)))}.space-x-1\.5>:not([hidden])~:not([hidden]){--tw-space-x-reverse: 0;margin-right:calc(6px * var(--tw-space-x-reverse));margin-left:calc(6px * calc(1 - var(--tw-space-x-reverse)))}.space-y-1\.5>:not([hidden])~:not([hidden]){--tw-space-y-reverse: 0;margin-top:calc(6px * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(6px * var(--tw-space-y-reverse))}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse: 0;margin-top:calc(8px * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(8px * var(--tw-space-y-reverse))}.space-y-4>:not([hidden])~:not([hidden]){--tw-space-y-reverse: 0;margin-top:calc(16px * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(16px * var(--tw-space-y-reverse))}.self-start{align-self:flex-start}.overflow-auto{overflow:auto}.overflow-hidden{overflow:hidden}.overflow-visible{overflow:visible}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.overflow-x-hidden{overflow-x:hidden}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.whitespace-normal{white-space:normal}.whitespace-nowrap{white-space:nowrap}.whitespace-pre-line{white-space:pre-line}.whitespace-pre-wrap{white-space:pre-wrap}.whitespace-break-spaces{white-space:break-spaces}.break-words{overflow-wrap:break-word}.rounded{border-radius:4px}.rounded-\[18px\]{border-radius:18px}.rounded-\[28px\]{border-radius:28px}.rounded-\[3px\]{border-radius:3px}.rounded-\[4px\]{border-radius:4px}.rounded-\[9999px\],.rounded-full{border-radius:9999px}.rounded-lg{border-radius:8px}.rounded-md{border-radius:6px}.rounded-sm{border-radius:2px}.rounded-xl{border-radius:12px}.rounded-t-md{border-top-left-radius:6px;border-top-right-radius:6px}.rounded-t-none{border-top-left-radius:0;border-top-right-radius:0}.rounded-tr-none{border-top-right-radius:0}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-b-0{border-bottom-width:0px}.border-b-\[8px\]{border-bottom-width:8px}.border-l-\[8px\]{border-left-width:8px}.border-r-\[8px\]{border-right-width:8px}.border-t,.border-t-\[1px\]{border-top-width:1px}.border-\[\#0f1419\]{--tw-border-opacity: 1;border-color:rgb(15 20 25 / var(--tw-border-opacity, 1))}.border-\[\#525252\]{--tw-border-opacity: 1;border-color:rgb(82 82 82 / var(--tw-border-opacity, 1))}.border-\[\#565856\]{--tw-border-opacity: 1;border-color:rgb(86 88 86 / var(--tw-border-opacity, 1))}.border-\[\#666666\]{--tw-border-opacity: 1;border-color:rgb(102 102 102 / var(--tw-border-opacity, 1))}.border-\[\#E0E0E0\]{--tw-border-opacity: 1;border-color:rgb(224 224 224 / var(--tw-border-opacity, 1))}.border-\[\#cfd7df\]{--tw-border-opacity: 1;border-color:rgb(207 215 223 / var(--tw-border-opacity, 1))}.border-\[\#d1d1d1\]{--tw-border-opacity: 1;border-color:rgb(209 209 209 / var(--tw-border-opacity, 1))}.border-\[\#dddddd\]{--tw-border-opacity: 1;border-color:rgb(221 221 221 / var(--tw-border-opacity, 1))}.border-\[\#eff3f4\]{--tw-border-opacity: 1;border-color:rgb(239 243 244 / var(--tw-border-opacity, 1))}.border-blue-300{--tw-border-opacity: 1;border-color:rgb(147 197 253 / var(--tw-border-opacity, 1))}.border-cyan-600{--tw-border-opacity: 1;border-color:rgb(8 145 178 / var(--tw-border-opacity, 1))}.border-neutral-200{--tw-border-opacity: 1;border-color:rgb(229 229 229 / var(--tw-border-opacity, 1))}.border-neutral-300{--tw-border-opacity: 1;border-color:rgb(212 212 212 / var(--tw-border-opacity, 1))}.border-neutral-400{--tw-border-opacity: 1;border-color:rgb(163 163 163 / var(--tw-border-opacity, 1))}.border-neutral-500{--tw-border-opacity: 1;border-color:rgb(115 115 115 / var(--tw-border-opacity, 1))}.border-orange-300{--tw-border-opacity: 1;border-color:rgb(253 186 116 / var(--tw-border-opacity, 1))}.border-orange-900{--tw-border-opacity: 1;border-color:rgb(124 45 18 / var(--tw-border-opacity, 1))}.border-red-200{--tw-border-opacity: 1;border-color:rgb(254 202 202 / var(--tw-border-opacity, 1))}.border-sky-600{--tw-border-opacity: 1;border-color:rgb(2 132 199 / var(--tw-border-opacity, 1))}.border-b-neutral-800{--tw-border-opacity: 1;border-bottom-color:rgb(38 38 38 / var(--tw-border-opacity, 1))}.border-l-transparent{border-left-color:transparent}.border-r-transparent{border-right-color:transparent}.bg-\[\#0f1419\]{--tw-bg-opacity: 1;background-color:rgb(15 20 25 / var(--tw-bg-opacity, 1))}.bg-\[\#1a1d21\]{--tw-bg-opacity: 1;background-color:rgb(26 29 33 / var(--tw-bg-opacity, 1))}.bg-\[\#292929\]{--tw-bg-opacity: 1;background-color:rgb(41 41 41 / var(--tw-bg-opacity, 1))}.bg-\[\#6a6b6c\]{--tw-bg-opacity: 1;background-color:rgb(106 107 108 / var(--tw-bg-opacity, 1))}.bg-\[\#939393\]{--tw-bg-opacity: 1;background-color:rgb(147 147 147 / var(--tw-bg-opacity, 1))}.bg-\[\#eff3f4\]{--tw-bg-opacity: 1;background-color:rgb(239 243 244 / var(--tw-bg-opacity, 1))}.bg-\[rgb\(25\,195\,125\)\]{--tw-bg-opacity: 1;background-color:rgb(25 195 125 / var(--tw-bg-opacity, 1))}.bg-black{--tw-bg-opacity: 1;background-color:rgb(0 0 0 / var(--tw-bg-opacity, 1))}.bg-blue-100{--tw-bg-opacity: 1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.bg-blue-200{--tw-bg-opacity: 1;background-color:rgb(191 219 254 / var(--tw-bg-opacity, 1))}.bg-blue-500{--tw-bg-opacity: 1;background-color:rgb(59 130 246 / var(--tw-bg-opacity, 1))}.bg-emerald-600{--tw-bg-opacity: 1;background-color:rgb(5 150 105 / var(--tw-bg-opacity, 1))}.bg-green-100{--tw-bg-opacity: 1;background-color:rgb(220 252 231 / var(--tw-bg-opacity, 1))}.bg-green-200{--tw-bg-opacity: 1;background-color:rgb(187 247 208 / var(--tw-bg-opacity, 1))}.bg-green-700{--tw-bg-opacity: 1;background-color:rgb(21 128 61 / var(--tw-bg-opacity, 1))}.bg-neutral-100{--tw-bg-opacity: 1;background-color:rgb(245 245 245 / var(--tw-bg-opacity, 1))}.bg-neutral-125{--tw-bg-opacity: 1;background-color:rgb(241 241 241 / var(--tw-bg-opacity, 1))}.bg-neutral-150{--tw-bg-opacity: 1;background-color:rgb(237 237 237 / var(--tw-bg-opacity, 1))}.bg-neutral-175{--tw-bg-opacity: 1;background-color:rgb(233 233 233 / var(--tw-bg-opacity, 1))}.bg-neutral-200{--tw-bg-opacity: 1;background-color:rgb(229 229 229 / var(--tw-bg-opacity, 1))}.bg-neutral-250{--tw-bg-opacity: 1;background-color:rgb(220 220 220 / var(--tw-bg-opacity, 1))}.bg-neutral-300{--tw-bg-opacity: 1;background-color:rgb(212 212 212 / var(--tw-bg-opacity, 1))}.bg-neutral-400{--tw-bg-opacity: 1;background-color:rgb(163 163 163 / var(--tw-bg-opacity, 1))}.bg-neutral-50{--tw-bg-opacity: 1;background-color:rgb(250 250 250 / var(--tw-bg-opacity, 1))}.bg-neutral-800{--tw-bg-opacity: 1;background-color:rgb(38 38 38 / var(--tw-bg-opacity, 1))}.bg-neutral-900{--tw-bg-opacity: 1;background-color:rgb(23 23 23 / var(--tw-bg-opacity, 1))}.bg-orange-100{--tw-bg-opacity: 1;background-color:rgb(255 237 213 / var(--tw-bg-opacity, 1))}.bg-orange-200{--tw-bg-opacity: 1;background-color:rgb(254 215 170 / var(--tw-bg-opacity, 1))}.bg-red-100{--tw-bg-opacity: 1;background-color:rgb(254 226 226 / var(--tw-bg-opacity, 1))}.bg-red-50{--tw-bg-opacity: 1;background-color:rgb(254 242 242 / var(--tw-bg-opacity, 1))}.bg-red-500{--tw-bg-opacity: 1;background-color:rgb(239 68 68 / var(--tw-bg-opacity, 1))}.bg-transparent{background-color:transparent}.bg-white{--tw-bg-opacity: 1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-zinc-800{--tw-bg-opacity: 1;background-color:rgb(39 39 42 / var(--tw-bg-opacity, 1))}.bg-zinc-900{--tw-bg-opacity: 1;background-color:rgb(24 24 27 / var(--tw-bg-opacity, 1))}.bg-opacity-25{--tw-bg-opacity: .25}.bg-gradient-to-b{background-image:linear-gradient(to bottom,var(--tw-gradient-stops))}.bg-gradient-to-br{background-image:linear-gradient(to bottom right,var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right,var(--tw-gradient-stops))}.from-cyan-500{--tw-gradient-from: #06b6d4 var(--tw-gradient-from-position);--tw-gradient-to: rgb(6 182 212 / 0) var(--tw-gradient-to-position);--tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to)}.from-pink-500{--tw-gradient-from: #ec4899 var(--tw-gradient-from-position);--tw-gradient-to: rgb(236 72 153 / 0) var(--tw-gradient-to-position);--tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to)}.from-white{--tw-gradient-from: #fff var(--tw-gradient-from-position);--tw-gradient-to: rgb(255 255 255 / 0) var(--tw-gradient-to-position);--tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to)}.to-\[\#f3f5f7\]{--tw-gradient-to: #f3f5f7 var(--tw-gradient-to-position)}.to-blue-500{--tw-gradient-to: #3b82f6 var(--tw-gradient-to-position)}.to-orange-400{--tw-gradient-to: #fb923c var(--tw-gradient-to-position)}.stroke-current{stroke:currentColor}.stroke-\[10\]{stroke-width:10}.stroke-\[11\]{stroke-width:11}.stroke-\[2\]{stroke-width:2}.stroke-\[40\]{stroke-width:40}.p-0\.5{padding:2px}.p-1{padding:4px}.p-1\.5{padding:6px}.p-2{padding:8px}.p-2\.5{padding:10px}.p-3{padding:12px}.p-4{padding:16px}.p-6{padding:24px}.p-\[1px\]{padding:1px}.p-\[3px\]{padding:3px}.px-1{padding-left:4px;padding-right:4px}.px-1\.5{padding-left:6px;padding-right:6px}.px-2{padding-left:8px;padding-right:8px}.px-2\.5{padding-left:10px;padding-right:10px}.px-3{padding-left:12px;padding-right:12px}.px-4{padding-left:16px;padding-right:16px}.px-6{padding-left:24px;padding-right:24px}.px-\[10px\]{padding-left:10px;padding-right:10px}.px-\[3px\]{padding-left:3px;padding-right:3px}.px-\[7px\]{padding-left:7px;padding-right:7px}.py-0\.5{padding-top:2px;padding-bottom:2px}.py-1{padding-top:4px;padding-bottom:4px}.py-1\.5{padding-top:6px;padding-bottom:6px}.py-2{padding-top:8px;padding-bottom:8px}.py-2\.5{padding-top:10px;padding-bottom:10px}.py-3{padding-top:12px;padding-bottom:12px}.py-4{padding-top:16px;padding-bottom:16px}.py-5{padding-top:20px;padding-bottom:20px}.py-\[1px\]{padding-top:1px;padding-bottom:1px}.py-\[2px\]{padding-top:2px;padding-bottom:2px}.py-\[3px\]{padding-top:3px;padding-bottom:3px}.py-\[5px\]{padding-top:5px;padding-bottom:5px}.py-\[6\.9px\]{padding-top:6.9px;padding-bottom:6.9px}.py-\[7px\]{padding-top:7px;padding-bottom:7px}.py-\[8px\]{padding-top:8px;padding-bottom:8px}.py-px{padding-top:1px;padding-bottom:1px}.pb-1{padding-bottom:4px}.pb-1\.5{padding-bottom:6px}.pb-2{padding-bottom:8px}.pb-2\.5{padding-bottom:10px}.pb-6{padding-bottom:24px}.pl-1\.5{padding-left:6px}.pl-2{padding-left:8px}.pl-5{padding-left:20px}.pr-1{padding-right:4px}.pr-2{padding-right:8px}.pr-2\.5{padding-right:10px}.pr-4{padding-right:16px}.pr-7{padding-right:28px}.pt-2{padding-top:8px}.pt-\[5px\]{padding-top:5px}.text-left{text-align:left}.text-center{text-align:center}.text-start{text-align:start}.align-sub{vertical-align:sub}.text-2xl{font-size:24px;line-height:32px}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-\[12px\]{font-size:12px}.text-\[13px\]{font-size:13px}.text-\[14px\]{font-size:14px}.text-\[15px\]{font-size:15px}.text-\[9px\]{font-size:9px}.text-base{font-size:16px;line-height:24px}.text-lg{font-size:18px;line-height:28px}.text-md{font-size:15px;line-height:22px}.text-sm{font-size:14px;line-height:20px}.text-xl{font-size:20px;line-height:28px}.text-xs{font-size:12px;line-height:16px}.text-xsm{font-size:13px;line-height:18px}.font-bold{font-weight:700}.font-light{font-weight:300}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.lowercase{text-transform:lowercase}.leading-\[1\.2\]{line-height:1.2}.leading-\[1\.4\]{line-height:1.4}.leading-\[1\],.leading-none{line-height:1}.leading-relaxed{line-height:1.625}.tracking-normal{letter-spacing:0em}.tracking-tight{letter-spacing:-.025em}.tracking-wide{letter-spacing:.025em}.text-\[\#000000BF\]{color:#000000bf}.text-\[\#183247\]{--tw-text-opacity: 1;color:rgb(24 50 71 / var(--tw-text-opacity, 1))}.text-\[\#1d1c1d\]{--tw-text-opacity: 1;color:rgb(29 28 29 / var(--tw-text-opacity, 1))}.text-\[\#242424\]{--tw-text-opacity: 1;color:rgb(36 36 36 / var(--tw-text-opacity, 1))}.text-\[\#2558BB\]{--tw-text-opacity: 1;color:rgb(37 88 187 / var(--tw-text-opacity, 1))}.text-\[\#293239\]{--tw-text-opacity: 1;color:rgb(41 50 57 / var(--tw-text-opacity, 1))}.text-\[\#334155\]{--tw-text-opacity: 1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-\[\#525d71\]{--tw-text-opacity: 1;color:rgb(82 93 113 / var(--tw-text-opacity, 1))}.text-\[\#5e93ff\]{--tw-text-opacity: 1;color:rgb(94 147 255 / var(--tw-text-opacity, 1))}.text-\[\#D8DCDE\]{--tw-text-opacity: 1;color:rgb(216 220 222 / var(--tw-text-opacity, 1))}.text-\[\#FFFFFFBF\]{color:#ffffffbf}.text-\[\#d1d2d3\]{--tw-text-opacity: 1;color:rgb(209 210 211 / var(--tw-text-opacity, 1))}.text-\[\#da7a5a\]{--tw-text-opacity: 1;color:rgb(218 122 90 / var(--tw-text-opacity, 1))}.text-\[\#f2f3f4\]{--tw-text-opacity: 1;color:rgb(242 243 244 / var(--tw-text-opacity, 1))}.text-black{--tw-text-opacity: 1;color:rgb(0 0 0 / var(--tw-text-opacity, 1))}.text-blue-500{--tw-text-opacity: 1;color:rgb(59 130 246 / var(--tw-text-opacity, 1))}.text-blue-600{--tw-text-opacity: 1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-blue-700{--tw-text-opacity: 1;color:rgb(29 78 216 / var(--tw-text-opacity, 1))}.text-blue-800{--tw-text-opacity: 1;color:rgb(30 64 175 / var(--tw-text-opacity, 1))}.text-blue-900{--tw-text-opacity: 1;color:rgb(30 58 138 / var(--tw-text-opacity, 1))}.text-cyan-600{--tw-text-opacity: 1;color:rgb(8 145 178 / var(--tw-text-opacity, 1))}.text-emerald-600{--tw-text-opacity: 1;color:rgb(5 150 105 / var(--tw-text-opacity, 1))}.text-green-700{--tw-text-opacity: 1;color:rgb(21 128 61 / var(--tw-text-opacity, 1))}.text-green-800{--tw-text-opacity: 1;color:rgb(22 101 52 / var(--tw-text-opacity, 1))}.text-green-900{--tw-text-opacity: 1;color:rgb(20 83 45 / var(--tw-text-opacity, 1))}.text-indigo-600{--tw-text-opacity: 1;color:rgb(79 70 229 / var(--tw-text-opacity, 1))}.text-neutral-300{--tw-text-opacity: 1;color:rgb(212 212 212 / var(--tw-text-opacity, 1))}.text-neutral-400{--tw-text-opacity: 1;color:rgb(163 163 163 / var(--tw-text-opacity, 1))}.text-neutral-450{--tw-text-opacity: 1;color:rgb(139 139 139 / var(--tw-text-opacity, 1))}.text-neutral-50{--tw-text-opacity: 1;color:rgb(250 250 250 / var(--tw-text-opacity, 1))}.text-neutral-500{--tw-text-opacity: 1;color:rgb(115 115 115 / var(--tw-text-opacity, 1))}.text-neutral-550{--tw-text-opacity: 1;color:rgb(98 98 98 / var(--tw-text-opacity, 1))}.text-neutral-600{--tw-text-opacity: 1;color:rgb(82 82 82 / var(--tw-text-opacity, 1))}.text-neutral-700{--tw-text-opacity: 1;color:rgb(64 64 64 / var(--tw-text-opacity, 1))}.text-neutral-800{--tw-text-opacity: 1;color:rgb(38 38 38 / var(--tw-text-opacity, 1))}.text-neutral-900{--tw-text-opacity: 1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.text-orange-400{--tw-text-opacity: 1;color:rgb(251 146 60 / var(--tw-text-opacity, 1))}.text-orange-500{--tw-text-opacity: 1;color:rgb(249 115 22 / var(--tw-text-opacity, 1))}.text-orange-700{--tw-text-opacity: 1;color:rgb(194 65 12 / var(--tw-text-opacity, 1))}.text-orange-800{--tw-text-opacity: 1;color:rgb(154 52 18 / var(--tw-text-opacity, 1))}.text-orange-900{--tw-text-opacity: 1;color:rgb(124 45 18 / var(--tw-text-opacity, 1))}.text-pink-600{--tw-text-opacity: 1;color:rgb(219 39 119 / var(--tw-text-opacity, 1))}.text-red-500{--tw-text-opacity: 1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.text-red-600{--tw-text-opacity: 1;color:rgb(220 38 38 / var(--tw-text-opacity, 1))}.text-red-700{--tw-text-opacity: 1;color:rgb(185 28 28 / var(--tw-text-opacity, 1))}.text-red-800{--tw-text-opacity: 1;color:rgb(153 27 27 / var(--tw-text-opacity, 1))}.text-sky-500{--tw-text-opacity: 1;color:rgb(14 165 233 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity: 1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-600{--tw-text-opacity: 1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity: 1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-zinc-100{--tw-text-opacity: 1;color:rgb(244 244 245 / var(--tw-text-opacity, 1))}.underline{text-decoration-line:underline}.line-through{text-decoration-line:line-through}.underline-offset-4{text-underline-offset:4px}.underline-offset-6{text-underline-offset:6px}.accent-cyan-600{accent-color:#0891b2}.opacity-0{opacity:0}.opacity-100{opacity:1}.opacity-25{opacity:.25}.opacity-50{opacity:.5}.opacity-90{opacity:.9}.shadow{--tw-shadow: 0 1px 3px 0 rgb(0 0 0 / .1), 0 1px 2px -1px rgb(0 0 0 / .1);--tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000),var(--tw-ring-shadow, 0 0 #0000),var(--tw-shadow)}.shadow-2xl{--tw-shadow: 0 25px 50px -12px rgb(0 0 0 / .25);--tw-shadow-colored: 0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000),var(--tw-ring-shadow, 0 0 #0000),var(--tw-shadow)}.shadow-\[0_2px_4px_rgb\(0\,0\,0\,0\.2\)\]{--tw-shadow: 0 2px 4px rgb(0,0,0,.2);--tw-shadow-colored: 0 2px 4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000),var(--tw-ring-shadow, 0 0 #0000),var(--tw-shadow)}.shadow-lg{--tw-shadow: 0 10px 15px -3px rgb(0 0 0 / .1), 0 4px 6px -4px rgb(0 0 0 / .1);--tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000),var(--tw-ring-shadow, 0 0 #0000),var(--tw-shadow)}.shadow-sm{--tw-shadow: 0 1px 2px 0 rgb(0 0 0 / .05);--tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000),var(--tw-ring-shadow, 0 0 #0000),var(--tw-shadow)}.outline-none{outline:2px solid transparent;outline-offset:2px}.outline{outline-style:solid}.ring-1{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.ring-inset{--tw-ring-inset: inset}.ring-neutral-200{--tw-ring-opacity: 1;--tw-ring-color: rgb(229 229 229 / var(--tw-ring-opacity, 1))}.blur{--tw-blur: blur(8px);filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow{--tw-drop-shadow: drop-shadow(0 1px 2px rgb(0 0 0 / .1)) drop-shadow(0 1px 1px rgb(0 0 0 / .06));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow-2xl{--tw-drop-shadow: drop-shadow(0 25px 25px rgb(0 0 0 / .15));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow-md{--tw-drop-shadow: drop-shadow(0 4px 3px rgb(0 0 0 / .07)) drop-shadow(0 2px 2px rgb(0 0 0 / .06));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow-sm{--tw-drop-shadow: drop-shadow(0 1px 1px rgb(0 0 0 / .05));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur-xs{--tw-backdrop-blur: blur(2px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-colors{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-opacity{transition-property:opacity;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.duration-100{transition-duration:.1s}.duration-150{transition-duration:.15s}.duration-200{transition-duration:.2s}.duration-300{transition-duration:.3s}.ease-in{transition-timing-function:cubic-bezier(.4,0,1,1)}.ease-in-out{transition-timing-function:cubic-bezier(.4,0,.2,1)}.ease-out{transition-timing-function:cubic-bezier(0,0,.2,1)}.truncate{white-space:nowrap;text-overflow:ellipsis;overflow:hidden;overflow:clip;overflow-clip-margin:2px;min-width:0}.\[-webkit-text-security\:disc\]{-webkit-text-security:disc}.\[background-image\:linear-gradient\(to_right\,theme\(colors\.cyan\.500\)\,theme\(colors\.blue\.500\)\)\]{background-image:linear-gradient(to right,#06b6d4,#3b82f6)}.\[background-image\:…\]{background-image:…}.\[border-radius\:inherit\]{border-radius:inherit}.\[field-sizing\:content\]{field-sizing:content}.\[overflow-wrap\:anywhere\]{overflow-wrap:anywhere}.\[padding-inline-start\:25px\]{padding-inline-start:25px}.\[scrollbar-width\:none\]{scrollbar-width:none}.\[stroke-width\:0\.3px\]{stroke-width:.3px}.\[stroke-width\:1\.5px\]{stroke-width:1.5px}.\[stroke-width\:1\.6\]{stroke-width:1.6}.\[stroke-width\:1\.9px\]{stroke-width:1.9px}.\[stroke-width\:10px\]{stroke-width:10px}.\[stroke-width\:16\]{stroke-width:16}.\[stroke-width\:2\.4\]{stroke-width:2.4}.\[stroke-width\:2\.5px\]{stroke-width:2.5px}.\[stroke-width\:2\.7px\]{stroke-width:2.7px}.\[stroke-width\:5px\]{stroke-width:5px}.\[stroke-width\:80\]{stroke-width:80}.\[stroke-width\:8px\]{stroke-width:8px}.codeblocks{counter-reset:sh-line-number}:host{--sh-class: #e3eaf2;--sh-identifier: #c699e3;--sh-sign: #66cccc;--sh-property: #c699e3;--sh-entity: #66cccc;--sh-jsxliterals: #e3eaf2;--sh-string: #91d076;--sh-keyword: #e9ae7e;--sh-comment: #8da1b9}.sh__line:before{counter-increment:sh-line-number 1;content:counter(sh-line-number);margin-right:20px;margin-left:20px;color:#a4a4a4}.custom-scrollbar{scrollbar-color:#a3a3a3 transparent;scrollbar-width:thin}.katex-html{display:none}.placeholder\:text-xsm::placeholder{font-size:13px;line-height:18px}.placeholder\:text-slate-400::placeholder{--tw-text-opacity: 1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.first\:mt-0:first-child{margin-top:0}.last\:mb-0:last-child{margin-bottom:0}.empty\:mb-0:empty{margin-bottom:0}.empty\:mt-0:empty{margin-top:0}.focus-within\:border-sky-600:focus-within{--tw-border-opacity: 1;border-color:rgb(2 132 199 / var(--tw-border-opacity, 1))}.hover\:cursor-nwse-resize:hover{cursor:nwse-resize}.hover\:border-\[\#272c30\]:hover{--tw-border-opacity: 1;border-color:rgb(39 44 48 / var(--tw-border-opacity, 1))}.hover\:border-\[\#d7dbdc\]:hover{--tw-border-opacity: 1;border-color:rgb(215 219 220 / var(--tw-border-opacity, 1))}.hover\:bg-\[\#112655\]:hover{--tw-bg-opacity: 1;background-color:rgb(17 38 85 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#242628\]:hover{--tw-bg-opacity: 1;background-color:rgb(36 38 40 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#272c30\]:hover{--tw-bg-opacity: 1;background-color:rgb(39 44 48 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#2c2d30\]:hover{--tw-bg-opacity: 1;background-color:rgb(44 45 48 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#3d3d3d\]:hover{--tw-bg-opacity: 1;background-color:rgb(61 61 61 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#c5c5c5\]:hover{--tw-bg-opacity: 1;background-color:rgb(197 197 197 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#d7dbdc\]:hover{--tw-bg-opacity: 1;background-color:rgb(215 219 220 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#eaf1ff\]:hover{--tw-bg-opacity: 1;background-color:rgb(234 241 255 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#f0f0f0\]:hover{--tw-bg-opacity: 1;background-color:rgb(240 240 240 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#f3f5f7\]:hover{--tw-bg-opacity: 1;background-color:rgb(243 245 247 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#f8f8f8\]:hover{--tw-bg-opacity: 1;background-color:rgb(248 248 248 / var(--tw-bg-opacity, 1))}.hover\:bg-\[rgba\(140\,140\,140\,0\.1\)\]:hover{background-color:#8c8c8c1a}.hover\:bg-\[rgba\(140\,140\,140\,0\.15\)\]:hover{background-color:#8c8c8c26}.hover\:bg-\[rgba\(31\,115\,183\,0\.08\)\]:hover{background-color:#1f73b714}.hover\:bg-blue-200:hover{--tw-bg-opacity: 1;background-color:rgb(191 219 254 / var(--tw-bg-opacity, 1))}.hover\:bg-blue-600:hover{--tw-bg-opacity: 1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.hover\:bg-emerald-600\/90:hover{background-color:#059669e6}.hover\:bg-green-100:hover{--tw-bg-opacity: 1;background-color:rgb(220 252 231 / var(--tw-bg-opacity, 1))}.hover\:bg-green-200:hover{--tw-bg-opacity: 1;background-color:rgb(187 247 208 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-100:hover{--tw-bg-opacity: 1;background-color:rgb(245 245 245 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-150:hover{--tw-bg-opacity: 1;background-color:rgb(237 237 237 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-175:hover{--tw-bg-opacity: 1;background-color:rgb(233 233 233 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-200:hover{--tw-bg-opacity: 1;background-color:rgb(229 229 229 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-250:hover{--tw-bg-opacity: 1;background-color:rgb(220 220 220 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-300:hover{--tw-bg-opacity: 1;background-color:rgb(212 212 212 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-400:hover{--tw-bg-opacity: 1;background-color:rgb(163 163 163 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-700:hover{--tw-bg-opacity: 1;background-color:rgb(64 64 64 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-800:hover{--tw-bg-opacity: 1;background-color:rgb(38 38 38 / var(--tw-bg-opacity, 1))}.hover\:bg-neutral-900\/90:hover{background-color:#171717e6}.hover\:bg-orange-100:hover{--tw-bg-opacity: 1;background-color:rgb(255 237 213 / var(--tw-bg-opacity, 1))}.hover\:bg-orange-200:hover{--tw-bg-opacity: 1;background-color:rgb(254 215 170 / var(--tw-bg-opacity, 1))}.hover\:bg-orange-900:hover{--tw-bg-opacity: 1;background-color:rgb(124 45 18 / var(--tw-bg-opacity, 1))}.hover\:bg-red-100:hover{--tw-bg-opacity: 1;background-color:rgb(254 226 226 / var(--tw-bg-opacity, 1))}.hover\:bg-red-600:hover{--tw-bg-opacity: 1;background-color:rgb(220 38 38 / var(--tw-bg-opacity, 1))}.hover\:bg-white:hover{--tw-bg-opacity: 1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.hover\:bg-zinc-800:hover{--tw-bg-opacity: 1;background-color:rgb(39 39 42 / var(--tw-bg-opacity, 1))}.hover\:bg-gradient-to-bl:hover{background-image:linear-gradient(to bottom left,var(--tw-gradient-stops))}.hover\:bg-none:hover{background-image:none}.hover\:text-\[\#0C3B5E\]:hover{--tw-text-opacity: 1;color:rgb(12 59 94 / var(--tw-text-opacity, 1))}.hover\:text-\[\#1d1c1d\]:hover{--tw-text-opacity: 1;color:rgb(29 28 29 / var(--tw-text-opacity, 1))}.hover\:text-\[\#242424\]:hover{--tw-text-opacity: 1;color:rgb(36 36 36 / var(--tw-text-opacity, 1))}.hover\:text-\[\#96b7fa\]:hover{--tw-text-opacity: 1;color:rgb(150 183 250 / var(--tw-text-opacity, 1))}.hover\:text-\[\#B4D6FA\]:hover{--tw-text-opacity: 1;color:rgb(180 214 250 / var(--tw-text-opacity, 1))}.hover\:text-\[rgba\(0\,0\,0\,0\.9\)\]:hover{color:#000000e6}.hover\:text-\[rgba\(255\,255\,255\,0\.9\)\]:hover{color:#ffffffe6}.hover\:text-black:hover{--tw-text-opacity: 1;color:rgb(0 0 0 / var(--tw-text-opacity, 1))}.hover\:text-blue-800:hover{--tw-text-opacity: 1;color:rgb(30 64 175 / var(--tw-text-opacity, 1))}.hover\:text-blue-900:hover{--tw-text-opacity: 1;color:rgb(30 58 138 / var(--tw-text-opacity, 1))}.hover\:text-green-700:hover{--tw-text-opacity: 1;color:rgb(21 128 61 / var(--tw-text-opacity, 1))}.hover\:text-neutral-100:hover{--tw-text-opacity: 1;color:rgb(245 245 245 / var(--tw-text-opacity, 1))}.hover\:text-neutral-50:hover{--tw-text-opacity: 1;color:rgb(250 250 250 / var(--tw-text-opacity, 1))}.hover\:text-neutral-700:hover{--tw-text-opacity: 1;color:rgb(64 64 64 / var(--tw-text-opacity, 1))}.hover\:text-neutral-800:hover{--tw-text-opacity: 1;color:rgb(38 38 38 / var(--tw-text-opacity, 1))}.hover\:text-neutral-900:hover{--tw-text-opacity: 1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.hover\:text-orange-900:hover{--tw-text-opacity: 1;color:rgb(124 45 18 / var(--tw-text-opacity, 1))}.hover\:text-red-400:hover{--tw-text-opacity: 1;color:rgb(248 113 113 / var(--tw-text-opacity, 1))}.hover\:text-sky-600:hover{--tw-text-opacity: 1;color:rgb(2 132 199 / var(--tw-text-opacity, 1))}.hover\:text-slate-900:hover{--tw-text-opacity: 1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.hover\:text-white:hover{--tw-text-opacity: 1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:underline:hover{text-decoration-line:underline}.hover\:decoration-2:hover{text-decoration-thickness:2px}.hover\:underline-offset-4:hover{text-underline-offset:4px}.hover\:ring-1:hover{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.hover\:ring-\[\#8c919a\]:hover{--tw-ring-opacity: 1;--tw-ring-color: rgb(140 145 154 / var(--tw-ring-opacity, 1))}.hover\:ring-\[\#dadbdd\]:hover{--tw-ring-opacity: 1;--tw-ring-color: rgb(218 219 221 / var(--tw-ring-opacity, 1))}.hover\:drop-shadow-md:hover{--tw-drop-shadow: drop-shadow(0 4px 3px rgb(0 0 0 / .07)) drop-shadow(0 2px 2px rgb(0 0 0 / .06));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.hover\:\[background-image\:linear-gradient\(to_bottom_left\,theme\(colors\.cyan\.500\)\,theme\(colors\.blue\.500\)\)\]:hover{background-image:linear-gradient(to bottom left,#06b6d4,#3b82f6)}.focus\:border-cyan-500:focus{--tw-border-opacity: 1;border-color:rgb(6 182 212 / var(--tw-border-opacity, 1))}.focus\:bg-neutral-150:focus{--tw-bg-opacity: 1;background-color:rgb(237 237 237 / var(--tw-bg-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:outline-cyan-500:focus{outline-color:#06b6d4}.focus\:ring-0:focus{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.focus\:ring-2:focus{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.focus\:ring-4:focus{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(4px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.focus\:ring-blue-500:focus{--tw-ring-opacity: 1;--tw-ring-color: rgb(59 130 246 / var(--tw-ring-opacity, 1))}.focus\:ring-cyan-300:focus{--tw-ring-opacity: 1;--tw-ring-color: rgb(103 232 249 / var(--tw-ring-opacity, 1))}.focus\:ring-cyan-500:focus{--tw-ring-opacity: 1;--tw-ring-color: rgb(6 182 212 / var(--tw-ring-opacity, 1))}.focus\:ring-neutral-500:focus{--tw-ring-opacity: 1;--tw-ring-color: rgb(115 115 115 / var(--tw-ring-opacity, 1))}.focus\:ring-pink-200:focus{--tw-ring-opacity: 1;--tw-ring-color: rgb(251 207 232 / var(--tw-ring-opacity, 1))}.focus-visible\:outline-none:focus-visible{outline:2px solid transparent;outline-offset:2px}.focus-visible\:ring-1:focus-visible{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.focus-visible\:ring-2:focus-visible{--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow, 0 0 #0000)}.focus-visible\:ring-blue-300:focus-visible{--tw-ring-opacity: 1;--tw-ring-color: rgb(147 197 253 / var(--tw-ring-opacity, 1))}.active\:cursor-grabbing:active{cursor:grabbing}.active\:bg-neutral-200:active{--tw-bg-opacity: 1;background-color:rgb(229 229 229 / var(--tw-bg-opacity, 1))}.enabled\:hover\:bg-red-100:hover:enabled{--tw-bg-opacity: 1;background-color:rgb(254 226 226 / var(--tw-bg-opacity, 1))}.enabled\:hover\:text-neutral-900:hover:enabled{--tw-text-opacity: 1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.enabled\:hover\:text-red-600:hover:enabled{--tw-text-opacity: 1;color:rgb(220 38 38 / var(--tw-text-opacity, 1))}.disabled\:pointer-events-none:disabled{pointer-events:none}.disabled\:cursor-not-allowed:disabled{cursor:not-allowed}.disabled\:select-none:disabled{-webkit-user-select:none;user-select:none}.disabled\:bg-neutral-100:disabled{--tw-bg-opacity: 1;background-color:rgb(245 245 245 / var(--tw-bg-opacity, 1))}.disabled\:bg-neutral-500:disabled{--tw-bg-opacity: 1;background-color:rgb(115 115 115 / var(--tw-bg-opacity, 1))}.disabled\:bg-orange-900:disabled{--tw-bg-opacity: 1;background-color:rgb(124 45 18 / var(--tw-bg-opacity, 1))}.disabled\:text-neutral-400:disabled{--tw-text-opacity: 1;color:rgb(163 163 163 / var(--tw-text-opacity, 1))}.disabled\:text-white:disabled{--tw-text-opacity: 1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.disabled\:no-underline:disabled{text-decoration-line:none}.disabled\:opacity-50:disabled{opacity:.5}.disabled\:opacity-60:disabled{opacity:.6}.group:hover .group-hover\:border-neutral-400{--tw-border-opacity: 1;border-color:rgb(163 163 163 / var(--tw-border-opacity, 1))}.group:hover .group-hover\:bg-neutral-150{--tw-bg-opacity: 1;background-color:rgb(237 237 237 / var(--tw-bg-opacity, 1))}.group:hover .group-hover\:bg-neutral-200{--tw-bg-opacity: 1;background-color:rgb(229 229 229 / var(--tw-bg-opacity, 1))}.group:hover .group-hover\:text-neutral-700{--tw-text-opacity: 1;color:rgb(64 64 64 / var(--tw-text-opacity, 1))}.group:hover .group-hover\:text-neutral-800{--tw-text-opacity: 1;color:rgb(38 38 38 / var(--tw-text-opacity, 1))}.group:hover .group-hover\:text-neutral-900{--tw-text-opacity: 1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.group:hover .group-hover\:text-red-400{--tw-text-opacity: 1;color:rgb(248 113 113 / var(--tw-text-opacity, 1))}.group:hover .group-hover\:text-red-500{--tw-text-opacity: 1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.group:focus .group-focus\:border-neutral-400{--tw-border-opacity: 1;border-color:rgb(163 163 163 / var(--tw-border-opacity, 1))}.group:focus .group-focus\:bg-neutral-150{--tw-bg-opacity: 1;background-color:rgb(237 237 237 / var(--tw-bg-opacity, 1))}.group:focus .group-focus\:bg-neutral-200{--tw-bg-opacity: 1;background-color:rgb(229 229 229 / var(--tw-bg-opacity, 1))}.group:focus .group-focus\:text-neutral-700{--tw-text-opacity: 1;color:rgb(64 64 64 / var(--tw-text-opacity, 1))}.group:focus .group-focus\:text-neutral-800{--tw-text-opacity: 1;color:rgb(38 38 38 / var(--tw-text-opacity, 1))}.group:focus .group-focus\:text-neutral-900{--tw-text-opacity: 1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.group:focus .group-focus\:text-red-400{--tw-text-opacity: 1;color:rgb(248 113 113 / var(--tw-text-opacity, 1))}.group:focus .group-focus\:text-red-500{--tw-text-opacity: 1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.group[data-selected=true] .group-data-\[selected\=true\]\:bg-neutral-200{--tw-bg-opacity: 1;background-color:rgb(229 229 229 / var(--tw-bg-opacity, 1))}.group[data-selected=true] .group-data-\[selected\=true\]\:text-neutral-900{--tw-text-opacity: 1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.group[data-selected=true] .group-data-\[selected\=true\]\:text-red-500{--tw-text-opacity: 1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}@media (min-width: 400px){.min-\[400px\]\:max-w-\[100px\]{max-width:100px}}@media (min-width: 438px){.min-\[438px\]\:w-\[400px\]{width:400px}}@media (min-width: 550px){.min-\[550px\]\:w-\[470px\]{width:470px}}@media (min-width: 768px){.md\:w-\[600px\]{width:600px}.md\:max-w-fit{max-width:fit-content}}.\[\&\:not\(\:last-child\)\]\:pb-0\.5:not(:last-child){padding-bottom:2px}.\[\&\>div\]\:h-full>div{height:100%}.\[\&\>li\]\:ml-5>li{margin-left:20px}.\[\&_a\]\:underline a{text-decoration-line:underline}</style></head><body style="font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; line-height: 18px; user-select: text; font-weight: normal; letter-spacing: normal; -webkit-font-smoothing: auto;"><div><div class="fixed z-[9999995] flex select-none items-center transition-opacity duration-200 ease-in-out" style="opacity: 0; pointer-events: none;"><div class="cursor-pointer rounded-full p-1"><div class="h-2.5 w-2.5 rounded-full bg-blue-500 shadow-[0_2px_4px_rgb(0,0,0,0.2)]"></div></div></div></div></body></html></template></cgw-writer-modal><button id="cgw_action_btn" tabindex="-1" style="position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;"></button><webhighlights-element-registry elements-count="46"></webhighlights-element-registry><div id="webhighlights-notificationshldjnlbobkdkghfidgoecgmklcemanhm"></div><style id="web-highlights-global-style-variables">:root { --wh-slate-50: #f8fafc;--wh-slate-100: #f1f5f9;--wh-slate-200: #e2e8f0;--wh-slate-300: #cbd5e1;--wh-slate-400: #94a3b8;--wh-slate-500: #64748b;--wh-slate-600: #475569;--wh-slate-700: #334155;--wh-slate-800: #1e293b;--wh-slate-900: #0f172a;--wh-slate-950: #020617;--wh-primary-50: rgb(188, 220, 205);--wh-primary-100: rgb(154, 208, 185);--wh-primary-200: rgb(120, 197, 164);--wh-primary-300: rgb(86, 186, 144);--wh-primary-400: rgb(53, 176, 125);--wh-primary-500: rgb(0, 179, 122);--wh-primary-600: hsl(161, 100%, 33%);--wh-primary-700: hsl(161, 100%, 31%);--wh-primary-800: hsl(161, 100%, 29%);--wh-primary-900: hsl(161, 100%, 25%);--wh-primary-950: hsl(161, 100%, 20%);--wh-secondary-50: hsl(218, 22%, 27%);--wh-secondary-100: hsl(218, 22%, 23%);--wh-secondary-200: hsl(218, 22%, 22%);--wh-secondary-300: hsl(218, 22%, 19%);--wh-secondary-400: hsl(218, 22%, 17%);--wh-secondary-500: hsl(218, 22%, 15%);--wh-secondary-600: hsl(218, 22%, 13%);--wh-secondary-700: hsl(218, 22%, 11%);--wh-secondary-800: hsl(218, 22%, 9%);--wh-secondary-900: hsl(218, 22%, 5%);--wh-secondary-950: hsl(218, 22%, 3%);--wh-gray-50: #f9fafb;--wh-gray-100: #f3f4f6;--wh-gray-200: #e5e7eb;--wh-gray-300: #d1d5db;--wh-gray-400: #9ca3af;--wh-gray-500: #6b7280;--wh-gray-600: #4b5563;--wh-gray-700: #374151;--wh-gray-800: #1f2937;--wh-gray-900: #111827;--wh-gray-950: #030712;--wh-zinc-50: #fafafa;--wh-zinc-100: #f4f4f5;--wh-zinc-200: #e4e4e7;--wh-zinc-300: #d4d4d8;--wh-zinc-400: #a1a1aa;--wh-zinc-500: #71717a;--wh-zinc-600: #52525b;--wh-zinc-700: #3f3f46;--wh-zinc-800: #27272a;--wh-zinc-900: #18181b;--wh-zinc-950: #09090b;--wh-neutral-50: #fafafa;--wh-neutral-100: #f5f5f5;--wh-neutral-200: #e5e5e5;--wh-neutral-300: #d4d4d4;--wh-neutral-400: #a3a3a3;--wh-neutral-500: #737373;--wh-neutral-600: #525252;--wh-neutral-700: #404040;--wh-neutral-800: #262626;--wh-neutral-900: #171717;--wh-neutral-950: #0a0a0a;--wh-stone-50: #fafaf9;--wh-stone-100: #f5f5f4;--wh-stone-200: #e7e5e4;--wh-stone-300: #d6d3d1;--wh-stone-400: #a8a29e;--wh-stone-500: #78716c;--wh-stone-600: #57534e;--wh-stone-700: #44403c;--wh-stone-800: #292524;--wh-stone-900: #1c1917;--wh-stone-950: #0c0a09;--wh-red-50: #fef2f2;--wh-red-100: #fee2e2;--wh-red-200: #fecaca;--wh-red-300: #fca5a5;--wh-red-400: #f87171;--wh-red-500: #ef4444;--wh-red-600: #dc2626;--wh-red-700: #b91c1c;--wh-red-800: #991b1b;--wh-red-900: #7f1d1d;--wh-red-950: #450a0a;--wh-orange-50: #fff7ed;--wh-orange-100: #ffedd5;--wh-orange-200: #fed7aa;--wh-orange-300: #fdba74;--wh-orange-400: #fb923c;--wh-orange-500: #f97316;--wh-orange-600: #ea580c;--wh-orange-700: #c2410c;--wh-orange-800: #9a3412;--wh-orange-900: #7c2d12;--wh-orange-950: #431407;--wh-amber-50: #fffbeb;--wh-amber-100: #fef3c7;--wh-amber-200: #fde68a;--wh-amber-300: #fcd34d;--wh-amber-400: #fbbf24;--wh-amber-500: #f59e0b;--wh-amber-600: #d97706;--wh-amber-700: #b45309;--wh-amber-800: #92400e;--wh-amber-900: #78350f;--wh-amber-950: #451a03;--wh-yellow-50: #fefce8;--wh-yellow-100: #fef9c3;--wh-yellow-200: #fef08a;--wh-yellow-300: #fde047;--wh-yellow-400: #facc15;--wh-yellow-500: #eab308;--wh-yellow-600: #ca8a04;--wh-yellow-700: #a16207;--wh-yellow-800: #854d0e;--wh-yellow-900: #713f12;--wh-yellow-950: #422006;--wh-lime-50: #f7fee7;--wh-lime-100: #ecfccb;--wh-lime-200: #d9f99d;--wh-lime-300: #bef264;--wh-lime-400: #a3e635;--wh-lime-500: #84cc16;--wh-lime-600: #65a30d;--wh-lime-700: #4d7c0f;--wh-lime-800: #3f6212;--wh-lime-900: #365314;--wh-lime-950: #1a2e05;--wh-green-50: #f0fdf4;--wh-green-100: #dcfce7;--wh-green-200: #bbf7d0;--wh-green-300: #86efac;--wh-green-400: #4ade80;--wh-green-500: #22c55e;--wh-green-600: #16a34a;--wh-green-700: #15803d;--wh-green-800: #166534;--wh-green-900: #14532d;--wh-green-950: #052e16;--wh-emerald-50: #ecfdf5;--wh-emerald-100: #d1fae5;--wh-emerald-200: #a7f3d0;--wh-emerald-300: #6ee7b7;--wh-emerald-400: #34d399;--wh-emerald-500: #10b981;--wh-emerald-600: #059669;--wh-emerald-700: #047857;--wh-emerald-800: #065f46;--wh-emerald-900: #064e3b;--wh-emerald-950: #022c22;--wh-teal-50: #f0fdfa;--wh-teal-100: #ccfbf1;--wh-teal-200: #99f6e4;--wh-teal-300: #5eead4;--wh-teal-400: #2dd4bf;--wh-teal-500: #14b8a6;--wh-teal-600: #0d9488;--wh-teal-700: #0f766e;--wh-teal-800: #115e59;--wh-teal-900: #134e4a;--wh-teal-950: #042f2e;--wh-cyan-50: #ecfeff;--wh-cyan-100: #cffafe;--wh-cyan-200: #a5f3fc;--wh-cyan-300: #67e8f9;--wh-cyan-400: #22d3ee;--wh-cyan-500: #06b6d4;--wh-cyan-600: #0891b2;--wh-cyan-700: #0e7490;--wh-cyan-800: #155e75;--wh-cyan-900: #164e63;--wh-cyan-950: #083344;--wh-sky-50: #f0f9ff;--wh-sky-100: #e0f2fe;--wh-sky-200: #bae6fd;--wh-sky-300: #7dd3fc;--wh-sky-400: #38bdf8;--wh-sky-500: #0ea5e9;--wh-sky-600: #0284c7;--wh-sky-700: #0369a1;--wh-sky-800: #075985;--wh-sky-900: #0c4a6e;--wh-sky-950: #082f49;--wh-blue-50: #eff6ff;--wh-blue-100: #dbeafe;--wh-blue-200: #bfdbfe;--wh-blue-300: #93c5fd;--wh-blue-400: #60a5fa;--wh-blue-500: #3b82f6;--wh-blue-600: #2563eb;--wh-blue-700: #1d4ed8;--wh-blue-800: #1e40af;--wh-blue-900: #1e3a8a;--wh-blue-950: #172554;--wh-indigo-50: #eef2ff;--wh-indigo-100: #e0e7ff;--wh-indigo-200: #c7d2fe;--wh-indigo-300: #a5b4fc;--wh-indigo-400: #818cf8;--wh-indigo-500: #6366f1;--wh-indigo-600: #4f46e5;--wh-indigo-700: #4338ca;--wh-indigo-800: #3730a3;--wh-indigo-900: #312e81;--wh-indigo-950: #1e1b4b;--wh-violet-50: #f5f3ff;--wh-violet-100: #ede9fe;--wh-violet-200: #ddd6fe;--wh-violet-300: #c4b5fd;--wh-violet-400: #a78bfa;--wh-violet-500: #8b5cf6;--wh-violet-600: #7c3aed;--wh-violet-700: #6d28d9;--wh-violet-800: #5b21b6;--wh-violet-900: #4c1d95;--wh-violet-950: #2e1065;--wh-purple-50: #faf5ff;--wh-purple-100: #f3e8ff;--wh-purple-200: #e9d5ff;--wh-purple-300: #d8b4fe;--wh-purple-400: #c084fc;--wh-purple-500: #a855f7;--wh-purple-600: #9333ea;--wh-purple-700: #7e22ce;--wh-purple-800: #6b21a8;--wh-purple-900: #581c87;--wh-purple-950: #3b0764;--wh-fuchsia-50: #fdf4ff;--wh-fuchsia-100: #fae8ff;--wh-fuchsia-200: #f5d0fe;--wh-fuchsia-300: #f0abfc;--wh-fuchsia-400: #e879f9;--wh-fuchsia-500: #d946ef;--wh-fuchsia-600: #c026d3;--wh-fuchsia-700: #a21caf;--wh-fuchsia-800: #86198f;--wh-fuchsia-900: #701a75;--wh-fuchsia-950: #4a044e;--wh-pink-50: #fdf2f8;--wh-pink-100: #fce7f3;--wh-pink-200: #fbcfe8;--wh-pink-300: #f9a8d4;--wh-pink-400: #f472b6;--wh-pink-500: #ec4899;--wh-pink-600: #db2777;--wh-pink-700: #be185d;--wh-pink-800: #9d174d;--wh-pink-900: #831843;--wh-pink-950: #500724;--wh-rose-50: #fff1f2;--wh-rose-100: #ffe4e6;--wh-rose-200: #fecdd3;--wh-rose-300: #fda4af;--wh-rose-400: #fb7185;--wh-rose-500: #f43f5e;--wh-rose-600: #e11d48;--wh-rose-700: #be123c;--wh-rose-800: #9f1239;--wh-rose-900: #881337;--wh-rose-950: #4c0519;--wh-primary-color: var(--wh-primary-500);--wh-primary-color-hover: #00a16e;--wh-primary-color-transparent: #00aa7424;--wh-primary-color-transparent-light: #00a8730f;--wh-primary-color-transparent-strong: #00a87340;--wh-primary-color-transparent-stronger: hsla(161, 100%, 33%, 0.5);--wh-primary-color-transparent-strongest: hsla(161, 100%, 33%, 0.75);--wh-primary-light: #53e3a6;--wh-primary-dark: #007f4b;--wh-primary-dark-hover: #017444;--wh-primary-shadow: #00b07841;--wh-primary-shadow-2: #00b07870;--wh-primary-border-color: #c8c8c870;--wh-warning-color: #ff5a1f;--wh-warning-color-light: #feecdc;--wh-ai-primary-decimal: 167, 139, 250;--wh-ai-secondary-decimal  : 147, 51, 234;--wh-ai-accent-decimal: 244, 114, 182;--wh-ai-primary: rgba(var(--wh-ai-primary-decimal), 1);--wh-ai-secondary: rgba(var(--wh-ai-secondary-decimal), 1);--wh-ai-accent: rgba(var(--wh-ai-accent-decimal), 1);--secondary-color: #3d4455;--secondary-color-hover: #3a4052;--secondary-color-transparent: #3d44556b;--secondary-light: #4c556d;--secondary-dark: #252934;--secondary-dark-hover: #191b22;--secondary-dark-transparent: #2e2d2d46;--highlight-color: #92ffaa;--error-color: #d62d4c;--error-color-light: #fde8e8;--error-info: #14854e;--success-color: #0e9f6e;--success-color-light: #def7ec;--font-color: #2f3237;--font-color-light: #626364;--font-color-dark: #252525;--wh-font-family: 'SF Pro Display', 'Inter', ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";--font-family: var(--wh-font-family);--wh-link-color: #1d9bf0;--wh-form-active-color: #3b82f6;--wh-accent-blue: #1f6feb;--BREAKPOINT_XS: 575px;--BREAKPOINT_S: 767px;--BREAKPOINT_M: 991px;--BREAKPOINT_L: 1199px;--BREAKPOINT_XL: 1399px;--BREAKPOINT_XXL: 1699px;--wh-danger-color: var(--wh-red-600);--wh-danger-color-hover: var(--wh-red-700);--wh-font-size: 13px;--wh-blockquote-line-height: 1.3;--wh-breakpoint-xs: 575px;--wh-breakpoint-s: 767px;--wh-breakpoint-m: 991px;--wh-breakpoint-l: 1199px;--wh-breakpoint-xl: 1399px;--wh-breakpoint-xxl: 1699px;--wh-font-size-2xs: 10px;--wh-font-size-xs: 11px;--wh-font-size-s: 12px;--wh-font-size-m: 13px;--wh-font-size-l: 14px;--wh-font-size-xl: 16px;--wh-font-size-2xl: 18px;--wh-font-size-3xl: 20px;--wh-font-size-4xl: 24px;--wh-font-size-5xl: 30px;--wh-font-size-6xl: 36px;--wh-spacing-2xs: 2px;--wh-spacing-xs: 4px;--wh-spacing-s: 8px;--wh-spacing-m: 12px;--wh-spacing-l: 16px;--wh-spacing-xl: 24px;--wh-spacing-2xl: 32px;--wh-spacing-3xl: 48px;--wh-spacing-4xl: 64px;--wh-spacing-5xl: 96px;--wh-border-radius-none: 0px;--wh-border-radius-xs: 2px;--wh-border-radius-s: 4px;--wh-border-radius-m: 6px;--wh-border-radius-l: 8px;--wh-border-radius-xl: 12px;--wh-border-radius-2xl: 16px;--wh-border-radius-3xl: 24px;--wh-border-radius-full: 9999px;--wh-font-weight-light: 300;--wh-font-weight-normal: 400;--wh-font-weight-medium: 500;--wh-font-weight-semibold: 600;--wh-font-weight-bold: 700;--wh-font-weight-extrabold: 800;--wh-line-height-tight: 1.25;--wh-line-height-snug: 1.375;--wh-line-height-normal: 1.5;--wh-line-height-relaxed: 1.625;--wh-line-height-loose: 2;--wh-bg-base: var(--wh-secondary-600);--wh-bg-base-hover: var(--wh-secondary-500);--wh-border-base: var(--wh-secondary-200);--wh-border-base-hover: var(--wh-secondary-100);--wh-border-base-strong: var(--wh-secondary-100);--wh-border-base-strong-hover: var(--wh-secondary-50);--wh-bg-base-hover-strong: var(--wh-secondary-300);--wh-bg-back: var(--wh-secondary-700);--wh-bg-back-strong: var(--wh-secondary-800);--wh-bg-back-strong-hover: var(--wh-secondary-900);--wh-bg-back-hover: var(--wh-secondary-600);--wh-bg-back-hover-strong: var(--wh-secondary-800);--wh-border-back: var(--wh-secondary-100);--wh-border-back-strong: var(--wh-secondary-50);--wh-bg-front: var(--wh-secondary-400);--wh-bg-front-strong: var(--wh-secondary-200);--wh-bg-front-strong-hover: var(--wh-secondary-50);--wh-bg-front-hover: var(--wh-secondary-300);--wh-bg-front-hover-strong: var(--wh-secondary-200);--wh-border-front: hsl(227, 20%, 25%);--wh-border-front-strong: hsl(227, 20%, 35%);--wh-border-front-hover: hsl(227, 20%, 55%);--wh-text-stronger: hsl(0, 0%, 95%);--wh-text-strongest: hsl(0, 0%, 100%);--wh-text-strong: hsl(0, 0%, 90%);--wh-text: hsl(0, 0%, 85%);--wh-text-hover: var(--wh-text-strong);--wh-text-light: hsl(0, 0%, 82%);--wh-text-lighter: hsl(0, 0%, 72%);--wh-text-lightest: hsl(0, 0%, 62%);--wh-border-color: hsla(0, 0%, 100%, 0.15);--wh-border-color-strong: hsla(0, 0%, 100%, 0.25);--wh-note-editor-bg-color: hsl(221, 27%, 17%);--wh-note-editor-bg-color-preview: hsl(221, 27%, 15%);--wh-bg-tags: var(--wh-secondary-300);--wh-bg-tags-hover: var(--wh-secondary-200);--wh-syntax-bg-color: rgba(255, 255, 255, 0.05);--wh-fallback-img-color: var(--wh-secondary-600);--wh-bg-disabled: hsl(220, 22%, 18%);--wh-bg-notification-unread: hsla(161, 100%, 20%, 0.15);--wh-bg-notification-unread-hover: hsla(161, 100%, 20%, 0.05);--wh-subtle-gray: rgb(255, 255, 255, 0.1);--wh-shadow: inset 0 0 0.5px 1px hsla(0, 0%, 100%, 0.1),
-      /* 2. shadow ring 👇 */ 0 0 0 1px hsla(230, 13%, 9%, 0.075),
-      /* 3. multiple soft shadows 👇 */ 0 0.3px 0.4px hsla(230, 13%, 9%, 0.02),
-      0 0.9px 1.5px hsla(230, 13%, 9%, 0.045),
-      0 3.5px 6px hsla(230, 13%, 9%, 0.09);--wh-shadow-primary: var(--wh-primary-500) 0px 0px 0px 1px inset,
-      var(--wh-primary-500) 0px 0px 1px;--wh-skeleton-bg: var(--wh-secondary-300);--wh-skeleton-bg-hover: var(--wh-secondary-200);--wh-skeleton-bg-strong: var(--wh-secondary-200);--wh-skeleton-bg-strong-hover: var(--wh-secondary-100);--wh-shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.3);--wh-shadow-s: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.4);--wh-shadow-m: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);--wh-shadow-l: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);--wh-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);--wh-shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }</style><div id="give-freely-root-hldjnlbobkdkghfidgoecgmklcemanhm" class="give-freely-root" data-extension-id="hldjnlbobkdkghfidgoecgmklcemanhm" data-extension-name="Web Highlights: PDF &amp; Web Highlighter + Notes &amp; AI Summary" style="display: block;"><template shadowrootmode="open"><style>
-  :host {
-    all: initial;
-  }
-
-  .gf-scroll-remove::-webkit-scrollbar {
-    border-radius-bottom-right: 15px;
-  }
-
-  button {
-    cursor: pointer;
-    transition: transform 0.1s ease;
-  }
-
-  button:active {
-    transform: scale(0.98);
-  }
-
-  .give-freely-close-button:hover {
-    opacity: 0.7;
-  }
-
-  input[type="radio"] {
-    margin-right: 8px;
-  }
-
-  hr {
-    border: none;
-    border-top: 1px solid #e5e5e5;
-    margin: 1em 0;
-  }
-
-  dialog::backdrop  {
-    background-color: rgba(180, 180, 180, 0.6);
-  }
-
-  dialog.backdrop-hidden::backdrop  {
-    background-color: transparent;
-  }
-</style><div><div class="gf-app"></div></div></template></div><style id="web-highlights-global-styles">
-  webhighlights-sidebar {
-    --wh-font-size: 13.5px;
-  }
-
-  body.web-highlights-animate {
-    transition: all 300ms linear;
-    transition-property: margin-left, margin-right;
-  }
-
-  body.web-highlights-open {
-    margin-left: 400px !important;
-  }
-
-  web-highlight.webhighlights-highlight {
-    background-color: #92ffaa;
-    cursor: pointer;
-    visibility: visible !important;
-  }
-
-  web-highlight.webhighlights-highlight.webhighlight-with-tags,
-  web-highlight.webhighlights-highlight.webhighlight-with-notes {
-    border-bottom: 2.8px solid gray;
-    border-radius: 0px;
-  }
-
-  web-highlight > *:not(webhighlights-popup-toolbox) {
-    background-color: #92ffaa;
-  }
-
-  webhighlights-popup-toolbox.contains-highlight {
-    transform: translate(-63px, -10px);
-    position: fixed;
-  }
-</style><webhighlights-popup-toolbox><template shadowrootmode="open"><!----><!--?--></template></webhighlights-popup-toolbox><webhighlights-marker><template shadowrootmode="open"><!---->
-      <!--?lit$924143992$-->
-    </template></webhighlights-marker></body><webhighlights-sidebar alignment="left" sidebar-width="400"><template shadowrootmode="open"><!---->
-      <!--?lit$924143992$-->
-            <webhighlights-main-component part="main-component" data-testid="webhighlights-sidebar-MAIN_COMPONENT" style="left: 0px; right: unset;"><template shadowrootmode="open"><!---->
-      <webhighlights-popover data-testid="webhighlights-main-component-POPOVER"><template shadowrootmode="open"><!----><!--?--></template>
-        <!--?lit$924143992$--><!--?-->
-      </webhighlights-popover>
-
-      <!-- Button to toggle side-bar. It hides when animation is active -->
-      <!--?lit$924143992$--><!--?-->
-      <!--?lit$924143992$-->
-    </template></webhighlights-main-component>
-          
-      <!--?lit$924143992$--><!--?-->
-    </template></webhighlights-sidebar><grammarly-desktop-integration data-grammarly-shadow-root="true"><template shadowrootmode="open"><style>
-      div.grammarly-desktop-integration {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
-        -moz-user-select: none;
-        -webkit-user-select: none;
-        -ms-user-select:none;
-        user-select:none;
-      }
-
-      div.grammarly-desktop-integration:before {
-        content: attr(data-content);
-      }
-    </style><div aria-label="grammarly-integration" role="group" tabindex="-1" class="grammarly-desktop-integration" data-content="{&quot;mode&quot;:&quot;full&quot;,&quot;isActive&quot;:true,&quot;isUserDisabled&quot;:false}"></div></template></grammarly-desktop-integration></html>
+</div>
+</body>
+</html>
