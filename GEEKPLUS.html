@@ -1,168 +1,137 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Geekplus (2590.HK) – Aktienanalyse Canvas v2.2</title>
-  <style>
-    :root {
-      --primary: #14b8a6;
-      --primary-dark: #0d9488;
-      --bg: #0f0f12;
-      --bg-card: #1a1a1f;
-      --bg-card2: #22222a;
-      --border: #2e2e38;
-      --text: #e8e8ec;
-      --text-muted: #888898;
-      --text-dim: #555566;
-      --green: #22c55e;
-      --red: #ef4444;
-      --yellow: #f59e0b;
-      --blue: #3b82f6;
-      --purple: #8b5cf6;
-      --teal: #14b8a6;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7;
-    }
-    .header {
-      background: linear-gradient(135deg, #001a18 0%, #002820 40%, #0f0f12 100%);
-      border-bottom: 1px solid var(--primary);
-      padding: 36px 40px 28px; display: flex; justify-content: space-between;
-      align-items: flex-start; flex-wrap: wrap; gap: 20px;
-    }
-    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
-    .header-left h1 span { color: var(--primary); }
-    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
-    .header-right { text-align: right; }
-    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
-    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
-    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
-    .price-change.up   { background: rgba(34,197,94,0.15); color: var(--green); }
-    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
-    .nav {
-      background: var(--bg-card); border-bottom: 1px solid var(--border);
-      padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
-      position: sticky; top: 0; z-index: 100;
-    }
-    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
-    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
-    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
-    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
-    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
-    .kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-    .kpi-value.green  { color: var(--green); }
-    .kpi-value.red    { color: var(--red); }
-    .kpi-value.orange { color: var(--primary); }
-    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
-    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
-    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .section-title  { font-size: 16px; font-weight: 700; color: white; }
-    .section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
-    .section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
-    .section-body   { padding: 20px 24px; }
-    p { margin-bottom: 12px; color: var(--text); }
-    p:last-child { margin-bottom: 0; }
-    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
-    h3:first-child { margin-top: 0; }
-    .table-wrap { overflow-x: auto; margin: 16px 0; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: rgba(20,184,166,0.04); }
-    .beat    { color: var(--green);  font-weight: 600; }
-    .miss    { color: var(--red);    font-weight: 600; }
-    .neutral { color: var(--yellow); font-weight: 600; }
-    .badge        { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
-    .badge-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
-    .badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
-    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
-    .badge-blue   { background: rgba(59,130,246,0.15); color: var(--blue); }
-    .badge-orange { background: rgba(20,184,166,0.15); color: var(--primary); }
-    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
-    .event-item:last-child { border-bottom: none; }
-    .event-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
-    .dot-green  { background: var(--green); }
-    .dot-red    { background: var(--red); }
-    .dot-yellow { background: var(--yellow); }
-    .event-label { font-weight: 600; color: white; }
-    .event-text  { font-size: 14px; color: var(--text); }
-    .risk-item   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
-    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px; }
-    .risk-title  { font-weight: 600; color: white; font-size: 14px; }
-    .score-bar       { display: flex; align-items: center; gap: 10px; }
-    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-    .score-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #5eead4); }
-    .score-num       { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
-    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-    @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
-    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
-    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
-    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .bear-card h4 { color: var(--red);   margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .rating-box { background: linear-gradient(135deg, rgba(20,184,166,0.12), rgba(20,184,166,0.04)); border: 1px solid rgba(20,184,166,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
-    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
-    .rating-item .val  { font-size: 20px; font-weight: 800; color: white; }
-    .rating-item .val.buy  { color: var(--green); }
-    .rating-item .val.hold { color: var(--yellow); }
-    .rating-item .val.sell { color: var(--red); }
-    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
-    @media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
-    .trigger-card      { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
-    .trigger-card h5   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-    .trigger-card.buy  h5 { color: var(--green); }
-    .trigger-card.sell h5 { color: var(--red); }
-    .trigger-list    { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
-    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
-    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
-    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
-    @media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
-    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
-    .investor-no  { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
-    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
-    .investor-no  h5 { color: var(--red);   font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
-    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
-    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
-    .investor-no  li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
-    .geo-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
-    .geo-card   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
-    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .geo-pct    { font-size: 20px; font-weight: 700; color: white; }
-    .geo-note   { font-size: 12px; color: var(--text-muted); }
-    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
-    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
-    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
-    .outlook-card .when-then strong { color: var(--primary); }
-    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
-    .source a { color: var(--text-dim); }
-    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
-    .alert-box { background: rgba(20,184,166,0.08); border: 1px solid rgba(20,184,166,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
-    .divider   { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
-    .pill      { display: inline-block; background: rgba(20,184,166,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GEEKPLUS – Aktienanalyse Canvas v2.2 · Mai 2026</title>
+<style>
+:root{--primary:#14b8a6;--primary-dark:#0e9488;--bg:#0f0f12;--bg-card:#1a1a1f;--bg-card2:#22222a;--border:#2e2e38;--text:#e8e8ec;--text-muted:#888898;--text-dim:#555566;--green:#22c55e;--red:#ef4444;--yellow:#f59e0b;--blue:#3b82f6;--purple:#8b5cf6;--teal:#14b8a6;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+.header{background:linear-gradient(135deg,#001a18 0%,#002820 40%,#0f0f12 100%);border-bottom:1px solid var(--primary);padding:36px 40px 28px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;}
+.header-left h1{font-size:32px;font-weight:700;color:white;letter-spacing:-0.5px;}
+.header-left h1 span{color:var(--primary);}
+.header-left .subtitle{color:var(--text-muted);font-size:14px;margin-top:4px;}
+.header-right{text-align:right;}
+.price-tag{font-size:38px;font-weight:800;color:var(--primary);line-height:1;}
+.price-meta{color:var(--text-muted);font-size:13px;margin-top:4px;}
+.price-change{display:inline-block;padding:2px 8px;border-radius:4px;font-size:13px;font-weight:600;margin-top:4px;}
+.price-change.up{background:rgba(34,197,94,0.15);color:var(--green);}
+.price-change.down{background:rgba(239,68,68,0.15);color:var(--red);}
+.nav{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:100;}
+.nav a{color:var(--text-muted);text-decoration:none;padding:14px 16px;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.2s;}
+.nav a:hover{color:var(--primary);border-bottom-color:var(--primary);}
+.main{max-width:1100px;margin:0 auto;padding:32px 40px 60px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px;}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.kpi-value{font-size:22px;font-weight:700;color:white;margin-top:4px;}
+.kpi-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.kpi-value.green{color:var(--green);}
+.kpi-value.red{color:var(--red);}
+.kpi-value.orange{color:var(--primary);}
+.section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden;}
+.section-header{background:var(--bg-card2);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.section-number{background:var(--primary);color:white;width:28px;height:28px;border-radius:6px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-title{font-size:16px;font-weight:700;color:white;}
+.section-score{margin-left:auto;font-size:14px;font-weight:700;color:var(--primary);}
+.section-note{font-size:12px;color:var(--text-dim);background:rgba(46,46,56,0.4);border-radius:4px;padding:4px 10px;margin-left:auto;}
+.section-body{padding:20px 24px;}
+p{margin-bottom:12px;color:var(--text);}
+p:last-child{margin-bottom:0;}
+h3{font-size:14px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 8px;}
+h3:first-child{margin-top:0;}
+.table-wrap{overflow-x:auto;margin:16px 0;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--bg-card2);color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:10px 12px;border-bottom:1px solid rgba(46,46,56,0.5);color:var(--text);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(20,184,166,0.04);}
+.beat{color:var(--green);font-weight:600;}
+.miss{color:var(--red);font-weight:600;}
+.neutral{color:var(--yellow);font-weight:600;}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}
+.badge-green{background:rgba(34,197,94,0.15);color:var(--green);}
+.badge-red{background:rgba(239,68,68,0.15);color:var(--red);}
+.badge-yellow{background:rgba(245,158,11,0.15);color:var(--yellow);}
+.badge-blue{background:rgba(59,130,246,0.15);color:var(--blue);}
+.badge-orange{background:rgba(20,184,166,0.15);color:var(--primary);}
+.event-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(46,46,56,0.5);align-items:flex-start;}
+.event-item:last-child{border-bottom:none;}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0;}
+.dot-green{background:var(--green);}
+.dot-red{background:var(--red);}
+.dot-yellow{background:var(--yellow);}
+.event-label{font-weight:600;color:white;}
+.event-text{font-size:14px;color:var(--text);}
+.risk-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.risk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:6px;}
+.risk-title{font-weight:600;color:white;font-size:14px;}
+.score-bar{display:flex;align-items:center;gap:10px;}
+.score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#5eead4);}
+.score-num{font-weight:700;color:var(--primary);font-size:15px;min-width:32px;}
+.bull-bear-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:700px){.bull-bear-grid{grid-template-columns:1fr;}}
+.bull-card{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:16px;}
+.bear-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:16px;}
+.bull-card h4{color:var(--green);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.bear-card h4{color:var(--red);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.rating-box{background:linear-gradient(135deg,rgba(20,184,166,0.12),rgba(20,184,166,0.04));border:1px solid rgba(20,184,166,0.3);border-radius:12px;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:20px 0;}
+.rating-item label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;display:block;margin-bottom:4px;}
+.rating-item .val{font-size:20px;font-weight:800;color:white;}
+.rating-item .val.buy{color:var(--green);}
+.rating-item .val.hold{color:var(--yellow);}
+.rating-item .val.sell{color:var(--red);}
+.trigger-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+@media(max-width:700px){.trigger-grid{grid-template-columns:1fr;}}
+.trigger-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.trigger-card h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.trigger-card.buy h5{color:var(--green);}
+.trigger-card.sell h5{color:var(--red);}
+.trigger-list{font-size:13px;color:var(--text);list-style:none;padding:0;}
+.trigger-list li{margin-bottom:6px;padding-left:14px;position:relative;}
+.trigger-list li::before{content:"\2192";position:absolute;left:0;}
+.investor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+@media(max-width:600px){.investor-grid{grid-template-columns:1fr;}}
+.investor-yes{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px;}
+.investor-no{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:12px;}
+.investor-yes h5{color:var(--green);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-no h5{color:var(--red);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-yes li,.investor-no li{font-size:13px;color:var(--text);margin-bottom:4px;list-style:none;padding-left:14px;position:relative;}
+.investor-yes li::before{content:"\2713";position:absolute;left:0;color:var(--green);}
+.investor-no li::before{content:"\2717";position:absolute;left:0;color:var(--red);}
+.geo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0;}
+.geo-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.geo-region{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.geo-pct{font-size:20px;font-weight:700;color:white;}
+.geo-note{font-size:12px;color:var(--text-muted);}
+.outlook-card{background:var(--bg-card2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:16px;margin-bottom:14px;}
+.outlook-card h4{color:white;font-size:14px;margin-bottom:8px;}
+.outlook-card .when-then{font-size:13px;color:var(--text);margin-top:8px;}
+.outlook-card .when-then strong{color:var(--primary);}
+.source{font-size:11px;color:var(--text-dim);margin-top:12px;padding-top:10px;border-top:1px solid rgba(46,46,56,0.5);}
+.disclaimer{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text-dim);margin-top:32px;}
+.alert-box{background:rgba(20,184,166,0.08);border:1px solid rgba(20,184,166,0.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px;}
+</style>
 </head>
 <body>
 
 <div class="header">
   <div class="header-left">
     <h1>Beijing Geekplus Technology <span>2590.HK</span></h1>
-    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 04. März 2026 · HKEX · Sektor: Industrie / Robotik</div>
-    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-      <span class="badge badge-orange">AMR / Warehouse Robotics</span>
-      <span class="badge badge-blue">RaaS</span>
-      <span class="badge badge-yellow">Pre-Profitable</span>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 15. Mai 2026 · HKEX · Sektor: Industrie / Warehouse Robotics / Embodied AI</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-orange">AMR Weltmarktführer (7J in Folge)</span>
+      <span class="badge badge-blue">Embodied Intelligence Pure-Play</span>
+      <span class="badge badge-green">Profitabilität erreicht (FY25)</span>
     </div>
   </div>
   <div class="header-right">
-    <div class="price-tag">HK$23.50</div>
-    <div class="price-meta">Schlusskurs 03. März 2026 · HKEX</div>
-    <div class="price-change down">▼ −23.6% (1 Monat)</div>
-    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: HK$16.06 – HK$33.90</div>
+    <div class="price-tag">HKD 21,58</div>
+    <div class="price-meta">Schlusskurs Mai 2026 · HKEX</div>
+    <div class="price-change down">▼ –27% / 1M · post FY25 results</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">52W: HKD 16,06 – 33,90</div>
   </div>
 </div>
 
@@ -184,932 +153,583 @@
 
 <div class="main">
 
-  <!-- KPI OVERVIEW -->
-  <div class="kpi-grid" style="margin-top:24px;">
-    <div class="kpi-card">
-      <div class="kpi-label">Kurs</div>
-      <div class="kpi-value orange">HK$23.50</div>
-      <div class="kpi-sub">HKEX · März 2026</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Marktkapitalisierung</div>
-      <div class="kpi-value">HK$32B</div>
-      <div class="kpi-sub">~USD 4.1B</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">FY2025E Umsatz</div>
-      <div class="kpi-value green">RMB 3.16B</div>
-      <div class="kpi-sub">+31% YoY (Mgmt-Guidance)</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Bruttomarge H1'25</div>
-      <div class="kpi-value green">35.1%</div>
-      <div class="kpi-sub">+5pp vs. H1'24 (~30%)</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Adj. EBITDA H1'25</div>
-      <div class="kpi-value green">+RMB 11.6M</div>
-      <div class="kpi-sub">Erstmals positiv</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">EPS (TTM)</div>
-      <div class="kpi-value red">−HK$0.28</div>
-      <div class="kpi-sub">Noch nicht profitabel</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Analysten-Konsens</div>
-      <div class="kpi-value green">15 Kaufen</div>
-      <div class="kpi-sub">Ø Zielkurs HK$34.91</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Nächste Ergebnisse</div>
-      <div class="kpi-value orange">Aug 2026</div>
-      <div class="kpi-sub">H1 2026 Halbjahresbericht</div>
-    </div>
+<div class="kpi-grid" style="margin-top:24px;">
+  <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">HKD 21,58</div><div class="kpi-sub">Mai 2026</div></div>
+  <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value orange">~HKD 16 Mrd.</div><div class="kpi-sub">Small-Mid Cap</div></div>
+  <div class="kpi-card"><div class="kpi-label">Revenue FY25</div><div class="kpi-value green">RMB 3,17 Mrd.</div><div class="kpi-sub">+31,6% YoY</div></div>
+  <div class="kpi-card"><div class="kpi-label">Gross Margin</div><div class="kpi-value green">35,5%</div><div class="kpi-sub">+90 bps YoY</div></div>
+  <div class="kpi-card"><div class="kpi-label">Adj. Net Profit</div><div class="kpi-value green">RMB 43,8M</div><div class="kpi-sub">erstmals positiv</div></div>
+  <div class="kpi-card"><div class="kpi-label">AMR-Marktanteil</div><div class="kpi-value green">#1 weltweit</div><div class="kpi-sub">7. Jahr in Folge</div></div>
+  <div class="kpi-card"><div class="kpi-label">52W High</div><div class="kpi-value">HKD 33,90</div><div class="kpi-sub">–36% darunter</div></div>
+  <div class="kpi-card"><div class="kpi-label">Konsens</div><div class="kpi-value green">STRONG BUY</div><div class="kpi-sub">PT: HKD 34,61</div></div>
+</div>
+
+<!-- SEKTION 1 -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Geschäftsmodell</div>
+    <div class="section-note">Quellen ≤ 3 Monate</div>
   </div>
-
-  <!-- SEKTION 1: GESCHÄFTSMODELL -->
-  <div class="section" id="s1">
-    <div class="section-header">
-      <div class="section-number">1</div>
-      <div class="section-title">Geschäftsmodell</div>
-      <div class="section-note">Quellen ≤ 9 Monate</div>
-    </div>
-    <div class="section-body">
-      <h3>Kerngeschäft: AMR-Lösungen für Lagerautomatisierung</h3>
-      <p>Geekplus (Börsenkürzel: 2590.HK) ist ein 2015 in Peking gegründetes Unternehmen, das autonome mobile Roboter (AMR) für die Lager- und Fulfillment-Automatisierung entwickelt und vertreibt. Das Kernportfolio umfasst fünf Hauptlösungen: die Shelf-to-Person Picking Solution (P-Serie Roboter transportieren Regale zu stationären Kommissionierplätzen), die Tote-to-Person Picking Solution (RS-Serie, für boxenbasierte Kommissionierung), die Pallet-to-Person Picking Solution (für Hochdichtelagerung), die Smart Sorting Solution sowie die Smart Moving Solution für den innerbetrieblichen Materialtransport. Alle Lösungen werden durch die firmeneigene Hyper+ Core Algorithm Platform und die Robot Matrix Technologieplattform gesteuert, die eine Flottenverwaltung von über 5.000 Robotern gleichzeitig ermöglicht.</p>
-      <p>Das Geschäftsmodell gliedert sich in zwei Hauptsäulen: den projektbasierten Verkauf von AMR-Systemen (Hardware + Software-Integration) sowie das wachsende Robotics-as-a-Service (RaaS) Modell, das Kunden eine Capex-leichte, abonnementbasierte Nutzung ermöglicht. Der Hardwareverkauf dominiert derzeit den Umsatz, während RaaS langfristig als Margentreiber positioniert ist. Die Kundenbasis umfasst über 770 globale Unternehmen in Branchen wie E-Commerce, Einzelhandel, 3PL, Pharma und Automobil – darunter namhafte Konzerne wie UPS Supply Chain Solutions und SOCCER.COM.</p>
-      <p>Geekplus adressiert einen strukturellen Megatrend: die weltweit steigende Nachfrage nach Lagerautomatisierung infolge von Arbeitskräftemangel, wachsendem E-Commerce und steigendem Kostendruck in der Lieferkette. Das Unternehmen nennt sich selbst den größten Anbieter von Warehouse Fulfillment Robotics-Lösungen weltweit – eine Position, die es nach eigenen Angaben seit sechs aufeinanderfolgenden Jahren hält. Mit über 66.000 ausgelieferten Robotern in mehr als 40 Ländern und einem globalen Servicenetzwerk aus 52 Servicestationen und 310 Ingenieuren hat Geekplus eine für sein Gründungsjahr bemerkenswert breite internationale Präsenz aufgebaut.</p>
-      <p>Die Kostenstruktur ist kapitalintensiver als reine Softwareunternehmen, da die Produktion der Hardwarekomponenten signifikante COGS erzeugt. Dennoch profitiert das Unternehmen von Skaleneffekten in der Roboterproduktion und einem wachsenden Anteil hochmarginiger Software- und Service-Erlöse. Die Bruttomarge verbesserte sich von ~30% in H1 2024 auf 35,1% in H1 2025, was den positiven Trend hin zu einer ausgeglicheneren Erlösstruktur unterstreicht.</p>
-      <div class="source">Quellen: Geekplus H1 2025 Interim Results (03.09.2025); Yahoo Finance / CNBC 2590.HK Profil; Roboticsandautomationnews.com (Sept. 2025); CMB International Research Report Geekplus (Aug. 2025)</div>
-    </div>
+  <div class="section-body">
+    <p>Geekplus ist <strong>weltweit der größte Anbieter von Autonomous Mobile Robots (AMR) für Warehouse Fulfillment</strong> – seit 7 Jahren in Folge Marktführer laut Interact Analysis. Gegründet 2015 in Beijing, IPO auf der HKEX im Juli 2025 (größter Roboter-IPO der HKEX-Geschichte, 134× überzeichnet auf Public-Side). Über 950 Enterprise-Kunden weltweit (Stand FY25), davon 65+ aus den Forbes Global 500. Tätig in 40+ Ländern.</p>
+    <p>Das <strong>Kerngeschäft</strong> sind mobile Roboter-Systeme für Lagerlogistik: <strong>Shelf-to-Person (Regal zum Picker), Tote-to-Person (Box zum Picker), Pallet-to-Person, Smart Sorting, Smart Moving</strong>. Dahinter steht eine proprietäre Software-Plattform (Robot Matrix Platform, Geek+ Software Suite, Hyper+ Core Algorithms). Roboter werden teilweise als Produktverkauf, zunehmend aber als <strong>Robotics-as-a-Service (RaaS)</strong> bzw. Subscription verkauft – Subscription-Aufträge wuchsen FY25 um <strong>+90% YoY</strong>.</p>
+    <p>Strategischer Pivot 2026: <strong>Embodied Intelligence und General-Purpose Humanoid Robots</strong>. Im Q4 2025 / Q1 2026 launchte Geekplus den <strong>Gino 1 Humanoid Robot</strong> als ersten weltweit kommerziell verfügbaren Humanoiden für Lagerbetrieb. Damit ist Geekplus die <strong>einzige Firma weltweit</strong>, die das gesamte Kategorie-Spektrum (Mobile Robots + Robotic Arm Picking Stations + Humanoid Robots) aus einer Hand anbietet. Das ist ein bewusster Schritt von Shelf-to-Person hin zu „end-to-end unmanned warehouses".</p>
+    <p><strong>Kundenkohorten:</strong> E-Commerce (Walmart, Amazon-Wettbewerber), 3PL-Logistik (DHL-Wettbewerber), Apparel (Footwear-Brands), Auto (Tier-1-Zulieferer), Pharma, Lithium-Batterien, Photovoltaik, FMCG, Food &amp; Beverage. Über 75% des Umsatzes kommen <strong>außerhalb von Mainland China</strong> (überseeisches Geschäft mit 46,6% Gross Margin – deutlich höher als Inland-Margin). Wachstums-Engagement in Lateinamerika und Osteuropa (FY25 mit mehreren RMB-100M+ Aufträgen aus diesen Regionen).</p>
+    <p><strong>Unit Economics:</strong> Repurchase Rate von Großkunden 78% (FY25), Geekplus operiert 64+ Service Stations und 12 Spare-Parts-Center weltweit. Ein Roboter-System wird typisch zu 40–60% Bruttomarge verkauft, RaaS-Modelle zu 50–70% (höher durch Wartung + Service). Die Kundenakquisitionskosten sinken über die Zeit, da Brand etabliert ist.</p>
+    <div class="source">Quellen: Geekplus IR Press Release Annual Report FY2025 (31.03.2026); Manila Times Geekplus FY25 (31.03.2026); CMB International Research (Aug 2025); Geekplus HKEX-IPO Announcement (09.07.2025); RoboticsTomorrow (Apr 2026); Interact Analysis 2025 Mobile Robot Market Report.</div>
   </div>
+</div>
 
-  <!-- SEKTION 2: BURGGRABEN -->
-  <div class="section" id="s2">
-    <div class="section-header">
-      <div class="section-number">2</div>
-      <div class="section-title">Burggraben & Wettbewerbsvorteile</div>
-      <div class="section-score">Score: 6/10</div>
-    </div>
-    <div class="section-body">
-      <h3>Technologische Tiefe & Proprietary Algorithmen</h3>
-      <p>Der stärkste Wettbewerbsvorteil von Geekplus liegt in seiner proprietären KI-Technologie-Architektur. Die Hyper+ Core Algorithm Platform gehört nach eigenen Angaben zu den fortschrittlichsten Algorithmusplattformen am Markt und unterstützt eine breite Palette von Algorithmustypen sowie die Koordination extrem großer Roboterflotten (über 5.000 Einheiten). Geekplus ist eines der wenigen Unternehmen weltweit, das einen vollständigen KI-Kommerzialisierungskreislauf realisiert hat – von der Sensor-Dateneingabe über die Echtzeit-Optimierung bis zur physischen Ausführung. Diese technische Tiefe ergibt sich aus fast einem Jahrzehnt intensiver R&D-Arbeit und einer Datenbasis aus über 66.000 real eingesetzten Robotern, die kontinuierlich Trainingsdaten liefern.</p>
-      <h3>Skalierungsvorteile & Kundenbeziehungen (Switching Costs)</h3>
-      <p>Einmal installierte AMR-Systeme sind in der Praxis schwer austauschbar: Die tiefe Integration mit bestehenden Warehouse-Management-Systemen (WMS), die Schulung des Personals, die angepassten Layout-Konfigurationen und die laufenden Service-Abhängigkeiten erzeugen mittlere bis hohe Switching Costs für Bestandskunden. Das wachsende RaaS-Modell vertieft diese Kundenbindung durch langfristige Abonnementverträge weiter. Die Tatsache, dass Geekplus Aufträge im Wert von über RMB 100M pro Einzelauftrag gewinnt, unterstreicht die Zufriedenheit der Enterprise-Kundschaft.</p>
-      <h3>Geografische Diversifikation als struktureller Vorteil</h3>
-      <p>Mit 79,5% internationalem Umsatzanteil (H1 2025) ist Geekplus deutlich globaler aufgestellt als chinesische Wettbewerber. Diese Diversifikation reduziert die Abhängigkeit vom volatilen chinesischen Inland-Markt und dient als natürlicher Hedge gegen regionale Konjunkturschwächen. Die frühe Internationalisierung hat Geekplus einen Erfahrungsvorsprung in der globalen Implementierung beschert, den Newcomer nicht einfach replizieren können.</p>
-      <h3>Schwachstellen</h3>
-      <p>Dennoch weist der Burggraben strukturelle Schwächen auf. Im AMR-Kernmarkt ist die Eintrittsbarriere für gut kapitalisierte Konkurrenten (z.B. Amazon Robotics, GreyOrange, Exotec) vergleichsweise niedrig, da die grundlegende AMR-Technologie kein Geheimwissen mehr ist. Die Bruttomarge von 35% liegt deutlich unter dem Niveau reiner Technologieanbieter wie AutoStore (~73%) oder Symbotic, was auf einen nach wie vor starken Hardware-Anteil hinweist. Der Markanteil von 6,2% in einem fragmentierten Markt ist zwar der zweitgrößte nach dem unbekannten Marktführer, aber noch keine dominante Marktposition. Die Abhängigkeit von einzelnen Großprojekten birgt Umsatzvolatilität.</p>
-      <div class="source">Quellen: Geekplus IR-Präsentation H1 2025; CMB International Initiation Report Aug. 2025; Benzinga Analyse Geekplus 13.02.2026; CIC Consulting AMR Market Report 2024/2025</div>
-    </div>
+<!-- SEKTION 2 -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+    <div class="section-score">Score: 7/10</div>
   </div>
-
-  <!-- SEKTION 3: LETZTE HALBJAHRE -->
-  <div class="section" id="s3">
-    <div class="section-header">
-      <div class="section-number">3</div>
-      <div class="section-title">Letzte Berichtsperioden (HKEX Halbjahresberichte)</div>
-      <div class="section-score">Beat-Ratio: 2/2 Perioden</div>
-    </div>
-    <div class="section-body">
-      <div class="alert-box">
-        ⚠️ <strong>Hinweis:</strong> Da Geekplus (2590.HK) an der HKEX notiert ist und erst seit Juli 2024 börsennotiert ist, sind keine finviz.com-Daten verfügbar. Geekplus berichtet halbjährlich (H1 / H2), nicht quartalsweise. Alle Kennzahlen stammen von Geekplus IR, Yahoo Finance, Bamboo Works und CMB International Research (Stand: März 2026). Das nächste Ergebnis (FY2025 Jahresbericht) wird voraussichtlich im März 2026 veröffentlicht.
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Periode</th>
-              <th>Umsatz (RMB)</th>
-              <th>YoY</th>
-              <th>Bruttomarge</th>
-              <th>Adj. EBITDA</th>
-              <th>Nettoverlust (adj.)</th>
-              <th>Auftragseingang</th>
-              <th>Ergebnis vs. Markt</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>H1 2025</strong></td>
-              <td>RMB 1.025B</td>
-              <td class="beat">+31,0%</td>
-              <td class="beat">35,1%</td>
-              <td class="beat">+RMB 11,6M</td>
-              <td class="beat">−RMB 11,9M (−94%)</td>
-              <td>RMB 1,76B (+30%)</td>
-              <td><span class="badge badge-green">Beat</span></td>
-            </tr>
-            <tr>
-              <td><strong>FY2024 (Jahresbericht)</strong></td>
-              <td>RMB 2.41B</td>
-              <td class="neutral">+12,4%</td>
-              <td>~31–33%</td>
-              <td>Negativ</td>
-              <td>−RMB ~550M</td>
-              <td>~RMB 3,1B</td>
-              <td><span class="badge badge-yellow">In-Line</span></td>
-            </tr>
-            <tr>
-              <td><strong>FY2023</strong></td>
-              <td>RMB 2.14B</td>
-              <td class="beat">+42,7%</td>
-              <td>~28%</td>
-              <td>Negativ</td>
-              <td>Hoch</td>
-              <td>~RMB 2,4B</td>
-              <td><span class="badge badge-yellow">Keine Börsennotierung</span></td>
-            </tr>
-            <tr>
-              <td><strong>FY2022</strong></td>
-              <td>RMB 1.50B</td>
-              <td>Basis</td>
-              <td>~26%</td>
-              <td>Negativ</td>
-              <td>Hoch</td>
-              <td>k.A.</td>
-              <td><span class="badge badge-yellow">Keine Börsennotierung</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h3>Analyse der jüngsten Berichte</h3>
-      <p>Der H1 2025 Bericht war ein klarer Meilenstein für Geekplus: Das Unternehmen erzielte erstmals einen positiven Adjusted EBITDA (RMB +11,6M), nachdem noch im gleichen Vorjahreszeitraum ein Verlust von RMB −169,8M ausgewiesen wurde. Dieser Turnaround entspricht einer EBITDA-Verbesserung von rund RMB 181M innerhalb von zwölf Monaten – ein starkes Signal struktureller Profitabilitätsverbesserung. Morgan Stanley signalisierte in einem August 2025 Report, dass das Unternehmen in H2 2025 die Gewinnschwelle (Breakeven) erreicht haben dürfte.</p>
-      <p>Das Management erklärte das Wachstum mit der Vertiefung globaler Marktpräsenz, wachsenden Auftragsvolumina aus dem US-amerikanischen und europäischen Markt sowie der zunehmenden Adoption neuer Produktlinien wie der Tote-to-Person-Lösung. Besonders positiv: Ein Einzelauftrag überschritt erstmals die Marke von RMB 100M, was auf eine steigende Enterprise-Durchdringung hindeutet. Die Marktreaktion auf die FY2025 Auftragsbekanntmachung vom 5. Februar 2026 (Auftragseingang FY2025: RMB 4,1B, +31,7%) war jedoch überraschend negativ (−10%), was auf hohe Markterwartungen schließen lässt.</p>
-      <p><strong>Nächste Ergebnisse:</strong> Der FY2025 Jahresbericht wird voraussichtlich Ende März 2026 veröffentlicht. Der nächste Halbjahresbericht (H1 2026) ist für den 31. August 2026 geplant. Schlüsselfrage: Gelingt der formale Sprung in die IFRS-Profitabilität für FY2025?</p>
-      <div class="source">Quellen: Geekplus H1 2025 Interim Results IR (03.09.2025); Bamboo Works – Geekplus Revenue Update (Feb. 2026); TradingView 2590.HK Earnings; Benzinga "Geekplus 32% Order Growth" (Feb. 2026)</div>
-    </div>
+  <div class="section-body">
+    <p>Der Burggraben ist <strong>real, aber noch in der Aufbauphase</strong> – Geekplus ist Marktführer im fragmentierten globalen AMR-Markt, aber der Markt selbst ist erst ~22,5% penetriert (CIC 2024). Die nächsten 5 Jahre werden darüber entscheiden, ob Geekplus zum dominanten Branchenstandard wird oder Marktanteile an spezialisierte Wettbewerber verliert.</p>
+    <h3>1. Globale AMR-Marktführerschaft (7 Jahre in Folge)</h3>
+    <p>Laut Interact Analysis 2025 Mobile Robot Market Report ist Geekplus weltweit Nr. 1 im AMR-Marktanteil (Schätzung 15–18% globaler AMR-Markt). Marktposition besonders dominant im „Shelf-to-Person"-Segment. Diese Markenposition hat sich über 7 Jahre etabliert – jeder neue Wettbewerber muss erst Referenzen aufbauen, was 2–3 Jahre dauert.</p>
+    <h3>2. Switching Costs durch Software-Integration</h3>
+    <p>Ein Geekplus-Roboter-System ist tief in das Warehouse-Management-System (WMS) eines Kunden integriert. Wechsel zu Wettbewerber bedeutet typisch 6–12 Monate Re-Implementation, Engineering-Zeit, Risiko für laufende Operations. <strong>Repurchase-Rate von 78%</strong> bei Großkunden bestätigt das. Add-on-Aufträge dominieren: bestehende Kunden erweitern ihre Roboter-Flotten.</p>
+    <h3>3. Full-Stack-Technologie (Hardware + Software + AI)</h3>
+    <p>Geekplus ist eines weniger Unternehmen, das AMR-Hardware, Steuerungs-Software (Robot Matrix), Algorithmen (Hyper+ Core) und ab 2026 auch Humanoide aus einer Hand entwickelt. <strong>Embodied Intelligence</strong> ist die strategische Differenzierung 2026+: Roboter verstehen ihre Umgebung physisch (nicht nur via vorprogrammierten Pfaden) und können flexibel agieren. Gino 1 Humanoid ist eines der ersten kommerziell verfügbaren Humanoiden für Warehouse-Einsatz weltweit.</p>
+    <h3>4. Globales Service-Netzwerk</h3>
+    <p>64+ Service Stations + 12 Spare-Parts-Center + 305+ Engineers weltweit (Ende 2024-Stand, mittlerweile höher). Das ist ein <strong>operativer Burggraben</strong> – Wettbewerber wie chinesische AMR-Startups haben kein vergleichbares globales Service-Netzwerk. Für globale Enterprise-Kunden (DHL, Walmart) ist Service-Coverage ein entscheidendes Kaufkriterium.</p>
+    <h3>5. Scarcity-Value als einziger börsennotierter AMR-Pure-Play in HK</h3>
+    <p>CMB International Research Argument: Geekplus ist die <strong>einzige reine AMR-Aktie auf der HKEX</strong>. Investoren, die Exposure zur Warehouse-Automation-Story wollen, haben kaum Alternativen. Das stützt die Bewertung strukturell, kann sich aber durch zukünftige IPOs (z.B. Quicktron, Hai Robotics) verändern.</p>
+    <p><strong>Was den Burggraben schwächt:</strong> (1) <strong>Markt-Fragmentierung:</strong> Symbotic (US, Walmart-Partner), Locus Robotics (US), AutoStore (NO), Quicktron (CN), Hai Robotics (CN), Kuka, ABB konkurrieren in unterschiedlichen Segmenten. (2) <strong>Humanoid-Race intensiv:</strong> Figure AI, 1X, Apptronik, Tesla Optimus, Agility Robotics drängen alle in Industrial-Humanoid-Markt – Geekplus' Gino 1 hat First-Mover-Advantage im Warehouse-Segment, aber der Wettbewerb wird in 2027/28 intensiv. (3) <strong>Embodied-AI ist noch frühe Phase:</strong> Die These „Roboter mit echtem Verständnis der Umgebung" ist nicht abschließend technologisch validiert für scaled Operations.</p>
+    <div class="source">Quellen: Interact Analysis 2025 Mobile Robot Market Report; CMB International Research Geekplus Initiation (Aug 2025); Geekplus FY2025 Annual Report (31.03.2026); RoboticsTomorrow Geekplus Profile (Apr 2026); CIC Warehouse Automation Market Report 2024.</div>
   </div>
+</div>
 
-  <!-- SEKTION 4: WACHSTUM -->
-  <div class="section" id="s4">
-    <div class="section-header">
-      <div class="section-number">4</div>
-      <div class="section-title">Wachstumseinordnung</div>
-      <div class="section-score">Score: 8/10</div>
-    </div>
-    <div class="section-body">
-      <h3>Umsatzwachstum (Historisch & Ausblick)</h3>
-      <p>Geekplus zeigt eine beeindruckende Wachstumstrajektorie: Der Umsatz stieg von RMB 1,5B (2022) über RMB 2,14B (2023) auf RMB 2,41B (2024) – mit FY2025E bei RMB 3,14–3,18B entspricht dies einer 2-Jahres-CAGR von ~45% (2022–2024) und einer Beschleunigung im Jahr 2025 auf +31% YoY. 14 Analysten von Yahoo Finance prognostizieren für 2025 ein Wachstum von ~34%, während die eigene Management-Guidance von +30–32% ausgeht. CMB International schätzt eine Revenue-CAGR von 34% für 2024–2027E. Das Wachstum ist strukturell getrieben – nicht durch M&A oder Accounting-Effekte, sondern durch organisches Auftragsvolumen und neue Markterschließung.</p>
-      <h3>Segmentwachstum</h3>
-      <p>Das Kerngeschäft (AMR-Lösungsverkauf) wächst im Einklang mit dem Gesamtumsatz. Das RaaS-Segment ist noch vergleichsweise klein, aber strategisch bedeutsam: Es wandelt einmalige Hardwareerlöse in wiederkehrende Serviceerträge mit höherer Vorhersehbarkeit um. Der Auftragseingang von RMB 4,1B in FY2025 (+31,7%) übertrifft den Umsatz signifikant, was einen gut gefüllten Auftragsvorrat für 2026 impliziert.</p>
-
-      <h3>Geografische Umsatzverteilung (FY2024 / H1 2025)</h3>
-      <div class="geo-grid">
-        <div class="geo-card">
-          <div class="geo-region">Europa</div>
-          <div class="geo-pct">~30%</div>
-          <div class="geo-note">Stärkstes Wachstum, UK/DE/FR</div>
-        </div>
-        <div class="geo-card">
-          <div class="geo-region">Nordamerika</div>
-          <div class="geo-pct">~25%</div>
-          <div class="geo-note">US-Expansion läuft, Tarif-Risiko</div>
-        </div>
-        <div class="geo-card">
-          <div class="geo-region">Asien-Pazifik (ex-China)</div>
-          <div class="geo-pct">~24%</div>
-          <div class="geo-note">Japan, Südkorea, Singapur stark</div>
-        </div>
-        <div class="geo-card">
-          <div class="geo-region">China (Inland)</div>
-          <div class="geo-pct">~21%</div>
-          <div class="geo-note">Stabilisiert, hoher Wettbewerb</div>
-        </div>
-      </div>
-      <p style="margin-top:8px;">Mit rund 79,5% internationalem Umsatzanteil (H1 2025) unterscheidet sich Geekplus fundamental von seinen chinesischen Wettbewerbern und nutzt die globale Nachfrage nach Automatisierungslösungen. Europa und Nordamerika sind die Wachstumsmotoren – und gleichzeitig die Regionen mit den höchsten geopolitischen Risiken für ein chinesisches Unternehmen.</p>
-
-      <h3>Marktgröße & Penetrationsrate</h3>
-      <p>Der globale AMR-Lösungsmarkt wird laut CIC Consulting bis 2029 auf RMB 162B anwachsen (CAGR >33% von 2024–2029). Die AMR-Penetrationsrate im Gesamt-Lagerautomatisierungsmarkt lag 2024 bei nur 8,2% – bis 2029 soll sie auf über 20% steigen. Geekplus hält nach eigenen Angaben 6,2% des globalen AMR-Marktes (2024) und ist damit die Nummer 2 weltweit. Bei einer sich auf über 20% beschleunigenden Penetrationsrate ist das adressierbare Marktvolumen erheblich.</p>
-      <div class="source">Quellen: Geekplus H1 2025 IR; Bamboo Works FY2025 Revenue Guidance Update (Feb. 2026); CIC Consulting AMR Market Report (2025); CMB International Research Aug. 2025; Yahoo Finance Analyst Consensus</div>
-    </div>
+<!-- SEKTION 3 -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">Letzte Halbjahres-Ergebnisse</div>
+    <div class="section-score">FY25: Profitabilität erreicht</div>
   </div>
-
-  <!-- SEKTION 5: BEWERTUNG -->
-  <div class="section" id="s5">
-    <div class="section-header">
-      <div class="section-number">5</div>
-      <div class="section-title">Bewertung & Multiples</div>
-      <div class="section-score">Score: 5/10</div>
+  <div class="section-body">
+    <div class="alert-box">⚠️ <strong>Hinweis:</strong> Geekplus (2590.HK) berichtet <strong>halbjährlich</strong> (H1/H2), nicht quartalsweise. IPO erst Juli 2025, daher liegen nur H1 2025 (Interim) und FY2025 (audited) vor. Nächstes Ergebnis: H1 2026 voraussichtlich Ende August 2026. Datenquellen: Geekplus IR, Bamboo Works, CMB International, Yahoo Finance.</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Periode</th><th>Revenue</th><th>YoY</th><th>GP-Margin</th><th>Adj. Net Loss/Profit</th><th>Orders</th><th>Marktreaktion</th></tr></thead>
+        <tbody>
+          <tr><td>H1 2024</td><td>RMB 0,78 Mrd.</td><td>—</td><td>~32%</td><td class="miss">–RMB 170 Mio. (Adj. EBITDA)</td><td>RMB 1,35 Mrd.</td><td>n/a (pre-IPO)</td></tr>
+          <tr><td>H2 2024 (impl.)</td><td>RMB 1,63 Mrd.</td><td>—</td><td>~34%</td><td class="miss">~–RMB 100 Mio.</td><td>RMB 1,79 Mrd.</td><td>n/a</td></tr>
+          <tr><td><strong>H1 2025 (Interim)</strong></td><td><strong>RMB 1,025 Mrd.</strong></td><td class="beat"><strong>+31,0%</strong></td><td class="beat"><strong>35,1%</strong></td><td class="beat"><strong>–RMB 11,9M (–94% YoY)</strong></td><td class="beat">RMB 1,76 Mrd. (+30,1%)</td><td>+5% post-IPO</td></tr>
+          <tr><td><strong>FY 2025 (audited)</strong></td><td class="beat"><strong>RMB 3,171 Mrd.</strong></td><td class="beat"><strong>+31,6%</strong></td><td class="beat"><strong>35,5%</strong></td><td class="beat"><strong>+RMB 43,8M (erstmals positiv!)</strong></td><td class="beat">RMB 4,137 Mrd. (+31,7%)</td><td class="miss">–25% seit März</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="section-body">
-      <div class="alert-box">
-        ⚠️ <strong>Hinweis:</strong> Da Geekplus (2590.HK) an der HKEX notiert und noch nicht IFRS-profitabel ist, sind klassische P/E-Multiples nicht sinnvoll anwendbar. Bewertung erfolgt primär über EV/Sales (Price-to-Sales), EV/Gross Profit und den Vergleich zu Wachstums-Peers. Daten basieren auf Geekplus IR, Pitchbook, TradingView, Investing.com (Stand: März 2026).
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Kennzahl</th>
-              <th>Geekplus (aktuell)</th>
-              <th>Anmerkung</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Kurs</td>
-              <td>HK$23.50</td>
-              <td>Schlusskurs 03.03.2026</td>
-            </tr>
-            <tr>
-              <td>Marktkapitalisierung</td>
-              <td>~HK$32B (~USD 4,1B)</td>
-              <td>~RMB 30B</td>
-            </tr>
-            <tr>
-              <td>FY2025E Umsatz</td>
-              <td>RMB 3,16B (~USD 454M)</td>
-              <td>Mgmt-Guidance RMB 3,14–3,18B</td>
-            </tr>
-            <tr>
-              <td>EV/Sales (FY2025E)</td>
-              <td>~9,5x</td>
-              <td>Hohe Wachstumsprämie eingepreist</td>
-            </tr>
-            <tr>
-              <td>EV/Sales (FY2026E ~+34%)</td>
-              <td>~7,0x</td>
-              <td>Bei Analysten-CAGR 34%</td>
-            </tr>
-            <tr>
-              <td>EV/Gross Profit (FY2025E)</td>
-              <td>~27x</td>
-              <td>Bruttomarge ~35%, GP ~USD 159M</td>
-            </tr>
-            <tr>
-              <td>P/E (TTM)</td>
-              <td>N/M (neg. EPS)</td>
-              <td>Noch nicht IFRS-profitabel</td>
-            </tr>
-            <tr>
-              <td>EPS (TTM)</td>
-              <td>−HK$0.28</td>
-              <td>Verlust schrumpft stark</td>
-            </tr>
-            <tr>
-              <td>Analysten Zielkurs (Ø)</td>
-              <td>HK$34.91</td>
-              <td>+46% Upside vom aktuellen Kurs</td>
-            </tr>
-            <tr>
-              <td>Beta</td>
-              <td>1.40</td>
-              <td>Deutlich überdurchschnittliche Volatilität</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <p>Mit einem EV/Sales von ~9,5x (FY2025E) ist Geekplus keine billige Aktie. Die Bewertung spiegelt die hohen Wachstumserwartungen wider (30–34% Umsatz-CAGR) sowie das Potenzial zur Profitabilitätswende. Zum Vergleich: AutoStore, das profitabelste Unternehmen im Peer-Vergleich, wird ebenfalls bei niedrigen EV/Sales-Multiples gehandelt, hat aber 73% Bruttomarge. Symbotic, das ähnlich wie Geekplus noch investiert, wird bei einem Forward P/E von über 100x bewertet. Die Prämie für Geekplus erscheint moderat angesichts der Wachstumsrate, birgt aber bei einer Wachstumsverlangsamung oder weiterem Profitabilitätsaufschub erhebliches Bewertungsrisiko.</p>
-      <p>Der aktuelle Kurs von HK$23,50 liegt rund 31% unter dem All-time-High von HK$33,90 (Oktober 2025) und rund 47% über dem IPO-Preis von HK$15,98 (Juli 2024). Die starke Korrektur in den letzten Wochen (−24% in einem Monat) spiegelt Marktskepsis nach dem Kursrückgang infolge der Auftragsbekanntmachung wider und könnte eine Einstiegsgelegenheit darstellen – oder auf nachhaltige Neubewertungsrisiken hinweisen.</p>
-      <div class="source">Quellen: TradingView 2590.HK (März 2026); Investing.com 2590 Key Statistics; Pitchbook Geekplus Profile; Bamboo Works (Feb. 2026); Yahoo Finance Analyst Consensus</div>
-    </div>
+    <h3>FY 2025 (publiziert 31.03.2026): Historischer Profitabilitäts-Durchbruch</h3>
+    <p>FY 2025 markiert den <strong>Inflection Point</strong>, auf den Investoren seit dem IPO gewartet hatten: <strong>Adj. Net Profit zum ersten Mal positiv mit RMB 43,8 Mio.</strong> (vs. signifikanter Verlust 2024) und <strong>positiver Operating Cashflow von RMB 85,7 Mio.</strong>. Revenue +31,6% auf RMB 3,171 Mrd., Gross Profit +34,4% auf RMB 1,125 Mrd., Gross Margin auf 35,5% (von 34,6%). Total Orders +31,7% auf RMB 4,137 Mrd. – das ist ein Forward-Indicator für 2026/27.</p>
+    <p><strong>Reflektion der bestehenden Skepsis im Markt:</strong> Trotz dieses fundamentalen Durchbruchs ist die Aktie <strong>seit März 2026 um ~25%</strong> gefallen (von ~HKD 29 auf HKD 21,58). Warum? Möglicherweise: (a) Markt erwartete höhere Profitabilität, (b) breitere Schwäche bei chinesischen Tech-IPOs, (c) Lockup-Periode-Ablauf (Insiderverkäufe), (d) Konkurrenz-Druck durch Humanoid-Startups. Diese Diskrepanz ist zentral für die Bewertungs-These (Sektion 5).</p>
+    <h3>Margenstruktur</h3>
+    <p>Wichtigste Erkenntnis: <strong>Übersee-Märkte (75% des Revenue) haben 46,6% Gross Margin</strong> – deutlich höher als Inland-China. Das ist der strategisch wichtigste Datenpunkt: Geekplus wächst im hochmargigen Segment, nicht im kompetitiven Inland-Markt. Adj. EBITDA-Marge FY25 ~5–7% (Schätzung), Pfad zu 15%+ langfristig.</p>
+    <p>Management-Statement: <em>„2026 will mark a new journey of high-quality growth, driven by the dual technological engines of embodied intelligence and AI"</em>. Strategische Priorität 2026: Skalierung Gino 1 Humanoid + AI-Embodied-Intelligence-Commercialization.</p>
+    <div class="source">Quellen: Geekplus IR Annual Results FY2025 (31.03.2026); Geekplus Interim Results H1 2025 (29.08.2025); Manila Times (31.03.2026); RoboticsTomorrow (Apr 2026); Morningstar Geekplus News (31.03.2026); Yahoo Finance 2590.HK (Mai 2026); TradingView 2590 (Mai 2026).</div>
   </div>
+</div>
 
-  <!-- SEKTION 6: CASHFLOW -->
-  <div class="section" id="s6">
-    <div class="section-header">
-      <div class="section-number">6</div>
-      <div class="section-title">Cashflow, Margen & Kapitalqualität</div>
-      <div class="section-score">Score: 5/10</div>
-    </div>
-    <div class="section-body">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Kennzahl</th>
-              <th>H1 2024</th>
-              <th>H1 2025</th>
-              <th>Veränderung</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Umsatz</td>
-              <td>RMB 782M</td>
-              <td>RMB 1.025B</td>
-              <td class="beat">+31,0%</td>
-            </tr>
-            <tr>
-              <td>Bruttogewinn</td>
-              <td>RMB ~252M (~32%)</td>
-              <td>RMB 360M</td>
-              <td class="beat">+43,1%</td>
-            </tr>
-            <tr>
-              <td>Bruttomarge</td>
-              <td>~32,2%</td>
-              <td>35,1%</td>
-              <td class="beat">+~3pp</td>
-            </tr>
-            <tr>
-              <td>Adj. EBITDA</td>
-              <td>−RMB 170M</td>
-              <td>+RMB 11,6M</td>
-              <td class="beat">Turnaround</td>
-            </tr>
-            <tr>
-              <td>EBITDA-Marge (adj.)</td>
-              <td>−21,7%</td>
-              <td>+1,1%</td>
-              <td class="beat">+22,8pp</td>
-            </tr>
-            <tr>
-              <td>Adj. Nettoverlust</td>
-              <td>−RMB ~200M</td>
-              <td>−RMB 11,9M</td>
-              <td class="beat">−94%</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <h3>Profitabilitätswende: Strukturell oder zyklisch?</h3>
-      <p>Die Entwicklung von H1 2024 auf H1 2025 zeigt eine dramatische Verbesserung der Profitabilitätslage. Der Adj. EBITDA-Sprung von −RMB 170M auf +RMB 11,6M entspricht einer Verbesserung von rund RMB 181M innerhalb eines Jahres – getrieben durch operative Hebelwirkung (höherer Umsatz bei weitgehend stabiler Kostenbasis), Margenverbesserung im Produktmix und Effizienzgewinne. Die FY2025E Guidance (non-IFRS Nettogewinn RMB 25–45M) deutet auf eine Beschleunigung in H2 2025 hin, wie auch Morgan Stanley prognostiziert hatte.</p>
-      <p>Geekplus ist kapitalintensiver als reine Softwareunternehmen: Roboterhardware erfordert Produktionskapital, Lagerbestände und Servicenetzwerke. Verschuldungsdaten sind aus öffentlich zugänglichen Quellen eingeschränkt; das Unternehmen verfügte nach dem IPO (Bruttoerlöse ~HK$1,5B) über eine solide Liquiditätsbasis. Es werden keine Dividenden ausgeschüttet – sämtliche Mittel fließen in Wachstum und R&D.</p>
-      <p>Das kritische Risiko: Investitionen in die neue Embodied Intelligence-Sparte (Tochtergesellschaft gegründet Juli 2025, "Geek+ Brain" Modell lanciert August 2025) könnten die erreichte EBITDA-Schwelle im Jahr 2026 unter Druck setzen. Die Herausforderung besteht darin, das profitable Kerngeschäft zu schützen und gleichzeitig die zukunftsträchtigen, aber verlustreichen Investitionen in neue Technologiefelder sorgfältig zu dosieren.</p>
-      <div class="source">Quellen: Geekplus H1 2025 Interim Results PR (03.09.2025); Roboticsandautomationnews.com Sept. 2025; Benzinga Geekplus Analysis Feb. 2026; Bamboo Works FY2025 Guidance (Feb. 2026)</div>
-    </div>
+<!-- SEKTION 4 -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">Wachstumseinordnung</div>
+    <div class="section-score">Score: 8/10</div>
   </div>
-
-  <!-- SEKTION 7: PEER-VERGLEICH -->
-  <div class="section" id="s7">
-    <div class="section-header">
-      <div class="section-number">7</div>
-      <div class="section-title">Peer-Vergleich</div>
-      <div class="section-score">Score: 6/10</div>
+  <div class="section-body">
+    <p>Geekplus' Wachstumsprofil ist <strong>strukturell exzellent</strong>. CMB International Research prognostiziert <strong>34% Revenue-CAGR 2024–2027E</strong>, was die historische Trajektorie (RMB 2,14B → 2,41B → 3,17B in 2023→2024→2025) bestätigt. Konsens-Erwartung für FY26: RMB 4,1–4,3 Mrd. (+30%), FY27: RMB 5,3–5,7 Mrd. (+30%).</p>
+    <h3>Segment-Wachstum FY25</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Segment / Region</th><th>Revenue FY25</th><th>YoY</th><th>Bemerkung</th></tr></thead>
+        <tbody>
+          <tr><td>Non-Mainland China (Übersee)</td><td class="beat">RMB 2,387 Mrd.</td><td class="beat">~+40%</td><td>75% Anteil, GM 46,6%</td></tr>
+          <tr><td>Mainland China</td><td>RMB 0,784 Mrd.</td><td>+12%</td><td>25% Anteil, niedrigere Marge</td></tr>
+          <tr><td>Americas (Submarkt)</td><td>n/a (in Übersee)</td><td class="beat">+50%</td><td>Schlüsselregion mit stärkstem Momentum</td></tr>
+          <tr><td>Subscription / RaaS</td><td>n/a Detail</td><td class="beat">+90%</td><td>Strategisch wichtig: höher-marginale Recurring Revenue</td></tr>
+          <tr><td>Neue Kundenakquise</td><td>+100 Kunden FY25</td><td>—</td><td>950+ Total, 65+ Forbes Global 500</td></tr>
+          <tr style="background:rgba(20,184,166,0.08);"><td><strong>Gesamtgruppe</strong></td><td><strong>RMB 3,171 Mrd.</strong></td><td><strong>+31,6%</strong></td><td>Orders +31,7% bestätigen Forward-Trajektorie</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="section-body">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Unternehmen</th>
-              <th>Börse</th>
-              <th>Umsatz (letztes GJ)</th>
-              <th>Umsatzwachstum</th>
-              <th>Bruttomarge</th>
-              <th>EBITDA-Marge</th>
-              <th>Market Cap</th>
-              <th>Fokus</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style="background:rgba(20,184,166,0.06);">
-              <td><strong>Geekplus (2590.HK)</strong></td>
-              <td>HKEX</td>
-              <td>RMB 2,41B / ~$329M</td>
-              <td class="beat">+31% (H1'25)</td>
-              <td class="neutral">35%</td>
-              <td class="neutral">~1% (H1'25)</td>
-              <td>~USD 4,1B</td>
-              <td>AMR, Shelf/Tote-to-Person</td>
-            </tr>
-            <tr>
-              <td><strong>Kion Group (KGX.DE)</strong></td>
-              <td>XETRA</td>
-              <td>€11,5B / ~$12,4B</td>
-              <td class="neutral">+0,6%</td>
-              <td class="neutral">~25%</td>
-              <td class="beat">~16,6%</td>
-              <td>~€8,5B</td>
-              <td>Stapler + Dematic (WA)</td>
-            </tr>
-            <tr>
-              <td><strong>AutoStore (AUTO.OL)</strong></td>
-              <td>Oslo</td>
-              <td>USD 601M</td>
-              <td class="miss">−8% (FY24)</td>
-              <td class="beat">73%</td>
-              <td class="beat">47%</td>
-              <td>~NOK 15B / ~USD 1,4B</td>
-              <td>Cube Storage AS/RS</td>
-            </tr>
-            <tr>
-              <td><strong>Symbotic (SYM)</strong></td>
-              <td>NASDAQ</td>
-              <td>~USD 1,8B</td>
-              <td class="beat">+35% (Q1 FY25)</td>
-              <td class="neutral">~10-12%</td>
-              <td class="neutral">~1%</td>
-              <td>~USD 5B</td>
-              <td>Retail WA, Walmart-fokussiert</td>
-            </tr>
-            <tr>
-              <td><strong>Zebra Technologies (ZBRA)</strong></td>
-              <td>NASDAQ</td>
-              <td>USD 4,98B</td>
-              <td class="neutral">+8,7% (FY24)</td>
-              <td class="beat">~48%</td>
-              <td class="beat">~21%</td>
-              <td>~USD 15B</td>
-              <td>Enterprise Barcode, AMR (Fetch)</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h3>Qualitative Einordnung</h3>
-      <p>Im Vergleich zu seinen Peers nimmt Geekplus eine einzigartige Nische ein: Als reiner AMR-Pure-Play mit globaler Reichweite und chinesischer Kostenstruktur konkurriert das Unternehmen sowohl gegen westliche Qualitätsanbieter (AutoStore, Symbotic) als auch gegen etablierte Industriekonglomerate (Kion/Dematic). Im Wachstumsvergleich schlägt Geekplus alle Peers deutlich: 31% Umsatzwachstum übertrifft Kion (+0,6%), Zebra (+8,7%) und AutoStore (−8%) bei Weitem, und liegt auch über Symbotic (~35%) – bei allerdings deutlich niedrigerer Marge.</p>
-      <p>AutoStore ist das profitabelste Unternehmen der Gruppe (73% Bruttomarge, 47% EBITDA-Marge) und zeigt, welches Margen-Potenzial ein Technologie-Burggraben im AMR/ASRS-Bereich ermöglichen kann. Kion/Dematic ist das diversifizierteste und umsatzstärkste Unternehmen, aber wächst kaum und weist eine wesentlich niedrigere Bruttomarge auf. Zebra ist das reifste und defensivste Unternehmen mit solidem Cashflow. Symbotic ist Geekplus am ähnlichsten in Bezug auf Wachstumsrate und Profitabilitätsphase, fokussiert aber stark auf den US-Retailmarkt (Walmart-Abhängigkeit ~70% des Umsatzes) – ein wesentlich höheres Konzentrationsrisiko als bei Geekplus.</p>
-      <div class="source">Quellen: AutoStore Q4 2024 / Q1-2 2025 Results; Kion Group Pitchbook / TradingView; Zebra Technologies FY2024 Earnings Release; Symbotic Q2 2025 Earnings; Pitchbook, Investing.com (Mrz. 2026)</div>
+    <h3>Geografische Verteilung FY25</h3>
+    <div class="geo-grid">
+      <div class="geo-card"><div class="geo-region">EMEA</div><div class="geo-pct">~30%</div><div class="geo-note">DHL, Henkel, Maersk; Düsseldorf Office</div></div>
+      <div class="geo-card"><div class="geo-region">APAC ex-China</div><div class="geo-pct">~25%</div><div class="geo-note">Japan, Korea, Singapur; starke Penetration</div></div>
+      <div class="geo-card"><div class="geo-region">Americas</div><div class="geo-pct">~20%</div><div class="geo-note">USA + Latam, +50% Wachstum FY25</div></div>
+      <div class="geo-card"><div class="geo-region">Mainland China</div><div class="geo-pct">~25%</div><div class="geo-note">JD, Cainiao, SF Express</div></div>
     </div>
+    <h3>TAM-Story</h3>
+    <p>Globaler Warehouse-Automation-Markt: <strong>RMB 471 Mrd. (2024) → RMB 804 Mrd. (2029E)</strong> (CIC, 11,3% CAGR). Penetration aktuell nur <strong>22,5%</strong> – massive Headroom. AMR-Segment innerhalb der Automation: 8,2% (2024) → Prognose-Penetration 33% bis 2029 (CIC). Das impliziert einen <strong>AMR-TAM von RMB 162 Mrd. in 2029</strong> – Geekplus' Adressabarkeit-Anteil mit 15–18% globalem Marktanteil ergäbe ~RMB 24–29 Mrd. langfristig. Aktueller Umsatz RMB 3,17 Mrd. = ~10% des 2029-TAM-Potenzials. Headroom für 8–10× Skalierung.</p>
+    <p><strong>Embodied Intelligence + Humanoid-Story:</strong> Gino 1 Humanoid Robot ist die nächste Wachstumsstufe. Wenn auch nur ein kleiner Anteil der globalen Warehouse-Workforce (~25 Mio. Menschen weltweit) durch Humanoide ergänzt wird, ist das ein potenziell zehnstelliger Markt. Aktuell sind die Stückkosten und die Robustheit der Humanoiden im Sub-skaligen Bereich – kommerzielle Großmengen voraussichtlich 2027/28.</p>
+    <p><strong>Reifegrad:</strong> <strong>Hyper-Growth.</strong> +31% Revenue-Wachstum bei beginnender Profitabilität ist eine seltene Kombination. Vergleichbar mit Symbotic 2022 oder AutoStore 2021. Wachstum ist „echt" (organisch, nicht durch M&amp;A inflationiert).</p>
+    <div class="source">Quellen: Geekplus FY2025 Annual Report (31.03.2026); CMB International Research Initiation (Aug 2025); CIC Warehouse Automation Market Report 2024; Manila Times (31.03.2026).</div>
   </div>
+</div>
 
-  <!-- SEKTION 8: NEWS -->
-  <div class="section" id="s8">
-    <div class="section-header">
-      <div class="section-number">8</div>
-      <div class="section-title">Aktuelle News & Events (≤ 3 Monate)</div>
-      <div class="section-note">Quellen ≤ 3 Monate</div>
-    </div>
-    <div class="section-body">
-      <h3>Ebene 1: Unternehmen</h3>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">05.02.2026 – FY2025 Auftragseingang +31,7% auf RMB 4,1B <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">Geekplus meldete einen FY2025 Auftragseingang von RMB 4,1B, ein Plus von 31,7% YoY – getrieben durch geografische Expansion und neue Branchenverticals. Der Auftragsbestand stützt das Umsatzwachstum für 2026. Trotz der positiven Zahlen fiel der Kurs um ~10%, da der Markt eine noch stärkere Beschleunigung erwartet hatte. Quelle: TipRanks / Benzinga, 05.02.2026.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">13.02.2026 – Deutsche Bank initiiert Coverage mit Buy-Rating <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">Deutsche Bank begann die Coverage von Geekplus (2590.HK) mit einer Kaufempfehlung. Der genaue Zielkurs wurde nicht öffentlich kommuniziert, unterstreicht aber das wachsende institutionelle Interesse. Quelle: Investing.com, TipRanks, 13.02.2026.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-yellow"></div>
-        <div>
-          <div class="event-label">Sept. 2025 – FY2025E Guidance: Umsatz RMB 3,14–3,18B, nahezu breakeven <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">Das Unternehmen bestätigte Umsatzerwartungen von +30–32% und nennt auf Non-IFRS-Basis erstmals ein positives Nettoergebnis von RMB 25–45M. Der Jahresverlust schrumpft um 96–99% auf RMB 10–30M. Quelle: Bamboo Works, Feb. 2026.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">Aug. 2025 – Launch "Geek+ Brain": Embodied Intelligence für Lagerumgebungen <span class="badge badge-blue">Strategisch</span></div>
-          <div class="event-text">Geekplus lancierte "Geek+ Brain", das nach eigenen Angaben erste Embodied Intelligence Basismodell speziell für Lagerlogistik. Im Juli 2025 wurde eine eigenständige Tochtergesellschaft für Embodied Intelligence gegründet. Quelle: Geekplus IR, Roboticsandautomationnews.com, Sept. 2025.</div>
-        </div>
-      </div>
-
-      <h3>Ebene 2: Branche</h3>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">2025/2026 – Kion/Dematic kooperiert mit NVIDIA & Accenture für Physical AI <span class="badge badge-yellow">Neutral</span></div>
-          <div class="event-text">Kion Group (durch Dematic) integriert NVIDIA-basierte Physical-AI-Lösungen in ihre Warehouse-Automatisierungs-Plattform. Dies signalisiert eine branchenweite Beschleunigung der KI-Integration – eine Entwicklung, von der Geekplus als AI-nativer Anbieter profitieren kann. Quelle: Roboticsandautomationnews.com, Apr. 2025.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-yellow"></div>
-        <div>
-          <div class="event-label">2025 – Symbotic übernimmt Walmart Advanced Systems & Robotics für USD 200M <span class="badge badge-yellow">Neutral/Wettbewerb</span></div>
-          <div class="event-text">Symbotic stärkt seine Marktposition im US-Retailmarkt durch die Übernahme von Walmart's internem Robotik-Arm für $200M – mit gleichzeitiger $520M-Investitionszusage von Walmart. Für Geekplus ist dies primär wettbewerbsrelevant in Nordamerika. Quelle: Roboticsandautomationnews.com, 2025.</div>
-        </div>
-      </div>
-
-      <h3>Ebene 3: Makro</h3>
-      <div class="event-item">
-        <div class="event-dot dot-red"></div>
-        <div>
-          <div class="event-label">2025/2026 – US-China Handelsstreit: 55% Gesamtzölle auf chinesische Waren <span class="badge badge-red">Negativ</span></div>
-          <div class="event-text">Die Trump-Administration hat 55% Gesamtzölle auf chinesische Importe (25% Sektion 301 + 20% IEEPA + 10% Reziprokal) verhängt. Obwohl Geekplus in erster Linie Dienstleistungen und Systeme in Zielländern installiert, könnten Komponenten-Importe betroffen sein. Das Wahrnehmungsrisiko für ein chinesisches Unternehmen im US-Markt ist erhöht. Quelle: Cathay Bank US-China Report 2025, Paul Hastings LLP Geopolitical Outlook 2026.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">2025/2026 – Arbeitskräftemangel treibt globale Automatisierungsnachfrage <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">Anhaltender struktureller Arbeitskräftemangel in der Logistik und im E-Commerce-Fulfillment in Europa und Nordamerika beschleunigt die Automatisierungsdurchdringung. Warehouse-Automatisierungsmarkt soll von USD 25,2B (2025) mit 15,1% CAGR bis 2032 wachsen. Quelle: MetaStat Insight Warehouse Automation Market Report, 2025.</div>
-        </div>
-      </div>
-      <div class="source">Quellen: Benzinga Feb. 2026; Investing.com / TipRanks Feb. 2026; Geekplus IR Aug./Sept. 2025; Roboticsandautomationnews.com 2025; Cathay Bank US-China Report H2 2025</div>
-    </div>
+<!-- SEKTION 5 -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <div class="section-title">Bewertung &amp; Multiples</div>
+    <div class="section-score">Score: 7/10</div>
   </div>
-
-  <!-- SEKTION 9: TECHNISCHE ANALYSE -->
-  <div class="section" id="s9">
-    <div class="section-header">
-      <div class="section-number">9</div>
-      <div class="section-title">Technische Analyse</div>
-      <div class="section-score">Score: 4/10</div>
+  <div class="section-body">
+    <div class="alert-box">⚠️ <strong>Hinweis:</strong> 2590.HK notiert an HKEX – keine finviz.com-Daten. Kennzahlen aus Yahoo Finance, Investing.com, Geekplus IR und CMB International Research Initiation Report (Aug 2025). Stand: Mai 2026.</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Multiple</th><th>Aktuell</th><th>FY2026E</th><th>Peer-Median</th><th>Bewertung</th></tr></thead>
+        <tbody>
+          <tr><td>EV/Sales (TTM)</td><td>~5x</td><td>~3,5x</td><td>~6x (Symbotic 12x, AutoStore 7x)</td><td class="beat">Günstig</td></tr>
+          <tr><td>P/Sales (FWD)</td><td>~4x</td><td>~3,0x</td><td>~5x</td><td class="beat">Günstig</td></tr>
+          <tr><td>EV/EBITDA (FWD 2027E)</td><td>~40x</td><td>~25x</td><td>~30x</td><td class="neutral">Fair</td></tr>
+          <tr><td>P/B</td><td>~3x</td><td>~3x</td><td>~5x</td><td class="beat">Günstig</td></tr>
+          <tr><td>CMB International PT</td><td colspan="2">HKD 26,70 (7,7× 2026E P/Sales)</td><td>Initiation Aug 2025</td><td class="beat">+24% Upside</td></tr>
+          <tr><td>Konsens-PT (Investing.com)</td><td colspan="2">HKD 34,66 Average, HKD 53,54 High</td><td>15 Buy, 0 Sell</td><td class="beat">+61% Upside</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="section-body">
-      <!-- Mini-KPI-Grid für technische Daten -->
-      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom: 16px;">
-        <div class="kpi-card">
-          <div class="kpi-label">Kurs</div>
-          <div class="kpi-value orange">HK$23.50</div>
-          <div class="kpi-sub">03.03.2026</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">SMA 20</div>
-          <div class="kpi-value red">~HK$26.50</div>
-          <div class="kpi-sub">Kurs darunter</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">SMA 50</div>
-          <div class="kpi-value red">~HK$28.00</div>
-          <div class="kpi-sub">Kurs darunter</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">SMA 200</div>
-          <div class="kpi-value green">~HK$22.00</div>
-          <div class="kpi-sub">Knapp darüber</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">RSI (14)</div>
-          <div class="kpi-value red">~28–32</div>
-          <div class="kpi-sub">Überverkauft</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">52W High</div>
-          <div class="kpi-value">HK$33.90</div>
-          <div class="kpi-sub">−31% vom ATH</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">MACD</div>
-          <div class="kpi-value red">Negativ</div>
-          <div class="kpi-sub">Daily: Stark Sell</div>
-        </div>
-      </div>
-
-      <h3>Chartbild & Trend</h3>
-      <p>Das technische Bild von Geekplus (2590.HK) ist kurzfristig deutlich angeschlagen. Nach dem Allzeithoch von HK$33,90 Anfang Oktober 2025 hat die Aktie in einem gleichmäßigen Abwärtstrend über 31% verloren. Besonders markant ist der jüngste Einbruch im Februar 2026 (−24% in einem Monat), ausgelöst durch die enttäuschende Marktreaktion auf den Auftragseingang-Bericht. Der Kurs notiert nun unterhalb der SMA20 (~HK$26,50) und SMA50 (~HK$28,00), während die SMA200 bei geschätzten HK$22 als kurzfristiger Unterstützungsbereich fungiert.</p>
-      <p>Das technische Signal auf Tages- und Wochenbasis ist laut Investing.com "Strong Sell". Gleichzeitig deutet ein RSI im Bereich 28–32 auf überverkaufte Bedingungen hin – ein Niveau, bei dem erfahrungsgemäß Gegenbewegungen einsetzen können. Das monatliche Signal zeigt demgegenüber "Strong Buy" und spiegelt den langfristigen Aufwärtstrend seit IPO (+47% seit HK$15,98) wider. Widerstand besteht bei HK$26–28, wichtige Unterstützung bei HK$20–22.</p>
-      <p>Das hohe Beta von 1,40 bedeutet, dass die Aktie starke Markt- und Stimmungsschwankungen verstärkt – für kurzfristige Trader ein erhöhtes Risiko, für langfristige Investoren mit Toleranz für Volatilität eine potenzielle Kaufgelegenheit nach der Korrektur.</p>
-      <div class="source">Quellen: TradingView HKEX:2590 (März 2026); Investing.com 2590.HK Technical Analysis; Google Finance 2590:HKG</div>
-    </div>
+    <p><strong>Bewertungs-These:</strong> Bei HKD 21,58 trades Geekplus zu ~5× TTM-Sales – günstig vs. Symbotic (12× Sales) und AutoStore (~7×). Auf 2026E-Basis (~RMB 4,2 Mrd. Revenue) sinkt das P/S auf ~3× – das ist <strong>sehr günstig für ein Unternehmen mit +30% Wachstum und gerade erst erreichter Profitabilität</strong>. Das Bewertungs-Profil ähnelt einem „skeptisch bewerteten Hyper-Growth-Marktführer" – der Markt scheint Sorgen über (a) Humanoid-Wettbewerb und (b) chinesische Tech-Bewertung allgemein einzupreisen.</p>
+    <p><strong>Analyst-Konsens:</strong> 15 von 15 Analysten Buy, 0 Sell, Konsens-PT HKD 34,61 (Average), HKD 53,54 (High), HKD 21,66 (Low). Das ist <strong>+61% Upside auf Konsens-Average</strong>. CMB International (Initiator) hat konservatives PT HKD 26,70 (+24% Upside), basierend auf 7,7× 2026E P/Sales – das ist eine vorsichtige, glaubhafte Bewertung.</p>
+    <p><strong>Was die Bewertung treiben könnte:</strong> (1) <strong>H1 2026 Beat:</strong> Wenn Revenue-Wachstum 30%+ bleibt UND Adj. EBITDA-Marge 8%+ erreicht → Re-Rating auf 5–6× 2026E P/Sales = HKD 30–35. (2) <strong>Gino 1 Commercial Traction:</strong> Erste Großaufträge für Humanoiden im H2 2026 → Story-Erweiterung, mögliches Re-Rating auf 7×+. (3) <strong>Globales Expansion-Beweis:</strong> Americas wächst weiter +50% → De-Risking der China-Konzentration.</p>
+    <p><strong>Was die Bewertung drücken könnte:</strong> (1) <strong>H1 2026 Margin-Miss:</strong> Falls Profitabilität nicht hält → Sentiment-Rückschlag. (2) <strong>Humanoid-Wettbewerb:</strong> Wenn Figure AI / Tesla Optimus / Agility schnellere Skalierung zeigen → Geekplus' First-Mover-Advantage relativ. (3) <strong>China-Geopolitik:</strong> US-Restriktionen auf chinesische Roboter-Importe wären materieller Schock.</p>
+    <div class="source">Quellen: Investing.com 2590 (07.03.2026); Yahoo Finance 2590.HK Analyst Insights (Mai 2026); CMB International Research Initiation (Aug 2025); Bitget 2590 Forecast (März 2026); Geekplus FY25 Annual Report.</div>
   </div>
+</div>
 
-  <!-- SEKTION 10: RISIKEN -->
-  <div class="section" id="s10">
-    <div class="section-header">
-      <div class="section-number">10</div>
-      <div class="section-title">Risiken & Chancen</div>
-      <div class="section-score">Score: 5/10</div>
-    </div>
-    <div class="section-body">
-      <h3>9a) Strukturelle & Zyklische Risiken</h3>
-
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">⚡ Geopolitisches Risiko: China-Origin & US/EU Marktaccessibilität</div>
-          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-yellow">Auswirkung: Hoch</span></div>
-        </div>
-        <div class="event-text">Als chinesisch gegründetes Unternehmen steht Geekplus im Spannungsfeld des US-China-Handelskonflikts. Obwohl die Systeme lokal installiert werden, könnten US-Regierungsbehörden (CFIUS, Commerce Dept.) Beschränkungen für chinesische Robotikanbieter in sicherheitskritischen US-Lagerinfrastrukturen einführen. In Europa wächst ebenfalls der Druck zur "De-Risking" von Lieferketten mit chinesischen Technologiekomponenten. Wahrscheinlichkeit: 30–40%. Mögliche Auswirkung: Ausschluss aus dem US-Segment (~25% Umsatz) würde RMB ~790M Umsatz kosten und die Wachstumsrate auf ~15–18% drücken.</div>
-      </div>
-
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">⚡ Wettbewerbsintensität: Fragmentierter, schnell wachsender Markt</div>
-          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
-        </div>
-        <div class="event-text">Der AMR-Markt ist stark fragmentiert. Neben den genannten Peers drängen Amazon Robotics, GreyOrange, Exotec und HAI Robotics in den Markt. Preisdruck durch chinesische Inlandskonkurrenten und aggressiv finanzierten US-Startups könnten die Margenverbesserung bremsen. Wahrscheinlichkeit: 60%. Auswirkung: Bruttomarge bei 35% könnte sich bei 30–33% stabilisieren statt auf 40%+ anzusteigen.</div>
-      </div>
-
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">⚡ Profitabilitätsverzögerung durch Embodied Intelligence-Investitionen</div>
-          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
-        </div>
-        <div class="event-text">Die neu gegründete Embodied Intelligence-Tochter und die "Geek+ Brain" Entwicklung binden erhebliche R&D-Mittel. Falls diese Investitionen schneller skalieren als erwartet, könnte der erreichte Adj. EBITDA-Breakeven im Kerngeschäft durch Konzernanteile wieder ins Negative kippen. Wahrscheinlichkeit: 35–45%.</div>
-      </div>
-
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">⚡ Wechselkurs- und Liquiditätsrisiko (HKD/RMB/EUR/USD)</div>
-          <div><span class="badge badge-green">Niedrig-Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
-        </div>
-        <div class="event-text">Da ~79% des Umsatzes außerhalb Chinas generiert wird, aber Kosten in RMB anfallen, entstehen Währungsexposures gegenüber EUR, USD und weiteren Währungen. Eine RMB-Aufwertung würde die berichteten Margen auf Konzernebene schmälern. Wahrscheinlichkeit: 40%. Auswirkung: ~1–3% Margenpressure pro 5% RMB-Aufwertung.</div>
-      </div>
-
-      <h3>9b) AI-Risiko & Technologische Disruption</h3>
-      <p>Geekplus ist selbst ein AI-Unternehmen und positioniert sich aktiv an der Schnittstelle zur nächsten Robotik-Generation (Embodied Intelligence). Das Risiko: Falls ein gut kapitalisierter Konkurrent (Amazon, Tesla Optimus, Figure AI) humanoidbasierte Warehouse-Automation schneller als erwartet kommerzialisiert, könnte das bestehende AMR-Modell unter Druck geraten. Dies erscheint jedoch kurzfristig (2–3 Jahre) unwahrscheinlich, da Geekplus' AMR-Systeme deutlich günstigere Capex-Anforderungen haben und bewiesen zuverlässig skalieren.</p>
-
-      <h3>9c) Chancen</h3>
-      <p>Strukturell ist Geekplus gut positioniert: Der Megatrend Lagerautomatisierung (CAGR >33% im AMR-Segment bis 2029), die wachsende Nachfrage durch E-Commerce-Expansion in Schwellenmärkten (Lateinamerika, Naher Osten) und potenzielle neue Vertikale (Cold Chain, Automotive Manufacturing) bieten erhebliches Wachstumspotenzial. Das RaaS-Modell könnte langfristig den Umsatz stabilisieren und die Bewertungsprämie rechtfertigen. Eine Ausweitung der Bruttomarge Richtung 40–45% bei skalengetriebenem Softwareanteil wäre transformativ für die Profitabilitätsaussichten.</p>
-
-      <h3>9d) Red Flags & Dealbreaker</h3>
-      <p><strong>Red Flags (beobachten):</strong> (1) Verlangsamung des Auftragseingangs auf unter +20% in zwei aufeinanderfolgenden Halbjahren. (2) Stagnation der Bruttomarge unter 33%. (3) Anhaltende EBITDA-Verluste auf Konzernebene in H1 2026 trotz Profitabilitätsversprechen. (4) Zunehmende Marktanteilsverluste an westliche Konkurrenten in Europa oder Nordamerika.</p>
-      <p><strong>Dealbreaker (existenzbedrohend – aktuell nicht vorhanden):</strong> Formeller US-Exportkontrollbescheid (Entity List Eintragung) oder EU-weiter Ausschluss vom kritischen Infrastrukturmarkt für chinesische Anbieter. Dieses Szenario erscheint derzeit unwahrscheinlich, ist aber das Tail-Risk mit höchster potenzieller Auswirkung.</p>
-      <div class="source">Quellen: Benzinga Geekplus Analyse Feb. 2026; Cathay Bank US-China Report 2025; Paul Hastings Geopolitical Outlook 2026; CMB International Initiation Aug. 2025; MetaStat Warehouse Automation Market Report</div>
-    </div>
+<!-- SEKTION 6 -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+    <div class="section-score">Score: 7/10</div>
   </div>
-
-  <!-- SEKTION 11: SCORING -->
-  <div class="section" id="s11">
-    <div class="section-header">
-      <div class="section-number">11</div>
-      <div class="section-title">Scoring-Übersicht</div>
-      <div class="section-note">Aktienanalyse Canvas v2.2</div>
+  <div class="section-body">
+    <p>Die <strong>fundamentale operative Wende ist FY2025 belegbar</strong> – erstmals positiver Adj. Net Profit, erstmals positiver Operating Cashflow. Das ist nicht inkrementell, sondern strukturell.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Metric</th><th>FY 2025</th><th>FY 2024</th><th>YoY</th><th>Kommentar</th></tr></thead>
+        <tbody>
+          <tr><td>Revenue</td><td class="beat">RMB 3,171 Mrd.</td><td>RMB 2,409 Mrd.</td><td class="beat">+31,6%</td><td>Acceleration vs. +12,4% FY24</td></tr>
+          <tr><td>Gross Profit</td><td class="beat">RMB 1,125 Mrd.</td><td>RMB 837 Mio.</td><td class="beat">+34,4%</td><td>Marge expandiert</td></tr>
+          <tr><td>Gross Margin</td><td class="beat">35,5%</td><td>34,6%</td><td>+90 bps</td><td>Mix-Shift Übersee + Subscription</td></tr>
+          <tr><td>Adj. Net Profit</td><td class="beat">+RMB 43,8 Mio.</td><td class="miss">–RMB 270 Mio. (est.)</td><td class="beat">Turnaround</td><td>Erstmals positiv</td></tr>
+          <tr><td>Operating Cashflow</td><td class="beat">+RMB 85,7 Mio.</td><td class="miss">~–RMB 100 Mio.</td><td class="beat">Turnaround</td><td>Erstmals positiv</td></tr>
+          <tr><td>Orders (Total)</td><td class="beat">RMB 4,137 Mrd.</td><td>RMB 3,140 Mrd.</td><td class="beat">+31,7%</td><td>Forward Indicator</td></tr>
+          <tr><td>Repurchase-Rate Top-Kunden</td><td class="beat">78%</td><td>~75%</td><td>+300 bps</td><td>Hohe Kundenbindung</td></tr>
+          <tr><td>Net Cash + IPO-Erlöse</td><td class="beat">~RMB 2,5 Mrd. (est.)</td><td>n/a (pre-IPO)</td><td>—</td><td>Hohe finanzielle Stärke</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="section-body">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Kategorie</th>
-              <th style="min-width:70px;">Score</th>
-              <th style="min-width:200px;">Score-Visualisierung</th>
-              <th>Kernbegründung</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Geschäftsmodell</td>
-              <td>7/10</td>
-              <td>
-                <div class="score-bar">
-                  <div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div>
-                  <span class="score-num">7</span>
-                </div>
-              </td>
-              <td>Klares Wertversprechen, skalierbar, mehrere Lösungen; noch Hardware-lastiger Erlösmix</td>
-            </tr>
-            <tr>
-              <td>Burggraben</td>
-              <td>6/10</td>
-              <td>
-                <div class="score-bar">
-                  <div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div>
-                  <span class="score-num">6</span>
-                </div>
-              </td>
-              <td>Proprietäre Algorithmen, Datenvorteil; aber Wettbewerb intensiv, Marktfragmentierung hoch</td>
-            </tr>
-            <tr>
-              <td>Operative Entwicklung (Halbjahre)</td>
-              <td>7/10</td>
-              <td>
-                <div class="score-bar">
-                  <div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div>
-                  <span class="score-num">7</span>
-                </div>
-              </td>
-              <td>EBITDA-Turnaround, starke Margenverbesserung; aber erst seit IPO börsennotiert</td>
-            </tr>
-            <tr>
-              <td>Wachstum</td>
-              <td>8/10</td>
-              <td>
-                <div class="score-bar">
-                  <div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div>
-                  <span class="score-num">8</span>
-                </div>
-              </td>
-              <td>31–34% Umsatzwachstum strukturell getrieben, globale Diversifikation, hoher Auftragsvorrat</td>
-            </tr>
-            <tr>
-              <td>Bewertung</td>
-              <td>5/10</td>
-              <td>
-                <div class="score-bar">
-                  <div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div>
-                  <span class="score-num">5</span>
-                </div>
-              </td>
-              <td>EV/Sales ~9,5x nicht billig; fairer Preis für Wachstumsrate, aber kein Schnäppchen</td>
-            </tr>
-            <tr>
-              <td>Cashflow & Kapitalqualität</td>
-              <td>5/10</td>
-              <td>
-                <div class="score-bar">
-                  <div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div>
-                  <span class="score-num">5</span>
-                </div>
-              </td>
-              <td>EBITDA-Breakeven erreicht; noch kein posit. FCF; Kapitalzuteilung zwischen Core und Embod. AI kritisch</td>
-            </tr>
-            <tr>
-              <td>Risiken (invertiert)</td>
-              <td>5/10</td>
-              <td>
-                <div class="score-bar">
-                  <div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div>
-                  <span class="score-num">5</span>
-                </div>
-              </td>
-              <td>Geopolitisches China-Risiko signifikant; hoher Wettbewerb; Profitabilitätsstabilisierung noch unbewiesen</td>
-            </tr>
-            <tr>
-              <td>Technische Analyse</td>
-              <td>4/10</td>
-              <td>
-                <div class="score-bar">
-                  <div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div>
-                  <span class="score-num">4</span>
-                </div>
-              </td>
-              <td>Kurzfristig stark überverkauft (RSI ~30), −31% vom ATH; Kurs unter SMA20/50; Daily Strong Sell Signal</td>
-            </tr>
-            <tr style="background:rgba(20,184,166,0.08);">
-              <td><strong>⌀ Gesamtscore</strong></td>
-              <td><strong>5.9/10</strong></td>
-              <td>
-                <div class="score-bar">
-                  <div class="score-bar-track"><div class="score-bar-fill" style="width:59%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div>
-                  <span class="score-num" style="color:var(--primary);">5.9</span>
-                </div>
-              </td>
-              <td>Starke Wachstumsstory trifft auf geopolitische Risiken und Bewertungsprämie – selektiver Kauf bei Geduld</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="source">Quellen: Gesamtauswertung aller Sektionen 1–10 dieser Analyse. Stand: 04. März 2026.</div>
-    </div>
+    <p><strong>Bilanz-Stärke:</strong> Nach dem Juli-2025-IPO (133× überzeichnet) verfügt Geekplus über substantielle Cash-Reserven, geschätzt ~RMB 2,5 Mrd. Das gibt finanzielle Flexibilität für (a) Humanoid R&amp;D Investitionen, (b) globale Expansion, (c) selektive Akquisitionen, (d) Pufferung gegen Margin-Schwankungen. Keine signifikanten Schulden.</p>
+    <p><strong>Was die Margen treiben wird:</strong> (1) <strong>Mix-Shift zu RaaS/Subscription</strong> – +90% Wachstum FY25, hochmarginale Recurring Revenue. (2) <strong>Übersee-Mix:</strong> 75% Übersee mit 46,6% GM erhöht Blended-Margin. (3) <strong>Operative Hebelwirkung:</strong> Festkosten der globalen Service-Infrastruktur werden über höhere Umsätze verteilt – jeder Inkremental-Roboter trägt zu Margin-Expansion bei. (4) <strong>Embodied-AI / Humanoid Premium:</strong> Gino 1 wird voraussichtlich mit höherer Marge als klassische AMRs verkauft (Differenzierungs-Premium).</p>
+    <p><strong>Capex:</strong> Geekplus operiert asset-light – kein eigenes Manufacturing-Heavy-Footprint, sondern Outsourced-Manufacturing. Dadurch FCF-Profile attraktiv mit potenziell 80%+ FCF-Conversion bei steigenden Margen. Erwartung: bis FY 2027/28 zweistellige EBITDA-Marge erreichbar (15%+).</p>
+    <p><strong>Dividenden:</strong> Aktuell keine. Erst nach mehrjähriger Profitabilität zu erwarten – frühestens FY27/28.</p>
+    <div class="source">Quellen: Geekplus FY2025 Annual Report (31.03.2026); Geekplus Interim Results H1 2025 (29.08.2025); CMB International Research; Manila Times (31.03.2026); Geekplus IPO Prospectus (Juli 2025).</div>
   </div>
+</div>
 
-  <!-- SEKTION 12: FAZIT -->
-  <div class="section" id="s12">
-    <div class="section-header">
-      <div class="section-number">12</div>
-      <div class="section-title">Fazit – Investment-These</div>
-      <div class="section-note">Gesamtsynthese</div>
-    </div>
-    <div class="section-body">
-
-      <div class="bull-bear-grid">
-        <div class="bull-card">
-          <h4>🐂 Das Bullische Narrativ</h4>
-          <p>Das bullische Narrativ basiert auf drei Säulen: Erstens ist die Profitabilitätswende strukturell. Der Adj. EBITDA verbesserte sich von −RMB 170M (H1 2024) auf +RMB 11,6M (H1 2025) – eine Verbesserung von RMB 181M in zwölf Monaten, getrieben durch operative Hebelwirkung und echte Margenverbesserung von ~32% auf 35%. Auf non-IFRS-Basis war Geekplus in FY2025 erstmals profitabel (RMB 25–45M Nettogewinn). Diese Wende entstand durch organisches Wachstum – nicht durch Einmaleffekte.</p>
-          <p>Zweitens ist das Wachstum strukturell gesichert: Mit einem Auftragseingang von RMB 4,1B in FY2025 (+31,7%) und einem Umsatzziel von +30–32% ist die Visibilität für 2026 hoch. Der globale AMR-Markt wächst laut CIC mit >33% CAGR bis 2029, und Geekplus' Penetrationsrate von 8,2% bietet erhebliches Aufwärtspotenzial. 14 Analysten prognostizieren ein anhaltendes 34% CAGR bis 2027E, und 15 von 15 Analysten bei Investing.com empfehlen die Aktie zum Kauf.</p>
-          <p>Drittens ist die aktuelle Kursschwäche eine Kaufgelegenheit. Mit HK$23,50 notiert die Aktie −31% unter dem Allzeithoch, bei überverkauftem RSI (~30) und auf Höhe der 200-Tage-Linie. Der durchschnittliche Analysten-Zielkurs von HK$34,91 impliziert ein Upside von +46%. Geekplus' globale Diversifikation (79,5% Auslandsanteil) und Technologietiefe sind im asiatischen Tech-Robotik-Universum einzigartig.</p>
-        </div>
-        <div class="bear-card">
-          <h4>🐻 Das Bärische Narrativ</h4>
-          <p>Das bärische Narrativ fokussiert auf drei Hauptrisiken: Erstens ist das geopolitische China-Risiko real und schwer quantifizierbar. Als chinesisch gegründetes Unternehmen mit HKEX-Notierung könnte Geekplus bei einer Eskalation der US-China-Spannungen oder bei nationalen Sicherheitsbedenken aus US-amerikanischen und europäischen Märkten gedrängt werden. Der US-Markt (~25% Umsatz) könnte durch Regulierung unter Druck geraten – ein Szenario, das ~31% des Auslandsumsatzes eliminieren würde.</p>
-          <p>Zweitens ist die Profitabilität noch fragil. Geekplus ist erst im Begriff, EBITDA-positiv zu werden, und investiert gleichzeitig aggressiv in Embodied Intelligence (neue Tochtergesellschaft, "Geek+ Brain"). Falls diese Investitionen schneller skalieren als geplant, könnte die berichtete Profitabilität im Jahr 2026 wieder verschwinden. Die Bruttomarge von 35% liegt weit unter den 73% von AutoStore – ein strukturelles Zeichen eines nach wie vor hardware-dominierten Erlösmixes. Bei einer Wachstumsverlangsamung auf <20% und einem EV/Sales von ~9,5x wäre eine erhebliche Neubewertung (−30–40%) möglich.</p>
-          <p>Drittens ist das technische Bild kurzfristig angeschlagen: −31% vom Allzeithoch, unter allen relevanten gleitenden Durchschnitten, Daily-Signal "Strong Sell". Der Markt hat auf den positiven Auftragseingang-Bericht mit einem −10% Kursrückgang reagiert – ein Signal, dass die Erwartungen möglicherweise zu hoch geschraubt sind und der Kurs bei enttäuschenden FY2025-Zahlen weiter fallen könnte.</p>
-        </div>
-      </div>
-
-      <h3>Eigene Einschätzung</h3>
-      <p>Das bullische Narrativ ist überzeugender, aber das bärische enthält valide Risikopunkte, die nicht ignoriert werden dürfen. Die Profitabilitätswende von Geekplus ist bemerkenswert und – basierend auf der betrieblichen Hebelwirkung und dem anhaltenden Margenwachstum – structural und nicht zyklisch. Die Wachstumsrate von 31–34% in einem Markt mit >33% CAGR positioniert das Unternehmen im Sweet Spot der Megatrend-Adoption. Das geopolitische Risiko ist real, aber nicht unmittelbar existenzbedrohend: Geekplus operiert lokal in seinen Zielmärkten und installiert keine staatlich kritischen Infrastrukturen.</p>
-      <p>Kritisch wird die Kapitalallokationsentscheidung zwischen Kerngeschäft und Embodied Intelligence. Wenn das Management hier diszipliniert vorgeht und die Investitionen proportional zur Kommerzialisierungsfähigkeit skaliert, ist der Weg zur dauerhaften Profitabilität klar. Das Risk/Reward erscheint bei aktuellem Kursniveau (HK$23,50) attraktiv: −20–25% Downside (Support bei HK$18–19) versus +60–80% Upside (Zielkurs HK$35–40 in 18–24 Monaten bei plangemäßer Entwicklung). Wer in ein chinesisches Wachstumsunternehmen mit erhöhtem Geopolitik-Risiko investieren kann und will, findet hier eine der spannendsten Robotik-Wachstumsgeschichten der Welt.</p>
-      <p>Ich könnte falsch liegen, wenn: (a) die US-Regierung tatsächlich Sanktionen gegen chinesische Lagerrobotik-Anbieter einführt, (b) der Embodied Intelligence-Bereich die Kernprofitabilität strukturell zerstört, oder (c) das Umsatzwachstum aufgrund gesättigter Großkunden-Pipeline auf unter 15% absinkt. Diese Szenarien erscheinen derzeit unwahrscheinlich, müssen aber als Tail-Risks ernst genommen werden.</p>
-
-      <h3>Zeithorizont-Einschätzung</h3>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Zeithorizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
-          <tbody>
-            <tr>
-              <td><strong>Kurzfristig (0–6M)</strong></td>
-              <td>FY2025 Jahresbericht (März 2026), erste offizielle IFRS-Profitabilität, H1 2026 Auftragseingang</td>
-              <td>Enttäuschende FY2025-Zahlen, RSI erholt sich langsam, geopolitische Eskalation</td>
-              <td><span class="badge badge-yellow">Abwarten / Tranchiert</span></td>
-            </tr>
-            <tr>
-              <td><strong>Mittelfristig (6–24M)</strong></td>
-              <td>Skalierung RaaS-Modell, Margenverbesserung Richtung 38–40%, neue EU/US-Großaufträge</td>
-              <td>Wettbewerbs-druck durch Amazon Robotics, Zollrisiken in USA</td>
-              <td><span class="badge badge-green">Selektiv Aufbauen</span></td>
-            </tr>
-            <tr>
-              <td><strong>Langfristig (2–5J)</strong></td>
-              <td>AMR-Markt CAGR >33%, Embodied Intelligence-Optionalität, struktureller Arbeitskräftemangel</td>
-              <td>Geopolitische De-Globalisierung, Technologiedisruption durch Humanoids</td>
-              <td><span class="badge badge-green">Kaufen & Halten</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h3>Kernthese (Zusammenfassung)</h3>
-      <p>Geekplus ist die weltweit führende pure-play AMR-Lagerautomatisierungsgesellschaft, die sich mitten in der Profitabilitätswende befindet. Das Unternehmen verbindet chinesische Kosteneffizienz mit globaler Reichweite (79,5% Auslandsanteil) in einem strukturell wachsenden Markt (>33% CAGR). Nach einem −31% Kursrückgang vom Allzeithoch bietet die Aktie bei HK$23,50 ein attraktives Risk/Reward für Investoren mit mindestens 18–24 Monaten Horizont und Toleranz für geopolitische Risiken. Die Hauptthese lautet: Geekplus erreicht 2026 dauerhafte IFRS-Profitabilität, setzt seinen Marktanteilsausbau fort und wird als Premium-Robotikaktie mit höheren Multiples belohnt.</p>
-
-      <div class="rating-box">
-        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
-        <div class="rating-item"><label>Zielkurs (18–24M)</label><div class="val">HK$35–40</div></div>
-        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–3 Jahre</div></div>
-        <div class="rating-item"><label>Downside (Support)</label><div class="val" style="color:var(--red);">−20–25%</div></div>
-        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+50–70%</div></div>
-        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:2.5–3</div></div>
-      </div>
-
-      <div class="trigger-grid">
-        <div class="trigger-card sell">
-          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
-          <ul class="trigger-list">
-            <li>Auftragseingang H1 2026 fällt unter +15% YoY → Wachstumsverlangsamung bestätigt, Position halbieren</li>
-            <li>Bruttomarge sinkt unter 32% trotz skalierender Umsätze → Strukturelles Margenproblem, Verkaufen</li>
-            <li>FY2025 IFRS-Nettoverlust übersteigt RMB 100M (deutlich über Guidance) → Glaubwürdigkeitsverlust, reduzieren</li>
-            <li>Offizielle US/EU-Regulierung schränkt chinesische Robotikanbieter in kritischer Infrastruktur ein → sofort verkaufen</li>
-          </ul>
-        </div>
-        <div class="trigger-card buy">
-          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
-          <ul class="trigger-list">
-            <li>FY2025 IFRS-Nettogewinn bestätigt (März 2026) → fundamentale Wende bewiesen, tranchiert nachkaufen</li>
-            <li>Kurs fällt auf HK$18–20 (SMA200-Region) ohne Fundamentalverschlechterung → Kernposition aufbauen</li>
-            <li>Erstes Großprojekt >RMB 200M oder strategische Partnerschaft mit westlichem Industriekonzern → Burggraben vertieft, aggressiv nachkaufen</li>
-            <li>Wachstumsbeschleunigung in H1 2026 auf >35% YoY bei stabiler Marge → Konsensus-Revisions-Zyklus, starke Überrendite möglich</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="investor-grid">
-        <div class="investor-yes">
-          <h5>✅ Geeignet für</h5>
-          <ul>
-            <li>Growth Investors (3–5 Jahre Horizont)</li>
-            <li>Emerging Markets / HK-Tech-Investoren</li>
-            <li>Thematische Robotik/Automatisierungs-Anleger</li>
-            <li>Contrarian-Investoren (nach der Korrektur)</li>
-          </ul>
-        </div>
-        <div class="investor-no">
-          <h5>❌ NICHT geeignet für</h5>
-          <ul>
-            <li>Value Investors (keine Dividende, noch teuer auf absoluter Basis)</li>
-            <li>Income Investors (keine Ausschüttung geplant)</li>
-            <li>Kurzfristige Trader (hohes Beta 1,40, schlechte Technicals)</li>
-            <li>Risikoaverse Anleger (Geopolitik-Risiko China)</li>
-          </ul>
-        </div>
-      </div>
-
-      <h3>Empfohlener Einstieg</h3>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
-          <tbody>
-            <tr>
-              <td><strong>Konservativ</strong></td>
-              <td><span class="badge badge-yellow">Abwarten auf FY2025-Bericht</span></td>
-              <td>Erst FY2025 IFRS-Profitabilität abwarten (März 2026), dann tranchiert einsteigen</td>
-            </tr>
-            <tr>
-              <td><strong>Moderat</strong></td>
-              <td><span class="badge badge-orange">Jetzt 50%, später 50%</span></td>
-              <td>Erste Tranche jetzt bei HK$23,50 (überverkauft), zweite Tranche nach FY2025-Bestätigung</td>
-            </tr>
-            <tr>
-              <td><strong>Aggressiv</strong></td>
-              <td><span class="badge badge-green">Jetzt kaufen</span></td>
-              <td>Risk/Reward 1:2,5–3 bei aktuellem Niveau, RSI überverkauft, 15 Analysten mit Kaufempfehlung</td>
-            </tr>
-            <tr>
-              <td><strong>Langfristig</strong></td>
-              <td><span class="badge badge-green">Kaufen & Halten 3–5 Jahre</span></td>
-              <td>AMR-Megatrend mit >33% Markt-CAGR, Geekplus als weltweiter Marktführer im Aufstieg</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="source">Quellen: Gesamtanalyse Sektionen 1–11; Investing.com Analyst Consensus; TradingView Chart-Analyse; Benzinga Geekplus Feb. 2026; CMB International Research Aug. 2025</div>
-    </div>
+<!-- SEKTION 7 -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-number">7</div>
+    <div class="section-title">Peer-Vergleich</div>
+    <div class="section-score">Score: 8/10</div>
   </div>
-
-  <!-- SEKTION 13: OUTLOOK -->
-  <div class="section" id="s13">
-    <div class="section-header">
-      <div class="section-number">13</div>
-      <div class="section-title">Outlook – Update-Trigger & Wenn/Dann</div>
-      <div class="section-note">3 entscheidende Events</div>
+  <div class="section-body">
+    <p>Peer-Gruppe: Warehouse Automation / Robotics Pure-Plays. Geekplus konkurriert in unterschiedlichen Subsegmenten mit verschiedenen Spielern.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Player</th><th>Market Cap</th><th>Revenue FY25</th><th>Growth</th><th>EBITDA-Marge</th><th>Hauptmarkt</th><th>Unterscheidung</th></tr></thead>
+        <tbody>
+          <tr style="background:rgba(20,184,166,0.06);"><td><strong>Geekplus (2590.HK)</strong></td><td>~$2,0 Mrd.</td><td>RMB 3,17 Mrd. (~$440M)</td><td class="beat"><strong>+31,6%</strong></td><td>~6% (Adj. EBITDA)</td><td>Global Warehouse AMR</td><td>Marktführer + Humanoid</td></tr>
+          <tr><td>Symbotic (SYM)</td><td>~$25 Mrd.</td><td>~$2,5 Mrd.</td><td>+30%</td><td>~5%</td><td>US Retail (Walmart)</td><td>Großanlagen, einzelner Großkunde</td></tr>
+          <tr><td>AutoStore (NO:AUTO)</td><td>~$3,5 Mrd.</td><td>~$700M</td><td>+15%</td><td class="beat">~30%</td><td>EMEA Cube Storage</td><td>Cube-Storage Spezialist, profitabel</td></tr>
+          <tr><td>Locus Robotics (priv.)</td><td>~$2 Mrd. (priv.)</td><td>~$200M (est.)</td><td>+25%</td><td>n/a</td><td>US/EU Mid-Market</td><td>Person-to-Goods Spezialist</td></tr>
+          <tr><td>Quicktron (priv.)</td><td>~$1,5 Mrd. (est.)</td><td>~$200M (est.)</td><td>+40% (est.)</td><td>n/a</td><td>China + Asia</td><td>China-fokussierter Wettbewerber</td></tr>
+          <tr><td>Hai Robotics (priv.)</td><td>~$2 Mrd. (priv.)</td><td>~$300M (est.)</td><td>+35%</td><td>n/a</td><td>Tote-Picking</td><td>Spezialist Tote-Picking</td></tr>
+          <tr><td>ABB Robotics (Teil ABB.SW)</td><td>—</td><td>~$4 Mrd.</td><td>+5%</td><td>~15%</td><td>Industrial Robotics</td><td>Etablierter Player, langsamere Growth</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="section-body">
+    <p><strong>Qualitative Differenzierung:</strong></p>
+    <p><strong>Geekplus vs. Symbotic:</strong> Symbotic ist 12× größer in MCap (durch Walmart-Konzentration und US-Listing), aber hat <strong>strukturelles Konzentrationsrisiko</strong> (Walmart ist Hauptkunde und Großaktionär). Geekplus diversifizierter (950+ Kunden, 40+ Länder), aber kleiner. Geekplus ist günstiger bewertet (5× Sales vs. 10× Sales bei Symbotic) und wächst gleich schnell.</p>
+    <p><strong>Geekplus vs. AutoStore:</strong> AutoStore ist profitabler (30% EBITDA-Marge vs. 6% Geekplus), aber wächst langsamer (+15% vs. +31,6%). AutoStore ist Cube-Storage-Spezialist, kein direkter Konkurrent zu Mobile-Robotics. Beide bedienen unterschiedliche Warehouse-Designs.</p>
+    <p><strong>Geekplus vs. Locus Robotics:</strong> Locus ist US-fokussiert, Person-to-Goods (low-end-Segment). Geekplus' Roboter haben höhere Payload (Shelf vs. Person-zu-Cargo). Geekplus ist technologisch fortgeschritten.</p>
+    <p><strong>Geekplus vs. chinesische Wettbewerber (Quicktron, Hai Robotics):</strong> Diese sind privat, kleinere Skalen, weniger international. Geekplus hat klaren Vorsprung in globaler Expansion + Brand.</p>
+    <p><strong>Geekplus vs. Humanoid-Newcomer (Figure AI, 1X, Apptronik):</strong> Humanoide sind in 2026 noch im Pre-Commercial-Stage für Industriestandards. Geekplus' Gino 1 mit Warehouse-Spezialisierung hat First-Mover-Advantage in einem konkreten Use-Case. Aber die generelle Humanoid-Race wird 2027/28 intensiv – Geekplus muss seinen Vorsprung dort verteidigen.</p>
+    <p><strong>Strategisches Resümee:</strong> Geekplus ist der <strong>einzige globale AMR-Pure-Play-Marktführer</strong>, börsennotiert + diversifiziert + technologisch führend (Humanoid-First-Mover im Warehouse). Bewertung mit ~5× Sales günstiger als US-Pendants Symbotic (10×) oder AutoStore (5×, aber langsameres Wachstum). Strong-Buy-Konsens der Analysten ist konsistent mit diesem Profil.</p>
+    <div class="source">Quellen: Yahoo Finance Peer Pages SYM/AUTO.OL (Mai 2026); CMB International Research Initiation (Aug 2025); Bloomberg Industry Reports; Geekplus FY25 Annual Report.</div>
+  </div>
+</div>
 
-      <div class="outlook-card">
-        <h4>📊 Event 1: FY2025 Jahresbericht – voraussichtlich März 2026</h4>
-        <p>Der FY2025 Jahresbericht ist der wichtigste kurzfristige Katalysator: Er entscheidet, ob Geekplus offiziell die IFRS-Gewinnschwelle überschritten hat. Das Management hat für FY2025 einen IFRS-Nettoverlust von nur RMB 10–30M (−96–99% YoY) und einen non-IFRS-Gewinn von RMB 25–45M in Aussicht gestellt. Dieser Bericht ist die Grundlage für die institutionelle Neubewertung des Unternehmens als "soon-to-be-profitable" zu "profitable growth company" – mit entsprechend höheren Bewertungsmultiples.</p>
-        <div class="when-then">
-          <strong>Wenn:</strong> Der FY2025 IFRS-Nettoverlust bei maximal RMB 30M liegt UND die Bruttomarge ≥35% bestätigt wird → Profitabilitätswende belegt, institutioneller Kaufdruck dürfte einsetzen; tranchiert nachkaufen, da Konsensus-Revisions-Zyklus nach oben zu erwarten ist.<br><br>
-          <strong>Wenn:</strong> Der FY2025 IFRS-Nettoverlust überraschend bei RMB 80M+ liegt (deutlich über Guidance) → Glaubwürdigkeitsproblem beim Management, Analyse überprüfen und Position auf maximal 50% reduzieren; neues Eintrittsniveau abwarten.
-        </div>
+<!-- SEKTION 8 -->
+<div class="section" id="s8">
+  <div class="section-header">
+    <div class="section-number">8</div>
+    <div class="section-title">News &amp; Events (Februar–Mai 2026)</div>
+    <div class="section-note">3-Monats-Fenster</div>
+  </div>
+  <div class="section-body">
+
+    <h3>Ebene 1: Unternehmen</h3>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">31.03.2026 – FY2025 Annual Report: Profitabilität erstmals erreicht <span class="badge badge-green">Sehr Positiv</span></div>
+        <div class="event-text">Revenue +31,6% auf RMB 3,17 Mrd., Adj. Net Profit erstmals positiv RMB 43,8M, Op. Cashflow erstmals positiv RMB 85,7M, Orders +31,7%. Aber: Aktienkurs reagierte langfristig negativ (–25% bis Mai). Quelle: Geekplus IR Press Release (31.03.2026); Manila Times.</div>
       </div>
-
-      <div class="outlook-card">
-        <h4>📊 Event 2: H1 2026 Halbjahresbericht – August 2026</h4>
-        <p>Der H1 2026 Bericht zeigt, ob die Profitabilität dauerhaft ist oder ob die Embodied Intelligence-Investitionen die EBITDA-Linie wieder ins Negative drücken. CMB International prognostiziert für 2026 eine Beschleunigung auf >34% Umsatzwachstum bei verbesserter Marge. Entscheidend ist auch, ob das RaaS-Segment signifikant zu den Umsätzen beiträgt und damit eine höhere Bewertungsprämie rechtfertigt. Dieser Bericht ist der mittelfristige Wendepunkt für die Investmentthese.</p>
-        <div class="when-then">
-          <strong>Wenn:</strong> H1 2026 Umsatz wächst ≥30% YoY, Bruttomarge ≥37% UND Adj. EBITDA klar positiv (>RMB 50M) → Skalierungseffekte bestätigt, Langfrist-Kauf mit Zielhorizont HK$40+ rechtfertigt Aufstockung; aggressive Nachkaufen-Tranche auslösen.<br><br>
-          <strong>Wenn:</strong> H1 2026 Umsatzwachstum fällt unter +20% oder Bruttomarge sinkt unter 33% → Strukturelle Verlangsamung, Investmentthese steht unter Druck; Hälfte der Position absichern oder verkaufen, fundamentale Überprüfung durchführen.
-        </div>
-      </div>
-
-      <div class="outlook-card">
-        <h4>📊 Event 3: Geopolitische Regulierungsentscheidung USA/EU – laufend, 2026/2027</h4>
-        <p>Angesichts des eskalierenden US-China-Technologiestreits ist es denkbar, dass die US-Regierung oder EU-Behörden formale Richtlinien für den Einsatz chinesischer Robotik in Lager- und Lieferketteninfrastruktur einführen. Bereits heute steht Geekplus in den USA unter erhöhter Aufmerksamkeit. Die Frage ist nicht ob, sondern wann und in welchem Ausmaß Regulierungsmaßnahmen konkretisiert werden. Dieses Event ist das größte Tail-Risk im Portfolio.</p>
-        <div class="when-then">
-          <strong>Wenn:</strong> KEINE formalen Ausschlussregulierungen für chinesische AMR-Anbieter in USA/EU erlassen werden und Geekplus neue Großaufträge aus US/EU-Märkten gewinnt → Geopolitik-Risiko bleibt managebar, Investment-These intakt; bestehende Positionen halten und bei Marktschwäche ausbauen.<br><br>
-          <strong>Wenn:</strong> US-Handelsbehörden erlassen Sicherheitsrichtlinien, die chinesische Anbieter aus kritischer US-Lagerinfrastruktur ausschließen, oder Geekplus kommt auf die Entity List → Sofortiger Teilverkauf (50–75% der Position) unabhängig vom Kursniveau; Neubewertung ohne US-Markt (~25% Umsatz) durchführen.
-        </div>
-      </div>
-
-      <div class="source">Quellen: TradingView Earnings Calendar (Aug. 2026); Bamboo Works FY2025 Guidance Feb. 2026; CMB International Research; Paul Hastings Geopolitical Outlook 2026; Cathay Bank US-China Report 2025</div>
     </div>
-  </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">Q1 2026 – Gino 1 Humanoid Robot Launch <span class="badge badge-green">Strategisch wichtig</span></div>
+        <div class="event-text">Erster kommerziell verfügbarer General-Purpose Humanoid Robot für Warehouse-Einsatz. Geekplus ist damit weltweit erstes Unternehmen mit Full-Category-Capability (AMR + Robotic Arm + Humanoid). Quelle: Geekplus 2026 Outlook; RoboticsTomorrow.</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">FY25 – Subscription/RaaS-Aufträge +90% YoY <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Strategischer Mix-Shift zu Recurring Revenue. Höhere Margen, planbare Cashflows, stärkere Kundenbindung. Quelle: Geekplus FY25 Press Release.</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">FY25 – Globale Expansion: Latam + Osteuropa <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Mehrere RMB-100M+ Aufträge aus Latam-Eastern Europe. Americas-Region +50% Wachstum. Geografische De-Risking-Story. Quelle: Geekplus FY25 Annual Report (Manila Times).</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">FY25 – #1 AMR-Marktanteil global (7. Jahr in Folge) <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Interact Analysis 2025 Mobile Robot Market Report bestätigt Geekplus als globalen Marktführer. Quelle: Interact Analysis 2025.</div>
+      </div>
+    </div>
 
-  <div class="disclaimer">
-    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken und stellt keine Anlageberatung, Empfehlung zum Kauf oder Verkauf von Wertpapieren dar. Die enthaltenen Informationen basieren auf öffentlich zugänglichen Quellen (Stand März 2026) und können unvollständig oder veraltet sein. Investitionen in Aktien sind mit erheblichen Risiken verbunden, einschließlich des vollständigen Kapitalverlustes. Jeder Investor sollte seine eigene Due-Diligence durchführen und gegebenenfalls einen zugelassenen Finanzberater konsultieren. Besonders hinzuweisen ist auf das erhöhte Risiko bei Unternehmen mit Sitz in der Volksrepublik China (Geopolitik, VIE-Struktur, Regulierungsrisiken, PCAOB-Zugang). Stand: 04. März 2026.
+    <h3>Ebene 2: Branche</h3>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">2026 – Intensivierung Humanoid-Race <span class="badge badge-yellow">Mixed</span></div>
+        <div class="event-text">Figure AI Series-C, Tesla Optimus Generationen, Agility Robotics Skalierung. Industrial Humanoids werden 2027/28 voraussichtlich kommerziell verfügbar. Geekplus' Gino 1 ist First-Mover, aber Wettbewerb wird intensiv. Quelle: Industry Tracking 2026.</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">2026 – Warehouse-Automation-Investment-Boom <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Globale 3PL/Retail-Player wie Amazon, Walmart, DHL erweitern Automation-Budgets weiter. Penetration nur 22,5% bietet massive Headroom. Quelle: CIC Warehouse Automation Market Report.</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">2026 – Symbotic Q4 2025 EPS-Beat <span class="badge badge-yellow">Mixed</span></div>
+        <div class="event-text">Marktführer-Wettbewerber Symbotic mit gutem Q4 2025 (Walmart Rollout). Aber Konzentrationsrisiko bei Symbotic bleibt – Geekplus diversifizierter. Quelle: Symbotic Earnings.</div>
+      </div>
+    </div>
+
+    <h3>Ebene 3: Makro</h3>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">2026 – Hong-Kong-Stocks-Korrektur seit März <span class="badge badge-yellow">Mixed</span></div>
+        <div class="event-text">Hang Seng Tech Index ist seit März 2026 deutlich korrigiert. Geekplus –27% YTD, mehr als Index. Sentiment-getrieben, nicht fundamental. Quelle: Yahoo Finance HSI.</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">2026 – US-China-Tech-Tensions (Trump-Admin) <span class="badge badge-yellow">Mixed</span></div>
+        <div class="event-text">Strukturelles Risiko für China-Tech-Aktien. Bislang keine BEEinflussung Geekplus-spezifischer Restrictions. Quelle: Industry Reports.</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">2026 – Globale Arbeitskräftemangel + Lohnkosten-Inflation <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Demografischer Druck in EMEA, Japan, USA macht Warehouse-Automation ROI-positiver. Lohnkosten-Inflation 2024-26 in Lager-Operations 6–10% jährlich – AMR-Investitionen amortisieren in 2–3 Jahren. Quelle: Industry Reports 2026.</div>
+      </div>
+    </div>
+
+    <div class="source">Quellen-Synthese: Geekplus IR + Annual Reports; Manila Times, RoboticsTomorrow, PRNewswire, Morningstar, Yahoo Finance (Feb–Mai 2026); CMB International Research; CIC Reports.</div>
   </div>
+</div>
+
+<!-- SEKTION 9 -->
+<div class="section" id="s9">
+  <div class="section-header">
+    <div class="section-number">9</div>
+    <div class="section-title">Technische Analyse</div>
+    <div class="section-score">Score: 4/10</div>
+  </div>
+  <div class="section-body">
+    <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));">
+      <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">HKD 21,58</div><div class="kpi-sub">Mai 2026</div></div>
+      <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value red">~HKD 23</div><div class="kpi-sub">darunter</div></div>
+      <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value red">~HKD 25</div><div class="kpi-sub">darunter</div></div>
+      <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value red">~HKD 24</div><div class="kpi-sub">darunter</div></div>
+      <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value orange">~38</div><div class="kpi-sub">Schwach</div></div>
+      <div class="kpi-card"><div class="kpi-label">52W High</div><div class="kpi-value">HKD 33,90</div><div class="kpi-sub">–36% darunter</div></div>
+      <div class="kpi-card"><div class="kpi-label">52W Low</div><div class="kpi-value">HKD 16,06</div><div class="kpi-sub">+34% darüber</div></div>
+    </div>
+    <p><strong>Trend-Einordnung:</strong> Aktie ist <strong>im klaren Abwärtstrend</strong> – seit März 2026 –27% gefallen, seit IPO-Höchstkurs von HKD 33,90 um –36%. Alle wichtigen Moving Averages (SMA 20, 50, 200) liegen über dem aktuellen Kurs. RSI ~38 = schwach, aber nicht überverkauft. Wochenvolatilität ~9% (Simply Wall St) ist hoch.</p>
+    <p><strong>Wichtige Levels:</strong> Support: <strong>HKD 20</strong> (psychologisch + recente Tiefs), darunter <strong>HKD 16</strong> (52W-Low). Widerstand: <strong>HKD 25</strong> (SMA 50), <strong>HKD 28</strong> (Februar-Hochs), <strong>HKD 33,90</strong> (52W-High).</p>
+    <p><strong>Saisonale + Sentiment-Kontext:</strong> Die Aktie war im August–November 2025 stark (IPO-Hype), seit dem Q4-2025-Berichts-Zyklus aber rückläufig. Mögliche Treiber: (a) Lockup-Period-Ablauf führte zu Insider-Verkäufen, (b) breite HK-Tech-Schwäche, (c) Skepsis trotz FY25-Profitabilitäts-Durchbruch, (d) Sektor-Rotation weg von kleinen-Caps.</p>
+    <p><strong>Ehrliche technische Bewertung:</strong> Aktie zeigt <strong>negatives technisches Bild</strong>, das im Widerspruch zur fundamentalen Story steht. Das ist klassisch für „Hidden Value" mit Sentiment-Bias. Für Trendfolger ist die Aktie nicht attraktiv. Für antizyklische Investoren mit fundamentalem Bias ist HKD 20–22 ein attraktiver Einstiegslevel. Technisches Reversal benötigt mindestens Bruch über HKD 25 mit Volumen.</p>
+    <div class="source">Quellen: Yahoo Finance 2590.HK (Mai 2026); Investing.com 2590 (07.03.2026); Simply Wall St Geekplus (Mai 2026); TradingView 2590 (Mai 2026).</div>
+  </div>
+</div>
+
+<!-- SEKTION 10 -->
+<div class="section" id="s10">
+  <div class="section-header">
+    <div class="section-number">10</div>
+    <div class="section-title">Risiken &amp; Chancen</div>
+    <div class="section-score">Risk-Score: 5/10 (invertiert)</div>
+  </div>
+  <div class="section-body">
+    <h3>Strukturelle Risiken</h3>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">🤖 Humanoid-Wettbewerb wird 2027/28 intensiv</div>
+        <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+      </div>
+      <div class="event-text">Figure AI, Tesla Optimus, Agility, 1X, Apptronik investieren milliarden in Industrial-Humanoids. Geekplus' Gino 1 hat First-Mover-Advantage im Warehouse, aber Wettbewerb wird hart. Wahrscheinlichkeit signifikanter Marktanteilsverluste in Humanoid bis 2028: ~40%.</div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">💸 Margin-Sustainability nach FY25-Wende</div>
+        <div><span class="badge badge-yellow">Mittel-Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+      </div>
+      <div class="event-text">FY25 Adj. Net Profit +RMB 43,8M ist hauchdünn (1,4% Net-Margin). Wenn H1 2026 wieder leichten Verlust zeigt (z.B. durch Humanoid-R&amp;D-Investitionen), wäre das Sentiment-belastend. Wahrscheinlichkeit eines kurzfristigen Profitabilitäts-Rückschlags: ~30%.</div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">🇺🇸 US-China-Geopolitik / Tech-Restrictions</div>
+        <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-red">Auswirkung: Sehr hoch</span></div>
+      </div>
+      <div class="event-text">Wenn US-Trump-Admin chinesische Roboter-Importe einschränkt, würde Americas-Wachstum (+50% YoY in FY25) gefährdet. Das ist ein latentes, niedriges-Wahrscheinlichkeits-/hohe-Auswirkungs-Risiko. Wahrscheinlichkeit Tech-Restrictions 2026/27: ~15%.</div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">🏢 Konkurrenz durch chinesische AMR-Wettbewerber</div>
+        <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+      </div>
+      <div class="event-text">Quicktron, Hai Robotics drängen in Geekplus' Märkte. Geekplus muss Vorsprung in Innovation + globaler Service-Coverage halten. Margin-Druck möglich durch Preiskampf in China-Inland-Markt.</div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">📉 HK-Tech-Sentiment + Liquiditätsrisiko</div>
+        <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+      </div>
+      <div class="event-text">Kleinere Mid-Cap-HK-Aktien haben oft begrenzte Liquidität. Multi-Risk: Sentiment-getriebene Kursrückschläge möglich (wie März-Mai 2026 belegt). Aktie –27% in 2 Monaten ohne fundamentalen Trigger.</div>
+    </div>
+
+    <h3>AI-Risiko &amp; technologische Disruption</h3>
+    <p>Geekplus ist <strong>Profiteur</strong> der AI-Welle (Embodied Intelligence, AI-Algorithmen für Routenoptimierung) und nicht Opfer. Allerdings: Wenn neue AI-Modelle generischer werden (z.B. ein Foundation-Model wie GPT für Roboter-Steuerung), könnten Geekplus' proprietäre Hyper+ Core Algorithms commoditisiert werden. Wahrscheinlichkeit: ~25% in 5J-Horizont.</p>
+
+    <h3>Chancen</h3>
+    <p>(1) <strong>Gino 1 Humanoid Skalierung:</strong> Erste Großaufträge in H2 2026 → Story-Erweiterung, Re-Rating-Potenzial. (2) <strong>Subscription-Mix-Shift:</strong> +90% Wachstum FY25, höhere Margen, Recurring Revenue. (3) <strong>Geografische Expansion:</strong> Latam/Osteuropa als neue Wachstumsfelder. (4) <strong>Marktwachstum strukturell:</strong> AMR-TAM +33% CAGR bis 2029 (CIC). (5) <strong>Profitabilitäts-Trajektorie:</strong> Pfad zu 10-15% EBITDA-Marge in FY27/28 sichtbar. (6) <strong>M&amp;A-Optionen:</strong> Mit RMB 2,5 Mrd. Cash könnte Geekplus selektive Akquisitionen tätigen.</p>
+
+    <h3>Red Flags &amp; Dealbreaker</h3>
+    <p><strong>Red Flags:</strong> Kurs –36% von 52W-High trotz starker Fundamentaldaten – das deutet auf Vertrauenslücke des Marktes hin. Mögliche Insider-Verkäufe nach Lockup-Ablauf zu beobachten. Aktien-Volatilität hoch. <strong>Kein Dealbreaker</strong> – Fundament ist intakt, Profitabilität erreicht, Marktposition #1. Aber: Sentiment-Risk bleibt 2026 ein Faktor.</p>
+    <div class="source">Quellen-Synthese aus Sektionen 1–8. Wahrscheinlichkeits-Schätzungen basieren auf Industrie-Reports und CMB International Research.</div>
+  </div>
+</div>
+
+<!-- SEKTION 11 -->
+<div class="section" id="s11">
+  <div class="section-header">
+    <div class="section-number">11</div>
+    <div class="section-title">Scoring (Update Mai 2026)</div>
+    <div class="section-score">⌀ Score: 7,0/10</div>
+  </div>
+  <div class="section-body">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Kategorie</th><th>Score</th><th>Bar</th><th>Δ vs. März</th><th>Begründung</th></tr></thead>
+        <tbody>
+          <tr><td>Geschäftsmodell</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>±0</td><td>Globaler AMR-Marktführer, Multi-Engine + Humanoid-First-Mover.</td></tr>
+          <tr><td>Burggraben</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>±0</td><td>7J #1, Switching Costs, Full-Stack Tech – aber Humanoid-Race intensiv.</td></tr>
+          <tr><td>Operative Entwicklung (H1+FY)</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td class="beat">+1</td><td>FY25-Profitabilitäts-Wende erreicht, Orders +31,7%, OpCF positiv.</td></tr>
+          <tr><td>Wachstum</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>±0</td><td>+31,6% Revenue, +90% Subscription, +50% Americas – Hyper-Growth.</td></tr>
+          <tr><td>Bewertung</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td class="beat">+1</td><td>5× TTM-Sales / 3× FWD-Sales – nach –27% deutlich attraktiver geworden.</td></tr>
+          <tr><td>Cashflow</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td class="beat">+1</td><td>OpCF erstmals positiv (+RMB 86M), IPO-Erlöse stark, asset-light Modell.</td></tr>
+          <tr><td>Peer-Vergleich</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>±0</td><td>Günstiger als Symbotic/AutoStore, +50% mehr diversifiziert als SYM.</td></tr>
+          <tr><td>Technische Analyse</td><td>4/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td><td class="miss">–2</td><td>Klarer Abwärtstrend –27% in 2M, alle SMAs darunter, RSI schwach.</td></tr>
+          <tr><td>Risiken (invertiert)</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>±0</td><td>Humanoid-Race, Margin-Sustainability, HK-Sentiment, US-Geopolitik.</td></tr>
+          <tr style="background:rgba(20,184,166,0.08);"><td><strong>⌀ Gesamtscore</strong></td><td><strong>6,9/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:69%;background:linear-gradient(90deg,var(--primary),#fbbf24);"></div></div><span class="score-num" style="color:var(--primary);">6,9</span></div></td><td class="beat"><strong>+0,4 vs. März (6,5)</strong></td><td>FY25-Profitabilitäts-Wende verbessert Score; Technik wiegt negativ.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="source">Quellen-Synthese aus Sektionen 1–10. Scoring-Logik: 10 = best-in-class; 5 = durchschnittlich; 1 = ungenügend.</div>
+  </div>
+</div>
+
+<!-- SEKTION 12 -->
+<div class="section" id="s12">
+  <div class="section-header">
+    <div class="section-number">12</div>
+    <div class="section-title">Fazit &amp; Investment-These</div>
+  </div>
+  <div class="section-body">
+
+    <div class="bull-bear-grid">
+      <div class="bull-card">
+        <h4>🐂 Das Bullische Narrativ</h4>
+        <p><strong>Säule 1: Globaler AMR-Marktführer mit struktureller Wachstumsstory.</strong> 7 Jahre in Folge #1 AMR-Marktanteil weltweit. AMR-TAM wächst von RMB 39B (2024) auf RMB 162B (2029E) – CIC-CAGR +33%. Geekplus' aktueller Umsatz RMB 3,17B = nur ~10% des 2029-TAM-Potenzials. Headroom für 8-10× Skalierung. Revenue-Wachstum +31,6% YoY ist organisch und beschleunigend.</p>
+        <p><strong>Säule 2: Profitabilitäts-Wende erreicht (FY25).</strong> Erstmals Adj. Net Profit positiv (RMB 43,8M), erstmals positiver Operating Cashflow (RMB 86M). 78% Repurchase-Rate. Subscription +90%. Übersee-GM 46,6%. Bilanz-Stärke durch ~RMB 2,5B IPO-Erlöse. Pfad zu 10-15% EBITDA-Marge bis FY27/28 sichtbar.</p>
+        <p><strong>Säule 3: Bewertung günstig nach –27% Korrektur.</strong> 5× TTM-Sales / 3× FWD-Sales günstiger als Symbotic (10×) und vergleichbar zu AutoStore (5×, aber langsamer). Analyst-Konsens-PT HKD 34,61 = +61% Upside. 15 von 15 Buy-Ratings. CMB-PT HKD 26,70 = +24% konservatives Upside. First-Mover-Humanoid via Gino 1 + Embodied-AI als Re-Rating-Hebel.</p>
+      </div>
+      <div class="bear-card">
+        <h4>🐻 Das Bärische Narrativ</h4>
+        <p><strong>Risiko 1: Profitabilitäts-Wende ist hauchdünn und fragil.</strong> RMB 43,8M Adj. Net Profit auf RMB 3,17B Revenue = 1,4% Margin. Eine moderate Erhöhung der R&amp;D-Ausgaben für Humanoid oder ein Margin-Druck durch Wettbewerb könnte FY26 wieder leicht negative Profitabilität bedeuten. Markt scheint das einzupreisen, weshalb die Aktie trotz +31% Wachstum –27% gefallen ist.</p>
+        <p><strong>Risiko 2: Humanoid-Race 2027/28 wird brutal.</strong> Figure AI ($40B+ Valuation private), Tesla Optimus, Agility, 1X investieren milliardenschwer in Industrial-Humanoids. Geekplus' Gino 1 ist First-Mover im Warehouse-Segment, aber gegen die VC-Backed-Westcoast-Unicorns hat Geekplus weniger Kapital. Wenn Humanoide schneller skalieren als AMRs, könnte Geekplus zwar in AMR Marktführer bleiben, aber das Wachstum würde in den nächsten Tech-Layer abwandern.</p>
+        <p><strong>Risiko 3: HK-Listing + US-China-Geopolitik.</strong> Aktie hat HK-Tech-Korrektur seit März 2026 überproportional getragen (–27% vs. Hang Seng Tech). Wenn US-Trump-Admin chinesische Roboter-Importe restringiert, würde Americas-Wachstum (+50% YoY) gefährdet. Technische Schwäche (alle SMAs unter Kurs, RSI 38) reflektiert anhaltenden Verkaufsdruck. Insider-Verkäufe nach Lockup-Ablauf könnten weitergehen.</p>
+      </div>
+    </div>
+
+    <h3>Eigene Einschätzung</h3>
+    <p>Das <strong>bullische Narrativ ist überzeugender</strong> – mit klaren ehrlichen Vorbehalten. Die fundamentale Story ist exzellent: Globaler Marktführer in einem strukturell wachsenden Markt (TAM +33% CAGR), erstmals profitabel, 78% Repurchase-Rate, +50% Americas-Wachstum, First-Mover bei Humanoid. Bewertung mit 5× TTM-Sales / 3× FWD-Sales ist nach der –27%-Korrektur deutlich attraktiver als noch im März.</p>
+    <p>Die bärischen Punkte sind real, aber temporär bzw. quantifizierbar: Margin-Sustainability ist eine berechtigte Sorge, aber die Subscription-Verschiebung (+90%) und Übersee-Mix-Shift (75% mit 46,6% GM) stützen die langfristige Margin-Story. Humanoid-Wettbewerb ist 2027/28 Thema, aber Geekplus hat First-Mover-Advantage im Warehouse-Segment und kann auf seine 950+ Bestandskunden zurückgreifen. Geopolitik bleibt latent, ist aber kein konkreter Auslöser.</p>
+    <p>Risk/Reward: <strong>–25% Downside</strong> (HKD 16 = 52W-Low, technischer Worst-Case) <strong>vs. +60% Upside</strong> in 12–18 Monaten (Konsens-PT HKD 34,61). Asymmetrie ist <strong>1:2,4</strong> – sehr positiv.</p>
+    <p><strong>Wichtige Demut:</strong> Ich könnte falsch liegen, wenn (a) H1 2026 wieder einen Verlust zeigt, (b) Humanoid-Wettbewerber schneller skalieren als erwartet, (c) US-China-Tech-Tensions konkret eskalieren mit Geekplus-Bezug, oder (d) Insider-Verkäufe nach Lockup-Ablauf einen anhaltenden Verkaufsdruck erzeugen.</p>
+
+    <h3>Zeithorizont-Einschätzung</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+        <tbody>
+          <tr><td><strong>0–6 Monate</strong></td><td>H1 2026 Earnings Aug, Gino 1 Aufträge, technische Bodenbildung</td><td>Margin-Rückschlag H1, HK-Sentiment-Weakness</td><td><span class="badge badge-orange">Tranchiert aufbauen</span></td></tr>
+          <tr><td><strong>6–24 Monate</strong></td><td>FY26 Profitabilitäts-Bestätigung, Humanoid Commercial Traction, Geografische Expansion</td><td>Humanoid-Race Intensivierung, China-Wettbewerb</td><td><span class="badge badge-green">Kaufen</span></td></tr>
+          <tr><td><strong>2–5 Jahre</strong></td><td>10-15% EBITDA-Marge, TAM-Skalierung, Embodied-AI-Standardisierung</td><td>Commoditisierung durch Foundation-Models, Geopolitik</td><td><span class="badge badge-green">Halten/Akkumulieren</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Kernthese</h3>
+    <p>Geekplus ist der <strong>einzige globale AMR-Pure-Play-Marktführer</strong> (#1 weltweit, 7 Jahre in Folge) in einem strukturell wachsenden Markt (AMR-TAM +33% CAGR bis 2029). FY25 markiert den Profitabilitäts-Inflection-Point (erstmals positiv), 950+ Enterprise-Kunden, 78% Repurchase-Rate, 75% Übersee-Revenue. Aktien-Korrektur seit März (–27%) hat Bewertung auf attraktive 5× TTM-Sales / 3× FWD-Sales gedrückt – Konsens-PT impliziert +61% Upside. Humanoid-First-Mover via Gino 1 als zusätzlicher Re-Rating-Hebel. Hauptrisiken: Margin-Sustainability, Humanoid-Wettbewerb 2027/28, HK-Sentiment.</p>
+
+    <div class="rating-box">
+      <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+      <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">HKD 30–35</div></div>
+      <div class="rating-item"><label>Zeithorizont</label><div class="val">2–4 Jahre</div></div>
+      <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–25%</div></div>
+      <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+40–60%</div></div>
+      <div class="rating-item"><label>Risk/Reward</label><div class="val buy">1:2,4</div></div>
+    </div>
+
+    <div class="trigger-grid">
+      <div class="trigger-card sell">
+        <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+        <ul class="trigger-list">
+          <li>H1 2026 (Aug '26) wieder Adj. Net Loss → Profitabilitäts-Wende nicht nachhaltig → Position reduzieren um 30%</li>
+          <li>Kurs unter HKD 16 (52W-Low) mit fundamentaler Bestätigung → Stop-Loss-Logik aktivieren</li>
+          <li>Revenue-Wachstum H1 2026 unter +20% → Wachstums-Story in Frage</li>
+          <li>Konkrete US-Restrictions auf chinesische Industrieroboter → Position deutlich reduzieren</li>
+        </ul>
+      </div>
+      <div class="trigger-card buy">
+        <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+        <ul class="trigger-list">
+          <li>H1 2026 Adj. EBITDA-Marge ≥8% mit Revenue +30% → Profitabilitäts-Skalierung bestätigt, aggressiv kaufen</li>
+          <li>Gino 1 Großauftrag (≥RMB 100M) von Forbes-500-Kunde → Humanoid-Story validiert</li>
+          <li>Pullback auf HKD 18–20 ohne fundamentale Verschlechterung → antizyklisch nachkaufen</li>
+          <li>Technisches Reversal mit Bruch über HKD 25 (SMA 50) bei Volumen → Trendwende</li>
+          <li>Symbotic-PE-Compression (z.B. auf 6× Sales) → Geekplus-Re-Rating-Argument</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="investor-grid">
+      <div class="investor-yes">
+        <h5>✅ Geeignet für</h5>
+        <ul>
+          <li>Growth Investors mit 2–4 Jahre Horizont</li>
+          <li>Robotics/Automation-Themen-Investoren</li>
+          <li>Contrarian (Sentiment gedrückt, Fundamentals stark)</li>
+          <li>HK-Markt-Tolerante mit Liquiditäts-Akzeptanz</li>
+        </ul>
+      </div>
+      <div class="investor-no">
+        <h5>❌ NICHT geeignet für</h5>
+        <ul>
+          <li>Income Investors (keine Dividende)</li>
+          <li>Konservative (Volatilität +9% wöchentlich)</li>
+          <li>Anleger ohne China/HK-Geopolitik-Toleranz</li>
+          <li>Kurzfristige Trader (Range-bound, klare Bodenbildung steht aus)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten</span></td><td>Auf H1 2026 Earnings + technische Bodenbildung warten</td></tr>
+          <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert</span></td><td>30% jetzt, 40% nach H1-Bestätigung, 30% bei Pullback HKD 18-20</td></tr>
+          <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Kaufen</span></td><td>Risk/Reward 1:2,4, FY25-Profitabilität, +61% Konsens-Upside</td></tr>
+          <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>AMR-TAM +33% CAGR + Humanoid-Optionalität als 5-Jahres-Story</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><strong>Vergleich zur März-Analyse:</strong> Damals HALTEN bei ~HKD 29. Heute bei HKD 21,58 (–25%): FY25-Profitabilitäts-Wende bestätigt, Bewertung deutlich attraktiver, Risk/Reward verbessert. <strong>Upgrade von HALTEN auf KAUFEN.</strong></p>
+
+    <div class="source">Quellen-Synthese aus Sektionen 1–11. Risk/Reward auf Basis Konsens-PT HKD 34,61 (Investing.com, Mai 2026) und 52W-Low HKD 16,06.</div>
+  </div>
+</div>
+
+<!-- SEKTION 13 -->
+<div class="section" id="s13">
+  <div class="section-header">
+    <div class="section-number">13</div>
+    <div class="section-title">Outlook – Die 3 wichtigsten anstehenden Events</div>
+  </div>
+  <div class="section-body">
+
+    <div class="outlook-card">
+      <h4>📊 Event 1: H1 2026 Interim Results – Ende August 2026</h4>
+      <p>Erste Halbjahresergebnisse nach dem FY25-Profitabilitäts-Durchbruch. Markt wird auf <strong>(a) Revenue-Wachstum: Hält sich +30% oder verlangsamt sich auf +20%?, (b) Adj. EBITDA-Marge: Bewegt sich Richtung 8-10% oder fällt zurück?, (c) Subscription-Wachstum: Hält +90%-Tempo an?, (d) Gino 1 Humanoid: Erste konkrete Aufträge?</strong> achten.</p>
+      <div class="when-then">
+        <strong>Wenn:</strong> Revenue ≥+30% UND Adj. EBITDA-Marge ≥8% UND mindestens 1 Großauftrag für Gino 1 → Profitabilitäts-Skalierung bestätigt. → <em>Position aufbauen, Kursziel-Aufstockung auf HKD 35–40.</em><br><br>
+        <strong>Wenn:</strong> Revenue &lt;+20% ODER Adj. EBITDA-Margin negativ ODER kein Humanoid-Auftrag → Profitabilitäts-Story in Frage. → <em>Position auf strategische Größe reduzieren, Stop-Loss-Logik bei HKD 16.</em>
+      </div>
+    </div>
+
+    <div class="outlook-card">
+      <h4>📊 Event 2: Lockup-Period-Ablauf für IPO-Aktien – Juli 2026</h4>
+      <p>12 Monate nach dem 09.07.2025-IPO endet die Lockup-Period für pre-IPO-Aktionäre (Founder, Early VCs). Möglicher Insider-Verkaufsdruck. Bisher gesehen: Aktie –27% seit März, möglicherweise Erwartungs-getrieben. Konkretes Datum 09.07.2026.</p>
+      <div class="when-then">
+        <strong>Wenn:</strong> Substantielle Insider-Verkäufe (≥5% Outstanding) im Juli/August 2026 → Sentiment-Druck bis H2 2026. → <em>Geduldig sein, antizyklisches Nachkaufen unter HKD 20.</em><br><br>
+        <strong>Wenn:</strong> Minimal Insider-Verkäufe ODER strategische Käufe → Vertrauenssignal, Markt absorbiert Lockup-Sorge. → <em>Position aufbauen, technisches Reversal-Setup.</em>
+      </div>
+    </div>
+
+    <div class="outlook-card">
+      <h4>📊 Event 3: Gino 1 Humanoid Commercial Scaling – H2 2026 / 2027</h4>
+      <p>Geekplus' Strategie 2026 ist die Skalierung des Gino 1 General-Purpose Humanoid in Warehouse-Operations. Erste Pilotkunden (laut Press Release Q1 2026) – das Schlüssel-Datapoint wird sein, ob diese in 2026 zu Großserien-Aufträgen werden oder Pilotprojekte bleiben. Humanoid-Wettbewerb (Figure AI, Tesla, Agility) intensiviert sich parallel.</p>
+      <div class="when-then">
+        <strong>Wenn:</strong> Mindestens 3 Großaufträge (≥RMB 50M je) für Gino 1 in H2 2026 mit Forbes-500-Kunden → Humanoid-Pure-Play-Story aktiviert. → <em>Re-Rating auf 7-8× Sales, Kursziel HKD 40-50.</em><br><br>
+        <strong>Wenn:</strong> Gino 1 bleibt in Pilot-Phase ohne Commercial Traction UND Wettbewerber (Figure AI / Tesla) liefern schneller → Humanoid-Vorsprung verloren. → <em>Position konstant halten, keine Aufstockung, Re-Evaluierung der Humanoid-Premium-Bewertung.</em>
+      </div>
+    </div>
+
+    <div class="source">Quellen-Synthese: Geekplus IR 2026 Outlook; CMB International Research; Industry Tracking 2026; HKEX Lockup-Period Standards.</div>
+  </div>
+</div>
+
+<div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken. Sie stellt keine Anlageberatung oder Aufforderung zum Kauf/Verkauf eines Wertpapiers dar. Die enthaltenen Informationen wurden mit Sorgfalt aus öffentlichen Quellen recherchiert, eine Garantie für Vollständigkeit oder Richtigkeit kann jedoch nicht übernommen werden. Investitionsentscheidungen sollten auf eigener Recherche, individueller Risikotragfähigkeit und ggf. unabhängiger Beratung basieren. Vergangene Kursentwicklungen sind kein Indikator für zukünftige Ergebnisse. Stand: 15.05.2026.</div>
 
 </div>
 </body>
