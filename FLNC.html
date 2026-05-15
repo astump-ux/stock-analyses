@@ -3,702 +3,701 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fluence Energy (FLNC) – Aktienanalyse Canvas v1.0</title>
+<title>FLNC – Aktienanalyse Canvas v2.2 · Mai 2026</title>
 <style>
-  :root {
-    --primary: #1a3a5c;
-    --accent: #2e7d32;
-    --danger: #c62828;
-    --warn: #e65100;
-    --neutral: #455a64;
-    --bg-light: #f4f6f8;
-    --border: #cfd8dc;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #212121; background: #fff; line-height: 1.65; }
-  
-  /* Cover */
-  .cover { background: linear-gradient(135deg, #1a3a5c 0%, #0d47a1 100%); color: #fff; padding: 52px 48px 40px; }
-  .cover h1 { font-size: 32px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px; }
-  .cover .subtitle { font-size: 16px; opacity: 0.85; margin-bottom: 24px; }
-  .cover-meta { display: flex; gap: 32px; flex-wrap: wrap; margin-top: 20px; }
-  .cover-meta div { background: rgba(255,255,255,0.12); border-radius: 8px; padding: 12px 18px; }
-  .cover-meta .label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; }
-  .cover-meta .val { font-size: 20px; font-weight: 700; margin-top: 2px; }
-  .cover-meta .val.red { color: #ef9a9a; }
-  .cover-meta .val.green { color: #a5d6a7; }
-  .cover-meta .val.yellow { color: #fff176; }
-
-  /* Layout */
-  .container { max-width: 1100px; margin: 0 auto; padding: 0 32px 60px; }
-  
-  /* Sections */
-  .section { margin-top: 40px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
-  .section-header { background: var(--primary); color: #fff; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
-  .section-header .num { background: rgba(255,255,255,0.2); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
-  .section-header h2 { font-size: 15px; font-weight: 600; letter-spacing: 0.3px; }
-  .section-body { padding: 20px 24px; }
-  .section-body p { margin-bottom: 12px; }
-  .section-body p:last-child { margin-bottom: 0; }
-
-  /* Phase 0 special */
-  .phase0 { background: var(--bg-light); border-radius: 10px; padding: 18px 24px; margin-top: 24px; border-left: 4px solid var(--primary); }
-  .phase0 h3 { color: var(--primary); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-
-  /* Tables */
-  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 12.5px; }
-  th { background: var(--primary); color: #fff; padding: 8px 12px; text-align: left; font-weight: 600; }
-  td { padding: 7px 12px; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
-  tr:nth-child(even) td { background: var(--bg-light); }
-  tr:hover td { background: #e3f2fd; }
-  .green-text { color: var(--accent); font-weight: 600; }
-  .red-text { color: var(--danger); font-weight: 600; }
-  .warn-text { color: var(--warn); font-weight: 600; }
-  .neutral-text { color: var(--neutral); }
-
-  /* Score badge */
-  .score-badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-weight: 700; font-size: 13px; }
-  .score-high { background: #c8e6c9; color: #1b5e20; }
-  .score-mid { background: #fff9c4; color: #f57f17; }
-  .score-low { background: #ffcdd2; color: #b71c1c; }
-
-  /* Callout boxes */
-  .callout { border-radius: 8px; padding: 14px 18px; margin: 14px 0; }
-  .callout-bull { background: #e8f5e9; border-left: 4px solid #2e7d32; }
-  .callout-bear { background: #fce4ec; border-left: 4px solid #c62828; }
-  .callout-neutral { background: #e3f2fd; border-left: 4px solid #1565c0; }
-  .callout-warn { background: #fff3e0; border-left: 4px solid #e65100; }
-  .callout h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
-  .callout-bull h4 { color: #1b5e20; }
-  .callout-bear h4 { color: #b71c1c; }
-  .callout-neutral h4 { color: #0d47a1; }
-  .callout-warn h4 { color: #bf360c; }
-
-  /* Source line */
-  .source { font-size: 11px; color: #78909c; margin-top: 12px; font-style: italic; }
-
-  /* Rating final */
-  .rating-block { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px; }
-  .rating-card { border-radius: 10px; padding: 16px 22px; flex: 1; min-width: 180px; }
-  .rating-hold { background: #fff9c4; border: 2px solid #f9a825; }
-  .rating-buy { background: #c8e6c9; border: 2px solid #2e7d32; }
-  .rating-sell { background: #ffcdd2; border: 2px solid #c62828; }
-  .rating-card .r-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; margin-bottom: 6px; }
-  .rating-card .r-val { font-size: 22px; font-weight: 800; }
-  .rating-hold .r-val { color: #f57f17; }
-  .rating-buy .r-val { color: #1b5e20; }
-  .rating-sell .r-val { color: #b71c1c; }
-
-  /* Subsection heading */
-  .subsection { margin-top: 18px; margin-bottom: 6px; font-size: 13px; font-weight: 700; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 4px; }
-
-  /* Tags */
-  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin: 2px; }
-  .tag-pos { background: #c8e6c9; color: #1b5e20; }
-  .tag-neg { background: #ffcdd2; color: #b71c1c; }
-  .tag-neu { background: #e8eaf6; color: #283593; }
-
-  /* footer */
-  .footer { margin-top: 48px; padding: 20px 0; border-top: 1px solid var(--border); font-size: 11px; color: #90a4ae; text-align: center; }
+:root{
+  --primary:#14b8a6;--primary-dark:#0d9488;
+  --bg:#0f0f12;--bg-card:#1a1a1f;--bg-card2:#22222a;--border:#2e2e38;
+  --text:#e8e8ec;--text-muted:#888898;--text-dim:#555566;
+  --green:#22c55e;--red:#ef4444;--yellow:#f59e0b;--blue:#3b82f6;--purple:#8b5cf6;--teal:#14b8a6;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+.header{background:linear-gradient(135deg,#001a18 0%,#002820 40%,#0f0f12 100%);border-bottom:1px solid var(--primary);padding:36px 40px 28px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;}
+.header-left h1{font-size:32px;font-weight:700;color:white;letter-spacing:-0.5px;}
+.header-left h1 span{color:var(--primary);}
+.header-left .subtitle{color:var(--text-muted);font-size:14px;margin-top:4px;}
+.header-right{text-align:right;}
+.price-tag{font-size:38px;font-weight:800;color:var(--primary);line-height:1;}
+.price-meta{color:var(--text-muted);font-size:13px;margin-top:4px;}
+.price-change{display:inline-block;padding:2px 8px;border-radius:4px;font-size:13px;font-weight:600;margin-top:4px;}
+.price-change.up{background:rgba(34,197,94,0.15);color:var(--green);}
+.price-change.down{background:rgba(239,68,68,0.15);color:var(--red);}
+.nav{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:100;}
+.nav a{color:var(--text-muted);text-decoration:none;padding:14px 16px;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.2s;}
+.nav a:hover{color:var(--primary);border-bottom-color:var(--primary);}
+.main{max-width:1100px;margin:0 auto;padding:32px 40px 60px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px;}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.kpi-value{font-size:22px;font-weight:700;color:white;margin-top:4px;}
+.kpi-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.kpi-value.green{color:var(--green);}
+.kpi-value.red{color:var(--red);}
+.kpi-value.orange{color:var(--primary);}
+.section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden;}
+.section-header{background:var(--bg-card2);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.section-number{background:var(--primary);color:white;width:28px;height:28px;border-radius:6px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-title{font-size:16px;font-weight:700;color:white;}
+.section-score{margin-left:auto;font-size:14px;font-weight:700;color:var(--primary);}
+.section-note{font-size:12px;color:var(--text-dim);background:rgba(46,46,56,0.4);border-radius:4px;padding:4px 10px;margin-left:auto;}
+.section-body{padding:20px 24px;}
+p{margin-bottom:12px;color:var(--text);}
+p:last-child{margin-bottom:0;}
+h3{font-size:14px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 8px;}
+h3:first-child{margin-top:0;}
+.table-wrap{overflow-x:auto;margin:16px 0;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--bg-card2);color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:10px 12px;border-bottom:1px solid rgba(46,46,56,0.5);color:var(--text);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(20,184,166,0.04);}
+.beat{color:var(--green);font-weight:600;}
+.miss{color:var(--red);font-weight:600;}
+.neutral{color:var(--yellow);font-weight:600;}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}
+.badge-green{background:rgba(34,197,94,0.15);color:var(--green);}
+.badge-red{background:rgba(239,68,68,0.15);color:var(--red);}
+.badge-yellow{background:rgba(245,158,11,0.15);color:var(--yellow);}
+.badge-blue{background:rgba(59,130,246,0.15);color:var(--blue);}
+.badge-orange{background:rgba(20,184,166,0.15);color:var(--primary);}
+.event-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(46,46,56,0.5);align-items:flex-start;}
+.event-item:last-child{border-bottom:none;}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0;}
+.dot-green{background:var(--green);}
+.dot-red{background:var(--red);}
+.dot-yellow{background:var(--yellow);}
+.event-label{font-weight:600;color:white;}
+.event-text{font-size:14px;color:var(--text);}
+.risk-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.risk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:6px;}
+.risk-title{font-weight:600;color:white;font-size:14px;}
+.score-bar{display:flex;align-items:center;gap:10px;}
+.score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#5eead4);}
+.score-num{font-weight:700;color:var(--primary);font-size:15px;min-width:32px;}
+.bull-bear-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:700px){.bull-bear-grid{grid-template-columns:1fr;}}
+.bull-card{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:16px;}
+.bear-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:16px;}
+.bull-card h4{color:var(--green);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.bear-card h4{color:var(--red);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.rating-box{background:linear-gradient(135deg,rgba(20,184,166,0.12),rgba(20,184,166,0.04));border:1px solid rgba(20,184,166,0.3);border-radius:12px;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:20px 0;}
+.rating-item label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;display:block;margin-bottom:4px;}
+.rating-item .val{font-size:20px;font-weight:800;color:white;}
+.rating-item .val.buy{color:var(--green);}
+.rating-item .val.hold{color:var(--yellow);}
+.rating-item .val.sell{color:var(--red);}
+.trigger-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+@media(max-width:700px){.trigger-grid{grid-template-columns:1fr;}}
+.trigger-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.trigger-card h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.trigger-card.buy h5{color:var(--green);}
+.trigger-card.sell h5{color:var(--red);}
+.trigger-list{font-size:13px;color:var(--text);list-style:none;padding:0;}
+.trigger-list li{margin-bottom:6px;padding-left:14px;position:relative;}
+.trigger-list li::before{content:"\2192";position:absolute;left:0;}
+.investor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+@media(max-width:600px){.investor-grid{grid-template-columns:1fr;}}
+.investor-yes{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px;}
+.investor-no{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:12px;}
+.investor-yes h5{color:var(--green);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-no h5{color:var(--red);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-yes li,.investor-no li{font-size:13px;color:var(--text);margin-bottom:4px;list-style:none;padding-left:14px;position:relative;}
+.investor-yes li::before{content:"\2713";position:absolute;left:0;color:var(--green);}
+.investor-no li::before{content:"\2717";position:absolute;left:0;color:var(--red);}
+.geo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0;}
+.geo-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.geo-region{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.geo-pct{font-size:20px;font-weight:700;color:white;}
+.geo-note{font-size:12px;color:var(--text-muted);}
+.outlook-card{background:var(--bg-card2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:16px;margin-bottom:14px;}
+.outlook-card h4{color:white;font-size:14px;margin-bottom:8px;}
+.outlook-card .when-then{font-size:13px;color:var(--text);margin-top:8px;}
+.outlook-card .when-then strong{color:var(--primary);}
+.source{font-size:11px;color:var(--text-dim);margin-top:12px;padding-top:10px;border-top:1px solid rgba(46,46,56,0.5);}
+.source a{color:var(--text-dim);}
+.disclaimer{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text-dim);margin-top:32px;}
+.alert-box{background:rgba(20,184,166,0.08);border:1px solid rgba(20,184,166,0.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px;}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+.pill{display:inline-block;background:rgba(20,184,166,0.12);color:var(--primary);border-radius:4px;padding:1px 7px;font-size:13px;font-weight:600;}
 </style>
 </head>
 <body>
 
-<!-- COVER -->
-<div class="cover">
-  <h1>⚡ Fluence Energy, Inc. (NASDAQ: FLNC)</h1>
-  <div class="subtitle">Aktienanalyse Canvas v1.0 &nbsp;|&nbsp; Datum: 27. Februar 2026</div>
-  <div class="cover-meta">
-    <div><div class="label">Aktueller Kurs</div><div class="val">$15.56</div></div>
-    <div><div class="label">Marktkapitalisierung</div><div class="val">$2.86 Mrd.</div></div>
-    <div><div class="label">52-W Hoch / Tief</div><div class="val yellow">$33.51 / $3.46</div></div>
-    <div><div class="label">Rating</div><div class="val yellow">HALTEN</div></div>
-    <div><div class="label">Nächste Quartalszahlen</div><div class="val">06. Mai 2026</div></div>
-  </div>
-</div>
-
-<div class="container">
-
-<!-- PHASE 0 -->
-<div class="phase0">
-  <h3>Phase 0 – Vorbereitungsphase</h3>
-  <p><strong>Aktie:</strong> Fluence Energy, Inc. (NASDAQ: FLNC) – globaler Marktführer für Batteriespeichersysteme (BESS) und Optimierungssoftware für erneuerbare Energien, gegründet 2018 als Joint Venture von Siemens und AES.</p>
-  <p><strong>User-Fokus (0b):</strong> AI/Disruptions-Risiko für das Geschäftsmodell &amp; Risikobewertung (Downside-Schutz im Fokus) – beide Aspekte werden in Sektion 9 und 12 besonders tiefgehend behandelt.</p>
-  <p><strong>Peer-Gruppe (0c):</strong> Tesla Energy (Megapack), Stem Inc. (STEM), Eos Energy Enterprises (EOSE), Ameresco (AMRC) – abgedeckt in Sektion 7.</p>
-</div>
-
-<!-- SEKTION 1: GESCHÄFTSMODELL -->
-<div class="section">
-  <div class="section-header"><div class="num">1</div><h2>GESCHÄFTSMODELL</h2></div>
-  <div class="section-body">
-    <p>Fluence Energy ist ein globaler System-Integrator im Bereich Batteriespeicher (BESS – Battery Energy Storage Systems) und bietet darüber hinaus AI-gestützte Optimierungssoftware sowie operative Dienstleistungen für erneuerbare Energieanlagen an. Das Unternehmen wurde 2018 als Joint Venture von Siemens und AES gegründet, ging 2021 an die Börse und hat seinen Sitz in Arlington, Virginia. Fluence ist in fast 50 Märkten weltweit tätig und gilt nach eigenen Angaben sowie nach einem S&amp;P Global Commodity Insights Report (Dezember 2025) als einer der drei größten BESS-Integratoren weltweit – sowohl inklusive als auch exklusive China.</p>
-
-    <p>Das Kerngeschäft besteht aus dem Vertrieb und der Lieferung von schlüsselfertigen Energiespeichersystemen. Zu den Flaggschiffen zählen Gridstack Pro (groß angelegte Front-of-the-Meter-Systeme), Ultrastack (für anspruchsvolle Netzbedingungen) und das neue Smartstack – ein modulares, hochdichtes System der nächsten Generation, das im Geschäftsjahr 2025 eingeführt wurde und für Rechenzentren sowie Long-Duration Energy Storage (LDES) positioniert ist. Das Geschäftsmodell ist Hardware-intensiv: Fluence kauft Batteriezellen bei Lieferanten wie AESC (Tennessee) ein, integriert sie in eigene Systemlösungen und liefert sie als Turnkey-Projekte an unabhängige Stromerzeuger, Entwickler, Versorgungsunternehmen und C&amp;I-Kunden. Die Kostenseite ist kapitalintensiv, mit erheblichem Working Capital Bedarf, da Projekte oft 6–24 Monate von Auftragseingang bis Revenue-Erkennung dauern.</p>
-
-    <p>Der zweite Geschäftsbereich – Software &amp; Services – gewinnt strategisch immer mehr Bedeutung und ist höhermarginig. Er umfasst erstens Mosaic, ein KI-gestütztes Gebotsoptimierungsprogramm für Energiemärkte mit über 13,3 GW Assets under Management (AUM), das Speicher- und Solaranlagen-Betreibern hilft, ihre Erlöse an Strombörsen zu maximieren. Zweitens Nispera, eine cloudbasierte Asset-Performance-Management-Software (APM) mit über 15,5 GW AUM, die mittels Machine-Learning Ausfallzeiten reduziert und die Energieproduktion optimiert. Drittens operative Wartungsverträge (O&amp;M Services), die langfristig wiederkehrende Erlöse generieren. Die Annual Recurring Revenue (ARR) aus dem digitalen Segment beläuft sich laut Guidance für FY2026 auf ca. 180 Mio. USD – ein noch bescheidener, aber wachsender Anteil am Gesamtumsatz von prognostizierten 3,2–3,6 Mrd. USD.</p>
-
-    <p>Kundenseitig adressiert Fluence primär B2B- und Enterprise-Kunden: unabhängige Stromproduzenten (IPPs), Entwickler, Versorgungsunternehmen und große Industrie- und Gewerbekunden. Der US-Markt gewinnt dabei stark an Gewicht – 72% des Order Intake in Q1 FY2026 stammten aus den USA, unterstützt durch Domestic Content-Incentives aus dem Inflation Reduction Act (IRA). Fluences Revenue-Modell ist damit eine Mischung aus projektbasiertem Hardware-Umsatz (dominant, aber zyklisch und niedrigmarginig), wiederkehrendem Service-Umsatz (stabil, höhermarginig) und SaaS-basiertem Digital-Umsatz (klein, aber hochmarginig und skalierbar).</p>
-
-    <div class="source">Quellen: Fluence IR – Q1 FY2026 Earnings Release (04.02.2026), FY2025 Annual Report (25.11.2025), fluenceenergy.com/fluence-iq-digital-platform (04.12.2025), S&amp;P Global Commodity Insights BESS Integrator Report (Dez. 2025)</div>
-  </div>
-</div>
-
-<!-- SEKTION 2: BURGGRABEN -->
-<div class="section">
-  <div class="section-header"><div class="num">2</div><h2>BURGGRABEN &amp; WETTBEWERBSVORTEILE</h2></div>
-  <div class="section-body">
-    <p>Fluences wirtschaftlicher Burggraben ist real, aber fragiler als auf den ersten Blick erkennbar. Das Unternehmen verfügt über bedeutende Wettbewerbsvorteile in bestimmten Bereichen, die jedoch durch strukturelle Schwächen in anderen Bereichen teilweise kompensiert werden.</p>
-
-    <p><strong>Skalierungsvorteile &amp; Track Record:</strong> Mit über 22 GWh deployter und verwalteter Kapazität in fast 50 Märkten besitzt Fluence einen Erfahrungsvorsprung, der für Utilities und IPPs entscheidungsrelevant ist. Kunden mit Multi-Milliarden-Dollar-Projekten bevorzugen erfahrene Partner – was Fluence drei Jahre in Folge den Titel „System Integrator of the Year" bei den Energy Storage News Awards eingebracht hat (2025). Dieser Ruf wirkt wie ein indirekter Netzwerkeffekt: Mehr Referenzprojekte → Mehr Aufträge → Mehr Daten für Software-Optimierung.</p>
-
-    <p><strong>Software-Moat (Mosaic/Nispera):</strong> Das AI-gestützte Mosaic-Bidding-Tool mit 13,3 GW AUM weist moderate bis hohe Switching Costs auf – Kunden, die ihre Assets in Mosaic integriert haben, akkumulieren dort wertvolle historische Performance-Daten. Ein Wechsel zu einem Konkurrenten würde diesen Datenvorteil kosten. Ähnliches gilt für Nispera im APM-Bereich. Allerdings sind diese Vorteile nicht unüberwindbar: Gut kapitalisierte Konkurrenten wie Bloomberg NEF-Backed-Startups oder die Software-Töchter von Siemens und AES (den eigenen Anteilseignern) könnten ähnliche Tools entwickeln. Der Software-Burggraben ist derzeit eher „mittel" als „hoch".</p>
-
-    <p><strong>Schwachstellen:</strong> Das Hardware-Kerngeschäft als System-Integrator ist strukturell schwach positioniert. Fluence stellt keine eigenen Batteriezellen her – es kauft primär bei CATL, LG Energy Solution und AESC ein und fügt System-Integration-Know-how hinzu. Diese Position wird von zwei Seiten bedroht: Chinesische Anbieter wie CATL und BYD expandieren aggressiv in die System-Integration und bieten Komplettlösungen zu deutlich niedrigeren Preisen an. Die Average Selling Prices im BESS-Markt sind um 26% YoY auf 192 USD/kWh gefallen – ein Zeichen massiven Preisdrucks. Auf der anderen Seite hat Tesla mit Megapack einen vertikal integrierten Konkurrenten, der ebenfalls eigene Zellen verwendet und laut Jefferies Research (Nov. 2025) besser für KI-Rechenzentrum-Anwendungen positioniert ist.</p>
-
-    <p><strong>Geopolitische Schutzwälle (kurzfristig):</strong> Die US-Politik schützt Fluences Heimatmarkt derzeit erheblich: Foreign Entity of Concern (FEOC)-Regeln schränken chinesische BESS-Systeme für staatlich finanzierte Projekte ein, und der „One Big Beautiful Bill Act" bietet Domestic Content Bonus Credits, von denen Fluences US-Fertigungsstrategie (Utah, Arizona, Tennessee, South Carolina) profitiert. Diese Schutzwälle sind real – aber politisch bedingt und damit strukturell unsicherer als technologische Moats.</p>
-
-    <p><strong>Bewertung Burggraben: <span class="score-badge score-mid">5/10</span></strong> – Starker Markt-Track-Record und wachsende Software-Assets schaffen einen soliden, aber nicht uneinholbaren Vorsprung. Die Hardware-Abhängigkeit und der aggressive Preisdruck durch chinesische Vertikale sind fundamentale Schwächen. Der eigentliche Burggraben liegt im Aufbau eines integrierten Hardware-Software-Ökosystems – dieser Weg ist richtig, aber noch nicht entschieden gewonnen.</p>
-
-    <div class="source">Quellen: Jefferies BESS/AI Datacenter Report (zit. in The Register, Nov. 2025), fluenceenergy.com/mosaic-intelligent-bidding-software (Dez. 2025), S&amp;P Global BESS Integrator Report (Dez. 2025), public.com Analyst Consensus (Feb. 2026)</div>
-  </div>
-</div>
-
-<!-- SEKTION 3: LETZTE 4 QUARTALE -->
-<div class="section">
-  <div class="section-header"><div class="num">3</div><h2>LETZTE 4 QUARTALE (Q2 FY2025 bis Q1 FY2026)</h2></div>
-  <div class="section-body">
-    <p>Fluences Geschäftsjahr endet am 30. September. Die folgenden vier Quartale decken den Zeitraum Januar 2025 bis Dezember 2025 ab.</p>
-    
-    <table>
-      <tr>
-        <th>Quartal</th>
-        <th>Zeitraum</th>
-        <th>Umsatz</th>
-        <th>YoY-Wachstum</th>
-        <th>Adj. Gross Margin</th>
-        <th>Net Income/Loss</th>
-        <th>EPS</th>
-        <th>Beat/Miss</th>
-        <th>Kurs-Reaktion</th>
-      </tr>
-      <tr>
-        <td><strong>Q2 FY2025</strong></td>
-        <td>Jan–Mrz 2025</td>
-        <td>~$511 Mio.*</td>
-        <td>~+24%</td>
-        <td>~14–15%</td>
-        <td>Verlust</td>
-        <td>n/v</td>
-        <td class="neutral-text">Neutral</td>
-        <td class="neutral-text">+/- 0%</td>
-      </tr>
-      <tr>
-        <td><strong>Q3 FY2025</strong></td>
-        <td>Apr–Jun 2025</td>
-        <td>$602.5 Mio.</td>
-        <td class="green-text">+24.7%</td>
-        <td class="green-text">15.4% (Rekord)</td>
-        <td>Verlust</td>
-        <td>n/v</td>
-        <td class="warn-text">Revenue miss (Fertigungsramp)</td>
-        <td class="warn-text">leicht neg.</td>
-      </tr>
-      <tr>
-        <td><strong>Q4 FY2025</strong></td>
-        <td>Jul–Sep 2025</td>
-        <td>$1,001 Mio.</td>
-        <td class="red-text">-15.2% YoY</td>
-        <td>~13.7%</td>
-        <td class="green-text">+$24.1 Mio. (profitabel!)</td>
-        <td>positiv</td>
-        <td class="green-text">Beat Guidance</td>
-        <td class="green-text">positiv</td>
-      </tr>
-      <tr>
-        <td><strong>Q1 FY2026</strong></td>
-        <td>Okt–Dez 2025</td>
-        <td>$475.2 Mio.</td>
-        <td class="green-text">+154.4%</td>
-        <td class="red-text">5.6% (Kollaps!)</td>
-        <td class="red-text">-$62.6 Mio.</td>
-        <td class="red-text">-$0.34 vs. -$0.18 erwartet</td>
-        <td class="red-text">EPS-Miss (89%!)</td>
-        <td class="red-text">-24% bis -36%</td>
-      </tr>
-    </table>
-    <p><em>* Q2 FY2025-Umsatz aus FY2025-Gesamtumsatz ($2.306 Mrd.) minus Q1 ($187 Mio.), Q3 ($602,5 Mio.) und Q4 (~$1.001 Mrd.) abgeleitet. Einzelne Quartalsberichte lagen zum Stichtag nicht vor.</em></p>
-
-    <p><strong>Beat-Ratio:</strong> 2/4 Quartale klar geschlagen – Q4 FY2025 beat auf Umsatz und Marge, Q1 FY2026 beat auf Umsatz aber massiver Miss auf EPS und Marge. Die operative Konsistenz ist das entscheidende Problem.</p>
-
-    <p>Das dominante Ereignis der letzten vier Quartale war der dramatische Margen-Kollaps in Q1 FY2026. CFO Ahmed Pasha attribuierte den Rückgang (von 12,5% auf 5,6% adj. Gross Margin) auf 20 Mio. USD zusätzliche Kosten auf zwei spezifischen Nicht-US-Projekten – eines mit Equipment-Scope-Änderungen, eines mit Terminverzögerungen. Management erwartet, diese Kosten im Verlauf von FY2026 zu recovern. Die Marktreaktion war brutal: -24% am Earnings-Tag, weitere Verluste in den Folgewochen brachten den Kurs von ~$28–30 auf ~$15. Mizuho reduzierte sein Kursziel auf $13 (Underperform), während Susquehanna sein positives Rating mit Kursziel $27 beibehielt.</p>
-
-    <p>Trotz aller Schwierigkeiten weist Q1 FY2026 einen entscheidenden positiven Datenpunkt auf: Der Auftragseingang von $757 Mio. (3,9 GWh Lösungsverträge + 2,9 GWh Services + 4,3 GW Digital) hob den Backlog auf ein Rekordhoch von $5,5 Mrd. – vollständig deckend für die FY2026-Umsatzguidance von $3,2–3,6 Mrd. Der Pipeline-Wert wuchs sogar um 30% auf $30 Mrd. an.</p>
-
-    <p><strong>Hinweis:</strong> Der nächste Quartalsbericht (Q2 FY2026, Berichtszeitraum Januar–März 2026) ist für den <strong>6. Mai 2026</strong> geplant.</p>
-
-    <div class="source">Quellen: Fluence Q1 FY2026 Earnings Release (04.02.2026), Q4/FY2025 Earnings Release (24.11.2025), Q3 FY2025 Release (11.08.2025), Trefis Analysis (06.02.2026), Fintool Q1 2026 Earnings Summary, Investopedia/Investing.com (Feb. 2026)</div>
-  </div>
-</div>
-
-<!-- SEKTION 4: WACHSTUMSEINORDNUNG -->
-<div class="section">
-  <div class="section-header"><div class="num">4</div><h2>WACHSTUMSEINORDNUNG</h2></div>
-  <div class="section-body">
-    <p>Fluences Wachstumsstory ist strukturell überzeugend, aber operativ holprig. Der globale BESS-Markt soll laut Straits Research von $10,2 Mrd. (2025) auf $86,9 Mrd. (2034) wachsen – eine CAGR von 26,9%. Fluence ist in diesem Hyperwachstumsmarkt gut positioniert, kämpft jedoch mit erheblichen Execution-Schwächen.</p>
-
-    <p><strong>Historisches Revenue-Wachstum:</strong></p>
-    <table>
-      <tr><th>Geschäftsjahr</th><th>Umsatz</th><th>YoY-Wachstum</th><th>Kommentar</th></tr>
-      <tr><td>FY2022</td><td>~$0.52 Mrd.</td><td>n/a (Baseline)</td><td>Frühphase nach IPO</td></tr>
-      <tr><td>FY2023</td><td>~$1.25 Mrd.</td><td class="green-text">+140%</td><td>Starke Marktexpansion</td></tr>
-      <tr><td>FY2024</td><td>$2.75 Mrd.</td><td class="green-text">+120%</td><td>Rekordnachfrage</td></tr>
-      <tr><td>FY2025</td><td>$2.31 Mrd.</td><td class="red-text">-16%</td><td>Fertigungsverzögerungen US-Werke, Projektstornierungen</td></tr>
-      <tr><td>FY2026 (Guidance)</td><td>$3.2–3.6 Mrd.</td><td class="green-text">+39%–56%</td><td>85% bereits im Backlog gesichert</td></tr>
-    </table>
-
-    <p>Der Umsatzrückgang in FY2025 war beunruhigend – er resultierte aus Verzögerungen beim Hochfahren der neuen US-amerikanischen Fertigungsstätten in Utah und Arizona, die einige Projekte in FY2026 verschoben. Positiv: Die Anlagen haben laut Management inzwischen ihre Zielkapazität erreicht. Die FY2026-Guidance impliziert eine Rückkehr zu 39–56% YoY-Wachstum, wofür 85% des Umsatzes bereits durch Backlog abgesichert ist – das ist ein entscheidender Risiko-Puffer.</p>
-
-    <div class="subsection">Geografische Verteilung</div>
-    <table>
-      <tr><th>Region</th><th>Anteil Order Intake Q1 FY2026</th><th>Wachstum/Trend</th><th>Besonderheiten</th></tr>
-      <tr><td>USA</td><td class="green-text">72%</td><td>↑ stark</td><td>IRA Domestic Content, FEOC-Schutz, Datenzentren</td></tr>
-      <tr><td>International</td><td>28%</td><td>→ stabil</td><td>Europa (LEAG Deutschland, Ukraine), APAC (Australien)</td></tr>
-    </table>
-    <p>Der US-Anteil steigt deutlich – sowohl wegen struktureller Nachfrage als auch wegen politischer Incentives. Dabei birgt die wachsende US-Konzentration ein Klumpenrisiko: Politische Veränderungen (z.B. Abschaffung von IRA-Vorteilen) würden überproportional wirken. International hat Fluence starke Referenzprojekte wie Ukraines größtes BESS (Sept. 2025) und ein 4 GWh-Projekt in Australien (Smartstack).</p>
-
-    <div class="subsection">Profitabilitätswachstum</div>
-    <p>Das ist die kritische Schwachstelle. Trotz starken Umsatzwachstums bleibt Fluence verlustbringend: Net Loss FY2025 betrug $68 Mio. (nach Net Income von $30 Mio. in FY2024). Die EBITDA-Guidance für FY2026 liegt bei nur $40–60 Mio. adjusted – bei $3,2–3,6 Mrd. Umsatz entspricht das einer EBITDA-Marge von ca. 1,2–1,8%. Das ist für ein $2,9 Mrd. Unternehmen erschreckend dünn und bietet kaum Puffer bei weiteren Projektkosten-Überläufen. Das Q1 FY2026-Ergebnis mit -$52 Mio. Adj. EBITDA und 5,6% Gross Margin zeigt, wie schnell die Profitabilitätsziele verschwinden können.</p>
-
-    <p><strong>Wachstumsscore: <span class="score-badge score-mid">6/10</span></strong> – Das strukturelle Marktwachstum ist außergewöhnlich, und 85% des FY2026-Umsatzes sind gesichert. Allerdings: FY2025-Umsatzrückgang, dünne Margen, Execution-Risiken und noch kein bewiesener, nachhaltiger Profitabilitätspfad drücken den Score.</p>
-
-    <div class="source">Quellen: Fluence FY2025 Annual Report, Q1 FY2026 Earnings Presentation (Feb. 2026), Straits Research BESS Market Report 2025, stockanalysis.com FLNC Revenue (Feb. 2026)</div>
-  </div>
-</div>
-
-<!-- SEKTION 5: BEWERTUNG -->
-<div class="section">
-  <div class="section-header"><div class="num">5</div><h2>BEWERTUNG &amp; MULTIPLES</h2></div>
-  <div class="section-body">
-    <p>Bei der Bewertung von Fluence ist besondere Vorsicht geboten, da das Unternehmen noch keine stabile Profitabilität erreicht hat. P/E-basierte Kennzahlen sind daher derzeit kaum aussagekräftig – der Fokus liegt auf umsatzbasierter und EV-basierter Bewertung.</p>
-
-    <table>
-      <tr><th>Kennzahl</th><th>Fluence (FLNC)</th><th>Sektor-Durchschnitt</th><th>Bewertung</th></tr>
-      <tr><td>P/E (TTM)</td><td class="red-text">N/M (Verlust)</td><td>~20–25x</td><td>Nicht anwendbar</td></tr>
-      <tr><td>P/E (Forward FY2026)</td><td class="warn-text">~100x (spekulativ)</td><td>~18x</td><td class="warn-text">Sehr ambitioniert</td></tr>
-      <tr><td>P/S (TTM)</td><td class="green-text">~1.1x ($2.86Mrd./$2.55Mrd.)</td><td>2.5x (US Electrical)</td><td class="green-text">Attraktiv</td></tr>
-      <tr><td>P/S (FY2026 Guidance Mid)</td><td class="green-text">~0.84x</td><td>2.5x</td><td class="green-text">Günstig</td></tr>
-      <tr><td>EV/EBITDA (adj. FY2026 est.)</td><td class="warn-text">~72x ($3.6Mrd./$50Mio.)</td><td>15–20x</td><td class="warn-text">Extrem teuer</td></tr>
-      <tr><td>EV/Revenue (FY2026 mid)</td><td class="green-text">~1.06x</td><td>~1.5–2x</td><td class="green-text">Günstig</td></tr>
-      <tr><td>Debt/Equity</td><td class="neutral-text">0.83</td><td>variabel</td><td class="neutral-text">Moderat</td></tr>
-    </table>
-
-    <p>Das Bewertungsbild ist gespalten: Auf Umsatzbasis erscheint Fluence mit einem P/S von 0.84–1.1x für ein Unternehmen mit 50%+ Wachstumspotenzial und $5.5 Mrd. Backlog günstig bis fair. Die SimplyWallSt-Analyse sieht ein fairer P/S von 2.4x (vs. aktuellem ~1.1x), was erhebliches Upside-Potential impliziert. Auf EBITDA-Basis hingegen ist das Unternehmen bei ~72x EV/EBITDA für FY2026 anspruchsvoll bewertet – aber nur wenn man die Guidance glaubt. Der Analyst-Konsens von 18 Analysten mit Kursziel $16.28 (per Feb. 2026) deutet auf eine faire Bewertung bei aktuellem Kurs hin. Die Spannbreite der Kursziele ($2 bis $27) zeigt jedoch die hohe Unsicherheit.</p>
-
-    <p>Nach dem Absturz von über $33 (Hoch 52W) auf $15.56 hat sich die Bewertung deutlich normalisiert. Das 52-Wochen-Hoch implizierte ein P/S von ~2.4x, das aktuelle Niveau ~1.1x – eine Komprimierung um mehr als die Hälfte in kurzer Zeit.</p>
-
-    <p><strong>Bewertungsscore: <span class="score-badge score-mid">5/10</span></strong> – Auf Umsatzbasis günstig, auf Profitabilitätsbasis sehr teuer (da kaum Profite). Bei einer Trendwende zum nachhaltigen Wachstum wäre die Bewertung attraktiv. Die aktuelle Unsicherheit über Margen-Konsistenz rechtfertigt keinen hohen Score.</p>
-
-    <div class="source">Quellen: Robinhood / stockanalysis.com FLNC Statistics (27.02.2026), SimplyWallSt FLNC Analyse (Feb. 2026), public.com Analyst Consensus (20.02.2026)</div>
-  </div>
-</div>
-
-<!-- SEKTION 6: CASHFLOW & MARGEN -->
-<div class="section">
-  <div class="section-header"><div class="num">6</div><h2>CASHFLOW, MARGEN &amp; KAPITALQUALITÄT</h2></div>
-  <div class="section-body">
-    <table>
-      <tr><th>Kennzahl</th><th>Wert</th><th>Trend</th><th>Einschätzung</th></tr>
-      <tr><td>Umsatz TTM</td><td>$2.55 Mrd.</td><td>→</td><td>Stagnation (FY2025 war schwach)</td></tr>
-      <tr><td>GAAP Gross Margin FY2025</td><td class="green-text">13.1%</td><td>↑ vs. FY2024 (12.6%)</td><td>Leichte Verbesserung – aber fragil</td></tr>
-      <tr><td>GAAP Gross Margin Q1 FY2026</td><td class="red-text">4.9%</td><td>↓↓↓</td><td>Projektkosten-Überläufe</td></tr>
-      <tr><td>Adj. Gross Margin Q1 FY2026</td><td class="red-text">5.6%</td><td>↓ von 12.5% (Q1 FY2025)</td><td>Massiver Rückgang</td></tr>
-      <tr><td>Net Loss FY2025</td><td class="red-text">-$68.0 Mio.</td><td>↓ von +$30 Mio. (FY2024)</td><td>Profitabilitätswende gescheitert</td></tr>
-      <tr><td>Net Loss TTM</td><td class="red-text">-$51.9 Mio.</td><td>↓</td><td>Verlustbringend</td></tr>
-      <tr><td>Adj. EBITDA Q1 FY2026</td><td class="red-text">-$52.1 Mio.</td><td>↓</td><td>Saisonbedingt + Projektkosten</td></tr>
-      <tr><td>FCF Q1 FY2026</td><td class="red-text">-$232.6 Mio.</td><td>↓ von -$213.3 Mio. (Q1 FY2025)</td><td>Hoher Working Capital Bedarf</td></tr>
-      <tr><td>Liquidität (Q1 FY2026 End)</td><td class="green-text">$1.1 Mrd.</td><td>↑ (Rekord)</td><td>$477 Mio. Cash + $617 Mio. Kreditlinien</td></tr>
-      <tr><td>ROE (TTM)</td><td class="red-text">-14.46%</td><td>↓</td><td>Kapitalzerstörung</td></tr>
-      <tr><td>ROA (TTM)</td><td>n/v</td><td>negativ</td><td>Verlustbetrieb</td></tr>
-      <tr><td>D/E Ratio</td><td class="neutral-text">0.83</td><td>→</td><td>Moderate Verschuldung</td></tr>
-      <tr><td>Current Ratio</td><td class="green-text">1.48</td><td>→</td><td>Ausreichende kurzfristige Liquidität</td></tr>
-      <tr><td>Dividende</td><td>Keine</td><td>–</td><td>Alle Mittel werden intern eingesetzt</td></tr>
-      <tr><td>Aktienrückkäufe</td><td>Keine</td><td>–</td><td>Aktienanzahl stieg +1.98% in 12M</td></tr>
-    </table>
-
-    <p>Die Cashflow-Situation ist das größte kurzfristige Risiko. Mit einem FCF von -$232 Mio. in nur einem Quartal und einem Working Capital-intensiven Geschäftsmodell (Projekte binden Kapital vor Revenue-Erkennung) ist Fluence auf seine Kreditlinien angewiesen. Die Rekordhöhe von $1.1 Mrd. Liquidität gibt zunächst Sicherheit – aber bei anhaltendem negativem FCF und wachsendem Umsatzvolumen (das ebenfalls mehr Working Capital erfordert) könnte eine erneute Kapitalmaßnahme nicht ausgeschlossen werden.</p>
-
-    <p>Positiv: Das Management betonte wiederholt, dass der Q1-Margin-Einbruch temporär sei und auf zwei spezifische Projekte zurückzuführen ist. Die FY2026-Adj.-EBITDA-Guidance von $40–60 Mio. bei einer rollierenden 12M Adj. Gross Margin von 12.3% ist erreichbar – aber erfordert eine deutliche Erholung ab Q2 FY2026. Die Backend-lastigkeit des Geschäftsjahres (Q4 historisch am stärksten) stützt diesen Erwartungswert.</p>
-
-    <p><strong>Cashflow/Margen-Score: <span class="score-badge score-low">3/10</span></strong> – Durchgängig negativer FCF, Margen-Kollaps in Q1 FY2026 und kein Track Record nachhaltiger Profitabilität. Die Rekordliquidität ist ein Puffer, aber kein Beleg für gesunde Kapitalqualität.</p>
-
-    <div class="source">Quellen: Fluence Q1 FY2026 Earnings Release (04.02.2026), stockanalysis.com FLNC Statistics (Feb. 2026)</div>
-  </div>
-</div>
-
-<!-- SEKTION 7: PEER-VERGLEICH -->
-<div class="section">
-  <div class="section-header"><div class="num">7</div><h2>PEER-VERGLEICH</h2></div>
-  <div class="section-body">
-    <table>
-      <tr>
-        <th>Unternehmen</th>
-        <th>Ticker</th>
-        <th>Marktkapitalisierung</th>
-        <th>Umsatz TTM</th>
-        <th>Revenue Growth</th>
-        <th>Gross Margin</th>
-        <th>P/S</th>
-        <th>Profitabilität</th>
-      </tr>
-      <tr>
-        <td><strong>Fluence Energy</strong></td>
-        <td>FLNC</td>
-        <td>$2.86 Mrd.</td>
-        <td>$2.55 Mrd.</td>
-        <td class="warn-text">+1.2% (TTM); FY2026e +50%</td>
-        <td class="warn-text">~12–13% FY2025; 4.9% Q1 FY2026</td>
-        <td class="green-text">1.1x</td>
-        <td class="red-text">Verlust ($-52 Mio. TTM)</td>
-      </tr>
-      <tr>
-        <td><strong>Tesla Energy</strong></td>
-        <td>TSLA (segment)</td>
-        <td>~$1 Bln. (Tesla gesamt)</td>
-        <td>~$10 Mrd. (Energy segment est.)</td>
-        <td class="green-text">+113% deployments 2024</td>
-        <td class="green-text">~25%+ (Energy segment)</td>
-        <td>n/a (Teil von Tesla)</td>
-        <td class="green-text">Profitabel, Megapack-Einheit wächst</td>
-      </tr>
-      <tr>
-        <td><strong>Stem Inc.</strong></td>
-        <td>STEM</td>
-        <td class="red-text">~$140 Mio.</td>
-        <td>~$165 Mio.</td>
-        <td class="red-text">-69% in 2024 (Hardware-Ausstieg)</td>
-        <td class="green-text">~32% (Software-Pivot)</td>
-        <td class="warn-text">~0.85x</td>
-        <td class="red-text">Verlust (negativer Adj. EBITDA)</td>
-      </tr>
-      <tr>
-        <td><strong>Eos Energy</strong></td>
-        <td>EOSE</td>
-        <td>~$700 Mio.</td>
-        <td>~$114 Mio. (FY2025)</td>
-        <td class="green-text">+700% YoY in FY2025!</td>
-        <td class="warn-text">noch negativ</td>
-        <td class="warn-text">~6x</td>
-        <td class="red-text">Verlust; Going Concern Zweifel gelöst</td>
-      </tr>
-      <tr>
-        <td><strong>Ameresco</strong></td>
-        <td>AMRC</td>
-        <td>~$1.74 Mrd.</td>
-        <td>$1.88 Mrd.</td>
-        <td class="green-text">+7% (TTM)</td>
-        <td>~14.7%</td>
-        <td>0.87x</td>
-        <td class="green-text">Profitabel (P/E 27.85x)</td>
-      </tr>
-    </table>
-
-    <p><strong>Qualitative Unterschiede:</strong> Tesla Energy (Megapack) ist der technologisch fortschrittlichste und finanziell stärkste Konkurrent. Vertikale Integration (eigene Zellen), globale Fertigung (Texas + Shanghai Megafactory für 40 GWh/Jahr), und eine überlegene Positionierung für AI-Rechenzentrum-Anwendungen laut Jefferies Research machen Tesla zum Hauptkonkurrenten für Fluence im US-Markt. Allerdings ist Tesla Energy als eigenständiges Geschäft nicht direktvergleichbar, da es innerhalb eines $1 Billion Dollar Unternehmens eingebettet ist.</p>
-
-    <p>Stem Inc. hat eine völlig andere Richtung eingeschlagen: weg von Hardware, hin zu Software und Services. Mit ihrer PowerTrack-Plattform und einem Solar-Monitoring-Portfolio von 29.9 GW ist Stem eher ein indirekter Konkurrent für Fluences Mosaic/Nispera-Software. Die Marktkapitalisierung von nur $140 Mio. zeigt jedoch, wie schwer der Übergang ist. Eos Energy ist ein interessanter Nischen-Spieler mit Zink-Batterie-Technologie für Long-Duration-Anwendungen (4–16+ Stunden), die Lithium-Ionen nicht gut abdeckt – aber noch in sehr früher Kommerzialisierungsphase. Ameresco ist breiter positioniert (Energieeffizienz + Erneuerbare) und profitabel, aber mit geringerer Wachstumsdynamik.</p>
-
-    <p><strong>Peer-Score: <span class="score-badge score-mid">5/10</span></strong> – Fluence ist der Umsatz-Marktführer unter den börsennotierten reinen BESS-Spielern, aber Tesla dominiert technologisch und finanziell. Das P/S von 1.1x ist im Peer-Vergleich attraktiv, aber die operativen Metriken (Margen, Profitabilität) bleiben schwach.</p>
-
-    <div class="source">Quellen: stockanalysis.com STEM/EOSE/AMRC (Feb. 2026), CNBC AMRC Quote (27.02.2026), Eos Energy Q4 2025 Earnings (26.02.2026), Stem TTM Revenue PitchBook (Feb. 2026), Energy-Storage.News (März 2025, Mai 2025)</div>
-  </div>
-</div>
-
-<!-- SEKTION 8: NEWS & EVENTS -->
-<div class="section">
-  <div class="section-header"><div class="num">8</div><h2>AKTUELLE NEWS &amp; EVENTS (letzte 3 Monate)</h2></div>
-  <div class="section-body">
-
-    <div class="subsection">Ebene 1: Unternehmen (Company-spezifische Events)</div>
-    <table>
-      <tr><th>Event</th><th>Datum</th><th>Bewertung</th><th>Kommentar</th></tr>
-      <tr><td>Q1 FY2026 Earnings – Margin Kollaps</td><td>04.02.2026</td><td><span class="tag tag-neg">NEGATIV</span></td><td>EPS miss von 89% ($-0.34 vs. $-0.18e), Gross Margin 4.9% vs. 11.4% – Marktschock. Guidance aber bestätigt.</td></tr>
-      <tr><td>Rekordbacklog $5.5 Mrd.</td><td>04.02.2026</td><td><span class="tag tag-pos">POSITIV</span></td><td>Höchster Backlog aller Zeiten, deckt gesamte FY2026-Guidance ab. Pipeline auf $30 Mrd. (+30%) gestiegen.</td></tr>
-      <tr><td>Pioneer Storage Project, Arizona (1.200 MWh)</td><td>15.01.2026</td><td><span class="tag tag-pos">POSITIV</span></td><td>Gridstack Pro™ System mit BrightNight/Cordelio – US Domestic Content. Stärkt Marktposition im US-Utility-Segment.</td></tr>
-      <tr><td>S&amp;P Global Top-3-BESS-Provider-Anerkennung</td><td>11.12.2025</td><td><span class="tag tag-pos">POSITIV</span></td><td>Dritter aufeinanderfolgender „System Integrator of the Year"-Award (Energy Storage News Awards).</td></tr>
-      <tr><td>LEAG Clean Power, Deutschland (Großprojekt)</td><td>07.11.2025</td><td><span class="tag tag-pos">POSITIV</span></td><td>Ausbau europäischer Präsenz in Deutschland.</td></tr>
-      <tr><td>FY2025 Ergebnisse + FY2026 Guidance</td><td>24.11.2025</td><td><span class="tag tag-neu">NEUTRAL</span></td><td>FY2025 Revenue $2.31 Mrd. (unter Guidance), aber Guidance FY2026 von $3.2–3.6 Mrd. (+50%) über Konsens.</td></tr>
-      <tr><td>Rechtliche Untersuchung durch Johnson Fistel (Aktionärsrechte)</td><td>Okt. 2025</td><td><span class="tag tag-neg">NEGATIV</span></td><td>Untersuchung wegen potenzieller Wertpapierverletzungen nach vorherigen Earnings-Enttäuschungen.</td></tr>
-    </table>
-
-    <div class="subsection">Ebene 2: Branche (Sektor-spezifische Events)</div>
-    <table>
-      <tr><th>Event</th><th>Bewertung</th><th>Kommentar</th></tr>
-      <tr><td>Eos Energy – 7x Umsatzwachstum FY2025, $300–400 Mio. Guidance FY2026</td><td><span class="tag tag-neg">NEGATIV FÜR FLNC</span></td><td>Eos wächst als LDES-Nischenspieler stark und erhöht Wettbewerbsdruck im Long-Duration-Segment.</td></tr>
-      <tr><td>Tesla Megapack Shanghai Fabrik – 40 GWh/Jahr online (Q1 2025)</td><td><span class="tag tag-neg">NEGATIV FÜR FLNC</span></td><td>Tesla steigert Produktionskapazität massiv, stärkt Preisführerschaft außerhalb USA.</td></tr>
-      <tr><td>BESS-Markt wächst 23% YoY in 2025 (globale Deployments)</td><td><span class="tag tag-pos">POSITIV</span></td><td>Steigende Gesamtnachfrage hebt alle Marktteilnehmer.</td></tr>
-      <tr><td>ASP-Verfall: -26% YoY auf $192/kWh</td><td><span class="tag tag-neg">NEGATIV</span></td><td>Anhaltender Preisdruck durch chinesische Überkapazitäten. Strukturelles Margenproblem für Hardware-Integratoren.</td></tr>
-      <tr><td>AI Datenzentren als neue BESS-Nachfragequelle (Jefferies: 20 GW über nächste 10 Jahre)</td><td><span class="tag tag-pos">POSITIV</span></td><td>Neuer, großer Wachstumsmarkt. Fluence hat 36 GWh in Data Center Pipeline.</td></tr>
-    </table>
-
-    <div class="subsection">Ebene 3: Makro</div>
-    <table>
-      <tr><th>Thema</th><th>Bewertung</th><th>Kommentar</th></tr>
-      <tr><td>FEOC-Regeln (Foreign Entity of Concern) für BESS</td><td><span class="tag tag-pos">POSITIV</span></td><td>Schützt US-Markt vor günstigen chinesischen Systemen. Schlüsselvoraussetzung für Fluences US-Wachstum.</td></tr>
-      <tr><td>IRA Domestic Content Bonus Credits (One Big Beautiful Bill Act)</td><td><span class="tag tag-pos">POSITIV</span></td><td>Stärkt Fluences US-Fertigungsstrategie (PFE-konforme Zellen aus Tennessee).</td></tr>
-      <tr><td>Trump-Administration / IRA-Unsicherheit</td><td><span class="tag tag-neg">NEGATIV</span></td><td>Potenzielle Kürzungen der Clean Energy Incentives würden BESS-Nachfrage dämpfen.</td></tr>
-      <tr><td>Zinsniveau (Fed – vorläufig stabil)</td><td><span class="tag tag-neu">NEUTRAL</span></td><td>Höhere Zinsen erhöhen Projektfinanzierungskosten für Kunden → leicht dämpfend auf Nachfrage.</td></tr>
-      <tr><td>Strom-Nachfrageexplosion durch AI/Rechenzentren</td><td><span class="tag tag-pos">POSITIV</span></td><td>Haupttreiber für beschleunigte Grid-Investitionen. Direkter positiver Nachfrageeffekt für BESS.</td></tr>
-    </table>
-
-    <div class="source">Quellen: Fluence IR (fluenceenergy.com/news-events), GlobeNewswire (Jan.–Feb. 2026), The Register (Nov. 2025), Quiver Quantitative (Feb. 2026), InsiderMonkey (Feb. 2026)</div>
-  </div>
-</div>
-
-<!-- SEKTION 9: TECHNISCHE ANALYSE -->
-<div class="section">
-  <div class="section-header"><div class="num">9</div><h2>TECHNISCHE ANALYSE</h2></div>
-  <div class="section-body">
-    <p>Die technische Situation ist nach dem katastrophalen Post-Earnings-Sell-Off vom 4.–5. Februar 2026 erheblich beschädigt. Der Kurs kollabierte von ~$28–30 auf ~$15, wobei extreme Volumina auf Panikverkäufe hindeuteten.</p>
-
-    <table>
-      <tr><th>Indikator</th><th>Wert</th><th>Signal</th></tr>
-      <tr><td>Kurs (27.02.2026)</td><td>$15.56</td><td class="neutral-text">→ in Konsolidierung</td></tr>
-      <tr><td>52-Wochen Hoch</td><td>$33.51</td><td class="red-text">Kurs -53.6% vom Hoch</td></tr>
-      <tr><td>52-Wochen Tief</td><td>$3.46</td><td class="green-text">Kurs +350% vom Tief</td></tr>
-      <tr><td>SMA-50 (ca.)</td><td>~$23.34</td><td class="red-text">Kurs darunter – Verkaufssignal</td></tr>
-      <tr><td>SMA-200 (ca.)</td><td>~$19.82</td><td class="red-text">Kurs darunter – bearish</td></tr>
-      <tr><td>RSI-14 (Investing.com)</td><td>~41</td><td class="warn-text">Neutral / Grenzwertig überverkauft</td></tr>
-      <tr><td>MACD</td><td>-0.49 (Histogramm negativ)</td><td class="red-text">Verkaufssignal</td></tr>
-      <tr><td>Volumen</td><td>↑ auf fallende Kurse</td><td class="red-text">Frühwarnsignal – anhaltender Verkaufsdruck</td></tr>
-      <tr><td>Support-Level</td><td>~$15.80 (Volumenakkumulation)</td><td class="neutral-text">Potenzielle Unterstützung</td></tr>
-      <tr><td>Widerstand</td><td>$19.62, $23.11</td><td class="warn-text">Erhebliche Widerstands-Cluster</td></tr>
-      <tr><td>Bollinger Bands</td><td>~$13.96–$26.58</td><td class="warn-text">Sehr hohe Volatilität</td></tr>
-      <tr><td>Beta</td><td>2.91</td><td class="red-text">Extrem volatil vs. Markt</td></tr>
-      <tr><td>Short Interest</td><td>11.84%</td><td class="warn-text">Erheblich – Short-Druck vorhanden</td></tr>
-    </table>
-
-    <p>Der Kurs befindet sich in einem klaren kurzfristigen Abwärtstrend nach dem Earnings-Schock. Der Kurs liegt aktuell deutlich unter dem SMA-50 und SMA-200 – beide Moving Averages sind auf Verkauf. Die RSI bei ~41 zeigt keinen extremen Überverkauft-Zustand, aber die Richtung bleibt negativ. Das 11.84% Short-Interest erhöht das Risiko weiterer Abwärtsbewegungen, bietet aber auch Potential für einen Short-Squeeze, wenn sich die Fundamentals stabilisieren.</p>
-
-    <p>Positiver Aspekt: Der TradingView-Konsens (wöchentlich) zeigt ein „Strong Buy"-Signal, was auf technische Erholung aus überverkauften Niveaus hindeutet. Das 1-Jahres-Momentum ist trotz der jüngsten Korrektur noch positiv (+187% 1-Jahres-Return). Der Rückfall von $33+ auf $15 hat möglicherweise übertrieben, da das Fundamentalargument (Backlog, Guidance) intakt blieb. Wichtiges Level: $15.80 als Unterstützung – ein Bruch würde auf $13–14 testen.</p>
-
-    <p><strong>Technischer Score: <span class="score-badge score-low">3/10</span></strong> – Kurzfristig klar bärisch (unter SMA-50 und SMA-200, MACD negativ, Sell-Off-Volumen). Mittelfristig neutral bis leicht bullish (RSI nicht extremly oversold, stabiler 52W-Trendkanal nach unten). Für reine kurzfristige Trader: Abwarten eines Reversal-Signals.</p>
-
-    <div class="source">Quellen: Investing.com FLNC Technical Analysis (27.02.2026), stockinvest.us FLNC (19.02.2026), TradingView FLNC Technicals, Robinhood FLNC Quote (27.02.2026)</div>
-  </div>
-</div>
-
-<!-- SEKTION 10: RISIKEN & CHANCEN -->
-<div class="section">
-  <div class="section-header"><div class="num">10</div><h2>RISIKEN &amp; CHANCEN (Sektion 10 des Canvas)</h2></div>
-  <div class="section-body">
-
-    <div class="subsection">9a) Strukturelle &amp; zyklische Risiken</div>
-    <table>
-      <tr><th>Risiko</th><th>Schweregrad</th><th>Wahrscheinlichkeit</th><th>Finanzielle Auswirkung</th></tr>
-      <tr><td>Margen-Erosion durch Preisverfall (ASP -26% YoY)</td><td class="red-text">HOCH</td><td>HOCH</td><td>Jede weitere 1 pp Gross Margin Verschlechterung = ~$32 Mio. weniger EBITDA bei $3.4 Mrd. Umsatz</td></tr>
-      <tr><td>Projektkosten-Überläufe (wie Q1 FY2026)</td><td class="red-text">HOCH</td><td>MITTEL</td><td>Einzelnes $20 Mio. Überlauffähigkeit hat Kurs um 36% gesenkt – Vertrauensproblem</td></tr>
-      <tr><td>Chinesische Konkurrenz (CATL/BYD) außerhalb USA</td><td class="red-text">HOCH</td><td>SEHR HOCH</td><td>60–70% Marktanteil China global; Preisunterbietung im internationalen Markt massiv</td></tr>
-      <tr><td>IRA/FEOC-Politische Unsicherheit (Trump)</td><td class="warn-text">MITTEL</td><td>MITTEL</td><td>Wegfall der Domestic Content Credits würde US-Marktposition empfindlich treffen</td></tr>
-      <tr><td>Tesla Megapack Wettbewerb (USA)</td><td class="warn-text">MITTEL</td><td>HOCH</td><td>Tesla besser für Data Center positioniert laut Jefferies – Verlust von Marktanteilen möglich</td></tr>
-      <tr><td>Lieferketten-Abhängigkeit (AESC PFE-Konformität)</td><td class="warn-text">MITTEL</td><td>MITTEL</td><td>AESC muss PFE-Konformität ohne Fluence-Eigentümerschaft nachweisen – rechtliche Grauzone</td></tr>
-      <tr><td>Negativer FCF / Kapitalbedarf</td><td class="warn-text">MITTEL</td><td>MITTEL</td><td>Bei $1.1 Mrd. Liquidität und -$232 Mio. FCF pro Quartal: ca. 4–5 Quartale Puffer</td></tr>
-    </table>
-
-    <div class="subsection">9b) AI/Disruptions-Risiko – Detailanalyse (User-Fokus)</div>
-    <div class="callout callout-bull">
-      <h4>🟢 Bullisches AI-Szenario</h4>
-      <p>AI ist für Fluence primär ein <strong>Enabler, nicht ein Disruptor</strong>. Die Nachfrage nach BESS explodiert durch AI-Rechenzentren: Jefferies prognostiziert 20 GW BESS-Deployments an Data Centers in der nächsten Dekade. Fluence hat bereits 36 GWh an Rechenzentrum-Projekten in seiner Pipeline und Leads – ein noch kaum erschlossenes Marktsegment. Gleichzeitig stärkt AI Fluences eigene Software: Mosaic's Machine Learning-Algorithmen werden mit mehr Daten besser, und Nispera's predictive Maintenance profitiert von wachsenden Trainingsdatensätzen. Fluences integrierter Ansatz (Hardware + Software + AI-Optimierung) könnte einen sich selbst verstärkenden Datenvorteil aufbauen: mehr deployte Systeme → mehr Betriebsdaten → bessere AI-Modelle → mehr Kunden.</p>
+<div class="header">
+  <div class="header-left">
+    <h1>Fluence Energy, Inc. <span>FLNC</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 15. Mai 2026 · NASDAQ · Sektor: Industrie / Energy Storage</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-orange">BESS / Grid-Scale</span>
+      <span class="badge badge-blue">Smartstack + Software (Mosaic/Nispera)</span>
+      <span class="badge badge-yellow">2 Hyperscaler-MSAs</span>
     </div>
-    <div class="callout callout-bear">
-      <h4>🔴 Bärisches AI/Disruptions-Szenario</h4>
-      <p>Das eigentliche Disruptions-Risiko liegt in der <strong>Softwareschicht</strong>. Mosaic und Nispera sind heute differenzierend – aber Energiemarkt-Optimierung ist kein unangreifbares Monopol. Gut finanzierte AI-Native-Startups (z.B. auf Basis von Large Language Models für Energiemarkt-Prognosen) oder horizontale Softwareanbieter könnten überlegene Bidding-Algorithmen entwickeln. Noch kritischer: Fluences Hardware-Kerngeschäft ist strukturell AI-neutral – ein BESS-Batteriespeicher wird nicht durch besserere AI obsolet. Aber vertikale Integration durch Tesla (eigene Hardware + Tesla-eigene Steuerungssoftware + xAI-Rechenzentrums-Synergien) könnte Fluence als Mittleman-Integrator überflüssig machen. Kurzfristig (2–3 Jahre) ist dieses Risiko gering. Mittelfristig (3–7 Jahre) ist es real.</p>
-      <p>Konkret: Falls Tesla Megapack mit einem AI-nativem Energiemanagementsystem ausgestattet wird und dies zur Branchenstandard für Data-Center-BESS wird, verliert Fluence seinen wichtigsten Differenzierungspunkt im wachstumsstärksten Marktsegment.</p>
-    </div>
-
-    <div class="subsection">9c) Chancen</div>
-    <p>Drei Hauptkatalysatoren haben das Potenzial, die Bull-These zu transformieren: Erstens der Datenzentrum-Boom – 36 GWh in der Pipeline sind noch nicht im Backlog und könnten bei Kontraktion einen Umsatzschub von mehreren Milliarden Dollar generieren. Zweitens Long-Duration Energy Storage (LDES) – Fluence positioniert Smartstack für 4–8 Stunden-Speicherung, ein Markt, der strukturell weniger preissensibel ist. Drittens der Software-Margin-Mix-Shift: Wenn ARR von $180 Mio. auf $500+ Mio. wächst (plausibel in 3–5 Jahren bei Mosaic-Skalierung), verändert sich das Margenprofil fundamental positiv.</p>
-
-    <div class="subsection">9d) Red Flags &amp; Dealbreaker</div>
-    <div class="callout callout-warn">
-      <h4>⚠️ Red Flags (beobachten, kein Dealbreaker)</h4>
-      <p>Wiederkehrende Projektkosten-Überläufe würden zeigen, dass das Margenproblem strukturell (nicht episodisch) ist. Short Interest von 11.84% – erheblich, aber kein Extremwert. Rechtliche Untersuchung durch Aktionärsrechtsanwälte (Johnson Fistel). Revenue-Guidance-Verfehlung wäre schwerwiegend, da 85% bereits gesichert – dies würde Kapitalerhöhung signalisieren.</p>
-    </div>
-    <div class="callout callout-bear">
-      <h4>🔴 Dealbreaker (Existenzgefährdendes Risiko)</h4>
-      <p>Aktuell <strong>kein</strong> identifizierbarer Dealbreaker. Das Unternehmen hat $1.1 Mrd. Liquidität, eine gesicherte Revenue-Pipeline und operiert in einem strukturellen Wachstumsmarkt. Ein echter Dealbreaker wäre: (1) Verlust der AESC-Lieferantenbeziehung ohne PFE-konforme Alternative – würde US-Marktposition vernichten. (2) Brecher der FY2026-Guidance um >30% bei gleichzeitig kritisch niedrigem Liquiditätspuffer.</p>
-    </div>
-
-    <p><strong>Gesamt-Risikoscore (invertiert, 10 = kein Risiko): <span class="score-badge score-low">4/10</span></strong> – Hohe, echte Risiken durch Preisdruck, Execution-Schwäche und politische Abhängigkeit. Kein Dealbreaker, aber mehrere signifikante Feuer.</p>
-
-    <div class="source">Quellen: Jefferies BESS Report (Nov. 2025), The Register (Nov. 2025), Fintool FLNC Q1 2026 Summary (Feb. 2026), InsiderMonkey (Okt. 2025), public.com (Feb. 2026)</div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$20,94</div>
+    <div class="price-meta">Schlusskurs 14.05.2026 · NASDAQ</div>
+    <div class="price-change up">▲ +71,9% / 2W · +321% / 1J</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">52W: $4,40 – $33,51</div>
   </div>
 </div>
 
-<!-- SEKTION 10: SCORING TABELLE -->
-<div class="section">
-  <div class="section-header"><div class="num">10</div><h2>SCORING ÜBERSICHT</h2></div>
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+<div class="kpi-grid" style="margin-top:24px;">
+  <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value">$20,94</div><div class="kpi-sub">14.05.2026</div></div>
+  <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value orange">~$3,86 Mrd.</div><div class="kpi-sub">Small-Mid Cap</div></div>
+  <div class="kpi-card"><div class="kpi-label">P/E</div><div class="kpi-value red">n/a (Verlust)</div><div class="kpi-sub">EPS TTM: –$0,34</div></div>
+  <div class="kpi-card"><div class="kpi-label">P/Sales</div><div class="kpi-value green">~1,1x</div><div class="kpi-sub">Günstig vs. Peers</div></div>
+  <div class="kpi-card"><div class="kpi-label">Backlog</div><div class="kpi-value green">$5,6 Mrd.</div><div class="kpi-sub">Rekord (Q2 FY26)</div></div>
+  <div class="kpi-card"><div class="kpi-label">Orders YTD</div><div class="kpi-value green">~$2,0 Mrd.</div><div class="kpi-sub">+100% YoY</div></div>
+  <div class="kpi-card"><div class="kpi-label">Next Earnings</div><div class="kpi-value orange">10.08.2026</div><div class="kpi-sub">Q3 FY 2026</div></div>
+  <div class="kpi-card"><div class="kpi-label">Konsens</div><div class="kpi-value">HOLD (Median)</div><div class="kpi-sub">PT-Range: $15–28</div></div>
+</div>
+
+<!-- SEKTION 1 -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Geschäftsmodell</div>
+    <div class="section-note">Quellen ≤ 6 Monate</div>
+  </div>
   <div class="section-body">
-    <table>
-      <tr>
-        <th>Kategorie</th>
-        <th>Score</th>
-        <th>Begründung</th>
-      </tr>
-      <tr><td>1. Geschäftsmodell</td><td><span class="score-badge score-mid">6/10</span></td><td>Starkes Marktumfeld, klares Revenue-Modell, aber Hardware-Abhängigkeit und dünne Margen</td></tr>
-      <tr><td>2. Burggraben</td><td><span class="score-badge score-mid">5/10</span></td><td>Track Record + Software-Assets gut, aber angreifbar durch vertikale Konkurrenz (Tesla/BYD)</td></tr>
-      <tr><td>3. Operative Entwicklung (4Q)</td><td><span class="score-badge score-low">4/10</span></td><td>Q4 FY2025 gut, aber Q1 FY2026 Margin-Schock – Konsistenz fehlt</td></tr>
-      <tr><td>4. Wachstum</td><td><span class="score-badge score-mid">6/10</span></td><td>50%+ FY2026-Wachstum gesichert, BESS-Markt stark – aber FY2025-Rückgang und dünne Profitabilität</td></tr>
-      <tr><td>5. Bewertung</td><td><span class="score-badge score-mid">5/10</span></td><td>P/S 1.1x günstig, aber EV/EBITDA extrem teuer; faire Bewertung bei aktuellem Kurs</td></tr>
-      <tr><td>6. Cashflow/Margen</td><td><span class="score-badge score-low">3/10</span></td><td>Durchgehend negativer FCF, Margen-Kollaps Q1 – keine nachhaltige Profitabilität bewiesen</td></tr>
-      <tr><td>7. Peer-Vergleich</td><td><span class="score-badge score-mid">5/10</span></td><td>Umsatzführer unter puren BESS-Plays, aber Tesla dominiert technologisch/fundamental</td></tr>
-      <tr><td>8. Technische Analyse</td><td><span class="score-badge score-low">3/10</span></td><td>Unter SMA-50 und SMA-200, MACD negativ, hohe Volatilität, Short-Druck</td></tr>
-      <tr><td>9. Risiken (invertiert)</td><td><span class="score-badge score-low">4/10</span></td><td>Reale, erhebliche Risiken (Preisverfall, Execution, Politik) – kein Dealbreaker</td></tr>
-      <tr style="background: #e3f2fd;"><td><strong>Ø Gesamtscore</strong></td><td><span class="score-badge score-mid"><strong>4.6/10</strong></span></td><td><strong>Hochriskantes, spekulatives Investment – nur für risikotolerante Wachstumsinvestoren</strong></td></tr>
-    </table>
+    <p>Fluence Energy ist ein globaler Anbieter von <strong>Energiespeicherprodukten (Battery Energy Storage Systems, BESS)</strong> und zugehöriger Optimierungssoftware. Gegründet 2018 als Joint Venture von Siemens und AES, seit 2021 börsennotiert. Hauptsitz Arlington, Virginia. Das Unternehmen positioniert sich als Tier-1-Lieferant für Utility-Scale-Speicherprojekte – Direktkunden sind Energieversorger, IPPs, Projektentwickler – und neuerdings auch <strong>Hyperscaler-Datacenter-Betreiber</strong>.</p>
+    <p>Die Produktpalette umfasst <strong>Gridstack Pro</strong> und <strong>Gridstack</strong> (Front-of-the-Meter), <strong>Ultrastack</strong> (für Distribution/Transmission), <strong>Sunstack</strong> (Solar-Hybrid) sowie das neu eingeführte <strong>Smartstack</strong> – eine High-Density-Modullösung mit 7,5 MWh nutzbarer Kapazität pro Einheit, eingebauter Leistungselektronik und Modul-Architektur, die mehr als 500 MWh Speicherkapazität pro Acre erlaubt. Über allen Produkten läuft die proprietäre <strong>Fluence OS</strong>-Plattform mit den Cloud-Software-Produkten <strong>Mosaic</strong> (Trading) und <strong>Nispera</strong> (Asset-Performance).</p>
+    <p>Die Revenue-Struktur ist primär transaktional (Hardware-Verkäufe mit Engineering-/Lieferdienstleistungen), kombiniert mit wachsendem Service- und Software-Geschäft. <strong>Annual Recurring Revenue (ARR) wuchs von $148 Mio. (FY2025) auf erwartete ~$180 Mio. (FY2026)</strong> – ein wichtiger Indikator für die Software/Services-Transformation. Die wesentliche Veränderung im letzten Quartal: <strong>Datacenter als neues Kundensegment</strong>. Mit den im Q2 FY2026 signierten Master Supply Agreements (MSAs) mit zwei großen Hyperscalern bedient Fluence erstmals AI-Workload-getriebene Power-Quality-Anforderungen – Smartstack adressiert hier extreme Lastfluktuationen, die durch AI-Chip-Aktivität entstehen.</p>
+    <p>Das Kostenmodell ist hardware-zentrisch mit niedrigen Bruttomargen (~10–13% adjusted). Lithium- und Zellpreise dominieren die COGS – Fluence kauft Zellen bei mehreren Lieferanten (CATL, EVE, BYD, sowie zunehmend US-domestic content). Die Vertical Integration ist begrenzt: Fluence designt Systems, integriert und liefert, fertigt aber Zellen nicht selbst. Das ist eine strukturelle Schwäche gegenüber Tesla Megapack (eigene Zellfertigung in Lathrop) und BYD (vertikal-integriert), aber gleichzeitig der Grund für höhere Software-Optionalität und schnellere Skalierung.</p>
+    <div class="source">Quellen: Fluence Energy Q2 FY26 Earnings Release (06.05.2026); SEC 8-K (06.05.2026); Fluence IR Presentations 2025–2026; Energy-Storage.News Fluence Q2 (08.05.2026); Utility Dive Fluence MSA Coverage (12.05.2026).</div>
   </div>
 </div>
 
-<!-- SEKTION 11: USER-SPEZIFISCHE ANALYSE -->
-<div class="section">
-  <div class="section-header"><div class="num">11</div><h2>USER-SPEZIFISCHE ANALYSE</h2></div>
+<!-- SEKTION 2 -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+    <div class="section-score">Score: 6/10 (zuvor: 5/10)</div>
+  </div>
   <div class="section-body">
-    <p>Der User-Fokus liegt auf zwei Themen: (A) AI/Disruptions-Risiko und (B) Downside-Schutz. Beide wurden bereits extensiv in den vorherigen Sektionen behandelt. Diese Sektion fasst die spezifischen Konsequenzen für die Investment-These zusammen und vertieft ein zentrales Argument.</p>
-
-    <p><strong>Zum AI/Disruptions-Risiko:</strong> Die Analyse ergibt, dass Fluence von der KI-Nachfrage kurzfristig profitiert (Datenzentren als BESS-Kunden) und mittelfristig ein echtes, aber noch nicht akutes Software-Disruptions-Risiko trägt. Die kritische Frage ist: Kann Fluence sein Software-Business (ARR ~$180 Mio. FY2026e) schnell genug skalieren, um eine eigenständige, schwer imitierbare Marktposition aufzubauen – bevor Tesla oder ein AI-Native-Konkurrent die Software-Schicht übernimmt? Der bisherige Stand deutet auf einen realen, aber noch nicht sprungbereiten Moat hin. Die Integration von Mosaic in die neuen Smartstack-Produkte ist ein richtiger Schritt – aber ARR von $180 Mio. vs. $3.4 Mrd. Gesamtumsatz zeigt, wie weit der Weg noch ist. Score-Auswirkung: keine Änderung der Einzelscores notwendig (bereits in Sektion 2 und 9 eingepreist).</p>
-
-    <p><strong>Zum Downside-Schutz (Risk-Assessment):</strong> Dieser Analyseschwerpunkt ist angesichts des jüngsten -36% Sell-Offs besonders relevant. Das Downside-Szenario ist konkret kalkulierbar: Ein weiterer Margen-Kollaps in Q2 FY2026 (ähnlich Q1) würde die FY2026-Adj.-EBITDA-Guidance von $40–60 Mio. in Gefahr bringen. Bei einer Guidance-Unterschreitung um >30% wäre eine Neubewertung auf P/S 0.6–0.7x denkbar, was einem Kursziel von $9–11 entsprechen würde (-30 bis -40% Downside vom aktuellen Niveau). Der eigentliche "Floor" liegt bei der Liquiditätsbasis: Bei $1.1 Mrd. Cash/Credit und FY2026-Guidance voll durch Backlog gedeckt, ist ein Kurs unter $8–10 per se fundamental schwer zu rechtfertigen (entspräche P/S von ~0.3x bei $3.4 Mrd. Umsatz). Aber: Der Markt hat in der Vergangenheit gezeigt, dass er Momentum-Aktien unter Buchwert treibt. Das 52-Wochen-Tief von $3.46 (erreicht vor ~10 Monaten) mahnt zur Bescheidenheit bei Downside-Annahmen.</p>
+    <p>Der Burggraben hat sich durch die <strong>Hyperscaler-MSAs in Q2 FY2026 materiell verstärkt</strong>. Die alte Bewertung (5/10, „Track Record + Software-Assets gut, aber angreifbar durch vertikale Konkurrenz") wird durch zwei neue Datenpunkte herausgefordert: (1) <strong>Erstkqualifikation</strong> – einer der beiden Hyperscaler startete den Qualifizierungsprozess mit 26 BESS-Vendoren, Fluence war der erste, der die globalen Anforderungen für ein MSA erfüllte. (2) Power-Quality-Anforderungen für AI-Datacenter sind eine völlig neue Kategorie, in der Fluences <strong>fortgeschrittenes Steuerungs-Know-how</strong> (jahrelang in Fast-Response-Frequenzregulierung trainiert) einen <em>technischen</em> Burggraben darstellt – nicht nur einen kommerziellen.</p>
+    <p><strong>Vier Burggraben-Komponenten:</strong> (1) <strong>Software-Stack</strong> (Mosaic, Nispera, Fluence OS): ARR $148→$180 Mio. mit ~70%+ Gross Margins. Diese Sparte ist asset-light und skaliert. (2) <strong>Track Record im Utility-Segment</strong>: Über 10 GW deployed weltweit, „bankable" Partner für Eigenkapital-Investoren und Lender. (3) <strong>Vertriebspräsenz in 30+ Ländern</strong> – kein chinesischer Spieler hat globale Reichweite + Compliance-Stack. (4) <strong>Datacenter-Qualifikationsbarriere</strong>: Die Hyperscaler-MSAs sind exklusive Eintrittstickets, die Wettbewerber erst durch eigene Qualifikationsprozesse erlangen müssen (12–18 Monate Vorlauf).</p>
+    <p><strong>Ehrliche Schwächen:</strong> (a) Die Hardware bleibt im Kern kommodisiert, Zellen werden zugekauft – chinesische Wettbewerber wie BYD und CATL haben direkten Kostenvorteil. (b) Tesla Megapack ist technologisch und finanziell dominant, mit eigener Zellfertigung in Lathrop und niedrigerer Kostenbasis. (c) Die Software-ARR ($180 Mio.) ist im Verhältnis zum Gesamtumsatz ($3,4 Mrd. Mid) immer noch klein (~5%). (d) <strong>Secondary Offering vom 12.05.2026</strong> (20M Class-A-Aktien zu $21, plus 117M Class-A-Filing für Holder) hat Dilution-Sorgen ausgelöst – ein Burggraben aus Kapital-Disziplin ist FLNC nicht.</p>
+    <p><strong>Score-Anhebung von 5/10 auf 6/10</strong> trotz Schwächen: Die Hyperscaler-MSA und der Datacenter-Pipeline-Win (12 GWh) sind ein qualitativer Burggraben-Sprung, der über die nächsten 12–18 Monate die Skalierung der Software/Services-Sparte beschleunigen kann. Score-Anhebung nicht auf 7, weil das Geschäftsmodell weiterhin in einem Hardware-dominanten Segment operiert.</p>
+    <div class="source">Quellen: Fluence Q2 FY26 Earnings Call (07.05.2026); Energy-Storage.News (08.05.2026); Stocktwits FLNC Hyperscaler Coverage (08.05.2026); Investing.com Q2 Earnings Transcript (Mai 2026); Yahoo Finance Q2 Highlights (07.05.2026).</div>
   </div>
 </div>
 
-<!-- SEKTION 12: FAZIT -->
-<div class="section">
-  <div class="section-header"><div class="num">12</div><h2>FAZIT – INVESTMENT-THESE</h2></div>
+<!-- SEKTION 3 -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">Letzte 4 Quartale</div>
+    <div class="section-score">EPS Beat-Ratio: 3/4 | Revenue: 1/4</div>
+  </div>
   <div class="section-body">
-
-    <div class="callout callout-bull">
-      <h4>📈 Das Bullische Narrativ</h4>
-      <p>Das bullische Narrativ für Fluence Energy ruht auf drei soliden Säulen. Erstens ist der strukturelle Marktmoment außergewöhnlich: Der globale BESS-Markt wächst mit einer CAGR von ~27% bis 2034, und Fluence ist als anerkannter Top-3-Integrator weltweit in einer einzigartigen Position, dieses Wachstum zu monetarisieren. Der Backlog von $5.5 Mrd. – höchster in der Unternehmensgeschichte – und eine Pipeline von $30 Mrd. (+30% in einem Quartal) zeigen, dass die Nachfrage nach Fluences Lösungen real und robust ist. Dass FY2026-Umsatz von $3.2–3.6 Mrd. zu 85% durch Backlog gedeckt ist, eliminiert das kurzfristige Revenue-Risiko faktisch.</p>
-      <p>Zweitens ist die AI-Datenzentrum-Nachfrage ein echter neuer Wachstumsmotor. Fluence hat 36 GWh an Datenzentrum-Projekten in der Pipeline – noch nicht im Backlog. Falls nur 30% davon in Verträge umgewandelt werden, würde das einen zusätzlichen Backlog von ~$6–7 Mrd. repräsentieren. Die Kombination aus Smartstack (hohe Energiedichte, ideal für Datenzentrum-Anwendungen) und Mosaic (AI-optimierte Steuerung) macht Fluence zum einzigen börsennotierten puren BESS-Integrator mit vollständig integriertem Hardware-Software-Stack. Drittens erscheint die Bewertung nach dem 36%-Einbruch attraktiv: P/S von 1.1x ist deutlich unter dem Branchen-Durchschnitt von 2.5x. Susquehanna unterstützt dies mit einem Kursziel von $27 – was einem Upside von +73% entspräche. Die geopolitischen Schutzwälle (FEOC, IRA Domestic Content) sind für Fluence's US-Wachstum entscheidend und politisch weitgehend biparteilich unterstützt.</p>
+    <p><strong>Wichtig zur Fiscal-Year-Struktur:</strong> Fluence operiert auf einem September-Geschäftsjahr (FY2026 = Okt 2025 – Sept 2026). Die letzten 4 Quartale umfassen daher Q3 FY25 (Jun 2025) bis Q2 FY26 (Mär 2026). <strong>Stichtag nächste Earnings: 10. August 2026 (Q3 FY 2026).</strong></p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Quartal</th><th>Periode</th><th>Umsatz</th><th>YoY</th><th>EPS</th><th>Konsens</th><th>Beat/Miss</th></tr></thead>
+        <tbody>
+          <tr><td>Q3 FY25</td><td>Jun 2025</td><td>~$483M</td><td>–58%</td><td>–$0,18</td><td>–$0,22</td><td class="beat">BEAT</td></tr>
+          <tr><td>Q4 FY25</td><td>Sep 2025</td><td>~$1.020M</td><td>+12%</td><td>$0,30</td><td>$0,15</td><td class="beat">BEAT (+100%)</td></tr>
+          <tr><td>Q1 FY26</td><td>Dez 2025</td><td>~$185M</td><td>–48%</td><td>–$0,30</td><td>–$0,22</td><td class="miss">MISS</td></tr>
+          <tr><td><strong>Q2 FY26</strong></td><td>Mär 2026</td><td><strong>$464,9M</strong></td><td>+7,7%</td><td>–$0,16</td><td>–$0,19</td><td class="beat"><strong>BEAT</strong></td></tr>
+        </tbody>
+      </table>
     </div>
+    <h3>Q2 FY2026: Margen-Rebound + Hyperscaler-Story</h3>
+    <p>Q2 FY26 ist <strong>der entscheidende Wendepunkt</strong> – nicht wegen der Headline-Zahlen, sondern wegen der unterliegenden Story: Adjusted Gross Margin sprang auf <strong>11,1%</strong> (Q1 FY26: ~3% nach Lithium-Preis-Schock; Q2 FY25: 10,4%). Net Loss Q2: $29,2 Mio. – deutlich verbessert gegenüber $41,9 Mio. Vorjahr. Adjusted EBITDA Q2: –$9,4 Mio. (vs. –$30,4 Mio. Vorjahr).</p>
+    <p>Revenue $464,9 Mio. lag <strong>33% unter dem Konsens</strong> von ~$635 Mio. – allerdings wurden ca. $80 Mio. Revenue in Q3 verschoben aufgrund von zwei Shipping-Problemen (Customs Vietnam + Loading Equipment Shortage Spanien). Beide Probleme sind laut Management gelöst, Lieferungen erfolgen. Bereinigt um den Timing-Effekt wäre Revenue bei ~$545 Mio. gewesen – immer noch unter Konsens, aber näher dran.</p>
+    <p><strong>Die wirkliche Story sind die Orders &amp; Backlog:</strong> Order Intake YTD ~$2,0 Mrd. (verdoppelt vs. Vorjahr), seit Q-End weitere $600 Mio. signiert. Backlog Rekord $5,6 Mrd. zum 31.03.2026. 50% der YTD-Orders kommen von neuen Kunden – ein starkes Signal für die Vertriebsexpansion. Datacenter-Pipeline ~12 GWh, die "große Mehrheit" davon mit den beiden Hyperscaler-MSAs verbunden. Ersten Hyperscaler-Order erwartet in Q3 FY26.</p>
+    <p>Management-Statement (Julian Nebreda, CEO): <em>„We are beginning to see the benefit of our pipeline growth with an acceleration of orders over the past few months. The MSAs with two major hyperscalers position us for near-term data center project orders – Fluence was the first to complete all qualifications in one process that began with 26 different BESS vendors."</em> Marktreaktion: <strong>+23,5% am Earnings-Tag</strong>, plus weitere Anstiege in den Folgetagen (Roth Capital PT-Upgrade auf $26 von $13, Citi auf $26 von $15).</p>
+    <p><strong>FY2026-Guidance reaffirmed:</strong> Revenue $3,2–3,6 Mrd. (Mid $3,4 Mrd.), ARR ~$180 Mio., Adj. EBITDA $40–60 Mio., ~70% des Revenue im H2 erwartet (Q3+Q4). Adjusted Gross Margin ~12% im H2 anvisiert.</p>
+    <div class="source">Quellen: Fluence Q2 FY26 Earnings Release SEC 8-K (06.05.2026); Quiver Quant FLNC Q2 (06.05.2026); Globe and Mail Q2 Transcript (Mai 2026); Investing.com Q2 Transcript (Mai 2026); Energy-Storage.News (08.05.2026); Yahoo Finance Q2 Highlights (07.05.2026).</div>
+  </div>
+</div>
 
-    <div class="callout callout-bear">
-      <h4>📉 Das Bärische Narrativ</h4>
-      <p>Das bärische Narrativ fokussiert auf drei hartnäckige Risiken, die den Bull Case fundamental in Frage stellen. Erstens ist das Margenproblem möglicherweise systemischer als "zwei Projektüberläufe". Der ASP-Verfall von 26% YoY auf $192/kWh zeigt, dass das Kerngeschäft unter strukturellem Preisdruck steht. Wenn die adjusted Gross Margin sich langfristig bei 8–10% statt der angestrebten 13–15% einpendelt, dann ist das FY2026-EBITDA-Ziel von $40–60 Mio. bei $3.4 Mrd. Umsatz unrealistisch. Jeder Prozentpunkt Gross Margin Verschlechterung entspricht ~$34 Mio. EBITDA-Verlust. Mizuho sieht das Papier mit Underperform und Kursziel $13 – und hat damit aus Risikosicht einen validen Standpunkt.</p>
-      <p>Zweitens ist Tesla der Elefant im Raum. Mit einer Shanghai Megafactory (40 GWh/Jahr) hat Tesla eine Produktionskapazität aufgebaut, die Fluences gesamten Jahresumsatz in GWh übersteigt. Tesla ist laut Jefferies „best positioned for AI datacenter use cases" – also genau im attraktivsten Wachstumssegment, auf das Fluence strategisch zielt. Die 26% YoY ASP-Erosion des Marktes reflektiert auch Teslas aggressive Preissetzung außerhalb der USA. Drittens: 4 der letzten 4 Quartale zeigten negative FCF. Bei einem FCF von -$232 Mio. pro Quartal und einer Liquidität von $1.1 Mrd. hat Fluence rechnerisch nur 4–5 Quartale Puffer. Falls das Umsatzwachstum im Rahmen der Guidance höhere Working Capital Bindung erfordert, könnte eine Kapitalerhöhung notwendig werden – mit entsprechendem Verwässerungseffekt.</p>
+<!-- SEKTION 4 -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">Wachstumseinordnung</div>
+    <div class="section-score">Score: 7/10 (zuvor: 6/10)</div>
+  </div>
+  <div class="section-body">
+    <p>Die Wachstumsstory hat sich durch Q2 FY26 <strong>strukturell beschleunigt</strong>. FY2026-Revenue-Guidance Mid $3,4 Mrd. impliziert +52% YoY (FY2025: ~$2,24 Mrd.). Der Backlog von $5,6 Mrd. deckt FY2026 vollständig ab und bietet Visibility weit ins FY2027 hinein.</p>
+    <h3>Geografische Verteilung &amp; Pipeline</h3>
+    <div class="geo-grid">
+      <div class="geo-card"><div class="geo-region">Americas</div><div class="geo-pct">~60%</div><div class="geo-note">US-fokussiert, IRA/45X-eligible Domestic Content</div></div>
+      <div class="geo-card"><div class="geo-region">EMEA</div><div class="geo-pct">~25%</div><div class="geo-note">Spanien, UK, DE Wachstumsregionen</div></div>
+      <div class="geo-card"><div class="geo-region">APAC</div><div class="geo-pct">~15%</div><div class="geo-note">Australien stark, weniger China</div></div>
+      <div class="geo-card"><div class="geo-region">Datacenter Pipeline</div><div class="geo-pct">12 GWh</div><div class="geo-note">Hauptsächlich US, MSA-getrieben</div></div>
     </div>
+    <p><strong>Wachstumstreiber 2026–2028:</strong> (1) <strong>AI-Datacenter-Power</strong>: 12 GWh Pipeline, MSAs mit zwei Hyperscalern, erster Order in Q3 FY26 erwartet. Pipeline +35% seit FY-Start. (2) <strong>BESS-Marktwachstum allgemein</strong>: globale BESS-Deployments +40–50% YoY 2026 (BNEF-Schätzung), getrieben durch Renewable-Integration und Grid-Stability-Bedarf. (3) <strong>Smartstack-Adoption</strong>: erstes Smartstack hat Commercial Operations erreicht (Q2 FY26), Backlog wächst, "Leads sind etwa 3x größer als Pipeline" laut CEO. (4) <strong>Software/Services-Skalierung</strong>: ARR +22% YoY auf $180 Mio. Ziel, mit deutlich höheren Margen als Hardware.</p>
+    <p><strong>Wo das Wachstum „unecht" werden könnte:</strong> $80 Mio. Q2-Revenue-Verschiebung zeigt operative Execution-Risiken (Customs, Logistik). Die Adj. EBITDA-Guidance $40–60 Mio. ist eng – wenn Margen unter 11% rutschen oder Volume nicht im H2 kommt, ist das schnell weg. Die Hyperscaler-Pipeline (12 GWh) ist <em>kein</em> Backlog – das sind potenzielle Orders, die noch Konversion brauchen. Der erste konkrete Hyperscaler-Order in Q3 wird beweisen müssen, dass die MSAs wirklich umsetzungsstark sind und nicht nur unverbindliche Frameworks.</p>
+    <p><strong>Reifegrad: Growth-Phase mit Operating-Leverage-Story.</strong> Fluence ist kein klassisches Hyper-Growth (Revenue +50% sind teils aus tieferem 2025-Niveau), aber kein reifer Profitablitäts-Spieler – die ARR-Skalierung und Hyperscaler-Optionalität rechtfertigen Premium-Bewertung wenn die Margen-Verbesserung anhält. Konsens FY26 EPS –$0,10 → FY27 +$0,30 → FY28 +$0,60 (analyst expectations, +83% Growth FY27).</p>
+    <div class="source">Quellen: Fluence Q2 FY26 Earnings Call (07.05.2026); Fluence IR Q2 FY26 Slides; Energy-Storage.News (08.05.2026); ChartMill FLNC Analyst Forecasts (Mai 2026); BNEF Energy Storage Outlook 2026 (Q1 2026).</div>
+  </div>
+</div>
 
-    <div class="callout callout-neutral">
-      <h4>⚖️ Eigene Einschätzung</h4>
-      <p>Das bullische Narrativ ist überzeugender auf der Nachfrageseite – der BESS-Boom ist real, der Backlog ist gesichert, und die AI-Rechenzentrum-Pipeline ist ein echter Wachstumskatalysator. Das bärische Narrativ überzeugt jedoch mehr auf der Angebots- und Margenseite. Fluence operiert in einem strukturell unter Preisdruck stehenden Hardware-Geschäft mit einer Gross Margin von 4–14%, die von Quartal zu Quartal variiert – das ist keine solide Basis für ein $2.9 Mrd. Bewertung. Die entscheidende Frage ist, ob die Margen-Expansion von heute ~13% (FY2025) auf 15–18% (mittelfristig) durch Software-Mix-Shift und operative Hebelwirkung gelingt. Derzeit gibt es keine belastbaren Beweise, dass das funktioniert – Q1 FY2026 war ein heftiger Rückschlag.</p>
-      <p>Das Risk/Reward bei $15.56 ist interessant, aber nicht überzeugend genug für ein volles Investment. Downside Szenario: Bei FY2026-Guidance-Verfehlung und Margen-Persistenzproblem – Kursziel $8–10 (-36 bis -49%). Upside Szenario: Saubere Q2–Q4 FY2026 Execution, Margen-Recovery, Datenzentrum-Deals – Kursziel $24–27 (+54–73%). Das Risk/Reward ist also ~-40% Downside vs. +60% Upside, was eine neutrale bis leicht positive Risikoadjustierung ergibt – aber nur für Investoren mit sehr hoher Risikobereitschaft.</p>
-      <p>Ich könnte falsch liegen, weil: (1) Management die Kosten auf zwei spezifische, recoverable Projekte attribuiert hat – falls Q2 tatsächlich die angekündigte Margen-Erholung zeigt, war der Sell-Off eine Kaufgelegenheit. (2) Die Datenzentrum-Pipeline von $30 Mrd. ist noch kaum eingepreist.</p>
+<!-- SEKTION 5 -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <div class="section-title">Bewertung &amp; Multiples</div>
+    <div class="section-score">Score: 5/10 (unverändert)</div>
+  </div>
+  <div class="section-body">
+    <div class="alert-box">
+      ⚠️ <strong>Hinweis:</strong> FLNC ist seit Q3 FY24 in operativer Wende – klassische Profitabilitäts-Multiples (P/E, EV/EBITDA TTM) sind verzerrt durch zyklische Verluste. Bewertung primär über P/Sales und Forward-Multiples nach EBITDA-Brücke.
     </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Multiple</th><th>Aktuell</th><th>Peer-Ø (BESS Pure-Plays)</th><th>Bewertung</th></tr></thead>
+        <tbody>
+          <tr><td>P/Sales (TTM)</td><td>~1,2x</td><td>Tesla Energy Sub: ~5x; Eos: ~3x</td><td class="beat">Günstig</td></tr>
+          <tr><td>P/Sales (FWD FY26)</td><td>~1,1x</td><td>—</td><td class="beat">Sehr günstig</td></tr>
+          <tr><td>EV/Sales (FWD)</td><td>~0,9x</td><td>—</td><td class="beat">Attraktiv</td></tr>
+          <tr><td>P/E (TTM)</td><td>n/a (Verlust)</td><td>—</td><td class="neutral">N/A</td></tr>
+          <tr><td>EV/EBITDA (FWD FY26)</td><td>~70x</td><td>—</td><td class="miss">Sehr teuer</td></tr>
+          <tr><td>EV/EBITDA (FWD FY27)</td><td>~15–20x</td><td>—</td><td class="neutral">Fair-to-rich</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Aktuelle Analyst-Coverage (Stand 13.05.2026):</strong> 25 Analysten, Median PT $15,56 (Barchart) bis $17,75 (Public.com). Aktueller Kurs $20,94 liegt <strong>über</strong> den meisten Targets. Aber: die jüngsten Updates nach Q2 sind alle bullisher: Roth Capital $26 (von $13, +100%, Upgrade Buy), Citi $26 (von $15), Canaccord $28 (von $25, Buy), Goldman Sachs $22 (von $20, Buy), Susquehanna $25 (von $23), RBC $16 (von $12). Bandbreite extrem groß – das zeigt die Bewertungsunsicherheit.</p>
+    <p><strong>Historischer Kontext:</strong> FLNC notierte vor 12 Monaten bei $4,40 (52W-Tief). Aktuelle Bewertung ist nach der Earnings-Rally und Secondary Offering deutlich gestreckt. GF Value von GuruFocus: $20,64 (zu Q2-Earnings) – fast deckungsgleich mit aktuellem Kurs. GF Score 77/100.</p>
+    <p><strong>Der ehrliche Bewertungspunkt:</strong> Bei aktuellem Kurs $20,94 ist die Bewertung <em>nicht mehr günstig</em>. P/S 1,1x mag im Software-Vergleich attraktiv klingen, aber FLNC ist primär Hardware-Geschäft mit ~11% Gross Margin. EV/EBITDA FWD 15–20x für FY27 setzt voraus, dass Margen sich linear verbessern und Hyperscaler-Orders materialisieren. Beide sind <em>möglich</em>, aber <em>nicht garantiert</em>. Der Sprung von $13 (Pre-Q2) auf $24 (Post-Q2) hat die Bewertung von „undervaluation mit Tail-Risiko" auf „fair mit Execution-Pressure" verlagert.</p>
+    <div class="source">Quellen: ChartMill FLNC Profile (Mai 2026); Public.com FLNC Forecast (14.05.2026); MarketBeat FLNC Forecast (Mai 2026); Insider Monkey Goldman PT (08.05.2026); Yahoo Finance Canaccord PT (08.05.2026); Stocktwits Roth PT (08.05.2026); GuruFocus Susquehanna PT (08.05.2026); StockInvest.us FLNC (14.05.2026); CNN FLNC Analyst Activity (Mai 2026).</div>
+  </div>
+</div>
 
-    <div class="subsection">Zeithorizont-Einschätzung</div>
-    <table>
-      <tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr>
-      <tr>
-        <td><strong>Kurzfristig (0–6 M)</strong></td>
-        <td>Q2 FY2026 Ergebnisse (06.05.2026) – Margen-Recovery würde Bull-Case bestätigen</td>
-        <td>Weitere Projektüberläufe, Short-Selling-Druck, technische Schwäche</td>
-        <td class="warn-text">ABWARTEN – erst Q2-Zahlen evaluieren</td>
-      </tr>
-      <tr>
-        <td><strong>Mittelfristig (6–24 M)</strong></td>
-        <td>FY2026-Guidance-Erfüllung, Datenzentrum-Kontrakte, ARR-Wachstum auf $250+ Mio.</td>
-        <td>IRA-Kürzungen, Tesla Marktanteilsgewinne, anhaltender ASP-Verfall</td>
-        <td class="warn-text">HALTEN mit Nachkauf-Option bei bestätigter Execution</td>
-      </tr>
-      <tr>
-        <td><strong>Langfristig (2–5 J)</strong></td>
-        <td>Software-Margin-Shift, BESS-Markt-CAGR 27%, Datenzentrum-Ökosystem</td>
-        <td>Chinesische Konkurrenz globaler, Tesla-Dominanz, AI-Disruption Softwareschicht</td>
-        <td class="green-text">KAUFEN in Tranchen für geduldige Quality-Growth-Investoren</td>
-      </tr>
-    </table>
+<!-- SEKTION 6 -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+    <div class="section-score">Score: 4/10 (zuvor: 3/10)</div>
+  </div>
+  <div class="section-body">
+    <p>Die Kapitalqualität bleibt <strong>der strukturell schwächste Bereich der Analyse</strong>, hat sich aber gegenüber Q1 FY26 marginal verbessert. Q2 FY26 zeigt eine partielle Margen-Erholung, aber FCF bleibt negativ.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Metric</th><th>Q2 FY26</th><th>Q1 FY26</th><th>Q2 FY25</th><th>Trend</th></tr></thead>
+        <tbody>
+          <tr><td>GAAP Gross Margin</td><td>10,0%</td><td>~3%</td><td>9,9%</td><td class="beat">Erholung</td></tr>
+          <tr><td>Adj. Gross Margin</td><td>11,1%</td><td>~4%</td><td>10,4%</td><td class="beat">Erholung</td></tr>
+          <tr><td>Operating Margin</td><td>~–6%</td><td>~–25%</td><td>~–9%</td><td class="beat">Erholung</td></tr>
+          <tr><td>Net Loss</td><td>–$29,2M</td><td>–$62,6M</td><td>–$41,9M</td><td class="beat">YoY besser</td></tr>
+          <tr><td>Adj. EBITDA</td><td>–$9,4M</td><td>–$52,1M</td><td>–$30,4M</td><td class="beat">YoY besser</td></tr>
+          <tr><td>FCF (geschätzt)</td><td>~–$50M</td><td>~–$120M</td><td>~–$80M</td><td class="neutral">negativ</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Bilanz &amp; Liquidität:</strong> Total Liquidity ~$900 Mio. zum 31.03.2026, davon Total Cash ~$412,9 Mio. Das ist eine komfortable Position, die Fluence über H2 FY2026 und H1 FY2027 ohne Stress trägt – selbst bei anhaltendem negativen FCF. Allerdings: Das <strong>Secondary Offering vom 12.05.2026</strong> (20M Class-A-Aktien zu $21, ~$420 Mio. Brutto, plus zusätzliche 117M Class-A-Filing) zeigt, dass die Kontroll-Stockholder (AES, Siemens) ihre Position deutlich reduzieren. Das schafft Aktien-Liquidität für den Markt, aber gleichzeitig signifikanten Dilution-Druck. Aktie –16,3% am Tag der Ankündigung (12.05.2026).</p>
+    <p><strong>FY2026 Adj. EBITDA-Guidance $40–60 Mio.</strong> impliziert eine deutliche H2-Verbesserung von gegenwärtig –$61,5 Mio. (H1 FY26). Das ist <strong>operativ ambitioniert</strong>, aber durch die hohen H2-Volume-Hochschätzungen (70% des FY-Revenue in H2) plausibel, wenn Margen bei 12% (Guidance) liegen. Wenn nicht: weiterer Verlust + zusätzliche Liquiditäts-Sorgen + zweite Eigenkapital-Maßnahme möglich.</p>
+    <p><strong>ARR-Sparte als Lichtblick:</strong> ARR von $148 Mio. (FY25) auf $180 Mio. (FY26-Ziel) = +22% YoY. Diese Sparte hat schätzungsweise 70%+ Gross Margins – wenn sie auf 8–10% Revenue-Anteil wächst, hebelt das die Konzern-Margin spürbar. Software ist Fluences einziger echter Margen-Hebel; ohne sie bleibt FLNC ein Low-Margin-Hardware-Spieler.</p>
+    <p><strong>Score-Anhebung 3→4:</strong> Q2-Erholung der Adj. Gross Margin auf 11,1% (Guidance-konform) + verbesserte Liquidität rechtfertigen leichte Anhebung. Keine 5+, solange FCF negativ und Dilution-Risiko real bleibt.</p>
+    <div class="source">Quellen: Fluence Q2 FY26 Earnings Release (06.05.2026); SEC Form 8-K (06.05.2026); SEC Filing Secondary Offering (12.05.2026); CNN FLNC Activity (Mai 2026); GuruFocus FLNC Reports (Mai 2026).</div>
+  </div>
+</div>
 
-    <div class="rating-block">
-      <div class="rating-card rating-hold">
-        <div class="r-title">Gesamtrating</div>
-        <div class="r-val">⏸ HALTEN</div>
+<!-- SEKTION 7 -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-number">7</div>
+    <div class="section-title">Peer-Vergleich</div>
+    <div class="section-score">Score: 6/10 (zuvor: 5/10)</div>
+  </div>
+  <div class="section-body">
+    <p>Peer-Gruppe (unverändert): Tesla Energy (TSLA-Segment), BYD (Energy Storage Division), Eos Energy (EOSE), Stem Inc (STEM), Energy Vault (NRGV).</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Metric</th><th>FLNC</th><th>Tesla Energy</th><th>BYD Storage</th><th>EOSE</th><th>STEM</th></tr></thead>
+        <tbody>
+          <tr><td>Revenue (TTM)</td><td>~$2,8B</td><td>>$15B</td><td>>$8B</td><td>~$0,1B</td><td>~$0,4B</td></tr>
+          <tr><td>Revenue Growth (YoY)</td><td>+52% (FY26e)</td><td>+60%</td><td>+85%</td><td>+200%</td><td>–25%</td></tr>
+          <tr><td>Adj. Gross Margin</td><td>11,1%</td><td>~25%</td><td>~22%</td><td>~–10%</td><td>~12%</td></tr>
+          <tr><td>P/Sales (FWD)</td><td>1,1x</td><td>n/a (Konzern)</td><td>n/a</td><td>~12x</td><td>~0,7x</td></tr>
+          <tr><td>Strategische Position</td><td>Pure-Play BESS Tier-1</td><td>Vertikal integriert</td><td>Vertikal integriert</td><td>Zink-Bromid (Niche)</td><td>Software-First</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>FLNC ist <strong>der größte börsennotierte Pure-Play-BESS-Anbieter</strong> in westlichen Märkten. Tesla und BYD haben jeweils größere absolute Volumina, aber als Konzernsparten – nicht als Investment-Vehikel direkt erwerbbar. Tesla Megapack ist <em>technologisch und kostenführerschaftlich</em> dominant (Lathrop-Werk, eigene 4680-Zellen, niedrigste LCOE im Markt). FLNC kompensiert mit (a) globaler Vertriebspräsenz, (b) Software-Stack, (c) Bankability für Utility-Kunden.</p>
+    <p><strong>Hyperscaler-Differenzierung:</strong> Hier hat FLNC einen <em>echten</em> Peer-Vorteil – Tesla bedient Datacenter bislang opportunistisch, BYD ist von US-Hyperscalern wegen Compliance-Risiken (FEOC) ausgeschlossen, EOSE/STEM haben nicht die Skalierungsfähigkeit. Smartstack-Architektur (500+ MWh/Acre, integrierte Power-Electronics, Fast-Response-Steuerung) ist im US-Datacenter-Segment derzeit unique.</p>
+    <p><strong>Score-Anhebung 5→6:</strong> Die Hyperscaler-Position ist ein echter strategischer Vorteil gegenüber Peers. Tesla bleibt dominant, aber FLNC ist <em>nicht direkt vergleichbar</em> – Pure-Play-Premium ist real.</p>
+    <div class="source">Quellen: BNEF Q1 2026 Energy Storage Update; Tesla Q1 2026 Earnings (Energy-Segment-Detail); BYD Annual Report 2025; EOSE/STEM Q1 2026 Earnings (Mai 2026); MarketBeat FLNC Peer Comparison (Mai 2026).</div>
+  </div>
+</div>
+
+<!-- SEKTION 8 -->
+<div class="section" id="s8">
+  <div class="section-header">
+    <div class="section-number">8</div>
+    <div class="section-title">News &amp; Events (Feb–Mai 2026)</div>
+    <div class="section-note">3-Monats-Fenster</div>
+  </div>
+  <div class="section-body">
+    <h3>Ebene 1: Unternehmen</h3>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">06.05.2026 – Q2 FY26 Earnings Beat &amp; Hyperscaler-MSAs <span class="badge badge-green">Game-Changer</span></div>
+        <div class="event-text">EPS –$0,16 (Beat, vs. –$0,19). Adj. Gross Margin 11,1% (vs. 4% Q1 FY26). Backlog Rekord $5,6 Mrd. Orders YTD ~$2 Mrd. (verdoppelt). <strong>Zwei MSAs mit Hyperscalern signiert</strong>, einer nach Qualifikationsprozess mit 26 BESS-Vendoren. Datacenter-Pipeline 12 GWh. Kurs +23,5% am Earnings-Tag, +40% Folgetag. Quelle: SEC 8-K (06.05.2026).</div>
       </div>
-      <div class="rating-card rating-hold">
-        <div class="r-title">Kursziel (12–18 Monate)</div>
-        <div class="r-val">$18–24</div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">Q2 FY26 – Smartstack erreicht Commercial Operations <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Erstes Smartstack-System hat substantielle Fertigstellung erreicht und Commercial Operation aufgenommen. 7,5 MWh nutzbare Kapazität pro Einheit, &gt;500 MWh/Acre Dichte. Wachsender Backlog mit zunehmenden long-duration Applications. Quelle: Q2 Earnings Transcript (07.05.2026).</div>
       </div>
-      <div class="rating-card rating-sell">
-        <div class="r-title">Downside-Risiko</div>
-        <div class="r-val">-35–50%</div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-red"></div>
+      <div>
+        <div class="event-label">12.05.2026 – Secondary Offering 20M Aktien @ $21 + 117M Shelf-Filing <span class="badge badge-red">Negativ</span></div>
+        <div class="event-text">Kontroll-Stockholder (AES, Siemens) verkaufen 20M Class-A-Aktien zu $21 ($420 Mio.). Zusätzlich 117,67M Class-A-Shares-Filing für Holders &amp; Mixed Securities Shelf eingereicht. Erhebliches Dilution-Risiko. Kurs –16,3% am Filing-Tag. Quelle: TipRanks (12.05.2026), CNN Markets.</div>
       </div>
-      <div class="rating-card rating-buy">
-        <div class="r-title">Upside-Potential</div>
-        <div class="r-val">+50–73%</div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">08.05.2026 – Analyst-Upgrades-Welle <span class="badge badge-yellow">Mixed</span></div>
+        <div class="event-text">Roth Capital: Upgrade Buy, PT $26 (von $13). Citi: PT $26 (von $15). Canaccord: PT $28 (von $25, Buy). Goldman Sachs: PT $22 (von $20, Buy). Susquehanna: PT $25 (von $23). RBC: PT $16 (von $12, neutraler). Median Konsens bleibt aber bei ~$15,5 (Barchart) bzw. $17,75 (Public.com) – große Range. Quelle: TipRanks, Insider Monkey, Stocktwits (08.05.2026).</div>
       </div>
     </div>
 
-    <div class="subsection">Was falsifiziert die These?</div>
-    <table>
-      <tr><th>Trigger</th><th>Maßnahme</th></tr>
-      <tr><td class="red-text"><strong>BEARISH:</strong> Q2 FY2026 Adj. Gross Margin bleibt unter 8%</td><td class="red-text">→ VERKAUFEN – systemisches Margenproblem bestätigt</td></tr>
-      <tr><td class="red-text"><strong>BEARISH:</strong> FY2026 Revenue-Guidance um >15% verfehlt</td><td class="red-text">→ VERKAUFEN – Backlog-Qualität zweifelhaft, FCF-Krise droht</td></tr>
-      <tr><td class="red-text"><strong>BEARISH:</strong> AESC verliert PFE-Konformität ohne Alternative</td><td class="red-text">→ VERKAUFEN – US-Marktposition gefährdet</td></tr>
-      <tr><td class="green-text"><strong>BULLISH:</strong> Q2 FY2026 Adj. Gross Margin >11% (Recovery bestätigt)</td><td class="green-text">→ NACHKAUFEN – Q1 war episodisch</td></tr>
-      <tr><td class="green-text"><strong>BULLISH:</strong> Datenzentrum-Verträge >1 GWh in einem Quartal signieret</td><td class="green-text">→ NACHKAUFEN – neues Wachstumssegment materialisiert sich</td></tr>
-    </table>
+    <h3>Ebene 2: Branche</h3>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">Q1–Q2 2026 – AI-Datacenter-Power-Demand explodiert <span class="badge badge-green">Sehr Positiv</span></div>
+        <div class="event-text">Hyperscaler suchen aktiv nach Power-Quality-BESS-Lösungen wegen AI-Chip-induzierter Lastfluktuationen. Mehrere Multi-Vendor-Qualifikationsprozesse 2025/2026. Fluences Smartstack adressiert genau diese Anforderungen. Quelle: Utility Dive Fluence MSA (12.05.2026); Investing.com Q2 Slides (Mai 2026).</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">Q1 2026 – BNEF: globale BESS-Deployments +40–50% YoY 2026 <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">BNEF erwartet 2026 starkes BESS-Markt-Wachstum, getrieben durch Renewable-Integration und Grid-Stability. Backlog bei Tier-1-Spielern wächst. Quelle: BNEF Energy Storage Outlook 2026.</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">Q1–Q2 2026 – Lithium-Preise erholen sich, dann stabilisieren <span class="badge badge-yellow">Neutral</span></div>
+        <div class="event-text">Anstieg Anfang 2026 (Q1 FY26 Margen-Schock), inzwischen normalisiert. CEO Nebreda: „Rising lithium prices temporarily slowed some customer decisions earlier this year." Q2 Margenerholung deutet auf entspannte Lage. Quelle: Utility Dive (12.05.2026).</div>
+      </div>
+    </div>
 
-    <div class="subsection">Für welchen Anlegertyp geeignet?</div>
-    <table>
-      <tr><th>Anlegertyp</th><th>Eignung</th><th>Empfehlung</th></tr>
-      <tr><td>Value Investor</td><td class="red-text">NICHT GEEIGNET</td><td>Verlustbringend, kein FCF, keine Dividende</td></tr>
-      <tr><td>Income Investor</td><td class="red-text">NICHT GEEIGNET</td><td>Keine Dividende</td></tr>
-      <tr><td>Quality Growth Investor</td><td class="warn-text">BEDINGT (langfristig)</td><td>In kleinen Tranchen über 12–18 Monate aufbauen</td></tr>
-      <tr><td>Spekulativer Growth Investor</td><td class="warn-text">GEEIGNET MIT RISIKOBEWUSSTSEIN</td><td>Nur mit festem Stop-Loss und klaren Triggers</td></tr>
-      <tr><td>Contrarian Investor</td><td class="green-text">INTERESSANT</td><td>Post-Earnings-Überreaktionen bieten Einstiegsfenster</td></tr>
-    </table>
-    <table>
-      <tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr>
-      <tr><td>Konservativ</td><td class="warn-text">WARTEN</td><td>Q2 FY2026 Ergebnisse (06.05.2026) abwarten – Margin-Recovery als Voraussetzung</td></tr>
-      <tr><td>Aggressiv</td><td class="warn-text">KLEINER EINSTIEG möglich</td><td>Bei $15–16 mit Stop-Loss bei $11–12 (ca. -25% Risiko) und Kursziel $24–27</td></tr>
-      <tr><td>Langfristig (3–5 J)</td><td class="green-text">TRANCHIERTER AUFBAU</td><td>Strukturelles BESS-Wachstum + Software-Upside rechtfertigt einen Aufbau in 3–4 Tranchen</td></tr>
-    </table>
+    <h3>Ebene 3: Makro &amp; Regulierung</h3>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">Q1 2026 – OBBBA FEOC-Restriktionen voll wirksam <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Section 48E ITC und 45X Tax Credit nicht mehr verfügbar für „Foreign-Influenced Entities" und Projekte mit Material Assistance aus FEOC-Ländern. BYD und CATL effektiv aus US-Hyperscaler-Pipeline ausgeschlossen. Fluence mit US Domestic Content Eligibility (Q2 reaffirmed). Quelle: Steptoe OBBBA Brief (Juli 2025); Fluence Q2 Earnings Call.</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">Q2 2026 pending – Section 232 Polysilicon &amp; Battery Cell Tarife <span class="badge badge-yellow">Pending</span></div>
+        <div class="event-text">Commerce Department prüft erweiterte Tarife auf Battery-Components, die Fluence über Zellzukäufe treffen können. Bisher kein finaler Bescheid. Risiko: Margen-Pressure wenn Tarife auf Zellen verhängt werden.</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">Q1 2026 – Interconnection Queues 2.500 GW USA <span class="badge badge-yellow">Indirektes Risiko</span></div>
+        <div class="event-text">Storage-Projekte teilen Interconnection-Bottleneck mit Solar/Wind. Verzögert Backlog-Konversion in Revenue. Federal Permitting Reform unsicher. Quelle: ad-hoc-news Solar Sector (März 2026).</div>
+      </div>
+    </div>
+    <div class="source">Quellen: Fluence Energy IR &amp; SEC Filings (Mai 2026); SEC 8-K (06.05.2026); Form S-3 Filing (12.05.2026); Utility Dive (12.05.2026); Energy-Storage.News (08.05.2026); Insider Monkey/Yahoo/Stocktwits/TipRanks (08.–13.05.2026); BNEF Energy Storage Outlook 2026; Steptoe/Sidley OBBBA-Briefings (Juli–Nov 2025).</div>
   </div>
 </div>
 
-<!-- SEKTION 13: OUTLOOK -->
-<div class="section">
-  <div class="section-header"><div class="num">13</div><h2>OUTLOOK – DIE 3 ENTSCHEIDENDEN ANSTEHENDEN EVENTS</h2></div>
+<!-- SEKTION 9 -->
+<div class="section" id="s9">
+  <div class="section-header">
+    <div class="section-number">9</div>
+    <div class="section-title">Technische Analyse</div>
+    <div class="section-score">Score: 6/10 (zuvor: 3/10)</div>
+  </div>
+  <div class="section-body">
+    <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));">
+      <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value">$20,94</div><div class="kpi-sub">14.05.2026</div></div>
+      <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value green">~$16,50</div><div class="kpi-sub">deutlich darüber</div></div>
+      <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value green">~$14,00</div><div class="kpi-sub">weit darüber</div></div>
+      <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value green">~$12,50</div><div class="kpi-sub">weit darüber</div></div>
+      <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value red">~75</div><div class="kpi-sub">Überkauft</div></div>
+      <div class="kpi-card"><div class="kpi-label">52W High</div><div class="kpi-value">$33,51</div><div class="kpi-sub">–38% darunter</div></div>
+      <div class="kpi-card"><div class="kpi-label">Beta</div><div class="kpi-value red">3,74</div><div class="kpi-sub">extrem volatil</div></div>
+    </div>
+    <p><strong>Trend-Einordnung:</strong> <strong>Massive Trendwende seit Q2-Earnings.</strong> Der Kurs ist von $13 (Pre-Q2 06.05.) auf $24,39 (Peak 11.05.) gesprungen, dann auf $20,94 (14.05.) korrigiert nach Secondary Offering. Cup-and-Handle-Formation auf Tageschart mit Golden Cross (SMA 50 über SMA 200) – textbook bullish reversal. Buy Zone laut TradingView-Analysten: $14,57–$16,80 (Fibonacci-Support-Konfluenz).</p>
+    <p><strong>Wichtige Levels:</strong> Support: $20,89 (kurzfristig), $14,86 (mittelfristig SMA-50-Bereich), $12,50 (SMA-200). Widerstand: $22 (lokales Top), $24 (kurzfristig Post-Earnings-Peak), $33,51 (52W-High).</p>
+    <p><strong>Ehrliche technische Vorbehalte:</strong> RSI ~75 = überkauft. Pullback-Risiko real. Sell-Signal von Pivot-Top am 11.05. ausgegeben, bis dahin –17% gefallen. Beta 3,74 macht die Aktie zu einer der volatilsten im S&amp;P-Universum – das schneidet in beide Richtungen. Volatilität 7,07%/Tag. ChartMill Technical Rating 7/10, Fundamental Rating 3/10 – das zeigt die Kluft zwischen Story und Fundamentals.</p>
+    <p><strong>Score-Anhebung 3→6:</strong> Massive Verbesserung der technischen Lage gegenüber Februar (damals unter allen MAs, Score 3/10). Jetzt über allen MAs mit Golden Cross. Nicht 7+, weil RSI überkauft und Secondary-Offering-Dilution-Druck.</p>
+    <div class="source">Quellen: TradingView FLNC Daily (Mai 2026); StockInvest.us FLNC (14.05.2026); ChartMill FLNC Profile (Mai 2026); Robinhood FLNC Quote (14.05.2026); CNN Markets FLNC.</div>
+  </div>
+</div>
+
+<!-- SEKTION 10 -->
+<div class="section" id="s10">
+  <div class="section-header">
+    <div class="section-number">10</div>
+    <div class="section-title">Risiken &amp; Chancen</div>
+    <div class="section-score">Risk-Score: 5/10 (invertiert, zuvor: 4/10)</div>
+  </div>
+  <div class="section-body">
+    <h3>Strukturelle &amp; zyklische Risiken</h3>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">💰 Dilution durch Secondary Offering &amp; Shelf-Filing</div>
+        <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+      </div>
+      <div class="event-text">12.05.2026: 20M Class-A-Aktien zu $21 ($420 Mio. brutto) plus 117,67M Class-A-Shelf-Filing für Holder. Bei Vollausnutzung weitere ~30% Dilution möglich. Kurs reagierte mit –16,3%. Kontroll-Stockholder (AES, Siemens) reduzieren signifikant. Wahrscheinlichkeit weiterer Dilution 2026: ~60%.</div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">⚡ Margen-Volatilität durch Lithium- &amp; Zellpreise</div>
+        <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+      </div>
+      <div class="event-text">Q1 FY26 zeigte: Lithium-Preisspike → Margen kollabieren auf ~3%. Q2 Erholung auf 11,1%. Fluence ist Zell-Käufer (CATL, EVE, BYD), nicht Hersteller – Margen volatil mit Rohstoffpreis. Wenn Lithium 2027 wieder anzieht: Margen-Druck.</div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">🚛 Execution-Risiken (Logistik, Customs, Lieferketten)</div>
+        <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+      </div>
+      <div class="event-text">Q2 FY26: $80 Mio. Revenue verschoben wegen Vietnam-Customs + Spanien-Loading-Equipment. Operative Reife im globalen Liefernetzwerk noch lückenhaft. Wahrscheinlichkeit ähnlicher Vorfälle in 2026: ~40%.</div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">🏆 Tesla-Dominanz im LCOS-Wettbewerb</div>
+        <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+      </div>
+      <div class="event-text">Tesla Megapack mit vertikaler Integration (4680-Zellen Lathrop) hat niedrigste LCOE. Fluence muss durch Software, Service und Datacenter-Spezialisierung differenzieren – schwierig in einem Commodity-Hardware-Markt mit langer Investment-Horizon.</div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">📊 Hyperscaler-Order-Konversion ist noch nicht bewiesen</div>
+        <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Sehr Hoch (für Aktie)</span></div>
+      </div>
+      <div class="event-text">12 GWh Datacenter-Pipeline ist kein Backlog. MSAs sind Framework-Agreements, keine festen Orders. Erster Hyperscaler-Order in Q3 FY26 erwartet (10.08.2026 Earnings). Wenn er nicht kommt oder klein ausfällt: Aktie wird massiv neu bewertet, der gesamte Q2-Rally-Run war im Vertrauen auf diese Konversion.</div>
+    </div>
+
+    <h3>AI-Risiko &amp; technologische Disruption</h3>
+    <p>Anders als bei klassischen Industrieunternehmen ist AI für Fluence <strong>primär ein Wachstumstreiber, nicht ein Risiko</strong>: AI-Datacenter-Power-Anforderungen sind genau der Grund für die Hyperscaler-MSAs. Indirektes Risiko: Wenn AI-Compute-Effizienz drastisch zunimmt (effizientere Modelle, neue Hardware-Architekturen), könnte der Power-Bedarf-Forecast überschätzt sein. Wahrscheinlichkeit signifikanter Reduktion 2026–2028: gering.</p>
+
+    <h3>Chancen</h3>
+    <p>(1) <strong>Hyperscaler-Order-Konversion</strong>: 12 GWh Pipeline = potenziell $5–8 Mrd. Revenue über 3–4 Jahre, wenn Konversion gelingt. (2) <strong>Smartstack-Adoption</strong>: höhere Margen durch differenziertere Hardware, plus Software-Stack-Anbindung. (3) <strong>Software-ARR-Skalierung</strong>: $148M→$180M→Ziel $300M+ in FY28. Margin-Hebel. (4) <strong>FEOC-Marktverschiebung</strong>: chinesische Wettbewerber strukturell aus US-Markt gedrängt. (5) <strong>BESS-Marktwachstum allgemein</strong>: +40–50% YoY 2026.</p>
+
+    <h3>Red Flags &amp; Dealbreaker</h3>
+    <p><strong>Red Flags:</strong> Anhaltender Class-Action-Securities-Lawsuit aus 2024/2025 noch nicht final aufgelöst (Rosen/Bronstein Filings). Secondary Offering Timing direkt nach Earnings-Rally = klassisches „Sell-the-News"-Setup für Insider. Insider-Sales $0,2 Mio. vs. $0 Buying letzte 3 Monate. <strong>Dealbreaker:</strong> Keine aktuell. Das Geschäft ist real, die Liquidität ausreichend, die Hyperscaler-MSAs verifizierbar.</p>
+
+    <p><strong>Score-Anhebung 4→5:</strong> Hyperscaler-MSAs reduzieren das große Customer-Concentration-Risiko der Vergangenheit. Aber Dilution + Execution-Risiken kompensieren. Keine 6+, solange erste Hyperscaler-Konversion nicht stattgefunden hat.</p>
+    <div class="source">Quellen: SEC Form S-3 / 8-K (Mai 2026); Fluence Q2 FY26 Earnings Call (07.05.2026); Class Action Filings (Rosen/Bronstein 2024–2025); GuruFocus FLNC Insider Activity (Mai 2026); CNN Markets FLNC Activity.</div>
+  </div>
+</div>
+
+<!-- SEKTION 11 -->
+<div class="section" id="s11">
+  <div class="section-header">
+    <div class="section-number">11</div>
+    <div class="section-title">Scoring (Update Mai 2026)</div>
+    <div class="section-score">⌀ Score: 5,6/10 (zuvor: 4,6/10)</div>
+  </div>
+  <div class="section-body">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Kategorie</th><th>Score</th><th>Bar</th><th>Δ vs. Feb 2026</th><th>Begründung</th></tr></thead>
+        <tbody>
+          <tr><td>Geschäftsmodell</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td><span class="badge badge-green">+1</span></td><td>Datacenter-Segment + Smartstack erweitern Modell strukturell.</td></tr>
+          <tr><td>Burggraben</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td><span class="badge badge-green">+1</span></td><td>Hyperscaler-Qualifikation als Eintrittsbarriere für Konkurrenten.</td></tr>
+          <tr><td>Operative Entwicklung (4Q)</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td><span class="badge badge-green">+1</span></td><td>Q2 Margen-Rebound 11,1%, aber Revenue-Miss und Volatilität.</td></tr>
+          <tr><td>Wachstum</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td><span class="badge badge-green">+1</span></td><td>FY26 +52% Revenue Mid, $5,6B Backlog, 12 GWh Datacenter-Pipeline.</td></tr>
+          <tr><td>Bewertung</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>—</td><td>Kurs +60% seit Vor-Analyse; P/S 1,1x nicht mehr außergewöhnlich günstig.</td></tr>
+          <tr><td>Cashflow</td><td>4/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td><td><span class="badge badge-green">+1</span></td><td>Margen-Rebound + Liquidität OK, aber FCF negativ und Dilution-Risiko.</td></tr>
+          <tr><td>Peer-Vergleich</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td><span class="badge badge-green">+1</span></td><td>Pure-Play-Premium, Datacenter-Differenzierung gegenüber Tesla.</td></tr>
+          <tr><td>Technische Analyse</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td><span class="badge badge-green">+3</span></td><td>Trendwende. Über allen MAs, Golden Cross. RSI überkauft.</td></tr>
+          <tr><td>Risiken (invertiert)</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td><span class="badge badge-green">+1</span></td><td>Customer-Konzentration reduziert, aber Dilution &amp; Execution neue Sorgen.</td></tr>
+          <tr style="background:rgba(20,184,166,0.08);"><td><strong>⌀ Gesamtscore</strong></td><td><strong>5,6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:56%;background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">5,6</span></div></td><td><strong>+1,0 vs. Feb 2026 (4,6)</strong></td><td>Story-Verbesserung deutlich, aber Bewertung &amp; Dilution dämpfen.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="source">Quellen-Synthese aus Sektionen 1–10. Scoring-Logik: 10 = best-in-class; 5 = durchschnittlich; 1 = ungenügend / hohes Risiko.</div>
+  </div>
+</div>
+
+<!-- SEKTION 12 -->
+<div class="section" id="s12">
+  <div class="section-header">
+    <div class="section-number">12</div>
+    <div class="section-title">Fazit &amp; Investment-These</div>
+  </div>
   <div class="section-body">
 
-    <div class="callout callout-neutral">
-      <h4>📅 Event 1: Q2 FY2026 Quartalsergebnisse – voraussichtlich 6. Mai 2026 (HÖCHSTE PRIORITÄT)</h4>
-      <p>Dies ist der mit Abstand wichtigste anstehende Katalysator. Der Markt wartet auf einen eindeutigen Beweis, dass der Q1-Margen-Kollaps (Adj. Gross Margin 5.6%) ein einmaliger Ausreißer war und keine systemische Schwäche reflektiert.</p>
-      <p><strong>Wenn:</strong> Adj. Gross Margin ≥ 10% in Q2 FY2026 <em>UND</em> keine neuen großen Projektkosten-Überläufe gemeldet werden <em>UND</em> Revenue im Einklang mit der linearen Hochrechnung zur FY2026-Guidance ($750–900 Mio. für Q2) liegt → <strong>dann kurzfristig aggressiv nachkaufen</strong>. Der Q1-Sell-Off war dann eine klassische Überreaktion, und der Kurs würde rapide in Richtung $22–27 zurückkehren.</p>
-      <p><strong>Wenn:</strong> Adj. Gross Margin in Q2 erneut unter 8% liegt oder eine weitere Guidance-Risiko-Kommunikation erfolgt → <strong>dann sofortige Reduktion der Position</strong>. Das Margenproblem wäre dann strukturell, und das Jahres-EBITDA-Ziel von $40–60 Mio. unerreichbar. Kursziel in diesem Szenario: $9–12.</p>
+    <div class="bull-bear-grid">
+      <div class="bull-card">
+        <h4>🐂 Das Bullische Narrativ</h4>
+        <p><strong>Säule 1: Hyperscaler-Story ist real.</strong> Zwei MSAs mit major Hyperscalern, einer nach 26-Vendor-Qualifikation. Datacenter-Pipeline 12 GWh = potenziell $5–8 Mrd. Revenue über 3–4 Jahre. Erster Order in Q3 FY26 (10.08.2026) erwartet. Wenn Konversion gelingt, ist FLNC nicht mehr ein zyklischer BESS-Player, sondern ein AI-Infrastruktur-Spieler mit Multi-Jahres-Visibilität.</p>
+        <p><strong>Säule 2: Operative Wende bestätigt.</strong> Adj. Gross Margin Q2 FY26: 11,1% (vs. 4% Q1, Lithium-Schock). H2-Guidance 12%+. Adj. EBITDA Erholung von –$30M auf –$9M. Backlog Rekord $5,6 Mrd. Software-ARR $148M→$180M (+22%) mit ~70%+ Margins als Margin-Hebel. FY26 Revenue Mid $3,4 Mrd. = +52% YoY.</p>
+        <p><strong>Säule 3: FEOC-Marktverschiebung.</strong> Chinesische Konkurrenten (BYD, CATL) effektiv aus US-Hyperscaler-Pipeline ausgeschlossen ab 2026. Tesla bleibt dominant, aber Tesla bedient Datacenter opportunistisch, nicht spezialisiert. Fluence hat als einziger Pure-Play-BESS-Tier-1 mit Smartstack die richtige Hardware-Software-Kombination für AI-Power-Quality. Roth Capital: PT $26 (+24% Upside).</p>
+      </div>
+      <div class="bear-card">
+        <h4>🐻 Das Bärische Narrativ</h4>
+        <p><strong>Risiko 1: Bewertung ist gestreckt.</strong> Kurs +321% in 12 Monaten, +71% in 2 Wochen. Median-Analyst-PT $15,56–$17,75 liegt <em>unter</em> aktuellem Kurs $20,94. EV/EBITDA FWD FY27 ~15–20x setzt Hyperscaler-Konversion <em>und</em> Margen-Verbesserung voraus. Bei Enttäuschung: schneller Reversal auf $14 (SMA-50) sehr wahrscheinlich. ChartMill Fundamental Rating 3/10 zeigt: die Story rennt den Fundamentals weit voraus.</p>
+        <p><strong>Risiko 2: Dilution &amp; Insider-Verkauf-Signale.</strong> 20M Class-A zu $21 + 117M Shelf für Holder = bis zu 30% Dilution möglich. Kontroll-Stockholder AES &amp; Siemens verkaufen aktiv. Kein Insider-Buying. Q2-Rally war Geschenk an Insider, die jetzt herausrotieren. Klassisches Sell-the-News-Setup.</p>
+        <p><strong>Risiko 3: Hyperscaler-Konversion nicht bewiesen.</strong> MSAs sind keine Orders. Wenn Q3 FY26 (10.08.2026) keinen oder nur einen kleinen ersten Hyperscaler-Order zeigt, kollabiert das gesamte Multiple-Expansion-Narrativ. Plus: Margen volatil mit Lithium-Preisen, Logistik-Execution-Schwächen ($80M Q2-Slip), und Tesla Megapack-Wettbewerbsdruck im Kerngeschäft. P/S 1,1x klingt günstig, ist es aber für 11%-Margin-Hardware nicht.</p>
+      </div>
     </div>
 
-    <div class="callout callout-neutral">
-      <h4>📅 Event 2: AESC Tennessee PFE-Konformitätslösung – erwartet im Laufe von H1 2026</h4>
-      <p>Die AESC-Frage ist ein kritisches Supply-Chain-Risiko. Fluence bezieht seine Batteriezellen für den US-Domestic-Content-Anspruch aus der AESC-Fabrik in Tennessee – aber AESC ist eine Tochter von Envision (chinesisch), was potenziell die PFE-Konformität tangiert. Management hat signalisiert, dass AESC das Problem "in anderer Form" lösen wird, ohne Fluence-Beteiligung an der Eigentümerstruktur. Eine Entscheidung wird erwartet.</p>
-      <p><strong>Wenn:</strong> AESC bestätigt eine klare, gesetzeskonforme Lösung (z.B. Joint Venture-Struktur, Veräußerung des chinesischen Anteils) → <strong>dann positiver Katalysator</strong>: Fluences US-Domestic-Content-Position ist gesichert, und ein erhebliches regulatorisches Risiko entfällt. Moderate positive Reaktion zu erwarten.</p>
-      <p><strong>Wenn:</strong> Keine zufriedenstellende Lösung bis Ende Q3 FY2026 (Juni 2026) → <strong>dann ernsthaftes Risiko für die US-Expansion</strong>. Fluence müsste auf alternative Zell-Lieferanten umsteigen (zeitintensiv) oder würde Domestic Content Bonus Credits verlieren – mit erheblicher Auswirkung auf Kundenwettbewerbsfähigkeit im US-Markt.</p>
+    <h3>Eigene Einschätzung</h3>
+    <p>Das bullische Narrativ <strong>überzeugt qualitativ</strong> – die Hyperscaler-MSAs und Margen-Wende sind <em>echte</em> Story-Inflection-Points. Aber die <strong>Bewertung hat die guten Nachrichten bereits stark vorweggenommen</strong>. Bei aktuellem Kurs $20,94 ist das Risk/Reward asymmetrisch zur Vorsicht: <strong>Upside +25% bis $26</strong> (Roth/Citi PT) <strong>vs. Downside –35–40% auf $14</strong> (SMA-50 / vor-Earnings-Niveau) wenn Q3-Order ausbleibt oder Dilution erhöht wird.</p>
+    <p>Wer bei $13–14 (vor Q2-Earnings) eingestiegen ist, sitzt auf einer +60%-Position und sollte <strong>partiell mitnehmen</strong> – nicht aus Anti-Story-Gründen, sondern aus Risikomanagement: die Story bleibt intakt, aber die Aktie ist nicht mehr „contrarian buy", sondern „crowded trade". Wer noch nicht drin ist, sollte <strong>auf $16–18 warten</strong> – das ist plausibel im Q3-Vorlaufkontext mit Secondary-Druck.</p>
+    <p>Vergleich zu Vor-Analyse: Damals (HALTEN bei ~$13–14) war das Risiko-Profil ungünstig durch Margen-Schock und unklare Konversion. Jetzt ist die Konversion sichtbar, aber bereits eingepreist. Rating-Anpassung: <strong>HALTEN mit positiver Bias</strong> – nicht KAUFEN, weil Einstiegspunkt zu spät; nicht VERKAUFEN, weil Story strukturell intakt.</p>
+
+    <h3>Zeithorizont-Einschätzung</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+        <tbody>
+          <tr><td><strong>0–6 Monate</strong></td><td>Q3 FY26 Earnings 10.08., erster Hyperscaler-Order</td><td>Dilution-Welle, RSI-Überkauf, Pullback auf $14–16</td><td><span class="badge badge-yellow">Tranchiert / Warten</span></td></tr>
+          <tr><td><strong>6–24 Monate</strong></td><td>Hyperscaler-Order-Konversion, ARR-Skalierung, FEOC-Vorteile</td><td>Tesla-Wettbewerb, Margen-Volatilität</td><td><span class="badge badge-orange">Tranchiert kaufen</span></td></tr>
+          <tr><td><strong>2–5 Jahre</strong></td><td>Datacenter-BESS-Marktdominanz, $300M+ ARR, EBITDA-Margen 15%+</td><td>Strukturelle Hardware-Kommodifizierung, Verlust eines Hyperscalers</td><td><span class="badge badge-green">Halten</span></td></tr>
+        </tbody>
+      </table>
     </div>
 
-    <div class="callout callout-neutral">
-      <h4>📅 Event 3: Erste signifikante Datenzentrum-Vertragsankündigung – erwartet H1/H2 2026</h4>
-      <p>Fluence hat 36 GWh an Datenzentrum-Projekten in Pipeline und Leads – noch kein einziger ist im Backlog kontrahiert. Das Datenzentrum-Segment ist der strategisch wichtigste neue Markt mit höheren Margen und geringerer Preissensibilität als Utility-Projekte.</p>
-      <p><strong>Wenn:</strong> Im Laufe von H1 oder H2 2026 mindestens ein öffentlich kommunizierter Datenzentrum-Vertrag >500 MWh (idealerweise >1 GWh) bekannt gegeben wird → <strong>dann starker Aufwärtskatalysator</strong>. Dies würde validieren, dass Fluence tatsächlich im attraktivsten Wachstumssegment konkurrenzfähig ist (vs. Tesla Megapack) und die Software-Hardware-Integration einen Mehrwert schafft. Möglicher Kursanstieg von 15–25%.</p>
-      <p><strong>Wenn:</strong> Bis Ende FY2026 (September 2026) kein signifikanter Datenzentrum-Vertrag – trotz 36 GWh Pipeline – bekannt wird → <strong>dann Zweifel an Datenzentrum-Positionierung gerechtfertigt</strong>. Das Wachstumsnarrativ verliert seinen wichtigsten Katalysator, und Tesla dominiert das Segment unangefochten. Moderate negative Revision der Langfrist-These.</p>
+    <h3>Kernthese</h3>
+    <p>Fluence Energy ist <strong>der schärfste börsennotierte Pure-Play auf AI-Datacenter-Power-Quality-Storage</strong>, kombiniert mit FEOC-protected US-Position. Q2 FY26 hat die strukturelle Wende bestätigt: Margen-Rebound, Rekord-Backlog, Hyperscaler-MSAs. Die Story ist <em>besser</em> als noch im Februar 2026. Aber: Der Markt hat die guten Nachrichten in 2 Wochen massiv eingepreist (+71%). Bei aktuellem Kurs ist die Aktie ein <strong>HALTEN mit positiver Mittelfrist-Bias</strong>, kein KAUFEN.</p>
+
+    <div class="rating-box">
+      <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN</div></div>
+      <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$22–26</div></div>
+      <div class="rating-item"><label>Zeithorizont</label><div class="val">12–24 Monate</div></div>
+      <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–35%</div></div>
+      <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+25%</div></div>
+      <div class="rating-item"><label>Risk/Reward</label><div class="val hold">1:0,7</div></div>
     </div>
 
-    <div class="source">Quellen: Fluence Q1 FY2026 Earnings Call Transkript (05.02.2026), Fintool FLNC Q1 2026 Summary, Investing.com FLNC Q1 2026 Slides Analysis (Feb. 2026), Jefferies BESS Report (zit. in The Register, Nov. 2025)</div>
+    <div class="trigger-grid">
+      <div class="trigger-card sell">
+        <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+        <ul class="trigger-list">
+          <li>Q3 FY26 (10.08.) kein konkreter Hyperscaler-Order signiert → Position auf 50% reduzieren</li>
+          <li>Weitere Secondary Offerings im Volumen &gt;30M Aktien → 70% reduzieren</li>
+          <li>Adj. Gross Margin fällt in Q3/Q4 unter 9% → strukturelle Sorge</li>
+          <li>FY26 Guidance-Cut (Revenue oder Adj. EBITDA) → sofort verkaufen</li>
+          <li>RSI bleibt &gt;75 über 4 Wochen + Pullback auf $16 → Risk-Off</li>
+        </ul>
+      </div>
+      <div class="trigger-card buy">
+        <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+        <ul class="trigger-list">
+          <li>Pullback auf $16–18 (SMA-50-Bereich) ohne Story-Verschlechterung → tranchiert einsteigen</li>
+          <li>Q3 FY26: erster Hyperscaler-Order &gt;$500M → nachkaufen</li>
+          <li>Adj. Gross Margin in Q3 ≥12% bestätigt → bullish Bestätigung</li>
+          <li>FY27 Guidance bei Q4-Call (Nov 2026): &gt;$4,5 Mrd. Revenue, EBITDA &gt;$200M → aggressiv aufbauen</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="investor-grid">
+      <div class="investor-yes">
+        <h5>✅ Geeignet für</h5>
+        <ul>
+          <li>Growth Investors mit AI-Infrastruktur-Thema</li>
+          <li>Speculative Growth mit mittlerem Risiko-Appetit</li>
+          <li>Anleger mit 18–24-Monats-Horizont</li>
+          <li>BESS-Sektor-Exposure-Wunsch</li>
+        </ul>
+      </div>
+      <div class="investor-no">
+        <h5>❌ NICHT geeignet für</h5>
+        <ul>
+          <li>Income Investors (keine Dividende)</li>
+          <li>Value Investors (Verlustbringer, hohe Multiples)</li>
+          <li>Risiko-averse Anleger (Beta 3,74!)</li>
+          <li>Buy-the-Dip-Sucher (kein Dip mehr aktuell)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten</span></td><td>Volatilität zu hoch, Konversion noch nicht bewiesen</td></tr>
+          <tr><td><strong>Moderat</strong></td><td><span class="badge badge-yellow">Halten / 25% bei $18</span></td><td>Wenn vorhanden halten, sonst auf Pullback warten</td></tr>
+          <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-orange">25% kaufen, Rest auf Q3</span></td><td>Risk/Reward jetzt nicht überragend, Q3 abwarten</td></tr>
+          <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Halten &amp; akkumulieren bei Schwäche</span></td><td>AI-Power-Storage-Story strukturell intakt</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="source">Quellen-Synthese aus Sektionen 1–11. Risk/Reward auf Basis Median-Analyst-Range $15–28.</div>
   </div>
 </div>
 
-<!-- FOOTER -->
-<div class="footer">
-  <p>Aktienanalyse Canvas v1.0 &nbsp;|&nbsp; Erstellt: 27. Februar 2026 &nbsp;|&nbsp; Erstellt mit Claude (Anthropic)</p>
-  <p style="margin-top:6px;"><strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung dar. Investitionsentscheidungen sollten stets auf Basis eigener Recherche und in Konsultation mit einem qualifizierten Finanzberater getroffen werden. Vergangene Kursentwicklungen sind kein zuverlässiger Indikator für zukünftige Ergebnisse.</p>
+<!-- SEKTION 13 -->
+<div class="section" id="s13">
+  <div class="section-header">
+    <div class="section-number">13</div>
+    <div class="section-title">Outlook – Die 3 wichtigsten anstehenden Events</div>
+  </div>
+  <div class="section-body">
+
+    <div class="outlook-card">
+      <h4>📊 Event 1: Erster Hyperscaler-Order in Q3 FY26 – Earnings 10. August 2026</h4>
+      <p>Das ist <strong>der einzelne kritischste Datenpunkt</strong> für die Q2-Rally-Bestätigung. CEO Nebreda hat in Q2 explizit gesagt, dass „we expect to find the initial order from one of the data center projects within the third quarter." Wenn das eintritt, materialisiert sich die 12-GWh-Pipeline-Story aus Theorie in Backlog. Wenn nicht, war die Q2-Rally größtenteils Spekulation.</p>
+      <div class="when-then">
+        <strong>Wenn:</strong> Q3-Call (10.08.2026) verkündet ersten Hyperscaler-Order &gt;$500 Mio. → Aktie sollte auf $26–30 springen, Story bestätigt. → <em>Aktiv nachkaufen vor Earnings auf Pullbacks, Kursziel hochsetzen auf $28–32.</em><br><br>
+        <strong>Wenn:</strong> Q3-Call keinen Hyperscaler-Order verkündet oder nur kleinen ($&lt;100 Mio. Pilot) → Story-Sorge, Reset auf vor-Q2-Niveau $13–16. → <em>Position auf 30–50% reduzieren, Stop-Loss bei $14 setzen.</em>
+      </div>
+    </div>
+
+    <div class="outlook-card">
+      <h4>📊 Event 2: Secondary Offering &amp; Shelf-Filing-Folgen – Mai–September 2026</h4>
+      <p>Das 117,67M-Class-A-Shelf-Filing vom 12.05.2026 ist der größte Dilution-Overhang. AES &amp; Siemens als Kontroll-Stockholder reduzieren ihre Positionen – die genaue Volumen-Sequenz und Pricing ist offen. Der Markt wird in den nächsten 4 Monaten mehrfach mit Block-Trades konfrontiert werden, was Volatilität und Pullback-Druck erzeugt.</p>
+      <div class="when-then">
+        <strong>Wenn:</strong> Weitere Block-Trades zu Preisen $19–22 (im Range) und Hyperscaler-Story bestätigt → das ist die kosteneffektive Akkumulationsphase für langfristige Anleger. → <em>Bei jedem Block-Pullback unter $19 tranchiert kaufen.</em><br><br>
+        <strong>Wenn:</strong> Block-Trades zu Preisen &lt;$17 (panische Liquidationen) oder Insider-Sales eskalieren auf &gt;$50 Mio. cumulative → Vertrauenskrise, möglicher 30–40% Drawdown. → <em>Aussetzen, klare Stop-Discipline bei $14 (SMA-200).</em>
+      </div>
+    </div>
+
+    <div class="outlook-card">
+      <h4>📊 Event 3: FY2027 Guidance bei Q4-Call (November 2026)</h4>
+      <p>Das Q4 FY26 Earnings Call (typischerweise November/Dezember 2026) liefert die erste FY2027-Guidance. Diese Zahl ist <strong>entscheidend</strong>: Sie verifiziert oder falsifiziert die Hyperscaler-Konversion und die Margen-Skalierung. Konsens-Erwartung: FY27 Revenue $4,2–4,6 Mrd. (+24–35% YoY), Adj. EBITDA $150–250 Mio., EPS $0,30+.</p>
+      <div class="when-then">
+        <strong>Wenn:</strong> FY27-Guidance Revenue &gt;$4,5 Mrd. und Adj. EBITDA &gt;$200 Mio. → strukturelle Profitabilität bestätigt, Multiple-Expansion gerechtfertigt. → <em>Position als Core-Holding aufbauen, Kursziel hochsetzen auf $30–35.</em><br><br>
+        <strong>Wenn:</strong> FY27-Guidance Revenue &lt;$4,0 Mrd. oder Adj. EBITDA &lt;$120 Mio. → Wachstum verlangsamt, Story-Discount erforderlich. → <em>Auf 50% reduzieren, Re-Evaluation der gesamten Investmentthese.</em>
+      </div>
+    </div>
+
+    <div class="source">Quellen-Synthese: Fluence Q2 FY26 Earnings Call (07.05.2026); Form S-3 Filing (12.05.2026); SEC 8-K (06.05.2026); Roth Capital / Citi / Goldman / Canaccord / Susquehanna Analyst Updates (08.05.2026).</div>
+  </div>
 </div>
 
-</div><!-- end container -->
+<div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken. Sie stellt keine Anlageberatung oder Aufforderung zum Kauf/Verkauf eines Wertpapiers dar. Die enthaltenen Informationen wurden mit Sorgfalt aus öffentlichen Quellen recherchiert, eine Garantie für Vollständigkeit oder Richtigkeit kann jedoch nicht übernommen werden. Investitionsentscheidungen sollten auf eigener Recherche, individueller Risikotragfähigkeit und ggf. unabhängiger Beratung basieren. Vergangene Kursentwicklungen sind kein Indikator für zukünftige Ergebnisse. Stand: 15.05.2026.</div>
+
+</div>
 </body>
 </html>
