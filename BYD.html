@@ -1,1045 +1,842 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BYD 1211.HK – Aktienanalyse Canvas v2.2</title>
-  <style>
-    :root {
-      --primary: #14b8a6;
-      --primary-dark: #0d9488;
-      --bg: #0f0f12;
-      --bg-card: #1a1a1f;
-      --bg-card2: #22222a;
-      --border: #2e2e38;
-      --text: #e8e8ec;
-      --text-muted: #888898;
-      --text-dim: #555566;
-      --green: #22c55e;
-      --red: #ef4444;
-      --yellow: #f59e0b;
-      --blue: #3b82f6;
-      --purple: #8b5cf6;
-      --teal: #14b8a6;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7;
-    }
-    .header {
-      background: linear-gradient(135deg, #001a18 0%, #002820 40%, #0f0f12 100%);
-      border-bottom: 1px solid var(--primary);
-      padding: 36px 40px 28px; display: flex; justify-content: space-between;
-      align-items: flex-start; flex-wrap: wrap; gap: 20px;
-    }
-    .header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
-    .header-left h1 span { color: var(--primary); }
-    .header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
-    .header-right { text-align: right; }
-    .price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
-    .price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
-    .price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
-    .price-change.up   { background: rgba(34,197,94,0.15); color: var(--green); }
-    .price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
-    .nav {
-      background: var(--bg-card); border-bottom: 1px solid var(--border);
-      padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
-      position: sticky; top: 0; z-index: 100;
-    }
-    .nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
-    .nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
-    .main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
-    .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
-    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
-    .kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-    .kpi-value.green  { color: var(--green); }
-    .kpi-value.red    { color: var(--red); }
-    .kpi-value.teal   { color: var(--primary); }
-    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
-    .section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
-    .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .section-title  { font-size: 16px; font-weight: 700; color: white; }
-    .section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
-    .section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
-    .section-body   { padding: 20px 24px; }
-    p { margin-bottom: 12px; color: var(--text); }
-    p:last-child { margin-bottom: 0; }
-    h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
-    h3:first-child { margin-top: 0; }
-    .table-wrap { overflow-x: auto; margin: 16px 0; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-    td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: rgba(20,184,166,0.04); }
-    .beat    { color: var(--green);  font-weight: 600; }
-    .miss    { color: var(--red);    font-weight: 600; }
-    .neutral { color: var(--yellow); font-weight: 600; }
-    .badge        { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
-    .badge-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
-    .badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
-    .badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
-    .badge-blue   { background: rgba(59,130,246,0.15); color: var(--blue); }
-    .badge-teal   { background: rgba(20,184,166,0.15); color: var(--primary); }
-    .event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
-    .event-item:last-child { border-bottom: none; }
-    .event-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
-    .dot-green  { background: var(--green); }
-    .dot-red    { background: var(--red); }
-    .dot-yellow { background: var(--yellow); }
-    .event-label { font-weight: 600; color: white; }
-    .event-text  { font-size: 14px; color: var(--text); }
-    .risk-item   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
-    .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px; }
-    .risk-title  { font-weight: 600; color: white; font-size: 14px; }
-    .score-bar       { display: flex; align-items: center; gap: 10px; }
-    .score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-    .score-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #5eead4); }
-    .score-num       { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
-    .bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-    @media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
-    .bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
-    .bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
-    .bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .bear-card h4 { color: var(--red);   margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .rating-box { background: linear-gradient(135deg, rgba(20,184,166,0.12), rgba(20,184,166,0.04)); border: 1px solid rgba(20,184,166,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
-    .rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
-    .rating-item .val  { font-size: 20px; font-weight: 800; color: white; }
-    .rating-item .val.buy  { color: var(--green); }
-    .rating-item .val.hold { color: var(--yellow); }
-    .rating-item .val.sell { color: var(--red); }
-    .trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
-    @media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
-    .trigger-card      { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
-    .trigger-card h5   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-    .trigger-card.buy  h5 { color: var(--green); }
-    .trigger-card.sell h5 { color: var(--red); }
-    .trigger-list    { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
-    .trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
-    .trigger-list li::before { content: "→"; position: absolute; left: 0; }
-    .investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
-    @media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
-    .investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
-    .investor-no  { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
-    .investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
-    .investor-no  h5 { color: var(--red);   font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
-    .investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
-    .investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
-    .investor-no  li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
-    .geo-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
-    .geo-card   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
-    .geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .geo-pct    { font-size: 20px; font-weight: 700; color: white; }
-    .geo-note   { font-size: 12px; color: var(--text-muted); }
-    .outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
-    .outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
-    .outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
-    .outlook-card .when-then strong { color: var(--primary); }
-    .source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
-    .source a { color: var(--text-dim); }
-    .disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
-    .alert-box { background: rgba(20,184,166,0.08); border: 1px solid rgba(20,184,166,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
-    .divider   { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
-    .pill      { display: inline-block; background: rgba(20,184,166,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
-    .thesis-box { background: rgba(20,184,166,0.06); border: 1px solid rgba(20,184,166,0.2); border-radius: 10px; padding: 16px 20px; margin-bottom: 20px; }
-    .thesis-box .thesis-label { font-size: 11px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 6px; }
-    .thesis-box p { color: var(--text); }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BYD – Aktienanalyse Canvas v2.2 · Mai 2026</title>
+<style>
+:root{
+  --primary:#E40521;--primary-dark:#a8031a;
+  --bg:#0f0f12;--bg-card:#1a1a1f;--bg-card2:#22222a;--border:#2e2e38;
+  --text:#e8e8ec;--text-muted:#888898;--text-dim:#555566;
+  --green:#22c55e;--red:#ef4444;--yellow:#f59e0b;--blue:#3b82f6;--purple:#8b5cf6;--teal:#14b8a6;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+.header{background:linear-gradient(135deg,#28000a 0%,#3a0010 40%,#0f0f12 100%);border-bottom:1px solid var(--primary);padding:36px 40px 28px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;}
+.header-left h1{font-size:32px;font-weight:700;color:white;letter-spacing:-0.5px;}
+.header-left h1 span{color:var(--primary);}
+.header-left .subtitle{color:var(--text-muted);font-size:14px;margin-top:4px;}
+.header-right{text-align:right;}
+.price-tag{font-size:38px;font-weight:800;color:var(--primary);line-height:1;}
+.price-meta{color:var(--text-muted);font-size:13px;margin-top:4px;}
+.price-change{display:inline-block;padding:2px 8px;border-radius:4px;font-size:13px;font-weight:600;margin-top:4px;}
+.price-change.up{background:rgba(34,197,94,0.15);color:var(--green);}
+.price-change.down{background:rgba(239,68,68,0.15);color:var(--red);}
+.nav{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:100;}
+.nav a{color:var(--text-muted);text-decoration:none;padding:14px 16px;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.2s;}
+.nav a:hover{color:var(--primary);border-bottom-color:var(--primary);}
+.main{max-width:1100px;margin:0 auto;padding:32px 40px 60px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px;}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.kpi-value{font-size:22px;font-weight:700;color:white;margin-top:4px;}
+.kpi-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.kpi-value.green{color:var(--green);}
+.kpi-value.red{color:var(--red);}
+.kpi-value.orange{color:var(--primary);}
+.section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden;}
+.section-header{background:var(--bg-card2);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.section-number{background:var(--primary);color:white;width:28px;height:28px;border-radius:6px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-title{font-size:16px;font-weight:700;color:white;}
+.section-score{margin-left:auto;font-size:14px;font-weight:700;color:var(--primary);}
+.section-note{font-size:12px;color:var(--text-dim);background:rgba(46,46,56,0.4);border-radius:4px;padding:4px 10px;margin-left:auto;}
+.section-body{padding:20px 24px;}
+p{margin-bottom:12px;color:var(--text);}
+p:last-child{margin-bottom:0;}
+h3{font-size:14px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 8px;}
+h3:first-child{margin-top:0;}
+.table-wrap{overflow-x:auto;margin:16px 0;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--bg-card2);color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:10px 12px;border-bottom:1px solid rgba(46,46,56,0.5);color:var(--text);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(228,5,33,0.04);}
+.beat{color:var(--green);font-weight:600;}
+.miss{color:var(--red);font-weight:600;}
+.neutral{color:var(--yellow);font-weight:600;}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}
+.badge-green{background:rgba(34,197,94,0.15);color:var(--green);}
+.badge-red{background:rgba(239,68,68,0.15);color:var(--red);}
+.badge-yellow{background:rgba(245,158,11,0.15);color:var(--yellow);}
+.badge-blue{background:rgba(59,130,246,0.15);color:var(--blue);}
+.badge-orange{background:rgba(228,5,33,0.15);color:var(--primary);}
+.event-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(46,46,56,0.5);align-items:flex-start;}
+.event-item:last-child{border-bottom:none;}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0;}
+.dot-green{background:var(--green);}
+.dot-red{background:var(--red);}
+.dot-yellow{background:var(--yellow);}
+.event-label{font-weight:600;color:white;}
+.event-text{font-size:14px;color:var(--text);}
+.risk-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.risk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:6px;}
+.risk-title{font-weight:600;color:white;font-size:14px;}
+.score-bar{display:flex;align-items:center;gap:10px;}
+.score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#ff5050);}
+.score-num{font-weight:700;color:var(--primary);font-size:15px;min-width:32px;}
+.bull-bear-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:700px){.bull-bear-grid{grid-template-columns:1fr;}}
+.bull-card{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:16px;}
+.bear-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:16px;}
+.bull-card h4{color:var(--green);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.bear-card h4{color:var(--red);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.rating-box{background:linear-gradient(135deg,rgba(228,5,33,0.12),rgba(228,5,33,0.04));border:1px solid rgba(228,5,33,0.3);border-radius:12px;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:20px 0;}
+.rating-item label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;display:block;margin-bottom:4px;}
+.rating-item .val{font-size:20px;font-weight:800;color:white;}
+.rating-item .val.buy{color:var(--green);}
+.rating-item .val.hold{color:var(--yellow);}
+.rating-item .val.sell{color:var(--red);}
+.trigger-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+@media(max-width:700px){.trigger-grid{grid-template-columns:1fr;}}
+.trigger-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.trigger-card h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.trigger-card.buy h5{color:var(--green);}
+.trigger-card.sell h5{color:var(--red);}
+.trigger-list{font-size:13px;color:var(--text);list-style:none;padding:0;}
+.trigger-list li{margin-bottom:6px;padding-left:14px;position:relative;}
+.trigger-list li::before{content:"\2192";position:absolute;left:0;}
+.investor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+@media(max-width:600px){.investor-grid{grid-template-columns:1fr;}}
+.investor-yes{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px;}
+.investor-no{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:12px;}
+.investor-yes h5{color:var(--green);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-no h5{color:var(--red);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-yes li,.investor-no li{font-size:13px;color:var(--text);margin-bottom:4px;list-style:none;padding-left:14px;position:relative;}
+.investor-yes li::before{content:"\2713";position:absolute;left:0;color:var(--green);}
+.investor-no li::before{content:"\2717";position:absolute;left:0;color:var(--red);}
+.geo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0;}
+.geo-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.geo-region{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.geo-pct{font-size:20px;font-weight:700;color:white;}
+.geo-note{font-size:12px;color:var(--text-muted);}
+.outlook-card{background:var(--bg-card2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:16px;margin-bottom:14px;}
+.outlook-card h4{color:white;font-size:14px;margin-bottom:8px;}
+.outlook-card .when-then{font-size:13px;color:var(--text);margin-top:8px;}
+.outlook-card .when-then strong{color:var(--primary);}
+.source{font-size:11px;color:var(--text-dim);margin-top:12px;padding-top:10px;border-top:1px solid rgba(46,46,56,0.5);}
+.disclaimer{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text-dim);margin-top:32px;}
+.alert-box{background:rgba(228,5,33,0.08);border:1px solid rgba(228,5,33,0.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px;}
+</style>
 </head>
 <body>
 
-  <!-- HEADER -->
-  <div class="header">
-    <div class="header-left">
-      <h1>BYD Company Limited <span>1211.HK</span></h1>
-      <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 04. März 2026 · HKEX · Sektor: Automobil / New Energy Vehicles</div>
-      <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-        <span class="badge badge-teal">New Energy Vehicles</span>
-        <span class="badge badge-blue">Batterietechnologie</span>
-        <span class="badge badge-green">Globale Expansion</span>
-        <span class="badge badge-yellow">Photovoltaik</span>
-      </div>
-    </div>
-    <div class="header-right">
-      <div class="price-tag">HKD 90.00</div>
-      <div class="price-meta">Schlusskurs 04. März 2026 · HKEX</div>
-      <div class="price-change down">▼ –6,45% (52W-Rückgang)</div>
-      <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: HKD 88,50 – HKD 159,27</div>
+<div class="header">
+  <div class="header-left">
+    <h1>BYD Company Limited <span>1211.HK</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 15. Mai 2026 · HKEX · Sektor: Automobil / NEV / Batterien</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-orange">Global EV-Marktführer</span>
+      <span class="badge badge-blue">Export-Pivot 70%</span>
+      <span class="badge badge-yellow">Brutal Knockout-Phase</span>
     </div>
   </div>
+  <div class="header-right">
+    <div class="price-tag">HKD 98,15</div>
+    <div class="price-meta">14.05.2026 · HKEX</div>
+    <div class="price-change down">▼ –38% vom 52W-High</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">52W: HKD 88,50 – 159,27</div>
+  </div>
+</div>
 
-  <!-- NAVIGATION -->
-  <nav class="nav">
-    <a href="#s1">1. Geschäftsmodell</a>
-    <a href="#s2">2. Burggraben</a>
-    <a href="#s3">3. Quartale</a>
-    <a href="#s4">4. Wachstum</a>
-    <a href="#s5">5. Bewertung</a>
-    <a href="#s6">6. Cashflow</a>
-    <a href="#s7">7. Peers</a>
-    <a href="#s8">8. News</a>
-    <a href="#s9">9. Technisch</a>
-    <a href="#s10">10. Risiken</a>
-    <a href="#s11">11. Scoring</a>
-    <a href="#s12">12. Fazit</a>
-    <a href="#s13">13. Outlook</a>
-  </nav>
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
 
-  <div class="main">
+<div class="main">
 
-    <!-- KPI OVERVIEW -->
-    <div class="kpi-grid" style="margin-top:24px;">
-      <div class="kpi-card">
-        <div class="kpi-label">Kurs (HKD)</div>
-        <div class="kpi-value teal">90,00</div>
-        <div class="kpi-sub">HKEX · 04.03.2026</div>
+<div class="kpi-grid" style="margin-top:24px;">
+  <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">HKD 98,15</div><div class="kpi-sub">14.05.2026</div></div>
+  <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value orange">~HKD 295 Mrd.</div><div class="kpi-sub">$38 Mrd.</div></div>
+  <div class="kpi-card"><div class="kpi-label">P/E (TTM)</div><div class="kpi-value">~13x</div><div class="kpi-sub">Post Q1-Miss</div></div>
+  <div class="kpi-card"><div class="kpi-label">P/E (FWD)</div><div class="kpi-value">~12x</div><div class="kpi-sub">erholt sich H2 2026</div></div>
+  <div class="kpi-card"><div class="kpi-label">Q1 Net Profit</div><div class="kpi-value red">–55,4%</div><div class="kpi-sub">YoY</div></div>
+  <div class="kpi-card"><div class="kpi-label">Q1 Exports YoY</div><div class="kpi-value green">+55,8%</div><div class="kpi-sub">321k Einheiten</div></div>
+  <div class="kpi-card"><div class="kpi-label">Export FY26-Ziel</div><div class="kpi-value green">1,5 Mio.</div><div class="kpi-sub">+15% vs. Januar-Ziel</div></div>
+  <div class="kpi-card"><div class="kpi-label">Konsens-PT</div><div class="kpi-value green">HKD 124,71</div><div class="kpi-sub">+27% Upside (25 Buy)</div></div>
+</div>
+
+<!-- SEKTION 1 -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Geschäftsmodell</div>
+    <div class="section-note">Quellen ≤ 6 Monate</div>
+  </div>
+  <div class="section-body">
+    <p>BYD ist <strong>der weltweit größte NEV-Hersteller</strong> (New Energy Vehicles = BEV + PHEV) – 2025 verkaufte BYD mehr NEVs als Tesla weltweit und ist seit 2024 nicht nur China-Marktführer, sondern auch globaler Marktführer. FY2025: Revenue ¥803,96 Mrd. (+3,5% YoY), Net Income ¥32,33 Mrd. (–19,6% YoY), Net Margin 4,1%. Das Geschäftsmodell ist <strong>strukturell zweigeteilt</strong>: (1) Automobile & New Energy Vehicles (~80% Revenue), (2) Mobile Handset Components + Photovoltaik + Batterien (~20%).</p>
+    <p><strong>Automotive-Segment</strong> dominiert: Zwei Hauptmarken-Familien – „Dynasty" (Premium/Mid-Range: Han, Tang, Song, Qin, Yuan) und „Ocean" (Mid/Volume: Seal, Sealion, Dolphin, Seagull). Plus Premium-Spin-offs Yangwang (Luxus), Denza (Premium-JV mit Mercedes), Fangchengbao (Off-Road) und Equation Leopard. BYDs Vertikal-Integration ist branchenweit einzigartig: Eigene Batterien (Blade Battery 2.0 = 1000+ km Reichweite, März 2026), eigene Halbleiter, eigene Motoren, eigene Power-Electronics – das ist <strong>der strukturelle Kostenvorteil</strong>, der BYD 2020–2024 ermöglichte, Tesla in der Margenführerschaft zu überholen.</p>
+    <p><strong>Q1 2026 – der harte Aufprall:</strong> Revenue ¥150,23 Mrd. (–11,8% YoY), Net Profit ¥4,09 Mrd. (–55,4%), NEV-Verkäufe 700.463 Einheiten (–30%). Wang Chuanfu (CEO) bezeichnete die chinesische Automobilbranche in seinem Aktionärsbrief als in einer „brutalen Knockout-Phase". Die Margen pro Fahrzeug sind kollabiert: Per-Vehicle Net Profit von ~¥8.800 Q1 2025 auf <strong>¥3.000–4.000 in Q1 2026</strong> (–55% bis –66% Erosion) gefallen. Das ist nicht „eine schwache Phase", sondern eine strukturelle Verschiebung der chinesischen NEV-Marktdynamik.</p>
+    <p><strong>Aber: BYD ist mitten in einem strategischen Pivot.</strong> Das ist der wichtigste Punkt. <strong>Q1 2026 ging 70% des Vehicle Revenue international</strong> (vs. 40% in 2025) – das ist ein riesiger Sprung. Exports: 321.165 Einheiten (+55,8% YoY), entsprechen 46% der gesamten Q1-Verkäufe. Das FY26-Export-Ziel wurde von 1,3 Mio. auf <strong>1,5 Mio. Einheiten</strong> angehoben (März 2026). Wenn das gelingt, kompensiert die Internationalisierung den China-Druck zumindest teilweise.</p>
+    <p><strong>Strategische Initiativen Mai 2026:</strong> (1) Stellantis-Talks für Europa-Werke (13.05.2026 Bloomberg) – wenn das durchgeht, kreiert BYD eine "Made-in-Europe"-Verteidigung gegen EU-Zölle. (2) Hungary-Werk skaliert. (3) Brazil + ASEAN + Thailand expandieren. (4) 5.000 Ultra-Fast Charging Stations in China deployment (April 2026) – Differenzierung gegen Tesla. (5) KFC-Partnership für 9-Minuten-Refueling-Stations (April 2026). (6) Alibaba Qwen AI in BYDs Fahrzeuge (April 2026) – Sprach-Assistent für Hotel- und Essen-Bestellung.</p>
+    <p>Wang Chuanfu war direkt in der Q1-Kommunikation: <em>„Weakere Player werden bankrott gehen. Nur Unternehmen mit Größe, Technologie und Zugang zu Übersee-Märkten werden überleben."</em> Das ist die Investment-These für BYD: Sie sind groß genug, um die Knockout-Phase auszuhalten, technologisch führend (Blade Battery 2.0, AI-Integration), und haben den Übersee-Pivot bereits aktiv vollzogen.</p>
+    <div class="source">Quellen: BYD Q1 2026 Earnings Report (28.04.2026); CnEVPost BYD Q1 (28.04.2026); Yahoo Finance BYD Q1 Earnings (29.04.2026); ChinaBizInsider BYD Q1 (Apr 2026); CleanTechnica BYD 2025 Annual Report (30.03.2026); EV Magazine Q1 2026 (Mai 2026); Wikipedia BYD Company (08.05.2026); TheStreet BYD Reality Check (30.04.2026); CarNewsChina Price War Evolves (26.02.2026).</div>
+  </div>
+</div>
+
+<!-- SEKTION 2 -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+    <div class="section-score">Score: 7/10</div>
+  </div>
+  <div class="section-body">
+    <p>BYDs Burggraben ist <strong>real und tief, aber in der Bewährungsprobe</strong>. Vier zentrale Säulen, die alle Pressure-Tests durchlaufen:</p>
+    <h3>1. Vertikale Integration + Kostenstruktur</h3>
+    <p>BYDs <strong>End-to-End-Vertikal-Integration</strong> ist branchenweit einzigartig. Eigene Batterien (Blade Battery 2.0), eigene Halbleiter (BYD Semiconductor), eigene Motoren, eigene Power-Electronics, eigene Software-Stack. Das ermöglicht: (a) Kostenvorteile von 15–25% vs. Wettbewerbern mit Tier-1-Suppliers, (b) schnellere Iterationszyklen (Blade Battery 2.0 in &lt;18 Monaten von 1.0 zu 2.0), (c) Margen-Resilienz selbst im Price-War. Tesla hat ähnliche Vertikal-Integration, aber BYD ist im Battery-Cost-Bereich <strong>fundamental führend</strong> – LFP-Blade-Batterien sind 20%+ günstiger als Tesla's 4680-NCA-Zellen bei vergleichbarer Energiedichte.</p>
+    <h3>2. Globale Marktposition + Brand-Recognition</h3>
+    <p>BYD ist <strong>seit 2024 globaler EV-Marktführer</strong>, hat Tesla in Volumen überholt. In China: April 2026 Marktanteil 22% (von 22,8% März leicht gefallen, aber #1 mit großem Abstand zu Geely #2 bei 11,3%). International: Brand-Recognition in Europa, ASEAN, LATAM rasant gewachsen. 38% der Amerikaner würden einen chinesischen EV in Betracht ziehen, BYD wird von 35% genannt (Cox Automotive Q2 2026 Survey) – obwohl US-Markt durch 100% Tarif blockiert ist.</p>
+    <h3>3. Battery-Technologie + Charging-Infrastruktur</h3>
+    <p><strong>Blade Battery 2.0 (März 2026)</strong> – LFP-Cell-to-Pack-Technologie mit 1000+ km Reichweite. Das übertrifft alle Wettbewerber im Mainstream-Segment. Plus: <strong>5.000 Ultra-Fast Charging Stations</strong> in China deployed (April 2026), 9-Minuten-Charging-Demos via KFC-Partnerschaft. Das ist Differenzierung gegen Tesla Supercharger-Network und schwächere domestische Wettbewerber.</p>
+    <h3>4. Battery-Business als unabhängiges Wachstumssegment</h3>
+    <p>BYD ist nicht nur Auto-OEM, sondern <strong>weltgrößter BESS-Hersteller (Battery Energy Storage Systems)</strong> nach installierter Kapazität. Plus EV-Battery-Drittkunden (BYDs Batterien werden auch an Toyota, Tesla für bestimmte Modelle verkauft). Das diversifiziert die Revenue-Basis und schafft Optionalität: Wenn das Auto-Business 2026 weiter unter Druck bleibt, könnten Energy Storage und Battery-Sales als profitable Wachstumssegmente entstehen.</p>
+    <p><strong>Was den Burggraben schwächt:</strong> (1) <strong>Per-Vehicle-Profit-Erosion auf ¥3.000–4.000 (–55–66%)</strong> – wenn Skalenvorteile durch Price-War aufgefressen werden, ist die Vertikal-Integration nicht mehr klare Margin-Story. (2) <strong>Xiaomi YU7 im Januar 2026 #1 in China nach Volumen</strong> – ein erschütterndes Signal, dass BYDs Domestic-Dominance bröckelt. (3) <strong>EU-Zollrisiko</strong>: Eu beobachtet BYDs Hungary-Werk wegen Labor-Vorwürfen (Reverse-Compliance-Probleme), könnte Importkosten weiter erhöhen. (4) <strong>Kein US-Marktzugang</strong> wegen 100% Trump-Tarif (seit 2024) – strukturelle Lücke. (5) <strong>Verschuldungsanstieg</strong>: ST-Borrowings +72% in 3 Monaten auf ¥66,3 Mrd., Net Debt-to-Equity von negativ in 2022 auf 25% in 2026 – Bilanz schwächt sich.</p>
+    <p><strong>Score 7/10:</strong> Burggraben strukturell intakt (Battery-Tech, Scale, globale Position), aber operativ unter Druck (Margins, Verschuldung, Domestic-Marktanteilsverluste an Xiaomi). Ein Punkt Abzug vs. 8/10 in März-Analyse, da der Q1-Disaster strukturelle Risse offenlegt.</p>
+    <div class="source">Quellen: BYD 2025 Annual Report; CleanTechnica BYD 2025 (30.03.2026); Automotive World China Price War (Apr 2026); TheElectricViking BYD NEV Lead April (Mai 2026); NBC News Chinese EVs World (13.05.2026); Bloomberg BYD Discounts (23.04.2026); EV Magazine Q1 2026 (Mai 2026); CnEVPost BYD Q1 (Apr 2026).</div>
+  </div>
+</div>
+
+<!-- SEKTION 3 -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">Letzte 4 Quartale</div>
+    <div class="section-score">Beat-Ratio: 1/4 (5 Quartale Profit-Decline)</div>
+  </div>
+  <div class="section-body">
+    <div class="alert-box">⚠️ <strong>Hinweis:</strong> BYD (1211.HK) notiert primär an der Hong Kong Stock Exchange. Daten aus BYD IR-Materialien, CnEVPost, CleanTechnica, Bloomberg/Reuters. <strong>Nächste Earnings: Q2 2026 (Halbjahresbericht) Ende August 2026.</strong></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Quartal</th><th>Revenue</th><th>YoY</th><th>Net Profit</th><th>YoY</th><th>NEV-Verkäufe</th><th>Trend</th></tr></thead>
+        <tbody>
+          <tr><td>Q1 2025</td><td>¥170,4 Mrd.</td><td class="beat">+25%</td><td>¥9,2 Mrd.</td><td class="beat">+101%</td><td>1,0M (+60%)</td><td class="beat">Peak Profitability</td></tr>
+          <tr><td>Q2 2025</td><td>¥200,9 Mrd.</td><td class="beat">+25%</td><td>¥9,1 Mrd.</td><td>+30%</td><td>1,0M (+45%)</td><td class="neutral">Margins beginnen zu drücken</td></tr>
+          <tr><td>Q3 2025</td><td>¥201,2 Mrd.</td><td>+8%</td><td class="miss">¥6,3 Mrd.</td><td class="miss">–33%</td><td>1,1M (+30%)</td><td class="miss">Klare Margin-Erosion</td></tr>
+          <tr><td>Q4 2025</td><td>¥231,4 Mrd.</td><td class="miss">–4%</td><td class="miss">¥7,7 Mrd.</td><td class="miss">–44%</td><td>1,3M (+15%)</td><td class="miss">Price-War-Trough</td></tr>
+          <tr><td><strong>Q1 2026</strong></td><td class="miss"><strong>¥150,2 Mrd.</strong></td><td class="miss"><strong>–11,8%</strong></td><td class="miss"><strong>¥4,1 Mrd.</strong></td><td class="miss"><strong>–55,4%</strong></td><td class="miss"><strong>700k (–30%)</strong></td><td class="miss"><strong>Brutal Knockout</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Q1 2026: Worst Quarter Since 2020</h3>
+    <p><strong>Q1 2026 war der schwächste Quartal seit der Pandemie</strong>. Die Zahlen im Detail:</p>
+    <ul style="list-style:none;padding-left:0;font-size:13px;color:var(--text);margin-bottom:12px;">
+      <li>• <strong>Revenue ¥150,23 Mrd. (–11,8% YoY)</strong> – beats expectations (Konsens ¥146 Mrd.), aber YoY-Decline schmerzhaft</li>
+      <li>• <strong>Net Profit ¥4,09 Mrd. (–55,4% YoY)</strong> – fünfter Quartal in Folge mit Profit-Decline</li>
+      <li>• <strong>Basic EPS ¥0,4480 (–56,89% YoY)</strong></li>
+      <li>• <strong>NEV-Verkäufe 700.463 Einheiten (–30,01% YoY, –47,82% QoQ)</strong> – saisonaler Effekt + struktureller Druck</li>
+      <li>• <strong>FX-Verlust ~¥2 Mrd.</strong> (Yuan-Aufwertung vs. USD/EUR)</li>
+      <li>• <strong>Per-Vehicle Net Profit ~¥3.000–4.000</strong> (vs. ¥8.800 Vorjahr) = –55–66% Erosion</li>
+    </ul>
+    <p><strong>Was die Q1-Schwäche getrieben hat:</strong> (1) Saisonalität (Q1 ist traditionell schwächster Quartal in China-Auto), (2) Tax-Exemption-Halving: Halbierung der NEV-Steuerbefreiung ab Januar 2026 = +¥9.000–15.000 zusätzliche on-road-Kosten pro Auto, (3) Lithium-Carbonate-Preis-Rebound: +130% seit Mid-2025, drückt Battery-COGS, (4) Aggressive Discounts: 10% durchschnittlicher Discount in März (2-Jahres-Hoch), (5) Xiaomi YU7-Druck im SUV-Segment, (6) FX-Verlust durch Yuan-Aufwertung.</p>
+    <p><strong>Positive Q1-Komponenten:</strong> (1) <strong>Exports +55,8% YoY auf 321.165 Einheiten</strong> – das ist <em>46% der Gesamtverkäufe</em>, von ~25% in Q1 2025. (2) <strong>70% des Vehicle Revenue international</strong> (Citi/JPMorgan estimate) – massive Verschiebung. (3) Operative Gross Margin auf Produktebene sequenziell verbessert (excluding FX). (4) FY-Export-Target von 1,3M auf 1,5M angehoben (März 2026).</p>
+    <p>Wang Chuanfu im Aktionärsbrief: <em>„Die chinesische Automobilbranche ist in einer brutalen Knockout-Phase. Wettbewerb hat 'Fieber-Höhepunkt' erreicht. Schwächere Spieler werden bankrott gehen. Nur Unternehmen mit Skala, Technologie und Übersee-Märkten werden überleben."</em> Das ist klar formuliert: BYD versteht, dass es ein Survival-Spiel ist, und positioniert sich entsprechend.</p>
+    <p><strong>Was die nächsten 2 Quartale zeigen müssen:</strong> Q2 2026 sollte sequenziell besser sein (Saisonalität + Stimulus-Programme + Discount-Anpassungen). Macquarie-Analyst Eugene Hsiao: „BYD braucht Domestic-Volume-Pickup in Q2, dann nachhaltige Erholung + Marktanteils-Recovery in Q3 für Gesamtprofit-Verbesserung." Das ist die Test-Roadmap.</p>
+    <div class="source">Quellen: BYD Q1 2026 Earnings Filing (28.04.2026); CnEVPost BYD Q1 (28.04.2026); Yahoo Finance Q1 (29.04.2026); Wikipedia BYD (Mai 2026); Nikkei Asia BYD Q1 (Apr 2026); TheStreet BYD Q1 Analysis (30.04.2026); Reuters Macquarie Quote (Apr 2026); BYD historische Quartalszahlen (CleanTechnica, Bloomberg).</div>
+  </div>
+</div>
+
+<!-- SEKTION 4 -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">Wachstumseinordnung</div>
+    <div class="section-score">Score: 5/10</div>
+  </div>
+  <div class="section-body">
+    <p>BYDs Wachstumsstory ist <strong>strukturell in der Transformation</strong>: Vom Domestic-Hyper-Growth (2020–2024) zum Globalen Export-Pivot (2025+). Domestic-Markt sättigt sich + reift ab, Export-Geschäft kompensiert teilweise. FY2025 Revenue +3,5%, FY2026e voraussichtlich +5–8% (Analyst-Konsens) – das ist deutlich unter den +30%+ Wachstumsraten 2022–2024.</p>
+    <h3>Revenue-Trajektorie (2020–2026e)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Fiskaljahr</th><th>Revenue</th><th>YoY</th><th>Treiber / Bemerkung</th></tr></thead>
+        <tbody>
+          <tr><td>FY 2020</td><td>¥156 Mrd.</td><td>+22%</td><td>Pre-EV-Boom</td></tr>
+          <tr><td>FY 2021</td><td>¥216 Mrd.</td><td class="beat">+38%</td><td>EV-Boom-Start</td></tr>
+          <tr><td>FY 2022</td><td>¥424 Mrd.</td><td class="beat">+96%</td><td>Hyper-Growth</td></tr>
+          <tr><td>FY 2023</td><td>¥602 Mrd.</td><td class="beat">+42%</td><td>Global Market Leadership</td></tr>
+          <tr><td>FY 2024</td><td>¥777 Mrd.</td><td class="beat">+29%</td><td>Tesla überholt global</td></tr>
+          <tr><td>FY 2025</td><td>¥804 Mrd.</td><td class="neutral">+3,5%</td><td>Price-War + China-Sättigung</td></tr>
+          <tr><td><strong>FY 2026e</strong></td><td><strong>~¥870 Mrd.</strong></td><td><strong>+5–8% (Konsens)</strong></td><td><strong>Export +50%, Domestic –10%</strong></td></tr>
+          <tr><td>FY 2027e</td><td>~¥960 Mrd.</td><td class="beat">+10–12%</td><td>Export-Skalierung, Stellantis-Deal?</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Geografische Verteilung (Q1 2026 Vehicle Revenue)</h3>
+    <div class="geo-grid">
+      <div class="geo-card"><div class="geo-region">China (Domestic)</div><div class="geo-pct">~54%</div><div class="geo-note">Sales 700k (–30% YoY); Margins gedrückt</div></div>
+      <div class="geo-card"><div class="geo-region">Übersee (Total)</div><div class="geo-pct">~46%</div><div class="geo-note">Exports 321k (+55,8% YoY)</div></div>
+      <div class="geo-card"><div class="geo-region">Vehicle Revenue Intl. (Citi est.)</div><div class="geo-pct">~70%</div><div class="geo-note">Premium-Pricing im Ausland</div></div>
+      <div class="geo-card"><div class="geo-region">Europa</div><div class="geo-pct">~12% Export</div><div class="geo-note">Hungary-Werk + Stellantis-Talks</div></div>
+      <div class="geo-card"><div class="geo-region">Brazil + LATAM</div><div class="geo-pct">~10% Export</div><div class="geo-note">Schnell wachsend</div></div>
+      <div class="geo-card"><div class="geo-region">ASEAN (Thailand, Indon., MY)</div><div class="geo-pct">~25% Export</div><div class="geo-note">Größtes Wachstumssegment</div></div>
+    </div>
+    <p><strong>Critical Insight – Export-Mix 70% vs. Domestic 30%:</strong> Citi und JPMorgan haben Q1 2026 als <em>Wendepunkt</em> identifiziert, an dem ~70% des Vehicle Revenue international entstand (vs. 40% in 2025). Das ist <strong>massive strategische Verschiebung</strong>. Export-Margen sind höher als Domestic-Margen (Premium-Pricing, weniger Discount-Druck), was die Profit-Recovery aushelfen sollte – allerdings sind FX-Effekte schwierig (Yuan-Stärke drückt EUR/USD-Receivables).</p>
+    <h3>Segment-Wachstum (FY2025)</h3>
+    <p><strong>Auto + NEV (~80% Revenue):</strong> +3% YoY 2025, voraussichtlich +5–10% 2026. NEV-Auto-Gross-Margin slipped 1,8pp auf 20,5% (von 22,3% 2024) – immer noch sehr gut absolut, aber Trend negativ.</p>
+    <p><strong>Mobile Components (~10–15% Revenue):</strong> Stabil, profitabel, niedriges Wachstum.</p>
+    <p><strong>Batteries + Photovoltaik + BESS (~5–10% Revenue):</strong> Schnellstes Wachstum, +25%+ YoY in 2025. <strong>BYD ist globaler #1 in BESS</strong>. Das ist eine separate Wachstumsstory, die im Auto-Decline teilweise versteckt ist.</p>
+    <p><strong>Reifegrad-Einschätzung:</strong> BYD ist in der <strong>Mature-Growth-Phase im China-Auto-Markt</strong>, aber in <strong>Hyper-Growth in Export-Märkten</strong>. Das ist ein klassisches Two-Speed-Geschäftsmodell. Der Erfolg der nächsten 18 Monate hängt fast vollständig daran, ob die Internationalisierung schnell genug Volumen + Margen-Recovery liefert, um den Domestic-Druck auszugleichen.</p>
+    <div class="source">Quellen: BYD 2025 Annual Report; ChinaBizInsider BYD Q1 (Apr 2026); CnEVPost BYD Q1 (28.04.2026); CleanTechnica BYD 2025 (30.03.2026); Bloomberg BYD Export Target (März 2026); Yahoo Finance BYD Q1 (Apr 2026); Citi/JPMorgan Research-Notes (Apr 2026).</div>
+  </div>
+</div>
+
+<!-- SEKTION 5 -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <div class="section-title">Bewertung &amp; Multiples</div>
+    <div class="section-score">Score: 8/10</div>
+  </div>
+  <div class="section-body">
+    <div class="alert-box">⚠️ <strong>Hinweis:</strong> BYD notiert an der HKEX (1211.HK), keine finviz.com-Daten verfügbar. Quellen: Investing.com, Yahoo Finance HKEX, Bloomberg, JPM/Citi Research-Notes.</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Multiple</th><th>Aktuell</th><th>5J-Median</th><th>Peer-Ø</th><th>Bewertung</th></tr></thead>
+        <tbody>
+          <tr><td>P/E (TTM)</td><td>~13x</td><td>~30x</td><td>~22x (Toyota/VW)</td><td class="beat">Günstig</td></tr>
+          <tr><td>P/E (FWD, FY26e)</td><td>~12x</td><td>~22x</td><td>~18x</td><td class="beat">Günstig</td></tr>
+          <tr><td>EV/EBITDA (TTM)</td><td>~6x</td><td>~12x</td><td>~8x</td><td class="beat">Günstig</td></tr>
+          <tr><td>P/S (TTM)</td><td>~0,4x</td><td>~1,0x</td><td>~0,6x</td><td class="beat">Sehr günstig</td></tr>
+          <tr><td>P/B</td><td>~2,7x</td><td>~5x</td><td>~1,5x</td><td class="neutral">Hoch vs. traditionelle OEMs</td></tr>
+          <tr><td>Dividend Yield</td><td>~1,8%</td><td>~1,5%</td><td>~3% (VW, Toyota)</td><td class="neutral">Moderat</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Bewertungs-Setup:</strong> BYD handelt bei P/E FWD ~12× und EV/EBITDA ~6× – das ist <strong>für einen globalen EV-Marktführer mit Battery-Technologie-Lead historisch günstig</strong>. Allerdings reflektiert das auch das Q1-2026-Disaster und die strukturelle Profit-Erosion. Bei einer Net-Income-Recovery auf ¥35 Mrd. FY26 (–11% YoY) wäre P/E FWD ~12×. Bei einem Recovery-Szenario FY27 mit ¥45 Mrd. wäre P/E FWD ~9×.</p>
+    <h3>Konsens-Targets (Mai 2026)</h3>
+    <p><strong>25 Buy / 1 Sell-Ratings.</strong> Konsens-Zielkurs: <strong>HKD 124,71</strong> (von Investing.com / 26 Analysten), Range HKD 87,50–148,10. Median ~HKD 125. Implied Upside +27%. Wichtige Konsens-Stützen: Citi, JPMorgan, Macquarie alle positiv mit Buy-Ratings, fokussiert auf Export-Pivot-Story.</p>
+    <p><strong>Vergleich zu Tesla:</strong> Tesla handelt bei P/E FWD ~75x bei Revenue-Stagnation und ~6% Margin. BYD handelt bei P/E FWD ~12x bei +5–8% Revenue-Wachstum und 4–5% Margin. <strong>BYD ist 6× günstiger bewertet als Tesla bei vergleichbarem Wachstum.</strong> Das ist die SOTP-Implikation: Tesla-Premium ist nicht durch Fundamentals gerechtfertigt; BYD-Discount reflektiert vor allem China-Geopolitik-Risiko und HKEX-Listing.</p>
+    <p><strong>SOTP-Argument:</strong></p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Segment</th><th>Annahme</th><th>Implizite Bewertung</th></tr></thead>
+        <tbody>
+          <tr><td>NEV-Auto + Mobility (~¥630B Run-Rate)</td><td>0,4× Revenue (Defensive, Price-War)</td><td>~¥250 Mrd.</td></tr>
+          <tr><td>Battery + BESS-Business (~¥120B Run-Rate)</td><td>1,5× Revenue (CATL-Vergleich 2×)</td><td>~¥180 Mrd.</td></tr>
+          <tr><td>Mobile Components + Photovoltaik</td><td>0,5× Revenue (~¥80B)</td><td>~¥40 Mrd.</td></tr>
+          <tr><td>Net Cash + Investments</td><td>—</td><td>~¥30 Mrd.</td></tr>
+          <tr style="background:rgba(228,5,33,0.08);"><td><strong>Sum-of-the-Parts</strong></td><td>—</td><td><strong>~¥500 Mrd. (~HKD 188/Aktie)</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>SOTP impliziert <strong>HKD 188 fair value</strong> – das ist deutlich über Konsens-PT HKD 125. Selbst bei sehr konservativen Annahmen wäre HKD 130–150 vertretbar. Das deutet auf strukturellen Discount durch (a) HKEX-Liquidity-Discount vs. NYSE, (b) China-Sentiment-Discount, (c) Q1-2026-Erosion-Schock hin.</p>
+    <p><strong>Was die Bewertung verteuern könnte:</strong> Bei Q2 2026 mit weiterer Net-Profit-Erosion (–60%+ YoY) wären Konsens-Estimates zu senken, P/E würde tatsächlich auf 14–15x springen. Was sie verbilligen könnte: Q2 2026 sequenziell besser, Stellantis-Deal-Bestätigung, Export-Volumen-Acceleration → Re-Rating Richtung HKD 130–140.</p>
+    <div class="source">Quellen: Investing.com BYD 1211 (14.05.2026); Stockanalysis.com BYD HKG:1211 (Mai 2026); CNBC BYD 1211-HK (Mai 2026); CleanTechnica BYD 2025 (März 2026); JPMorgan/Citi Research-Notes via ChinaBizInsider (Apr 2026).</div>
+  </div>
+</div>
+
+<!-- SEKTION 6 -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+    <div class="section-score">Score: 5/10</div>
+  </div>
+  <div class="section-body">
+    <p>Die Cashflow-Story ist <strong>der schwächste Punkt der aktuellen BYD-Situation</strong> – und das ist eine signifikante Verschlechterung vs. März-Analyse (damals Score 7/10).</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Metric</th><th>Q1 2026 / FY 2025</th><th>Vorjahr</th><th>YoY</th><th>Kommentar</th></tr></thead>
+        <tbody>
+          <tr><td>Revenue Q1 2026</td><td class="miss">¥150,2 Mrd.</td><td>¥170,4 Mrd.</td><td>–11,8%</td><td>Beats Konsens ¥146 Mrd.</td></tr>
+          <tr><td>Net Profit Q1 2026</td><td class="miss">¥4,09 Mrd.</td><td>¥9,2 Mrd.</td><td>–55,4%</td><td>5. Quartal in Folge YoY-Decline</td></tr>
+          <tr><td>Net Margin Q1 2026</td><td class="miss">~2,7%</td><td>~5,4%</td><td>–270 bps</td><td>Massive Compression</td></tr>
+          <tr><td>Auto Gross Margin (FY25)</td><td>20,5%</td><td>22,3%</td><td>–180 bps</td><td>Absolut stark, Trend negativ</td></tr>
+          <tr><td>Net Margin (FY25)</td><td>4,1%</td><td>5,2%</td><td>–110 bps</td><td>Knapp über Toyota 7%, deutlich über VW 2,1%</td></tr>
+          <tr><td>Per-Vehicle Net Profit Q1 26</td><td class="miss">¥3.000–4.000</td><td>¥8.800</td><td>–55 bis –66%</td><td>Brutaler Strukturwandel</td></tr>
+          <tr><td>Operating Cash Flow Q1 26</td><td class="miss">–67% YoY</td><td>—</td><td>—</td><td>Erhebliche Schwäche</td></tr>
+          <tr><td>ST-Borrowings (Q1 26)</td><td class="miss">¥66,3 Mrd.</td><td>~¥38 Mrd.</td><td>+72% in 3M</td><td>$9,7 Mrd. = Rekordhoch</td></tr>
+          <tr><td>Net Debt-to-Equity</td><td class="miss">~25%</td><td>~0% (neg.)</td><td>—</td><td>4 Jahre negativer Net Debt vorbei</td></tr>
+          <tr><td>Capex (FY25)</td><td>~¥120 Mrd.</td><td>~¥110 Mrd.</td><td>+9%</td><td>Expansion läuft weiter</td></tr>
+          <tr><td>FX-Verlust Q1 26</td><td class="miss">~¥2 Mrd.</td><td>—</td><td>—</td><td>Yuan-Stärke vs. USD/EUR</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Die kritische Verschlechterung:</strong> Operating Cash Flow –67% YoY, ST-Borrowings +72% auf Rekordhoch ¥66,3 Mrd., Net Debt-to-Equity von negativ auf 25%. Das sind <strong>klassische Frühwarnsignale</strong> für ein Unternehmen, das den Capex weiter hochfährt (Expansion in Übersee, neue Fabriken) gleichzeitig mit Profit-Erosion. Wenn das Q2/Q3 2026 nicht improvet, ist Bilanz-Stress-Test wahrscheinlich.</p>
+    <p><strong>Was die Schwäche treibt:</strong> (1) <strong>Price-War zwingt zu Discounts</strong>, drückt Auto-Margen. (2) <strong>Lithium-Carbonate +130%</strong> seit Mid-2025 = COGS-Inflation. (3) <strong>Capex bleibt hoch</strong> wegen Übersee-Expansion (Hungary, Brazil, Thailand-Werke). (4) <strong>Working Capital-Belastung</strong> durch Exportgeschäft (längere Receivables-Zyklen). (5) <strong>FX-Verlust ¥2 Mrd.</strong> durch Yuan-Stärke.</p>
+    <p><strong>Bilanz im Kontext:</strong> ~¥98 Mrd. Cash + ST-Investments (Stand FY25). Total Debt ~¥160 Mrd. Net Debt ~¥60 Mrd. Verhältnis zu EBITDA ~0,9× = nicht alarmierend, aber Trend negativ. <strong>Wichtig:</strong> BYD bezahlt 2025 mehr in Domestic-Steuern als sie Net Profit machten – Government-Support-Funktion erhalten, was bei einer Bilanz-Krise Backstop-Funktion hätte.</p>
+    <p><strong>Capex-Verteilung:</strong> Hungary-Werk skaliert (~$5B Investment Total), Brazil-Werk in Frühphase, Thailand-Werk operational, Mexiko-Plan verschoben. Plus: Battery-Manufacturing-Expansion. Capex-Cycle bleibt elevated bis FY27.</p>
+    <p><strong>Was die Story noch retten kann:</strong> H2 2026-Recovery wäre der Trigger. Bei Q3 2026 Net Profit zurück bei ¥8–10 Mrd. (vs. Q3 2025 ¥6,3 Mrd. = +27–58%) wäre Erosionsphase beendet. Bei H2 2026 Operating Cash Flow Recovery wäre Verschuldungs-Anstieg stoppbar.</p>
+    <p>Score 5/10: <strong>Strukturell ok</strong>, aber Trend deutlich negativ. Ein Punkt höher als 4/10, weil BYDs Bilanz absolut betrachtet nicht in Gefahr ist (¥98B Cash, Government-Backstop, profitabel auch in Krise). Aber 2 Punkte unter März-Analyse (damals 7/10), weil die Verschlechterung real und schnell ist.</p>
+    <div class="source">Quellen: BYD Q1 2026 Earnings (28.04.2026); TheStreet BYD Reality (30.04.2026); CnEVPost BYD Q1 (Apr 2026); CleanTechnica BYD 2025 (30.03.2026); Moomoo Financial via TheStreet (Apr 2026); Automotive World China Price War (Apr 2026); BYD 2025 Annual Report.</div>
+  </div>
+</div>
+
+<!-- SEKTION 7 -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-number">7</div>
+    <div class="section-title">Peer-Vergleich (Global EV / NEV)</div>
+    <div class="section-score">Score: 7/10</div>
+  </div>
+  <div class="section-body">
+    <p>Peer-Gruppe: Tesla (TSLA), Xiaomi EV (1810.HK), Geely (0175.HK), Volkswagen (VOW3.DE), Toyota (TM), Stellantis (STLA). Mix aus Pure-Play-EV und Hybrid-/Traditional-OEMs zur Einordnung.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Player</th><th>FY25 Revenue</th><th>FY25 Net Margin</th><th>P/E FWD</th><th>EV-Volumen 2025</th><th>Differenzierung</th></tr></thead>
+        <tbody>
+          <tr style="background:rgba(228,5,33,0.06);"><td><strong>BYD (1211.HK)</strong></td><td>$110B</td><td class="neutral">4,1%</td><td class="beat">~12x</td><td class="beat">~4,3M (#1 global)</td><td>Vertikal-Integration, Battery-Tech</td></tr>
+          <tr><td>Tesla (TSLA)</td><td>$98B</td><td class="miss">3,8%</td><td class="miss">~75x</td><td>~1,8M (#2 global)</td><td>Premium-Brand, AI/Autonomy-Push</td></tr>
+          <tr><td>Xiaomi EV (1810.HK)</td><td>$5B (2025 EV-Segment)</td><td class="miss">–10% (Investment)</td><td>~25x (Konzern)</td><td>~270k (in 2025)</td><td>Konsumer-Tech-Crossover, YU7 #1 China Jan26</td></tr>
+          <tr><td>Geely (0175.HK)</td><td>$35B</td><td class="beat">4,9%</td><td class="beat">~10x</td><td>~1,1M</td><td>Multi-Brand (Volvo, Polestar, Geely)</td></tr>
+          <tr><td>Volkswagen (VOW3.DE)</td><td>$330B</td><td class="miss">2,1%</td><td>~5x</td><td>~770k EV</td><td>Scale, Multi-Brand-Portfolio</td></tr>
+          <tr><td>Toyota (TM)</td><td>$300B</td><td class="beat">7,1%</td><td>~10x</td><td>~145k BEV (forecast 243k FY26)</td><td>Hybrid-Lead, Margen-Disziplin</td></tr>
+          <tr><td>Stellantis (STLA)</td><td>$180B</td><td>~3,5%</td><td>~5x</td><td>~340k EV</td><td>Multi-Brand US/EU, BYD-Talks 13.05.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Qualitative Differenzierung</h3>
+    <p><strong>BYD vs. Tesla:</strong> BYD ist Volumen-King (4,3M vs. 1,8M), Tesla ist Premium-Brand-King. Tesla hat 75× P/E vs. BYD 12× – das ist eine 6× Multiple-Differenz, die durch Tesla's „AI Robotaxi"-Narrativ und US-Listing-Premium getrieben wird. Operativ liefert BYD bessere Auto-Margen (Battery-Tech-Cost-Advantage). Tesla hat <strong>März/April 2026 China-Marktanteil-Krise</strong>: Tesla aus Top-10 NEV-Ranking gefallen in April 2026, Sales –9,66% YoY und –53,74% MoM. Das schwächt Tesla's „Premium-EV-Marktführer"-These materiell.</p>
+    <p><strong>BYD vs. Xiaomi EV:</strong> <strong>Der wichtigste neue Wettbewerber</strong>. Xiaomi YU7 wurde im Januar 2026 #1 in China nach Volumen (über alle Powertrains). YU7 ist ein direkter SUV-Konkurrent zu BYD Sealion 8/Tang. Xiaomi hat eine Konsumer-Tech-Brand-Identität, die BYDs „industrial OEM"-Brand-Identität herausfordert. Xiaomi ist klein (~270k Auto-Vol. 2025), aber mit +500%+ Wachstum und massivem Marketing-Spend. Strategisches Risiko für BYD: Wenn Xiaomi auf 1M+ Auto-Vol. 2027 skaliert, ist BYDs Domestic-Marktanteil unter 20% absehbar.</p>
+    <p><strong>BYD vs. Geely:</strong> Geely hat höhere Net Margin (4,9% vs. 4,1%), wachsen ähnlich (Geely Multi-Brand-Strategie via Volvo, Polestar, Zeekr). Im April 2026 China-NEV-Ranking ist Geely #2 (11,3% Marktanteil, 95.585 Verkäufe), näher an BYD #1 (22%) als je zuvor. Geely könnte BYDs Domestic-Marktdominanz in 2027 substantiell challengen.</p>
+    <p><strong>BYD vs. Volkswagen:</strong> VW hat $330B Revenue vs. BYDs $110B, aber Net Margin 2,1% vs. BYD 4,1%. VW kämpft im China-Markt (XPeng/Horizon-Partnerships als Verteidigung), in Europa ist VW noch dominant aber unter Druck. BYD strategischer Vorteil: Battery-Tech-Lead, Multi-Geographic-Expansion ohne Legacy-ICE-Costs.</p>
+    <p><strong>BYD vs. Toyota:</strong> Toyota ist Margen-King (7,1% Net Margin), aber strukturell zurück im BEV-Segment (~145k BEV 2025/26 vs. BYD 4,3M total NEV). Toyota wird vom Hybrid-Markt sehr lange profitieren, aber im Pure-BEV-Übergang ist BYD strukturell besser positioniert.</p>
+    <p><strong>BYD vs. Stellantis (potenzieller Partner!):</strong> Stellantis hat im Mai 2026 mit BYD über Europa-Werks-Cooperation gesprochen (Bloomberg, 13.05.). Wenn das Deal-Form annimmt, kreiert BYD einen Made-in-Europe-Backbone via Stellantis' bestehende Werke. Das wäre <strong>strategisch transformational</strong> – würde EU-Tarif-Risiko mitigieren und BYDs Europe-Expansion beschleunigen.</p>
+    <p><strong>Strategisches Resümee:</strong> BYD ist <strong>Global EV-Volume-Leader</strong> mit Battery-Tech-Lead, aber Domestic-Marktanteil unter Druck von Xiaomi + Geely. Internationales Wachstum kompensiert. Bewertungs-Discount vs. Tesla strukturell ungerechtfertigt (6× Gap), aber bleibt durch Geopolitik und Listing-Effekt bestehen.</p>
+    <div class="source">Quellen: BYD 2025 Annual Report; Tesla 2025 Annual Report; CleanTechnica BYD 2025 (30.03.2026); EV Magazine Q1 2026 (Mai 2026); TheElectricViking BYD April NEV (Mai 2026); CNBC BYD News-Stream (Mai 2026); Bloomberg Stellantis-BYD Talks (13.05.2026); China Passenger Car Association Data April 2026.</div>
+  </div>
+</div>
+
+<!-- SEKTION 8 -->
+<div class="section" id="s8">
+  <div class="section-header">
+    <div class="section-number">8</div>
+    <div class="section-title">News &amp; Events (Februar–Mai 2026)</div>
+    <div class="section-note">3-Monats-Fenster</div>
+  </div>
+  <div class="section-body">
+
+    <h3>Ebene 1: Unternehmen</h3>
+    <div class="event-item">
+      <div class="event-dot dot-red"></div>
+      <div>
+        <div class="event-label">28.04.2026 – Q1 2026 Earnings: Net Profit –55,4% <span class="badge badge-red">Sehr negativ</span></div>
+        <div class="event-text">Revenue ¥150,2B (–11,8%), Net Profit ¥4,09B (–55,4%), NEV-Sales 700k (–30%), Per-Vehicle-Profit auf ¥3.000–4.000 von ¥8.800 gefallen. 5. Quartal in Folge YoY-Profit-Decline. Aktie reagierte mit –4–5%. Quelle: BYD Q1 2026 Earnings Release; CnEVPost (28.04.2026); TheStreet (30.04.2026).</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Marktkapitalisierung</div>
-        <div class="kpi-value">HKD 821B</div>
-        <div class="kpi-sub">ca. USD 105B</div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">März 2026 – Export-Target erhöht auf 1,5M (vs. 1,3M Januar-Ziel) <span class="badge badge-green">Sehr positiv</span></div>
+        <div class="event-text">Management hebt Export-Ziel um +15%. Reflektiert Confidence in International-Pivot. Quelle: Bloomberg via CnEVPost (März 2026); Automotive World (Apr 2026).</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">P/E (TTM)</div>
-        <div class="kpi-value teal">~22x</div>
-        <div class="kpi-sub">Peer-Ø: ~9,6x</div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">März 2026 – Blade Battery 2.0 Launch (1000+ km Range) <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Neue Generation LFP-Cell-to-Pack-Technologie mit über 1000 km Reichweite. Tech-Differenzierung vs. Konkurrenz. Quelle: EV Magazine BYD BMW Toyota Q1 (Mai 2026).</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Revenue TTM</div>
-        <div class="kpi-value">RMB 841B</div>
-        <div class="kpi-sub">ca. USD 117,8B</div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">April 2026 – 5.000 Ultra-Fast Charging Stations Deployed <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">BYDs Charging-Network-Push gegen Tesla Supercharger. Inklusive KFC-Partnership für 9-Minuten-Refueling-Stations (April 2026). Quelle: ChinaBizInsider BYD Q1 (Apr 2026); CNBC (09.04.2026).</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Bruttomarge</div>
-        <div class="kpi-value green">~18%</div>
-        <div class="kpi-sub">H1 2025: 18%</div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">13.05.2026 – Stellantis-Talks für Europa-Werke <span class="badge badge-green">Sehr positiv (potenziell transformational)</span></div>
+        <div class="event-text">Bloomberg: BYD im Gespräch mit Stellantis und anderen für gemeinsame Europa-Werke. Wäre Made-in-Europe-Lösung gegen EU-Zölle (Trump's NICE Act). Strategischer Game-Changer für Europe-Expansion. Quelle: TipRanks via CNBC (13.05.2026); Bloomberg.</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">BEV-Absatz 2025</div>
-        <div class="kpi-value green">2,26 Mio.</div>
-        <div class="kpi-sub">+28% YoY · Nr. 1 global</div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-red"></div>
+      <div>
+        <div class="event-label">27.04.2026 – EU-Probe Hungary-Werk (Labor-Abuse-Vorwürfe) <span class="badge badge-red">Negativ</span></div>
+        <div class="event-text">EU Parliament scrutiny zu Labor-Vorwürfen bei BYD Hungary-Werk Subkontraktor. Reputational + potenzieller Reg-Risk für EU-Aktivitäten. Quelle: CNBC (27.04.2026).</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Nächste Earnings</div>
-        <div class="kpi-value teal">24. Mrz</div>
-        <div class="kpi-sub">2026 · Jahresergebnis</div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">April 2026 – Brazil: Government-Inspector wegen BYD-Listing gefeuert <span class="badge badge-yellow">Mixed</span></div>
+        <div class="event-text">Brazil's secretary of labor inspection wurde gefeuert, nachdem BYD in Slavery-like-Conditions-Registry gelistet wurde. Bizarre Geschichte mit Politik-Implikationen für BYD Brazil-Operations. Quelle: Stockanalysis BYD News (Apr 2026).</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Konsens</div>
-        <div class="kpi-value green">KAUFEN</div>
-        <div class="kpi-sub">23 Analysten · Ziel HKD 126</div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">April 2026 – Alibaba Qwen AI in BYDs Fahrzeuge <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Qwen AI-Sprach-Assistent für Hotel- und Essen-Bestellung in BYD-Autos. Differenzierung im Smart-Cockpit-Bereich. Quelle: CNBC (23.04.2026).</div>
       </div>
     </div>
 
-    <!-- SEKTION 1: GESCHÄFTSMODELL -->
-    <div class="section" id="s1">
-      <div class="section-header">
-        <div class="section-number">1</div>
-        <div class="section-title">Geschäftsmodell</div>
-        <div class="section-note">Quellen ≤ 9 Monate</div>
+    <h3>Ebene 2: Branche</h3>
+    <div class="event-item">
+      <div class="event-dot dot-red"></div>
+      <div>
+        <div class="event-label">Januar 2026 – NEV-Tax-Exemption Halving <span class="badge badge-red">Sehr negativ</span></div>
+        <div class="event-text">China halbiert NEV-Purchase-Tax-Exemption ab 01.01.2026 = +¥9.000–15.000 zusätzliche Kosten für Mid-Range-NEV. Driver für Q1-Verkaufsschwäche (–30% NEV-Sales BYD). Quelle: CnEVPost; Wikipedia BYD (Mai 2026).</div>
       </div>
-      <div class="section-body">
-        <h3>Unternehmensüberblick</h3>
-        <p>BYD Company Limited (Build Your Dream) wurde 1995 in Shenzhen gegründet und hat sich von einem Batteriehersteller zu einem der größten und technologisch fortschrittlichsten New-Energy-Vehicle-Konzerne weltweit entwickelt. Das Unternehmen beschäftigt rund 968.900 Mitarbeiter und erwirtschaftete im Geschäftsjahr 2024 einen Umsatz von RMB 777,1 Milliarden (ca. USD 107 Milliarden), womit BYD zum ersten Mal seit 2018 Tesla in der Jahresumsatz-Rangliste überholte. Der Konzern notiert sowohl an der Hongkonger Börse (1211.HK) als auch in Shenzhen (002594.SZ).</p>
-
-        <h3>Revenue-Streams &amp; Segmente</h3>
-        <p>BYD gliedert seine Aktivitäten in drei Hauptsegmente: Erstens das Automobil- und verwandte Produkte-Segment, welches mit rund 81,5 Prozent des Umsatzes (H1 2025: RMB 302,5 Milliarden, +32,5 Prozent YoY) das dominierende Standbein darstellt. Hierin enthalten sind PKW und Nutzfahrzeuge aller Antriebsarten, Ladeinfrastruktur sowie Finanzierungs- und Aftersales-Services. Zweitens das Segment für wiederaufladbare Batterien und Photovoltaik – BYDs Blade-Battery-Technologie findet nicht nur in eigenen Fahrzeugen Verwendung, sondern wird auch an Dritthersteller wie Mercedes-Benz, Toyota, Ford und Kia lizenziert. Drittens das Elektronik-Segment (Mobile Handset Components & Assembly), welches Gehäusekomponenten und Montagedienstleistungen für die Smartphone-Industrie umfasst.</p>
-
-        <p>Ein strukturelles Differenzierungsmerkmal ist BYDs außergewöhnlich tiefe vertikale Integration: Das Unternehmen produziert seine eigenen Batterien (Blade-Battery auf LFP-Basis), Elektromotoren, Leistungselektronik, Halbleiter (BYD Semiconductor) sowie in jüngster Zeit sogar eigene Frachtschiffe für den Fahrzeugtransport. Diese Integration schafft massive Kostenvorteile und macht BYD nahezu immun gegen externe Lieferkettenstörungen, die Wettbewerber wie NIO oder Rivian stark treffen.</p>
-
-        <h3>Produkt- &amp; Markenarchitektur</h3>
-        <p>BYD betreibt eine ausdifferenzierte Markenarchitektur: Die Kernmarke BYD bedient das Volumengeschäft im Preisbereich von ca. 80.000 bis 250.000 RMB. Das Premium-Joint-Venture Denza (mit Mercedes-Benz) richtet sich an die obere Mittelklasse. Yangwang ist die Ultra-Luxus-Marke ab 800.000 RMB. Fang Cheng Bao adressiert Offroad- und Sport-Enthusiasten. Diese Spreizung ermöglicht BYD, sowohl im Massenmarkt als auch im Premiumsegment Marktanteile zu gewinnen – eine Strategie, mit der Tesla direkt konkurriert. Mit dem 2025 eingeführten „Super e-Platform"-System, das Ladevorgänge auf Megawatt-Niveau ermöglicht, setzt BYD zudem neue technologische Maßstäbe bei Ladegeschwindigkeit und Reichweite.</p>
-
-        <div class="source">Quellen: BYD Annual Report 2024 (byd.com, März 2025); Gasgoo – H1 2025 Earnings (August 2025); CarNewsChina – Q1-Q3 2025 Ergebnisse (Oktober 2025); Yahoo Finance – Income Statement 1211.HK (März 2026).</div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-red"></div>
+      <div>
+        <div class="event-label">März 2026 – Lithium-Carbonate +130% seit Mid-2025 <span class="badge badge-red">Negativ</span></div>
+        <div class="event-text">Battery-grade Lithium-Carbonate-Preise +130% in 9 Monaten. Drückt Battery-COGS für alle EV-OEMs. BYD durch Vertikal-Integration weniger betroffen, aber nicht immun. Quelle: Automotive World China Price War (Apr 2026).</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-red"></div>
+      <div>
+        <div class="event-label">März 2026 – Xiaomi YU7 wird #1 in China nach Volumen <span class="badge badge-red">Strategisch negativ</span></div>
+        <div class="event-text">Xiaomi YU7 SUV best-selling vehicle in China (alle Powertrains) im Januar 2026. Direkter SUV-Wettbewerb zu BYD Sealion/Tang. Konsumer-Tech-Brand-Crossover-Erfolg. Quelle: China EVs Podcast (März 2026); CarNewsChina (Feb 2026).</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-red"></div>
+      <div>
+        <div class="event-label">März 2026 – BYD Discounts auf 10% (2-Jahres-Hoch) <span class="badge badge-red">Negativ</span></div>
+        <div class="event-text">Bloomberg: durchschnittliche BYD-Discounts auf 10% in März = 2-Jahres-Hoch. Wang Chuanfu: „Brutale Knockout-Phase". Regulatorische Warnungen gegen Below-Cost-Selling helfen wenig. Quelle: Bloomberg BYD Discounts (23.04.2026).</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">Februar 2026 – 7-Jahres-Loans als neue Preis-Waffe <span class="badge badge-yellow">Mixed</span></div>
+        <div class="event-text">BYD, Tesla, Xiaomi, Nio, Geely launchten 7-Jahres-Low-Interest-Loans als alternative Preisreduktion (Regulator hat Direct-Discounts limitiert). 29 Yuan/Tag = $4 Daily-Payments. Quelle: CarNewsChina (26.02.2026).</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">April 2026 – CPCA-Regulatorische Below-Cost-Selling-Warnungen <span class="badge badge-yellow">Neutral</span></div>
+        <div class="event-text">Februar 2026: Rules forbidding below-cost EV-sales eingeführt. März/April: Discounting bleibt aber wegen Factory-Idle-Vermeidung. Regulatorische Pressure langfristig positiv für Industry-Profitability. Quelle: Automotive World (Apr 2026).</div>
       </div>
     </div>
 
-    <!-- SEKTION 2: BURGGRABEN -->
-    <div class="section" id="s2">
-      <div class="section-header">
-        <div class="section-number">2</div>
-        <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
-        <div class="section-score">Score: 7/10</div>
+    <h3>Ebene 3: Makro</h3>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">13.05.2026 – Trump-Xi-Meeting in Beijing <span class="badge badge-yellow">Mixed</span></div>
+        <div class="event-text">Trump-Visite mit US-CEOs (Musk, andere). 100% Trump-Tarife auf chinesische EVs bleiben aktiv, aber Verhandlungen offen. Tesla-Loan-Incentive in China parallel angekündigt. Quelle: TipRanks via CNBC (13.05.2026).</div>
       </div>
-      <div class="section-body">
-        <h3>Vertikale Integration als Kernvorteil</h3>
-        <p>BYDs wichtigster Wettbewerbsvorteil ist die beispiellose vertikale Integration entlang der gesamten EV-Wertschöpfungskette. Das Unternehmen kontrolliert alles – von der Rohstoffverarbeitung über Batterieproduktion, Halbleiter, Elektromotoren bis hin zum Endprodukt und sogar den Schiffen für den Fahrzeugtransport. Diese Kontrolle ermöglicht Kosteneinsparungen, die branchenübliche Konkurrenten strukturell nicht replizieren können. Die proprietäre Blade-Battery-Technologie (LFP-Chemie) bietet höhere Energiedichte, überlegene Sicherheit (kein thermisches Durchgehen) und Kostenvorteile gegenüber NMC-Akkus, die Tesla, NIO und viele westliche OEMs verwenden. Kein anderer Automobilhersteller kommt dieser Integrationstiefe auch nur annähernd nahe.</p>
-
-        <h3>Scale-Vorteile &amp; Kostendegression</h3>
-        <p>Mit 4,27 Millionen verkauften NEVs im Jahr 2024 und einem anvisierten Absatz von über 5 Millionen im Jahr 2026 profitiert BYD von massiven Skaleneffekten in der Batterieproduktion. Citigroup projiziert für 2026 einen Absatz von 5,39 Millionen Einheiten. Das Unternehmen hat seit Gründung kumulative F&E-Ausgaben von über 220 Milliarden RMB getätigt, was ein technologisches Fundament aufgebaut hat, das für neue Marktteilnehmer in vielen Jahren und Dutzenden von Milliarden USD nicht replizierbar ist. Die R&D-Ausgaben 2024 beliefen sich auf RMB 54,2 Milliarden – ein Anstieg von 36 Prozent YoY und bemerkenswert genug, diese übertrafen BYDs eigenen Nettogewinn in 13 der vergangenen 14 Jahre.</p>
-
-        <h3>Schwachstellen des Burggrabens</h3>
-        <p>Die Grenzen des Burggrabens zeigen sich in zwei Bereichen: Erstens erforinert der domestische Preiskampf in China – mit über 50 aktiven EV-Herstellern – BYD zu aggressiven Preissenkungen (bis zu 34 Prozent über 20 Modelle in 2025), was die Margen unter Druck setzt. BYDs Marktanteil in China sank von 35 Prozent (2023) auf 29 Prozent (ersten 11 Monate 2025), während Geely (+90 Prozent YoY Sales) und Xiaomi aggressiv aufholen. Zweitens ist BYD im US-amerikanischen Markt aufgrund von Strafzöllen strukturell ausgesperrt, was den globalen Anspruch limitiert und die vermeintliche Tesla-Herausfordererrolle auf alle Märkte außer den USA reduziert. Tesla hingegen bleibt in seinem Heimatmarkt ohne nennenswerte chinesische Konkurrenz.</p>
-
-        <div class="source">Quellen: Motley Fool – BYD Risk Analysis (Oktober 2025); BYD Fortune Global 500 Statement (byd.com, 2025); Counterpoint Research – Global BEV Forecast (April 2025); Kavout – BYD vs Tesla Analysis (2025).</div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">2026 – EU-Tarife auf chinesische EVs anhaltend <span class="badge badge-yellow">Mixed</span></div>
+        <div class="event-text">EU-Tarif-Regime aus 2024 bleibt aktiv. Hungary-Werk + potenziell Stellantis-Cooperation als Made-in-Europe-Mitigation. Canada erwägt brand-spezifische Chinese-EV-Quoten. Quelle: Automotive World China Price War (Apr 2026).</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">2026 – Yuan-Aufwertung vs. USD/EUR <span class="badge badge-green">Mixed-Bullish</span></div>
+        <div class="event-text">Yuan-Stärke schafft Q1 ¥2B FX-Verlust, aber langfristig schützt vor USD-Schulden-Risiko und macht BYDs Übersee-Investments wertvoller. Quelle: ChinaBizInsider BYD Q1 (Apr 2026).</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">2026 – BESS-Markt-„Tipping Point" (Fitch) <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Fitch: China's Battery-Makers profitieren von Energy-Storage-Tipping-Point. BYD #1 globaler BESS-Hersteller. Separates Wachstumssegment, nicht im Auto-Decline gefangen. Quelle: CNBC (07.04.2026).</div>
       </div>
     </div>
 
-    <!-- SEKTION 3: LETZTE 4 QUARTALE -->
-    <div class="section" id="s3">
-      <div class="section-header">
-        <div class="section-number">3</div>
-        <div class="section-title">Letzte 4 Quartale</div>
-        <div class="section-score">Beat-Ratio: k.A.*</div>
+    <div class="source">Quellen-Synthese: BYD IR + Earnings Releases (Feb–Mai 2026); CnEVPost, Bloomberg, CNBC, Reuters, TheStreet, Yahoo Finance, EV Magazine, Automotive World, ChinaBizInsider, CarNewsChina, Wikipedia, TipRanks, TheElectricViking, Stockanalysis (Feb–Mai 2026).</div>
+  </div>
+</div>
+
+<!-- SEKTION 9 -->
+<div class="section" id="s9">
+  <div class="section-header">
+    <div class="section-number">9</div>
+    <div class="section-title">Technische Analyse</div>
+    <div class="section-score">Score: 4/10</div>
+  </div>
+  <div class="section-body">
+    <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));">
+      <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">HKD 98,15</div><div class="kpi-sub">14.05.2026</div></div>
+      <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value red">~HKD 99</div><div class="kpi-sub">knapp darunter</div></div>
+      <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value red">~HKD 104</div><div class="kpi-sub">darunter</div></div>
+      <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value red">~HKD 122</div><div class="kpi-sub">–20% darunter</div></div>
+      <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value orange">~42</div><div class="kpi-sub">Leicht überverkauft</div></div>
+      <div class="kpi-card"><div class="kpi-label">52W High</div><div class="kpi-value">HKD 159,27</div><div class="kpi-sub">–38% darunter</div></div>
+      <div class="kpi-card"><div class="kpi-label">52W Low</div><div class="kpi-value">HKD 88,50</div><div class="kpi-sub">+11% darüber</div></div>
+    </div>
+    <p><strong>Trend-Einordnung:</strong> Klassisches Bear-Konsolidierungsmuster. Aktie ist seit Q1-2026-Earnings (28.04.) in einer Range HKD 95–105 gefangen. Vor Q1-Earnings stand sie noch bei HKD 110–115. <strong>YTD –24% Performance</strong>. Kurs unter allen drei Moving-Averages (SMA 20, 50, 200) = klares Down-Trend-Signal. RSI 42 = leicht überverkauft, aber kein extremes Setup.</p>
+    <p><strong>Wichtige Levels:</strong></p>
+    <ul style="list-style:none;padding-left:0;font-size:13px;color:var(--text);">
+      <li>• <strong>52W-Low Support: HKD 88,50</strong> (Pre-Q1 Tief Februar 2026)</li>
+      <li>• <strong>Aktueller Support: HKD 95–98</strong> (Post-Q1-Konsolidierungs-Range)</li>
+      <li>• <strong>Erster Widerstand: HKD 104–106</strong> (SMA 50)</li>
+      <li>• <strong>Zweiter Widerstand: HKD 122</strong> (SMA 200)</li>
+      <li>• <strong>52W-High: HKD 159,27</strong> (Februar 2026 Peak)</li>
+    </ul>
+    <p><strong>Saisonaler Kontext:</strong> BYD hatte 2025 ein gutes Jahr (+30% YTD), 2026 YTD aber durchwachsen (~–24%). Wendepunkt war Februar-Q4-2025-Earnings (Profit –44%), dann Q1-2026-Earnings (Profit –55%) als zweiter Trigger.</p>
+    <p><strong>Ehrliche technische Bewertung:</strong> Aktie ist in <strong>klarem Down-Trend</strong>, aber nahe 52W-Tief mit überverkauften Setup. Technisches Re-Rating würde Bruch über HKD 110 (Pre-Q1 Level) erfordern. Bei Stellantis-Deal-Bestätigung oder Q2-Sequenzieller-Improvement-Signalen wäre das möglich. Bis dahin: <strong>technisch schwach, fundamental günstig</strong>.</p>
+    <p><strong>Volume-Pattern:</strong> Volume war post-Q1-Earnings spike-high, dann progressive Abkühlung – kein Capitulation-Pattern, aber auch kein Accumulation. Neutral.</p>
+    <p>Score 4/10: Klarer Down-Trend, alle SMAs sell-Mode. Ein Punkt über 3/10, weil RSI nicht extreme und Konsolidierungs-Pattern nahe Support stabil.</p>
+    <div class="source">Quellen: Investing.com BYD 1211 (14.05.2026); Tradingeconomics BYD 1211 (Mai 2026); Yahoo Finance BYD 1211.HK (Mai 2026); CNBC BYD News (Mai 2026); Stockanalysis BYD HKG:1211 (Mai 2026).</div>
+  </div>
+</div>
+
+<!-- SEKTION 10 -->
+<div class="section" id="s10">
+  <div class="section-header">
+    <div class="section-number">10</div>
+    <div class="section-title">Risiken &amp; Chancen</div>
+    <div class="section-score">Risk-Score: 5/10 (invertiert)</div>
+  </div>
+  <div class="section-body">
+    <h3>Strukturelle Risiken</h3>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">⚡ China-Markt-Knockout-Phase + Per-Vehicle-Profit-Erosion</div>
+        <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
       </div>
-      <div class="section-body">
-        <div class="alert-box">
-          ⚠️ <strong>Hinweis:</strong> BYD notiert an der HKEX und der Shenzhen Stock Exchange, weshalb keine finviz.com-Daten verfügbar sind. Konsens-Abweichungen (Beat/Miss) sind für chinesische Aktien weniger präzise messbar. Alle Kennzahlen stammen von Investing.com, Yahoo Finance, Gasgoo und der Unternehmens-IR. Nächste Quartalsergebnisse (Jahresbericht 2025): <strong>24. März 2026</strong>.
-        </div>
+      <div class="event-text">Per-Vehicle Net Profit von ¥8.800 auf ¥3.000–4.000 (–55–66%). 5 Quartale in Folge Profit-Decline. Wenn Q2 2026 keine sequenzielle Verbesserung zeigt, ist strukturelle Margen-Krise möglich. Wahrscheinlichkeit Q2 weitere Profit-Erosion vs. Q1: ~25%.</div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">📱 Xiaomi YU7 + Geely-Marktanteilsgewinne</div>
+        <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel-Hoch</span></div>
+      </div>
+      <div class="event-text">Xiaomi YU7 #1 China Volumen Januar 2026. Geely #2 mit 11,3% Marktanteil (BYD #1 22%). Wenn Domestic-Marktanteil unter 20% fällt 2026/27, ist Scale-Vorteil bedroht. Wahrscheinlichkeit Marktanteils-Verlust unter 20% bis Ende 2026: ~30%.</div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">🏛️ EU-Tarif-Eskalation + Hungary-Labor-Probe</div>
+        <div><span class="badge badge-yellow">Mittel-Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+      </div>
+      <div class="event-text">EU-Parliament-Probe Hungary-Werk wegen Labor-Vorwürfen (April 2026). Zusätzliche EU-Tarife möglich. Wenn Made-in-Europe-Strategy via Stellantis nicht klappt, ist EU-Wachstum begrenzt. Wahrscheinlichkeit zusätzlicher EU-Restriktionen: ~30%.</div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">💰 Bilanz-Stress: ST-Borrowings +72%, OCF –67%</div>
+        <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+      </div>
+      <div class="event-text">ST-Borrowings auf Rekord ¥66,3B. Operating Cash Flow –67% YoY. Net Debt-to-Equity von 0% auf 25%. Wenn H2 2026 keine Recovery, könnte BYD weitere Kapital-Maßnahmen (Anleihen, Equity-Issuance) brauchen.</div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">🇺🇸 Trump-China-Tariff-Eskalation</div>
+        <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel (kein US-Markt)</span></div>
+      </div>
+      <div class="event-text">BYD hat keinen US-Markt-Zugang (100% Trump-Tarif seit 2024). Eskalation würde Übersee-Märkte indirekt belasten (Decoupling-Effekt). Wahrscheinlichkeit gravierender Eskalation 2026: ~25%.</div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">🔋 Lithium-Carbonate-Preis +130%</div>
+        <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+      </div>
+      <div class="event-text">Battery-grade Lithium-Carbonate +130% seit Mid-2025. Drückt Battery-COGS. BYD durch Vertikal-Integration teilweise geschützt, aber nicht immun.</div>
+    </div>
 
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Quartal</th>
-                <th>Revenue (RMB Mrd.)</th>
-                <th>YoY</th>
-                <th>Nettogewinn (RMB Mrd.)</th>
-                <th>YoY</th>
-                <th>Bruttomarge</th>
-                <th>NEV-Absatz</th>
-                <th>Beat/Miss</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Q4 2024</strong></td>
-                <td>~275 (Schätzung)</td>
-                <td class="beat">+~30%</td>
-                <td>~11–12 (Schätzung)</td>
-                <td class="beat">+~20%</td>
-                <td>~19,5%</td>
-                <td>~1,25 Mio.</td>
-                <td class="beat">Beat</td>
-              </tr>
-              <tr>
-                <td><strong>Q1 2025</strong></td>
-                <td>~170</td>
-                <td class="beat">+~30%</td>
-                <td>~9,2</td>
-                <td class="beat">+100%</td>
-                <td>20,7%</td>
-                <td>~1,00 Mio.</td>
-                <td class="beat">Beat</td>
-              </tr>
-              <tr>
-                <td><strong>Q2 2025</strong></td>
-                <td>~201</td>
-                <td class="beat">+~16%</td>
-                <td>~6,3</td>
-                <td class="miss">–30%</td>
-                <td>16,3%</td>
-                <td>~1,10 Mio.</td>
-                <td class="neutral">Neutral</td>
-              </tr>
-              <tr>
-                <td><strong>Q3 2025</strong></td>
-                <td>194,98</td>
-                <td class="miss">–3,1%</td>
-                <td>7,82</td>
-                <td class="miss">–32,6%</td>
-                <td>~18%</td>
-                <td>~1,15 Mio.</td>
-                <td class="neutral">Neutral</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+    <h3>AI-Risiko &amp; technologische Disruption</h3>
+    <p>Tesla's Robotaxi-Strategie + AV-Software-Layer ist ein langfristiges Disruption-Risiko, aber bisher hat Tesla in China keinen klaren AV-Vorsprung. BYD's Antwort: Smart-Cockpit + Qwen-Integration (Alibaba-Partnership), eigene Autonomy-Stack-Development. Bisher: <strong>Bull-Case-relevant, kein akutes Risiko</strong> für 12–24 Monate.</p>
 
-        <p style="font-size:13px; color:var(--text-muted);">* Q4 2024 und Q1 2025 Revenue-Zahlen sind Schätzungen basierend auf bekannten Halbjahresdaten; Q3 2025 ist offiziell bestätigt. Q4 2025-Jahresergebnisse werden am 24. März 2026 veröffentlicht.</p>
+    <h3>Chancen</h3>
+    <p>(1) <strong>Stellantis-Deal-Bestätigung:</strong> Made-in-Europe via Stellantis-Werke = transformational. (2) <strong>Q2/Q3 2026 Sequenzielle Recovery:</strong> Saisonalität + Stimulus + Discount-Anpassungen sollten Profit-Recovery liefern. (3) <strong>Export-Skalierung:</strong> FY-Target 1,5M, mit Aufwärtspotenzial 1,7–1,8M. (4) <strong>Blade Battery 2.0:</strong> Tech-Differenzierung schafft Premium-Pricing-Hebel. (5) <strong>BESS-Markt-Tipping-Point:</strong> Battery-Energy-Storage-Segment in Hyper-Growth, kann Auto-Schwäche teilweise kompensieren. (6) <strong>SOTP-Discount-Closing:</strong> ~HKD 188 fair vs. HKD 98 aktuell = 92% Upside, nur graduell. (7) <strong>Domestic-Stabilisierung:</strong> Wenn Wang Chuanfu Recht hat und „weakere Player bankrott gehen", profitiert BYD strukturell.</p>
 
-        <h3>Managementkommentar &amp; Entwicklung</h3>
-        <p>Das Q1 2025 war das stärkste Quartal in BYDs Profitabilitätsgeschichte: Der Nettogewinn verdoppelte sich auf RMB 9,2 Milliarden, die Bruttomarge stieg auf 20,7 Prozent und übertraf erstmals seit Langem wieder Tesla (16,3 Prozent im selben Quartal). Dieses Bild trübte sich in Q2 und Q3 ein, als BYD eine aggressive Preisstrategie über 20 Modelle einführte – Rabatte von bis zu 34 Prozent – um Marktanteile im überhitzten chinesischen Markt zu verteidigen. CEO Wang Chuanfu räumte in einem Dezember-Investorengespräch ein, dass BYDs technologischer Vorsprung im Heimatmarkt schrumpft und die Produktdifferenzierung verstärkt werden muss. Die operative Cashflow-Stärke blieb jedoch robust: In H1 2025 stieg der OCF um 125 Prozent YoY auf RMB 31,8 Milliarden – ein klares Zeichen, dass der Gewinnrückgang strategisch motiviert und nicht strukturell bedingt ist.</p>
+    <h3>Red Flags &amp; Dealbreaker</h3>
+    <p><strong>Red Flags:</strong> 5 Quartale Profit-Decline, –55% Q1 Net Profit, Operating Cash Flow –67%, ST-Borrowings auf Rekord, Marktanteils-Verlust an Xiaomi/Geely, Hungary-EU-Probe. <strong>Kein Dealbreaker</strong>, aber Risiko-Akkumulation ist signifikant. Wenn Q2 2026 nicht sequenziell verbessert, würde Hold/Buy-Rating in Frage gestellt.</p>
+    <div class="source">Quellen-Synthese aus Sektionen 1–8; TheStreet Q1 Analysis (30.04.2026); Automotive World China Price War (Apr 2026); CNBC Hungary EU Probe (27.04.2026); ChinaBizInsider Q1 (Apr 2026); Bloomberg BYD Discounts (23.04.2026).</div>
+  </div>
+</div>
 
-        <div class="source">Quellen: CarNewsChina – Q1-Q3 2025 Results (Oktober 2025); Gasgoo – H1 2025 Earnings (August 2025); MarkLines – Q3 2025 Financial Report (Oktober 2025); Yahoo Finance – Quarterly Financials 1211.HK (März 2026); Kavout – BYD vs Tesla Analysis (2025).</div>
+<!-- SEKTION 11 -->
+<div class="section" id="s11">
+  <div class="section-header">
+    <div class="section-number">11</div>
+    <div class="section-title">Scoring (vs. März 2026)</div>
+    <div class="section-score">⌀ Score: 6,0/10</div>
+  </div>
+  <div class="section-body">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Kategorie</th><th>Score</th><th>Bar</th><th>Δ vs. März</th><th>Begründung</th></tr></thead>
+        <tbody>
+          <tr><td>Geschäftsmodell</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>—</td><td>Global EV-Leader, Vertikal-Integration intakt, Battery-Tech-Lead.</td></tr>
+          <tr><td>Burggraben</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>–1</td><td>Xiaomi-Druck + Per-Vehicle-Margin-Erosion offenlegen Risse.</td></tr>
+          <tr><td>Operative Entwicklung (4Q)</td><td>4/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td><td>–3</td><td>Q1 –55% Net Profit, 5 Quartale Decline, Per-Vehicle-Profit halbiert.</td></tr>
+          <tr><td>Wachstum</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>–2</td><td>FY26e +5–8% Revenue, Domestic –10%, Export +50%.</td></tr>
+          <tr><td>Bewertung</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>—</td><td>P/E FWD 12×, SOTP HKD 188 vs. HKD 98 = massiver Discount.</td></tr>
+          <tr><td>Cashflow</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>–2</td><td>OCF –67%, ST-Borrowings +72%, Net Debt-to-Equity 25%.</td></tr>
+          <tr><td>Peer-Vergleich</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>—</td><td>Global #1 EV, 6× günstiger als Tesla, aber Xiaomi-Threat real.</td></tr>
+          <tr><td>Technische Analyse</td><td>4/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td><td>–1</td><td>Down-Trend, alle SMAs Sell, aber nahe 52W-Tief mit RSI 42.</td></tr>
+          <tr><td>Risiken (invertiert)</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>–1</td><td>China-Knockout-Phase, EU-Tarif-Probe, Bilanz-Stress.</td></tr>
+          <tr style="background:rgba(228,5,33,0.08);"><td><strong>⌀ Gesamtscore</strong></td><td><strong>6,0/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%;background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">6,0</span></div></td><td><strong>–0,7 vs. März</strong></td><td>Q1-Disaster überdrückt Bewertungs-Attraktivität.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Vergleich zur März-Analyse:</strong> Damals KAUFEN bei HKD 90 mit ⌀ Score 6,7. Heute bei HKD 98,15: Q1-2026-Disaster (–55% Net Profit) hat Operative + Cashflow + Risiko-Scores deutlich gedrückt. Bewertung leicht weniger attraktiv (Kurs +9% von HKD 90), Burggraben durch Xiaomi-Druck etwas schwächer. <strong>Netto: –0,7 Score-Verschlechterung von 6,7 auf 6,0. Rating-Downgrade von KAUFEN auf HALTEN angemessen.</strong></p>
+    <div class="source">Quellen-Synthese aus Sektionen 1–10. Score-Logik: 10 = best-in-class; 5 = durchschnittlich; 1 = ungenügend.</div>
+  </div>
+</div>
+
+<!-- SEKTION 12 -->
+<div class="section" id="s12">
+  <div class="section-header">
+    <div class="section-number">12</div>
+    <div class="section-title">Fazit &amp; Investment-These</div>
+  </div>
+  <div class="section-body">
+
+    <div class="bull-bear-grid">
+      <div class="bull-card">
+        <h4>🐂 Das Bullische Narrativ</h4>
+        <p><strong>Säule 1: Massiver Bewertungs-Discount bei intakter Marktposition.</strong> BYD handelt bei P/E FWD ~12× und EV/EBITDA ~6× – das ist <em>günstiger als Volkswagen (P/E 5×) und Toyota (P/E 10×)</em>, obwohl BYD globaler EV-Marktführer mit Volumen-Lead über Tesla ist. SOTP-Modell impliziert HKD 188 fair vs. HKD 98 aktuell = 92% Upside. Konsens-PT HKD 124,71 = +27% Upside (25 Buy / 1 Sell). Selbst bei konservativem Recovery-Szenario (HKD 130 Q4 2026) ist Risk/Reward 1:3.</p>
+        <p><strong>Säule 2: Export-Pivot bereits messbar erfolgreich.</strong> Q1 2026: Exports +55,8% YoY auf 321.165 Einheiten = <em>46% der Gesamt-Verkäufe</em>. Citi/JPMorgan: <em>70% des Vehicle Revenue international</em> in Q1 (vs. 40% 2025). FY-Export-Target von 1,3M auf 1,5M angehoben. Stellantis-Talks für Europa-Werke (13.05.) wäre transformational. Hungary + Brazil + Thailand + ASEAN-Expansion läuft. Wenn International auf 50%+ Revenue-Share skaliert 2027, ist BYD effektiv „globaler EV-Konzern" und nicht „chinesischer Lokal-Champion".</p>
+        <p><strong>Säule 3: Technologie-Lead in Battery + AI-Integration.</strong> Blade Battery 2.0 mit 1000+ km Range (März 2026) ist Mainstream-Lead. 5.000 Ultra-Fast-Charging-Stations in China deployed. Alibaba Qwen AI in Fahrzeugen (April 2026) = Smart-Cockpit-Differenzierung. BESS-Marktführer global, Fitch sieht „Tipping Point" – separates Wachstumssegment. Wang Chuanfu hat klar Strategie: „Knockout-Phase überleben, schwächere Wettbewerber verschwinden, BYD profitiert strukturell."</p>
+      </div>
+      <div class="bear-card">
+        <h4>🐻 Das Bärische Narrativ</h4>
+        <p><strong>Risiko 1: 5 Quartale in Folge Profit-Decline ist strukturell.</strong> Q1 2026 Net Profit –55,4% YoY. Per-Vehicle-Profit von ¥8.800 auf ¥3.000–4.000 (–55–66%) gefallen. Das ist nicht „Saisonalität", das ist <em>strukturelle Margen-Erosion durch Price-War</em>. Wenn Q2 2026 nicht sequenziell verbessert, ist Recovery-These tot. Operating Cash Flow –67% YoY, ST-Borrowings +72% auf Rekord ¥66,3 Mrd. Net Debt-to-Equity 25% (von negativ in 2022) – Bilanz-Trend ist klar negativ. Wenn das eskaliert, ist Equity-Issuance möglich.</p>
+        <p><strong>Risiko 2: Xiaomi YU7 + Geely-Druck reduzieren Domestic-Marktanteil strukturell.</strong> Xiaomi YU7 wurde #1 in China nach Volumen (Januar 2026, alle Powertrains). Geely #2 in NEV-Ranking April 2026 mit 11,3% (BYD #1 22%, –1pp seit März). Wenn BYDs Domestic-Marktanteil unter 20% fällt 2026/27, ist Scale-Vorteil bedroht. Plus: Hungary EU-Labor-Probe (April 2026), zusätzliche EU-Tarif-Risiken möglich. Made-in-Europe-Lösung via Stellantis ist nur in Talk-Phase – kein Deal.</p>
+        <p><strong>Risiko 3: Lithium-Carbonate +130%, Yuan-Aufwertung, Tax-Exemption-Halving.</strong> Drei strukturelle Headwinds: (a) Battery-COGS-Inflation (auch Vertikal-Integration nicht immun), (b) Yuan-Aufwertung drückt Export-Receivables (¥2B FX-Verlust Q1), (c) NEV-Tax-Exemption-Halving ab Januar 2026 hat Domestic-Verkäufe direkt belastet. Capex bleibt high für Übersee-Werke (Hungary $5B+). FCF wird weiter gedrückt 2026.</p>
       </div>
     </div>
 
-    <!-- SEKTION 4: WACHSTUM -->
-    <div class="section" id="s4">
-      <div class="section-header">
-        <div class="section-number">4</div>
-        <div class="section-title">Wachstumseinordnung</div>
-        <div class="section-score">Score: 7/10</div>
+    <h3>Eigene Einschätzung</h3>
+    <p>Die <strong>Bull/Bear-Konstellation ist ausgewogen</strong>. Bullisch: SOTP-Discount riesig, Export-Pivot real, Battery-Tech-Lead intakt, Konsens-PT 27% Upside, Wang Chuanfus „Knockout-These" könnte aufgehen. Bärisch: Q1-Disaster nicht „Einmal-Effekt", strukturelle Per-Vehicle-Margin-Erosion, Bilanz-Stress, Domestic-Marktanteils-Verluste.</p>
+    <p>Was den Ausschlag gibt für <strong>HALTEN statt KAUFEN</strong>: Die operative Verschlechterung in Q1 ist drastisch genug, dass Q2 2026 (Halbjahresbericht Ende August) ein <em>kritisches Validierungs-Event</em> ist. Wenn Q2 sequenzielle Verbesserung zeigt (Net Profit ≥¥6 Mrd. = +50% QoQ), ist Wendepunkt bestätigt → Upgrade auf KAUFEN. Wenn Q2 weitere Verschlechterung (Net Profit &lt;¥4 Mrd. = weitere Decline), ist die Bilanz-Krise möglich → Downgrade-Risiko.</p>
+    <p>Risk/Reward bei HKD 98: <strong>–10–15% Downside</strong> (52W-Low HKD 88,50 als Support, Worst-Case bei Q2-Disaster ~HKD 80) <strong>vs. +30–55% Upside</strong> (Konsens-PT HKD 125, SOTP HKD 188 wenn Stellantis-Deal + Q2-Recovery zusammenkommen) in 12–18 Monaten. Asymmetrie weiterhin positiv, aber das Recovery-Timing ist unklar. <strong>HALTEN</strong> reflektiert das: Position halten oder vorsichtig akkumulieren, aber nicht aggressiv kaufen vor Q2-Bestätigung.</p>
+    <p><strong>Wichtige Demut:</strong> Ich könnte falsch liegen, wenn (a) Q2 2026 viel besser als erwartet ausfällt und Profit-Recovery früher kommt, (b) Stellantis-Deal in Juni/Juli 2026 bestätigt wird und Re-Rating triggert, (c) Xiaomi/Geely-Druck überschätzt wird und BYD-Marktanteil stabilisiert. In diesen Fällen wäre KAUFEN korrekt. Umgekehrt: Wenn Q2 weiter sinkt, Hungary-EU-Probe eskaliert, oder Bilanz-Stress sich verschärft, wäre VERKAUFEN korrekt.</p>
+
+    <h3>Zeithorizont-Einschätzung</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+        <tbody>
+          <tr><td><strong>0–6 Monate</strong></td><td>Q2 2026 Halbjahresbericht (Ende Aug), Stellantis-Deal-Update, BESS-Auftragseingänge</td><td>Weitere Profit-Erosion, Hungary EU-Probe-Eskalation, Bilanz-Stress</td><td><span class="badge badge-yellow">Halten / vorsichtig akkumulieren</span></td></tr>
+          <tr><td><strong>6–24 Monate</strong></td><td>Export-Pivot 50%+ Share, Stellantis-Werks-Cooperation, H2 2026 Profit-Recovery</td><td>Xiaomi-Skalierung, China-Marktanteilsverluste, EU-Tarif-Eskalation</td><td><span class="badge badge-orange">Bei Q2-Bestätigung: Kaufen</span></td></tr>
+          <tr><td><strong>2–5 Jahre</strong></td><td>Globaler EV-Marktführer-Konsolidierung, BESS-Hyper-Growth, AV/AI-Integration</td><td>Tesla-Robotaxi-Disruption, China-Geopolitik, Substitut-Technologien (Solid-State, etc.)</td><td><span class="badge badge-green">Halten/Akkumulieren</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Kernthese</h3>
+    <p>BYD ist der <strong>globale EV-Marktführer in der schwierigsten Phase seit der Pandemie</strong>. Q1 2026 Net Profit –55,4%, Per-Vehicle-Profit halbiert, 5 Quartale in Folge Profit-Decline. Aber: Export-Pivot mit Q1 +55,8% YoY (321k Einheiten, 46% der Gesamtverkäufe) ist real und beschleunigt. Bewertung bei P/E FWD 12× extrem günstig vs. globalen Peers. SOTP HKD 188 vs. HKD 98 = 92% Upside. Stellantis-Talks für Europa-Werke wären transformational. Q2 2026 (Ende August) ist kritisches Validierungs-Event. Rating: <strong>HALTEN (Downgrade von KAUFEN)</strong> bis Q2-Bestätigung.</p>
+
+    <div class="rating-box">
+      <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN</div></div>
+      <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">HKD 120–140</div></div>
+      <div class="rating-item"><label>Zeithorizont</label><div class="val">12–24 Monate</div></div>
+      <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–15%</div></div>
+      <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+30–45%</div></div>
+      <div class="rating-item"><label>Risk/Reward</label><div class="val buy">1:2,5</div></div>
+    </div>
+
+    <div class="trigger-grid">
+      <div class="trigger-card sell">
+        <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+        <ul class="trigger-list">
+          <li>Q2 2026 (August) Net Profit weiter unter ¥4 Mrd. (also &lt; Q1) → strukturelle Krise, Position reduzieren um 50%</li>
+          <li>Domestic NEV-Marktanteil unter 20% in Juni/Juli 2026 → Scale-Vorteil bedroht, Stop-Loss bei HKD 85</li>
+          <li>Hungary EU-Probe führt zu konkreten Restriktionen → Made-in-Europe-Strategy in Frage</li>
+          <li>Stellantis-Deal wird abgesagt → kein Made-in-Europe-Backbone, Upside-These eingeschränkt</li>
+          <li>ST-Borrowings &gt; ¥80 Mrd. Q2 2026 → Bilanz-Stress, kritisch evaluieren</li>
+        </ul>
       </div>
-      <div class="section-body">
-        <h3>Revenue-Wachstum (Historisch)</h3>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>Jahr</th><th>Revenue (RMB Mrd.)</th><th>YoY Wachstum</th><th>Nettogewinn (Mrd.)</th><th>NEV-Absatz (Mio.)</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>2021</td><td>216</td><td>–</td><td>~3</td><td>0,59</td></tr>
-              <tr><td>2022</td><td>424</td><td class="beat">+96%</td><td>~17</td><td>1,86</td></tr>
-              <tr><td>2023</td><td>602</td><td class="beat">+42%</td><td>~30</td><td>3,02</td></tr>
-              <tr><td>2024</td><td>777</td><td class="beat">+29%</td><td>~35</td><td>4,27</td></tr>
-              <tr><td>Q1-Q3 2025</td><td>566</td><td class="neutral">+13%</td><td>23,3</td><td>~3,5</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3>Geografische Verteilung des Umsatzes (H1 2025)</h3>
-        <div class="geo-grid">
-          <div class="geo-card">
-            <div class="geo-region">China (Inland)</div>
-            <div class="geo-pct">~64%</div>
-            <div class="geo-note">Wettbewerbsdruck steigt</div>
-          </div>
-          <div class="geo-card">
-            <div class="geo-region">Übersee gesamt</div>
-            <div class="geo-pct">~36%</div>
-            <div class="geo-note">+130% YoY in H1 2025</div>
-          </div>
-          <div class="geo-card">
-            <div class="geo-region">Europa</div>
-            <div class="geo-pct">~12%</div>
-            <div class="geo-note">Stärkste Wachstumsregion</div>
-          </div>
-          <div class="geo-card">
-            <div class="geo-region">Lateinamerika</div>
-            <div class="geo-pct">~9%</div>
-            <div class="geo-note">Fabrik Brasilien läuft an</div>
-          </div>
-          <div class="geo-card">
-            <div class="geo-region">ASEAN / Pazifik</div>
-            <div class="geo-pct">~8%</div>
-            <div class="geo-note">Thailand, Australien stark</div>
-          </div>
-          <div class="geo-card">
-            <div class="geo-region">Naher Osten / Sonstige</div>
-            <div class="geo-pct">~7%</div>
-            <div class="geo-note">Expansion läuft</div>
-          </div>
-        </div>
-
-        <h3>Wachstumstreiber &amp; Qualitätsbewertung</h3>
-        <p>BYDs Wachstum ist organisch und nicht durch M&A inflationiert – ein positives Qualitätsmerkmal. Die Overseas-Expansion ist das Schaufenster der Wachstumsstory: Exportvolumen von 1,05 Millionen Einheiten in 2025 (+200 Prozent YoY) überzeugend bestätigen, dass der internationale Rollout weit über einen China-Only-Play hinausgeht. Besonders positiv: Überseemärkte erzielen höhere Margen als der Heimatmarkt (in Europa/MENA werden Preise nahe europäischer Premium-OEMs erzielt). Die Überseeumsätze stiegen in H1 2025 um 130 Prozent YoY auf RMB 135,4 Milliarden.</p>
-
-        <p>Die Verlangsamung im Inland (Marktanteil von 35 auf 29 Prozent) ist der kritische Risikofaktor beim Wachstumsprofil. Das Unternehmen befindet sich im Übergang von Hyper-Growth (2022/2023: +96/+42 Prozent) zu Growth-at-Scale, mit einem Umsatzwachstum von rund 13 Prozent YoY in Q1-Q3 2025. Die Citigroup projiziert für 2026 5,39 Millionen Einheiten (+26 Prozent YoY), was eine Stabilisierung auf hohem Niveau signalisiert.</p>
-
-        <div class="source">Quellen: Yahoo Finance – Income Statement 1211.HK; BYD Fortune Global 500 Statement (byd.com, 2025); Gasgoo – H1 2025; Electrek – BYD crushes Tesla BEV Sales 2025 (Januar 2026); Carbon Credits – BYD Overtakes Tesla (Januar 2026).</div>
+      <div class="trigger-card buy">
+        <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+        <ul class="trigger-list">
+          <li>Q2 2026 Net Profit ≥¥6 Mrd. (+50% QoQ) → Recovery bestätigt, Upgrade KAUFEN, aggressiv kaufen</li>
+          <li>Stellantis-Deal bestätigt mit konkretem Investment-Volumen → Re-Rating-Trigger Richtung HKD 150</li>
+          <li>Exports ≥400k in Q2 2026 (vs. 321k Q1) → Internationalisierung beschleunigt sich</li>
+          <li>BYD Domestic-Marktanteil stabilisiert über 22% in Mai-Juli 2026 → Xiaomi-Druck wird managebar</li>
+          <li>Pullback auf HKD 88–92 (52W-Low Bereich) ohne Q2-Verschlechterung → antizyklisch nachkaufen</li>
+        </ul>
       </div>
     </div>
 
-    <!-- SEKTION 5: BEWERTUNG -->
-    <div class="section" id="s5">
-      <div class="section-header">
-        <div class="section-number">5</div>
-        <div class="section-title">Bewertung &amp; Multiples</div>
-        <div class="section-score">Score: 6/10</div>
+    <div class="investor-grid">
+      <div class="investor-yes">
+        <h5>✅ Geeignet für</h5>
+        <ul>
+          <li>Value-Investoren (Discount-zu-Peers)</li>
+          <li>China-EV-Exposure-Sucher</li>
+          <li>Langfrist-Growth (3–5 Jahre Horizont)</li>
+          <li>Dividend-Akkumulierer (1,8% Yield)</li>
+        </ul>
       </div>
-      <div class="section-body">
-        <div class="alert-box">
-          ⚠️ <strong>Hinweis:</strong> BYD notiert an der HKEX (1211.HK), daher sind keine finviz.com-Daten verfügbar. Alle Kennzahlen stammen von Investing.com, Yahoo Finance und der Unternehmens-IR (Stand: März 2026).
-        </div>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>Kennzahl</th><th>BYD (aktuell)</th><th>Peer-Ø (HK/Asia Auto)</th><th>Einordnung</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>P/E (TTM)</td><td>~21,9x</td><td>~9,6x (Direkte Peers)</td><td><span class="badge badge-red">Teuer vs. Peers</span></td></tr>
-              <tr><td>P/E (Sektor)</td><td>~21,9x</td><td>~22x (Asia Auto Sek.)</td><td><span class="badge badge-yellow">In-Line Sektor</span></td></tr>
-              <tr><td>DCF Fair Value</td><td>HKD 90–100 (aktuell)</td><td>Modell: ~HKD 119</td><td><span class="badge badge-green">~15% Upside</span></td></tr>
-              <tr><td>P/S (TTM)</td><td>~0,7x</td><td>Tesla: ~8x</td><td><span class="badge badge-green">Attraktiv</span></td></tr>
-              <tr><td>EV/EBITDA</td><td>~9–11x</td><td>Tesla: ~35x</td><td><span class="badge badge-green">Signifikante Diskont.</span></td></tr>
-              <tr><td>P/B</td><td>~3,5x</td><td>Sektor-Ø: ~2x</td><td><span class="badge badge-yellow">Leicht erhöht</span></td></tr>
-              <tr><td>Analyst-Konsens</td><td>23 Buy / 2 Sell</td><td>Zielkurs: HKD 126</td><td><span class="badge badge-green">+27% Upside</span></td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3>Bewertungsurteil</h3>
-        <p>BYD ist im direkten Peer-Vergleich (chinesische EV-Hersteller) mit einem P/E von ~22x teuer – NIO, Li Auto und XPENG handeln beim Bruchteil dieser Bewertung, sind aber auch deutlich schlechter profitabel oder noch nicht profitabel. Der interessantere Vergleich ist Tesla: BYD erzielt mittlerweile mehr Revenue (USD 117,8B TTM vs. Teslas ~USD 95-100B), hat eine höhere Bruttomarge im Automobilbereich (20% vs. 16-18%), verkauft mehr BEVs (2,26 Mio. vs. 1,64 Mio. in 2025) und handelt dennoch bei einem EV/EBITDA von ~10x verglichen mit Teslas ~35x. Diese Bewertungsdiskrepanz reflektiert primär: (1) BYDs Ausschluss aus dem US-Markt durch Zölle, (2) geopolitische Risikoprämie als chinesisches Unternehmen, und (3) Teslas höhere Wachstumsprämie für FSD/Robotaxi.</p>
-
-        <p>Für einen Fair-Value-orientierten Anleger ist BYD bei HKD 88–100 eindeutig attraktiv bewertet. Das DCF-Modell von Simply Wall St. errechnet einen fairen Wert von HKD 118,85. Der Analystenkonsenszielkurs liegt bei HKD 125,62 (Stand März 2026). Kritisch bleibt: Das P/E von ~22x ist für eine Aktie, bei der Nettogewinne in Q2 und Q3 2025 um 30-33 Prozent YoY fielen, keine Schnäppchenpreis – Wachstumsinvestoren sollten auf Erholung der Marge warten.</p>
-
-        <div class="source">Quellen: Investing.com – 1211 Technical/Valuation Data (März 2026); Simply Wall St. – BYD Valuation (November 2025); Kavout – BYD vs Tesla (2025); Yahoo Finance Income Statement 1211.HK.</div>
+      <div class="investor-no">
+        <h5>❌ NICHT geeignet für</h5>
+        <ul>
+          <li>Momentum/Growth-Investoren (kein klares Wachstum)</li>
+          <li>Kurzfristige Trader (Recovery-Timing unklar)</li>
+          <li>Anleger ohne China-Geopolitik-Toleranz</li>
+          <li>Investoren mit niedriger Volatilitäts-Toleranz</li>
+        </ul>
       </div>
     </div>
 
-    <!-- SEKTION 6: CASHFLOW -->
-    <div class="section" id="s6">
-      <div class="section-header">
-        <div class="section-number">6</div>
-        <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
-        <div class="section-score">Score: 7/10</div>
-      </div>
-      <div class="section-body">
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>Kennzahl</th><th>2024 (FY)</th><th>H1 2025</th><th>Q3 2025</th><th>Trend</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>Bruttomarge</td><td>~19,4%</td><td>18,0%</td><td>~18%</td><td><span class="badge badge-yellow">Stabil/leicht sinkend</span></td></tr>
-              <tr><td>Nettogewinnmarge</td><td>~4,5%</td><td>4,2%</td><td>4,0%</td><td><span class="badge badge-red">Leicht rückläufig</span></td></tr>
-              <tr><td>R&D-Ausgaben</td><td>RMB 54,2 Mrd.</td><td>RMB 30,9 Mrd.</td><td>–</td><td><span class="badge badge-green">+36%/+53% YoY</span></td></tr>
-              <tr><td>Cash &amp; Äquivalente</td><td>–</td><td>RMB 156,1 Mrd.</td><td>–</td><td><span class="badge badge-green">Stark</span></td></tr>
-              <tr><td>Operativer CF (OCF)</td><td>–</td><td>RMB 31,8 Mrd.</td><td>RMB 40,85 Mrd.</td><td><span class="badge badge-green">H1 +125% YoY</span></td></tr>
-              <tr><td>Debt/Equity</td><td>~20–40%</td><td>~20%</td><td>–</td><td><span class="badge badge-green">Konservativ</span></td></tr>
-              <tr><td>R&D &gt; Nettogewinn</td><td>Ja (seit 13/14 Jahren)</td><td>Ja</td><td>–</td><td><span class="badge badge-blue">Strukturell</span></td></tr>
-            </tbody>
-          </table>
-        </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten</span></td><td>Q2 2026 Halbjahresbericht (Ende Aug) als Bestätigung abwarten</td></tr>
+          <tr><td><strong>Moderat</strong></td><td><span class="badge badge-yellow">Halten / Akkumulieren bei HKD &lt;95</span></td><td>Q1-Disaster eingepreist, aber Q2 Validierungs-Risiko</td></tr>
+          <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-orange">Tranchiert</span></td><td>30% jetzt, 40% bei Q2-Bestätigung, 30% bei Stellantis-Deal</td></tr>
+          <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Akkumulieren</span></td><td>Globaler EV-Marktführer zu P/E 12× ist historisch günstig</td></tr>
+        </tbody>
+      </table>
+    </div>
 
-        <h3>Qualitätsbeurteilung der Earnings</h3>
-        <p>BYDs Earnings-Qualität ist trotz der sinkenden Nettogewinnmargen strukturell solide. Der entscheidende Indikator: Während der Nettogewinn in H1 2025 um 13,8 Prozent YoY stieg und in Q3 2025 um 32,6 Prozent fiel, stieg der operative Cashflow in H1 um 125 Prozent YoY auf RMB 31,8 Milliarden. Diese Divergenz deutet darauf hin, dass der Gewinnrückgang primär durch hohe R&D-Investitionen (Non-Cash-/Cash-nah) und agressive Kapazitätsausbauinvestitionen verursacht wird – nicht durch operative Schwäche. Die Cashreserven von RMB 156,1 Milliarden (H1 2025) sind ein mächtiger Wettbewerbspuffer.</p>
+    <div class="source">Quellen-Synthese aus Sektionen 1–11. Risk/Reward auf Basis Konsens-PT HKD 124,71 (26 Analysten via Investing.com, Mai 2026).</div>
+  </div>
+</div>
 
-        <p>Die Verschuldung ist für einen Automobilhersteller dieser Größenordnung konservativ: Debt/Equity liegt bei rund 20-40 Prozent, verglichen mit westlichen OEMs, die oft bei 150-300 Prozent liegen. BYD hat keine High-Yield-Anleihen, keine riskanten Leveraged-Buy-outs und kein nennenswertes Zinsrisiko. Auf der Risikoseite: Die Ausweitung des H-Share-Financing um HKD 44 Milliarden (ca. USD 5,6 Milliarden) im Jahr 2025 ist ein Verwässerungssignal, wurde aber zur Finanzierung internationaler Kapazitäten eingesetzt und ist strategisch nachvollziehbar.</p>
+<!-- SEKTION 13 -->
+<div class="section" id="s13">
+  <div class="section-header">
+    <div class="section-number">13</div>
+    <div class="section-title">Outlook – Die 3 wichtigsten anstehenden Events</div>
+  </div>
+  <div class="section-body">
 
-        <div class="source">Quellen: Gasgoo – H1 2025 Earnings (August 2025); CarNewsChina – Q1-Q3 Results (Oktober 2025); BYD Fortune Global 500 (byd.com, 2025); Medium – Tesla vs BYD Comparative Analysis (Oktober 2025).</div>
+    <div class="outlook-card">
+      <h4>📊 Event 1: Q2 2026 Halbjahresbericht – Ende August 2026</h4>
+      <p>Das <strong>wichtigste Validierungs-Event</strong> der nächsten 4 Monate. Markt fokussiert auf: (a) Net Profit Q2: Sequenzielle Verbesserung (≥¥6 Mrd. = +50% QoQ) oder weiterhin Decline?, (b) Per-Vehicle-Profit-Recovery: Stabilisiert sich Margin-Erosion?, (c) Export-Volumen Q2: ≥400k Einheiten?, (d) Operating Cash Flow: Stoppt der –67%-Decline?, (e) Domestic-Marktanteil Mai-Juli: Stabilisiert über 22%?</p>
+      <div class="when-then">
+        <strong>Wenn:</strong> Net Profit Q2 ≥¥6 Mrd. UND Exports ≥400k UND Domestic-Marktanteil stabil ≥22% → Wendepunkt bestätigt, Recovery-Story validiert. → <em>Upgrade von HALTEN auf KAUFEN, Position aggressiv aufbauen, Kursziel HKD 140 in 12 Monaten erreichbar.</em><br><br>
+        <strong>Wenn:</strong> Net Profit Q2 &lt;¥4 Mrd. (weiter unter Q1) ODER Domestic-Marktanteil unter 20% → strukturelle Krise, kein Recovery in Sicht. → <em>Position 50% reduzieren, Stop-Loss bei HKD 85, Re-Evaluation der gesamten Investment-These.</em>
       </div>
     </div>
 
-    <!-- SEKTION 7: PEER-VERGLEICH -->
-    <div class="section" id="s7">
-      <div class="section-header">
-        <div class="section-number">7</div>
-        <div class="section-title">Peer-Vergleich</div>
-        <div class="section-score">Score: 9/10</div>
-      </div>
-      <div class="section-body">
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Unternehmen</th>
-                <th>Marktkapitalisierung</th>
-                <th>Revenue (TTM / 2024)</th>
-                <th>BEV-Absatz 2025</th>
-                <th>Bruttomarge</th>
-                <th>Profitabilität</th>
-                <th>P/E</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style="background:rgba(20,184,166,0.06);">
-                <td><strong>BYD (1211.HK)</strong></td>
-                <td>USD ~105B</td>
-                <td>USD ~118B (TTM)</td>
-                <td class="beat">2,26 Mio. (+28%)</td>
-                <td>~18–20%</td>
-                <td class="beat">Profitabel</td>
-                <td>~22x</td>
-              </tr>
-              <tr>
-                <td>Tesla (TSLA)</td>
-                <td>USD ~800–1.000B</td>
-                <td>USD ~97,7B (2024)</td>
-                <td class="miss">1,64 Mio. (–8,6%)</td>
-                <td>16–18%</td>
-                <td class="beat">Profitabel</td>
-                <td>~70–100x</td>
-              </tr>
-              <tr>
-                <td>NIO (NIO)</td>
-                <td>USD ~17B</td>
-                <td>USD ~10B (2024)</td>
-                <td>~440K (+120%)</td>
-                <td>13,9%</td>
-                <td class="miss">Verlust</td>
-                <td>N/M</td>
-              </tr>
-              <tr>
-                <td>Li Auto (LI)</td>
-                <td>USD ~21B</td>
-                <td>USD ~20B (2024)</td>
-                <td>~297K (–13%)</td>
-                <td>16,3%</td>
-                <td class="neutral">Verlust seit Q3 2025</td>
-                <td>~30x</td>
-              </tr>
-              <tr>
-                <td>XPENG (XPEV)</td>
-                <td>USD ~21B</td>
-                <td>USD ~8B (2024)</td>
-                <td>~313K (+218%)</td>
-                <td>20,1%</td>
-                <td class="neutral">Knapp Verlust</td>
-                <td>N/M</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3>Qualitative Einordnung</h3>
-        <p>BYD ist in diesem Peer-Vergleich der unangefochtene Sieger auf praktisch allen Dimensionen außer der Bewertungs-Storytelling-Prämie, die Tesla zukommt. BYD ist größer (Umsatz), profitabler (Marge), schneller wachsend (Absatz) und besser diversifiziert als alle chinesischen Peers. NIO bleibt chronisch verlustbringend und lebt von Kapitalinfusionen; Li Auto verlor nach 11 profitablen Quartalen in Q3 2025 plötzlich Geld, was auf strukturelle Probleme im Kernportfolio hindeutet; XPENG wächst eindrucksvoll (+218 Prozent Absatz), generiert aber noch keinen Profit. Gegenüber Tesla ist das Bild differenzierter: BYD gewinnt bei Volume, Revenue und Bruttomarge im Automotive-Segment; Tesla gewinnt bei Software-Monetarisierung, FSD/Robotaxi-Option und Bewertungsprämie.</p>
-
-        <p>Die Bewertungsdiskrepanz zwischen BYD (EV/EBITDA ~10x) und Tesla (~35x) erklärt sich durch drei Faktoren: BYDs Ausschluss aus dem US-Markt (Tarife 100%+), die geopolitische China-Risikoprämie für westliche Investoren und Teslas spekulativen Bewertungsaufschlag für autonomes Fahren. Für Anleger, die China-Risiken akzeptieren, ist BYDs fundamentale Überlegenheit bei vernünftigerer Bewertung ein überzeugendes Argument.</p>
-
-        <div class="source">Quellen: Kavout – BYD vs Tesla High-Stakes Battle (2025); TechNode – NIO/XPENG/Li Auto Q3 2025 Earnings (November 2025); IDNFinancials – Chinese Automakers vs Tesla Margins (Juli 2025); Futunn – Comparative Q3 2025 Review (November 2025).</div>
+    <div class="outlook-card">
+      <h4>📊 Event 2: Stellantis-Cooperation-Deal-Update – Juni–September 2026</h4>
+      <p>Die Bloomberg-Story vom 13.05.2026 deutete auf BYD-Stellantis-Gespräche für gemeinsame Europa-Werke hin. Wenn das Deal-Form annimmt, wäre es <em>strategisch transformational</em>: (a) Made-in-Europe-Backbone via Stellantis-Werke, (b) EU-Tarif-Mitigation, (c) Beschleunigung der Europe-Expansion, (d) Diversifikation des Geopolitik-Risikos. Konsens-Erwartung: konkretes Update bis Q3 2026.</p>
+      <div class="when-then">
+        <strong>Wenn:</strong> Stellantis-Deal bestätigt mit ≥1 konkretem Werk + Investment-Volumen ≥€2B + Production-Timeline 2027 → Made-in-Europe-Strategy konkretisiert. → <em>Re-Rating-Trigger, Kursziel HKD 150 in 12 Monaten, aggressives Bull-Setup.</em><br><br>
+        <strong>Wenn:</strong> Stellantis-Deal wird abgesagt ODER ohne konkretes Werk/Investment → Europe-Expansion bleibt auf Hungary-Basis. → <em>Kein zusätzlicher Upside-Trigger, BYD bleibt von China-Recovery abhängig, Kursziel HKD 110–120 nur via Bewertungs-Re-Rating.</em>
       </div>
     </div>
 
-    <!-- SEKTION 8: NEWS -->
-    <div class="section" id="s8">
-      <div class="section-header">
-        <div class="section-number">8</div>
-        <div class="section-title">Aktuelle News &amp; Events</div>
-        <div class="section-note">Quellen ≤ 3 Monate</div>
-      </div>
-      <div class="section-body">
-        <h3>Ebene 1: Unternehmen (Company-spezifische Events)</h3>
-
-        <div class="event-item">
-          <div class="event-dot dot-green"></div>
-          <div>
-            <div class="event-label">02.01.2026 – BYD übertrifft Tesla erstmals im Jahres-BEV-Absatz <span class="badge badge-green">Meilenstein</span></div>
-            <div class="event-text">BYD verkaufte im Gesamtjahr 2025 genau 2.254.714 rein elektrische Fahrzeuge (+27,9% YoY), während Tesla auf 1.636.129 Auslieferungen (–8,6% YoY) sank. Erstmals in der Geschichte übertrifft ein chinesischer Hersteller Tesla bei BEVs auf Jahresbasis. Quellen: Electrek, CNBC, CNN Business, Januar 2026.</div>
-          </div>
-        </div>
-
-        <div class="event-item">
-          <div class="event-dot dot-green"></div>
-          <div>
-            <div class="event-label">25.02.2026 – HSBC empfiehlt BYD Super e-Platform als Upgrade-Treiber <span class="badge badge-green">Positiv</span></div>
-            <div class="event-text">HSBC platzierte eine Analyse, wonach BYDs Super e-Platform (Megawatt-Schnellladung, höhere Energiedichte) im März 2026 debütieren soll. Das System könnte BYD erlauben, Reichweite zu steigern und gleichzeitig Modellpreise zu senken, ohne die Margen zu belasten. Starke Buy-Signal für das weitere 2026. Quelle: Meyka/HSBC, Februar 2026.</div>
-          </div>
-        </div>
-
-        <div class="event-item">
-          <div class="event-dot dot-green"></div>
-          <div>
-            <div class="event-label">Jan. 2026 – Europäische Expansion beschleunigt, Kanada im Fokus <span class="badge badge-blue">Expansion</span></div>
-            <div class="event-text">BYD überprüft weitere Expansionsschritte in Europa und einen Markteintritt in Kanada. Die europäische Zentrale in Budapest/Ungarn wurde im Mai 2025 eröffnet; das dortige Werk soll 2026 anlaufen. Das Türkei-Werk (Manisa, 150.000 Einheiten p.a.) ist für Mitte 2026 geplant. Quelle: AutoNews, Januar 2026.</div>
-          </div>
-        </div>
-
-        <div class="event-item">
-          <div class="event-dot dot-yellow"></div>
-          <div>
-            <div class="event-label">Feb. 2026 – Absatzdelle nach Chinesischem Neujahrsfest <span class="badge badge-yellow">Neutral</span></div>
-            <div class="event-text">BYD-Aktien setzen sich einem 6-wöchigen Abwärtstrend aus, nachdem im Februar 2026 ein 2-Jahres-Tief beim Inlandsabsatz verzeichnet wurde. Die saisonale Schwäche nach dem Lunar New Year ist typisch; Analysten erwarten eine Normalisierung im März 2026. Quelle: CNBC, Februar 2026.</div>
-          </div>
-        </div>
-
-        <div class="event-item">
-          <div class="event-dot dot-red"></div>
-          <div>
-            <div class="event-label">Lfd. – Mexiko-Fabrikpläne pausiert wegen Trump-Tarifen <span class="badge badge-red">Risiko</span></div>
-            <div class="event-text">BYD EVP Stella Li bestätigte, dass die Mexiko-Fabrik-Entscheidung aufgrund der Trump-Handelspolitik und 25%-Tarifen auf Kfz ohne ausreichenden USMCA-Content auf Eis liegt. Beijing hat noch keine Genehmigung erteilt. Die Brazil-Fabrik (Camacari) ist dagegen angelaufen. Quelle: Electrive, August 2025.</div>
-          </div>
-        </div>
-
-        <h3>Ebene 2: Branche (Sektor-spezifische Events)</h3>
-
-        <div class="event-item">
-          <div class="event-dot dot-green"></div>
-          <div>
-            <div class="event-label">Lfd. 2025/2026 – Xiaomi SU7 als neuer Konkurrent im Heimatmarkt <span class="badge badge-yellow">Neutral/Negativ</span></div>
-            <div class="event-text">Xiaomis elektrischer SUV übertraf den Tesla Model Y bei chinesischen Verkäufen – ein Zeichen für zunehmenden Druck auf BYD im Heimatmarkt. Mit über 150 EV-Herstellern in China bleibt der Preiskampf brutal. Quelle: CNBC, Februar 2026.</div>
-          </div>
-        </div>
-
-        <div class="event-item">
-          <div class="event-dot dot-green"></div>
-          <div>
-            <div class="event-label">EU-Zölle: BYD zahlt 17% Zusatzzoll + 10% Standard <span class="badge badge-red">Risiko</span></div>
-            <div class="event-text">Die EU verhängte nach einer Anti-Subventions-Untersuchung BYD-spezifische Zusatzzölle von 17% (andere chinesische Hersteller bis zu 35,3%). Trotz des Zolls liegen BYD-Fahrzeuge in Europa oft im Preisbereich oder unterhalb vergleichbarer Tesla-Modelle. Die lokale Produktion in Ungarn/Türkei soll dieses Risiko mittelfristig neutralisieren. Quelle: Motley Fool (Oktober 2025); Euronews (Januar 2026).</div>
-          </div>
-        </div>
-
-        <h3>Ebene 3: Makro (Gesamtwirtschaft &amp; Geopolitik)</h3>
-
-        <div class="event-item">
-          <div class="event-dot dot-red"></div>
-          <div>
-            <div class="event-label">USA: 100%-Tarife auf chinesische EVs – kein BYD-Marktzugang <span class="badge badge-red">Strukturelles Risiko</span></div>
-            <div class="event-text">Die USA haben Einfuhrzölle von 100%+ auf chinesische Pkw eingeführt. BYD hat de facto keinen Zugang zum US-Markt für Pkw, dem weltgrößten EV-Wachstumsmarkt ex-China. Dies ist das fundamentalste strukturelle Handicap gegenüber Tesla. Quelle: Diverse US Trade Policy Reports, 2025/2026.</div>
-          </div>
-        </div>
-
-        <div class="event-item">
-          <div class="event-dot dot-yellow"></div>
-          <div>
-            <div class="event-label">China: EV-Förderung läuft 2026 aus <span class="badge badge-yellow">Neutral</span></div>
-            <div class="event-text">Chinas NEV-Kaufsubventionen wurden schrittweise reduziert, was den Preisdruck im Heimatmarkt verstärkt. Der NEV-Penetrationsgrad bei chinesischen Pkw-Käufen hat im H1 2025 die 50%-Marke überschritten – der inländische Wachstumspfad flacht ab. Quelle: Motley Fool – BYD Risk Analysis (Oktober 2025).</div>
-          </div>
-        </div>
-
-        <div class="source">Quellen: Electrek (Januar 2026); CNBC (Februar 2026); AutoNews (Januar 2026); Electrive (August 2025); Meyka/HSBC (Februar 2026); Motley Fool (Oktober 2025); Euronews (Januar 2026).</div>
+    <div class="outlook-card">
+      <h4>📊 Event 3: H2 2026 China NEV-Marktanteils-Entwicklung + Xiaomi-Skalierung</h4>
+      <p>BYDs Domestic-Marktanteil war im März 2026 noch 22,8%, im April auf 22% gefallen. Geely #2 mit 11,3% nähert sich an. Xiaomi YU7 wurde #1 in China nach Volumen (Januar 2026). Die kritische Frage: Stabilisiert sich BYDs Marktanteil 22%+, oder erodieren er weiter durch Xiaomi (skaliert auf 50k+/Monat) und Geely (Multi-Brand-Druck)?</p>
+      <div class="when-then">
+        <strong>Wenn:</strong> BYD Domestic-NEV-Marktanteil bleibt ≥22% Juni–Sept 2026 UND Xiaomi-Skalierung verlangsamt sich auf &lt;50k/Monat → Domestic-Position stabilisiert, Bedrohung managebar. → <em>Bull-Case-Bestätigung, Recovery-Pfad klarer, Kursziel HKD 130+ realistisch.</em><br><br>
+        <strong>Wenn:</strong> BYD Domestic-Marktanteil fällt unter 20% Mai–Aug 2026 ODER Xiaomi skaliert auf 60k+/Monat → Strukturelle Marktanteilsverluste, Scale-Vorteil bedroht. → <em>Long-Term-Story in Frage, Bewertungs-Discount könnte sich strukturell zementieren, Kursziel HKD 100–110 als Range.</em>
       </div>
     </div>
 
-    <!-- SEKTION 9: TECHNISCHE ANALYSE -->
-    <div class="section" id="s9">
-      <div class="section-header">
-        <div class="section-number">9</div>
-        <div class="section-title">Technische Analyse</div>
-        <div class="section-score">Score: 5/10</div>
-      </div>
-      <div class="section-body">
-        <div class="kpi-grid" style="margin-bottom:20px; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));">
-          <div class="kpi-card">
-            <div class="kpi-label">Kurs (HKD)</div>
-            <div class="kpi-value teal">90,00</div>
-            <div class="kpi-sub">04.03.2026</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">SMA 20</div>
-            <div class="kpi-value">~96,50</div>
-            <div class="kpi-sub">Kurs darunter</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">SMA 50</div>
-            <div class="kpi-value">~98,30</div>
-            <div class="kpi-sub">Kurs darunter</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">SMA 200</div>
-            <div class="kpi-value red">~113</div>
-            <div class="kpi-sub">Kurs –20% darunter</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">RSI (14d)</div>
-            <div class="kpi-value">~48–56</div>
-            <div class="kpi-sub">Neutral</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">52W-High</div>
-            <div class="kpi-value red">159,27</div>
-            <div class="kpi-sub">–43% vom High</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">MACD</div>
-            <div class="kpi-value green">+0,05</div>
-            <div class="kpi-sub">Leicht positiv</div>
-          </div>
-        </div>
+    <div class="source">Quellen-Synthese: BYD Q1 2026 Earnings (28.04.2026); Bloomberg Stellantis-Talks (13.05.2026); CPCA Marktanteilsdaten April 2026; TheElectricViking BYD NEV Lead (Mai 2026); Macquarie / JPM / Citi Research-Notes.</div>
+  </div>
+</div>
 
-        <h3>Chartbild &amp; Trendeinordnung</h3>
-        <p>BYDs Aktie befindet sich in einem ausgeprägten mittelfristigen Abwärtstrend. Der Kurs fiel von einem 52-Wochen-Hoch von HKD 159,27 (Mai 2025) auf ein 52-Wochen-Tief von HKD 88,50 (Februar 2026) – ein Rückgang von –44 Prozent. Dieser Einbruch vollzog sich im Kontext der verschlechterten Q3-Ergebnisse (Nettogewinn –32,6% YoY), der Inlandsabsatzschwäche und allgemeiner Risikoreduktion bei China-Aktien. Aktuell versucht der Kurs eine Bodenbildung im Bereich HKD 88–100, unterstützt durch ein positives Pivot-Signal vom 3. Februar 2026 und einem danach +11 Prozent-Anstieg.</p>
+<div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken. Sie stellt keine Anlageberatung oder Aufforderung zum Kauf/Verkauf eines Wertpapiers dar. Die enthaltenen Informationen wurden mit Sorgfalt aus öffentlichen Quellen recherchiert, eine Garantie für Vollständigkeit oder Richtigkeit kann jedoch nicht übernommen werden. Investitionsentscheidungen sollten auf eigener Recherche, individueller Risikotragfähigkeit und ggf. unabhängiger Beratung basieren. Vergangene Kursentwicklungen sind kein Indikator für zukünftige Ergebnisse. Stand: 15.05.2026.</div>
 
-        <p>Der Kurs liegt deutlich unterhalb des SMA200 (ca. HKD 113), was charttechnisch bearish ist und für einen langfristigen Trend-Abwärtsdruck spricht. Der SMA50 (~HKD 98) und SMA20 (~HKD 96) liegen ebenfalls über dem aktuellen Kurs, bilden aber einen zunehmend komprimierten Widerstandscluster. Ein nachhaltiger Schlusskurs über HKD 102–105 würde das Bild aufhellen und einen Trendwechsel signalisieren. Der RSI im neutralen Bereich (48–56) und der leicht positive MACD (+0,05) deuten darauf hin, dass die unmittelbare Verkaufspanik abgeklungen ist. Das Upside-Risiko: Positive Q4/FY 2025-Ergebnisse am 24. März 2026 könnten als starker Katalysator für eine technische Erholung wirken.</p>
-
-        <div class="source">Quellen: Investing.com – 1211 Technical Analysis (März 2026); StockInvest.us – 1211.HK (Februar 2026); Capital.com – BYD Stock Forecast (Januar 2026); Meyka – HSBC Commentary (Februar 2026).</div>
-      </div>
-    </div>
-
-    <!-- SEKTION 10: RISIKEN -->
-    <div class="section" id="s10">
-      <div class="section-header">
-        <div class="section-number">10</div>
-        <div class="section-title">Risiken &amp; Chancen</div>
-        <div class="section-score">Score: 5/10</div>
-      </div>
-      <div class="section-body">
-        <h3>9a) Strukturelle &amp; zyklische Risiken</h3>
-
-        <div class="risk-item">
-          <div class="risk-header">
-            <div class="risk-title">⚡ Geopolitische Zölle &amp; US-Marktausschluss</div>
-            <div><span class="badge badge-red">Hoch</span> <span class="badge badge-red">Auswirkung: Sehr Hoch</span></div>
-          </div>
-          <div class="event-text">BYD ist durch US-Zölle von 100%+ strukturell vom weltweit zweitgrößten Automarkt ausgesperrt. Auch EU-Zölle (17% zusätzlich = 27% gesamt) und mögliche weitere protektionistische Maßnahmen in Indien, Mexiko, ASEAN limitieren das globale Wachstumspotenzial erheblich. Ohne eigene lokale Produktion in diesen Märkten ist BYD abhängig von der Exportstrategie, deren Margen durch Zölle komprimiert werden. Wahrscheinlichkeit, dass Zölle sinken: <15% in 12 Monaten.</div>
-        </div>
-
-        <div class="risk-item">
-          <div class="risk-header">
-            <div class="risk-title">🔥 Chinesischer Inlandsmarkt: Margenerosion durch Preiskampf</div>
-            <div><span class="badge badge-red">Hoch</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
-          </div>
-          <div class="event-text">Mit über 50 aktiven EV-Herstellern in China ist der Preiskampf strukturell. BYD senkte Preise über 20 Modelle um bis zu 34%, was die Bruttomarge in Q2 2025 auf 16,3% – den niedrigsten Wert seit 3 Jahren – drückte. Konkurrenten wie Xiaomi, Geely und Leapmotor agieren zunehmend aggressiv. BYDs Inlandsmarktanteil sank von 35% (2023) auf 29% (H1 2025). Weitere Marktanteilsverluste könnten die Profitabilität strukturell belasten.</div>
-        </div>
-
-        <div class="risk-item">
-          <div class="risk-header">
-            <div class="risk-title">🏛️ Regulatorisches &amp; China-Policy-Risiko</div>
-            <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-red">Auswirkung: Hoch</span></div>
-          </div>
-          <div class="event-text">Als chinesisches Staatsunternehmen-nahes Unternehmen unterliegt BYD dem Einfluss der chinesischen Industriepolitik. Die Einstellung staatlicher NEV-Kaufsubventionen 2026, mögliche Technologietransfer-Beschränkungen durch Beijing (etwa der China-Veto gegen eine Mexiko-Fabrik) und politische Spannungen zwischen China und dem Westen können Strategien kurzfristig vollständig verändern. Warren Buffetts Berkshire Hathaway hat seinen BYD-Stake nahezu vollständig veräußert – ein nicht zu ignorierendes Signal.</div>
-        </div>
-
-        <div class="risk-item">
-          <div class="risk-header">
-            <div class="risk-title">🤖 Technologische Disruption durch Software-defined Vehicles</div>
-            <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
-          </div>
-          <div class="event-text">BYDs Stärke liegt in Hardware-Integration und Batterietechnologie. Im Software- und autonomen Fahren liegt BYD hinter Tesla (FSD), Huawei (ADS) und Xiaomi (zurück). Die „God's Eye"-ADAS-Plattform wurde mit über 1,7 Millionen Fahrzeugen ausgerollt, positioniert BYD aber noch nicht als technologischen Leader im Soft ware-Bereich. Sollte Software-Monetarisierung zum dominierenden Differenzierungsmerkmal werden, könnte BYDs Hardware-Fokus langfristig zum Nachteil werden.</div>
-        </div>
-
-        <h3>9c) Chancen</h3>
-        <p>Die größte strukturelle Chance ist die globale EV-Marktexpansion: Bloomberg NEF prognostiziert bis 2030 CAGR von über 30 Prozent bei EV-Verkäufen, mit einem globalen Markt von 40 Millionen Einheiten. BYD ist in einer einzigartigen Ausgangsposition, da es als günstigster profitabler Großserienhersteller von BEVs global operiert. Die lokale Produktion (Brasilien läuft, Ungarn 2026, Türkei Mitte 2026) wird die Tarif-Schutzwälle sukzessive überwinden. Batterietechnologie als B2B-Umsatzquelle (Lieferungen an Mercedes, Toyota, Ford, Kia) bietet hochmargige Lizenzeinnahmen unabhängig vom direkten Fahrzeugabsatz. Die Super e-Platform könnte das Ladebedenken (Range Anxiety) eliminieren und weiteres globales Wachstum freisetzen.</p>
-
-        <h3>9d) Red Flags</h3>
-        <p>Die wichtigsten Red Flags sind: (1) Berkshire Hathaways fast vollständiger Ausstieg (von ~10% auf ~1,79%) seit Q4 2022 – selbst wenn dies primär Portfolio-Rebalancing war, ist es ein Warnsignal für Value-Investoren; (2) BYDs eigener CEO räumt Technologieführerschaft-Verlust im Heimatmarkt ein; (3) Der operative Cashflow-Rückgang in Q3 2025 (–27,4% YoY) nach einem starken H1 lässt sich noch als saisonal erklären, muss aber bei den Q4/FY 2025-Ergebnissen beobachtet werden. Kein Dealbreaker, aber überwachungswürdig.</p>
-
-        <div class="source">Quellen: Motley Fool – 3 Major Risks BYD (Oktober 2025); Electrive – Mexico Factory Pause (August 2025); Kavout – BYD vs Tesla (2025); CNN Business – BYD overtakes Tesla (Januar 2026); TradingView – BYD Shareholders (2025).</div>
-      </div>
-    </div>
-
-    <!-- SEKTION 11: SCORING -->
-    <div class="section" id="s11">
-      <div class="section-header">
-        <div class="section-number">11</div>
-        <div class="section-title">Scoring – Gesamtbewertung</div>
-        <div class="section-score">Score: 6,6/10</div>
-      </div>
-      <div class="section-body">
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>Kategorie</th><th>Score</th><th>Bewertungsbalken</th><th>Begründung</th></tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>1. Geschäftsmodell</td>
-                <td>8/10</td>
-                <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
-                <td>Tiefe Vertikalintegration, 4 Segmente, starke Brand-Architektur, globale Expansion angelaufen</td>
-              </tr>
-              <tr>
-                <td>2. Burggraben</td>
-                <td>7/10</td>
-                <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
-                <td>Blade-Battery-Monopol, Scale-Vorteile, aber inländische Erosion und Zölle als Limitierung</td>
-              </tr>
-              <tr>
-                <td>3. Operative Entwicklung (4Q)</td>
-                <td>6/10</td>
-                <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
-                <td>Umsatz stark, aber Gewinnrückgang in Q2/Q3 2025 (–30%/–33% YoY) besorgniserregend</td>
-              </tr>
-              <tr>
-                <td>4. Wachstum</td>
-                <td>7/10</td>
-                <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
-                <td>Overseas +130-200% YoY, NEV-Absatz +28% BEVs in 2025, aber inländische Verlangsamung</td>
-              </tr>
-              <tr>
-                <td>5. Bewertung</td>
-                <td>6/10</td>
-                <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
-                <td>P/E 22x teuer vs. direkte Peers (9,6x), aber tief vs. Tesla (70–100x) und P/S attraktiv (0,7x)</td>
-              </tr>
-              <tr>
-                <td>6. Cashflow &amp; Margen</td>
-                <td>7/10</td>
-                <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
-                <td>OCF stark (+125% H1), Kassenbestand RMB 156B, Schulden konservativ – Earnings-Qualität gut</td>
-              </tr>
-              <tr>
-                <td>7. Peer-Vergleich</td>
-                <td>9/10</td>
-                <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
-                <td>Unangefochtener Marktführer unter chinesischen EVs; Revenue und Marge besser als Tesla Automotive</td>
-              </tr>
-              <tr>
-                <td>8. Technische Analyse</td>
-                <td>5/10</td>
-                <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td>
-                <td>–44% vom 52W-Hoch, unter SMA50/200, Bodenbildung möglich aber noch nicht bestätigt</td>
-              </tr>
-              <tr>
-                <td>9. Risiken (invertiert)</td>
-                <td>5/10</td>
-                <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td>
-                <td>Hohe geopolitische Risiken, US-Ausschluss strukturell, Inlandsmarkt unter Druck, China-Policy</td>
-              </tr>
-              <tr style="background:rgba(20,184,166,0.08);">
-                <td><strong>⌀ Gesamtscore</strong></td>
-                <td><strong>6,6/10</strong></td>
-                <td>
-                  <div class="score-bar">
-                    <div class="score-bar-track">
-                      <div class="score-bar-fill" style="width:66%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
-                    </div>
-                    <span class="score-num" style="color:var(--primary);">6,6</span>
-                  </div>
-                </td>
-                <td>Fundamentaler Champion mit erheblichen Risiken – attraktiv für risikobewusste Growth-Investoren mit China-Toleranz und 2–3 Jahres-Horizont</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="source">Eigene Analyse auf Basis der Sektionen 1–10. Stand: 04. März 2026.</div>
-      </div>
-    </div>
-
-    <!-- SEKTION 12: FAZIT -->
-    <div class="section" id="s12">
-      <div class="section-header">
-        <div class="section-number">12</div>
-        <div class="section-title">Fazit – Investment-These: Kann BYD Tesla global herausfordern?</div>
-        <div class="section-note">Gesamtsynthese</div>
-      </div>
-      <div class="section-body">
-
-        <div class="thesis-box">
-          <div class="thesis-label">📋 Leitfrage dieser Analyse</div>
-          <p>Kann BYD Tesla global ernsthaft herausfordern? – Die kurze Antwort: Ja, und auf Volumenebene hat BYD es 2025 bereits getan. Die längere Antwort ist komplexer und hängt davon ab, wie man "global" definiert.</p>
-        </div>
-
-        <div class="bull-bear-grid">
-          <div class="bull-card">
-            <h4>🐂 Das Bullische Narrativ</h4>
-            <p>Das bullische Narrativ basiert auf drei strukturellen Säulen. Erstens ist die globale EV-Führerschaft bereits Realität: BYD verkaufte 2025 genau 2,26 Millionen BEVs (+28% YoY), während Teslas Absatz auf 1,64 Millionen (–8,6%) fiel. Auf allen Märkten außer den USA – wo BYD durch Tarife blockiert ist – holt BYD auf oder hat Tesla bereits überholt. In Europa überholte BYD Tesla erstmals im April/Mai 2025 bei BEV-Neuzulassungen. Die Exportstrategie mit über 1 Million Einheiten außerhalb Chinas (+200% YoY) und lokalen Werken in Brasilien, Ungarn und Türkei schafft zunehmend reale Präsenz.</p>
-            <p>Zweitens ist BYDs vertikale Integration ein strukturell nicht replizierbarer Kostenvorteil. Die Bruttomarge im Automobilbereich (20% in Q1 2025) übertraf Teslas 16,3% in demselben Quartal. Der P/S von 0,7x gegenüber Teslas ~8x und das EV/EBITDA von ~10x vs. Teslas ~35x zeigen, dass der Markt BYDs fundamentale Überlegenheit bei Fahrzeugvolumen und -marge derzeit drastisch unterbewertet – primär aufgrund der China-Risikoprämie und des US-Ausschlusses.</p>
-            <p>Drittens: Die Super e-Platform, die im März 2026 debütieren soll, könnte das letzte verbleibende Tesla-Argument – Ladeinfrastruktur und Ladegeschwindigkeit – angreifen. Mit Megawatt-Ladetechnologie, erhöhter Energiedichte und attraktiveren Preisen nach Effizienzgewinn könnte BYD 2026/2027 auch in Europa und anderen Märkten beschleunigt Marktanteile gewinnen. Die Citigroup projiziert für 2026 einen BYD-Absatz von 5,39 Millionen Einheiten.</p>
-          </div>
-          <div class="bear-card">
-            <h4>🐻 Das Bärische Narrativ</h4>
-            <p>Das bärische Narrativ fokussiert auf drei fundamentale Grenzen. Erstens: BYD kann Tesla nicht global herausfordern, weil es de facto nicht "global" ist. Die USA – BEV-Markt mit ~1,3 Millionen Einheiten jährlich und Teslas dominanter Heimatbasis – sind für BYD durch 100%+ Zölle strukturell unzugänglich. Tesla bleibt dort unangefochten mit >40% Marktanteil und hat keinen nennenswerten chinesischen Konkurrenten. Ein globaler Herausforderer ohne US-Marktpräsenz ist faktisch kein vollständig globaler Herausforderer.</p>
-            <p>Zweitens sieht das Bullenlager einen Profitabilitätschampion, während der Bär eine Gewinnverschlechterung sieht: Nettogewinn in Q2 2025 –30% YoY, in Q3 2025 –32,6% YoY. Der Marktanteil in China sank von 35% auf 29%. Wenn BYD im Heimatmarkt strukturell unter Druck steht und Preiskapitulationen die Marge komprimieren – EBITDA-Marge von 15,5% könnte auf 11–12% fallen bei weiterem Preiskampf – ist das Gewinnwachstum nicht sichergestellt.</p>
-            <p>Drittens: Tesla ist bei BEV-Software, FSD/Autonomes Fahren und Robotaxis fundamental anders positioniert. Teslas Bewertung von P/E ~70–100x reflektiert die Option auf eine Robotaxi/Software-Plattform, die BYD schlicht nicht hat. Falls diese Technologiewette aufgeht, wird die Bewertungslücke zwischen Tesla und BYD niemals schließen – nicht weil BYD schlecht ist, sondern weil Tesla in einem anderen Bewertungsrahmen operiert. P/E 22x ist für einen reinen Hardware-Auto-Hersteller mit Margendruck nicht attraktiv.</p>
-          </div>
-        </div>
-
-        <h3>Eigene Einschätzung</h3>
-        <p>Das bullische Narrativ ist im Hinblick auf die Frage „Kann BYD Tesla herausfordern?" überzeugender – aber mit einer entscheidenden Nuancierung: BYD hat Tesla auf Volumen- und Automobilmargen-Ebene bereits herausgefordert und in vielen Märkten überholt. Auf Bewertungs- und Software-Narrativ-Ebene wird BYD Tesla aber in den nächsten 3-5 Jahren nicht einholen, weil beide Unternehmen in unterschiedlichen Investoren-Rahmen operieren. BYD ist ein exzellentes Automobil- und Energietechnologieunternehmen, Tesla ist zunehmend ein KI/Robotics/Software-Unternehmen mit einem Automobilgeschäft.</p>
-
-        <p>Für den Investor hat diese Erkenntnis klare Implikationen: Bei einem Kurs von HKD 88–100 und einem Analyst-Konsens-Zielkurs von HKD 125,62 (+40% Upside) bietet BYD ein attraktives Risk/Reward. Das DCF-Modell zeigt HKD 119 als fairen Wert (+33%). Die negativen Trigger sind reale Risiken (Zölle, China), aber nicht existenzbedrohend. Ein Anleger, der China-Risiko akzeptiert und einen 2-3 Jahres-Horizont hat, wird BYD zu aktuellen Kursen sehr wahrscheinlich für eine attraktive Einstiegsgelegenheit halten. Ich könnte falsch liegen, weil: Geopolitische Eskalation (Taiwan, US-China-Handelskrieg), ein beschleunigter Margenzerfall in China oder ein schnellerer Tesla-Robotaxi-Rollout könnten die These vollständig kippen.</p>
-
-        <h3>Zeithorizont-Einschätzung</h3>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Zeithorizont</th><th>Einschätzung</th><th>Katalysatoren</th><th>Risiken</th></tr></thead>
-            <tbody>
-              <tr>
-                <td><strong>Kurzfristig (0–6M)</strong></td>
-                <td><span class="badge badge-yellow">Neutral/Aufhellen</span></td>
-                <td>FY 2025-Ergebnisse (24. Mrz), Super e-Platform Launch, Erholung Inlandsabsatz nach LNY</td>
-                <td>Weitere Gewinnmargenerosion, China-Makro-Risiko, Q4 Miss</td>
-              </tr>
-              <tr>
-                <td><strong>Mittelfristig (6–24M)</strong></td>
-                <td><span class="badge badge-green">Bullisch</span></td>
-                <td>Ungarn/Türkei-Werke starten, EU-Marktanteilsgewinn, Overseas >30% des Umsatzes</td>
-                <td>EU-Zollverschärfung, Geopolitik, US-Eskalation</td>
-              </tr>
-              <tr>
-                <td><strong>Langfristig (2–5J)</strong></td>
-                <td><span class="badge badge-green">Stark Bullisch</span></td>
-                <td>5M+ Einheiten 2026, Batterie-Lizenzgeschäft skaliert, EV-Markt 50%+ 2030</td>
-                <td>Technologiedisruption durch Solid-State-Batterien, China-Abkühlung</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3>Kernthese</h3>
-        <p>BYD ist der global überzeugendste Automobilhersteller des EV-Zeitalters. Mit 2,26 Millionen BEV-Einheiten in 2025 (erstmals mehr als Tesla), einem Revenue von USD 118 Milliarden (erstmals mehr als Tesla), einer Bruttomarge die Teslas übersteigt und einem EV/EBITDA von ~10x (vs. Teslas 35x) bietet BYD fundamentalen Wert, der durch die China-Risikoprämie verdeckt wird. Die Frage, ob BYD Tesla global herausfordern kann, ist für alle Märkte außer den USA bereits beantwortet – und die US-Barrikade kann durch lokale Produktion (mittelfristig) oder politische Veränderungen überwunden werden.</p>
-
-        <div class="rating-box">
-          <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
-          <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">HKD 120–135</div></div>
-          <div class="rating-item"><label>Zeithorizont</label><div class="val">2–3 Jahre</div></div>
-          <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–15%</div></div>
-          <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+33–50%</div></div>
-          <div class="rating-item"><label>Risk/Reward</label><div class="val buy">1:3</div></div>
-        </div>
-
-        <div class="trigger-grid">
-          <div class="trigger-card sell">
-            <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
-            <ul class="trigger-list">
-              <li>FY 2025 Nettogewinn liegt unterhalb RMB 30 Milliarden → Position reduzieren (struktureller Margendruck)</li>
-              <li>Bruttomarge fällt in 2026 unter 15% (aktuell ~18%) → Verkaufen</li>
-              <li>NEV-Inlandsabsatz fällt 2026 unter 3,5 Millionen Einheiten (–18% YoY) → reduzieren</li>
-              <li>EU beschließt weitere signifikante Zollerhöhungen auf >35% für BYD → Position halbieren</li>
-              <li>CEO-Wechsel oder signifikante Regierungsintervention in BYDs Strategie → Verkaufen</li>
-            </ul>
-          </div>
-          <div class="trigger-card buy">
-            <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
-            <ul class="trigger-list">
-              <li>FY 2025 Nettogewinn übersteigt RMB 38 Milliarden → aggressiv nachkaufen</li>
-              <li>Super e-Platform Launch löst Begeisterung aus und Bestellzahlen steigen deutlich → nachkaufen</li>
-              <li>Overseas-Absatz übersteigt 1,5 Millionen Einheiten in 2026 → Position aufbauen</li>
-              <li>Kurs fällt auf HKD 80 oder darunter ohne fundamentale Verschlechterung → stark kaufen</li>
-              <li>EU senkt Zölle oder BYD Ungarn-Werk läuft mit >50.000 Einheiten/Quartal an → nachkaufen</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="investor-grid">
-          <div class="investor-yes">
-            <h5>✅ Geeignet für</h5>
-            <ul>
-              <li>Growth Investoren mit China-Toleranz</li>
-              <li>EM/Asia-Spezialisten</li>
-              <li>Contrarian Value (vs. Tesla-Bewertung)</li>
-              <li>Langfristige EV-Thema-Investoren</li>
-            </ul>
-          </div>
-          <div class="investor-no">
-            <h5>❌ NICHT geeignet für</h5>
-            <ul>
-              <li>Reine Value-Investoren (P/E 22x)</li>
-              <li>Income-Investoren (Dividende gering)</li>
-              <li>China-risiko-averse Anleger</li>
-              <li>Kurzfristige Trader (technisch schwach)</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
-            <tbody>
-              <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten</span></td><td>Abwarten auf FY 2025-Ergebnisse (24. März 2026) und Bestätigung Margenerhohlung</td></tr>
-              <tr><td><strong>Moderat</strong></td><td><span class="badge badge-teal">Tranchiert einsteigen</span></td><td>50% jetzt bei HKD 88–95, 50% nach positivem Earnings am 24. März 2026</td></tr>
-              <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Risk/Reward 1:3 bei aktuellem Kurs nahe 52W-Tief; Super e-Platform als naher Katalysator</td></tr>
-              <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>EV-Weltmarktführer bei Volumen, strukturell 2–5 Jahre Wachstumspfad klar sichtbar</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="source">Eigene Synthese. Quellen: alle Sektionen 1–11. Stand: 04. März 2026.</div>
-      </div>
-    </div>
-
-    <!-- SEKTION 13: OUTLOOK -->
-    <div class="section" id="s13">
-      <div class="section-header">
-        <div class="section-number">13</div>
-        <div class="section-title">Outlook – Die 3 entscheidenden Events</div>
-        <div class="section-note">Wenn/Dann-Szenarien</div>
-      </div>
-      <div class="section-body">
-
-        <div class="outlook-card">
-          <h4>📊 Event 1: Jahresergebnisse FY 2025 – 24. März 2026</h4>
-          <p>Das wichtigste kurzfristige Event für das BYD-Narrativ. Der Markt erwartet Jahresumsatz von ca. RMB 800–820 Milliarden und einen Nettogewinn von RMB 32–38 Milliarden. Zentral ist nicht nur das Zahlenwerk, sondern das Management-Guidance für 2026 – insbesondere zur Margenentwicklung und Overseas-Wachstumspfad.</p>
-          <div class="when-then">
-            <strong>Wenn:</strong> FY 2025 Nettogewinn liegt bei RMB 38 Milliarden oder mehr (ca. +10% YoY) UND Management gibt optimistischen 2026-Ausblick für Übersee-Wachstum und Margen über 18% Bruttomarge → sofort nachkaufen; das technische Bild dreht bullisch und ein Kurs von HKD 115–120 innerhalb von 3 Monaten ist realistisch.<br><br>
-            <strong>Wenn:</strong> FY 2025 Nettogewinn unter RMB 30 Milliarden (Enttäuschung) und Management-Ausblick unterstreicht strukturellen Margendruck ohne klare Erholungsperspektive → Position auf maximal 50% Restposition reduzieren; das Risiko weiterer Abwärtskorrektur auf HKD 70–75 wächst erheblich.
-          </div>
-        </div>
-
-        <div class="outlook-card">
-          <h4>📡 Event 2: Super e-Platform Launch &amp; Ungarn-Werk Serienstart – Q1–Q2 2026</h4>
-          <p>BYDs Super e-Platform soll im März 2026 debütieren und ermöglicht Megawatt-Schnellladung (1.000–1.500 kW) sowie erhöhte Reichweite bei niedrigeren Kosten – ein direkter Angriff auf Teslas letztes verbleibendes Differenzierungsmerkmal in Europa. Gleichzeitig soll das Ungarn-Werk im Laufe 2026 anlaufen und BYD die EU-Zölle von 27% für lokal produzierte Fahrzeuge umgehen lassen. Beide Events zusammen wären ein Doppelkatalysator für die europäische Expansion.</p>
-          <div class="when-then">
-            <strong>Wenn:</strong> Super e-Platform erzielt überzeugenden Launch mit gemessenen Ladezeiten unter 15 Minuten für 300+ km Reichweite UND erste Bestellzahlen übersteigen 50.000 Einheiten in den ersten 3 Monaten → Kauf und/oder Aufstockung; dies wäre ein technologischer Wendepunkt, der BYD mittelfristig in Europa auf Tesla-Augenhöhe bringt.<br><br>
-            <strong>Wenn:</strong> Super e-Platform-Launch enttäuscht (spezifizierte Reichweite/Ladezeiten nicht geliefert) UND Ungarn-Werk verzögert sich → neutral; die Overseas-Story bleibt intakt, aber der Zeitplan verschiebt sich; bestehende Position halten, Neueinstieg zurückstellen.
-          </div>
-        </div>
-
-        <div class="outlook-card">
-          <h4>🌍 Event 3: US-China Handelsrelationen &amp; EU-Zollrevision – H2 2026</h4>
-          <p>Die US-Administration unter Trump hält 100%+ Zölle auf chinesische Kfz aufrecht, was BYDs US-Markteinritt unmöglich macht. Die EU überprüft ihre EV-Zollpolitik im Kontext des 2035-ICE-Verbots – ein Trade-Deal zwischen China und der EU oder eine Entschärfung der US-Handelsbarrieren wäre für BYD ein transformativer Katalysator. Umgekehrt würden neue Handelssanktionen (z.B. Sekundärsanktionen auf BYD-Lieferanten) das Investmentnarratv erheblich beschädigen.</p>
-          <div class="when-then">
-            <strong>Wenn:</strong> EU und China einigen sich auf ein Handelsabkommen, das BYD-Zölle auf unter 10% senkt, oder die USA lockern EV-Importzölle im Rahmen eines größeren Handelsdeals → massiv nachkaufen; BYD würde schlagartig eine globale Marktbewerbung ermöglicht, die in der aktuellen Bewertung schlicht nicht eingepreist ist. Upside von 100%+ wäre möglich.<br><br>
-            <strong>Wenn:</strong> USA verhängen Sekundärsanktionen auf BYDs europäische Lieferanten oder EU verschärft Zölle auf 35%+ für alle chinesischen EVs → Position auf unter 25% reduzieren oder vollständig verkaufen; die Overseas-Wachstumsthese würde strukturell kollabieren.
-          </div>
-        </div>
-
-        <div class="source">Quellen: Meyka/HSBC (Februar 2026); AutoNews – BYD 2026 Global Expansion (Januar 2026); Electrive – Mexico Plant Pause (August 2025); Euronews – Global Trade 2025 (Dezember 2025); Phenomenal World – Global BYD (April 2025).</div>
-      </div>
-    </div>
-
-    <!-- DISCLAIMER -->
-    <div class="disclaimer">
-      ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken und stellt keine Anlageberatung, Kaufempfehlung oder Aufforderung zum Handel mit Wertpapieren dar. Investitionen in Aktien sind mit erheblichen Risiken verbunden, einschließlich des vollständigen Kapitalverlustes. Der Autor dieser Analyse hält möglicherweise Positionen in den genannten Wertpapieren. Vergangene Wertentwicklungen sind kein Indikator für zukünftige Ergebnisse. Alle Angaben ohne Gewähr. Stand: 04. März 2026. Bitte konsultieren Sie einen lizenzierten Finanzberater vor Investitionsentscheidungen.
-    </div>
-
-  </div><!-- /main -->
+</div>
 </body>
 </html>
