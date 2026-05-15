@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BABA – Aktienanalyse Canvas v2.2 · Mai 2026</title>
+<style>
+:root{
+  --primary:#FF6900;--primary-dark:#cc5400;
+  --bg:#0f0f12;--bg-card:#1a1a1f;--bg-card2:#22222a;--border:#2e2e38;
+  --text:#e8e8ec;--text-muted:#888898;--text-dim:#555566;
+  --green:#22c55e;--red:#ef4444;--yellow:#f59e0b;--blue:#3b82f6;--purple:#8b5cf6;--teal:#14b8a6;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+.header{background:linear-gradient(135deg,#1a0800 0%,#2a1000 40%,#0f0f12 100%);border-bottom:1px solid var(--primary);padding:36px 40px 28px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;}
+.header-left h1{font-size:32px;font-weight:700;color:white;letter-spacing:-0.5px;}
+.header-left h1 span{color:var(--primary);}
+.header-left .subtitle{color:var(--text-muted);font-size:14px;margin-top:4px;}
+.header-right{text-align:right;}
+.price-tag{font-size:38px;font-weight:800;color:var(--primary);line-height:1;}
+.price-meta{color:var(--text-muted);font-size:13px;margin-top:4px;}
+.price-change{display:inline-block;padding:2px 8px;border-radius:4px;font-size:13px;font-weight:600;margin-top:4px;}
+.price-change.up{background:rgba(34,197,94,0.15);color:var(--green);}
+.price-change.down{background:rgba(239,68,68,0.15);color:var(--red);}
+.nav{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:100;}
+.nav a{color:var(--text-muted);text-decoration:none;padding:14px 16px;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.2s;}
+.nav a:hover{color:var(--primary);border-bottom-color:var(--primary);}
+.main{max-width:1100px;margin:0 auto;padding:32px 40px 60px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px;}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.kpi-value{font-size:22px;font-weight:700;color:white;margin-top:4px;}
+.kpi-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.kpi-value.green{color:var(--green);}
+.kpi-value.red{color:var(--red);}
+.kpi-value.orange{color:var(--primary);}
+.section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden;}
+.section-header{background:var(--bg-card2);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.section-number{background:var(--primary);color:white;width:28px;height:28px;border-radius:6px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-title{font-size:16px;font-weight:700;color:white;}
+.section-score{margin-left:auto;font-size:14px;font-weight:700;color:var(--primary);}
+.section-note{font-size:12px;color:var(--text-dim);background:rgba(46,46,56,0.4);border-radius:4px;padding:4px 10px;margin-left:auto;}
+.section-body{padding:20px 24px;}
+p{margin-bottom:12px;color:var(--text);}
+p:last-child{margin-bottom:0;}
+h3{font-size:14px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 8px;}
+h3:first-child{margin-top:0;}
+.table-wrap{overflow-x:auto;margin:16px 0;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--bg-card2);color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:10px 12px;border-bottom:1px solid rgba(46,46,56,0.5);color:var(--text);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,105,0,0.04);}
+.beat{color:var(--green);font-weight:600;}
+.miss{color:var(--red);font-weight:600;}
+.neutral{color:var(--yellow);font-weight:600;}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}
+.badge-green{background:rgba(34,197,94,0.15);color:var(--green);}
+.badge-red{background:rgba(239,68,68,0.15);color:var(--red);}
+.badge-yellow{background:rgba(245,158,11,0.15);color:var(--yellow);}
+.badge-blue{background:rgba(59,130,246,0.15);color:var(--blue);}
+.badge-orange{background:rgba(255,105,0,0.15);color:var(--primary);}
+.event-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(46,46,56,0.5);align-items:flex-start;}
+.event-item:last-child{border-bottom:none;}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0;}
+.dot-green{background:var(--green);}
+.dot-red{background:var(--red);}
+.dot-yellow{background:var(--yellow);}
+.event-label{font-weight:600;color:white;}
+.event-text{font-size:14px;color:var(--text);}
+.risk-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.risk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:6px;}
+.risk-title{font-weight:600;color:white;font-size:14px;}
+.score-bar{display:flex;align-items:center;gap:10px;}
+.score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#ff9500);}
+.score-num{font-weight:700;color:var(--primary);font-size:15px;min-width:32px;}
+.bull-bear-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:700px){.bull-bear-grid{grid-template-columns:1fr;}}
+.bull-card{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:16px;}
+.bear-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:16px;}
+.bull-card h4{color:var(--green);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.bear-card h4{color:var(--red);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.rating-box{background:linear-gradient(135deg,rgba(255,105,0,0.12),rgba(255,105,0,0.04));border:1px solid rgba(255,105,0,0.3);border-radius:12px;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:20px 0;}
+.rating-item label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;display:block;margin-bottom:4px;}
+.rating-item .val{font-size:20px;font-weight:800;color:white;}
+.rating-item .val.buy{color:var(--green);}
+.rating-item .val.hold{color:var(--yellow);}
+.rating-item .val.sell{color:var(--red);}
+.trigger-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+@media(max-width:700px){.trigger-grid{grid-template-columns:1fr;}}
+.trigger-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.trigger-card h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.trigger-card.buy h5{color:var(--green);}
+.trigger-card.sell h5{color:var(--red);}
+.trigger-list{font-size:13px;color:var(--text);list-style:none;padding:0;}
+.trigger-list li{margin-bottom:6px;padding-left:14px;position:relative;}
+.trigger-list li::before{content:"\2192";position:absolute;left:0;}
+.investor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+@media(max-width:600px){.investor-grid{grid-template-columns:1fr;}}
+.investor-yes{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px;}
+.investor-no{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:12px;}
+.investor-yes h5{color:var(--green);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-no h5{color:var(--red);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-yes li,.investor-no li{font-size:13px;color:var(--text);margin-bottom:4px;list-style:none;padding-left:14px;position:relative;}
+.investor-yes li::before{content:"\2713";position:absolute;left:0;color:var(--green);}
+.investor-no li::before{content:"\2717";position:absolute;left:0;color:var(--red);}
+.geo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0;}
+.geo-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.geo-region{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.geo-pct{font-size:20px;font-weight:700;color:white;}
+.geo-note{font-size:12px;color:var(--text-muted);}
+.outlook-card{background:var(--bg-card2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:16px;margin-bottom:14px;}
+.outlook-card h4{color:white;font-size:14px;margin-bottom:8px;}
+.outlook-card .when-then{font-size:13px;color:var(--text);margin-top:8px;}
+.outlook-card .when-then strong{color:var(--primary);}
+.source{font-size:11px;color:var(--text-dim);margin-top:12px;padding-top:10px;border-top:1px solid rgba(46,46,56,0.5);}
+.source a{color:var(--text-dim);}
+.disclaimer{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text-dim);margin-top:32px;}
+.alert-box{background:rgba(255,105,0,0.08);border:1px solid rgba(255,105,0,0.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px;}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+.pill{display:inline-block;background:rgba(255,105,0,0.12);color:var(--primary);border-radius:4px;padding:1px 7px;font-size:13px;font-weight:600;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Alibaba Group Holding <span>BABA</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 15. Mai 2026 · NYSE / 9988.HK · Sektor: China Tech / Cloud / E-Commerce</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-orange">AI + Cloud Champion</span>
+      <span class="badge badge-blue">Qwen Open-Source-LLM</span>
+      <span class="badge badge-yellow">E-Commerce unter Druck</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$141,12</div>
+    <div class="price-meta">Schlusskurs 14.05.2026 · NYSE</div>
+    <div class="price-change down">▼ –3,2% / 1T · post-Earnings volatil</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">52W: ~$95 – $192,67</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+<div class="kpi-grid" style="margin-top:24px;">
+  <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">$141,12</div><div class="kpi-sub">14.05.2026</div></div>
+  <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value orange">~$340 Mrd.</div><div class="kpi-sub">Mega Cap</div></div>
+  <div class="kpi-card"><div class="kpi-label">P/E (TTM)</div><div class="kpi-value">~24x</div><div class="kpi-sub">post Q4-Miss</div></div>
+  <div class="kpi-card"><div class="kpi-label">P/E (FWD)</div><div class="kpi-value">~22x</div><div class="kpi-sub">EBITA-Druck</div></div>
+  <div class="kpi-card"><div class="kpi-label">Cloud-Wachstum</div><div class="kpi-value green">+38% YoY</div><div class="kpi-sub">Q4 FY26</div></div>
+  <div class="kpi-card"><div class="kpi-label">AI-Revenue Anteil</div><div class="kpi-value green">~30% Cloud</div><div class="kpi-sub">Ziel: &gt;50% in 12M</div></div>
+  <div class="kpi-card"><div class="kpi-label">52W High</div><div class="kpi-value">$192,67</div><div class="kpi-sub">–27% darunter</div></div>
+  <div class="kpi-card"><div class="kpi-label">Konsens</div><div class="kpi-value green">STRONG BUY</div><div class="kpi-sub">PT: ~$186–205</div></div>
+</div>
+
+<!-- SEKTION 1 -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Geschäftsmodell</div>
+    <div class="section-note">Quellen ≤ 6 Monate</div>
+  </div>
+  <div class="section-body">
+    <p>Alibaba ist <strong>Chinas größtes Tech-Konglomerat</strong> mit zwei zunehmend gleichberechtigten Wachstumssäulen: <strong>(1) AI + Cloud</strong> (Cloud Intelligence Group + Qwen-Foundation-Models) und <strong>(2) E-Commerce</strong> (Taobao, Tmall, AliExpress, Quick Commerce/Taocaicai). Daneben Logistik (Cainiao), Local Services (Ele.me, Amap), Digital Media. FY2026 (April 2025–März 2026): Gesamtumsatz RMB 1,02 Bio. (~$140 Mrd., +2,7% YoY GAAP; +9% ex-Disposals).</p>
+    <p>Das <strong>E-Commerce-Geschäft</strong> (China Commerce Group: Taobao, Tmall) bleibt mit ~50% Gruppenumsatzanteil der Cash-Generator, aber Wachstum hat sich strukturell verlangsamt – PDD/Temu, Douyin (TikTok in China) und JD.com haben in den letzten 3 Jahren signifikant Marktanteile abgegraben. Alibabas Antwort: aggressive Investition in <strong>Quick Commerce (Taocaicai)</strong> mit ~40% Revenue-Wachstum in Q4, integration in Taobao-App resultierte in +20% mehr Daily Active Users. Management Ziel: Quick Commerce profitabel ab FY2029. International Commerce (AliExpress, Lazada) wächst zweistellig, bleibt aber im Verhältnis klein.</p>
+    <p>Das <strong>Cloud + AI Geschäft</strong> ist die strategische Story 2026+. Cloud Intelligence Group Revenue in Q4 FY26: <strong>RMB 41,6 Mrd. (+38% YoY)</strong>, externe Cloud-Revenue +40% YoY. AI-bezogene Produkte: 11 Quartale in Folge Triple-Digit-Wachstum, AI-Anteil ~30% der externen Cloud-Revenue (Ziel: &gt;50% in 12 Monaten). Annualisierte AI-Revenue: <strong>RMB 35,8 Mrd.</strong>. Das macht BABA zum unbestrittenen Marktführer in Chinas AI-Cloud-Markt (Marktanteil 35,8% vs. ByteDance/Volcano 14,8%, Huawei 13,1%, Tencent 7%, Baidu 6,1% – Omdia-Daten H1 2025).</p>
+    <p><strong>AI-Investment-Kommitment:</strong> Im Februar 2025 hatte Alibaba angekündigt, in 3 Jahren <strong>RMB 380 Mrd. (~$53 Mrd.)</strong> in Cloud + AI Infrastruktur zu investieren. Im Mai 2026 hat das Management <strong>angekündigt, dieses Niveau zu überschreiten</strong> – konkrete Größenordnung jetzt $52–56 Mrd. plus Erweiterung. Foundation-Model Qwen: über 200 Open-Source-Modelle, 300 Mio.+ kumulative Downloads, 100.000+ derivative Modelle. Qwen ist global das meistgenutzte chinesische Open-Source-LLM und mittlerweile auch das meistgenutzte Open-Source-LLM überhaupt.</p>
+    <p>Daneben: <strong>T-Head proprietäre Chips</strong> werden tiefer in Alibabas Cloud-Infrastruktur integriert (für Inferenz-Kostensenkung), Hauptmotivation: Reduktion der Abhängigkeit von Nvidia-Chips, die durch US-Exportkontrollen erschwert sind. Das ist ein materieller strategischer Hebel – wenn T-Head-Inferenz-ASIC-Chips skalierbar werden, sinken Alibabas Cloud-Margen-Kosten deutlich.</p>
+    <div class="source">Quellen: Alibaba Q4 FY2026 Earnings Release SEC 6-K (13.05.2026); Investing.com BABA Earnings (13.05.2026); TipRanks BABA Earnings (13.05.2026); SCMP Alibaba AI Cloud Leadership (Sep 2025); Public.com BABA Forecast (Apr 2026); MLQ.ai Alibaba Profit Collapse (13.05.2026).</div>
+  </div>
+</div>
+
+<!-- SEKTION 2 -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+    <div class="section-score">Score: 8/10</div>
+  </div>
+  <div class="section-body">
+    <p>Alibabas Burggraben ist <strong>multidimensional und in der AI/Cloud-Dimension aktuell der stärkste in China</strong>. Vier sich verstärkende Komponenten:</p>
+    <h3>1. AI-Cloud-Infrastruktur-Marktführerschaft</h3>
+    <p>35,8% Marktanteil im chinesischen AI-Cloud-Markt – mehr als <strong>2,4× größer als der Zweitplatzierte ByteDance (14,8%)</strong>. Alibaba Cloud führt seit 6 Jahren in Folge im chinesischen Financial-Cloud-Markt mit Rekord 43% Marktanteil (IDC, H1 2025). Im Public Cloud Infrastructure (PaaS) ist BABA Marktführer. Im Gartner Magic Quadrant for Cloud Database Management Systems Leader (6. Jahr in Folge). Wichtig: Cloud-Switching-Costs sind enorm – Migrations-Projekte dauern Quartale, Engineering-Teams müssen umgeschult werden, Datenbestand muss umziehen. Alibabas Cloud-Kunden bleiben.</p>
+    <h3>2. Qwen als Open-Source-AI-Standard</h3>
+    <p>Qwen-Familie hat <strong>600 Mio.+ kumulative Downloads weltweit</strong> – das macht es zum meistgenutzten Open-Source-LLM. 100.000+ derivative Modelle. Jede dieser Derivaten ist potenziell ein zukünftiger Cloud-Kunde, da Hochleistungs-Inferenz nicht lokal läuft. Das ist ein <strong>Plattform-Burggraben</strong> ähnlich Linux/Android – wenn Entwickler weltweit Qwen lernen und darauf bauen, bekommt Alibaba Cloud automatischen Vorteil als „Heimatumgebung". Februar 2026: Alibaba investierte $431 Mio. allein in Qwen-App-Promotion zum Lunar New Year (3× was Tencent, 6× was Baidu für ihre konkurrierenden Produkte ausgaben). Das ist Aggression mit Methode.</p>
+    <h3>3. E-Commerce-Skalenvorteile + Quick-Commerce-Integration</h3>
+    <p>Über 1 Mrd. aktive Konsumenten auf Taobao/Tmall, Logistik-Backbone Cainiao, integrierte Payment-Infrastruktur (Alipay via Ant Group). Quick Commerce (Taocaicai) ist 2025/26 eine massive Investition geworden – die in Q4 FY26 –84% Adj. EBITA waren weitgehend bewusste Reinvestitionen in Quick Commerce + Marketing. Das ist ein Defense-Move gegen PDD/Temu und Douyin, kein bullisches Wachstumssignal – wichtig zu unterscheiden.</p>
+    <h3>4. Vertikale Integration: T-Head Chip-Stack</h3>
+    <p>BABA entwickelt eigene Inferenz-ASICs unter der T-Head-Marke – das ist Insurance gegen Nvidia-Export-Restriktionen. Wenn die T-Head-Chips bis 2027 in Alibabas Cloud-Inferenz integriert sind, sinken die Marginal-Kosten pro AI-Anfrage drastisch, was die Cloud-Marge strukturell heben würde. Auch Tencent signalisiert ähnliche Stack-Verfügbarkeit, aber Alibaba ist führend.</p>
+    <p><strong>Was den Burggraben schwächt:</strong> (1) <strong>E-Commerce-Marktanteil ist erodiert</strong> – PDD/Temu mit deutlich aggressiverem Pricing, Douyin mit Social Commerce. Alibabas China Commerce Group Revenue stagniert. (2) <strong>Chinese Reg-Risk</strong> bleibt latent (auch wenn die Ant-Group-Krise 2020/21 weitgehend ausgestanden ist). (3) <strong>Tencent/Huawei holen im Cloud auf</strong> – Tencent signalisiert mehr eigene AI-Chip-Verfügbarkeit. Das Cloud-Rennen ist nicht gewonnen, sondern führt aktuell.</p>
+    <div class="source">Quellen: SCMP Alibaba AI Cloud Leadership (10.09.2025); kr-asia AI Cloud Race (27.01.2026); Bloomberg Tencent Alibaba AI (Juni 2025); Build AIQ China AI Ecosystem (Apr 2026); Phemex BABA 2026 Analysis (März 2026); Alibaba Q4 FY26 6-K (13.05.2026); SEC 6-K Q3 FY26 (Feb 2026).</div>
+  </div>
+</div>
+
+<!-- SEKTION 3 -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">Letzte 4 Quartale</div>
+    <div class="section-score">Beat-Ratio: 1/4 (Q4 Miss)</div>
+  </div>
+  <div class="section-body">
+    <div class="alert-box">⚠️ <strong>Hinweis:</strong> BABA notiert primär an der NYSE (auch HK-Dual-Listing 9988.HK). Daten aus SEC-Filings, Yahoo Finance, StockAnalysis.com, MacroTrends. <strong>Nächste Earnings: August 2026 (Q1 FY27).</strong></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Quartal (Fiskal)</th><th>Revenue</th><th>YoY</th><th>EPS (ADS)</th><th>Konsens</th><th>Beat/Miss</th><th>Reaktion</th></tr></thead>
+        <tbody>
+          <tr><td>Q1 FY26 (Juni '25)</td><td>$33,5 Mrd.</td><td>+2%</td><td>$1,87</td><td>$1,55</td><td class="beat">BEAT +21%</td><td>+13% (Sept)</td></tr>
+          <tr><td>Q2 FY26 (Sept '25)</td><td>$34,8 Mrd.</td><td>+5%</td><td>$2,28</td><td>$2,07</td><td class="beat">BEAT +10%</td><td>+19% (1 Tag)</td></tr>
+          <tr><td>Q3 FY26 (Dez '25)</td><td>$40,7 Mrd.</td><td>+2% (+9% ex-Disp.)</td><td>$0,97</td><td>$1,50</td><td class="miss">MISS –35%</td><td>–7%</td></tr>
+          <tr><td><strong>Q4 FY26 (März '26)</strong></td><td><strong>$35,3 Mrd.</strong></td><td><strong>+3%</strong></td><td><strong>$0,70</strong></td><td>$1,02</td><td class="miss"><strong>MISS –31%</strong></td><td><strong>+8% (!)</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Q4 FY26: Earnings-Miss, aber Cloud/AI bestätigt</h3>
+    <p>Die Headline ist düster: <strong>Adj. EBITA –84% YoY auf RMB 5,1 Mrd.</strong>, EPS-Miss um 31% vs. Konsens, Marketing &amp; Sales Expenses sprangen von RMB 36,2 Mrd. auf RMB 53,4 Mrd. (Vor allem getrieben durch Taocaicai-Subventionen und Qwen-App-Promotion). Aber: <strong>der Markt belohnte die Aktie mit +8%</strong> nach den Earnings, weil die <strong>Cloud-Story bestätigt wurde</strong>: Cloud +38% YoY, externe Cloud +40% YoY, AI-Anteil 30% der externen Cloud (von ~10% vor 12 Monaten). CEO Eddie Wu: „Wir haben den Inflection Point von Incubation zu Commercialization at Scale erreicht."</p>
+    <p><strong>Margen-Bild Q4:</strong> Cloud Operating Margin verbessert sich, aber wird durch Quick-Commerce-Investitionen und AI-Capex teilweise konsumiert. Quick Commerce Verluste sollen sich H2 FY27 narrowen, mit Ziel Profitabilität FY29. Capex bleibt elevated bis March 2027, was FCF kurzfristig drückt.</p>
+    <p><strong>Was die Quartalsreihe wirklich zeigt:</strong> Q1 und Q2 FY26 waren operative Beats mit positiver Marktreaktion. Q3 (Dez '25) markierte den Wendepunkt – höhere Capex und Quick-Commerce-Investitionen drückten EPS deutlich, Aktie –7%. Q4 wiederholte das Muster, aber diesmal akzeptierte der Markt die Investitions-Story und reagierte positiv. Das deutet darauf hin, dass Investoren <strong>die Earnings-Schwäche als „bewusste Investition" akzeptieren</strong>, nicht als Geschäftsproblem.</p>
+    <p>Management-Statement (Eddie Wu, CEO, Q4-Call): <em>„AI plus Cloud Revenue Growth beschleunigt sich mit verbesserten Margen. Model und Application Services ARR wächst weiter. In etwa einem Jahr wird AI-bezogene Revenue die 50%-Schwelle der Cloud-Revenue überschreiten."</em></p>
+    <div class="source">Quellen: Alibaba SEC 6-K Q4 FY26 (13.05.2026); Yahoo Finance BABA Earnings Call Transcript (13.05.2026); TipRanks BABA Earnings (13.05.2026); MLQ.ai Alibaba Profit Collapse (13.05.2026); MacroTrends BABA Revenue (Mai 2026); TIKR BABA Earnings Preview (10.05.2026); Tickeron BABA Q4 Expectations (10.05.2026).</div>
+  </div>
+</div>
+
+<!-- SEKTION 4 -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">Wachstumseinordnung</div>
+    <div class="section-score">Score: 7/10</div>
+  </div>
+  <div class="section-body">
+    <p>Alibabas Wachstumstrajektorie ist <strong>fundamental zweigeteilt</strong>: AI/Cloud beschleunigt sich, E-Commerce stagniert. FY26 Revenue +2,7% GAAP / +9% ex-Disposals. Konsens für FY27: <strong>RMB 1.036 Mrd.</strong> (+1,5% vs. FY26), FY28: <strong>RMB 1.154 Mrd.</strong> (+11,4%). Die Beschleunigung kommt erst FY28 – das spiegelt wider, dass Q1/Q2 FY27 noch durch hohe Investitionen geprägt sein werden, mit erwarteter Margin-Recovery FY28+.</p>
+    <h3>Segment-Wachstum Q4 FY26 (YoY)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Segment</th><th>Revenue Q4 FY26</th><th>YoY</th><th>Bemerkung</th></tr></thead>
+        <tbody>
+          <tr><td>Cloud Intelligence Group</td><td class="beat">RMB 41,6 Mrd.</td><td class="beat">+38%</td><td>Externe Cloud +40%, AI-Anteil 30%</td></tr>
+          <tr><td>China Commerce (Taobao/Tmall)</td><td>~RMB 110 Mrd.</td><td>~+2%</td><td>Stagnation, Quick Commerce wächst aber</td></tr>
+          <tr><td>International Commerce</td><td>~RMB 35 Mrd.</td><td>+15%</td><td>AliExpress + Lazada</td></tr>
+          <tr><td>Local Services (Ele.me, Amap)</td><td>~RMB 18 Mrd.</td><td>+12%</td><td>Solider Wachstum</td></tr>
+          <tr><td>Cainiao Logistics</td><td>~RMB 25 Mrd.</td><td>+8%</td><td>Stabil</td></tr>
+          <tr><td>Digital Media + Innovation</td><td>~RMB 14 Mrd.</td><td>+5%</td><td>Kleines Segment</td></tr>
+          <tr><td><strong>Gesamtgruppe</strong></td><td><strong>RMB 243,4 Mrd.</strong></td><td><strong>+3% (+5% ex-Disp.)</strong></td><td>Cloud-Mix-Shift in Progress</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Geografische Verteilung FY26</h3>
+    <div class="geo-grid">
+      <div class="geo-card"><div class="geo-region">China (Mainland)</div><div class="geo-pct">~85%</div><div class="geo-note">Dominant: Commerce + Cloud</div></div>
+      <div class="geo-card"><div class="geo-region">International Commerce</div><div class="geo-pct">~10%</div><div class="geo-note">AliExpress, Lazada (SEA, EU)</div></div>
+      <div class="geo-card"><div class="geo-region">Other</div><div class="geo-pct">~5%</div><div class="geo-note">DingTalk Enterprise, Misc.</div></div>
+    </div>
+    <p><strong>AI-Revenue als sekulärer Wachstumstreiber:</strong> AI-Annualisierte Revenue von RMB 35,8 Mrd. wächst Triple-Digit. Wenn das Tempo bis Q4 FY27 (März '27) bei +100% YoY weiterläuft, wären das ~RMB 70 Mrd. AI-Revenue allein in 12 Monaten. Das ist materiell – etwa das 4-fache der gesamten BAIDU AI-Revenue. CEO Eddie Wus „Ziel $100B AI Revenue"-Vision impliziert das Ziel, in 3–4 Jahren auf diese Größenordnung zu skalieren.</p>
+    <p><strong>Worauf der Markt skeptisch ist:</strong> Die Beschleunigung in Cloud (von 18% → 26% → 34% → 38% in den letzten 4 Quartalen) muss <strong>fortgesetzt werden</strong>. Wenn das nächste Quartal nur +40% liefert statt +45–50%, wäre das eine Verlangsamung relativ zur Story und würde Re-Rating kosten. Plus: Quick-Commerce-Verluste müssen sich narrowen – bisher kein klarer Profitabilitätspfad bis FY29 sichtbar.</p>
+    <p><strong>Reifegrad:</strong> <strong>Two-Speed-Company.</strong> Cloud/AI in Hyper-Growth, E-Commerce in Mature/Defending Mode. Das ist nicht unmittelbar negativ – Microsoft hat dieses Modell (Cloud Hyper-Growth, Office Mature) und ist die wertvollste Firma der Welt geworden. Alibaba versucht den gleichen Trick.</p>
+    <div class="source">Quellen: Alibaba SEC 6-K Q4 FY26 (13.05.2026); Public.com BABA Forecast (Apr 2026); StockAnalysis BABA Overview (Mai 2026); Phemex BABA 2026 (März 2026); Yahoo Finance BABA Analyst Estimates.</div>
+  </div>
+</div>
+
+<!-- SEKTION 5 -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <div class="section-title">Bewertung &amp; Multiples</div>
+    <div class="section-score">Score: 7/10</div>
+  </div>
+  <div class="section-body">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Multiple</th><th>Aktuell</th><th>5J-Median</th><th>Peer-Ø (China Tech)</th><th>Bewertung</th></tr></thead>
+        <tbody>
+          <tr><td>P/E (TTM)</td><td>~24x</td><td>~19x</td><td>~22x</td><td class="neutral">Fair</td></tr>
+          <tr><td>P/E (FWD)</td><td>~22x</td><td>—</td><td>~25x (Tencent)</td><td class="beat">Etwas günstig</td></tr>
+          <tr><td>EV/EBITDA (FWD)</td><td>~13,7x</td><td>~14x</td><td>~15x</td><td class="beat">Günstig</td></tr>
+          <tr><td>P/Sales (TTM)</td><td>~2,4x</td><td>~3,0x</td><td>~5x (Tencent)</td><td class="beat">Günstig</td></tr>
+          <tr><td>P/B</td><td>~1,9x</td><td>~2,2x</td><td>~3x</td><td class="beat">Günstig</td></tr>
+          <tr><td>Cloud-Bewertung (implizit)</td><td>~6× Cloud-Sales</td><td>—</td><td>~10–15× (AWS-Vergl.)</td><td class="beat">Sehr günstig</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Bewertungs-These im Kontext:</strong> Bei $141 trades BABA zu P/E FWD ~22x und EV/EBITDA FWD ~13,7x. Das ist nicht „cheap" auf Basis aktueller Earnings (durch Investment-Druck), aber attraktiv relativ zu einer Sum-of-the-Parts-Bewertung:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Segment (SOTP-Schätzung)</th><th>Annahme</th><th>Implizite Bewertung</th></tr></thead>
+        <tbody>
+          <tr><td>Cloud Intelligence Group (+38% Growth)</td><td>15× Revenue (Run-Rate $25B annualized)</td><td>~$375 Mrd.</td></tr>
+          <tr><td>E-Commerce + Logistics (Cainiao)</td><td>8× EBITDA (~$15B run-rate)</td><td>~$120 Mrd.</td></tr>
+          <tr><td>International Commerce + Local Services</td><td>10× EBITDA (~$3B)</td><td>~$30 Mrd.</td></tr>
+          <tr><td>Ant Group Stake (33%)</td><td>30% Discount auf $200B</td><td>~$45 Mrd.</td></tr>
+          <tr><td>Net Cash + Investments</td><td>—</td><td>~$50 Mrd.</td></tr>
+          <tr style="background:rgba(255,105,0,0.08);"><td><strong>Sum-of-the-Parts</strong></td><td>—</td><td><strong>~$620 Mrd. (~$255/Aktie)</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>SOTP-Modell impliziert deutlichen Discount zur aktuellen Marktkapitalisierung von ~$340 Mrd. Das ist die <strong>Kernlogik des bullischen Cases</strong> – aber natürlich nur Wert, wenn die einzelnen Bestandteile auch operativ liefern.</p>
+    <p><strong>Analyst-Konsens nach Q4-Earnings:</strong> Strong Buy. JP Morgan: PT $205 (Overweight); Mizuho: PT $195 (Outperform); Barclays: PT $186→195 (Overweight); Citi: PT $200 (Buy); Susquehanna: PT $170 (gesenkt von $190); Baird: PT $164 (gesenkt von $174). Average PT ~$185,86 (StockAnalysis), implied Upside +27–45% (je nach Quelle). 20 von 21 Brokern Strong Buy laut Zacks ABR 1,10.</p>
+    <p><strong>Was die Bewertung verteuern könnte:</strong> Q4 EPS-Miss bedeutet, dass NTM-EPS-Konsens nach unten korrigiert wurde, sodass das P/E FWD trotz Kursrückgangs nicht günstiger wurde. Aber: Bei Multi-Year-Recovery-Story (FCF-Rebound ab FY28) ist das aktuelle P/E nicht der relevante Ankerpunkt. Investoren bewerten den ROI auf RMB 380 Mrd. AI-Capex.</p>
+    <div class="source">Quellen: TIKR BABA Earnings (10.05.2026); StockAnalysis BABA Forecast (14.05.2026); Tipranks BABA Forecast (14.05.2026); Benzinga BABA Analyst Ratings (14.05.2026); Public.com BABA Price Targets (Apr 2026); Zacks BABA Forecast.</div>
+  </div>
+</div>
+
+<!-- SEKTION 6 -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+    <div class="section-score">Score: 6/10</div>
+  </div>
+  <div class="section-body">
+    <p>Die Kapitalqualität ist <strong>bilanztechnisch stark, aber operativ unter Druck</strong>. Das ist die zentrale Margen-Story 2026: Alibaba sacrifices kurzfristige Profitabilität bewusst zugunsten von AI/Cloud-Marktpositionierung – das ist eine bewusste strategische Entscheidung des Managements, nicht operative Schwäche.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Metric</th><th>FY 2026</th><th>FY 2025</th><th>YoY</th><th>Kommentar</th></tr></thead>
+        <tbody>
+          <tr><td>Revenue</td><td class="beat">RMB 1.020 Mrd.</td><td>RMB 996 Mrd.</td><td>+2,7%</td><td>+9% ex-Disposals</td></tr>
+          <tr><td>Net Income</td><td class="miss">RMB 106 Mrd.</td><td>RMB 130 Mrd.</td><td>–18,2%</td><td>Investment-Druck</td></tr>
+          <tr><td>Adj. EBITA Q4</td><td class="miss">RMB 5,1 Mrd.</td><td>RMB 31,8 Mrd.</td><td>–84%</td><td>Massive Q4-Investition</td></tr>
+          <tr><td>Gross Margin</td><td>~37%</td><td>~38%</td><td>–100 bps</td><td>Cloud-Mix kompensiert noch nicht</td></tr>
+          <tr><td>Operating Margin</td><td>~10%</td><td>~14%</td><td>–400 bps</td><td>Marketing-Spike</td></tr>
+          <tr><td>Net Margin</td><td>~10,4%</td><td>~13%</td><td>–260 bps</td><td>Wie Operating-Druck</td></tr>
+          <tr><td>FCF</td><td>~$15 Mrd.</td><td>~$20 Mrd.</td><td>–25%</td><td>Capex-Spike</td></tr>
+          <tr><td>Capex</td><td class="miss">~$25 Mrd.</td><td>~$10 Mrd.</td><td>+150%</td><td>AI-Infrastruktur-Build</td></tr>
+          <tr><td>Net Cash + Inv.</td><td class="beat">~$50 Mrd.</td><td>~$58 Mrd.</td><td>–14%</td><td>Bleibt sehr stark</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Strukturelle Bilanz-Stärke:</strong> ~$50 Mrd. Net Cash + Investments. ROE im Bereich ~8–10%, ROA ~5–6%. Diese Kennzahlen sehen optisch schwach aus relativ zu Apple/MSFT, sind aber für ein massiv reinvestierendes Unternehmen normal. Buybacks: Aktive Buyback-Programme laufen, $5+ Mrd. in FY26 zurückgekauft.</p>
+    <p><strong>Dividenden:</strong> BABA hat 2024 angefangen, Dividenden zu zahlen (kleine, aber strategisch wichtige Signal-Veränderung). Aktuelle Dividend Yield ~1,2% – nichts für Income Investors, aber Signal of Capital Return.</p>
+    <p><strong>Was die Margen-Story wirklich aussagt:</strong> Die –84% Q4 Adj. EBITA sind nicht „Geschäft funktioniert nicht", sondern „Management investiert aggressiv". Das ist die Microsoft-Azure-Story 2010–2015: kurzfristige Margenkompression, langfristig massive Marktdominanz. Ob das aufgeht, wird sich in FY28 zeigen – wenn dann die Cloud-Margen-Expansion sichtbar wird, ist die These bestätigt. Wenn nicht, ist das Risiko, dass die Investitionen verbrannt wurden.</p>
+    <p>Capex bleibt elevated bis Q1 FY27 (März '27) – das ist eine 12-Monats-Window, in dem FCF schwach bleiben wird. Investoren müssen geduldig sein.</p>
+    <div class="source">Quellen: Alibaba SEC 6-K Q4 FY26 (13.05.2026); Yahoo Finance BABA Earnings Call (13.05.2026); MLQ.ai Alibaba Profit Collapse (13.05.2026); MacroTrends BABA Revenue (Mai 2026); IG.com BABA Q4 Preview (12.05.2026); TIKR BABA Earnings Preview.</div>
+  </div>
+</div>
+
+<!-- SEKTION 7 -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-number">7</div>
+    <div class="section-title">Peer-Vergleich (China AI/Cloud-Wettbewerber)</div>
+    <div class="section-score">Score: 8/10</div>
+  </div>
+  <div class="section-body">
+    <p>Peer-Gruppe gemäß User-Vorgabe: Tencent (0700.HK), Baidu (BIDU), ByteDance (privat, Schätzungen), Microsoft Azure China.</p>
+    <h3>China AI-Cloud-Marktanteil (Omdia, H1 2025 / IDC bestätigt)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Player</th><th>AI-Cloud Marktanteil</th><th>LLM-Marktanteil (Daily Invocations)</th><th>Foundation Model</th><th>Bemerkung</th></tr></thead>
+        <tbody>
+          <tr style="background:rgba(34,197,94,0.06);"><td><strong>Alibaba</strong></td><td class="beat"><strong>35,8%</strong></td><td class="beat"><strong>17,7%</strong></td><td>Qwen</td><td>Klarer Marktführer beides</td></tr>
+          <tr><td>ByteDance (Volcano)</td><td>14,8%</td><td>14,1%</td><td>Doubao</td><td>Konsumer-AI-stark</td></tr>
+          <tr><td>Huawei</td><td>13,1%</td><td>~5%</td><td>Pangu</td><td>Enterprise + Government</td></tr>
+          <tr><td>Tencent</td><td>7,0%</td><td>~5%</td><td>Hunyuan</td><td>Social/Gaming-Integration</td></tr>
+          <tr><td>Baidu</td><td>6,1%</td><td>~4%</td><td>ERNIE</td><td>Search + Autonomous Driving</td></tr>
+          <tr><td>DeepSeek (priv.)</td><td>—</td><td>10,3%</td><td>DeepSeek V3</td><td>Cost-Efficient Models</td></tr>
+          <tr><td>MSFT Azure China</td><td>~3%</td><td>—</td><td>OpenAI (begrenzt)</td><td>Eingeschränkt durch Reg-Restrictions</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Finanzielle Eckdaten (FY2025 Last Reported)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Metric</th><th>BABA</th><th>Tencent</th><th>Baidu</th><th>ByteDance (est.)</th></tr></thead>
+        <tbody>
+          <tr><td>Market Cap</td><td>~$340 Mrd.</td><td>~$560 Mrd.</td><td>~$45 Mrd.</td><td>~$300 Mrd. (priv.)</td></tr>
+          <tr><td>Revenue 2025</td><td>~$137 Mrd.</td><td>~$95 Mrd.</td><td>~$19 Mrd.</td><td>~$155 Mrd. (est.)</td></tr>
+          <tr><td>Revenue Growth</td><td>+9% (ex-Disp.)</td><td>+8%</td><td>+2%</td><td>+22% (est.)</td></tr>
+          <tr><td>P/E FWD</td><td class="beat">~22x</td><td>~17x</td><td>~12x</td><td>n/a</td></tr>
+          <tr><td>EBITA Margin</td><td>~10% (Q4 stark gedrückt)</td><td class="beat">~28%</td><td>~15%</td><td>n/a</td></tr>
+          <tr><td>Cloud Growth (latest)</td><td class="beat">+38%</td><td>~+22%</td><td>~+15%</td><td>~+30%+</td></tr>
+          <tr><td>AI Investment Commitment (3J)</td><td class="beat">$52–56 Mrd.</td><td>~$25 Mrd.</td><td>~$10 Mrd.</td><td>~$30 Mrd. (est.)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Qualitative Differenzierung:</strong></p>
+    <p><strong>BABA vs. Tencent:</strong> Tencent ist profitabler (28% Operating Margin vs. 10% BABA), aber Tencents Cloud-Position ist schwächer (7% AI-Cloud vs. 35,8% BABA). Tencent dominiert Social/Gaming, BABA dominiert E-Commerce + Enterprise Cloud. Wertvoller: <em>Bewertungs-Perspektive</em>. Tencent P/E 17x bei +8% Growth und 28% Margins ist ähnlich attraktiv wie BABA P/E 22x bei +9% Growth und 10% Margins (mit klarer Recovery-Optionalität).</p>
+    <p><strong>BABA vs. Baidu:</strong> Baidu ist deutlich kleiner und verliert Marktanteil im AI-Bot-Bereich (Bloomberg: „Ernie progressively loses market share to DeepSeek"). Baidu Cloud nur 6,1% AI-Marktanteil. P/E 12x reflektiert Wachstumsstagnation. Nicht direkter Wettbewerber im Sinne der Größenordnung.</p>
+    <p><strong>BABA vs. ByteDance:</strong> ByteDance (Doubao) ist der ernsteste Wettbewerber im Konsumer-AI-Bereich und Volcano Engine (Cloud) wächst aggressiv. Aber ByteDance ist private – kann nicht öffentlich gehandelt werden. ByteDance schätzt ~$155 Mrd. Revenue 2025 (TikTok + Douyin + Volcano). Cloud-Wettbewerb intensiv, aber BABAs Lead von 35,8% vs. 14,8% ist substantiell.</p>
+    <p><strong>BABA vs. MSFT Azure China:</strong> Effektiv nicht direkt vergleichbar – Azure China unterliegt regulatorischen Beschränkungen (operiert via 21Vianet als JV-Partner). MSFTs Azure-Position in China bleibt klein im Vergleich zu BABA. Azure global ist natürlich riesig – aber das ist nicht das relevante Vergleichs-Universum für BABAs China-Cloud-Marktposition.</p>
+    <p><strong>Strategisches Resümee:</strong> Alibaba ist <strong>der eindeutige Marktführer im chinesischen AI-Cloud-Markt</strong>, mit Tencent als zweitgrößter listed Konkurrent (aber unterlegen in Cloud). ByteDance ist Wettbewerb, aber private. Baidu hat strukturell Marktanteile verloren. Position ist stark.</p>
+    <div class="source">Quellen: SCMP Alibaba AI Cloud Lead (10.09.2025); kr-asia China AI Cloud Race (27.01.2026); Bloomberg Tencent Alibaba AI (Juni 2025); Yahoo Finance Peer Pages BABA/0700/BIDU (Mai 2026); Phemex BABA 2026 (März 2026); Build AIQ China AI Ecosystem (Apr 2026).</div>
+  </div>
+</div>
+
+<!-- SEKTION 8 -->
+<div class="section" id="s8">
+  <div class="section-header">
+    <div class="section-number">8</div>
+    <div class="section-title">News &amp; Events (Februar–Mai 2026)</div>
+    <div class="section-note">3-Monats-Fenster</div>
+  </div>
+  <div class="section-body">
+
+    <h3>Ebene 1: Unternehmen</h3>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">13.05.2026 – Q4 FY26 Earnings: Cloud +38%, AI Triple-Digit <span class="badge badge-green">Mixed-Positiv</span></div>
+        <div class="event-text">Revenue $35,3 Mrd. (+3%, leicht unter Konsens), EPS Miss –31%, aber Cloud-Story bestätigt. Cloud Intelligence Group RMB 41,6 Mrd. (+38%), AI-Anteil 30%. Aktie +8% trotz Headline-Miss – Markt akzeptiert Investment-Story. Quellen: SEC 6-K (13.05.2026); TipRanks BABA Earnings.</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">13.05.2026 – Erweiterung des AI-Investment-Commitment über RMB 380 Mrd. hinaus <span class="badge badge-green">Sehr positiv</span></div>
+        <div class="event-text">Alibaba kündigte an, das ursprünglich für 3 Jahre geplante RMB 380 Mrd. ($52–56 Mrd.) AI/Cloud-Investment zu überschreiten. Klares Signal: Management ist bereit, mehr zu investieren, um Marktposition zu zementieren. Quelle: Investing.com BABA Surge (13.05.2026).</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">Februar 2026 – Qwen-App Lunar New Year Promo: $431 Mio. Marketing-Push <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">3× Tencent-Spending und 6× Baidu-Spending. Aggressive Konsumer-AI-Push, um Qwen-Mindshare gegen Doubao/DeepSeek zu sichern. Quelle: Phemex BABA 2026 (März 2026).</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">Februar 2026 – Qwen-Major-Upgrade für Agents + Multimodal <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Neue Generation Qwen-Modelle für Agent-Tasks und Multimodal Understanding. Strategisches Positioning für nächste Phase Enterprise-AI-Wettbewerb. Quelle: Phemex BABA 2026 (März 2026).</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-red"></div>
+      <div>
+        <div class="event-label">Mai 2026 – Chip-Smuggling-Probe involves Alibaba als End Customer <span class="badge badge-red">Negativ (Reg-Risk)</span></div>
+        <div class="event-text">US-Staatsanwälte verdächtigen thailändisches AI-Unternehmen, Nvidia-Chips an China geschmuggelt zu haben – Alibaba wird unter Endkunden genannt. Reputational + möglicher Reg-Risk. Quelle: TIKR BABA Earnings Preview (10.05.2026).</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">März/April 2026 – Quick Commerce (Taocaicai) integriert in Taobao <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">+20% Daily Active Users durch Quick-Commerce-Integration. Operative Verluste narrowen sich. Pfad zu Profitabilität FY29 geplant. Quelle: Public.com BABA Forecast (Apr 2026).</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">14.05.2026 – JP Morgan PT $205, Mizuho $195, Citi $200 <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Mehrere große Häuser hoben Kursziele nach Q4-Earnings an. JP Morgan: $205 (von $200). Mizuho: $195 (von $190). Konsens-PT $185–205. Susquehanna senkte allerdings auf $170 (von $190), Baird auf $164 (von $174) – Streuung der Meinungen. Quellen: TipRanks BABA Forecast (14.05.2026); Benzinga.</div>
+      </div>
+    </div>
+
+    <h3>Ebene 2: Branche</h3>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">2026 – AI-Spending-War in China intensiviert <span class="badge badge-green">Mixed</span></div>
+        <div class="event-text">Alibaba, Tencent, ByteDance, Baidu und Huawei investieren alle aggressiv in AI/Cloud. Beste Position für Alibaba mit klarem Lead (35,8% AI-Cloud-Marktanteil). Aber Wettbewerb erhöht Investment-Burden. Quelle: Phemex BABA 2026 (März 2026); SCMP Sep 2025.</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-red"></div>
+      <div>
+        <div class="event-label">2026 – PDD/Temu, Douyin, JD.com Wettbewerb im E-Commerce <span class="badge badge-red">Negativ</span></div>
+        <div class="event-text">PDD/Temu mit aggressivem Pricing, Douyin mit Social Commerce, JD mit Logistik-Differenzierung – BABAs China Commerce stagniert. Quick Commerce ist die strategische Antwort, aber kostet Margen. Quelle: AskTraders BABA Q4 Preview (10.05.2026).</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">2026 – T-Head ASIC-Integration vs. Tencent Self-Developed Chips <span class="badge badge-yellow">Neutral</span></div>
+        <div class="event-text">Alibaba und Tencent signalisieren beide proprietäre AI-Chip-Verfügbarkeit. Reduziert Nvidia-Abhängigkeit, aber Tencent holt im Chip-Stack auf. Quelle: StockAnalysis BABA News (Mai 2026).</div>
+      </div>
+    </div>
+
+    <h3>Ebene 3: Makro</h3>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">13.05.2026 – Trump-Xi Meeting in Beijing <span class="badge badge-yellow">Mixed</span></div>
+        <div class="event-text">Tagleich mit BABA Q4-Earnings. Marktstimmung positiv für China-Tech, aber „much of the optimism was already built into prices". Geopolitisches Risiko bleibt latent. Quelle: StockAnalysis BABA News-Stream (Mai 2026).</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-yellow"></div>
+      <div>
+        <div class="event-label">2025/26 – Chinesische Konsumzurückhaltung anhaltend <span class="badge badge-yellow">Mixed</span></div>
+        <div class="event-text">„Stubbornly soft domestic consumption backdrop" belastet China Commerce. Politische Stimulus-Programme bisher zurückhaltend. Quelle: AskTraders BABA Q4 (10.05.2026).</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-red"></div>
+      <div>
+        <div class="event-label">2025/26 – US-Nvidia-Export-Kontrollen für China-Tech <span class="badge badge-red">Negativ</span></div>
+        <div class="event-text">US-Restriktionen für H100/H200 Chips an chinesische Hyperscaler belasten Cloud-Capex-Effizienz. BABA reagiert mit T-Head-ASIC-Strategie. Strukturelles Risiko, das aber 2026 nicht eskaliert ist. Quelle: TIKR BABA Earnings Preview (10.05.2026).</div>
+      </div>
+    </div>
+    <div class="event-item">
+      <div class="event-dot dot-green"></div>
+      <div>
+        <div class="event-label">2026 – Dividende + Buybacks <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">BABA hat seine Dividende und Buyback-Programme nach Q4-Earnings als „generous dividend surprise" angekündigt. Total $5+ Mrd. Buybacks in FY26. Signal für Capital Return-Disziplin. Quelle: Investing.com BABA Surge (13.05.2026).</div>
+      </div>
+    </div>
+    <div class="source">Quellen-Synthese: Alibaba IR + SEC Filings (13.05.2026); Investing.com, TipRanks, TIKR, AskTraders, Phemex, MLQ.ai, Public.com, Tickeron, StockAnalysis (Feb–Mai 2026); SCMP, Bloomberg, IG.com.</div>
+  </div>
+</div>
+
+<!-- SEKTION 9 -->
+<div class="section" id="s9">
+  <div class="section-header">
+    <div class="section-number">9</div>
+    <div class="section-title">Technische Analyse</div>
+    <div class="section-score">Score: 5/10</div>
+  </div>
+  <div class="section-body">
+    <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));">
+      <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">$141,12</div><div class="kpi-sub">14.05.2026</div></div>
+      <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value">~$140</div><div class="kpi-sub">knapp darüber</div></div>
+      <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value red">~$148</div><div class="kpi-sub">darunter</div></div>
+      <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value">~$145</div><div class="kpi-sub">knapp darunter</div></div>
+      <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value orange">~50</div><div class="kpi-sub">Neutral</div></div>
+      <div class="kpi-card"><div class="kpi-label">52W High</div><div class="kpi-value">$192,67</div><div class="kpi-sub">–27% darunter</div></div>
+      <div class="kpi-card"><div class="kpi-label">52W Low</div><div class="kpi-value">~$95</div><div class="kpi-sub">+48% darüber</div></div>
+    </div>
+    <p><strong>Trend-Einordnung:</strong> Volatil, technisch ambivalent. Aktie ist <strong>seit Februar 2026 von 52W-Hoch $192,67 um –27% gefallen</strong>, hat aber im April/Mai eine Konsolidierung um $135–150 etabliert. Die Q4-Earnings-Reaktion (+8% am 13.05.) wurde am 14.05. teilweise wieder abgegeben (–3,2%). Kurs liegt knapp unter SMA 50 ($148) und SMA 200 ($145), aber über SMA 20 ($140) – das ist eine <strong>Konsolidierungs-Range</strong>, keine klare Trendrichtung.</p>
+    <p><strong>Wichtige Levels:</strong> Support: <strong>$135</strong> (kurzfristig, 14.05. Overnight-Tief), darunter <strong>$120</strong> (technisches Support-Level aus Februar). Widerstand: <strong>$150</strong> (SMA 50), <strong>$160</strong> (Februar-Resistance), 52W-High $192,67.</p>
+    <p><strong>Saisonale Kontext:</strong> BABA hatte 2025 ein starkes Jahr (+72% YTD), 2026 YTD aber durchwachsen (~–6% YTD). Wieso? Das Bewertungs-Repricing nach Q3-Miss (Mar 2026, –7%) hat Momentum gebrochen. Der Q4-Beat (+8%) ist die erste echte positive Tagesreaktion seit Februar.</p>
+    <p><strong>Ehrliche technische Bewertung:</strong> Range-bound bei $130–150. Kein klarer Trend up oder down. RSI 50 = Neutral. Für eine technische Bestätigung der Aufwärtswende müsste $160 mit Volumen gebrochen werden. Bis dahin ist BABA technisch <strong>Trading-Range</strong>, fundamental aber mit asymmetrischer Upside (siehe Sektion 5).</p>
+    <div class="source">Quellen: Yahoo Finance BABA Analyst Estimates (14.05.2026); CNN Markets BABA Quote (14.05.2026); StockAnalysis BABA Overview (Mai 2026); TIKR BABA Analysis (10.05.2026).</div>
+  </div>
+</div>
+
+<!-- SEKTION 10 -->
+<div class="section" id="s10">
+  <div class="section-header">
+    <div class="section-number">10</div>
+    <div class="section-title">Risiken &amp; Chancen</div>
+    <div class="section-score">Risk-Score: 6/10 (invertiert)</div>
+  </div>
+  <div class="section-body">
+    <h3>Strukturelle Risiken</h3>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">⚡ Cloud-Wachstum muss Triple-Digit-AI-Story bestätigen</div>
+        <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+      </div>
+      <div class="event-text">Cloud-Wachstum hat sich beschleunigt (18→26→34→38%). Wenn das nächste Quartal nicht ≥40% liefert oder AI-Anteil nicht weiter Richtung 50% wandert, würde das Re-Rating-Story sofort in Frage gestellt. Wahrscheinlichkeit Cloud-Deceleration in den nächsten 2 Quartalen: ~25%.</div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">🛒 E-Commerce-Marktanteil-Erosion (PDD, Temu, Douyin)</div>
+        <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel-Hoch</span></div>
+      </div>
+      <div class="event-text">PDD/Temu mit aggressivem Pricing, Douyin Social Commerce. China Commerce stagniert. Quick Commerce ist die Antwort, aber unprofitabel bis FY29 geplant. Belastet Margen weiter 2–3 Jahre. Wahrscheinlichkeit anhaltender Marktanteilsverluste: ~60%.</div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">🇺🇸 US-Chip-Export-Kontrollen + Geopolitik</div>
+        <div><span class="badge badge-yellow">Mittel-Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+      </div>
+      <div class="event-text">Nvidia H100/H200/B100 Chips für chinesische Hyperscaler eingeschränkt. BABAs AI-Infrastruktur-Build ist durch begrenzte Chip-Availability langsamer als bei US-Hyperscalern. Plus: Trump-Administration könnte VIE-Struktur/ADR-Listing weiter unter Druck setzen. Chip-Smuggling-Probe (Mai 2026) ist Frühwarnsignal.</div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">📉 Profitabilitäts-Recovery-Timing</div>
+        <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+      </div>
+      <div class="event-text">EBITA wird voraussichtlich bis Ende FY27 (März '27) gedrückt bleiben. Wenn Capex elevated und Quick-Commerce-Verluste anhalten, könnte Net Income FY27 weiter sinken. Erst FY28 wird Recovery erwartet. 24-Monate-Geduld erforderlich.</div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-header">
+        <div class="risk-title">🏛️ Chinesisches Regulierungsrisiko (Ant-Group-Echo)</div>
+        <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+      </div>
+      <div class="event-text">Ant-Group-Krise 2020/21 weitgehend ausgestanden. Aber Chinas Regulierung kann jederzeit zurückkommen – Anti-Trust, Data-Privacy, Fintech-Restrictions. Wahrscheinlichkeit gravierender Eingriffe 2026/27: ~10–15%.</div>
+    </div>
+
+    <h3>AI-Risiko &amp; technologische Disruption</h3>
+    <p>Alibaba ist <strong>direkt im Zentrum der AI-Story</strong> – das Risiko ist nicht Disruption, sondern Wettbewerbsverlust gegen ByteDance/Tencent/DeepSeek. Bullish: Qwen ist führend, 600 Mio. Downloads, 100k derivative Modelle, 35,8% AI-Cloud-Marktanteil. Bärisch: Wenn DeepSeek (private) oder Doubao schnellere/billigere Modelle liefert, könnte Qwen-Lead schmelzen. Aktuell: Alibaba führt klar, aber Wettbewerb intensiv.</p>
+
+    <h3>Chancen</h3>
+    <p>(1) <strong>$100B AI-Revenue-Vision:</strong> CEO Eddie Wus spezifisches Ziel impliziert 4x Skalierung der AI-Revenue in 3–4 Jahren. (2) <strong>T-Head Chip-Integration:</strong> Reduziert Margin-Kosten in Cloud-Inferenz, kann Margen strukturell heben. (3) <strong>Cloud-Marktdominanz China:</strong> 35,8% Anteil mit weiter beschleunigendem Wachstum. (4) <strong>SOTP-Discount:</strong> Implizit ~40% Discount zu Sum-of-the-Parts. (5) <strong>Dividende + Buybacks:</strong> Erste Anzeichen Capital-Return-Disziplin. (6) <strong>Ant-Group-Recovery:</strong> 33% Stake in Ant ist nominal ~$45 Mrd. wert mit Wiederbelebungspotenzial.</p>
+
+    <h3>Red Flags &amp; Dealbreaker</h3>
+    <p><strong>Red Flags:</strong> EBITA –84% Q4, Capex +150%, FCF –25%, China Commerce-Stagnation, US-Chip-Probe involves BABA als End Customer, anhaltender E-Commerce-Marktanteilsverlust. <strong>Kein Dealbreaker</strong> – die Bilanz ist stark genug ($50 Mrd. Net Cash), die Cloud-Story operativ bestätigt, das Management klar in seiner Strategie. Aber: Wer die nächsten 24 Monate keine Profitabilitäts-Recovery sehen kann (mental), sollte nicht investieren.</p>
+    <div class="source">Quellen-Synthese aus Sektionen 1–8. Probability-Schätzungen basieren auf Analyst-Konsens und industrieller Benchmarks.</div>
+  </div>
+</div>
+
+<!-- SEKTION 11 -->
+<div class="section" id="s11">
+  <div class="section-header">
+    <div class="section-number">11</div>
+    <div class="section-title">Scoring (Erstanalyse Mai 2026)</div>
+    <div class="section-score">⌀ Score: 6,9/10</div>
+  </div>
+  <div class="section-body">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Kategorie</th><th>Score</th><th>Bar</th><th>Δ</th><th>Begründung</th></tr></thead>
+        <tbody>
+          <tr><td>Geschäftsmodell</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>—</td><td>Multi-Engine: AI/Cloud Hyper-Growth + E-Commerce Cash-Generator.</td></tr>
+          <tr><td>Burggraben</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>—</td><td>35,8% AI-Cloud-Lead, Qwen-Ökosystem, T-Head Chip-Stack.</td></tr>
+          <tr><td>Operative Entwicklung (4Q)</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>—</td><td>Q3+Q4 EPS-Miss –31%+, Beat-Ratio nur 2/4. EBITA –84% Q4.</td></tr>
+          <tr><td>Wachstum</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>—</td><td>Cloud +38% accelerating; E-Commerce stagnierend; AI-Revenue Triple-Digit.</td></tr>
+          <tr><td>Bewertung</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>—</td><td>P/E FWD 22x, EV/EBITDA 13,7x; SOTP impliziert ~$255/Aktie.</td></tr>
+          <tr><td>Cashflow</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>—</td><td>$50B Net Cash stark; aber FCF –25% durch Capex-Spike.</td></tr>
+          <tr><td>Peer-Vergleich</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>—</td><td>Klarer Marktführer AI-Cloud vs. Tencent/ByteDance/Baidu/Huawei.</td></tr>
+          <tr><td>Technische Analyse</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>—</td><td>Range-bound $130–150, neutral RSI, kein klarer Trend.</td></tr>
+          <tr><td>Risiken (invertiert)</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>—</td><td>Geopolitik, Chip-Export, E-Commerce-Druck, Profit-Timing.</td></tr>
+          <tr style="background:rgba(255,105,0,0.08);"><td><strong>⌀ Gesamtscore</strong></td><td><strong>6,9/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:69%;background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">6,9</span></div></td><td><strong>Neuanlage Mai 2026</strong></td><td>Starkes Cloud/AI-Profil, operative Schwäche temporär.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="source">Quellen-Synthese aus Sektionen 1–10. Scoring-Logik: 10 = best-in-class; 5 = durchschnittlich; 1 = ungenügend.</div>
+  </div>
+</div>
+
+<!-- SEKTION 12 -->
+<div class="section" id="s12">
+  <div class="section-header">
+    <div class="section-number">12</div>
+    <div class="section-title">Fazit &amp; Investment-These</div>
+  </div>
+  <div class="section-body">
+
+    <div class="bull-bear-grid">
+      <div class="bull-card">
+        <h4>🐂 Das Bullische Narrativ</h4>
+        <p><strong>Säule 1: Klare Marktführerschaft in Chinas AI-Cloud-Markt.</strong> 35,8% AI-Cloud-Marktanteil vs. 14,8% bei ByteDance (Zweiter), Qwen mit 600 Mio. globalen Downloads das meistgenutzte Open-Source-LLM weltweit. Cloud-Wachstum beschleunigt sich (18→26→34→38% in den letzten 4 Quartalen), AI-Anteil von ~10% auf 30% in 12 Monaten gewachsen, Ziel &gt;50% in 12 weiteren Monaten. Das ist nicht „Story-Wachstum", das sind reale, von Hyperscaler-Demand getriebene Run-Rate-Zahlen.</p>
+        <p><strong>Säule 2: Massiv unterbewertet auf SOTP-Basis.</strong> Sum-of-the-Parts: Cloud bei 15× Revenue ($25B Run-Rate) → $375 Mrd. + E-Commerce/Cainiao bei 8× EBITDA → $120 Mrd. + International + Local Services + Ant-Stake + Net Cash → ~$620 Mrd. Implizit ~$255/Aktie. Aktueller Kurs $141 = ~45% Discount. Selbst bei vorsichtiger Bewertung (Cloud 10× Sales) wären ~$200/Aktie fair. JP Morgan PT $205, Mizuho $195, Citi $200 spiegeln das wider.</p>
+        <p><strong>Säule 3: Klar definierte Investment-Strategie + Capital Return.</strong> CEO Eddie Wu hat eine spezifische $100B AI-Revenue-Vision genannt. Management investiert $52–56 Mrd. über 3 Jahre, plus Erweiterung. T-Head Chip-Integration als strukturelle Margin-Hebel. Gleichzeitig: Dividende +$5B Buybacks in FY26 = Capital-Return-Disziplin. Quick Commerce mit klarem Pfad zu Profitabilität FY29.</p>
+      </div>
+      <div class="bear-card">
+        <h4>🐻 Das Bärische Narrativ</h4>
+        <p><strong>Risiko 1: Earnings-Recovery erst FY28.</strong> Adj. EBITA –84% in Q4 FY26 ist nicht „Einmal-Effekt", sondern Anfang eines 6–8 Quartale Investment-Cycle. Capex +150% YoY. FCF –25%. Wer in BABA investiert, kauft eine Geschichte, die operativ erst FY28 sichtbar wird – das sind 24 Monate Geduld. In dieser Zeit kann viel passieren: Wettbewerb, Geopolitik, China-Macro. Plus: Sub-Konsens-Häuser Susquehanna/Baird senkten PTs auf $164–170 wegen genau dieser Sorge.</p>
+        <p><strong>Risiko 2: E-Commerce-Erosion ist strukturell.</strong> PDD/Temu hat Chinas E-Commerce-Markt dauerhaft verändert. Quick-Commerce-Investitionen sind eine Defense-Operation gegen Douyin/PDD, nicht eine offensive Wachstumsstory. China Commerce GMV-Wachstum praktisch null. Wenn Quick Commerce nicht bis FY29 profitabel wird, sind RMB 80–100 Mrd. kumulative Verluste verbrannt. Das ist real downside scenario.</p>
+        <p><strong>Risiko 3: Geopolitik + Chip-Restrictions.</strong> US-Nvidia-Export-Kontrollen verlangsamen AI-Capex-Effizienz. T-Head ist Insurance, aber 12–24 Monate hinter Nvidia. Plus: Chip-Smuggling-Probe (Mai 2026) involves Alibaba als End Customer. Trump-Administration könnte VIE-Struktur/ADR-Listing weiter unter Druck setzen. „Geopolitical overhang has erased billions in market cap without warning twice already this year" (TIKR-Zitat). Technisch: Aktie range-bound, kein klarer Aufwärtstrend, Volatilität hoch.</p>
+      </div>
+    </div>
+
+    <h3>Eigene Einschätzung</h3>
+    <p>Das <strong>bullische Narrativ ist überzeugender</strong> – mit klaren ehrlichen Vorbehalten. Die Cloud/AI-Marktführerschaft (35,8% Marktanteil, +38% Wachstum, AI-Anteil 30%→50%) ist nicht Hype, sondern operativ belegt. Die Bewertung (P/E FWD 22x, SOTP-impliziert $200+) ist günstig relativ zur Wachstumsdynamik. Capital-Return + AI-Investment-Disziplin signalisiert reifes Management.</p>
+    <p>Die bärischen Punkte sind real, aber temporär. EBITA-Druck ist <strong>bewusste Investitionsentscheidung</strong>, nicht Geschäftsproblem – Microsoft Azure 2010–2015 hatte vergleichbares Profil. E-Commerce-Erosion ist real, aber Quick-Commerce-Antwort ist methodisch. Geopolitik bleibt latentes Risiko, aber kein „Trigger zum Verkaufen", solange keine konkrete Eskalation eintritt.</p>
+    <p>Risk/Reward: <strong>–20% Downside</strong> (Support $115–120 bei Q1 FY27 Miss + China-Macro-Schwäche) <strong>vs. +35–45% Upside</strong> in 12–18 Monaten (Konsens-PT $186–205, JP Morgan $205). Asymmetrie ist positiv.</p>
+    <p><strong>Wichtige Demut:</strong> Ich könnte falsch liegen, wenn (a) Cloud-Wachstum schneller deceleriert als angenommen, (b) E-Commerce-Marktanteil weiter sinkt unter 40%, (c) chinesische Regulierung zurückkehrt, oder (d) Trump-Administration konkrete BABA-spezifische Restrictions verhängt. Bei einer dieser Bedingungen ist die These zu re-evaluieren.</p>
+
+    <h3>Zeithorizont-Einschätzung</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+        <tbody>
+          <tr><td><strong>0–6 Monate</strong></td><td>Q1 FY27 Earnings (Aug '26), Trump-Xi-Konkretisierung</td><td>Profit-Erholung verzögert, Geopolitik-Eskalation</td><td><span class="badge badge-orange">Tranchiert aufbauen</span></td></tr>
+          <tr><td><strong>6–24 Monate</strong></td><td>AI-Revenue &gt;50% Cloud, T-Head Integration, $100B AI-Vision</td><td>Wettbewerb (ByteDance/DeepSeek), Capex-Inflation</td><td><span class="badge badge-green">Kaufen</span></td></tr>
+          <tr><td><strong>2–5 Jahre</strong></td><td>FY28 Profit-Recovery, $100B AI-Run-Rate, Quick Commerce Profit</td><td>China Decoupling, ADR-Listing-Risk</td><td><span class="badge badge-green">Halten/Akkumulieren</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Kernthese</h3>
+    <p>Alibaba ist der <strong>klare Marktführer in Chinas $7+ Mrd. AI-Cloud-Markt</strong> mit dem global meistgenutzten Open-Source-LLM (Qwen, 600 Mio. Downloads), 35,8% AI-Cloud-Marktanteil und beschleunigendem Cloud-Wachstum (+38% in Q4 FY26). Die Bewertung von P/E FWD 22x und EV/EBITDA 13,7x ist günstig vs. SOTP von ~$255/Aktie. Operative Schwäche (EBITA –84% Q4) ist bewusste Investitionsentscheidung, kein Geschäftsproblem. Risk/Reward 1:2 positiv asymmetrisch. Hauptrisiken: Profit-Timing (FY28), E-Commerce-Erosion, Geopolitik.</p>
+
+    <div class="rating-box">
+      <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+      <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$185–210</div></div>
+      <div class="rating-item"><label>Zeithorizont</label><div class="val">18–36 Monate</div></div>
+      <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–20%</div></div>
+      <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+35–50%</div></div>
+      <div class="rating-item"><label>Risk/Reward</label><div class="val buy">1:2,0</div></div>
+    </div>
+
+    <div class="trigger-grid">
+      <div class="trigger-card sell">
+        <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+        <ul class="trigger-list">
+          <li>Cloud-Wachstum in Q1 FY27 (Aug '26) &lt;35% → Story-Verlangsamung, Position reduzieren um 30%</li>
+          <li>Kurs unter $115 (technischer Support-Bruch) mit fundamentaler Bestätigung → Stop-Loss-Logik</li>
+          <li>Konkrete US-Regulatorische BABA-spezifische Maßnahme (z.B. ADR-Delisting-Eskalation) → Position auf strategische Größe reduzieren</li>
+          <li>EBITA-Margin Q1 FY27 weiter unter 5% ohne klare Recovery-Indikatoren → kritisch evaluieren</li>
+        </ul>
+      </div>
+      <div class="trigger-card buy">
+        <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+        <ul class="trigger-list">
+          <li>Cloud-Wachstum Q1 FY27 ≥42% mit AI-Anteil &gt;35% → Acceleration bestätigt, aggressiv kaufen</li>
+          <li>Konkrete Trump-Xi-Deal mit Chip-Lockerung oder ADR-Listing-Stabilisierung → Position aufbauen</li>
+          <li>EBITA-Recovery früher als erwartet (FY27 H2 statt FY28) → re-rate zu $220+</li>
+          <li>Pullback auf $125–130 ohne fundamentale Verschlechterung → antizyklisch nachkaufen</li>
+          <li>T-Head Chip-Integration mit messbarem Margin-Hebel (in Q2 FY27 Call sichtbar) → strukturelles Re-Rating</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="investor-grid">
+      <div class="investor-yes">
+        <h5>✅ Geeignet für</h5>
+        <ul>
+          <li>Growth Investors mit 2–4 Jahre Horizont</li>
+          <li>China-AI/Cloud-Exposure-Sucher</li>
+          <li>Contrarian Investors (Sentiment nach Q3/Q4-Misses gedrückt)</li>
+          <li>SOTP-Value-Investoren (Discount zu Sum-of-Parts)</li>
+        </ul>
+      </div>
+      <div class="investor-no">
+        <h5>❌ NICHT geeignet für</h5>
+        <ul>
+          <li>Income Investors (Dividende nur ~1,2%)</li>
+          <li>Kurzfristige Trader (Range-bound, volatile)</li>
+          <li>Anleger ohne China-Geopolitik-Toleranz</li>
+          <li>Profit-fokussierte Value-Investoren (24M Geduld erforderlich)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten</span></td><td>Auf Q1 FY27 (Aug '26) Earnings + Cloud-Bestätigung warten</td></tr>
+          <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert</span></td><td>40% jetzt, 30% nach Q1 FY27, 30% bei Konsolidierung</td></tr>
+          <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Kaufen</span></td><td>Risk/Reward 1:2,0, Cloud-Story bestätigt, SOTP-Discount</td></tr>
+          <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>China-AI-Champion mit klarer 3–5 Jahre Story</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="source">Quellen-Synthese aus Sektionen 1–11. Risk/Reward auf Basis Konsens-PT Median ~$186 (Reuters/Bloomberg-Konsens, 14.05.2026).</div>
+  </div>
+</div>
+
+<!-- SEKTION 13 -->
+<div class="section" id="s13">
+  <div class="section-header">
+    <div class="section-number">13</div>
+    <div class="section-title">Outlook – Die 3 wichtigsten anstehenden Events</div>
+  </div>
+  <div class="section-body">
+
+    <div class="outlook-card">
+      <h4>📊 Event 1: Q1 FY27 Earnings (Juni-Quartal) – August 2026</h4>
+      <p>Erste Earnings nach Q4 FY26-Miss und 2 Monate nach Investment-Erweiterungs-Ankündigung. Markt wird besonders auf <strong>(a) Cloud-Wachstum: Hält sich +38% oder beschleunigt auf +40–45%?, (b) AI-Anteil an externer Cloud-Revenue: Auf dem Pfad zu &gt;50% in 12 Monaten?, (c) EBITA-Trajectory: Erste Anzeichen Stabilisierung oder weiterer Druck?</strong> achten. Konsens für Cloud-Wachstum Q1 FY27 voraussichtlich +40%, EPS bei ~$1,20.</p>
+      <div class="when-then">
+        <strong>Wenn:</strong> Cloud-Wachstum ≥42% mit AI-Anteil ≥35% UND EBITA-Margin verbessert sich um ≥200 bps QoQ → strukturelle Bestätigung, Re-Rating-Argument. → <em>Position aufbauen, Kursziel-Aufstockung auf $210–230.</em><br><br>
+        <strong>Wenn:</strong> Cloud-Wachstum &lt;35% ODER AI-Anteil stagniert bei 30% UND EBITA weiter unter Druck → Wachstumsstory in Zweifel. → <em>Position auf strategische Größe reduzieren, Stop-Loss-Logik bei $115.</em>
+      </div>
+    </div>
+
+    <div class="outlook-card">
+      <h4>📊 Event 2: Trump-Xi US-China-Tech-Verhandlungen – H2 2026</h4>
+      <p>Nach dem Trump-Xi-Treffen in Beijing am 13.05.2026 sind konkrete Verhandlungen zu Chip-Exporten, ADR-Listings und Tech-Decoupling in den nächsten 6–12 Monaten zu erwarten. Materielle Auswirkung auf BABA: (a) Nvidia-Chip-Verfügbarkeit für AI-Infrastruktur, (b) ADR-Listing-Sicherheit, (c) mögliche zusätzliche Sanctions/Restrictions auf chinesische Tech-Giganten.</p>
+      <div class="when-then">
+        <strong>Wenn:</strong> Konstruktiver Deal mit Chip-Export-Lockerung ODER ADR-Listing-Stabilisierung → China-Tech-Sentiment-Verbesserung, BABA spezifisch +15–20% Re-Rating. → <em>Position aufbauen, Kursziel hochsetzen auf $230+.</em><br><br>
+        <strong>Wenn:</strong> Eskalation mit zusätzlichen BABA-spezifischen Restrictions ODER ADR-Delisting-Druck → Multi-Risiko aktiviert. → <em>Position deutlich reduzieren, Re-Evaluation der gesamten These; Stop-Loss bei $100.</em>
+      </div>
+    </div>
+
+    <div class="outlook-card">
+      <h4>📊 Event 3: AI-Anteil-Übergang 50% in Cloud-Revenue – ca. Q3 FY27 (Dez '26)</h4>
+      <p>CEO Eddie Wu hat in Q4 FY26 explizit gesagt, dass AI-Anteil an externer Cloud-Revenue in ca. 12 Monaten die 50%-Schwelle überschreitet. Das ist ein <strong>messbares, datierbares Milestone</strong>, das den Markt mit AI-Pure-Play-Investoren neu anspricht. Wenn das in Q3 FY27 (Dezember '26 reported in Februar '27) bestätigt wird, ist das ein klarer Re-Rating-Trigger.</p>
+      <div class="when-then">
+        <strong>Wenn:</strong> AI-Anteil an externer Cloud erreicht ≥50% Q3 FY27 ODER früher mit Triple-Digit-Wachstum bestätigt → BABA wird als Pure-AI-Play neu bewertet. → <em>Re-Rating auf P/E FWD 25–28× (vs. aktuell 22x), Kursziel $230–280.</em><br><br>
+        <strong>Wenn:</strong> AI-Anteil stagniert bei 30–35% durch Q3 FY27 → Cloud-Wachstum verlangsamt sich entweder oder ist überdurchschnittlich Non-AI-getrieben. → <em>Position überprüfen; Cloud-Story muss neu kalibriert werden.</em>
+      </div>
+    </div>
+
+    <div class="source">Quellen-Synthese: Alibaba Q4 FY26 Earnings Call (13.05.2026); Investor-Konsens-Daten Mai 2026; Trump-Xi-Meeting-Berichte; CEO Eddie Wu Statements.</div>
+  </div>
+</div>
+
+<div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken. Sie stellt keine Anlageberatung oder Aufforderung zum Kauf/Verkauf eines Wertpapiers dar. Die enthaltenen Informationen wurden mit Sorgfalt aus öffentlichen Quellen recherchiert, eine Garantie für Vollständigkeit oder Richtigkeit kann jedoch nicht übernommen werden. Investitionsentscheidungen sollten auf eigener Recherche, individueller Risikotragfähigkeit und ggf. unabhängiger Beratung basieren. Vergangene Kursentwicklungen sind kein Indikator für zukünftige Ergebnisse. Stand: 15.05.2026.</div>
+
+</div>
+</body>
+</html>
