@@ -3,33 +3,35 @@ name: analyse-deploy
 description: >
   Verwende diesen Skill IMMER wenn eine fertige Aktienanalyse (neue Analyse ODER Update)
   nach GitHub/Vercel deployed werden soll und das Kerndaten-JSON für die Portfolio-App
-  ausgegeben werden soll. Trigger-Phrasen: "deploy die Analyse", "pushe die Analyse",
-  "publish die Analyse", "Analyse deployen", "Kerndaten-JSON ausgeben",
-  "nach GitHub pushen", oder am Ende jedes Analyse-Workflows nach Sektion 13.
-  WICHTIG: Immer automatisch pushen — nie auf Bestätigung warten, nie nur Download anbieten.
+  ausgegeben werden soll. WICHTIG: Immer automatisch pushen — nie auf Bestätigung warten.
 ---
 
 # Analyse-Deploy Skill
 
-Dieser Skill deckt den vollständigen Publikations-Workflow ab:
-GitHub-Push → Vercel-Auto-Deploy → Kerndaten-JSON für Portfolio-App.
+## KRITISCHE DATENTYP-REGELN (ZWINGEND EINHALTEN)
 
-**GRUNDREGEL: Immer automatisch pushen. Nie fragen, nie nur Download anbieten.**
+Alle Felder im Kerndaten-JSON MÜSSEN korrekte Datentypen haben:
+
+| Feld | Typ | Korrekt | Falsch |
+|---|---|---|---|
+| `price` | String | `"~$166"` | `166` |
+| `currentPrice` | String | `"166.50"` | `166.50` |
+| `upside` | String | `"+35–50%"` | `35` |
+| `downside` | String | `"-15%"` | `-15` |
+| `rr` | String | `"1:2.5"` | `2.5` |
+| `w52` | String | `"$103 – $210"` | – |
+| `scores` | Objekt mit Zahlen | `{"gm":8,"bg":7,...}` | `{"gm":"8"}` |
+| `events` | Array | `[]` | fehlendes Feld |
+| `badges` | Array | `["Badge1"]` | fehlendes Feld |
+
+**Niemals Zahlen für String-Felder verwenden — crash in parseP() der App!**
 
 ---
 
-## 1. Voraussetzungen
-
-- HTML-Datei liegt unter `/mnt/user-data/outputs/[TICKER]_Aktienanalyse_Canvas_v2.2.html`
-  ODER wurde direkt hochgeladen (dann Pfad aus `/mnt/user-data/uploads/`)
-- Alle 13 Sektionen vollständig
-
----
-
-## 2. GitHub-Push Analysen (astump-ux/stock-analyses)
+## 1. GitHub-Push Analysen (astump-ux/stock-analyses)
 
 ```bash
-TICKER="NOW"   # ← anpassen
+TICKER="NOW"
 TOKEN="GH_TOKEN_IN_MEMORY"
 WORK_DIR="/tmp/gh_push_$$"
 
@@ -54,7 +56,7 @@ rm -rf "$WORK_DIR"
 
 ---
 
-## 3. GitHub-Push Portfolio-App (astump-ux/portfolio-canvas)
+## 2. GitHub-Push Portfolio-App (astump-ux/portfolio-canvas)
 
 ```bash
 TOKEN="GH_TOKEN_IN_MEMORY"
@@ -71,7 +73,7 @@ git config user.email "bot@claude.ai"
 git config user.name "Claude Bot"
 git add index.html
 git diff --cached --quiet && echo "Keine Änderungen." || \
-  (git commit -m "[Beschreibung der Änderung]" && \
+  (git commit -m "[Beschreibung]" && \
    git push "https://${TOKEN}@github.com/astump-ux/portfolio-canvas.git" main 2>&1)
 rm -rf "$WORK_DIR"
 ```
@@ -80,71 +82,71 @@ rm -rf "$WORK_DIR"
 
 ---
 
-## 4. Kerndaten-JSON (nach jedem Analyse-Deploy ausgeben)
-
-Nach dem Push diesen JSON-Block ausgeben — User kopiert in:
-**Portfolio-App → Verwalten → "Analyse deployen" → Paste & Deploy**
+## 3. Kerndaten-JSON Template (PFLICHTFORMAT)
 
 ```json
 {
-  "ticker": "[TICKER]",
-  "name": "[Vollständiger Unternehmensname]",
-  "exchange": "[NYSE / NASDAQ / XETRA / HKEX / ...]",
-  "sector": "[Sektor]",
-  "price": "[~$XXX]",
-  "priceDate": "[TT.MM.JJJJ]",
-  "w52": "[LOW – HIGH]",
+  "ticker": "NOW",
+  "name": "ServiceNow, Inc.",
+  "exchange": "NYSE",
+  "sector": "Enterprise Software",
+  "price": "~$166",
+  "priceDate": "14.05.2026",
+  "w52": "~$103 – $210",
   "scores": {
-    "gm": 0,
-    "bg": 0,
-    "qu": 0,
-    "wa": 0,
-    "bw": 0,
-    "cf": 0,
-    "ri": 0,
-    "ta": 0
+    "gm": 8,
+    "bg": 8,
+    "qu": 9,
+    "wa": 9,
+    "bw": 5,
+    "cf": 9,
+    "ri": 6,
+    "ta": 7
   },
-  "rating": "[KAUFEN / HALTEN / VERKAUFEN]",
-  "zielkurs": "[z.B. $140–180]",
-  "upside": "[z.B. +70%]",
-  "downside": "[z.B. -20%]",
-  "rr": "[z.B. 1:3.5]",
-  "horizont": "[z.B. 2–3 Jahre]",
-  "analyseDate": "[TT.MM.JJJJ]",
-  "badges": ["[Badge 1]", "[Badge 2]"]
+  "rating": "KAUFEN",
+  "zielkurs": "$220–250",
+  "upside": "+35–50%",
+  "downside": "-15%",
+  "rr": "1:2.5",
+  "horizont": "2–3 Jahre",
+  "analyseDate": "14.05.2026",
+  "badges": ["AI Control Tower", "Workflow Platform"]
 }
 ```
 
 ### Score-Mapping:
-| JSON-Feld | Sektion | Beschreibung |
-|---|---|---|
-| `gm` | S1 | Geschäftsmodell (solide=7, stark=8–9) |
-| `bg` | S2 | Burggraben |
-| `qu` | S3 | Operative Entwicklung / 4 Quartale |
-| `wa` | S4 | Wachstum |
-| `bw` | S5 | Bewertung |
-| `cf` | S6 | Cashflow & Kapitalqualität |
-| `ri` | S10 | Risiken **invertiert** (10=kein Risiko) |
-| `ta` | S9 | Technische Analyse |
-
----
-
-## 5. Konfiguration
-
-```
-GitHub Token : GH_TOKEN_IN_MEMORY
-GitHub User  : astump-ux
-Repo Analysen: astump-ux/stock-analyses → https://v0-stock-analyses.vercel.app/[TICKER].html
-Repo App     : astump-ux/portfolio-canvas → https://portfolio-canvas-ten.vercel.app
-```
-
----
-
-## 6. Häufige Fehler
-
-| Problem | Fix |
+| JSON-Feld | Sektion |
 |---|---|
-| `Repository not found` | Token prüfen/erneuern |
-| `nothing to commit` | Normal — Datei identisch |
+| `gm` | S1 Geschäftsmodell |
+| `bg` | S2 Burggraben |
+| `qu` | S3 Operative Entwicklung |
+| `wa` | S4 Wachstum |
+| `bw` | S5 Bewertung |
+| `cf` | S6 Cashflow |
+| `ri` | S10 Risiken (invertiert, 10=kein Risiko) |
+| `ta` | S9 Technische Analyse |
+
+---
+
+## 4. Konfiguration
+
+```
+GitHub User  : astump-ux
+Token        : GH_TOKEN_IN_MEMORY (in Claude-Memory gespeichert)
+Repo Analysen: astump-ux/stock-analyses
+Vercel URL   : https://v0-stock-analyses.vercel.app/[TICKER].html
+Repo App     : astump-ux/portfolio-canvas
+App URL      : https://portfolio-canvas-ten.vercel.app
+JSONBin ID   : 69b68c14aa77b81da9e78b7e
+```
+
+---
+
+## 5. Häufige Fehler
+
+| Problem | Ursache | Fix |
+|---|---|---|
+| Blank Screen `parseP is not a function` | price als Zahl statt String | Immer `"~$166"` nicht `166` |
+| Blank Screen `filter is not a function` | events/badges fehlen | sanitizeCo() läuft automatisch |
+| `nothing to commit` | Datei identisch | Normal |
 | `non-fast-forward` | `git pull --rebase` vor Push |
-| Datei nicht gefunden | Pfad prüfen: outputs/ oder uploads/ |
