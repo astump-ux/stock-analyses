@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shimano (7309.T) – Aktienanalyse Canvas v2.2</title>
+<style>
+:root {
+  --primary: #E60028;
+  --primary-dark: #b8001f;
+  --bg: #0f0f12;
+  --bg-card: #1a1a1f;
+  --bg-card2: #22222a;
+  --border: #2e2e38;
+  --text: #e8e8ec;
+  --text-muted: #888898;
+  --text-dim: #555566;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --blue: #3b82f6;
+  --purple: #8b5cf6;
+  --teal: #14b8a6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7;
+}
+.header {
+  background: linear-gradient(135deg, #1a0008 0%, #2a0010 40%, #0f0f12 100%);
+  border-bottom: 1px solid var(--primary);
+  padding: 36px 40px 28px; display: flex; justify-content: space-between;
+  align-items: flex-start; flex-wrap: wrap; gap: 20px;
+}
+.header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+.header-left h1 span { color: var(--primary); }
+.header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+.header-right { text-align: right; }
+.price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+.price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+.price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+.price-change.up   { background: rgba(34,197,94,0.15); color: var(--green); }
+.price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+.nav {
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
+  position: sticky; top: 0; z-index: 100;
+}
+.nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+.main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+.kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+.kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.kpi-value.green  { color: var(--green); }
+.kpi-value.red    { color: var(--red); }
+.kpi-value.orange { color: var(--primary); }
+.section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+.section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+.section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.section-title  { font-size: 16px; font-weight: 700; color: white; }
+.section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+.section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+.section-body   { padding: 20px 24px; }
+p { margin-bottom: 12px; color: var(--text); }
+p:last-child { margin-bottom: 0; }
+h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+h3:first-child { margin-top: 0; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(230,0,40,0.04); }
+.beat    { color: var(--green);  font-weight: 600; }
+.miss    { color: var(--red);    font-weight: 600; }
+.neutral { color: var(--yellow); font-weight: 600; }
+.badge        { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.badge-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
+.badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
+.badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+.badge-blue   { background: rgba(59,130,246,0.15); color: var(--blue); }
+.badge-orange { background: rgba(230,0,40,0.15);  color: var(--primary); }
+.event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+.event-item:last-child { border-bottom: none; }
+.event-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+.dot-green  { background: var(--green); }
+.dot-red    { background: var(--red); }
+.dot-yellow { background: var(--yellow); }
+.event-label { font-weight: 600; color: white; }
+.event-text  { font-size: 14px; color: var(--text); }
+.risk-item   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+.risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.risk-title  { font-weight: 600; color: white; font-size: 14px; }
+.score-bar       { display: flex; align-items: center; gap: 10px; }
+.score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.score-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #ff9500); }
+.score-num       { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+.bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+.bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+.bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+.bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.bear-card h4 { color: var(--red);   margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.rating-box { background: linear-gradient(135deg, rgba(230,0,40,0.12), rgba(230,0,40,0.04)); border: 1px solid rgba(230,0,40,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+.rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+.rating-item .val  { font-size: 20px; font-weight: 800; color: white; }
+.rating-item .val.buy  { color: var(--green); }
+.rating-item .val.hold { color: var(--yellow); }
+.rating-item .val.sell { color: var(--red); }
+.trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+.trigger-card      { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.trigger-card h5   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.trigger-card.buy  h5 { color: var(--green); }
+.trigger-card.sell h5 { color: var(--red); }
+.trigger-list    { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+.trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+.trigger-list li::before { content: "→"; position: absolute; left: 0; }
+.investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+@media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+.investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+.investor-no  { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+.investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-no  h5 { color: var(--red);   font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+.investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+.investor-no  li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+.geo-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+.geo-card   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.geo-pct    { font-size: 20px; font-weight: 700; color: white; }
+.geo-note   { font-size: 12px; color: var(--text-muted); }
+.outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+.outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+.outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+.outlook-card .when-then strong { color: var(--primary); }
+.source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+.source a { color: var(--text-dim); }
+.disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+.alert-box { background: rgba(230,0,40,0.08); border: 1px solid rgba(230,0,40,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+.divider   { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.pill      { display: inline-block; background: rgba(230,0,40,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Shimano <span>7309.T</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 18. Mai 2026 · Tokyo Stock Exchange · Sektor: Consumer Cyclical (Leisure Equipment)</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">Bicycle Components (~76%)</span>
+      <span class="badge badge-blue">Fishing Tackle (~24%)</span>
+      <span class="badge badge-yellow">Net-Cash ¥483 Mrd.</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">¥17.070</div>
+    <div class="price-meta">Schlusskurs 13.05.2026 · TSE Prime</div>
+    <div class="price-change up">▲ +2,28% Tagesperf.</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: ¥14.895 – ¥21.850</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">¥17.070</div><div class="kpi-sub">JPY · 13.05.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Marktkap.</div><div class="kpi-value">¥1,47 Bio.</div><div class="kpi-sub">~$9,6 Mrd.</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/E (TTM)</div><div class="kpi-value">43,4</div><div class="kpi-sub">FWD: ~29,6</div></div>
+    <div class="kpi-card"><div class="kpi-label">EV/EBITDA</div><div class="kpi-value">12,4</div><div class="kpi-sub">10J-Median: 11,2</div></div>
+    <div class="kpi-card"><div class="kpi-label">Net-Cash</div><div class="kpi-value green">¥483 Mrd.</div><div class="kpi-sub">~33% Marktkap.</div></div>
+    <div class="kpi-card"><div class="kpi-label">Div-Yield</div><div class="kpi-value">2,1%</div><div class="kpi-sub">Total Ret.: 234% (2025)</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Earn.</div><div class="kpi-value">28.07.</div><div class="kpi-sub">Q2 2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">52W-Perf.</div><div class="kpi-value red">-17%</div><div class="kpi-sub">vs. ATH 2021: -55%</div></div>
+  </div>
+
+  <!-- ===================== SEKTION 1: GESCHÄFTSMODELL ===================== -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <p>Shimano ist ein 1921 in Osaka gegründeter japanischer Komponenten-Hersteller mit zwei industriell dominierenden Segmenten: Fahrradkomponenten (rund 76% des Konzernumsatzes, FY2025: ¥355 Mrd.) und Angelgerät (ca. 24%, FY2025: ¥111 Mrd.). Ein winziges drittes Segment „Rowing & Other" rundet das Portfolio auf rund ¥466 Mrd. Konzernumsatz ab. Der entscheidende Punkt: Shimano verkauft <em>keine</em> Fahrräder, sondern die unsichtbaren, aber leistungsbestimmenden Innereien — Schaltwerke, Bremsen, Kurbeln, Naben, Kassetten, Schalthebel — die ein Komplettrad zu einem „guten" oder „mittelmäßigen" Rad machen.</p>
+
+      <p>Die Kundenstruktur ist zweigeteilt: Im <strong>OEM-Kanal</strong> beliefert Shimano nahezu alle namhaften Fahrradmarken weltweit (Trek, Specialized, Giant, Merida, Canyon, Cube, etc.) mit Komponentengruppen, die als geschlossene „Groupsets" verbaut werden (z.B. Shimano 105, Ultegra, Dura-Ace bei Rennrädern; Deore, SLX, XT, XTR bei MTB). Im <strong>Aftermarket-Kanal</strong> verkaufen Fachhändler einzelne Ersatzteile und Upgrades an Endkunden — höhermargig als OEM. Im Angelsegment ist die Struktur ähnlich: globale OEM-Belieferung großer Tackle-Brands plus eigener Premium-Vertrieb unter den Marken Stella, Stradic, Vanford u.a.</p>
+
+      <p>Revenue-Modell: rein transaktional, kein Abo. Pro Komponentensatz erhält Shimano je nach Premium-Stufe zwischen $80 (Einsteiger Tourney) und $4.500 (Top-End Dura-Ace Di2 Wireless). Die Unit Economics sind durch eine bemerkenswerte vertikale Integration getrieben — Shimano fertigt fast alles selbst, inklusive Aluminium-Forging, Wärmebehandlung, Beschichtung und Elektronik in eigenen Werken in Japan (Sakai, Yamaguchi), Singapur, Malaysia und Tschechien. 2023 wurde ein neues Werk in Singapur für ¥25 Mrd. (~$165 Mio.) eröffnet, das nun rund 70% der Mid-Range-Sportkomponenten produziert.</p>
+
+      <p>Die Kostenstruktur ist <em>nicht</em> Asset-Light — Shimano ist ein klassisches Capex-intensives Industrieunternehmen mit hohem Anlagevermögen, aber gleichzeitig fast schuldenfrei. Die operative Bruttomarge lag historisch bei 38–42%, die EBITDA-Marge bei 22–28%, gestützt durch Mix (Premium-Anteil ~50%) und Skalenvorteile. 2025 fiel die EBITDA-Marge tariffbedingt und durch hohe Lagerbestände in China auf ~17%, was die aktuelle Bewertungskompression erklärt.</p>
+
+      <div class="source">Quellen: Shimano FY2025 Earnings Report (10.02.2026, marketscreener.com); Investor Relations Presentation Q1 2026 (23.04.2026); Persistence Market Research „Bicycle Components Market 2025"; CNBC/Yahoo Finance Company Profile (Stand 05.2026).</div>
+    </div>
+  </div>
+
+  <!-- ===================== SEKTION 2: BURGGRABEN ===================== -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <p>Shimanos Burggraben gehört zu den breitesten und tiefsten in der gesamten Consumer-Cyclical-Welt — und genau das ist Kern dieser Analyse. Mit einem geschätzten Marktanteil von <strong>70–80% bei Mid-to-High-End Fahrradkomponenten</strong> (Mechanik plus Elektronik kombiniert) dominiert Shimano die globale Industrie seit Jahrzehnten. SRAM, der einzige relevante Wettbewerber im Premium-Segment, kommt auf grob 15–20%, Campagnolo unter 5%. In der Mittel- und Einstiegsklasse sind die Anteile noch dominanter.</p>
+
+      <h3>Vier Schichten des Burggrabens</h3>
+
+      <p><strong>1. OEM-Lock-In durch Groupset-Logik:</strong> Ein modernes Fahrrad wird vom Hersteller mit einer kompletten Komponentengruppe konfiguriert, weil Schalthebel, Schaltwerk, Kassette, Kette und Bremse aus dem gleichen System feinabgestimmt sind. Das macht Mischbetrieb über Hersteller hinweg fast unmöglich (Shifter-Schaltwerk-Ratio ist 2:1 bei Shimano, 1:1 bei SRAM — inkompatibel). Wer als Bike-Marke einmal Shimano-105/Ultegra verkauft, bleibt fast immer Shimano, weil Endkunden Service-Kompatibilität und Marken-Konsistenz erwarten.</p>
+
+      <p><strong>2. Skala &amp; Fertigungstiefe:</strong> Shimano fertigt Hochpräzisions-Aluminium-Forging in Eigenfertigung — ein Verfahren, das SRAM bis heute nicht in vergleichbarer Qualität beherrscht. Das ergibt einen Kostenvorteil pro Komponente von geschätzt 15–25% gegenüber Wettbewerbern bei gleichbleibender Qualität. Der Singapur-Hub (¥25 Mrd. Investment) hat die Kapazität für Mid-Range-Komponenten 2024/25 nochmals deutlich erhöht.</p>
+
+      <p><strong>3. Markenmacht im Aftermarket:</strong> Bei Endkunden ist „Shimano" das Synonym für Fahrradkomponenten — vergleichbar mit Bosch bei Bohrmaschinen oder Sennheiser bei Kopfhörern. Das verleiht Preissetzungsmacht im aftermarket: Dura-Ace Di2 wird bei rund $4.500 verkauft, ein SRAM Red AXS bei $4.300 — bei kaum unterscheidbarer Leistung, aber Shimano profitiert von höherer Bekanntheit. Endkunden zahlen für „die richtige Schaltung".</p>
+
+      <p><strong>4. Service-Netzwerk &amp; Patentportfolio:</strong> Über 70.000 zertifizierte Shimano-Werkstätten weltweit, ein dichtes Ersatzteil-Netz und ein Patentportfolio mit >2.000 aktiven Patents (Hyperglide, Di2-Protokoll, Hollowtech) schaffen Reparatur- und Switching-Costs für sowohl Hersteller wie Endkunden.</p>
+
+      <h3>Schwachstellen — und warum SRAM ihnen ein Stück Burggraben abnagt</h3>
+
+      <p>Der Burggraben ist nicht unsterblich. Drei strukturelle Risse zeigen sich seit 2022: <strong>(a)</strong> Wireless-Schaltung: SRAM hat 2019 mit eTap/AXS den Schritt zu kabelloser Schaltung als erstes Großserien-System geschafft. Shimano zog 2023/24 mit Dura-Ace Di2 R9200 und 2025 mit XTR Di2 M9200 (Mountainbike) nach, aber im High-End-MTB hat SRAM mit Transmission/Eagle eine 2–3-Jahres-Marktführerschaft erobert. <strong>(b)</strong> E-Bike-Antriebe (NICHT Schaltung, sondern Motoren): Hier sind Bosch und DJI Avinox die Marktführer, Shimano hat mit dem EP801/EP6-System nur einen kleinen Marktanteil von ~15% im europäischen Premium-E-Bike-Segment. <strong>(c)</strong> Antitrust-Risiko: Im Juli 2025 wurde von Branchenanalyst Fideres ein Schadenersatz von $214–427 Mio. an SRAM für unzulässige Kopplungspraktiken im elektronischen Groupset-Markt errechnet. SRAM hat noch nicht formal geklagt, aber ein Rechtsstreit könnte den Burggraben zumindest medial beschädigen.</p>
+
+      <p><strong>Fazit Burggraben:</strong> Shimano hat einen der stärksten Burggräben der Sportindustrie — ähnlich Adidas/Nike, aber strukturell vielleicht sogar tiefer wegen der OEM-Integration. Der Score von 8/10 statt 9/10 reflektiert, dass SRAM im High-End-MTB-Segment (das zwar nur ~10% des Volumens, aber ~25% der Marge ausmacht) reale Marktanteile gewonnen hat und Shimano dort verteidigen muss. Der Burggraben ist nicht erodiert, aber er rostet an den teuersten Stellen.</p>
+
+      <div class="source">Quellen: Fideres „Bicycle Thieves – How Shimano Put the Brakes on SRAM" (12.03.2025); GMInsights „Bicycle Electronic Drivetrain Market 2025"; BikeRadar „Mountain Bike Groupsets Explained" (17.04.2025 Update); The Pros Closet „Shimano vs SRAM 2025/2026 Guide"; Persistence Market Research „Bicycle Components Market 2025".</div>
+    </div>
+  </div>
+
+  <!-- ===================== SEKTION 3: LETZTE 4 QUARTALE ===================== -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale (Operative Entwicklung)</div>
+      <div class="section-score">Beat-Ratio: 3/4 Sales · 1/4 OP · Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Da Shimano (7309.T) an der Tokyo Stock Exchange notiert ist, sind keine finviz.com-Daten verfügbar. Alle Kennzahlen stammen aus den offiziellen Shimano-Geschäftsberichten (JGAAP), Investing.com, Smartkarma, Bicycle Retailer und Sporting Goods Intelligence (Stand: Mai 2026). Geschäftsjahr = Kalenderjahr. <strong>Nächste Earnings:</strong> Q2 2026 voraussichtlich 28. Juli 2026.</div>
+
+      <p>Die operative Story der letzten vier Quartale ist eine Geschichte von zwei Linien: Der <em>Top-Line</em> stabilisiert sich auf niedrigem Niveau und schlägt zuletzt die Guidance — aber die <em>Bottom-Line</em> bricht ein, weil Yen-Schwäche, China-Lagerabbau und steigende SG&amp;A die Margen drücken. Beat-Ratio: 3 von 4 Sales-Beats, aber nur 1 von 4 OP-Beats — ein klassisches Signal für ein Unternehmen in der späten Phase eines Capex-/Lagerzyklus.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Quartal</th><th>Net Sales (¥ Mrd.)</th><th>YoY</th><th>Op. Income (¥ Mrd.)</th><th>YoY</th><th>Net Income (¥ Mrd.)</th><th>vs. Konsens</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Q2 2025</strong><br><span style="color:var(--text-muted); font-size:12px;">30.07.2025</span></td><td>121,2</td><td class="beat">+6,7%</td><td>15,1</td><td class="miss">-13,8%</td><td>9,8</td><td><span class="badge badge-green">Sales Beat</span> <span class="badge badge-red">OP Miss</span></td></tr>
+            <tr><td><strong>Q3 2025</strong><br><span style="color:var(--text-muted); font-size:12px;">28.10.2025</span></td><td>113,6</td><td class="beat">+5,3%</td><td>8,4</td><td class="miss">-57%</td><td>12,1</td><td><span class="badge badge-green">Sales Beat</span> <span class="badge badge-red">OP Miss</span></td></tr>
+            <tr><td><strong>Q4 2025</strong><br><span style="color:var(--text-muted); font-size:12px;">10.02.2026</span></td><td>115,2</td><td class="neutral">+0,3%</td><td>15,1</td><td class="beat">+5%</td><td>5,2</td><td><span class="badge badge-yellow">Sales In-Line</span> <span class="badge badge-green">OP Beat</span></td></tr>
+            <tr><td><strong>Q1 2026</strong><br><span style="color:var(--text-muted); font-size:12px;">23.04.2026</span></td><td>117,6</td><td class="beat">+3,6%</td><td>10,4</td><td class="miss">-35,6%</td><td>12,8</td><td><span class="badge badge-green">Sales Beat (¥109 Guide)</span> <span class="badge badge-red">OP Miss (¥11,2 Guide)</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Was Management bei Q1 2026 sagte (23.04.2026 Earnings Call)</h3>
+
+      <p>Drei Kern-Aussagen aus dem Q1-2026 Bericht: <strong>(1)</strong> Bicycle-Components-Umsatz von ¥87,4 Mrd. (-0,7% YoY) übertraf das Guidance von ¥80 Mrd. um deutliche 9% — der Lagerabbau im Channel ist also nicht so brutal wie vom Management eingepreist. <strong>(2)</strong> Operating Income der Fahrradsparte bei ¥7,8 Mrd. (Marge 8,9%) lag aber unter dem Ziel von ¥8,4 Mrd. — Ursache: einmalige Lagerneubewertung in Q1 2025 zum Vergleich plus FX-Belastung durch schwächeren USD vs. asiatischen Währungen plus erhöhte SG&amp;A. <strong>(3)</strong> Net Income stieg um +30,9% auf ¥12,8 Mrd., aber das ist vor allem FX-Bewertungsgewinn auf Auslands-Cash — operativ irrelevant.</p>
+
+      <p>Marktreaktion am Earnings-Tag (23.04.2026): Aktie fiel intraday um -3% auf ¥16.530, weil OP-Miss gegenüber Konsens und Buyback-Programm bereits eingepreist war. Drei Wochen später bei ¥17.070 (+3,3% seitdem) deutet auf moderate Erholung mit Short-Cover.</p>
+
+      <h3>Die Bottom-Line-Story: Warum bricht das OP-Income so ein?</h3>
+
+      <p>FY2025 Konzern-OP fiel um -20,6% auf ¥51,7 Mrd. trotz +3,4% Umsatzwachstum. Die Brücke: (a) China-Lagerabbau drückte hochmargigen Premium-Mix um ~3 pp auf 11%, (b) Yen schwächte sich gegen USD ab — kostet bei FX-Bewertung von Forderungen, (c) SG&amp;A stieg um ~5% durch Inflation in Singapur/Japan und Marketing-Push für Wireless-Launch. FY2025 Guidance 2026: Sales flat (~¥467 Mrd.), OP -9% auf ~¥47 Mrd. — Management bleibt konservativ.</p>
+
+      <div class="source">Quellen: Shimano IR „Consolidated Financial Results FY2025" (10.02.2026, marketscreener.com); Investing.com „Shimano Q1 sales beat guidance despite profit miss" (24.04.2026); Bicycle Retailer „Shimano Q1 sales flat but operating income down sharply" (23.04.2026); Sporting Goods Intelligence „Shimano Q1 2026 results: five takeaways" (Mai 2026); Smartkarma „Shimano 3Q Earnings" (28.10.2025).</div>
+    </div>
+  </div>
+
+  <!-- ===================== SEKTION 4: WACHSTUMSEINORDNUNG ===================== -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <p>Shimano ist heute ein zyklisches Mature-Business im Tief eines Lagerabbau-Zyklus, nicht ein Wachstumsunternehmen. Der Revenue-CAGR der letzten fünf Jahre (2021–2025) liegt bei nur +1,2% — und das ist optimistisch gerechnet, weil 2021 wegen Covid bereits ein Spitzenjahr war (Umsatz ¥629 Mrd.). Von dieser Spitze ist Shimano um -26% auf FY2025 von ¥466 Mrd. zurückgefallen. Im Vergleich: Operative Income fiel von ¥168 Mrd. (2021) auf ¥52 Mrd. (2025) — ein Einbruch von -69%, der die operative Hebelwirkung schmerzhaft offenlegt.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Jahr</th><th>Konzernumsatz (¥ Mrd.)</th><th>YoY</th><th>OP-Income (¥ Mrd.)</th><th>OP-Marge</th><th>Kommentar</th></tr></thead>
+          <tbody>
+            <tr><td>2021</td><td>628,7</td><td class="beat">+45%</td><td>168,3</td><td class="beat">26,8%</td><td>Covid-Peak, e-bike boom</td></tr>
+            <tr><td>2022</td><td>628,9</td><td class="neutral">+0,0%</td><td>164,9</td><td class="beat">26,2%</td><td>Plateau, Lager läuft auf</td></tr>
+            <tr><td>2023</td><td>478,7</td><td class="miss">-23,9%</td><td>91,4</td><td class="miss">19,1%</td><td>Krise beginnt, Channel destocking</td></tr>
+            <tr><td>2024</td><td>451,2</td><td class="miss">-5,7%</td><td>65,1</td><td class="miss">14,4%</td><td>Tiefster OP-Punkt</td></tr>
+            <tr><td>2025</td><td>466,2</td><td class="beat">+3,4%</td><td>51,7</td><td class="miss">11,1%</td><td>Sales-Stabilisierung, OP-Druck</td></tr>
+            <tr><td>2026E</td><td>467,0</td><td class="neutral">+0,2%</td><td>47,0</td><td class="miss">10,1%</td><td>Guidance: flach, OP weiter sinkend</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Segment-Wachstum FY2025</h3>
+
+      <p>Bicycle Components (FY2025): +2,7% auf ¥355 Mrd., aber OP -20,9% auf ¥42,8 Mrd. (Marge sank von 16% auf 12%). Fishing Tackle (FY2025): +5,6% auf ¥110,8 Mrd., OP -18,9% auf ¥8,9 Mrd. (Marge sank von 10,3% auf 8,0%). Damit ist die Fahrradsparte ~76% des Umsatzes und ~83% des OP-Incomes — Shimano ist und bleibt primär ein Fahrradkonzern, auch wenn das Fishing-Segment 2025 erstmals stabil bleibt.</p>
+
+      <h3>Geografische Verteilung (FY2025)</h3>
+
+      <div class="geo-grid">
+        <div class="geo-card"><div class="geo-region">Europa</div><div class="geo-pct">~46%</div><div class="geo-note">+30% YoY in 2025, Hauptmarkt für OEM, hohe Lager</div></div>
+        <div class="geo-card"><div class="geo-region">China (Asien)</div><div class="geo-pct">~17%</div><div class="geo-note">¥116 Mrd., schwach, Lager hoch</div></div>
+        <div class="geo-card"><div class="geo-region">Nordamerika</div><div class="geo-pct">~18%</div><div class="geo-note">Lager appropriate, Tariff-Risiko</div></div>
+        <div class="geo-card"><div class="geo-region">Japan</div><div class="geo-pct">~10%</div><div class="geo-note">¥67 Mrd. davon Germany allein, Heimatmarkt schwach</div></div>
+        <div class="geo-card"><div class="geo-region">Rest of World</div><div class="geo-pct">~9%</div><div class="geo-note">Lateinamerika, Ozeanien, Südostasien</div></div>
+      </div>
+
+      <p>Europa ist mit ~46% Anteil der dominante Markt — und gleichzeitig die größte Schwäche, weil die europäische Bicycle Industry im Krisenmodus ist (vgl. Sektion 8 Ebene 2). Deutschland allein steht für ¥67 Mrd. Umsatz, dort sank der Fahrradmarkt 2024 um -10% auf €6,3 Mrd. (Quelle: EY-Parthenon). China ist mit ¥116 Mrd. (~17% Konzernumsatz) der zweitgrößte Hebel und derzeit das größte Sorgenkind — Channel-Inventories „remain high", retail sales „lackluster". Nordamerika (~18%) hat einen anderen Risikofaktor: US-Tariffs von 45-56% auf Komplettbikes aus China.</p>
+
+      <h3>Wachstumsqualität — kritisch betrachtet</h3>
+
+      <p>Ist das Wachstum „echt"? Die kurze Antwort: 2025 ist Sales-Wachstum von +3,4% fast vollständig durch Yen-Schwäche-Effekte gestützt. Volumenmäßig ist das Geschäft eher stagnierend. Reifegrad: <em>Mature/Cyclical</em>, kein Growth. Die strukturellen Treiber (E-Bikes, urbane Mobilität, Bike-Infrastructure) sind intakt, aber Shimano kann sie nicht in Topline-Wachstum übersetzen, solange (a) der Channel überfüllt ist und (b) Wireless-Marktanteil im MTB von SRAM gehalten wird. Erst 2027–2028 könnte ein neuer Wachstumszyklus auf Basis Wireless-Adoption und Premium-Mix anlaufen, mit organisch geschätzten +5-7% Sales-CAGR.</p>
+
+      <div class="source">Quellen: Shimano FY2025 Consolidated Financial Results (10.02.2026); Bicycle Retailer „Global performances mixed in 2025" (10.02.2026); Show Daily „Shimano Financial Report" (11.02.2026); MatrixBCG Geographic Analysis Shimano (23.03.2026); EY-Parthenon European Bike Market Study 2024.</div>
+    </div>
+  </div>
+
+  <!-- ===================== SEKTION 5: BEWERTUNG ===================== -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Aufgrund TSE-Notierung keine finviz-Daten. Multiples aus Stockanalysis.com (TYO:7309), GuruFocus, Morningstar, Simply Wall St (Stand: Mai 2026).</div>
+
+      <p>Die Bewertungsfrage „Ist Shimano nach Multi-Jahres-Bärenmarkt günstig?" hat eine differenzierte Antwort: <strong>Nach Headline-Multiples ist sie teuer. Nach EV-bereinigten Multiples ist sie fair. Auf normalisierte Erträge bezogen ist sie deutlich unterbewertet.</strong> Genau diese Spreizung erklärt die anhaltende Stagnation des Kurses und die geteilten Analystenmeinungen.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Metric</th><th>Shimano (7309)</th><th>5J-Median</th><th>10J-Median</th><th>10J-Min/Max</th><th>Einordnung</th></tr></thead>
+          <tbody>
+            <tr><td>P/E (TTM)</td><td>43,4</td><td>22,5</td><td>22,7</td><td>14,5 / 55</td><td>Optisch teuer (zyklisch dep. E)</td></tr>
+            <tr><td>P/E (FWD)</td><td>29,6</td><td>20,0</td><td>~20</td><td>13 / 35</td><td>Über historischem Schnitt</td></tr>
+            <tr><td>PEG</td><td>4,6</td><td>2,5</td><td>2,8</td><td>0,8 / 6,0</td><td>Schwach wg. -9% OP-Wachstum 2026E</td></tr>
+            <tr><td>EV/EBITDA</td><td>12,4</td><td>10,5</td><td>11,2</td><td>5,5 / 18,2</td><td>Leicht über Median, fair</td></tr>
+            <tr><td>EV/EBIT</td><td>22,3</td><td>17,5</td><td>18,5</td><td>7,8 / 27,5</td><td>Premium, aber im 10J-Korridor</td></tr>
+            <tr><td>P/Sales</td><td>3,1</td><td>3,8</td><td>3,5</td><td>1,8 / 6,2</td><td>Unter Median = günstig</td></tr>
+            <tr><td>P/Book</td><td>1,5</td><td>2,4</td><td>2,2</td><td>1,2 / 3,5</td><td>Deutlich unter Median</td></tr>
+            <tr><td>FCF-Yield</td><td>~3,5%</td><td>4,5%</td><td>~4%</td><td>1,5 / 8%</td><td>Adäquat, normalisiert besser</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Das wahre Bewertungsargument: Ex-Cash</h3>
+
+      <p>Shimano hält ¥482,8 Mrd. (~$3,1 Mrd.) Netto-Cash und Investments — das entspricht <strong>33% der Marktkapitalisierung</strong>. Adjustiert man die Marktkapitalisierung um diesen Cash-Bestand, sinkt das ex-Cash P/E von 43x auf ~29x und EV/EBITDA von 12,4x auf ~8,1x. Das ist im Vergleich zum 10-Jahres-Median von 11,2x eine <strong>signifikante Diskontierung</strong>, die das eigentliche Argument für eine Long-Position liefert. Der Cash-Berg ist nicht „totes" Kapital — er finanziert Buybacks (¥50 Mrd. jährlich, 234% Total Return Ratio 2025) und gibt strategische Flexibilität für M&amp;A (etwa ein E-Bike-Motor-Player wie Brose oder Mahle).</p>
+
+      <h3>Normalisiertes Ertragsbild</h3>
+
+      <p>Die entscheidende Frage: Sind die ¥387 EPS (TTM) repräsentativ — oder zyklisch deprimiert? In den Jahren 2021–2022 lag das EPS bei ¥1.500–1.800. Das Mittel über 10 Jahre liegt bei ¥800–900. Selbst wenn Shimano in einem normalen Zyklus auf ¥800 EPS zurückkehrt (also gut +100% Erholung), ergäbe das ein normalisiertes P/E von ~21x — etwa im Bereich des historischen Schnitts. Auf Basis des 2021-Spitzen-EPS wäre die Aktie sogar bei nur ~11x P/E. Die heutige Bewertung ist also eine implizite Wette auf <em>keine</em> Erholung — sehr konservativ.</p>
+
+      <h3>Vergleich zu Peers (Details siehe Sektion 7)</h3>
+
+      <p>Giant Manufacturing (9921.TW): P/E TTM 38x, aber bei Net-Income TTM TWD 723 Mio. ist die Earnings-Basis fast zerstört — bessere Vergleichsmetrik ist EV/EBITDA 9,0x. Globeride (7990.T, Daiwa-Eigentümer): viel kleiner (Marktkap. ~$340 Mio.), aber profitabel mit niedrigerem P/E. Merida (9914.TW): ähnliches Schicksal wie Giant. SRAM: privat, geschätzt $1,5 Mrd. Umsatz 2024 mit OP-Marge ~12% → bei vergleichbarer Bewertung wären sie etwa $2-3 Mrd. wert — Shimano ist ~5x größer.</p>
+
+      <p><strong>Bewertungs-Fazit:</strong> Auf Headline-P/E teuer (P/E 43x), aber adjustiert um ¥483 Mrd. Cash-Berg deutlich attraktiver (EV/EBITDA 8,1x). Die Bewertung diskontiert eine schwierige 2026, aber kaum eine darauffolgende Erholung. Das macht die Aktie zur „Asymmetric Bet" — wenig Downside (Cash-Floor) bei moderaten positiven Überraschungen sind 30-50% Upside möglich.</p>
+
+      <div class="source">Quellen: Stockanalysis.com „Shimano (TYO:7309) Statistics" (Mai 2026); GuruFocus „TSE:7309 EV-to-EBIT" (April 2026); Simply Wall St Shimano Valuation (Mai 2026); Morningstar Shimano Quote (Mai 2026); Companies Market Cap PE History.</div>
+    </div>
+  </div>
+
+  <!-- ===================== SEKTION 6: CASHFLOW ===================== -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 9/10</div>
+    </div>
+    <div class="section-body">
+      <p>Wenn Bewertung die Frage ist, ist Bilanzqualität die Antwort. Shimano hat eine der besten Bilanzen im gesamten Consumer-Cyclical-Sektor weltweit — das ist nicht Übertreibung, sondern messbar. Drei strukturelle Stärken: (1) Netto-Cash-Position von ¥483 Mrd. bei null Net-Debt (D/E = 0,00), (2) Current Ratio von 11,3 (das ist absurd hoch, normal wäre 1,5–2,5), (3) FCF-Konversionsrate über die letzten 10 Jahre durchschnittlich >90% des Net Income.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>FY2025</th><th>FY2024</th><th>FY2023</th><th>5J-Schnitt</th><th>Bewertung</th></tr></thead>
+          <tbody>
+            <tr><td>Gross Margin</td><td>~33%</td><td>~36%</td><td>~39%</td><td>37%</td><td><span class="badge badge-yellow">Druck</span></td></tr>
+            <tr><td>Operating Margin</td><td>11,1%</td><td>14,4%</td><td>19,1%</td><td>20%</td><td><span class="badge badge-red">Zyklisch tief</span></td></tr>
+            <tr><td>Net Margin</td><td>7,3%</td><td>16,9%</td><td>23,8%</td><td>17%</td><td><span class="badge badge-yellow">Erholung 2026?</span></td></tr>
+            <tr><td>ROE</td><td>3,9%</td><td>9,5%</td><td>14,8%</td><td>11%</td><td><span class="badge badge-red">Zyklisch tief</span></td></tr>
+            <tr><td>ROA</td><td>2,7%</td><td>6,5%</td><td>10,2%</td><td>8%</td><td><span class="badge badge-yellow">Druck</span></td></tr>
+            <tr><td>FCF-Konversion (FCF/NI)</td><td>~115%</td><td>~95%</td><td>~88%</td><td>92%</td><td><span class="badge badge-green">Stark</span></td></tr>
+            <tr><td>Capex/Sales</td><td>~5%</td><td>~7%</td><td>~6%</td><td>5,5%</td><td><span class="badge badge-green">Normal</span></td></tr>
+            <tr><td>Debt/EBITDA</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td><span class="badge badge-green">Schuldenfrei</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Capital Returns 2025</h3>
+
+      <p>Shimano hat 2025 einen außergewöhnlichen <strong>Total Return Ratio von 234%</strong> erreicht — das heißt, Dividende + Buyback haben den Net Income um mehr als das Doppelte überstiegen. Wie? Ein 2-Jahres-Buyback-Programm über ¥100 Mrd. wurde 2024–2025 ausgeführt, dazu eine stabile Dividende von ¥363/Aktie (Yield ~2,1%). Anfang 2026 wurde ein <strong>neues 1-Jahres-Buyback-Programm</strong> über ¥50 Mrd. (~3,4% der ausstehenden Aktien) bis 31.01.2027 angekündigt — bereits 35% (¥17,1 Mrd.) Stand Q1 2026 ausgeführt.</p>
+
+      <p>Ein interessantes Detail: Im Februar 2026 hat der Aktivisten-Investor <em>Dalton Investments / LONGCHAMP SICA V</em> einen Antrag auf <strong>zusätzliche</strong> Aktienrückkäufe gestellt, weil Shimano „too much idle capital" halte. Das Management lehnte dies offiziell ab mit Hinweis auf den 234% Total Return Ratio und die Notwendigkeit von M&amp;A-Reserven sowie R&amp;D-Investitionen. Diese Spannung zwischen aktivistischem Druck und konservativem Management ist ein latenter Katalysator — sollte Shimano nachgeben und das Programm auf ¥75-100 Mrd. erhöhen, wäre das ein kurzfristiger positiver Trigger.</p>
+
+      <h3>Margen-Druck-Analyse</h3>
+
+      <p>Die Gross Margin sank von 39% (2023) auf ~33% (2025) — also -6 pp. Drei Treiber: (a) Yen-Schwäche (Rohmaterial-Einkauf in USD und EUR teurer, Verkauf in lokalen Währungen umgerechnet), (b) Werks-Auslastung in Singapur unter 70% wegen Lagerabbau (Fixkosten-Belastung), (c) Mix-Verschlechterung durch geringeren China-Premium-Anteil. Bei einer normalisierten Auslastung (>85%) und stabilem Yen erwarten Analysten eine Erholung der GM auf 36–37% bis 2027 — das wäre +¥15–20 Mrd. zusätzliches OP-Income pro Jahr.</p>
+
+      <p><strong>Kapitalqualitäts-Fazit:</strong> Shimano ist eine der bilanzstärksten Industrieaktien weltweit. Die zyklische Margen-Schwäche ist real, aber das Unternehmen kann sie aus eigener Kraft ohne Verschuldung überstehen. Das ist der entscheidende Defensiv-Faktor für die Investmentthese.</p>
+
+      <div class="source">Quellen: Shimano Consolidated Financial Results FY2025 (10.02.2026); Stockanalysis.com TYO:7309 Statistics (Mai 2026); TipRanks „Shimano Board Rejects Investor's Call for Additional Share Buybacks" (28.02.2026); MarketScreener Shimano Equity Buyback (11.02.2026); SGB Media „Shimano Capital Returns" (April 2026).</div>
+    </div>
+  </div>
+
+  <!-- ===================== SEKTION 7: PEERS ===================== -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <p>Shimanos Peer-Vergleich ist methodisch herausfordernd, weil der wichtigste Wettbewerber — SRAM — privat ist und keine Multiples liefert. Wir nutzen daher eine erweiterte Peer-Gruppe aus drei Kategorien: <strong>SRAM</strong> (direkt, qualitativ), <strong>Giant Manufacturing &amp; Merida</strong> (Fahrradhersteller, indirekt) und <strong>Globeride</strong> (Fishing-Segment, direkt).</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Unternehmen</th><th>Marktkap.</th><th>Revenue 2025</th><th>Rev. Growth</th><th>OP-Marge</th><th>P/E (TTM)</th><th>EV/EBITDA</th><th>Net-Cash/Debt</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Shimano (7309)</strong></td><td>$9,6 Mrd.</td><td>¥466 Mrd. (~$3,1 Mrd.)</td><td>+3,4%</td><td>11,1%</td><td>43,4</td><td>12,4</td><td>+¥483 Mrd.</td></tr>
+            <tr><td>SRAM (privat)</td><td>~$2-3 Mrd. (geschätzt)</td><td>~$1,5 Mrd. (geschätzt)</td><td>~+5% (geschätzt)</td><td>~12% (geschätzt)</td><td>n.v.</td><td>n.v.</td><td>n.v.</td></tr>
+            <tr><td>Giant Mfg. (9921.TW)</td><td>$0,9 Mrd.</td><td>TWD 60,3 Mrd. (~$1,9 Mrd.)</td><td>-10% (2025)</td><td>1,8%</td><td>38,4</td><td>9,0</td><td>-TWD 0,6 Mrd.</td></tr>
+            <tr><td>Merida (9914.TW)</td><td>$0,7 Mrd.</td><td>TWD ~28 Mrd. (~$0,9 Mrd.)</td><td>-9,7%</td><td>~2%</td><td>~25</td><td>~7,5</td><td>positiv</td></tr>
+            <tr><td>Globeride (7990.T)</td><td>$0,34 Mrd.</td><td>¥124 Mrd. (~$0,82 Mrd.)</td><td>-1,6%</td><td>5,2%</td><td>~12</td><td>~6</td><td>positiv</td></tr>
+            <tr><td>Fox Factory (FOXF)</td><td>$0,9 Mrd.</td><td>$1,4 Mrd.</td><td>-11%</td><td>3%</td><td>n.m.</td><td>13,5</td><td>-$0,9 Mrd.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>SRAM — qualitativer Vergleich (privat)</h3>
+
+      <p>SRAM ist nicht börsennotiert, daher keine Multiples — aber die strategische Position ist die entscheidende Vergleichsdimension. Geschätzte Umsatz-Range 2024: $1,3–1,6 Mrd., damit etwa <strong>halb so groß</strong> wie Shimano im Fahrradgeschäft. Stärken: (a) Wireless-Vorsprung im High-End MTB (Eagle Transmission, AXS), (b) aggressive Preispolitik in mittleren Preisklassen (Rival AXS, Force AXS unterhalb von Shimano 105 Di2), (c) breitere Akquisitionsstrategie (RockShox-Federung, Zipp-Laufräder, Quarq-Powermeter, Hammerhead-Computer). Schwächen: (a) keine Fishing-Diversifikation, (b) US-Headquarter mit höheren Kosten und Tariff-Exposure, (c) fehlende Skalenvorteile bei Mid-Range-Volumen.</p>
+
+      <p><strong>Marktanteils-Bilanz 2025:</strong> Shimano hält ~70% Mid-to-High-End Bicycle Components Markt, SRAM ~20%. Im High-End-MTB ist SRAM nahe 50:50. Im High-End-Road (Tour de France) ~60% Shimano, ~30% SRAM, ~10% Campagnolo. Trend: SRAM hat seit 2022 leichte Anteile im MTB Premium-Segment gewonnen, Shimano antwortete 2025 mit XTR Di2 M9200 Wireless. Stabilisierung erwartet, aber kein Anteilsgewinn von Shimano gegen SRAM kurzfristig.</p>
+
+      <h3>Was macht Shimano besser/schlechter als Peers?</h3>
+
+      <p><strong>Besser:</strong> Bilanz (Net-Cash +¥483 Mrd. vs. Net-Debt bei Giant, Fox Factory), Profitabilität (OP-Marge 11% vs. 1,8% bei Giant), Marktanteil &amp; Skala, Markenmacht, vertikale Integration. <strong>Schlechter:</strong> Optisches P/E (43x vs. 12x bei Globeride), Wachstumsdynamik (zyklisch deprimiert), Dividend-Yield (2,1% vs. ~3% bei Giant), kein Wireless-Vorsprung im MTB.</p>
+
+      <p><strong>Peer-Fazit:</strong> Shimano ist im Peer-Vergleich klar Premium-Bewertet, aber die Premium-Bewertung ist durch Bilanz, Marktanteile und Burggraben fundamental gerechtfertigt. Die anderen börsennotierten Peers (Giant, Merida, Fox) sind eher Indikatoren für Sektor-Stress als Investment-Alternativen — sie zeigen, wie schwer es Komplettrad-Hersteller haben, wenn der Endmarkt schwächelt. Shimano ist als Komponenten-Lieferant strukturell besser positioniert.</p>
+
+      <div class="source">Quellen: Stockanalysis.com (TYO:7309, TPE:9921, TYO:7990); GuruFocus Peer Comparison; Persistence Market Research „Bicycle Components Market 2025"; The Pros Closet „Shimano vs SRAM 2025/2026"; Bike Europe „Confidence in market recovery has eroded quickly" (18.11.2025); Fideres SRAM Damages Estimation (12.03.2025).</div>
+    </div>
+  </div>
+
+  <!-- ===================== SEKTION 8: NEWS & EVENTS ===================== -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+
+      <h3>Ebene 1: Unternehmen (Company-spezifisch)</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">23.04.2026 – Q1 2026 Earnings: Sales-Beat, OP-Miss <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Sales ¥117,6 Mrd. (+3,6% YoY, Beat vs. Guidance ¥109 Mrd.), OP ¥10,4 Mrd. (-35,6% YoY, Miss vs. Konsens ¥12,5 Mrd.). Bicycle-OP fiel um -46% auf ¥7,8 Mrd. wegen einmaliger Lagerneubewertung im Vorjahr, FX und höherer SG&amp;A. Full-Year-Guidance bestätigt: ¥467 Mrd. Sales, ¥47 Mrd. OP. Quelle: Investing.com/Bicycle Retailer, 23-24.04.2026.</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">10.02.2026 – Neues Buyback-Programm ¥50 Mrd. <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Aufsichtsrat genehmigt Aktienrückkauf von bis zu 2,95 Mio. Aktien (3,4% Float) für ¥50 Mrd. bis 31.01.2027. Bereits 35% (¥17,1 Mrd.) bis Ende Q1 2026 ausgeführt. Quelle: MarketScreener/Japan IR, 11.02.2026.</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">28.02.2026 – Aktivisten-Antrag von Dalton Investments abgelehnt <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">LONGCHAMP SICA V (vertreten durch Dalton Investments) fordert zusätzliche Buybacks über die ¥50 Mrd. hinaus. Management lehnt formal ab mit Verweis auf 234% Total Return Ratio 2025 und M&amp;A/R&amp;D-Reserven. Latenter Druck auf Kapitalstruktur. Quelle: TipRanks, 28.02.2026.</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Juni 2025 – Shimano Deore Di2 M6200 Launch <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Wireless-Schaltung jetzt auch im Einstiegs-MTB-Segment. Damit hat Shimano nach SRAM Apex AXS / Rival AXS technologisch nachgezogen und seine Wireless-Range über alle Preisklassen geöffnet. Lange Wirkung. Quelle: Persistence Market Research, BikeRadar.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche (Sektor-spezifisch)</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Mai 2026 – Giant Manufacturing zeigt Q1-Schwäche (-20% YoY) <span class="badge badge-red">Negativ für Sektor</span></div>
+          <div class="event-text">Giant berichtete für Januar 2026 -21,6% Umsatz YoY, Februar -40%, März -17%. „Lager bei OEM-Kunden zwar normalisiert, aber Sell-Through bleibt schwach". Direkter Indikator, dass die für 2026 erwartete Recovery sich verzögert. Quelle: ClipClopBike, Mai 2026.</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">November 2025 – Globale Bicycle Purchasing Index unter 100 <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">GBPI fiel von 101,6 (Juni 2025) auf 98,8 (November 2025) — unter 100 = Kontraktion. 75% der Befragten nennen Unsicherheit als Hauptbelastung. Bike-Eu: „Sales-Forecasts für 2026 sind niedriger als zuvor erwartet." Quelle: Bike Europe, 18.11.2025.</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">März 2026 – ECI Survey: 50% melden weiterhin Überbestände <span class="badge badge-yellow">Mixed</span></div>
+          <div class="event-text">European Cycling Industries Survey 2026: 50% der Mitglieder beobachten weiterhin Überbestände von Komplett-Bikes, aber 50% bleiben optimistisch zur Sektorerholung. 79% erkunden neue Partnerschaften — Konsolidierungsphase. Quelle: ECI, Mai 2026.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro (Gesamtwirtschaft &amp; Politik)</h3>
+
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">21.02.2026 – Supreme Court erklärt IEEPA-Tariffs für illegal <span class="badge badge-yellow">Mixed</span></div>
+          <div class="event-text">US-Verfassungsgericht hebt Trump-Tariffs unter International Emergency Economic Powers Act auf. Trek, Specialized, Shimano, GoPro und andere klagen jetzt auf Rückerstattung gezahlter Zölle. ABER: Trump kündigt sofort neue 10%-Tariffs unter Section 122 an. Netto-Effekt für Shimano ambivalent — Rückzahlung möglich, neue Belastung wahrscheinlich. Quelle: Pinkbike, Bicycle Retailer, 26.02.2026.</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">November 2025 – China Trade Deal: Tariffs auf Bikes weiter bei 56% <span class="badge badge-red">Belastung</span></div>
+          <div class="event-text">US-China-Deal von 01.11.2025 senkt IEEPA-Fentanyl-Tarif von 20% auf 10%, aber Komplettbikes bleiben bei 56% Total Tariff (vorher 66%), E-Bikes bei 45% (vorher 55%). Für Shimano direkt nicht relevant (Komponenten anders verzollt), aber drückt OEM-Volumen weiter. Quelle: PeopleForBikes, 11.2025.</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – E-Bike-Batterie-Tariffs steigen auf 25% <span class="badge badge-yellow">Risiko</span></div>
+          <div class="event-text">USTR-Sektion-301-Anpassung: E-Bike-Lithium-Batterien werden ab 2026 mit 25% (vorher 7,5%) verzollt. Belastet primär chinesische E-Bike-Komplettanbieter, indirekt Shimano EP801/EP6 Motor-Antriebs-Geschäft im US-Markt. Quelle: Crowell &amp; Moring, 2026.</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">Q1 2026 – Yen-Schwächung verlangsamt sich <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">USD/JPY hat im Q1 2026 zwischen 148–155 gehandelt, weniger volatil als 2024. Für Shimano dämpft das die FX-Volatilität in der GuV — bei Stabilisierung bei ~150 JPY/USD könnte das OP-Income 2026 +¥5–8 Mrd. höher ausfallen als guided. Quelle: Bank of Japan, Bloomberg.</div>
+        </div>
+      </div>
+
+      <div class="source">Quellen: Investing.com, Bicycle Retailer, MarketScreener, TipRanks, PeopleForBikes, Pinkbike, ECI Survey 2026, Bike Europe, ClipClopBike, Crowell &amp; Moring (Februar–Mai 2026).</div>
+    </div>
+  </div>
+
+  <!-- ===================== SEKTION 9: TECHNISCHE ANALYSE ===================== -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-bottom:20px;">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value">¥17.070</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value" style="font-size:18px;">¥16.420</div><div class="kpi-sub" style="color:var(--green);">Kurs darüber</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value" style="font-size:18px;">¥16.180</div><div class="kpi-sub" style="color:var(--green);">Kurs darüber</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value" style="font-size:18px;">¥17.850</div><div class="kpi-sub" style="color:var(--red);">Kurs darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI(14)</div><div class="kpi-value" style="font-size:18px;">51</div><div class="kpi-sub">Neutral</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value" style="font-size:18px;">¥21.850</div><div class="kpi-sub" style="color:var(--red);">-21,9%</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value" style="font-size:18px;">+25</div><div class="kpi-sub" style="color:var(--green);">Bullisch</div></div>
+      </div>
+
+      <h3>Trendlage</h3>
+
+      <p>Der Trend ist auf langer Sicht (200-Tage-Linie ¥17.850 oberhalb des Kurses) <strong>abwärtsgerichtet</strong> — der Multi-Jahres-Bärenmarkt seit November 2021 (ATH ¥38.000) ist intakt, ein klassischer „Falling Resistance"-Verlauf. Auf der kurz- und mittelfristigen Ebene ist die Stimmung dagegen <strong>konstruktiver</strong>: Der Kurs hat im März 2026 bei ¥15.965 ein lokales Tief gemacht und ist seitdem in einem milden Aufwärtstrend, gestützt durch den SMA 20 (¥16.420) und SMA 50 (¥16.180). Das 52W-Low bei ¥14.895 (Februar 2026) wurde nicht mehr getestet — ein leicht positives Zeichen.</p>
+
+      <h3>Wichtige Levels</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Level-Typ</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+          <tbody>
+            <tr><td>Wichtiger Support 1</td><td>¥16.135</td><td>Volumen-Akkumulation März 2026, Pivot Bottom</td></tr>
+            <tr><td>Support 2 (52W-Low)</td><td>¥14.895</td><td>Februar-Tief 2026 — Crash unter dieses Level wäre starkes Verkaufssignal</td></tr>
+            <tr><td>Resistance 1</td><td>¥17.231</td><td>200-Tage-Bereich, Marktpsychologische Marke</td></tr>
+            <tr><td>Resistance 2 (SMA 200)</td><td>¥17.850</td><td>Bruch oberhalb wäre Trendwende-Signal</td></tr>
+            <tr><td>Resistance 3</td><td>¥19.500–20.000</td><td>Multi-Year-Resistance-Zone, langfristiges Target</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Indikatoren</h3>
+
+      <p>RSI(14) bei 51 = neutral, kein Überkauft/Überverkauft-Signal. MACD ist mit +25 leicht positiv und hat im April 2026 ein bullisches Kreuz vollzogen. Beta von 0,41 (5-Jahre) bestätigt: Shimano ist ein <strong>defensiver</strong> Titel — Kursbewegungen sind nur ~40% so volatil wie der Markt. Das macht die Aktie für Tradingview kein „strong sell"-Signal mehr (wie noch im März 2026), sondern eher ein „neutral" mit moderater bullischer Tendenz.</p>
+
+      <p><strong>Analystenerwartung:</strong> 11 Analysten Konsens, 12-Monats-Kursziel ¥18.046 (~+5,7% Upside). Range: ¥15.800 (Low) bis ¥24.000 (High). Rating: 2 Buy, 8 Hold, 1 Sell. Eher zurückhaltend, was zur eigenen Einschätzung passt (vgl. Sektion 12).</p>
+
+      <p><strong>Technisches Fazit:</strong> Aktie ist im Korridor ¥16.000–17.500, mit klarem Support bei ¥15.000 und Resistance bei ¥17.800 (SMA 200). Trendwende-Bestätigung wäre erst oberhalb ¥18.000 mit Volumen. Für Einstieg ist das aktuelle Niveau (¥17.070) nicht ideal — eher Wartepunkt im Korridor oder Tranchierung empfohlen. Score 5/10 spiegelt die ambivalente Lage: kurzfristig stabil, langfristig noch Bärenmarkt.</p>
+
+      <div class="source">Quellen: Investing.com Technical Analysis Shimano (Mai 2026); StockInvest.us 7309.T Forecast (04.03.2026); TipRanks Technical Analysis (Mai 2026); TradingView Symbol 7309 (Mai 2026); Yahoo Finance Chart 7309.T.</div>
+    </div>
+  </div>
+
+  <!-- ===================== SEKTION 10: RISIKEN ===================== -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 6/10 (invertiert)</div>
+    </div>
+    <div class="section-body">
+
+      <h3>10a) Strukturelle &amp; zyklische Risiken</h3>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🏭 China-Lagerzyklus zieht sich länger als erwartet</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Wahrscheinlichkeit: 55%. China ist ~17% Konzernumsatz (¥116 Mrd.). Shimano selbst sagt: „retail sales were lackluster, market inventories remained at high level". Falls Recovery bis Ende 2026 nicht eintritt, sinkt China-Sales um weitere -10% und drückt Konzern-OP um zusätzliche ¥5–8 Mrd.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ SRAM erodiert High-End-MTB-Marktanteil weiter</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Wahrscheinlichkeit: 40%. SRAM hat mit Eagle Transmission/AXS einen Wireless-Vorsprung von ~2 Jahren im High-End-MTB. Shimanos XTR Di2 M9200 (2025) und Deore Di2 M6200 (Juni 2025) sind technisch kompetitiv, aber der Markenwechsel bei OEM-Modellen (Trek, Specialized) braucht 2–3 Modelljahre. Bei Anteilsverlust von 5pp im MTB-Premium wären ~¥3-5 Mrd. weniger OP-Income p.a.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">📉 US-Tariffs eskalieren erneut</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-red">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Wahrscheinlichkeit: 35%. Supreme-Court-Urteil eliminierte IEEPA-Tariffs, aber Trump reagiert mit Section-122-Zöllen (10%) und neue Anti-China-Maßnahmen sind möglich. E-Bike-Batterie-Tarif steigt 2026 auf 25%. Sollte ein 25%-Tarif auf alle Komponenten kommen, drückt das den NA-Markt (~18% Umsatz) um -15–20%. Mitigation: Shimano klagt mit Trek/Specialized auf Rückerstattung und kann Singapur-Werk als Tariff-Bypass nutzen.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">💱 Yen-Volatilität / Carry-Trade-Risiko</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Wahrscheinlichkeit: 40%. Bank-of-Japan-Politik nach Ueda könnte 2026 weitere Zinsschritte bringen, was den Yen stärken würde. Das wäre OP-positiv (Rohstoff-Einkauf günstiger), aber Sales-negativ bei Umrechnung von EUR/USD-Erlösen. Netto kurzfristig leicht negativ, langfristig leicht positiv.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚖️ Antitrust-Klage von SRAM</div>
+          <div><span class="badge badge-blue">Niedrig</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Wahrscheinlichkeit: 20%. Fideres schätzt SRAM-Schaden auf $214–427 Mio. zwischen 2022–2027 wegen behauptetem unzulässigem Tying von Cycle-Computer-Integration im Di2-System. Eine formale Klage wurde noch nicht erhoben, könnte aber ein juristisches und PR-Risiko werden. Worst Case: $400 Mio. Settlement = ~6% Marktkap.</div>
+      </div>
+
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">🌡️ Wetter-Risiko (kühler, regnerischer Frühling Europa)</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-blue">Auswirkung: Niedrig</span></div>
+        </div>
+        <div class="event-text">Wahrscheinlichkeit: 40%. Sogar in Shimano-Quartalsberichten wird das Wetter als Sales-Treiber erwähnt. 2025 war ein „weather-positives" Jahr in Europa. Falls 2026 schlechteres Wetter bringt, könnten Sell-Through-Volumen um -5–10% im Q2/Q3 fallen. Aber niedrige Auswirkung gesamt.</div>
+      </div>
+
+      <h3>10b) AI-Risiko &amp; technologische Disruption</h3>
+
+      <p>Im klassischen Sinne ist Shimano <strong>kein AI-Risiko-Kandidat</strong> — Mechanik, Aluminium-Forging und Bremsen sind nicht direkt durch AI-Modelle substituierbar. Aber zwei indirekte Disruptionen sind real:</p>
+
+      <p><strong>(1) DJI / Avinox E-Bike-Motoren-Disruption (geringes Risiko, mittlere Auswirkung):</strong> Drohnen-Hersteller DJI hat 2024 ein E-Bike-Motor-System Avinox Drive vorgestellt mit AI-gestützter Power-Modulation und integriertem Sensorik. Falls DJI im E-Bike-Motor-Markt aggressiv expandiert, könnte Shimano EP801/EP6 (Marktanteil ~15% EU) Marktanteile verlieren. Schwere: niedrig (E-Bike-Motoren sind nur ~3-5% Konzernumsatz), aber strukturell beunruhigend.</p>
+
+      <p><strong>(2) Wireless / Software-Standards (real, ungelöst):</strong> Mit zunehmender Integration von Schaltung, Sensorik und Smart-Apps wird das Schalt-Protokoll zur Software-Frage. SRAM AXS und Shimano Di2 sind proprietär und nicht kompatibel. Wer den De-facto-Standard im aufkommenden vernetzten Fahrrad setzt (Ähnlich CarPlay vs. Android Auto im Auto), gewinnt das Software-Ökosystem. Hier hat SRAM mit der Akquisition von Hammerhead (Cycle Computer) einen Lead. Schwere: mittel.</p>
+
+      <h3>10c) Chancen</h3>
+
+      <p><strong>(1) Wireless-Marktdurchdringung (Höchste Chance):</strong> Im Schalt-Markt sind aktuell nur ~20% der verkauften Komponenten elektronisch (vs. mechanisch). Bei einer Verschiebung auf 35-40% bis 2030 wäre das ein Volumen-/Mix-Boost von ~30%. Shimano profitiert disproportional, weil Wireless-Komponenten 3-4x höhere Preise haben.</p>
+
+      <p><strong>(2) E-Bike-Recovery in Europa (Höhe der Chance):</strong> Europäischer E-Bike-Markt soll von $18,7 Mrd. (2026) auf $36 Mrd. (2035) wachsen — CAGR 7,6%. Wenn der Lagerzyklus 2027 endet, kommt eine 5-10% Volumenerholung im OEM-Geschäft.</p>
+
+      <p><strong>(3) M&amp;A-Potenzial (Spekulativ):</strong> ¥483 Mrd. Net-Cash gibt Optionen für Akquisition eines E-Bike-Motor-Players (Brose, Mahle e-bike division) oder eines AI-Software-Players. Würde Burggraben strukturell erweitern.</p>
+
+      <p><strong>(4) Aftermarket-Wachstum:</strong> Post-Covid-Bikes von 2020/21 kommen in den Service-Zyklus — Ersatzteile, Upgrades. Aftermarket-Margen sind +5-7pp höher als OEM.</p>
+
+      <h3>10d) Red Flags &amp; Dealbreaker</h3>
+
+      <p><strong>Red Flags (beobachten):</strong> (a) OP-Marge fällt unter 8% in zwei aufeinanderfolgenden Quartalen — würde strukturelles Problem signalisieren. (b) Erfolgreiche SRAM-Klage gegen Shimano über $400+ Mio. (c) China-Lagerabbau zieht sich über 2027 hinaus.</p>
+
+      <p><strong>Dealbreaker (existenzbedrohend):</strong> Keine. Shimano hat eine Festungs-Bilanz mit ¥483 Mrd. Cash bei null Net-Debt und einem Burggraben, der durch keine einzelne Krise gefährdet wird. Selbst im schwersten Stress-Szenario (OP-Marge bei 5%, FX-Krise) wäre das Unternehmen rentabel und cashflow-positiv. Das ist der Hauptgrund, warum die invertierte Risiko-Score bei 6/10 (nicht 3/10) liegt.</p>
+
+      <div class="source">Quellen: Fideres SRAM Damages (12.03.2025); PeopleForBikes US Tariff Update (11.2025); Cycling Weekly „A feast and a famine – why are profits falling" (27.03.2026); GMInsights Europe E-Bike Market 2026; Bike-Eu Inventory Reports (11.2025); BIKE Magazin „Bicycle crisis 2026" (03.2026).</div>
+    </div>
+  </div>
+
+  <!-- ===================== SEKTION 11: SCORING ===================== -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring-Übersicht</div>
+      <div class="section-score">Ø Gesamtscore: 6,6/10</div>
+    </div>
+    <div class="section-body">
+
+      <p>Die User-spezifischen Thesen (Lagerzyklus, Bewertung, Burggraben vs. SRAM) wurden in den jeweiligen Sektionen integriert und beeinflussen die Scores wie folgt: <strong>(a) Lagerzyklus</strong> drückt Wachstums-Score (5/10) und Quartals-Score (5/10). <strong>(b) Bewertung</strong> ergibt einen fairen Score (6/10) — günstig auf ex-Cash-Basis, teuer auf Headline-P/E. <strong>(c) Burggraben vs. SRAM</strong> rechtfertigt einen hohen Burggraben-Score (8/10), wenn auch nicht 9/10 wegen High-End-MTB-Druck. Cashflow/Bilanz (9/10) bleibt das stärkste Argument der Investmentthese.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Score-Bar</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td>Geschäftsmodell</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>OEM-Lock-In, vertikale Integration, kein Abo aber kapital-effizient</td></tr>
+            <tr><td>Burggraben</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>70% Mid-to-High-End Marktanteil, aber SRAM erodiert High-End-MTB</td></tr>
+            <tr><td>Op. Entwicklung (4Q)</td><td><strong>5/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Sales-Beats, OP-Misses, Margen-Druck zyklisch</td></tr>
+            <tr><td>Wachstum</td><td><strong>5/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>+0,2% Sales-Guidance 2026, Reifegrad Mature/Cyclical</td></tr>
+            <tr><td>Bewertung</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Headline-P/E teuer, ex-Cash EV/EBITDA 8,1x — fair</td></tr>
+            <tr><td>Cashflow &amp; Kapitalqualität</td><td><strong>9/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>¥483 Mrd. Net-Cash, 234% Total Return Ratio, FCF/NI >100%</td></tr>
+            <tr><td>Peer-Vergleich</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Klar Marktführer, Bilanz beste der Branche, Premium-Bewertung gerechtfertigt</td></tr>
+            <tr><td>Risiken (invertiert)</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Real (China, Tariffs, SRAM), aber kein Dealbreaker</td></tr>
+            <tr><td>Technische Analyse</td><td><strong>5/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Stabilisierung, aber unter SMA 200, langfristig Bärenmarkt</td></tr>
+            <tr style="background:rgba(230,0,40,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>6,6/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track">
+                    <div class="score-bar-fill" style="width:66%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
+                  </div>
+                  <span class="score-num" style="color:var(--primary);">6,6</span>
+                </div>
+              </td>
+              <td>Solide Quality-Story mit zyklischem Gegenwind. Bilanz und Burggraben ziehen, Wachstum und Technik bremsen.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Die Score-Verteilung zeigt das fundamentale Profil: Shimano ist <strong>kein klassisches Wachstumsinvestment</strong> (Score 5/10), sondern eine <strong>Quality-Value-Story mit zyklischem Erholungspotenzial</strong>. Bilanz (9/10) und Burggraben/Geschäftsmodell (jeweils 8/10) sind die Triebfedern. Schwächen sind zyklisch, nicht strukturell — was die Asymmetrie für Long-Investoren attraktiv macht.</p>
+
+      <div class="source">Eigene Bewertung auf Basis aller vorhergehenden Sektionen, kalibriert gegen Canvas-v2.2-Methodik.</div>
+    </div>
+  </div>
+
+  <!-- ===================== SEKTION 12: FAZIT ===================== -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit &amp; Investment-These</div>
+      <div class="section-score">Score: ⌀ 6,6/10</div>
+    </div>
+    <div class="section-body">
+
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 — Festungsbilanz als Optionsschein.</strong> Shimano hält ¥483 Mrd. Net-Cash (~$3,1 Mrd.), das sind 33% der Marktkapitalisierung von ¥1,47 Bio. Ex-Cash handelt die Aktie zu EV/EBITDA 8,1x — vs. 10-Jahres-Median von 11,2x ist das ein <em>klarer Discount</em>. Das ist nicht „totes" Geld: 2025 wurden ¥100 Mrd. (über 2 Jahre) in Buybacks zurückgegeben, 2026 läuft ein weiteres ¥50 Mrd. Programm, Aktivist Dalton drückt für noch mehr. Die Bilanz finanziert die Bewertungs-Wiederaufholung quasi selbst.</p>
+          <p><strong>Säule 2 — Burggraben unverändert breit, gerade rentabilitäts-zyklisch.</strong> Mit ~70-80% Marktanteil bei Mid-to-High-End Bicycle Components ist Shimano nach wie vor der unbestrittene Marktführer. Der Wireless-Rückstand zu SRAM im High-End-MTB ist mit XTR Di2 M9200 (2025) und Deore M6200 (Juni 2025) technologisch geschlossen — die OEM-Adoption folgt mit 2-3 Jahren Verzögerung. Im Road-Bike-Segment (Tour de France, 60%+ Marktanteil) ist Shimano de facto unangefochten. Marktanteilsstabilisierung ist 2026/27 hochwahrscheinlich.</p>
+          <p><strong>Säule 3 — Asymmetrische Reaktionsfähigkeit.</strong> Bei Normalisierung der EBITDA-Marge von aktuell 17% auf den 5J-Schnitt von 24% wären ~¥110 Mrd. statt aktuell ~¥80 Mrd. EBITDA — bei gleichem Umsatz. Das EBITDA-Multiple würde auf ~6x ex-Cash fallen, was historisch ein klarer Buy ist. Bei Normalisierung des EPS von ¥387 (TTM) auf ¥800-900 (10J-Median) ergäbe das implizierte P/E ~21x — bei aktuellem Kurs entsprechend. Die Bewertung enthält fast keine Erholungs-Erwartung.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 — China-Lagerzyklus verschleppt sich bis 2028.</strong> Shimanos eigene Sprache: „retail sales were lackluster, inventories remained high in China." Giant Manufacturing meldet für Q1 2026 -20-40% Sales-Decline YoY. Falls die Recovery bis 2028 dauert (statt 2027), drückt das den OP weitere ¥10-15 Mrd. nach unten, die EBITDA-Marge bleibt bei 17-18% statt 24%. Das aktuelle KGV von 43x wäre dann <em>strukturell</em> teuer, nicht zyklisch.</p>
+          <p><strong>Risiko 2 — SRAM gewinnt strukturell im High-End-MTB.</strong> Wireless ist im MTB-Premium ein Marktanteils-Spiel: SRAM Eagle Transmission ist seit 2022 etabliert, Shimano XTR Di2 M9200 ist erst 2025 erschienen. OEM-Modellzyklen brauchen 2-3 Jahre — das heißt, SRAM kann 2026-2028 weiter Anteile fressen. Bei -10pp Marktanteilsverlust im MTB-Premium-Segment wären ~¥5-8 Mrd. weniger OP-Income jährlich permanent verloren. Plus mögliche $400 Mio. Settlement bei Antitrust-Klage.</p>
+          <p><strong>Risiko 3 — Trump-Tariffs, Yen-Stärke, Europa-Krise.</strong> Der Sektor ist von externen Faktoren gebeutelt: 56% Tariff auf Komplettbikes aus China (drückt US-OEM-Volumen), 25% E-Bike-Batterie-Tariff ab 2026, mögliche Yen-Aufwertung (kostet Umrechnungserlöse), ECI-Survey meldet weiterhin 50% Überbestände in Europa. P/E 43x ist objektiv teuer für eine Aktie, deren Hauptmarkt strukturell unter Druck steht. Konsens-Kursziel ¥18.046 = nur +5,7% Upside.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+
+      <p>Das bullische Narrativ überzeugt mehr — aber das bärische enthält zwei valide Risikoblöcke, die nicht ignorierbar sind. Die Quintessenz: <strong>Shimano ist heute eine Quality-Value-Asymmetrie mit moderatem Upside und sehr begrenztem Downside.</strong> Drei Begründungspunkte:</p>
+
+      <p>Erstens — der <strong>Cash-Floor</strong>: Bei ¥483 Mrd. Net-Cash ist ein Kursfall unter ¥13.000 (Cash-Wert pro Aktie + minimaler Goodwill für operatives Geschäft) extrem unwahrscheinlich. Das limitiert das Downside-Risiko auf ~-25% selbst im Worst-Case. Der Vergleich: Giant Manufacturing ist 2025 um -44% gefallen, Merida ähnlich — beide sind aber Komplettrad-Hersteller mit dünnen Margen und Net-Debt. Shimano kann Krisen aus dem Cash-Berg „aushalten" wie kein anderes Unternehmen der Branche.</p>
+
+      <p>Zweitens — der <strong>Bewertungs-Discount auf normalisierte Erträge</strong>: Falls EBITDA-Marge auf 22% (mid-cycle, nicht Peak) erholt, ergibt das EBITDA ~¥100 Mrd. Bei einem fairen EV/EBITDA-Multiple von 10x (10J-Median liegt bei 11,2x) wäre der EV ¥1.000 Mrd., plus Net-Cash ¥483 Mrd. = ¥1.483 Mrd. Marktkap. = <strong>¥17.200/Aktie</strong>. Das ist exakt der aktuelle Kurs. Aber: bei Peak-EBITDA-Marge wären es ¥21.000-22.000 (was das 52W-High war). Die heutige Bewertung ist also fair für ein zyklisch deprimiertes Mid-Cycle-Szenario, mit klarer Asymmetrie nach oben.</p>
+
+      <p>Drittens — der <strong>Burggraben-Test</strong>: Die These „SRAM kann Shimano dethronen" überzeugt mich nicht. SRAM hat 2019-2023 echte Anteile im High-End gewonnen, aber Shimano hat 2024-2026 nachgezogen. Die strukturellen Vorteile Shimanos (vertikale Integration, OEM-Lock-In, Markenmacht) sind nicht erodiert — sie sind nur kurzfristig schwer monetarisierbar in einer zyklischen Krise. Auch die Antitrust-Klage ist eher ein juristisches als ein wirtschaftliches Risiko (max. 6% Marktkap. bei Worst Case).</p>
+
+      <p><strong>Wo ich falsch liegen könnte:</strong> (a) Die China-Konsum-Schwäche ist strukturell, nicht zyklisch — dann wären 17% des Umsatzes permanent reduziert. (b) DJI/Avinox revolutioniert E-Bike-Motoren und Shimano verliert dort dauerhaft. (c) Trump eskaliert mit 100% Tariffs auf alle asiatischen Produkte — was den US-Markt für Shimano effektiv zerstören würde. Alle drei haben aber niedrige (10-20%) Wahrscheinlichkeit.</p>
+
+      <p><strong>Risk/Reward:</strong> -15% Downside (Support bei ¥14.500 / Cash-Floor bei ¥13.000) vs. +30-50% Upside (Zielkorridor ¥21.500-25.500 in 2-3 Jahren bei Margen-Erholung).</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kurz (0-6M)</strong></td><td>Q2 2026 Earnings (28.07.), Buyback-Acceleration, EU-Wetter</td><td>OP-Miss bei Q2/Q3, Yen-Volatilität, neue US-Tariffs</td><td><span class="badge badge-yellow">Halten / Tranchiert einsteigen</span></td></tr>
+            <tr><td><strong>Mittel (6-24M)</strong></td><td>China-Recovery, Margenerholung, M&amp;A im E-Bike-Motor-Segment</td><td>Lagerzyklus zieht sich, SRAM gewinnt MTB-Anteile, Konsum-Krise EU</td><td><span class="badge badge-green">Kaufen — Quality-Recovery-Position</span></td></tr>
+            <tr><td><strong>Lang (2-5J)</strong></td><td>Wireless-Adoption auf 35-40%, E-Bike-Markt Verdopplung, Service-Cycle</td><td>Strukturelle Disruption durch AI/DJI im E-Bike-Antrieb</td><td><span class="badge badge-green">Kaufen &amp; Halten — Quality-Compounder</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese (Zusammenfassung)</h3>
+
+      <p>Shimano ist die qualitativ beste Aktie der globalen Cycling-Industrie in einer zyklisch deprimierten Phase, mit einer Festungsbilanz, die das Downside-Risiko fundamental limitiert und gleichzeitig Buybacks finanziert. Der Burggraben hält trotz SRAM-Druck im High-End-MTB. Die Headline-Bewertung (P/E 43x) ist optisch teuer, aber ex-Cash (EV/EBITDA 8,1x) liegt sie unter dem 10-Jahres-Median. Bei Normalisierung der EBITDA-Marge von 17% auf 22-24% ergibt sich ein Kursziel von ¥21.500-25.500 in 2-3 Jahren — Upside +25 bis +50%. Risiken sind real, aber kein Dealbreaker. Geeignet für Quality-Value-Investoren mit 2-5 Jahres Horizont und Geduld für einen Lagerzyklus.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN (Tranchiert)</div></div>
+        <div class="rating-item"><label>Zielkurs (12-18M)</label><div class="val">¥19.500-21.500</div></div>
+        <div class="rating-item"><label>Zielkurs (24-36M)</label><div class="val">¥22.000-25.500</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2-3 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">-15%</div></div>
+        <div class="rating-item"><label>Upside (24-36M)</label><div class="val" style="color:var(--green);">+30 bis +50%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val buy">1:2,5</div></div>
+        <div class="rating-item"><label>Conviction</label><div class="val" style="color:var(--yellow);">Mittel-Hoch</div></div>
+      </div>
+
+      <h3>Was falsifiziert die These? (Trigger)</h3>
+
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>OP-Marge fällt in 2 aufeinanderfolgenden Quartalen unter 8% → strukturelles Problem, reduzieren</li>
+            <li>China-Sales fallen Q2/Q3 2026 um mehr als -15% YoY → Lagerzyklus erweitert sich auf 2028</li>
+            <li>SRAM erfolgreiche Antitrust-Klage > $400 Mio. → reduzieren</li>
+            <li>Kursdurchbruch unter ¥14.500 (52W-Low + Support) → technisches Verkaufssignal, reduzieren um 30-50%</li>
+            <li>Verlust eines Top-5-OEM-Kunden (Trek, Specialized, Giant, Canyon) an SRAM exclusiv → strukturelle Burggraben-Erosion</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Q2 2026 OP-Income > ¥12 Mrd. (Konsens-Beat) → Recovery beginnt, nachkaufen</li>
+            <li>China-Sales kehren in Q3 2026 zu positivem YoY → strukturelles Wendesignal, voll einsteigen</li>
+            <li>Management erhöht Buyback-Programm auf > ¥75 Mrd. (Dalton-Aktivisten-Druck siegt) → kurzfristiger Kurs-Push</li>
+            <li>Bruch oberhalb ¥18.000 (SMA 200) mit Volumen → Trendwende-Bestätigung, aggressiv aufbauen</li>
+            <li>M&amp;A-Akquisition eines E-Bike-Motor-Players (Brose, Mahle-Division) → strategisches Re-Rating</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Welcher Anlegertyp passt?</h3>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Quality-Value-Investoren mit Geduld (2-5 J)</li>
+            <li>Defensive Allokationen (Beta 0,41)</li>
+            <li>Anti-Zyklische Investoren (Sektor-Tief)</li>
+            <li>Bilanz-fokussierte Investoren (Net-Cash-Story)</li>
+            <li>Dividenden-Wachstums-Investoren (2,1% + Buybacks)</li>
+            <li>Japan-Exposure für Diversifikation</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Wachstumsinvestoren (Wachstum +0,2% 2026E)</li>
+            <li>Kurzfristige Trader (Trend noch nicht bestätigt)</li>
+            <li>Hoch-Yield-Investoren (Dividend Yield nur 2,1%)</li>
+            <li>Investoren ohne Geduld für Lagerzyklus</li>
+            <li>Anleger ohne Yen-Hedge-Möglichkeit (FX-Risiko)</li>
+            <li>Momentum-Investoren (langsame Story)</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten auf Q2-Bestätigung</span></td><td>Abwarten bis Q2 2026 Earnings (28.07.) → falls OP-Beat, dann tranchiert einsteigen</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>30% jetzt bei ¥17.000, 30% bei Pullback auf ¥16.000, 40% bei Bruch über ¥18.000</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt voll kaufen</span></td><td>Asymmetrie Risk/Reward 1:2,5 bei aktuellem Kurs ist favorable. Cash-Floor begrenzt Downside</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Buy &amp; Hold mit Tranchen</span></td><td>Quality-Compounder im Sektor-Tief, 2-5 Jahre für strukturelles Re-Rating bei Wireless-Adoption</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="source">Eigene Investment-Synthese basierend auf Sektionen 1-11. Quellen für einzelne Argumente: dort jeweils aufgeführt.</div>
+    </div>
+  </div>
+
+  <!-- ===================== SEKTION 13: OUTLOOK ===================== -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Anstehende Events &amp; Trigger</div>
+    </div>
+    <div class="section-body">
+
+      <p>Drei konkret datierte Events in den kommenden 6-12 Monaten werden über das Narrativ entscheiden:</p>
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q2 2026 Earnings – voraussichtlich 28. Juli 2026</h4>
+        <p>Die kommenden Quartalsergebnisse sind der wichtigste Test der bullischen These. Drei Schlüsselgrößen sind entscheidend: (a) <strong>OP-Income absolut</strong> — Konsens liegt bei ¥10-12 Mrd., (b) <strong>OP-Income YoY-Vergleich</strong>, weil Q2 2025 mit ¥15,1 Mrd. hoch war, (c) <strong>China-Sales-Kommentar</strong> aus dem Management-Call.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Q2 2026 OP-Income &gt; ¥12 Mrd. UND Management bestätigt „China-Lagerabbau abgeschlossen" oder „Wendepunkt sichtbar" → kurzfristig nachkaufen, Position auf Vollgewichtung erhöhen. Das wäre das stärkste Recovery-Signal seit 2022.<br><br>
+          <strong>Wenn:</strong> Q2 2026 OP-Income &lt; ¥9 Mrd. UND/ODER China-Sales sinken weiter um -10% YoY → Position bei ¥17.000 reduzieren um 30%, abwarten auf Q3-Daten Oktober 2026. Lagerzyklus erweitert sich auf 2028, EBITDA-Marge bleibt strukturell tief.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 2: US-China Trade Deal Verlängerung – Stichtag 10. November 2026</h4>
+        <p>Das aktuelle US-China-Tariff-Arrangement aus November 2025 (10% IEEPA-Fentanyl, 56% Komplettbike-Tariff) läuft bis 10. November 2026. Ohne Verlängerung droht eine Eskalation auf 66-100% Tariffs. Shimano ist als Komponenten-Lieferant nicht direkt von Komplettbike-Tariffs betroffen, aber sehr wohl von der OEM-Volumenreduktion in den USA und durch das Singapur-Werk umgehbar.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Trade Deal wird mindestens für 12 weitere Monate verlängert ODER Tariffs sinken auf &lt; 40% → US-Markt-Erholung 2027 wahrscheinlich, nordamerikanische OEM-Aufträge steigen. Position halten oder leicht aufstocken bei Kursschwäche.<br><br>
+          <strong>Wenn:</strong> Tariffs eskalieren auf &gt; 80% ODER neue Section-301-Maßnahmen gegen alle asiatischen Komponenten-Importe → NA-Markt (~18% Konzernumsatz) sinkt um -20-30%, Position um 25% reduzieren bei Kursen über ¥17.000.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 3: Q3 2026 Earnings &amp; Eurobike 2026 – Oktober 2026</h4>
+        <p>Q3 2026 Ergebnisse (voraussichtlich Ende Oktober 2026) und parallel die Eurobike-Branchenmesse (Frankfurt, üblicherweise Ende Juni/Juli) sind der nächste Wendepunkt. Q3 ist saisonal der wichtigste Quartal für die Komponenten-Industrie (Vorlauf für die Modelljahre 2027). Die Eurobike zeigt OEM-Auftragslage und Wireless-Technologie-Trends. Falls SRAM dort einen weiteren Wireless-Coup vorstellt (z.B. Apex AXS 2.0 oder Force AXS), könnte das Shimanos Marktanteilsverteidigung infrage stellen.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Q3 OP-Marge erholt sich auf &gt;15% UND Shimano auf der Eurobike zeigt überzeugende Wireless-Roadmap (z.B. neue Dura-Ace Di2 Generation, integrierte Smart-Schaltung) → Burggraben-Befestigung bestätigt, langfristiges Re-Rating beginnt. Position voll aufbauen bei Kursen unter ¥19.000.<br><br>
+          <strong>Wenn:</strong> Q3 OP-Marge bleibt unter 12% UND SRAM zeigt auf der Eurobike eine deutlich überlegene neue Wireless-Generation (kürzere Reaktionszeit, längere Akkulaufzeit, niedrigerer Preis) → Burggraben-Erosion-Risiko steigt, Position reduzieren auf max. 50% der ursprünglichen Allokation, abwarten auf 2027er Modelljahre.
+        </div>
+      </div>
+
+      <div class="source">Quellen: Shimano IR Calendar (Stand 05.2026); PeopleForBikes US Tariff Tracker; Eurobike Frankfurt Event-Plan 2026; eigene Synthese.</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken. Sie stellt keine Anlageberatung, kein Angebot zum Kauf oder Verkauf von Wertpapieren und keine Empfehlung dar. Investitionen in Aktien sind mit erheblichen Risiken verbunden, einschließlich des Verlusts des eingesetzten Kapitals. Wertpapierkurse und Wechselkurse können volatil sein. Die hier dargestellten Daten basieren auf öffentlich verfügbaren Quellen und können Fehler enthalten. Jeder Investor sollte seine eigene Recherche durchführen oder einen qualifizierten Finanzberater konsultieren, bevor er Anlageentscheidungen trifft. Die Analyse spiegelt die persönliche Einschätzung des Verfassers zum Stichtag wider und kann sich jederzeit ändern. Vergangene Performance ist kein Indikator für zukünftige Ergebnisse. Stand: 18. Mai 2026.
+  </div>
+
+</div>
+</body>
+</html>
