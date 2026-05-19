@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MELI – Aktienanalyse Canvas v2.2</title>
+<style>
+:root {
+  --primary: #FFE600;
+  --primary-dark: #ccb800;
+  --bg: #0f0f12;
+  --bg-card: #1a1a1f;
+  --bg-card2: #22222a;
+  --border: #2e2e38;
+  --text: #e8e8ec;
+  --text-muted: #888898;
+  --text-dim: #555566;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --blue: #3b82f6;
+  --purple: #8b5cf6;
+  --teal: #14b8a6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7;
+}
+.header {
+  background: linear-gradient(135deg, #1a1a00 0%, #2a2800 40%, #0f0f12 100%);
+  border-bottom: 1px solid var(--primary);
+  padding: 36px 40px 28px; display: flex; justify-content: space-between;
+  align-items: flex-start; flex-wrap: wrap; gap: 20px;
+}
+.header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+.header-left h1 span { color: var(--primary); }
+.header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+.header-right { text-align: right; }
+.price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+.price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+.price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+.price-change.up   { background: rgba(34,197,94,0.15); color: var(--green); }
+.price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+.nav {
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
+  position: sticky; top: 0; z-index: 100;
+}
+.nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+.main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+.kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+.kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.kpi-value.green  { color: var(--green); }
+.kpi-value.red    { color: var(--red); }
+.kpi-value.orange { color: var(--primary); }
+.section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+.section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+.section-number { background: var(--primary); color: #0f0f12; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.section-title  { font-size: 16px; font-weight: 700; color: white; }
+.section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+.section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+.section-body   { padding: 20px 24px; }
+p { margin-bottom: 12px; color: var(--text); }
+p:last-child { margin-bottom: 0; }
+h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+h3:first-child { margin-top: 0; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,230,0,0.04); }
+.beat    { color: var(--green);  font-weight: 600; }
+.miss    { color: var(--red);    font-weight: 600; }
+.neutral { color: var(--yellow); font-weight: 600; }
+.badge        { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.badge-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
+.badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
+.badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+.badge-blue   { background: rgba(59,130,246,0.15); color: var(--blue); }
+.badge-orange { background: rgba(255,230,0,0.15);  color: var(--primary); }
+.event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+.event-item:last-child { border-bottom: none; }
+.event-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+.dot-green  { background: var(--green); }
+.dot-red    { background: var(--red); }
+.dot-yellow { background: var(--yellow); }
+.event-label { font-weight: 600; color: white; }
+.event-text  { font-size: 14px; color: var(--text); }
+.risk-item   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+.risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.risk-title  { font-weight: 600; color: white; font-size: 14px; }
+.score-bar       { display: flex; align-items: center; gap: 10px; }
+.score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.score-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #ff9500); }
+.score-num       { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+.bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+.bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+.bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+.bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.bear-card h4 { color: var(--red);   margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.rating-box { background: linear-gradient(135deg, rgba(255,230,0,0.12), rgba(255,230,0,0.04)); border: 1px solid rgba(255,230,0,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+.rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+.rating-item .val  { font-size: 20px; font-weight: 800; color: white; }
+.rating-item .val.buy  { color: var(--green); }
+.rating-item .val.hold { color: var(--yellow); }
+.rating-item .val.sell { color: var(--red); }
+.trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+.trigger-card      { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.trigger-card h5   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.trigger-card.buy  h5 { color: var(--green); }
+.trigger-card.sell h5 { color: var(--red); }
+.trigger-list    { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+.trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+.trigger-list li::before { content: "→"; position: absolute; left: 0; }
+.investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+@media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+.investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+.investor-no  { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+.investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-no  h5 { color: var(--red);   font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+.investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+.investor-no  li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+.geo-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+.geo-card   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.geo-pct    { font-size: 20px; font-weight: 700; color: white; }
+.geo-note   { font-size: 12px; color: var(--text-muted); }
+.outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+.outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+.outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+.outlook-card .when-then strong { color: var(--primary); }
+.source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+.source a { color: var(--text-dim); }
+.disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+.alert-box { background: rgba(255,230,0,0.08); border: 1px solid rgba(255,230,0,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+.divider   { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.pill      { display: inline-block; background: rgba(255,230,0,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>MercadoLibre <span>MELI.US</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 19. Mai 2026 · NASDAQ · Sektor: Consumer Discretionary / E-Commerce &amp; Fintech</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">E-Commerce LatAm Marktführer</span>
+      <span class="badge badge-blue">Mercado Pago Fintech</span>
+      <span class="badge badge-yellow">Margin Compression</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$1.578</div>
+    <div class="price-meta">Schlusskurs 18.05.2026 · NASDAQ</div>
+    <div class="price-change down">▼ –40,4 % unter 52W-High</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $1.495 – $2.645</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <!-- KPI OVERVIEW -->
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">$1.578</div><div class="kpi-sub">USD · 18.05.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Marktkap.</div><div class="kpi-value">$80,0 Mrd</div><div class="kpi-sub">50,7 Mio Aktien</div></div>
+    <div class="kpi-card"><div class="kpi-label">FWD P/E</div><div class="kpi-value orange">29,7×</div><div class="kpi-sub">TTM: 42,4×</div></div>
+    <div class="kpi-card"><div class="kpi-label">EV/EBITDA</div><div class="kpi-value">25,0×</div><div class="kpi-sub">TTM, Mai 26</div></div>
+    <div class="kpi-card"><div class="kpi-label">Revenue 2025</div><div class="kpi-value green">$28,9 Mrd</div><div class="kpi-sub">+39 % YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">Op. Marge Q1</div><div class="kpi-value red">6,9 %</div><div class="kpi-sub">Q1'25: 12,2 %</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value">05.08.2026</div><div class="kpi-sub">Q2 2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Analystenkonsens</div><div class="kpi-value green">Buy</div><div class="kpi-sub">PT ⌀ $2.236 (+41 %)</div></div>
+  </div>
+
+  <!-- SEKTION 1: GESCHÄFTSMODELL -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-score">Score: 9/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Was MercadoLibre macht</h3>
+      <p>MercadoLibre ist die mit Abstand führende Internet-Plattform Lateinamerikas und vereint Marktplatz, Logistik, Werbung und Finanzdienstleistungen in einem integrierten Ökosystem. Die Gesellschaft betreibt unter <span class="pill">Mercado Libre</span> einen Online-Marktplatz, der über Mobile-App und Website in 18 Ländern erreichbar ist, sowie unter <span class="pill">Mercado Pago</span> eine vollwertige Fintech-Plattform mit Konten, Investments, Krediten und Acquiring. Hinzu kommen die Logistiksparte <span class="pill">Mercado Envíos</span>, die Werbeplattform <span class="pill">Mercado Ads</span> und das Kredit-Geschäft <span class="pill">Mercado Crédito</span>.</p>
+      <p>Die Kundensegmente sind sowohl B2C (mehr als 100 Mio. einzigartige Käufer) als auch B2B (rund 1 Mio. aktive Verkäufer und Millionen kleinerer Händler, die Mercado Pago Acquiring nutzen). Geografisch dominieren Brasilien (Hauptprofitpool), Mexiko (zweitwichtigster Markt) und Argentinien (Heimatmarkt mit hoher Margenvolatilität wegen Inflation) das Geschäft; "Other Countries" (Chile, Kolumbien, Peru, Uruguay etc.) liefern einen wachsenden, aber kleinen Beitrag.</p>
+      <h3>Revenue-Streams</h3>
+      <p>Das Modell ist sehr diversifiziert: Final-Value-Fees aus Marketplace-Transaktionen, Shipping-Gebühren über Mercado Envíos, Werbeerlöse (Mercado Ads wuchs in Q1'26 um 73 % YoY), Subscription-Gebühren für Verkäuferprogramme, Acquiring-Gebühren (Mercado Pago verarbeitet TPV von $87,2 Mrd. allein in Q1'26) sowie Zinserträge aus dem rasant wachsenden Kreditbuch ($14,6 Mrd. Ende Q1'26). Im Gesamtjahr 2025 entfielen rund 55 % der Erlöse auf den Commerce- und 45 % auf den Fintech-Bereich; in Q1'26 betrug der Fintech-Anteil bereits ca. 46 % ($4,0 Mrd. von $8,8 Mrd. Gesamtumsatz).</p>
+      <h3>Kostenstruktur &amp; Unit Economics</h3>
+      <p>MELI ist kein klassisches Asset-Light-Geschäft mehr. Massive Capex-Investitionen in Fulfillment-Center (insbesondere Argentinien, Mexiko, Brasilien) und das schnell wachsende erste-Partei-Inventar (1P) erhöhen die Capital-Intensität deutlich. Der entscheidende strategische Hebel ist die Cross-Sell-Mechanik zwischen Marktplatz und Fintech: Käufer werden zu Mercado-Pago-Nutzern (Konto, Karten), Verkäufer zu Acquiring-Kunden und Kreditnehmern. In Q1'26 wurden 2,7 Mio. Mercado-Pago-Kreditkarten ausgegeben (+104 % YoY beim Kartenportfolio); ein bedeutender Anteil der Karteninhaber war zuvor reiner Marktplatznutzer. Genau diese Konversion ist die Quelle des überdurchschnittlichen Lifetime-Values pro Kunde – aber auch der Grund für die kurzfristige Margenkompression, weil Kredit-Provisionen ("Allowance for Doubtful Accounts") direkt bei Origination erfasst werden, während Zinserträge erst über die Laufzeit entstehen.</p>
+      <div class="source">Quellen: MELI Q1'26 Shareholder Letter (07.05.2026); SEC 8-K (07.05.2026); Morningstar Company Profile (Mai 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 2: BURGGRABEN -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Netzwerkeffekte – stark, aber regional differenziert</h3>
+      <p>MercadoLibre profitiert vom klassischen zweiseitigen Marktplatz-Netzwerkeffekt: Käufer kommen wegen der Auswahl (>600 Mio. aktive Listings), Verkäufer wegen der Käufer-Reichweite. In Brasilien hält MELI laut Marktanalysen rund 40 % E-Commerce-Marktanteil, in Mexiko Position 1 oder 2 (zusammen mit Amazon) im Multi-Kategorien-Segment, in Argentinien praktisch monopolartige Stellung. Dieser Netzwerkeffekt ist in Brasilien jedoch deutlich angegriffener als noch vor zwei Jahren: Shopee (~15 %), Amazon (~10 %), Magazine Luiza, Shein und Temu kämpfen aggressiv um GMV-Share.</p>
+      <h3>Switching Costs – Fintech als Lock-in</h3>
+      <p>Im reinen E-Commerce sind die Switching-Costs für Käufer niedrig (Multi-Homing ist die Regel; gleicher Verkäufer auf MELI, Shopee und Amazon). Das entscheidende Asset für die Kundenbindung ist Mercado Pago: 83 Mio. monatlich aktive Fintech-Nutzer mit Assets under Management von rund $20 Mrd. (+77 % YoY) und einem Kreditportfolio von $14,6 Mrd. Wer Lohn, Investments und Karten bei Mercado Pago hat, wechselt nicht wegen $5 Versandkosten. Genau hier liegt der differenzierende Burggraben gegen Amazon und die asiatischen Player – keiner von ihnen hat ein vergleichbares vollintegriertes Bank-Ökosystem in LatAm.</p>
+      <h3>Scale &amp; Logistik – der teuer erkaufte Vorsprung</h3>
+      <p>Mercado Envíos ist mit Free-Same-Day-Delivery in vielen LatAm-Großstädten infrastrukturell weit voraus. MELI investierte 2024 allein $2,45 Mrd. in Mexico-Logistik und kündigte 2026 weitere $3,4 Mrd. Investitionen in Argentinien an. Diese Investitionen sind so kapitalintensiv, dass ein neuer Eintritt schwer ist – aber sie sind eben auch der Grund für die aktuelle Margenkompression. Free-Shipping-Threshold wurde 2025 in Brasilien auf BRL 19 gesenkt; das beschleunigte Items-sold-Growth in Q1'26 auf +56 % YoY.</p>
+      <h3>Schwächen des Burggrabens</h3>
+      <p>Drei spürbare Risse: (1) In Fashion und Long-Tail-Cross-Border-Categories sind Shein und Temu strukturell günstiger – MELI kann hier nur über 1P-Inventar und Cross-Border-Programme kontern, was Margen kostet. (2) In Brasilien droht Shopee mit Sea Limited's Monee/SeaMoney-Fintech-Backend ein direkter Angriff aufs Cross-Sell-Modell, und Nubank dominiert das pure Digital-Banking. (3) In Mexiko gewinnen Temu, Shein und Walmart-Mercadolibre-Kombinationen an Boden; AdSpend muss permanent hoch bleiben.</p>
+      <div class="source">Quellen: PYMNTS – Latin America eCommerce Growth (28.01.2026); BusinessOfFashion – Mercado Libre Asian rivals; PaySpace – Top 10 Brazil Fintechs (20.03.2026); MELI Q1'26 Shareholder Letter</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 3: 4 QUARTALE -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale (Q2'25 – Q1'26)</div>
+      <div class="section-score">Beat-Ratio Rev: 4/4 · EPS: 0/4</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">
+        ⚠️ <strong>Hinweis:</strong> Nächste Earnings am <strong>05.08.2026 (Q2'26)</strong>. Konsens-Schätzungen für Q2'26: EPS ~$9,8, Revenue ~$9,3 Mrd. Geführte Quartale: Q3'26 EPS $10,85 / Revenue $9,16 Mrd; Q4'26 EPS $12,70 / Revenue $9,91 Mrd.
+      </div>
+      <h3>Quartalsergebnisse im Überblick</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quartal</th>
+              <th>Revenue (Mrd $)</th>
+              <th>YoY</th>
+              <th>Op. Marge</th>
+              <th>EPS Actual / Est.</th>
+              <th>Beat/Miss</th>
+              <th>GMV / TPV</th>
+              <th>Marktreaktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Q2 2025</strong></td>
+              <td>6,79</td>
+              <td>+34 %</td>
+              <td>~14 %</td>
+              <td>10,31 / 11,89</td>
+              <td><span class="miss">EPS-Miss –13 %</span></td>
+              <td>GMV ~$15,1 Mrd / TPV ~$70 Mrd</td>
+              <td>Aktie –5 % Tag danach</td>
+            </tr>
+            <tr>
+              <td><strong>Q3 2025</strong></td>
+              <td>7,41</td>
+              <td>+39 %</td>
+              <td>9,8 %</td>
+              <td>8,32 / 10,90</td>
+              <td><span class="miss">EPS-Miss –24 %</span></td>
+              <td>GMV $16,5 Mrd / TPV $71,2 Mrd</td>
+              <td>–16 % am Earnings-Tag (größter Drop in 12M)</td>
+            </tr>
+            <tr>
+              <td><strong>Q4 2025</strong></td>
+              <td>8,76</td>
+              <td>+45 %</td>
+              <td>10,1 %</td>
+              <td>11,03 / 12,09</td>
+              <td><span class="miss">EPS-Miss –9 %</span></td>
+              <td>GMV $19,9 Mrd / TPV $83,7 Mrd</td>
+              <td>–9 % am Earnings-Tag</td>
+            </tr>
+            <tr>
+              <td><strong>Q1 2026</strong></td>
+              <td>8,85</td>
+              <td>+49 %</td>
+              <td>6,9 %</td>
+              <td>8,23 / 9,37</td>
+              <td><span class="miss">EPS-Miss –12 %</span></td>
+              <td>GMV $19,0 Mrd / TPV $87,2 Mrd</td>
+              <td>–11 % am Earnings-Tag</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Kommentar</h3>
+      <p>Das Bild ist sehr klar: Die Top-Line beschleunigt sich von Quartal zu Quartal – Q1'26 lieferte das stärkste Wachstum seit Q2 2022 (+49 % YoY) – aber die Bottom-Line enttäuscht jedes Mal. Vier Quartale in Folge EPS-Miss vs. Konsens (Durchschnitts-Miss –14 %), während Revenue im Schnitt 4 % über Konsens lag. Die operative Marge hat sich binnen vier Quartalen von ~14 % auf 6,9 % praktisch halbiert.</p>
+      <p>Treiber sind aus Sicht des Managements explizit gewollt: niedrigerer Free-Shipping-Threshold in Brasilien (BRL 19 statt vorher BRL 79), aggressive 1P-Expansion mit höheren CoGS-Quoten, massive Card-Issuance (2,7 Mio. allein in Q1'26 = $6,6 Mrd. Karten-Portfolio, +104 % YoY), Cross-Border-Programme und damit verbundene Marketing-Aufwendungen sowie Allowances-for-Doubtful-Accounts beim Kredit-Volumen-Wachstum. Brasilien-GMV beschleunigte sich in Q1'26 auf +38 % YoY (FX-neutral), Items-sold +56 % – beides Rekord seit 2020.</p>
+      <p>Wichtige Management-Statements vom Q1'26-Call: CFO Martín de los Santos formulierte explizit, das Unternehmen werde "nicht zögern, in langfristige Chancen zu investieren, auch wenn das kurzfristigen Margendruck bedeutet". Es gibt offiziell keine quantitative Margen-Guidance – ein Signal, dass die Investitionsphase 2026 noch nicht abgeschlossen ist.</p>
+      <div class="source">Quellen: MELI 8-K Filings Q2'25–Q1'26 (SEC); Investing.com Earnings Call Transcript Q1'26 (07.05.2026); ChartMill Earnings History (April 2026); 24/7 Wall St – Q4'25 Earnings Tells (25.02.2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 4: WACHSTUM -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 9/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Revenue-Wachstum: Beschleunigung statt Sättigung</h3>
+      <p>2025: Revenue $28,9 Mrd. (+39 % YoY). 5-Jahres-CAGR seit 2020 (~$4 Mrd.) liegt bei rund 49 %. Das macht MELI zu einer der schnellst wachsenden Mega-Cap-Plattformen der Welt – schneller als Amazon (Single-digit Retail) und schneller als Sea Limited (+47 % in Q1'26) bei deutlich höherem absolutem Umsatzniveau. Wichtig: Q1'26 (+49 %) markiert eine <em>Beschleunigung</em>, nicht eine Verlangsamung. 27+ Quartale ununterbrochenes Wachstum &gt; 30 %.</p>
+      <h3>Segment-Wachstum (Q1'26, YoY USD)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Segment</th><th>YoY USD</th><th>Treiber</th></tr></thead>
+          <tbody>
+            <tr><td>Commerce gesamt</td><td>+47 %</td><td>Brasilien-Items-sold +56 %, Cross-Border-Trade</td></tr>
+            <tr><td>Fintech gesamt</td><td>+51 %</td><td>Karten +104 %, Kreditbuch +87 %, AUM +77 %</td></tr>
+            <tr><td>Mercado Ads</td><td>+73 %</td><td>AI-Bidding, schnellst wachsende AdPlatform LatAm</td></tr>
+            <tr><td>Acquiring TPV (FX-neutral)</td><td>+41 %</td><td>Brasilien 26 %, Mexiko 46 %, Argentinien 55 %, Chile 69 %</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Geografische Verteilung &amp; Wachstumsraten (Q1'26 YoY USD)</h3>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">Brasilien</div>
+          <div class="geo-pct">+55 %</div>
+          <div class="geo-note">Größter Markt, beschleunigt</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Mexiko</div>
+          <div class="geo-pct">+62 %</div>
+          <div class="geo-note">Zweitwichtigster Markt, Re-Akzeleration</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Argentinien</div>
+          <div class="geo-pct">+23 %</div>
+          <div class="geo-note">FX-neutral +65 %; Inflation-Normalisierung</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Other (CL, CO, PE…)</div>
+          <div class="geo-pct">+40 %</div>
+          <div class="geo-note">Chile GMV +40 %; kleinere Base</div>
+        </div>
+      </div>
+      <h3>Profitabilitätswachstum vs. Top-Line</h3>
+      <p>Hier ist die Diskrepanz: Während Revenue 2025 um 39 % wuchs, stieg Net Income nur 4,5 % – Margen wurden vom Management bewusst geopfert. Das ist die Kernspannung der MELI-These: Management investiert in TAM-Capture (gerade Brasilien), nimmt aber zwei Jahre Margenpause hin. Operating Income 2025 stieg moderater als Umsatz; in Q1'26 lag Op. Income bei $611 Mio. vs. theoretischen $1,1 Mrd. bei "alter" Marge.</p>
+      <h3>TAM &amp; Reifegrad</h3>
+      <p>LatAm-E-Commerce wird 2025 mit $1,61 Bio. beziffert (CAGR ~11 % bis 2034 lt. Market Data Forecast). Brasilien als größter Markt: nur 15 % der Bevölkerung kaufen aktuell online (Itaú BBA), Mexiko 10,3 % Penetration (vs. USA &gt;19 %). Die Region wächst 1,5× schneller als der globale Durchschnitt (12,2 % in 2025). MELI ist also klar im <strong>Growth-at-Scale-</strong>Stadium mit deutlich erweiterbarem TAM – nicht Hyper-Growth (zu groß für 100 %+), aber auch nicht mature.</p>
+      <div class="source">Quellen: MELI Q1'26 Shareholder Letter (07.05.2026); Market Data Forecast – LatAm E-Commerce 2034 (März 2026); Mobiloud Ecommerce Market Size by Country (2026); Statista – LatAm key markets e-retail growth (16.03.2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 5: BEWERTUNG -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Aktuelle Multiples (Mai 2026)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Multiple</th><th>MELI aktuell</th><th>5J-Schnitt MELI</th><th>Internet-Retail-Median</th><th>Einordnung</th></tr></thead>
+          <tbody>
+            <tr><td>P/E TTM</td><td>42,4×</td><td>~75×</td><td>28,1×</td><td><span class="neutral">Moderater Aufschlag, deutlich unter 5J-Schnitt</span></td></tr>
+            <tr><td>P/E FWD</td><td>29,7×</td><td>~45×</td><td>20–25×</td><td><span class="beat">attraktiv für +49 % Wachstum</span></td></tr>
+            <tr><td>PEG (FY26 ~26 % EPS-Growth)</td><td>~1,1</td><td>~1,5</td><td>~1,4</td><td><span class="beat">unter 1,5 für ein Quality-Compounder = günstig</span></td></tr>
+            <tr><td>EV/EBITDA TTM</td><td>25,0×</td><td>~45×</td><td>15–18×</td><td><span class="neutral">Aufschlag fair für Wachstumstempo</span></td></tr>
+            <tr><td>P/Sales TTM</td><td>~2,7×</td><td>~4,5×</td><td>~2,0×</td><td><span class="neutral">Aufschlag, aber nur leichter</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Vergleich vs. Analystenkursziele</h3>
+      <p>Aktueller Kurs $1.578. Konsens-Kursziel von 25 Analysten: $2.236 (+41 % Upside; Range $1.750 – $2.800). Nach den Q1'26-Ergebnissen senkten u.a. UBS (auf $1.750, Neutral), JPMorgan ($1.900, Neutral), Goldman Sachs ($2.100, Buy), Citi ($1.950, Neutral), Raymond James ($2.000, Strong Buy), Barclays ($2.300, Overweight). Das Spektrum ist signifikant – mehrere Banken sehen ein Mid-Teens-Downside-Risiko bis $1.750 für plausibel; mehrere Top-Houses halten an Buy-Calls fest. Notable: Michael Burry baute laut Filings nach den Q1'26-Ergebnissen eine neue volle Position bei MELI auf.</p>
+      <h3>DCF-Range (eigene Sensitivität)</h3>
+      <p>Bei einem WACC von 11–12 %, Terminal Growth 3,5 %, Umsatz-CAGR 2026–2030 von 25–30 % und einer Op-Marge-Normalisierung auf 13–15 % bis 2028 ergibt sich ein Fair Value zwischen $1.900 und $2.500 je Aktie. Aggressivere Modelle (WallStreetZen DCF: $5.513; Simply Wall St: $2.698) sind nicht implausibel, aber annahmesensitiv. Realistische Range: <strong>Fair Value heute $1.900 – $2.400</strong>, was bei $1.578 ein attraktives Risk/Reward impliziert.</p>
+      <h3>Was ist eingepreist?</h3>
+      <p>Bei FWD P/E 29,7 und PEG ~1,1 preist der Markt aktuell ein: (a) Margen-Erholung auf 11–12 % Op. Marge bis 2027, (b) Revenue-Wachstum von &gt;25 % p.a. fortgesetzt, (c) keinen substantiellen Marktanteilsverlust gegen Shopee/Amazon/Shein. Wenn Item (a) verzögert eintritt (etwa weil 2026 weitere Q hinausgezögert wird), ist Downside auf $1.300–$1.400 (P/E 25× auf 2026er EPS) plausibel. Wenn alle drei eintreten, sind Kurse jenseits $2.500 in 18 Monaten erreichbar.</p>
+      <div class="source">Quellen: Finbox MELI Forward P/E (Mai 2026); ValueInvesting.io EV/EBITDA (08.05.2026); StockAnalysis.com – MELI Overview; Investing.com – MELI Analyst Targets (18.05.2026); WallStreetZen DCF (Mai 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 6: CASHFLOW -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Margen-Trend (TTM)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>2023</th><th>2024</th><th>2025</th><th>Q1 2026</th></tr></thead>
+          <tbody>
+            <tr><td>Bruttomarge</td><td>52,1 %</td><td>53,4 %</td><td>48,2 %</td><td>~43 %</td></tr>
+            <tr><td>Operating Margin</td><td>13,7 %</td><td>15,8 %</td><td>~11 %</td><td>6,9 %</td></tr>
+            <tr><td>Net Margin</td><td>5,8 %</td><td>9,2 %</td><td>6,9 %</td><td>4,7 %</td></tr>
+            <tr><td>EBITDA-Marge</td><td>~16 %</td><td>~18 %</td><td>~13 %</td><td>~9 %</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Cashflow &amp; ROE</h3>
+      <p>FY 2025 generierte MELI rund $2,0 Mrd. Net Income und einen geschätzten Free Cash Flow von ~$3,5 Mrd. (FCF/Revenue ~12 %), getragen vor allem von einem positiven Working-Capital-Beitrag aus dem Mercado-Pago-Float (Custodial Balances). FCF-Konversionsrate (FCF/Net Income) lag dadurch bei rund 175 % – eine Eigenheit des Fintech-Modells, das FCF kurzfristig "vorzieht". TTM ROE liegt aktuell bei sehr volatilen 25–35 %, leicht rückläufig durch Margenkompression. Asset Turnover ist mit ~0,2 wegen des wachsenden Kreditbuchs naturgemäß niedrig.</p>
+      <h3>Kreditqualität – das wichtigste Watch-Item</h3>
+      <p>Mit einem Kreditportfolio von $14,6 Mrd. (+87 % YoY) ist MELI faktisch zu einer Bank-Cum-E-Commerce-Firma geworden. Das Kreditbuch ist 18 % der Marktkapitalisierung. Management berichtet "stabile Asset Quality" und kürzere Provisions-Anpassungen. Die in Q1'26 erhöhten Provisionen (NIMAL-Kompression durch längere Laufzeiten und höherer Karten-Mix) sind erklärbar, aber das Risiko ist nicht trivial – ein LatAm-Macro-Shock würde direkt die Bilanz treffen, nicht nur den GMV.</p>
+      <h3>Verschuldung &amp; Kapitalrückgabe</h3>
+      <p>Debt-to-Equity-Ratio bei 1,59, Total Debt/Capitalization bei 61 % – das ist deutlich mehr als ein klassischer E-Commerce-Player und reflektiert die Fintech-Bilanzstruktur (Deposits und Funding-Lines als "Verbindlichkeiten"). Keine Dividende, keine signifikanten Buybacks – jeder Dollar fließt in Wachstumsinvestitionen.</p>
+      <h3>Capex-Intensität</h3>
+      <p>Hoch und steigend: $2,45 Mrd. Mexiko-Logistik (2024), $3,4 Mrd. Argentinien-Investitionen für 2026 angekündigt, dazu kontinuierliche Investitionen in Fulfillment-Centers und AI-Infrastruktur. Capex/Revenue lag 2025 bei ~9 %, dürfte 2026 ähnlich bleiben.</p>
+      <div class="source">Quellen: MELI 10-K/10-Q Filings (SEC); MELI Q1'26 Shareholder Letter; rockflow.ai MELI Fundamentals Q3 2025</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 7: PEERS -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Peer-Set: AMZN, SE, NU, CPNG</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Kennzahl</th>
+              <th>MELI</th>
+              <th>AMZN</th>
+              <th>SE</th>
+              <th>NU</th>
+              <th>CPNG</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Marktkap.</strong></td><td>$80 Mrd</td><td>~$2.300 Mrd</td><td>$65 Mrd</td><td>~$65 Mrd</td><td>~$37 Mrd</td></tr>
+            <tr><td><strong>Revenue Q1'26 YoY</strong></td><td><span class="beat">+49 %</span></td><td>~+10 %</td><td>+47 %</td><td>+53 %</td><td>+7,5 %</td></tr>
+            <tr><td><strong>Op. Marge Q1'26</strong></td><td><span class="miss">6,9 %</span></td><td>~11–12 %</td><td>~8,1 %</td><td>~25 % (Banken-NIM)</td><td><span class="miss">negativ</span></td></tr>
+            <tr><td><strong>FWD P/E</strong></td><td>29,7×</td><td>~32×</td><td>~36×</td><td>~25×</td><td>n.m.</td></tr>
+            <tr><td><strong>P/Sales TTM</strong></td><td>~2,7×</td><td>~3,4×</td><td>~2,4×</td><td>~3,2×</td><td>~1,1×</td></tr>
+            <tr><td><strong>ROE</strong></td><td>~25–35 %</td><td>~25 %</td><td>~17 %</td><td><span class="beat">29 %</span></td><td>negativ</td></tr>
+            <tr><td><strong>Regional</strong></td><td>LatAm 100 %</td><td>USA 60 %, Welt</td><td>SEA 80 %, LatAm 18 %</td><td>BR/MX/CO 100 %</td><td>Korea, Taiwan</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Qualitative Einordnung</h3>
+      <p><strong>Amazon (AMZN):</strong> Spielt in LatAm zwar mit, aber regional klar ein Distant Second nach MELI. Amazons 2026er Initiativen (Amazon-Now Grocery in São Paulo, Nu-Holdings-Partnerschaft für Konsumentenkredite) zeigen, dass Bezos Brasilien ernster nimmt als jemals zuvor. Hat unendlich Capital-Backing aus AWS, aber kein integriertes Fintech-Ökosystem in LatAm. Größter Bedrohungsfaktor strukturell – aber MELI hat in den letzten 10 Jahren wiederholt gezeigt, dass es Amazons LatAm-Vorstöße erfolgreich abgewehrt hat.</p>
+      <p><strong>Sea Limited (SE) / Shopee:</strong> Aktuell die spannendste Bedrohung. Shopee wuchs Brasilien-GMV 2024–2025 mit dreistelligen Raten, Shopee-Mall-Brasilien-GMV verdoppelte sich in Q1'26 YoY. Monee (Sea-Fintech) hat in Brasilien eine SCFI-Lizenz erhalten und wuchs Lending +250 % YoY (auf niedriger Base). Sea Q1'26 +47 % Revenue zeigt, dass Shopee in LatAm strukturell Marktanteile gewinnt – nicht mehr nur in der Fashion-Nische. Mittelfristig der gefährlichste Wettbewerber, weil das Geschäftsmodell strukturell vergleichbar ist (Marketplace + Fintech), nur in anderer Region erprobt.</p>
+      <p><strong>Nu Holdings (NU):</strong> 135 Mio. Kunden weltweit (115 Mio. Brasilien), $5 Mrd. Revenue Q1'26 (+53 %), 29 % ROE, $871 Mio. Net Income. Nu ist nicht direkter Marketplace-Konkurrent, sondern direkter Mercado-Pago-Konkurrent in Pure-Banking. Klare strukturelle Differenzierung: Nu führt im pure Digital-Banking und Cross-Selling (Karten, Anlagen, Kredite), MELI bietet Banking embedded im Marketplace. Sehr profitables Geschäft mit 19,9 % Efficiency-Ratio. Wichtiges Detail: Amazon hat Q4'25 eine Partnerschaft mit Nu Holdings zur Konsumentenkredit-Vergabe in Brasilien geschlossen – ein direkter Angriff auf Mercado Pagos Cross-Sell-Vorteil.</p>
+      <p><strong>Coupang (CPNG):</strong> Marktführer Südkorea, jetzt mit Taiwan-Expansion und Farfetch-Acquisition. Q1'26 enttäuschend (–7,5 % Revenue-Surprise wegen Datenleck-Effekt). Strukturell weniger relevant für MELI direkt, aber wertvoll als Vergleichsmaßstab für "Was passiert, wenn ein dominanter Marketplace in einem Einzelland reift?" – Coupang wächst nur noch single-digit. MELI hat hier den Vorteil der Multi-Country-Optionalität (Mexiko und Brasilien nicht zugleich gesättigt).</p>
+      <h3>Was macht MELI besser?</h3>
+      <p>(1) Höchstes Revenue-Wachstum in der Peer-Group bei mittlerer Größe; (2) integriertes Marketplace+Fintech-Ökosystem ohne direkten Peer in LatAm (Nu kann das nicht, Sea ist Outside-LatAm-Native); (3) klarer Logistik-Vorsprung in 18 Ländern; (4) Mercado Ads als zusätzlicher höchstmargiger Wachstumstreiber (+73 % YoY).</p>
+      <h3>Was macht MELI schlechter?</h3>
+      <p>(1) Schlechteste operative Profitabilität der profitablen Peers in Q1'26; (2) hohe Capital-Intensität und Bilanz-Hebel; (3) Single-Region-Risiko (LatAm-FX, LatAm-Macro); (4) viele direkte Wettbewerber gleichzeitig in der gleichen Region (anders als Coupang, das in Korea nur Naver hat).</p>
+      <div class="source">Quellen: AMZN, SE, NU, CPNG Q1'26 Filings; Insider Monkey – Sea Q1'26; Stocktitan – Sea Q1'26 (12.05.2026); BusinessWire Nu Holdings Q1'26 (14.05.2026); Yahoo Finance CPNG Quote</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 8: NEWS -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">07.05.2026 – Q1'26 Earnings: 4. EPS-Miss in Folge <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">EPS $8,23 vs. Konsens $9,37 (–12 %); Revenue $8,85 Mrd. (+49 %, größte Beschleunigung seit Q2 2022). Operating Margin auf 6,9 % gefallen (Q1'25: 12,2 %). Aktie –13 % nach Veröffentlichung, später Erholung. Quelle: BusinessWire/SEC.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">08.–13.05.2026 – Welle von Analysten-Downgrades und PT-Senkungen <span class="badge badge-yellow">Gemischt</span></div>
+          <div class="event-text">UBS senkte PT auf $1.750 (Neutral); JPMorgan $1.900 (Neutral); Goldman $2.100 (Buy); Citi auf Neutral mit $1.950; Raymond James $2.000 (Strong Buy bestätigt). Daiwa downgrade auf Hold. Quelle: TipRanks, CNN Markets.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">~12.05.2026 – Michael Burry baut neue volle Position in MELI auf <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Laut 13F-Filings nahm "The-Big-Short"-Investor nach den Q1-Ergebnissen eine neue volle Position auf – Contrarian-Signal. Quelle: Traders Union, 13F.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">11.03.2026 – $3,4 Mrd. Argentinien-Investment 2026 angekündigt <span class="badge badge-green">Positiv strategisch</span></div>
+          <div class="event-text">CEO Argentina Ariel Szarfsztejn kündigte Rekord-Investments in Logistik und Tech an. Reflektiert MELIs Confidence in Argentina-Macro-Erholung. Quelle: Reuters.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">07.05.2026 – Brasilien-Strategie zeigt erste positive Effekte <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Unique-Buyer-Wachstum in Brasilien +32 % YoY (höchstes seit 5 Jahren); Items-sold +56 % (mehr als 2× pre-FS-Threshold); Unit-Shipping-Kosten –17 % – das aggressive Bet zahlt sich operativ aus. Quelle: MELI Q1'26 Letter.</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">März 2026 – Amazon launcht 15-Min Grocery-Delivery in Brasilien <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">"Amazon Now"-Lieferung &lt;15 Min in São Paulo, Plan: Expansion auf 7 weitere Städte. Direkter Angriff auf MELIs Last-Mile-Vorteil. Quelle: Baidu/Investing.com, Branchenmedien.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Q4'25 – Amazon-Nu-Holdings Partnerschaft für Brasilien-Kredite <span class="badge badge-red">Negativ strategisch</span></div>
+          <div class="event-text">Amazon kooperiert mit Nubank um Konsumentenkredite und Payments für brasilianische Käufer anzubieten – direkter Konter zu Mercado Pagos Cross-Sell-Vorteil. MELI-Aktie –8 % am Tag der Bekanntgabe (November 2025).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">12.05.2026 – Sea Limited Q1'26: Shopee +45 % Revenue, Brasilien-Schwerpunkt <span class="badge badge-yellow">Wettbewerbsdruck</span></div>
+          <div class="event-text">Shopee GMV $37,3 Mrd. (+30 %); Shopee-Mall-Brasilien GMV mehr als verdoppelt YoY; Premium-Tier-Mall macht ~15 % des brasilianischen Shopee-GMV aus. Monee in Brasilien +250 % YoY Lending. Quelle: Insider Monkey, Sea Q1'26.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2025/2026 – TikTok Shop Launch in Mexiko und Brasilien <span class="badge badge-yellow">Disruptionsrisiko</span></div>
+          <div class="event-text">TikTok Shop seit 2025 in Mexiko, 2026 in Brasilien gelauncht – nutzt 111 Mio. brasilianische und 81 Mio. mexikanische TikTok-Nutzer. Direkter Angriff auf Fashion/Beauty-Kategorien wo Shein/Temu führen. Quelle: Rest of World (13.08.2025).</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">2025/2026 – Brasilien hebt 20%-Tax auf Cross-Border-Imports unter $50 <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Brasilianische Regierung führte 20 %-Levy auf billige Asien-Imports ein – primär gegen Shein/Temu gerichtet, profitiert MELI strukturell. Quelle: eMarketer (Nov 2025).</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – Brasilien-Real (BRL) und Mexiko-Peso (MXN) volatil <span class="badge badge-yellow">Risiko</span></div>
+          <div class="event-text">FX-neutrale Revenue-Wachstumsraten von 39 % Brasilien lagen 2026 unter den USD-Raten (55 %) – Reflexion einer BRL-Aufwertung. Aber Brasiliens hohe Inflation 2025/2026 (SELIC-Rate ~10,75 %) bleibt Risikofaktor.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – Argentinien-Inflation deutlich rückläufig <span class="badge badge-yellow">Gemischt</span></div>
+          <div class="event-text">Milei-Reformen senken Inflation; FX-neutrales Wachstum verlangsamt sich daher von 125 % (Q1'25) auf "nur" 65 % (Q1'26). Strukturell langfristig positiv (höhere Real-Marktgröße), kurzfristig revenue-headwind.</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – US-Konsumentenvertrauen rückläufig, Tariff-Risiken in LatAm <span class="badge badge-yellow">Gemischt</span></div>
+          <div class="event-text">MELI ist USD-reported aber LatAm-operiert – globaler Risk-Off-Sentiment hat sekundäre Effekte auf Bewertung. USMCA-Review 2026 könnte Mexiko-relevant werden.</div>
+        </div>
+      </div>
+      <div class="source">Quellen: SEC-Filings, BusinessWire MELI 07.05.2026; Reuters 11.03.2026; CSIS Mexico E-Commerce Analysis; eMarketer Nov 2025; Yahoo Finance/PYMNTS 25.11.2025; Rest of World 13.08.2025</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 9: TECHNISCH -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 3/10</div>
+    </div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">$1.578</div><div class="kpi-sub">–40 % vom 52W-High</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA-20</div><div class="kpi-value red">$1.696</div><div class="kpi-sub">Kurs darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA-50</div><div class="kpi-value red">$1.749</div><div class="kpi-sub">Kurs darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA-200</div><div class="kpi-value red">$2.069</div><div class="kpi-sub">deutlich darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value">35</div><div class="kpi-sub">leicht überverkauft</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value">$2.645</div><div class="kpi-sub">Juni 2025</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value red">negativ</div><div class="kpi-sub">Sell-Signal</div></div>
+      </div>
+      <h3>Trend &amp; Setup</h3>
+      <p>Klarer mittelfristiger Abwärtstrend. Der Kurs notiert –40 % unter dem 52W-High vom Juni 2025 ($2.645) und nur ~6 % über dem 52W-Tief ($1.495) – die Aktie befindet sich am unteren Ende ihrer Jahresbandbreite. Alle wichtigen gleitenden Durchschnitte (SMA-20/50/200) liegen über dem aktuellen Kurs; SMA-50 unter SMA-200 ist Death-Cross-Konstellation. TradingView vergibt aktuell "Strong Sell" auf Daily- und Weekly-Basis.</p>
+      <h3>Support- und Resistance-Levels</h3>
+      <p>Wichtigste Unterstützung: <strong>$1.520–$1.540</strong> (Double-Bottom-Bereich, knapp über dem 52W-Low). Bei einem Bruch des $1.540-Levels drohen Tests von $1.450 und im Worst-Case $1.350. Unmittelbare Resistance: <strong>$1.690–$1.760</strong> (SMA-20 und SMA-50, Ichimoku-Kijun-Linie). Erst über $1.850 wäre der mittelfristige Downtrend wirklich gebrochen; entscheidende Resistance darüber $2.000–$2.020.</p>
+      <h3>RSI &amp; MACD</h3>
+      <p>RSI bei ~35 – leicht überverkauft, aber nicht extrem. MACD klar negativ (Daily und Weekly). Stochastik-RSI deutet auf mögliche Boden-Formation hin, aber ohne klares Reversal-Signal. Volumen am 15.05. (Tag eines –3,8 %-Drops) fiel mit dem Kurs gemeinsam, was Risiko marginal reduziert (Capitulation-Phase noch nicht erreicht).</p>
+      <h3>Einordnung</h3>
+      <p>Die technische Situation ist eindeutig negativ – keine Kaufsignal-Konstellation, sondern Bottom-Fishing-Setup. Für kurzfristige Trader ungeeignet. Für langfristige Investoren: die mehr als –40 % vom Top bilden potenziell eine attraktive Tranchen-Einstiegszone, sofern man die fundamentale These trägt und mit weiteren –10 bis –15 % Drawdown im Worst-Case-Szenario leben kann.</p>
+      <div class="source">Quellen: Investing.com Technical Analysis (Mai 2026); TradingView Technicals MELI (Mai 2026); Traders Union 12.05.2026 + 15.05.2026; StockInvest.us 15.05.2026</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 10: RISIKEN -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 6/10 (Risk invertiert)</div>
+    </div>
+    <div class="section-body">
+      <h3>Strukturelle &amp; zyklische Risiken</h3>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Margen-Erholung wird ausbleiben / verschoben</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Management investiert sehr aggressiv und verweigert Margen-Guidance. Falls 2026 nochmal ein margin-decline-Jahr wird (statt erwarteter Stabilisierung), reduziert sich der 2026er EPS-Konsens deutlich und das FWD-P/E steigt mechanisch von 29,7× auf 35–40× – was bei aktuellem Kurs Re-Rating-Druck nach unten bedeutet. Wahrscheinlichkeit 35 %.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Wettbewerbsdruck Brasilien: Amazon + Nu-Holdings-Partnerschaft</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel-Hoch</span></div>
+        </div>
+        <div class="event-text">Amazon-Now Grocery + Nu-Kredit-Partnerschaft + Amazon-FBA-Subvention für Brasilien-Verkäufer zusammen verändern die Wettbewerbsdynamik. Falls MELI Marktanteilsverluste in Brasilien hinnehmen muss (z.B. von 40 % auf 35 %), würde GMV in Brasilien stagnieren statt weiter zu wachsen. Wahrscheinlichkeit eines spürbaren Share-Loss in den nächsten 18 Monaten: 30 %.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Sea/Shopee + Asia-FastFashion (Shein/Temu) gewinnen Fashion-Share</div>
+          <div><span class="badge badge-orange">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Shein und Temu haben in Mexiko bereits 33 % und 39 % User-Preference-Share erreicht (Statista). Shopee-Mall in Brasilien verdoppelte GMV YoY. Fashion ist eine kleinere, aber margenstarke Kategorie für MELI. Volume-Auswirkung auf MELI-Gesamtumsatz: 3–5 %.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Kreditrisiko: Schneller wachsendes Kreditbuch in volatilem Macro-Umfeld</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-red">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Kreditbuch $14,6 Mrd. mit +87 % YoY-Wachstum. Bei BRL-Abwertung oder Brasilien-Rezession könnten NPLs spike (Q1'26 hat MELI schon vorsichtshalber Provisionen erhöht). Ein Anstieg der Default-Rate um 200 bps würde Net Income um schätzungsweise $300–400 Mio. p.a. drücken (~20 % von 2025er Net Income). Wahrscheinlichkeit moderate Verschlechterung 35 %.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ FX- und Macro-Risiko LatAm</div>
+          <div><span class="badge badge-orange">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">USD-reported revenue ist FX-sensitiv. BRL und MXN haben historisch &gt;30 % Volatilitätsphasen. Argentinien stabilisiert sich, aber Disinflation reduziert USD-Wachstumsraten. Ein 15 %-Drop BRL würde Revenue-Wachstum um 6–8 pp reduzieren.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Regulatorisches Risiko: Mexiko COFECE-Untersuchung</div>
+          <div><span class="badge badge-orange">Mittel</span> <span class="badge badge-yellow">Auswirkung: Niedrig-Mittel</span></div>
+        </div>
+        <div class="event-text">COFECE Mexico hat 2024/2025 eine Wettbewerbsuntersuchung gegen Amazon und Mercado Libre eingeleitet. Mögliche Auflagen: Take-Rate-Begrenzung, Self-Preferencing-Beschränkung. Materialität bisher unklar, aber Schwarzer Schwan möglich.</div>
+      </div>
+
+      <h3>Chancen</h3>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">💎 LatAm-Penetration: nur 10–15 % der Bevölkerung kauft online</div>
+          <div><span class="badge badge-green">Hoch</span></div>
+        </div>
+        <div class="event-text">Brasilien E-Commerce-Penetration 10,3 % (vs. USA 19 %), Mexiko 10,3 %. Pro-Capita-Online-Spending in LatAm hat 2–3× Verdopplungspotenzial. CAGR Markt 11–22 % bis 2027. MELI als Marktführer profitiert proportional am stärksten von Penetrations-Acceleration.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">💎 Mercado Ads: höchstmargige Adsbase wächst +73 % YoY</div>
+          <div><span class="badge badge-green">Hoch</span></div>
+        </div>
+        <div class="event-text">Mercado Ads ist die mit Abstand schnellst wachsende digitale Werbe-Plattform LatAms. Mit ~95 % Bruttomarge ist jeder $ Werbeumsatz ein direkter EBIT-Hebel. Bei einem Anteil von &lt;5 % am Gesamtumsatz heute, aber Wachstum 70 %+, könnte Ads in 3–5 Jahren 8–12 % des Umsatzes ausmachen und Margen strukturell anheben.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">💎 Cross-Sell-Flywheel zwischen Marketplace und Mercado Pago</div>
+          <div><span class="badge badge-green">Hoch</span></div>
+        </div>
+        <div class="event-text">2,7 Mio. neue Karten in Q1'26, ein erheblicher Anteil zuvor reine Marktplatznutzer. Wenn die heutigen 100+ Mio. Käufer schrittweise auch Banking-Kunden werden, multipliziert sich der Customer-LTV. Mercado Pago hat in Mai 2026 den Status "second-largest financial institution Brasilien by customers" – nahe an traditionellen Banken.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">💎 AI-getriebene Effizienzgewinne und Search-Improvements</div>
+          <div><span class="badge badge-green">Mittel</span></div>
+        </div>
+        <div class="event-text">MELI hat in Q1'26 die gesamte Search-Architektur auf LLMs umgebaut, Mercado Pago AI-Support löst 87 % der Anfragen ohne Mensch. Mittelfristig 100–200 bps Margen-Tailwind durch OpEx-Reduktion möglich.</div>
+      </div>
+
+      <h3>Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> 4 EPS-Misses in Folge ist ein klares Pattern; Kreditbuch-Wachstum &gt;80 % YoY verdient besondere Beobachtung; Management-Statements zu "wir investieren weiter, ohne Margen-Guidance" sind langfristig ok, kurzfristig riskant.</p>
+      <p><strong>Dealbreaker (existenzbedrohend) – keine vorhanden:</strong> Bilanz ist solide, Cash-Generation funktioniert, Marktposition ungefährdet. Eine größere LatAm-Macro-Krise oder ein konzertierter Amazon-Sea-Shein-Angriff könnten zu mehrjähriger Underperformance führen, aber nicht zur Existenzbedrohung.</p>
+      <div class="source">Quellen: MELI Q1'26 Shareholder Letter; Statista Mexico E-Commerce; Mobiloud Ecommerce Market Size (2026); Yahoo Finance / Brazil Stock Guide; Buenos Aires Times (26.11.2025); Motley Fool – Mercado Pago Growth Engine (Feb 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 11: SCORING -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring &amp; User-spezifische Analyse</div>
+      <div class="section-score">Ø Gesamtscore: 7,1/10</div>
+    </div>
+    <div class="section-body">
+      <h3>User-These – AI-/Wettbewerbs-Risiko und realistisch adressierbarer Markt</h3>
+      <p><strong>Frage:</strong> Wie real ist die Bedrohung durch Amazon, Shein, Temu und Shopee – und wie groß bleibt der adressierbare Markt, in dem MELI sich differenzieren kann?</p>
+      <p><strong>Analyse:</strong> Die Bedrohungen sind real, aber differenziert nach Kategorie und Land:</p>
+      <p><strong>(a) Amazon in Brasilien</strong> ist die seriöseste strukturelle Bedrohung – nicht weil Amazon LatAm-native ist, sondern weil Amazons globales Capital-Backing nahezu unbegrenzte Investments erlaubt. Die Nu-Holdings-Kreditpartnerschaft + Amazon-Now Grocery + FBA-Subventionen für brasilianische Verkäufer adressieren genau die Felder, in denen MELI traditionell dominiert. Hier muss MELI permanent in Logistik und Fintech-Cross-Sell investieren – was die Margen-Story belastet. <em>Aber:</em> Amazon ist seit ~10 Jahren in Brasilien aktiv, hatte Marktanteile von ~15 % zur Spitze, und MELI hat in dieser Zeit seinen Brasilien-Marktanteil <strong>erhöht</strong> auf rund 40 %. Die Lock-in-Effekte über Mercado Pago sind real und schwer zu attackieren.</p>
+      <p><strong>(b) Shein und Temu</strong> sind <strong>kategorial begrenzte</strong> Bedrohungen – primär in Fashion, Beauty, Long-Tail-Cross-Border-Goods. MELI hat hier nie dominiert. In Multi-Kategorien-Use-Cases (Elektronik, Großgeräte, Haushaltswaren), wo Same-Day-Delivery und lokale Garantien zählen, sind Shein und Temu strukturell schwach. Die Brasilien-Tax-Reform 2025 (20 % Levy auf billige Imports unter $50) wirkt hier sogar zu MELIs Vorteil. <strong>Adressierbarer Verlust an Shein/Temu insgesamt: 3–6 % des Brutto-GMV in 3 Jahren.</strong></p>
+      <p><strong>(c) Sea/Shopee</strong> ist mittelfristig die unterschätzte Bedrohung. Shopee-Mall verdoppelte Brasilien-GMV YoY. Shopee hat – anders als Shein/Temu – ein Multi-Kategorien-Modell, AI-Logistik und mit Monee/SCFI-Lizenz nun auch eine Fintech-Story. <strong>Realistische Auswirkung: in 3 Jahren wächst Shopee in Brasilien von ~15 % auf möglicherweise 18–22 % Marktanteil – auf Kosten von Amazon und MELI gemischt.</strong></p>
+      <p><strong>Adressierbarer Markt für MELIs Differenzierung:</strong> Trotz Wettbewerb bleibt der LatAm-E-Commerce-Markt mit ~$1,78 Bio (2026) und Wachstum &gt;11 % p.a. extrem groß. MELI muss <em>nicht</em> Marktanteile gewinnen, um sein Wachstumstempo zu halten – ein Anteils-Plateau bei 35–40 % in Brasilien und 20–25 % in Mexiko, kombiniert mit Marktwachstum, würde ein 20–25 % Revenue-CAGR über die nächsten 5 Jahre tragen. Die <strong>differenzierte Margenposition</strong> kommt aus drei Quellen: (1) Mercado Pago Banking (Nu kann nicht so eng mit Marketplace verknüpfen), (2) Mercado Ads als 90+ %-Bruttomargen-Hebel, (3) Mercado Envíos als Capital-Moat. Diese drei sind 5+ Jahre nicht reproduzierbar.</p>
+      <p><strong>Implikation für die Scoring-Adjustierung:</strong> Wettbewerbsrisiko ist material aber nicht existenzgefährdend. Geschäftsmodell-Score bleibt bei 9; Burggraben-Score bleibt bei 8 (statt theoretisch 9, denn Brasilien-Lücke ist real); Wachstums-Score bleibt bei 9 (Marktwachstum allein trägt). Risiko-Score (invertiert) bleibt bei 6 wegen erhöhtem Wettbewerb und Margin-Compression-Risiko.</p>
+
+      <h3>Gesamt-Scoring-Tabelle</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Bar</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Geschäftsmodell</td>
+              <td>9/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+              <td>Einzigartiges integriertes Marketplace+Fintech-Ökosystem; klare Cross-Sell-Mechanik</td>
+            </tr>
+            <tr>
+              <td>Burggraben</td>
+              <td>8/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>Marktführer in 18 Ländern, aber Brasilien zunehmend umkämpft</td>
+            </tr>
+            <tr>
+              <td>Operative Entwicklung (4Q)</td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>4× EPS-Miss in Folge, Revenue-Beat aber Margen halbiert</td>
+            </tr>
+            <tr>
+              <td>Wachstum</td>
+              <td>9/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+              <td>+49 % YoY Q1'26 ist Top-Tier für Mega-Cap; Multi-Country-Optionalität</td>
+            </tr>
+            <tr>
+              <td>Bewertung</td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>FWD P/E 29,7× / PEG ~1,1 attraktiv, aber Margen-Annahme-Risiko</td>
+            </tr>
+            <tr>
+              <td>Cashflow &amp; Kapitalqualität</td>
+              <td>7/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>FCF stark dank Mercado-Pago-Float, aber wachsendes Kreditbuch erhöht Bilanzrisiko</td>
+            </tr>
+            <tr>
+              <td>Risiken (invertiert)</td>
+              <td>6/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Wettbewerb intensiviert sich, Kreditrisiko wächst, FX-Volatilität bleibt</td>
+            </tr>
+            <tr>
+              <td>Technische Analyse</td>
+              <td>3/10</td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:30%"></div></div><span class="score-num">3</span></div></td>
+              <td>Klarer Downtrend, alle SMAs als Resistance, Death-Cross-Konstellation</td>
+            </tr>
+            <tr style="background:rgba(255,230,0,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>6,9/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track">
+                    <div class="score-bar-fill" style="width:69%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
+                  </div>
+                  <span class="score-num" style="color:var(--primary);">6,9</span>
+                </div>
+              </td>
+              <td>Qualitäts-Compounder mit Margen-Pause-Phase – attraktive Bewertung kompensiert Margen-Schwäche</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Eigene Synthese auf Basis aller vorhergehenden Sektionen + User-Frage zur Wettbewerbslage</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 12: FAZIT -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-score">Rating: KAUFEN (tranchiert)</div>
+    </div>
+    <div class="section-body">
+      <h3>Bullish vs. Bearish Narrative</h3>
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p>Säule 1 – <strong>Wachstum beschleunigt sich.</strong> Q1'26 lieferte +49 % YoY Revenue-Wachstum, das höchste in fast 4 Jahren. Brasilien-Unique-Buyer +32 % YoY (5-Jahres-Rekord), Items-sold +56 %, Brasilien-GMV +38 % FX-neutral – die strategische Entscheidung, den Free-Shipping-Threshold zu senken, funktioniert besser als vom Management erwartet. Mexiko-GMV +48 %, Argentinien stabilisiert sich. Mercado Ads wächst +73 % YoY und ist die schnellst wachsende AdsPlatform Lateinamerikas.</p>
+          <p>Säule 2 – <strong>Fintech-Cross-Sell-Flywheel ist intakt und beschleunigt.</strong> 2,7 Mio. neue Karten in Q1'26, Kreditportfolio +87 % auf $14,6 Mrd., AUM +77 % auf $20 Mrd., 83 Mio. monatlich aktive Fintech-User. Mercado Pago hat den höchsten NPS in BR/MX/AR/CL und ist die zweitgrößte private Bank Brasiliens nach Kundenzahl. Diese Cross-Sell-Mechanik produziert pro Kunde 2–3× höheren LTV als ein Pure-Player – kein Wettbewerber in LatAm hat eine vergleichbare Kombination.</p>
+          <p>Säule 3 – <strong>Bewertung ist nach –40 % Drawdown attraktiv.</strong> FWD P/E 29,7× / PEG ~1,1 für ein Unternehmen mit +49 % Top-Line und 25–35 % ROE ist deutlich unter dem 5-Jahres-Schnitt (P/E ~75×). DCF-Range $1.900–$2.500 impliziert +20 bis +60 % Upside vom aktuellen Kurs. Michael Burry baute eine neue volle Position auf – ein Contrarian-Quality-Signal. Mehrheit der Analysten (21 von 25) hält Buy-Rating, Konsens-PT $2.236 (+41 %).</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p>Risiko 1 – <strong>Margen-Erholung könnte sich auf 2027/28 verzögern.</strong> 4× EPS-Miss in Folge ist kein Zufall, sondern Pattern. Operating Margin halbierte sich binnen vier Quartalen von ~14 % auf 6,9 %. Wenn Management 2026 nochmal "wir investieren weiter ohne Guidance" sagt (Wahrscheinlichkeit nicht trivial), drohen weitere EPS-Anpassungen nach unten und ein FWD-P/E-Anstieg auf 35–40× bei aktuellem Kurs – mit entsprechendem Re-Rating-Druck auf $1.350–$1.450.</p>
+          <p>Risiko 2 – <strong>Wettbewerbsverdichtung in Brasilien.</strong> Amazon-Now 15-Min Grocery, Amazon-Nu-Kreditpartnerschaft, Shopee-Mall-GMV-Verdopplung, Shein-Temu-TikTok-Shop in Mode/Beauty – das ist nicht "ein Wettbewerber", sondern ein konzertiertes Vier-Fronten-Szenario. Falls MELIs Brasilien-Marktanteil auf 35 % oder darunter fällt, würden GMV-Wachstumsraten halbiert. Operativ würde der Free-Shipping-Threshold zu einem permanenten Margenfresser ohne Wachstumsbeitrag.</p>
+          <p>Risiko 3 – <strong>Kreditbuch-Risiko und LatAm-Macro.</strong> $14,6 Mrd. Kreditportfolio bei +87 % YoY-Wachstum ist erheblich. Eine moderate Brasilien-Rezession 2026/2027 (etwa durch fortgesetzt hohe SELIC und FX-Druck) könnte NPLs spike. 200 bps mehr Defaults würden ~$300–400 Mio. Net Income kosten (~20 % der 2025er Earnings). Technisch ist die Aktie –40 % unter dem 52W-High mit klarer SMA-200-Resistance – Timing für Kurzfristanleger schlecht.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung (ausgewogen)</h3>
+      <p>Das bullische Narrativ überwiegt aus meiner Sicht, aber das bärische enthält valide kurzfristige Punkte. Drei Beobachtungen prägen die Einschätzung: Erstens, das Wachstum von +49 % in Q1'26 zeigt, dass die These "MELI hat keine Wachstumsprobleme, nur ein temporäres Margenproblem" empirisch belegt ist. Zweitens, Mercado Pago hat sich von einer "Wallet" zu einer Vollbank entwickelt, und das ist ein strukturell schwer angreifbarer Burggraben gegen Amazon und die asiatischen Player. Drittens, die Bewertung bei FWD P/E ~30 für ein Wachstumsunternehmen dieser Qualität wäre vor 12 Monaten als "Schnäppchen" gehandelt worden.</p>
+      <p>Das größte realistische Downside-Szenario ist –10 bis –15 % auf $1.350–$1.450, falls (a) Q2'26 nochmal EPS-Miss bringt UND (b) Margen-Guidance ausbleibt UND (c) Brasilien-Marktanteil-Diskussion aufkommt. Das Upside-Szenario im 18-Monats-Horizont ist +30–60 % auf $2.000–$2.500, falls Margen 2026/27 stabilisieren und Cross-Sell-Mechanik weiter funktioniert. Risk/Reward ist klar asymmetrisch zugunsten Upside, aber nicht für kurzfristige Trader geeignet (Technik bestätigt noch keine Wende).</p>
+      <p>Wo ich falsch liegen könnte: (a) wenn LatAm-Macro deutlich verschlechtert (Brasilien-Rezession + FX-Schock), (b) wenn Amazon mit unbegrenztem Capital tatsächlich Brasilien als strategisches Top-3-Land deklariert und massiv investiert, (c) wenn das Kreditbuch eine Negativüberraschung bei Asset Quality bringt. Diese Szenarien sind nicht zentral, aber materiell möglich.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Kurzfristig (0–6 M)</strong></td>
+              <td>Q2'26 Earnings 05.08.; Margen-Stabilisierung-Signal; FX-neutrale Re-Akzeleration Argentinien</td>
+              <td>5. EPS-Miss möglich; technische Bodenbildung noch nicht abgeschlossen; LatAm-Macro</td>
+              <td><span class="badge badge-yellow">Halten / Tranchen-Aufbau</span></td>
+            </tr>
+            <tr>
+              <td><strong>Mittelfristig (6–24 M)</strong></td>
+              <td>Margen-Bottoming; Cross-Sell-Conversion-Daten; Mercado-Ads-Skalierung; Mexiko-Acceleration</td>
+              <td>Amazon-Nu-Brasilien-Partnerschaft Effekte; Shopee-Mall-Verdrängung; Mexiko-Regulierung</td>
+              <td><span class="badge badge-green">Kaufen</span></td>
+            </tr>
+            <tr>
+              <td><strong>Langfristig (2–5 J)</strong></td>
+              <td>Strukturelle E-Commerce-Penetration LatAm 10 %→20 %+; Mercado Pago Brasilien Top-3-Bank; Cross-Border-Trade-Optionalität</td>
+              <td>Disruption durch AI-native Shopping; potentielle COFECE/Regulierung; mehrjährige Margen-Pause</td>
+              <td><span class="badge badge-green">Kaufen &amp; Halten</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese (Zusammenfassung)</h3>
+      <p>MercadoLibre ist mit Abstand das hochwertigste E-Commerce-/Fintech-Compounder-Asset Lateinamerikas. Die aktuelle 40 %-Korrektur vom 52W-High ist primär eine Marktreaktion auf vier aufeinanderfolgende EPS-Misses und Sorge vor anhaltender Margenkompression, nicht auf strukturelle Geschäftsmodell-Schwäche. Die Wachstumsbeschleunigung auf +49 % YoY in Q1'26, der intakte Cross-Sell-Flywheel zwischen Marketplace und Mercado Pago, sowie die Bewertung bei FWD P/E 29,7× / PEG ~1,1 machen MELI für mittel- bis langfristige Investoren mit 3–5 Jahres-Horizont attraktiv. Wettbewerbsbedrohungen durch Amazon, Sea/Shopee, Shein und Temu sind real, aber begrenzt durch MELIs Mercado-Pago-Lock-in und Logistik-Vorsprung. Das Risk/Reward auf 18 Monate ist ~–15 % Downside vs. +30–60 % Upside.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN (tranchiert)</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$2.000 – $2.400</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–5 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–15 %</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+40 %</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val" style="color:var(--green);">1 : 2,7</div></div>
+      </div>
+
+      <h3>Was falsifiziert die These?</h3>
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Q2'26 Earnings (05.08.): Operating Margin &lt; 6 % UND Revenue-Wachstum &lt; 35 % → Position reduzieren</li>
+            <li>Brasilien-GMV-Wachstum fällt unter 20 % YoY (FX-neutral) → Marktanteils-Verluste-Bestätigung → Verkaufen</li>
+            <li>Kreditportfolio: 90-Tage-NPL-Ratio steigt &gt; 9 % oder Provisions-Ratio &gt; 12 % → reduzieren</li>
+            <li>Kurs schließt nachhaltig unter $1.450 → Stop-Loss / Reduktion auf 50 % Position</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Q2'26: Operating Margin &gt; 9 % UND Revenue +&gt; 40 % → Bestätigung Margen-Bottom → nachkaufen</li>
+            <li>Management gibt Margen-Guidance für 2027 (12–14 % Op. Margin) → strukturelles Re-Rating Signal</li>
+            <li>Mercado Ads kommt über 6 % des Gesamtumsatzes (aktuell &lt;4 %) → Margen-Hebel bestätigt</li>
+            <li>Kurs schließt über $1.850 und SMA-50-Crossover bestätigt → technische Wende</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Welcher Anlegertyp passt?</h3>
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Quality Growth Investoren (3–5 Jahre Horizont)</li>
+            <li>Contrarian-Investoren (Bottom-Fishing in Drawdown)</li>
+            <li>LatAm-Exposure-Suchende (TAM-Capture-Play)</li>
+            <li>Compounder-Investoren (Cross-Sell-Flywheel-These)</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Value Investoren (P/E &gt; 30 ist nicht "günstig")</li>
+            <li>Income Investoren (keine Dividende)</li>
+            <li>Kurzfristige Trader (Technik klar bearish)</li>
+            <li>Anleger mit niedriger FX-Risiko-Toleranz</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / Tranchen</span></td><td>Abwarten auf Q2'26 (05.08.), erste Tranche bei klarer Margen-Stabilisierung</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>33 % jetzt, 33 % bei Bruch über $1.700, 33 % nach Q2'26-Earnings</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Risk/Reward 1 : 2,7 bei aktuellem Kurs, Burry-Signal als Confirmation</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>LatAm-E-Commerce-Penetrationsthese und Mercado-Pago-Banking-Optionalität strukturell intakt</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Synthese aus allen vorhergehenden Sektionen; Analystenkonsens via Investing.com, StockAnalysis.com, CNN Markets (Mai 2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 13: OUTLOOK -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Anstehende Events &amp; Wenn-Dann-Szenarien</div>
+      <div class="section-note">Nächste 3–12 Monate</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q2 2026 Earnings – voraussichtlich 05. August 2026</h4>
+        <p>Die wichtigste 6-Monats-Wegmarke. Konsens für Q2'26: EPS ~$9,8, Revenue ~$9,3 Mrd. (entspräche ~+37 % YoY). Entscheidende Frage: Bricht die EPS-Miss-Serie, und stabilisiert sich die Operating Margin über 8 %?</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Operating Margin in Q2'26 &gt;= 9 % UND Revenue-Wachstum &gt;= 35 % YoY UND klar sichtbare Brasilien-GMV-Beschleunigung (mind. +35 % FX-neutral) → starkes Signal, dass das Investment-Plateau seinen Höhepunkt erreicht hat. <strong>Aktion:</strong> Position auf Full-Weight aufbauen, ggf. zukaufen falls vorher tranchiert eingestiegen. Kursziel-Upgrade auf $2.400–$2.800 in 18M plausibel.<br><br>
+          <strong>Wenn:</strong> Operating Margin &lt; 6 % ODER Revenue-Wachstum &lt; 30 % ODER 5. EPS-Miss in Folge → strukturelle Sorge bestätigt. <strong>Aktion:</strong> Position reduzieren (50–70 % der ursprünglichen Allokation), Stop-Loss bei $1.450 setzen, Re-Entry erst nach Q3-Earnings (Oktober/November 2026) prüfen.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 2: Brasilien-Wettbewerbsdynamik – Q3/Q4 2026 (Amazon, Shopee Black-Friday)</h4>
+        <p>Black Friday und Q4-Hochsaison werden entscheidend zeigen, ob Amazon-Now Grocery, Amazon-Nu-Kredite und Shopee-Mall MELIs Brasilien-Marktanteil tatsächlich angreifen können. MELI hatte in Q4'25 schon $19 Mio. in Couponing investiert (Rekord), Black Friday 2026 dürfte noch teurer werden. Plus: ABComm und Conversion-Stats werden veröffentlicht.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Brasilien-GMV-Wachstum in Q4'26 bleibt &gt;+30 % YoY (FX-neutral) und Brasilien-Marktanteil stabil/höher → klares Signal, dass die Cross-Sell-Defense funktioniert. <strong>Aktion:</strong> Long-Position auf 5+ Jahre Horizont fortsetzen; eine zweite kleine Tranche bei Q3'26 hinzufügen.<br><br>
+          <strong>Wenn:</strong> Brasilien-GMV-Wachstum fällt auf &lt; 20 % YoY (FX-neutral) oder Indizien für Marktanteils-Verlust gegen Shopee/Amazon → strukturelles Re-Rating-Risiko. <strong>Aktion:</strong> Position reduzieren und intensiv beobachten, ob es Einmaleffekt oder Trend ist. Falls 2 Quartale in Folge: deutlich reduzieren oder ausstoppen.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 3: Mercado Pago Kreditbuch-Qualität – Q3'26 NPL-Reporting</h4>
+        <p>Mit $14,6 Mrd. Kreditbuch und +87 % YoY-Wachstum ist die Kreditqualität die meistunterschätzte Variable. In Q3'26 (Earnings Oktober/November) werden die Q2-NPLs und Provisionen detailliert berichtet. Für Vergleich: Nu Holdings 90+-NPL-Ratio liegt bei 6,5 %; MELI berichtet keine direkt vergleichbare Kennzahl, aber Provisions/Loan-Portfolio-Ratio.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Provisions-Ratio bleibt stabil oder verbessert sich und Management berichtet "stabile Asset Quality" mit konkreten Zahlen → Bestätigung, dass das schnelle Wachstum bei Cardholdern (104 % YoY) primär bei niedrig-Risiko-Multi-Produkt-Kunden stattfindet. <strong>Aktion:</strong> Fintech-Story als zusätzlicher Bullish-Treiber bestätigt; Kursziel-Anker $2.400+ für 24-Monats-Horizont.<br><br>
+          <strong>Wenn:</strong> Provisions/Loans-Ratio steigt &gt; 14 % oder explizite Asset-Quality-Verschlechterung im Earnings-Call → erhebliches Bilanzrisiko. <strong>Aktion:</strong> Sofort Position um 50 % reduzieren, weil Margenerholung im 2027-Konsens dann unrealistisch wird und Re-Rating-Druck auf P/E 22–25× droht.
+        </div>
+      </div>
+      <div class="source">Quellen: MELI Q1'26 Earnings Call (07.05.2026); Investing.com – Forward Guidance; Marktkonsens Q2/Q3/Q4 2026 EPS- und Revenue-Erwartungen</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken. Sie stellt keine Anlage-, Steuer- oder Rechtsberatung dar und ist keine Aufforderung zum Kauf oder Verkauf von Wertpapieren. Alle Zahlen wurden mit größter Sorgfalt aus öffentlich zugänglichen Quellen recherchiert (Stand: 19. Mai 2026), können aber Fehler enthalten. Vergangene Performance ist kein verlässlicher Indikator für zukünftige Ergebnisse. MercadoLibre operiert in volatilen Emerging-Markets-Währungen und ist mit erheblichen Macro- und Wettbewerbsrisiken konfrontiert. Jede Anlageentscheidung sollte auf Basis eigener Recherche, individueller Risikotragfähigkeit und ggf. in Abstimmung mit einem qualifizierten Berater erfolgen. Der Autor übernimmt keinerlei Haftung für Anlageentscheidungen, die auf Basis dieser Analyse getroffen werden.
+  </div>
+
+</div>
+</body>
+</html>
