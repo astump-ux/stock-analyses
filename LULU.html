@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LULU – Aktienanalyse Canvas v2.2</title>
+<style>
+:root {
+  --primary: #FF6900;
+  --primary-dark: #cc5400;
+  --bg: #0f0f12;
+  --bg-card: #1a1a1f;
+  --bg-card2: #22222a;
+  --border: #2e2e38;
+  --text: #e8e8ec;
+  --text-muted: #888898;
+  --text-dim: #555566;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --blue: #3b82f6;
+  --purple: #8b5cf6;
+  --teal: #14b8a6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+.header { background: linear-gradient(135deg, #1a0800 0%, #2a1000 40%, #0f0f12 100%); border-bottom: 1px solid var(--primary); padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; }
+.header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+.header-left h1 span { color: var(--primary); }
+.header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+.header-right { text-align: right; }
+.price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+.price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+.price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+.price-change.up { background: rgba(34,197,94,0.15); color: var(--green); }
+.price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+.nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100; }
+.nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+.main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+.kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+.kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.kpi-value.green { color: var(--green); }
+.kpi-value.red { color: var(--red); }
+.kpi-value.orange { color: var(--primary); }
+.section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+.section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+.section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.section-title { font-size: 16px; font-weight: 700; color: white; }
+.section-score { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+.section-note { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+.section-body { padding: 20px 24px; }
+p { margin-bottom: 12px; color: var(--text); }
+p:last-child { margin-bottom: 0; }
+h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+h3:first-child { margin-top: 0; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,105,0,0.04); }
+.beat { color: var(--green); font-weight: 600; }
+.miss { color: var(--red); font-weight: 600; }
+.neutral { color: var(--yellow); font-weight: 600; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+.badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+.badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+.badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+.badge-orange { background: rgba(255,105,0,0.15); color: var(--primary); }
+.event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+.event-item:last-child { border-bottom: none; }
+.event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+.dot-green { background: var(--green); }
+.dot-red { background: var(--red); }
+.dot-yellow { background: var(--yellow); }
+.event-label { font-weight: 600; color: white; }
+.event-text { font-size: 14px; color: var(--text); }
+.risk-item { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+.risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.risk-title { font-weight: 600; color: white; font-size: 14px; }
+.score-bar { display: flex; align-items: center; gap: 10px; }
+.score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #ff9500); }
+.score-num { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+.bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+.bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+.bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+.bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.rating-box { background: linear-gradient(135deg, rgba(255,105,0,0.12), rgba(255,105,0,0.04)); border: 1px solid rgba(255,105,0,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+.rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+.rating-item .val { font-size: 20px; font-weight: 800; color: white; }
+.rating-item .val.buy { color: var(--green); }
+.rating-item .val.hold { color: var(--yellow); }
+.rating-item .val.sell { color: var(--red); }
+.trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+.trigger-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.trigger-card h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.trigger-card.buy h5 { color: var(--green); }
+.trigger-card.sell h5 { color: var(--red); }
+.trigger-list { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+.trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+.trigger-list li::before { content: "→"; position: absolute; left: 0; }
+.investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+@media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+.investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+.investor-no { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+.investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-no h5 { color: var(--red); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+.investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+.investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+.geo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+.geo-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.geo-pct { font-size: 20px; font-weight: 700; color: white; }
+.geo-note { font-size: 12px; color: var(--text-muted); }
+.outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+.outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+.outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+.outlook-card .when-then strong { color: var(--primary); }
+.source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+.source a { color: var(--text-dim); }
+.disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+.alert-box { background: rgba(255,105,0,0.08); border: 1px solid rgba(255,105,0,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.pill { display: inline-block; background: rgba(255,105,0,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Lululemon Athletica <span>LULU</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 19. Mai 2026 · NASDAQ · Sektor: Premium Athleisure / Apparel</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="badge badge-orange">Premium Athleisure</span>
+      <span class="badge badge-blue">Global Brand</span>
+      <span class="badge badge-yellow">Turnaround Story</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$120.65</div>
+    <div class="price-meta">Schlusskurs 18.05.2026 · NASDAQ</div>
+    <div class="price-change down">▼ –64% YoY</div>
+    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $118.38 – $340.25</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">$120.65</div><div class="kpi-sub">USD · 18.05.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value">$14.5 Mrd</div><div class="kpi-sub">Large Cap</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/E (TTM)</div><div class="kpi-value orange">9.0x</div><div class="kpi-sub">vs. 10Y-Ø ~40x</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/E (Fwd)</div><div class="kpi-value orange">9.7x</div><div class="kpi-sub">FY26 EPS $12.20</div></div>
+    <div class="kpi-card"><div class="kpi-label">EV/EBITDA</div><div class="kpi-value">~5x</div><div class="kpi-sub">EBITDA $2.71B</div></div>
+    <div class="kpi-card"><div class="kpi-label">Bruttomarge</div><div class="kpi-value">56.6%</div><div class="kpi-sub">FY25, –260 Bp</div></div>
+    <div class="kpi-card"><div class="kpi-label">ROE (TTM)</div><div class="kpi-value green">34.0%</div><div class="kpi-sub">Sehr hoch</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value">03.06.2026</div><div class="kpi-sub">Q1 FY26</div></div>
+  </div>
+
+  <!-- SEKTION 1 -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Was Lululemon verkauft</h3>
+      <p>Lululemon Athletica ist ein vertikal integrierter Designer, Hersteller und Einzelhändler von technischer Athletic Apparel mit klarem Premium-Positioning. Das Kernsortiment umfasst Pants, Shorts, Tops und Jacken für Yoga, Running, Training, Tennis und Golf, ergänzt durch Footwear (seit 2022) und Accessoires. Proprietäre Stoffinnovationen wie Nulu, Luxtreme, Everlux und Warpstreme sind das technische Rückgrat der Preissetzungsmacht — eine "Align"-Legging kostet $98–128, während Konkurrenten wie Vuori und Alo Yoga in ähnlichen Preisbändern operieren, generische Athleisure-Konkurrenten wie Gap/Athleta jedoch deutlich darunter.</p>
+
+      <h3>Kundensegmente & Vertriebskanäle</h3>
+      <p>Lululemon adressiert primär B2C im Premium-Segment: berufstätige Frauen 25–45 (Kernsegment), Männer (wachsendes Segment, ~25% des Umsatzes), und seit etwa 2023 explizit jüngere Käufer (Gen Z) sowie Männer mit den ABC-Pants als "Commuter-Wear". Vertrieb läuft fast vollständig direct-to-consumer (DTC) über drei Kanäle: company-operated Stores (811 Stores Ende Q4 FY25, +44 YoY), e-Commerce-Plattform (Direct-to-Consumer Umsatz ca. 41–42% des Gesamtumsatzes), sowie temporäre Locations/Pop-ups. Wholesale ist sehr klein. Die DTC-Struktur sichert Markenkontrolle, Margen und First-Party-Datenströme, schließt aber die Möglichkeit aus, schnell Marktanteile via Wholesale-Skalierung zurückzugewinnen.</p>
+
+      <h3>Revenue-Modell & Unit Economics</h3>
+      <p>Das Geschäftsmodell ist transaktional (kein Subscription, kein Usage-based) mit hoher Wiederkaufrate: Stammkunden generieren laut Management einen substanziellen Anteil des Umsatzes. Unit Economics waren historisch erstklassig — Bruttomarge über 58%, Operating Margin Q4 2024 noch bei 28.9%, Sales pro Quadratfuß ca. $1.400 (mit Abstand führend in Sportswear). Allerdings ist die Margenstruktur unter Druck: Q4 FY25 Bruttomarge fiel auf 54.9% (–550 Bp YoY), Operating Margin auf 22.3% (–660 Bp), getrieben durch Tariffs (US-Zölle auf chinesische/asiatische Sourcing), höhere Markdowns durch Abverkauf von Slow-Sellern und neue Credit-Card-Affiliate-Programme.</p>
+
+      <h3>Kostenstruktur</h3>
+      <p>Lululemon ist relativ asset-light auf Produktionsseite — die Produktion läuft vollständig über Auftragsfertiger in Vietnam, Sri Lanka, Kambodscha, Bangladesh und Indonesien. Eigenes Capital wird primär in Stores, Distribution Centers und Tech-Stack investiert (Capex Q1 FY25 ca. $152 Mio). Die Tariff-Exposition ist substanziell: 2026 erwartet das Management $380 Mio Brutto-Tariff-Belastung (vs. $275 Mio in 2025) — netto nach Mitigation $220 Mio (vs. $213 Mio).</p>
+
+      <div class="source">Quellen: Lululemon 8-K Q4 FY2025 (corporate.lululemon.com, 17.03.2026); CNBC "Lululemon earnings Q4 2025" (18.03.2026); Lululemon Investor Relations Presentations Q1–Q4 FY2025; Morningstar Equity Research "LULU" (14.05.2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 2 -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Brand Power — historisch stark, aktuell unter Druck</h3>
+      <p>Lululemons stärkster historischer Burggraben war Brand Equity — die Marke war praktisch synonym mit Premium-Yoga-Wear für ein ganzes Jahrzehnt. Diese Brand Power erlaubte Pricing-Premiums von 50–100% gegenüber generischen Athleisure-Konkurrenten ohne nennenswerten Volumenverlust. Allerdings hat das Brand Heat 2024/2025 sichtbar nachgelassen: Laut Piper Sandler Teens-Umfrage rutschten Vuori und Alo Yoga in der "Most Important Athletic Brand"-Kategorie auf Platz 11 und 15, während Lululemon zwar Platz 2 hält, aber an Faszinationskraft verliert. ConsumerEdge-DTC-Daten zeigen Lululemons DTC-Channel-Marktanteil-Rückgang von 30% (Jan 2025) auf 24% (Nov 2025), während Alo Yoga im gleichen Zeitraum von 8% auf 14% sprang.</p>
+
+      <h3>Switching Costs — niedrig (Schwäche)</h3>
+      <p>Switching Costs sind im Apparel-Segment fundamental niedrig — Kunden können jederzeit zu Konkurrenten wechseln, ohne wirtschaftliche oder funktionale Nachteile zu erleben. Lululemon kompensiert dies historisch durch Community-Building (Ambassador-Programm, In-Store-Yoga-Klassen, lokale Events) und Loyalty-Programm. Diese "Soft Moats" funktionieren bei loyalen Kunden weiterhin, aber sie verhindern nicht den Erstkundenverlust an Vuori/Alo, die mit Influencer-Marketing (Kendall Jenner, Hailey Bieber, Bella Hadid bei Alo) jüngere Käufer abgreifen.</p>
+
+      <h3>Scale Advantages — moderat positiv</h3>
+      <p>Mit $11.1 Mrd Umsatz ist Lululemon der mit Abstand größte Premium-Athleisure-Spezialist — Vuori liegt geschätzt bei $1.0–1.2 Mrd, Alo Yoga bei $1.5–2.0 Mrd. Diese Größenüberlegenheit bringt Vorteile bei Sourcing-Verhandlungen, Marketing-Effizienz und Store-Real-Estate. Aber: Nike ($45+ Mrd) und Adidas ($25+ Mrd) sind ein Vielfaches größer, sodass Lululemon im Athleisure-Premium-Subsegment dominiert, im breiteren Sportswear-Markt aber Nische ist.</p>
+
+      <h3>Technologischer Vorsprung — vorhanden, aber kopierbar</h3>
+      <p>Lululemons proprietäre Stoffe (Nulu, Luxtreme, Everlux) sind echte technische Differenzierung — patentiert, durch Jahre R&amp;D entwickelt, mit messbarem Performance-Vorsprung. Allerdings haben Konkurrenten wie Alo (DreamKnit) und Vuori (Performance Jogger) eigene proprietäre Materials entwickelt, die ähnliche Premium-Touchpoints bieten. Der "Fabric Moat" ist real, aber nicht uneinholbar.</p>
+
+      <h3>Schwachstellen des Burggrabens</h3>
+      <p>Drei kritische Schwachstellen: (1) Produkt-Innovationslücke seit ca. 2023 — Management räumte selbst ein, "Produktlebenszyklen wurden zu lange laufen gelassen, insbesondere in Lounge und Social"; (2) Dupes &amp; Discounts erodieren die Premium-Wahrnehmung — Costco-Dupes der Align-Pants ($20) und TikTok-Dupe-Kultur greifen die Pricing Power an; (3) Heavy Discounting in 2025 selbst (laut Jefferies-Analyse) signalisiert Brand-Schwäche. Score 6/10 reflektiert die intakte aber bröckelnde Marken-Stärke.</p>
+
+      <div class="source">Quellen: Stocktwits "Lululemon's Stretch Is Snapping" (05.03.2026); Retail TouchPoints "Athleisure Faceoff" (20.01.2026); Earnest Analytics Active &amp; Athleisure Spending Data; channelnews.com.au "Lululemon Forced into Heavy Discounting" (14.07.2025); Morningstar Equity Research (15.05.2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 3 -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale (Q1–Q4 FY2025)</div>
+      <div class="section-score">Beat: 4/4 (Umsatz &amp; EPS)</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">
+        ⚠️ <strong>Hinweis:</strong> Daten stammen von SEC-Filings (8-K), Lululemon Investor Relations und CNBC. Nächste Earnings: Q1 FY2026 am <strong>03.06.2026</strong> (Konsensus EPS $1.65, Revenue ~$2.42 Mrd).
+      </div>
+
+      <h3>Quartalsweiser Überblick FY2025</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Quartal</th><th>Revenue</th><th>YoY</th><th>Comp Sales</th><th>Americas</th><th>International</th><th>China</th><th>EPS</th><th>vs. Konsens</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Q1 FY25</strong> (Mai 25)</td><td>$2.37 Mrd</td><td class="beat">+7%</td><td>+1%</td><td class="miss">–2%</td><td class="beat">+6%</td><td class="beat">+8%</td><td>$2.60</td><td class="beat">Beat</td></tr>
+            <tr><td><strong>Q2 FY25</strong> (Aug 25)</td><td>$2.53 Mrd</td><td class="beat">+7%</td><td>+1%</td><td class="miss">–4%</td><td class="beat">+15%</td><td class="beat">+18%</td><td>$3.10</td><td class="beat">Beat</td></tr>
+            <tr><td><strong>Q3 FY25</strong> (Nov 25)</td><td>$2.56 Mrd</td><td class="beat">+7%</td><td>+1%</td><td class="miss">–5%</td><td class="beat">+18%</td><td class="beat">+24%</td><td>$2.59</td><td class="beat">Beat</td></tr>
+            <tr><td><strong>Q4 FY25</strong> (Feb 26)</td><td>$3.64 Mrd</td><td class="neutral">+1%*</td><td>+3%</td><td class="miss">–3%</td><td class="beat">+20%</td><td class="beat">+30%</td><td>$5.01</td><td class="beat">Beat</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text-muted);">* Q4 FY24 enthielt 53. Woche; bereinigt +6% YoY. Comp Sales Q4 +3% inkl. 1-Wochen-Shift.</p>
+
+      <h3>Die "Tale of Two Companies"-Story</h3>
+      <p>Vier Quartale Beat in Folge auf Umsatz und EPS — auf den ersten Blick solide. Bei genauerem Hinsehen entsteht ein dramatisches Bild der zwei Geschäftshälften: Das Americas-Geschäft (74% des Q4-Umsatzes) ist im negativen Comparable-Sales-Modus seit sieben aufeinanderfolgenden Quartalen laut Chip Wilson — also bereits seit Q2 FY2024. Das internationale Geschäft, insbesondere China Mainland, wächst dagegen mit beschleunigender Dynamik: Q1 +8% Comps → Q4 +30% Comps. International macht inzwischen 26% des Umsatzes (vs. 23% in FY2024).</p>
+
+      <h3>Management-Statements &amp; Marktreaktion</h3>
+      <p>Im Q2-Call gab CEO Calvin McDonald die ungewöhnlich direkte Aussage: "Wir sind enttäuscht von unseren US-Business-Ergebnissen und Aspekten unserer Produkt-Execution." Diese Eingestehung von Produktversagen führte erstmalig zur kompletten Kapitulation der Premium-Bewertung — die Aktie verlor 2025 etwa 50% des Werts. Q4-Reaktion am 18.03.2026 war –8% Drop trotz Beats, weil die FY2026-Guidance ($11.35–11.50 Mrd Umsatz, EPS $12.10–12.30) deutlich unter Konsens lag und weiteren Americas-Decline von 1–3% impliziert. McDonald trat Ende Januar 2026 zurück; Heidi O'Neill (Ex-Nike) wurde am 22.04.2026 zur Nachfolgerin ernannt, Start aber erst 08.09.2026.</p>
+
+      <div class="source">Quellen: SEC 8-K Filings Q1–Q4 FY2025 (sec.gov, 05.06.2025 / 04.09.2025 / 11.12.2025 / 17.03.2026); CNBC "Lululemon (LULU) earnings Q4 2025" (18.03.2026); Investing.com Q4 FY25 Slides Recap (17.03.2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 4 -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Historischer Wachstumstrend</h3>
+      <p>Lululemon hat zwischen FY2019 und FY2024 seinen Umsatz nahezu verdreifacht — von ca. $4.0 Mrd auf $10.59 Mrd. Das ist eine Compound Annual Growth Rate (CAGR) von ca. 22% über fünf Jahre, getragen durch Pandemie-Athleisure-Boom, internationale Expansion (insbesondere China) und Pricing Power. In FY2025 verlangsamte sich das Wachstum dramatisch auf +5% (auf $11.1 Mrd) und die FY2026-Guidance impliziert nur noch +2–4% — ein Bruch im Wachstumsprofil, der die Bewertungskompression erklärt.</p>
+
+      <h3>Geografische Verteilung FY2025 (Revenue-Mix)</h3>
+      <div class="geo-grid">
+        <div class="geo-card">
+          <div class="geo-region">Americas</div>
+          <div class="geo-pct">~74%</div>
+          <div class="geo-note">FY25 Comps –1%, –6% US in Q4 — strukturelle Schwäche</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">China Mainland</div>
+          <div class="geo-pct">~15%</div>
+          <div class="geo-note">Q4 +30% Comps, +32% Revenue — beschleunigt</div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-region">Rest of World</div>
+          <div class="geo-pct">~11%</div>
+          <div class="geo-note">Q4 +16% Revenue, +9% Comps — solide</div>
+        </div>
+      </div>
+      <p>FY2026-Guidance bestätigt diese Bifurkation: Americas –1% bis –3%, China +20%, Rest of World "mid-teens". Internationaler Anteil dürfte bis Ende FY2026 auf ca. 30% steigen.</p>
+
+      <h3>Wachstumstreiber International — der eigentliche Hebel</h3>
+      <p>China Mainland ist die wichtigste Wachstumsstory: 154 Stores Ende Q1 FY25 → vermutlich >170 Ende FY26. Q4 FY25 Comparable Sales +30% (constant dollar +26%) sind außergewöhnlich für ein bereits etabliertes Geschäft mit $528 Mio Q4-Umsatz (15% Total). Bis 2026 dürfte China laut Analysten zweitgrößter Markt weltweit werden. Parallel läuft eine aggressive europäische Expansion: 2025 Eintritt nach Italien, Dänemark, Türkei, Belgien. Für 2026 geplant: Griechenland, Österreich, Polen, Ungarn, Rumänien (via Franchise/Partnership) sowie Indien-Eintritt via Tata CLiQ-Partnerschaft.</p>
+
+      <h3>Wachstumstreiber Americas — das strukturelle Problem</h3>
+      <p>Sieben aufeinanderfolgende Quartale negative oder flache Comparable Sales in Nordamerika sprechen gegen eine zyklische Erklärung. Strukturelle Treiber: (a) Marktanteilsverlust an Alo Yoga (DTC-Share 8%→14% in 2025) und Vuori (~5%); (b) Innovationslücke im Kerngeschäft (Align, Lounge); (c) Dupe-Kultur; (d) Nike-Resurgence unter neuem CEO Elliott Hill drückt auch auf Lululemon. Management führt FY2026 explizit als "Übergangsjahr" mit erwarteten weiteren Rückgängen — die ehrlichste, aber für die Aktie schmerzhafteste Eingestehung.</p>
+
+      <h3>Reifegrad &amp; Profitabilitätswachstum</h3>
+      <p>Lululemon ist klar in der "Growth-at-Scale → Mature"-Phase: aus dem Hyper-Growth-Modus heraus, mit selektiven Hyper-Growth-Pockets (China, EMEA-Frühphasen). Profitabilität wuchs FY25 langsamer als Revenue — Operating Income Q4 fiel um 22% YoY trotz 1% Revenue-Plus, getrieben durch Tariffs und Margendruck. Das ist kein gesundes Wachstum.</p>
+
+      <div class="source">Quellen: Lululemon 8-K FY2025 Full-Year Release (17.03.2026); Retail Insider "Lululemon Q4 Profit Falls" (18.03.2026); SwotPal "Lululemon SWOT Analysis 2026" (19.03.2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 5 -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Aktuelle Bewertung — extrem komprimiert</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kennzahl</th><th>Aktuell (18.05.26)</th><th>5-Jahres-Ø</th><th>10-Jahres-Ø</th><th>Bewertung</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>P/E TTM</td><td>9.0x</td><td>~32x</td><td>~40x</td><td class="beat">Sehr günstig</td></tr>
+            <tr><td>P/E Forward (FY26)</td><td>9.7x</td><td>~28x</td><td>~35x</td><td class="beat">Sehr günstig</td></tr>
+            <tr><td>EV/EBITDA TTM</td><td>~5x</td><td>~17x</td><td>~20x</td><td class="beat">Extrem günstig</td></tr>
+            <tr><td>P/Sales</td><td>1.3x</td><td>~5x</td><td>~6x</td><td class="beat">Historischer Tiefstand</td></tr>
+            <tr><td>PEG (FY26)</td><td>1.9x*</td><td>~1.5x</td><td>~1.2x</td><td class="neutral">Nicht billig wegen Wachstumsschwäche</td></tr>
+            <tr><td>Dividend Yield</td><td>0%</td><td>0%</td><td>0%</td><td class="neutral">Keine Dividende</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text-muted);">* PEG-Berechnung basiert auf erwarteter EPS-Stagnation; bei Recovery auf zweistelliges Wachstum würde PEG unter 1.0 fallen.</p>
+
+      <h3>Historischer Kontext — größte Bewertungs-Korrektur seit IPO</h3>
+      <p>Lululemons P/E-Ratio von 9.0x ist der tiefste Stand seit dem IPO 2007. Das 10-Jahres-Durchschnitts-P/E lag bei über 40x — die Aktie wurde traditionell als "Quality Compounder" gehandelt. Die aktuelle Bewertung impliziert, dass der Markt einen dauerhaften Verlust der Premium-Positionierung und permanenten Wachstumsstillstand einpreist. Das ist eine extreme Position, die historisch bei Lululemon nie eingetreten ist.</p>
+
+      <h3>Peer-Vergleich Bewertung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Unternehmen</th><th>P/E Fwd</th><th>EV/EBITDA</th><th>Revenue Growth</th><th>Op. Margin</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Lululemon (LULU)</strong></td><td>9.7x</td><td>~5x</td><td>+5% FY25 / +3% E</td><td>22%</td></tr>
+            <tr><td>Nike (NKE)</td><td>~30x</td><td>~17x</td><td>+2.8% E</td><td>10–11%</td></tr>
+            <tr><td>On Holding (ONON)</td><td>21x</td><td>21x</td><td>+23% E</td><td>~12%</td></tr>
+            <tr><td>Adidas (ADS)</td><td>~25x</td><td>~14x</td><td>+8–14% Q1</td><td>~9%</td></tr>
+            <tr><td>Deckers (DECK)</td><td>~15x</td><td>~10x</td><td>Mature</td><td>~20%</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>DCF-Sanity-Check (vereinfacht)</h3>
+      <p>Bei FY26 EPS $12.20 (Guidance-Mittel), erwarteter Wachstumsrückkehr auf +5–7% ab FY27 und einem auf 15x normalisierten Forward-P/E (immer noch weit unter Historie): impliziter Fair Value ca. $185–195. Selbst bei sehr konservativer Annahme (kein Wachstum, P/E 13x) bleibt $160. Morningstar setzt Fair Value bei $531 mit "High Uncertainty" — extrem bullish. Konsens-Analystenkursziel: $179.36 (+49% Upside). Score 8/10: extreme Unterbewertung gegenüber Historie und Peers, aber gerechtfertigt durch fundamentale Schwäche und unsichere Turnaround-Timing — kein "Free Lunch".</p>
+
+      <div class="source">Quellen: Stockanalysis.com "LULU Statistics" (19.05.2026); KoalaGains "LULU Stock Analysis" (02.12.2025); CNBC LULU Quote (18.05.2026); Morningstar Equity Research (15.05.2026); Yahoo Finance Analyst Targets</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 6 -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Margen-Entwicklung — der Schmerz ist real</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Marge</th><th>FY2023</th><th>FY2024</th><th>FY2025</th><th>FY2026E</th><th>Trend</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Bruttomarge</td><td>58.3%</td><td>59.2%</td><td>56.6%</td><td>~55%</td><td class="miss">–260 Bp, weitere Verschlechterung</td></tr>
+            <tr><td>Operating Margin</td><td>22.2%</td><td>23.7%</td><td>21.5%</td><td>~19%</td><td class="miss">–220 Bp FY25, weitere –200 Bp E</td></tr>
+            <tr><td>Net Margin</td><td>15.4%</td><td>17.1%</td><td>14.2%</td><td>~13%</td><td class="miss">Tariff &amp; Markdown-Druck</td></tr>
+            <tr><td>ROE</td><td>40%</td><td>43%</td><td>34%</td><td>~28%</td><td class="miss">Immer noch hoch, aber fallend</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Cashflow-Qualität — der Lichtblick</h3>
+      <p>Trotz Margendruck bleibt Lululemons Cashflow-Profil robust. EBITDA TTM $2.71 Mrd, mit EBITDA-Marge ca. 24.5%. FCF-Konversion (FCF/Net Income) liegt historisch um 0.9–1.1x — Earnings sind also "echt" und nicht durch Working-Capital-Tricks oder Capex-Underspending aufgeblasen. Operating Cash Flow FY25 dürfte bei $1.6–1.8 Mrd liegen, bei Capex von ~$700–800 Mio (40–45 neue Stores in FY26 geplant) bleibt FCF von $0.9–1.0 Mrd — entsprechend etwa 6–7% FCF-Yield zum aktuellen Marktwert.</p>
+
+      <h3>Bilanz-Stärke — eine Festung</h3>
+      <p>Lululemon ist netto schuldenfrei: $1.0–1.3 Mrd Cash auf der Bilanz Ende Q4 FY25, keine wesentliche Verschuldung (Debt/Equity 0.36 wegen Lease-Liabilities), Current Ratio 2.26. Interest Coverage ist effektiv unendlich. Diese Bilanz-Festung erlaubt aggressives Capital Return: $1.6 Mrd verbleibendes Buyback-Programm wurde im Dezember 2025 sogar um $1.0 Mrd aufgestockt. FY25 Buybacks ca. $1.0 Mrd, aktiv im 2-Jahres-Tief — was die Übersetzung in EPS-Wachstum erheblich verstärkt.</p>
+
+      <h3>Capex-Intensität &amp; Kapitalallokation</h3>
+      <p>Capex-Intensität ist moderat (~6–7% des Umsatzes), getrieben durch Store-Build-Outs in International (höhere Kosten pro Store als Americas). Keine Dividende — Capital Return komplett über Buybacks. Diese Allokation ist bei aktuellem Kurs hochgradig akkretiv: bei P/E 9x und unverändertem EPS bedeuten $1 Mrd Buybacks ca. 7% Outstanding-Share-Reduktion. Management nutzt die schwache Bewertung intelligent.</p>
+
+      <h3>Tariff-Belastung als großer Margen-Drücker</h3>
+      <p>Die einzige große Sorge auf Margenseite sind Tariffs: Brutto-Belastung 2026 $380 Mio (vs. $275 Mio in 2025), netto $220 Mio (vs. $213 Mio). Bei FY26 Net Income Guidance ca. $1.4 Mrd ist das ein massiver Drücker — etwa 14 Prozentpunkte vom Net Income. Eine Tariff-Entspannung würde EPS um 10–15% sofort hochziehen. Score 7/10: starke Bilanz und Cashflow-Qualität, aber Margen unter strukturellem Druck.</p>
+
+      <div class="source">Quellen: Lululemon SEC 8-K Q1–Q4 FY2025; Stockanalysis.com "LULU Financials" (19.05.2026); CNBC LULU Quote — EBITDA TTM $2.71B (18.05.2026); Investor Day Disclosures</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 7 -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Peers laut User-Auswahl: Nike, Adidas, On Holding, Alo Yoga, Vuori</h3>
+      <p>Die User-spezifische Peer-Gruppe ist sehr gut gewählt, da sie Lululemons direkten Wettbewerb auf zwei Ebenen abbildet: (1) Etablierte Riesen (Nike, Adidas) — Skalen-Konkurrenten; (2) DTC-Premium-Disruptoren (On, Alo, Vuori) — strukturelle Bedrohung.</p>
+
+      <h3>Quantitativer Peer-Vergleich</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Unternehmen</th><th>Revenue TTM</th><th>Growth YoY</th><th>P/E Fwd</th><th>Op. Margin</th><th>Market Cap</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Lululemon (LULU)</strong></td><td>$11.1 Mrd</td><td class="neutral">+5%</td><td>9.7x</td><td>21.5%</td><td>$14.5 Mrd</td></tr>
+            <tr><td>Nike (NKE)</td><td>$49 Mrd</td><td class="miss">~+3%</td><td>~30x</td><td>10–11%</td><td>~$120 Mrd</td></tr>
+            <tr><td>Adidas (ADDYY)</td><td>$26 Mrd</td><td class="beat">+8–14% Q1</td><td>~25x</td><td>~9%</td><td>~$28 Mrd</td></tr>
+            <tr><td>On Holding (ONON)</td><td>$3.9 Mrd</td><td class="beat">+23–26%</td><td>21x</td><td>~12%</td><td>$12.7 Mrd</td></tr>
+            <tr><td>Alo Yoga (privat)</td><td>~$1.8–2.0 Mrd*</td><td class="beat">+50–80%</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+            <tr><td>Vuori (privat)</td><td>~$1.0–1.2 Mrd*</td><td class="beat">+30–40%</td><td>n/a (IPO geplant)</td><td>n/a</td><td>~$5–6 Mrd Valuation</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text-muted);">* Privatunternehmen, Umsätze geschätzt aus Branchenberichten/Spatial.ai/Reuters.</p>
+
+      <h3>Qualitative Differenzierung</h3>
+      <p><strong>Nike:</strong> Ist nach jahrelanger Schwäche unter neuem CEO Elliott Hill in Turnaround-Modus — Skims-Partnership zur Adressierung des Womens-Segments greift direkt Lululemon an. Skala unschlagbar, aber innovationsgetrieben langsamer. <strong>Adidas:</strong> Q1 2026 +14% currency-neutral Wachstum, profitiert von Samba/Gazelle-Lifestyle-Boom — aber primär Lifestyle, nicht Premium-Athleisure-Konkurrent. <strong>On:</strong> Premium-Running mit Apparel-Erweiterung, +26% Q1-Wachstum, exzellent in China (+61% APAC) — direkter Premium-Konkurrent in Performance, weniger im Yoga-Segment.</p>
+
+      <p><strong>Alo Yoga:</strong> Die größte Bedrohung. Influencer-Marketing-Maschine (Kendall Jenner, Hailey Bieber, Bella Hadid), 66+ US-Stores, hat 2024 Umsatz um bis zu 88% gesteigert in Peak-Zeiten. Direkt am Lululemon-Flagship-Store auf 5th Avenue platziert. Avg. Ticket $185 vs. Lululemon $145. <strong>Vuori:</strong> Männer-zentriert, expandiert zu Frauen, $825 Mio Funding-War-Chest, IPO-Vorbereitung. Affluent-Demographics-Strategy. Marktanteil-Stabilität bei 5% in DTC.</p>
+
+      <h3>Marktanteilsentwicklung (Athleisure DTC, USA)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Marke</th><th>Jan 2025</th><th>Sep 2025</th><th>Nov 2025</th><th>Delta</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Lululemon</strong></td><td>30%</td><td>27%</td><td>24%</td><td class="miss">–6 pp</td></tr>
+            <tr><td>Alo Yoga</td><td>8%</td><td>8%</td><td>14%</td><td class="beat">+6 pp</td></tr>
+            <tr><td>Vuori</td><td>~5%</td><td>5%</td><td>5%</td><td>flat</td></tr>
+            <tr><td>Nike</td><td>~32%</td><td>~32%</td><td>~32%</td><td>flat</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Die ConsumerEdge-Daten zeigen eindeutig: Lululemons verlorene 6 Prozentpunkte gingen primär an Alo Yoga, sekundär an Vuori und On. Score 6/10: Lululemon hält die zweitgrößte Position im Athleisure-Markt, aber die Trajektorie ist eindeutig negativ.</p>
+
+      <div class="source">Quellen: Stocktwits/ConsumerEdge Daten (05.03.2026); Retail TouchPoints "Athleisure Faceoff" (20.01.2026); Stockanalysis.com Peer-Daten (19.05.2026); CNBC On Q1 2026 Earnings (12.05.2026); Investing.com Adidas Q1 2026 Earnings (29.04.2026); Spatial.ai "Vuori Brand Teardown"</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 8 -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">18.05.2026 – Lululemon geht Proxy-Battle gegen Chip Wilson öffentlich an <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">Das Board veröffentlicht Investorenbrief, in dem Wilson "outdated perspectives" und "troubling conflicts of interest" vorgeworfen werden. Settlement-Gespräche letzte Woche geplatzt. Annual Meeting auf 25.06.2026 datiert. Quelle: CNBC, 18.05.2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">22.04.2026 – Heidi O'Neill als neue CEO ernannt — Aktie fällt –11% <span class="badge badge-red">Negativ kurzfristig</span></div>
+          <div class="event-text">29-jährige Nike-Veteranin (zuletzt President Consumer, Product &amp; Brand) übernimmt ab 08.09.2026. Markt sieht (a) zu lange Vakanz-Zeit (300 Tage), (b) Nike-Tarnish (Nike selbst im Turnaround), (c) keine Brand/Product-Disruptionserfahrung. Chip Wilson kritisierte Wahl scharf. Quelle: Lululemon 8-K + CNBC, 22.–23.04.2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">17.03.2026 – Q4 FY25 Earnings: schwache FY26-Guidance, Aktie –8% <span class="badge badge-red">Negativ</span></div>
+          <div class="event-text">Q4 Beat ($3.6 Mrd Revenue, $5.01 EPS), aber FY26-Guidance ($11.35–11.50 Mrd Umsatz / EPS $12.10–12.30) deutlich unter Konsens. Weiterer Americas-Decline 1–3%. Tariff-Cost 2026 $380 Mio brutto. Quelle: SEC 8-K, 17.03.2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">Januar 2026 – CEO Calvin McDonald tritt zurück <span class="badge badge-yellow">Neutral</span></div>
+          <div class="event-text">McDonald (seit 2018, hat Umsatz fast verdreifacht) verlässt das Unternehmen. Interim Co-CEOs: CFO Meghan Frank &amp; CCO André Maestrini. Quelle: Lululemon IR, Januar 2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-green"></div>
+        <div>
+          <div class="event-label">11.12.2025 – Board genehmigt $1 Mrd Buyback-Erhöhung <span class="badge badge-green">Positiv</span></div>
+          <div class="event-text">Aufstockung des Stock Repurchase Programms; verbleibende Authorization danach ca. $1.6 Mrd. Klares Capital-Return-Signal auf Tiefkurs-Niveau. Quelle: Q3 FY25 8-K, 11.12.2025</div>
+        </div>
+      </div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">Q1 2026 – On Holding: +26% Wachstum, China +61% <span class="badge badge-red">Negativ für LULU</span></div>
+          <div class="event-text">On Q1 Revenue $832 Mio (+26% currency-neutral), Apparel-Penetration in China 30% (vs. 6% global), Zendaya-Apparel-Linie gelauncht. Direkter Premium-Performance-Druck auf Lululemons China-Wachstum. Quelle: CNBC, 12.05.2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">29.04.2026 – Adidas Q1 Beat mit +14% Currency-Neutral <span class="badge badge-red">Negativ für LULU</span></div>
+          <div class="event-text">Adidas-Turnaround beschleunigt, Performance-Kategorie +29%, DTC-Channel +25%. Brand-Heat in Lifestyle/Lounge — direkter Druck auf Lululemons Lounge-Schwäche. Quelle: Investing.com, 29.04.2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">2025/2026 – Alo Yoga DTC-Share +6 pp, Vuori IPO-Vorbereitung <span class="badge badge-red">Negativ strukturell</span></div>
+          <div class="event-text">Alo Yoga steigerte DTC-Share von 8% (Sep 2025) auf 14% (Nov 2025), übernahm exakt Lululemons Verlust. Vuori bereitet IPO bei ~$5–6 Mrd Bewertung vor. Quelle: ConsumerEdge / Stocktwits, 05.03.2026</div>
+        </div>
+      </div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item">
+        <div class="event-dot dot-red"></div>
+        <div>
+          <div class="event-label">2025–2026 – US-Tariff-Erweiterung trifft Apparel <span class="badge badge-red">Negativ branchenweit</span></div>
+          <div class="event-text">US-Tariffs auf chinesische/vietnamesische Apparel-Imports und Ende der de-minimis-Exemption belasten Lululemon mit $380 Mio Brutto 2026. Konkurrenten ähnlich betroffen, aber Lululemons Premium-Pricing erschwert vollständige Weitergabe. Quelle: CNBC, 18.03.2026</div>
+        </div>
+      </div>
+      <div class="event-item">
+        <div class="event-dot dot-yellow"></div>
+        <div>
+          <div class="event-label">2026 – US-Consumer-Discretionary-Schwäche <span class="badge badge-yellow">Neutral-Negativ</span></div>
+          <div class="event-text">Allgemeine Verlangsamung im Consumer-Discretionary-Segment ("Trading-Down"-Trend, höhere Zinsen). Trifft Premium-Apparel stärker als Mass-Market. Quelle: Fast Money / CNBC, 11.05.2026</div>
+        </div>
+      </div>
+
+      <div class="source">Quellen: CNBC.com Multi-Article-Coverage Mai 2026; SEC 8-K Filings (sec.gov); Stocktwits, Benzinga, TipRanks Coverage 04–05.2026; Investing.com Adidas/On Q1 2026</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 9 -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 3/10</div>
+    </div>
+    <div class="section-body">
+      <h3>Mini-KPI-Übersicht Technik (Stand 18.05.2026)</h3>
+      <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">$120.65</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value">~$135</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value">~$155</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value">$173.94</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value orange">~32</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W High</div><div class="kpi-value">$340.25</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value red">negativ</div></div>
+      </div>
+
+      <h3>Trend-Analyse — schwerer struktureller Abwärtstrend</h3>
+      <p>Lululemon befindet sich in einem mehrere Quartale währenden Abwärtstrend. Vom 52-Wochen-Hoch von $340.25 (Anfang Juni 2025) auf aktuell $120.65 entspricht das einem Verlust von 64.5%. Der 52-Wochen-Tief wurde am 15.05.2026 mit $119.06 markiert — die Aktie handelt also direkt auf dem Tief. Alle Moving Averages (SMA 20, 50, 200) liegen über dem aktuellen Kurs, was klassischen "Verkauf"-Signal aller Trend-Indikatoren bedeutet. SMA 200 bei $174 bedeutet, der Kurs ist 31% unter der wichtigsten Langfrist-Linie — extrem schwacher technischer Zustand.</p>
+
+      <h3>Momentum &amp; Oszillatoren</h3>
+      <p>Der RSI(14) liegt bei ca. 32 — am Übergang zum überverkauften Bereich (RSI &lt; 30). Das ist NICHT extrem überverkauft, aber suggeriert dass kurzfristig der Verkaufsdruck nachlassen könnte. MACD ist deutlich negativ mit MACD-Linie unter Signal-Linie — Momentum bleibt bärisch. Die Investing.com-Tagesanalyse zeigt zwar ein "Buy"-Signal aus kurzfristigen Indikatoren (typisch nach starken Verlusten), das Wochen- und Monats-Signal ist aber neutral bis "Strong Sell".</p>
+
+      <h3>Support- &amp; Resistance-Levels</h3>
+      <p><strong>Support:</strong> Unmittelbarer Support bei $118–120 (52W-Tief). Bei Bruch dieses Niveaus nächster signifikanter Support bei $105–110 (Pandemie-Lows 2020) und in Extremfall $90–95 (langfristige Trendlinie). <strong>Resistance:</strong> Erste Hürde $135–140 (SMA 20), dann $155–160 (SMA 50, Konsolidierungszone März 2026), dann $173–180 (SMA 200, Analystenkursziel-Mittelwert). Über $200 erst beginnt eine echte Trendwende.</p>
+
+      <h3>Volumen &amp; institutionelle Aktivität</h3>
+      <p>Daily Volume ca. 3.3 Mio Shares (10D-Average 3.4M) — normales Volumen, kein Panik-Sell, aber auch kein Akkumulations-Signal. Short Interest moderate (~3–4% des Floats). Optionsmarkt zeigt erhöhte Implied Volatility um Q1-Earnings (03.06.2026) — Markt erwartet substanzielle Bewegung in beide Richtungen.</p>
+
+      <h3>Bewertung des technischen Bilds</h3>
+      <p>Score 3/10 spiegelt das katastrophale Trendbild wider: alle MAs auf Verkauf, RSI nahe oversold aber nicht extrem, 52-Wochen-Tief erreicht. Das ist aus reinem Trendfolge-Sicht ein klares "Vermeiden"-Signal. Antizyklische Investoren sehen umgekehrt: extreme Pessimismus-Levels und Bewertungs-Kompression sind historisch oft Vorboten von Bottoming-Prozessen — aber Timing ist unmöglich vor klaren Trigger-Events (Earnings, CEO-Start, China-Beschleunigung).</p>
+
+      <div class="source">Quellen: Investing.com LULU Technical Analysis (19.05.2026); TradingView NASDAQ:LULU (18.05.2026); TipRanks LULU Technical; Robinhood LULU Quote (18.05.2026); CNBC LULU Quote (18.05.2026)</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 10 -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 5/10 (invertiert)</div>
+    </div>
+    <div class="section-body">
+      <h3>Strukturelle Risiken</h3>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Anhaltender Marktanteilsverlust an Alo Yoga &amp; Vuori</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Wahrscheinlichkeit: 65%. Alo gewann 6 pp DTC-Share in 8 Monaten — das Tempo ist beunruhigend. Falls Trend anhält, sinkt LULU Americas-Umsatz noch um $1–2 Mrd in 2–3 Jahren, EBITDA-Marge fällt auf 15–17%. Finanzielle Auswirkung: $300–500 Mio Operating Income jährlich.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ CEO-Vakanz bis September 2026 ohne sichtbare Strategie-Wende</div>
+          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Wahrscheinlichkeit: 80%. Interim Co-CEOs können keine grundlegende Strategie-Änderung anstoßen, die Q1+Q2 FY26 Earnings werden ohne neuen CEO-Impuls geliefert. Mögliche weitere Earnings-Disappointments treiben Aktie auf $90–110-Niveau.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Tariff-Eskalation</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-red">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Wahrscheinlichkeit: 40%. Bei Verschärfung der US-Apparel-Tariffs (z.B. weitere Erhöhungen auf vietnamesische Imports) könnte Brutto-Belastung 2026 auf $500–600 Mio steigen. Direkte EBITDA-Reduktion von $100–200 Mio.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ Heidi O'Neill liefert nicht — kein Turnaround-Katalyst</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-red">Auswirkung: Hoch</span></div>
+        </div>
+        <div class="event-text">Wahrscheinlichkeit: 35%. Chip Wilson's Kritik ist nicht völlig unbegründet — eine Nike-Karriere garantiert keine Disruption-Fähigkeit. Falls O'Neill nach 6–12 Monaten keine sichtbare Produkt/Brand-Wende einleitet, gibt Markt komplett Vertrauen auf.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ China-Verlangsamung oder geopolitische Eskalation</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-red">Auswirkung: Sehr Hoch</span></div>
+        </div>
+        <div class="event-text">Wahrscheinlichkeit: 25%. China ist DER Wachstumstreiber. Bei US-China-Eskalation (zusätzliche Sanktionen, Konsumboykott westlicher Marken) könnte China-Umsatz um 20–40% kollabieren. EBITDA-Impact $300–500 Mio. Lokale Konkurrenten (Anta, Li-Ning, Descente) lauern.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header">
+          <div class="risk-title">⚡ US-Rezession trifft Premium-Discretionary</div>
+          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+        </div>
+        <div class="event-text">Wahrscheinlichkeit: 30%. Eine US-Rezession in 2026/2027 würde Premium-Athleisure überproportional treffen. Trading-Down auf Athleta/Old-Navy/Costco-Dupes verstärkt sich.</div>
+      </div>
+
+      <h3>Chancen</h3>
+      <p><strong>Strukturelle Aufwärtsoptionen:</strong> (1) <strong>China-Skalierung</strong>: bei +20% Wachstum jährlich verdoppelt sich China-Geschäft binnen 4 Jahren von $1.7 Mrd auf $3.4 Mrd, würde dann ~25–28% Total ausmachen. (2) <strong>EMEA &amp; Indien</strong>: Indien-Eintritt via Tata CLiQ + 5 neue europäische Märkte 2026 — strukturelle "Land &amp; Expand"-Story für 5+ Jahre. (3) <strong>Product-Innovation-Reset</strong>: Falls O'Neill Produkt-Pipeline frisch aufstellt, kann Americas-Comparable in H2 FY2027 wieder positiv werden. (4) <strong>Bewertungs-Re-Rating</strong>: Bei nur halber Multiple-Erholung auf P/E 18x = $220 fairer Wert (+82% Upside vom aktuellen Kurs).</p>
+
+      <h3>AI-Risiko</h3>
+      <p>Begrenzt direkt anwendbar. Anders als Software-Unternehmen ist physische Apparel-Produktion nicht durch AI bedroht. AI bietet aber Vorteile in (a) personalisiertem Marketing, (b) Inventory Management, (c) Design-Iteration. Lululemons Hauptkonkurrenten (Alo, Vuori) sind digital-nativer und nutzen AI-driven Influencer-Strategien intensiver — leichter Nachteil, aber nicht existenzbedrohend.</p>
+
+      <h3>Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags:</strong> 7 Quartale negative Americas Comps, CEO-Wechsel mitten in Krise, Margenerosion, Proxy-Fight, sinkendes Brand Heat. <strong>Dealbreaker (KEINE bisher):</strong> keine existenzbedrohenden Risiken — Bilanz ist solide, FCF positiv, internationales Wachstum intakt. Lululemon ist kein "Sears"-Style-Case.</p>
+
+      <div class="source">Quellen: SwotPal SWOT-Analyse (19.03.2026); Stocktwits Lululemon Marktanteils-Daten (05.03.2026); PortersFiveForce.com Competitive Analysis; CNBC Multi-Article-Coverage 03–05.2026; SEC Chip Wilson 13D/A Filings</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 11 -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">User-spezifische Analyse: Growth US &amp; International + Competition</div>
+      <div class="section-score">Score: 6.0/10 Gesamt</div>
+    </div>
+    <div class="section-body">
+      <h3>User-Fragestellung 1: Growth-Aussichten US &amp; International</h3>
+      <p>Die Spaltung im Wachstumsprofil ist die Kernfrage. <strong>US/Americas:</strong> Die Aussichten sind kurz- bis mittelfristig schlecht. Sieben Quartale negative Comps, US-Revenue Q4 FY25 –6%, FY26-Guidance impliziert weitere –1% bis –3%. Selbst optimistisch betrachtet (O'Neill bringt Brand-Reset, Tariff-Mitigation klappt, Marktanteilsverluste stabilisieren sich) ist eine Rückkehr zu positiven Comps frühestens H2 FY2027 realistisch. Das ist 18–24 Monate Geduld. Pessimistisch betrachtet könnte der strukturelle Schaden so groß sein (Brand-Erosion bei Gen Z, Premium-Positioning-Verlust) dass Americas dauerhaft im 0–2%-Wachstum gefangen bleibt.</p>
+
+      <p><strong>International:</strong> Hier ist das Bild fundamental anders und überraschend stark. China Mainland zeigt mit +30% Q4-Comps und +24% Q4-Revenue eine Wachstumsbeschleunigung, nicht Verlangsamung. Lululemon ist in China noch in der "Land &amp; Expand"-Phase mit 154 Stores Ende Q1 FY25 — verglichen mit Nike's >7.000 China-Verkaufspunkten ist die Marke dort untererschlossen. Rest of World wächst +9% Comps mit 5 neuen Märkten in 2025 (Italien, Dänemark, Türkei, Belgien) und 5 weiteren in 2026 (Griechenland, Österreich, Polen, Ungarn, Rumänien) plus Indien via Tata-Partnership. International-Anteil dürfte von 26% (FY25) auf ~35% bis FY28 steigen, und die viel höhere Wachstumsrate (15–20%+) kompensiert teilweise die US-Schwäche.</p>
+
+      <p><strong>Synthetisches Gesamtwachstum:</strong> Bei –2% Americas + 20% China + 15% Rest of World = ca. +3.5% Gesamtwachstum FY2026 — entspricht exakt der Mitte der Guidance ($11.35–11.50 Mrd). Sobald Americas wieder bei 0% steht (frühestens FY2027), würde Gesamtwachstum auf 6–7% steigen. Diese mathematische Realität ist die Basis des Bull Cases — international rettet das Investment-Case.</p>
+
+      <h3>User-Fragestellung 2: Competition (Nike, Adidas, On, Alo Yoga, Vuori)</h3>
+      <p><strong>Nike:</strong> Größte direkte Bedrohung in den USA seit Hill-Comeback und Skims-Partnerschaft. Skims-Lulu greift exakt Lululemons Frauensegment an. Aber: Nike's Apparel-Schwäche ist strukturell, eine Wende braucht 2–3 Jahre. Heidi O'Neill kommt direkt aus Nikes Apparel-Division — sie kennt die Konkurrenten-Schwachstellen intim. Doppelter Effekt: könnte Vorteil sein oder Belastung (Compliance-Risiken).</p>
+
+      <p><strong>Adidas:</strong> Begrenzte direkte Bedrohung. Adidas-Stärke liegt in Footwear (Samba, Gazelle) und Lifestyle, nicht in technischem Athleisure-Apparel. Lululemon-Kundinnen wechseln nicht zu Adidas. Aber: Adidas profitiert von gleicher Tariff-Entlastung, falls die kommt — kein "Lululemon-spezifischer Vorteil".</p>
+
+      <p><strong>On Holding:</strong> Starker Premium-Performance-Konkurrent, besonders in China (APAC +61% Q1) und im Apparel-Aufbau (Zendaya-Linie). Aber Schwerpunkt Running/Performance, weniger Yoga/Lounge. Direkter Wettbewerb im Premium-Activewear-Segment, aber kein Frontalangriff auf Lululemons Kerngeschäft (Yoga-Lifestyle für Frauen).</p>
+
+      <p><strong>Alo Yoga (ENTSCHEIDEND):</strong> Das ist der gefährlichste Wettbewerber. Vom Marktanteils-Sprung 8%→14% in 8 Monaten gewann Alo praktisch Lululemons gesamten Verlust. Influencer-Strategie (Kendall Jenner, Hailey Bieber) erreicht jüngere Demographics, die Lululemon nicht mehr cool finden. Höherer Avg. Ticket ($185 vs. $145) zeigt Premium-Positioning. Chip Wilson sagt in seinem Brief sogar, er habe Alo und Vuori indirekt geholfen — bezeichnend, dass der Gründer Lululemon's größte Bedrohungen lobt. Investment-Implikation: Falls Alo IPO-Bewertung von $8–10 Mrd schafft, würde Lululemons DTC-Wertanteil weiter unter Druck geraten.</p>
+
+      <p><strong>Vuori:</strong> Komplementär gefährlich — fokussiert primär auf Männer (Lululemons Wachstumssegment) mit Performance-Joggern und Tech-Apparel. $825 Mio Funding-War-Chest, IPO geplant. Hat aktuell stabilen 5% DTC-Share, aber starke Wachstumsambitionen. Affluent-Demographics-Strategy zielt auf Lululemons profitabelste Käuferschicht.</p>
+
+      <h3>Bewertung &amp; Score-Adjustments</h3>
+      <p>Die User-spezifische Analyse bestätigt und vertieft die Sektion-2/4/7-Findings, ändert die Scores aber nicht fundamental. Der "Two-Track"-Wachstumsbefund (Americas schwach / International stark) ist im Score 5/10 für Sektion 4 bereits berücksichtigt. Der Competition-Befund (Alo &amp; Vuori >> Nike/Adidas/On als Bedrohung) bestätigt Sektion 7 Score 6/10. <strong>Keine Score-Änderungen.</strong></p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Sektion</th><th>Ursprünglich</th><th>Nach User-Analyse</th><th>Begründung</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>2 Burggraben</td><td>6/10</td><td>6/10</td><td>Bestätigt: Brand erodiert, aber proprietäre Fabrics &amp; Skala intakt</td></tr>
+            <tr><td>4 Wachstum</td><td>5/10</td><td>5/10</td><td>Bestätigt: International rettet Gesamtwachstum, Americas bleibt Problem</td></tr>
+            <tr><td>7 Peer</td><td>6/10</td><td>6/10</td><td>Bestätigt: Alo &amp; Vuori sind primäre Bedrohung, weniger Nike/Adidas/On</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="source">Quellen: Synthese aus Sektionen 1–10; ConsumerEdge DTC Marktanteile; Lululemon FY2025 Geo-Splits; Spatial.ai Vuori-Analyse; Earnest Analytics Athleisure-Daten</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 12 (Scoring + Fazit zusammengeführt) -->
+  <div class="section" id="s11score" style="display:none;"></div>
+
+  <!-- SCORING (eigentlich Sektion 11 nach Canvas-Doku, hier separat) -->
+  <div class="section" id="s11scoring">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring-Übersicht</div>
+      <div class="section-score">⌀ 5.8/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kategorie</th><th>Score</th><th>Score-Bar</th><th>Begründung</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Geschäftsmodell</td>
+              <td><strong>7/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>Vertikales DTC-Modell mit Premium-Pricing-Power. Skalenvorteile vs. Alo/Vuori intakt.</td>
+            </tr>
+            <tr>
+              <td>Burggraben</td>
+              <td><strong>6/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Brand erodiert; proprietäre Stoffe und Community-Effekte intakt aber unter Druck.</td>
+            </tr>
+            <tr>
+              <td>Operative Entwicklung (4Q)</td>
+              <td><strong>6/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>4/4 Beat, aber Americas-Schwäche &amp; Margenerosion belasten Qualität der Beats.</td>
+            </tr>
+            <tr>
+              <td>Wachstum</td>
+              <td><strong>5/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td>
+              <td>+2–4% FY26-Guidance ist Bruch im Wachstumsprofil. International rettet das Gesamtbild.</td>
+            </tr>
+            <tr>
+              <td>Bewertung</td>
+              <td><strong>8/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+              <td>P/E 9x vs. historisch 40x = größte Multiple-Compression seit IPO. Margin of Safety hoch.</td>
+            </tr>
+            <tr>
+              <td>Cashflow &amp; Bilanz</td>
+              <td><strong>7/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+              <td>$1.0+ Mrd Cash, kein Net Debt, ROE 34%, $1.6 Mrd Buyback. Margen fallen, FCF aber robust.</td>
+            </tr>
+            <tr>
+              <td>Peer-Position</td>
+              <td><strong>6/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+              <td>Nr. 2 im Athleisure-DTC nach Nike, aber Alo &amp; Vuori greifen aggressiv an.</td>
+            </tr>
+            <tr>
+              <td>Technische Analyse</td>
+              <td><strong>3/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:30%"></div></div><span class="score-num">3</span></div></td>
+              <td>Alle MAs auf Verkauf, 52W-Tief, –64% YoY. RSI nahe oversold, kein Boden-Signal.</td>
+            </tr>
+            <tr>
+              <td>Risiken (invertiert)</td>
+              <td><strong>5/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td>
+              <td>Multiple Risiken (CEO-Vakanz, Tariffs, Marktanteile, China-Geopolitik), aber Bilanz schützt.</td>
+            </tr>
+            <tr style="background:rgba(255,105,0,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>5.9/10</strong></td>
+              <td>
+                <div class="score-bar">
+                  <div class="score-bar-track">
+                    <div class="score-bar-fill" style="width:59%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
+                  </div>
+                  <span class="score-num" style="color:var(--primary);">5.9</span>
+                </div>
+              </td>
+              <td>"Contrarian Quality Compounder at Inflection Point" — extrem günstige Bewertung trifft auf fundamentale Schwäche und unklare Turnaround-Timeline.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEKTION 12 -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-score">Rating: HALTEN mit Tendenz Kauf</div>
+    </div>
+    <div class="section-body">
+
+      <h3>Bull vs. Bear: Die zentralen Narrative</h3>
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 — Extreme Bewertungs-Diskrepanz:</strong> Lululemon handelt bei P/E 9.0x TTM und 9.7x Forward — das ist der tiefste Stand seit dem IPO 2007 und 75–80% unter dem 10-Jahres-Durchschnitt von ~40x. EV/EBITDA bei 5x ist absurd günstig für ein Unternehmen mit 34% ROE und 22% Operating Margin. Selbst bei konservativem Re-Rating auf P/E 15x (immer noch deutlich unter historisch) ergibt sich Fair Value $185 = +53% Upside. Buybacks von $1.6 Mrd auf diesem Niveau sind hochgradig akkretiv.</p>
+          <p><strong>Säule 2 — International ist der echte Wachstumshebel:</strong> China Mainland Q4 +30% Comp Sales, FY26-Guidance +20% Revenue. Indien-Eintritt via Tata, 5 neue europäische Märkte 2026. International-Anteil steigt von 26% (FY25) auf vermutlich 35% (FY28). Bei nur Stabilisierung von Americas (0% Wachstum) liefert International allein +6–7% Gesamtwachstum — und Lululemon ist in China noch massiv untererschlossen vs. Nike's >7.000 Standorte.</p>
+          <p><strong>Säule 3 — CEO-Wechsel + Buybacks als Katalysatoren:</strong> Heidi O'Neill (Ex-Nike, Apparel-Hintergrund) startet 08.09.2026 und wird mit hoher Wahrscheinlichkeit (i) Produktionszyklen verkürzen wie sie bei Nike tat, (ii) Brand-Reset durchführen, (iii) Inventory-Disziplin verstärken. Parallel laufender $1.6 Mrd Buyback-Programm reduziert Shares um 7–8% in 2026 — übersetzt direkt in EPS-Wachstum auch ohne operative Verbesserung. Bilanz mit $1+ Mrd Cash, ROE 34%, kein Net Debt — Lululemon kann jede Schwäche-Phase überstehen.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 — Strukturelle Brand-Erosion in den USA:</strong> Sieben aufeinanderfolgende Quartale negative Comparable Sales sind keine zyklische Anomalie, sondern struktureller Marktanteilsverlust. Alo Yoga sprang von 8% auf 14% DTC-Share in 8 Monaten — genau Lululemons Verlust. Falls dieser Trend anhält, könnte Americas-Umsatz weiter um $1.5–2.0 Mrd schrumpfen, EBITDA-Marge auf 15–17% fallen. Bei "Permanenter Lululemon"-Szenario (P/E nie über 12x) ist Fair Value nur $145 — wenig Margin of Safety.</p>
+          <p><strong>Risiko 2 — Tariff-Belastung wird strukturell:</strong> $380 Mio Brutto-Tariff 2026 (vs. $275 Mio 2025) sind kein temporäres Issue. Bei weiterer Eskalation (Vietnam, Bangladesh-Tariffs steigen) könnte FY27-Belastung $500–600 Mio erreichen — das wären 30–35% des aktuellen Net Income. Konkurrenten wie Alo (US-zentrierter) und Vuori sind weniger exponiert. Margen-Recovery dürfte sich um 2–3 Jahre verzögern.</p>
+          <p><strong>Risiko 3 — Technische Schwäche &amp; Timing-Risiko:</strong> Aktie auf 52-Wochen-Tief, –64% YoY, alle Moving Averages auf Verkauf. Bei Bruch von $118 Support ist nächster Halt $105–110. Q1-Earnings am 03.06.2026 + Annual Meeting am 25.06.2026 (Wilson-Proxy-Fight Entscheidung) sind beide Trigger-Events mit Downside-Risiko. P/E 9x ist nicht billig in absoluten Zahlen, wenn EPS auf $10–11 fällt — dann wäre Forward-P/E plötzlich wieder 11–12x bei Wachstum von 0%.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Beide Narrative haben substantielle Berechtigung. Das bullische Narrativ ist mathematisch überzeugender — die Bewertungs-Kompression ist historisch extrem, die internationale Wachstumsdynamik ist real und unterbewertet, die Bilanz ist eine Festung. Das bärische Narrativ adressiert das richtige Hauptrisiko (US-Brand-Erosion ist strukturell), übersieht aber, dass selbst bei permanenter Americas-Stagnation Lululemon ein wertvolles Asset mit 22% Operating Margin und 34% ROE bleibt — solche Unternehmen handeln nicht dauerhaft bei P/E 9x.</p>
+
+      <p>Die kritische Frage ist Timing, nicht Direction. Auf 2–3-Jahres-Sicht ist das Risk/Reward überzeugend: Downside scheint begrenzt bei $90–100 (technischer Support + 7x P/E Worst-Case), Upside ist $180–220 (Re-Rating auf 13–16x P/E mit moderater EPS-Recovery) bis $260–300 (Multiple-Recovery + international beschleunigt). Auf 6–12-Monats-Sicht ist die Aktie aber im "Falling Knife"-Modus ohne klaren Boden. Trigger-Events Q1-Earnings (03.06.), Annual Meeting (25.06.) und insbesondere Heidi O'Neill's Antritt (08.09.) sind binäre Risiko-Punkte.</p>
+
+      <p>Risk/Reward auf 24-Monats-Sicht: –17% Downside ($100) vs. +50–80% Upside ($180–220), bestes Case +130% ($280). Für Anleger mit 2–4-Jahres-Horizont und Fähigkeit, weitere Volatilität auszuhalten, ist Lululemon ein attraktives "Quality at a Discount"-Investment. Für kurzfristige Anleger ist die Aktie ein klares Vermeiden.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>0–6 Monate</strong></td>
+              <td>Q1-Earnings 03.06.26; Annual Meeting 25.06.26; potentielle Tariff-Entspannung</td>
+              <td>Weiterer Earnings-Miss; O'Neill-Antritt noch fern; Alo IPO bei hoher Bewertung</td>
+              <td><span class="badge badge-yellow">Warten / Tranchen aufbauen</span></td>
+            </tr>
+            <tr>
+              <td><strong>6–24 Monate</strong></td>
+              <td>O'Neill-Antritt 09/2026; erste Product-Refresh-Zyklen; China-Expansion-Beschleunigung; Buyback-Effekte</td>
+              <td>Americas-Comps bleiben negativ; CEO-Strategy enttäuscht Markt; Alo &amp; Vuori weiter angreifen</td>
+              <td><span class="badge badge-orange">Aufbauen</span></td>
+            </tr>
+            <tr>
+              <td><strong>2–5 Jahre</strong></td>
+              <td>China wird 2.-größter Markt; Indien-Skalierung; Margen-Recovery; Multiple Re-Rating</td>
+              <td>Permanente Premium-Positioning-Verlust; geopolitische China-Eskalation; Dupes-Kultur eskaliert</td>
+              <td><span class="badge badge-green">Kaufen &amp; Halten</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese (Zusammenfassung)</h3>
+      <p>Lululemon ist ein <strong>"Contrarian Quality Compounder at Inflection Point"</strong>: Die fundamentale Qualität (Marke, Bilanz, Cashflow, ROE 34%) bleibt intakt — die operativen Probleme (US-Schwäche, Wettbewerb, Tariffs) sind real, aber adressierbar. Die Bewertung preist permanente Zerstörung ein, was historisch fast nie der korrekte Trade bei Quality-Unternehmen war. Hauptkatalysator: Heidi O'Neill 09/2026 + China-Skalierung. Hauptrisiko: weitere Brand-Erosion vor CEO-Antritt. Risk/Reward günstig auf 24-Monats-Sicht.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN (mit Bias KAUFEN)</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$180–220</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–3 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–17%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+50–82%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:3 bis 1:5</div></div>
+      </div>
+
+      <h3>Was falsifiziert die These?</h3>
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Q1 FY26 Comps Americas unter –5% (statt –1 bis –3%) → strukturelle Erosion bestätigt</li>
+            <li>China-Wachstum fällt unter +10% in Q2/Q3 → wichtigste Hoffnung weg</li>
+            <li>Aktie bricht $118 nach unten → technischer Crash auf $90–100</li>
+            <li>O'Neill kündigt im ersten Quartal keine sichtbare Strategie-Wende an</li>
+            <li>Tariff-Belastung 2026 übersteigt $450 Mio Brutto → EPS-Cut bevor</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Q1 FY26 Americas zeigt Stabilisierung (Comps –1% oder besser)</li>
+            <li>China Q1 Comps weiterhin &gt;20% → Wachstumsmotor intakt</li>
+            <li>Tariff-Entspannung (z.B. Vietnam-Deal) → EPS-Upgrade von 10–15%</li>
+            <li>O'Neill kündigt frühen Strategy-Update an (vor September)</li>
+            <li>Wilson-Settlement oder klares Proxy-Voting-Ergebnis (Unsicherheit raus)</li>
+            <li>Aktie stabilisiert über SMA 50 ($155) → erste Trend-Wende</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Welcher Anlegertyp passt?</h3>
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Contrarian Investors / Value-Tilted Quality</li>
+            <li>Quality Growth (langer Horizont)</li>
+            <li>Anleger mit Toleranz für hohe Volatilität</li>
+            <li>2–4 Jahres-Investmenthorizont</li>
+            <li>Buy-the-Dip-Strategien bei intakter Markenstärke</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Income Investors (keine Dividende)</li>
+            <li>Momentum/Growth-only-Investoren</li>
+            <li>Anleger mit &lt;12 Monaten Horizont</li>
+            <li>Kurzfristige Trader (technische Lage schlecht)</li>
+            <li>Anleger, die keine Volatilität tolerieren</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten</span></td><td>Abwarten auf O'Neill-Antritt + 1–2 Quartale Beweis für Trend-Wende</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>1/3 jetzt bei $120, 1/3 bei Q1-Earnings-Reaktion, 1/3 nach O'Neill-Antritt</td></tr>
+            <tr><td><strong>Aggressiv / Contrarian</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Risk/Reward 1:3–1:5 auf 24-Monats-Sicht, Bewertungs-Floor gefunden</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>Strukturelle China/Indien-Story über 5+ Jahre, intakte Markenqualität</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="source">Quellen: Synthese aller vorhergehenden Sektionen 1–11; Morningstar Equity Research LULU (15.05.2026); Analystenkonsens via Yahoo Finance (18.05.2026); Eigene DCF-Sanity-Checks</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 13 -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – die 3 entscheidenden Events</div>
+      <div class="section-note">Konkrete Wenn/Dann-Trigger</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q1 FY2026 Earnings – 03. Juni 2026</h4>
+        <p>Erste Quartalsergebnisse unter Interim Co-CEOs. Konsens erwartet Revenue $2.42 Mrd (+2%) und EPS $1.65. Kritisch sind die Americas-Comparable-Sales — die Guidance impliziert weitere –1% bis –3%. Marktreaktion wird stark von International-Performance (China &gt;20% erwartet) und Margenkommentar (Tariff-Mitigation, Markdown-Niveau) abhängen.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Americas Comps besser als –3% (z.B. –1% oder flat) UND China-Comps &gt;25% UND Bruttomarge stabilisiert (kein weiterer Rückgang &gt;100 Bp) → starkes "Bottom"-Signal, sofortiges Aufbauen einer Position. Erwarteter Kurssprung +10–15% auf $135–140.<br><br>
+          <strong>Wenn:</strong> Americas Comps schlechter als –5% ODER China-Comps unter +15% ODER Bruttomarge weitere –200 Bp → strukturelle Krise bestätigt. Wahrscheinlicher Kursverfall auf $100–105. Position halten, aber nicht aufbauen, bis O'Neill-Antritt.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 2: Annual Shareholder Meeting &amp; Proxy-Vote – 25. Juni 2026</h4>
+        <p>Entscheidung über Chip Wilson's drei Director-Nominees (Marc Maurer ex-On, Laura Gentile ex-ESPN, Eric Hirshberg ex-Activision). Settlement-Gespräche sind gescheitert — das Ergebnis ist binär. Falls Wilson-Kandidaten gewinnen, droht radikale Strategy-Veränderung. Falls Board gewinnt, bleibt Status quo bis O'Neill antritt. Beide Outcomes haben Implikationen für Brand-Direction und Aktien-Volatilität.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Lululemon-Board-Kandidaten klar bestätigt (&gt;60% Zustimmung) UND O'Neill öffentlich Vertrauensvotum bekommt → Unsicherheits-Discount fällt, Re-Rating Phase 1. Kursziel kurzfristig $135–145 (Konvergenz mit SMA 20/50).<br><br>
+          <strong>Wenn:</strong> Wilson gewinnt mindestens 1 Sitz UND/ODER ein Insider-Verkauf folgt → Strategy-Vakuum erweitert sich, weitere 3–6 Monate Unsicherheit. Wahrscheinlicher Test von $105–110. Bei diesem Niveau aggressives Aufbauen, da Wilson-Einfluss langfristig Brand-positiv sein könnte.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 3: Heidi O'Neill startet als CEO – 08. September 2026</h4>
+        <p>Das wichtigste Catalyst-Event der nächsten 12 Monate. O'Neill wird mit hoher Wahrscheinlichkeit in den ersten 90 Tagen einen Strategy-Reset kommunizieren — vermutlich: (i) Produktportfolio-Bereinigung, (ii) Verkürzung der Lead-Times (wie bei Nike), (iii) Marketing-Refresh mit klarem Brand-Statement, (iv) potentiell Capital-Markets-Day mit neuer Mittelfrist-Guidance. Die Marktreaktion auf das erste "Strategic Update" entscheidet, ob Re-Rating Phase 2 startet oder nicht.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> O'Neill liefert glaubwürdigen Strategy-Reset binnen 6 Monaten (klare Product-Pipeline, Margen-Recovery-Plan, mittelfristige Wachstums-Targets &gt;8%) UND Q3/Q4 FY26 zeigen erste Americas-Stabilisierung → Multiple-Recovery auf P/E 14–16x. Kursziel $200–230, Risk/Reward über 1:3 bestätigt.<br><br>
+          <strong>Wenn:</strong> O'Neill liefert keine sichtbare Wende ODER kündigt sich abzeichnende Probleme an (z.B. weiterer Tariff-Belastungs-Update, China-Verlangsamung) → die Bewertung bleibt komprimiert oder fällt weiter. Reduktion der Position auf 50% empfohlen, da Bull-Case dann mindestens 18 Monate verzögert ist. Erneute Bewertung Q1 FY2027.
+        </div>
+      </div>
+
+      <div class="source">Quellen: Lululemon IR Earnings Calendar; CNBC "Lululemon proxy war" (18.05.2026); Lululemon 8-K Heidi O'Neill Appointment (22.04.2026); SEC Schedule 13D/A Filings Chip Wilson</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken und stellt keine Anlageberatung, kein Angebot und keine Empfehlung zum Kauf, Verkauf oder Halten von Wertpapieren dar. Alle Daten wurden nach bestem Wissen aus öffentlich zugänglichen Quellen (SEC-Filings, Unternehmens-IR, etablierte Finanzpublikationen) zusammengetragen und auf Plausibilität geprüft, sind jedoch ohne Gewähr. Vergangene Wertentwicklungen sind kein Indikator für zukünftige Ergebnisse. Investitionen in Einzelaktien können zu erheblichen Verlusten führen, einschließlich des Totalverlusts des eingesetzten Kapitals. Vor jeder Investitionsentscheidung sollten Sie eine eigene Due Diligence durchführen und gegebenenfalls einen qualifizierten Finanzberater konsultieren.
+  </div>
+
+</div>
+
+</body>
+</html>
