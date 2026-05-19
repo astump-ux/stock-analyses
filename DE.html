@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DE – Aktienanalyse Canvas v2.2</title>
+  <style>
+:root {
+  --primary: #22c55e;
+  --primary-dark: #16a34a;
+  --bg: #0f0f12;
+  --bg-card: #1a1a1f;
+  --bg-card2: #22222a;
+  --border: #2e2e38;
+  --text: #e8e8ec;
+  --text-muted: #888898;
+  --text-dim: #555566;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --blue: #3b82f6;
+  --purple: #8b5cf6;
+  --teal: #14b8a6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7;
+}
+.header {
+  background: linear-gradient(135deg, #001a08 0%, #002810 40%, #0f0f12 100%);
+  border-bottom: 1px solid var(--primary);
+  padding: 36px 40px 28px; display: flex; justify-content: space-between;
+  align-items: flex-start; flex-wrap: wrap; gap: 20px;
+}
+.header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+.header-left h1 span { color: var(--primary); }
+.header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+.header-right { text-align: right; }
+.price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
+.price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+.price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+.price-change.up   { background: rgba(34,197,94,0.15); color: var(--green); }
+.price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
+.nav {
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 0 40px; display: flex; gap: 0; overflow-x: auto;
+  position: sticky; top: 0; z-index: 100;
+}
+.nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+.main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+.kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
+.kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.kpi-value.green  { color: var(--green); }
+.kpi-value.red    { color: var(--red); }
+.kpi-value.orange { color: var(--primary); }
+.section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+.section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+.section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.section-title  { font-size: 16px; font-weight: 700; color: white; }
+.section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
+.section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
+.section-body   { padding: 20px 24px; }
+p { margin-bottom: 12px; color: var(--text); }
+p:last-child { margin-bottom: 0; }
+h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
+h3:first-child { margin-top: 0; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(34,197,94,0.04); }
+.beat    { color: var(--green);  font-weight: 600; }
+.miss    { color: var(--red);    font-weight: 600; }
+.neutral { color: var(--yellow); font-weight: 600; }
+.badge        { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.badge-green  { background: rgba(34,197,94,0.15);  color: var(--green); }
+.badge-red    { background: rgba(239,68,68,0.15);  color: var(--red); }
+.badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+.badge-blue   { background: rgba(59,130,246,0.15); color: var(--blue); }
+.badge-orange { background: rgba(34,197,94,0.15);  color: var(--primary); }
+.event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
+.event-item:last-child { border-bottom: none; }
+.event-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+.dot-green  { background: var(--green); }
+.dot-red    { background: var(--red); }
+.dot-yellow { background: var(--yellow); }
+.event-label { font-weight: 600; color: white; }
+.event-text  { font-size: 14px; color: var(--text); }
+.risk-item   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+.risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.risk-title  { font-weight: 600; color: white; font-size: 14px; }
+.score-bar       { display: flex; align-items: center; gap: 10px; }
+.score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.score-bar-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #4ade80); }
+.score-num       { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
+.bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
+.bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
+.bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
+.bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.bear-card h4 { color: var(--red);   margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.rating-box { background: linear-gradient(135deg, rgba(34,197,94,0.12), rgba(34,197,94,0.04)); border: 1px solid rgba(34,197,94,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+.rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+.rating-item .val  { font-size: 20px; font-weight: 800; color: white; }
+.rating-item .val.buy  { color: var(--green); }
+.rating-item .val.hold { color: var(--yellow); }
+.rating-item .val.sell { color: var(--red); }
+.trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
+.trigger-card      { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.trigger-card h5   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.trigger-card.buy  h5 { color: var(--green); }
+.trigger-card.sell h5 { color: var(--red); }
+.trigger-list    { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
+.trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
+.trigger-list li::before { content: "→"; position: absolute; left: 0; }
+.investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+@media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
+.investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
+.investor-no  { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
+.investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-no  h5 { color: var(--red);   font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+.investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
+.investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
+.investor-no  li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
+.geo-grid   { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+.geo-card   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.geo-pct    { font-size: 20px; font-weight: 700; color: white; }
+.geo-note   { font-size: 12px; color: var(--text-muted); }
+.outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
+.outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
+.outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
+.outlook-card .when-then strong { color: var(--primary); }
+.source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
+.source a { color: var(--text-dim); }
+.disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+.alert-box { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+.divider   { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.pill      { display: inline-block; background: rgba(34,197,94,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-left">
+      <h1>Deere &amp; Company <span>DE.NYSE</span></h1>
+      <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 19. Mai 2026 · NYSE · Sektor: Industrie / Landtechnik</div>
+      <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+        <span class="badge badge-orange">Production &amp; Precision Ag</span>
+        <span class="badge badge-blue">Small Ag &amp; Turf</span>
+        <span class="badge badge-yellow">Construction &amp; Forestry</span>
+        <span class="badge badge-green">Financial Services</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="price-tag">$564.49</div>
+      <div class="price-meta">Schlusskurs 18.05.2026 · NYSE</div>
+      <div class="price-change up">▲ +0.47% (Tag)</div>
+      <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $433.00 – $674.19</div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <a href="#s1">1. Geschäftsmodell</a>
+    <a href="#s2">2. Burggraben</a>
+    <a href="#s3">3. Quartale</a>
+    <a href="#s4">4. Wachstum</a>
+    <a href="#s5">5. Bewertung</a>
+    <a href="#s6">6. Cashflow</a>
+    <a href="#s7">7. Peers</a>
+    <a href="#s8">8. News</a>
+    <a href="#s9">9. Technisch</a>
+    <a href="#s10">10. Risiken</a>
+    <a href="#s11">11. Scoring</a>
+    <a href="#s12">12. Fazit</a>
+    <a href="#s13">13. Outlook</a>
+  </nav>
+
+  <div class="main">
+
+    <div class="kpi-grid" style="margin-top:24px;">
+      <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$564.49</div><div class="kpi-sub">USD · 18.05.2026</div></div>
+      <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value">$152 Mrd.</div><div class="kpi-sub">Large Cap</div></div>
+      <div class="kpi-card"><div class="kpi-label">P/E (TTM)</div><div class="kpi-value">~33x</div><div class="kpi-sub">10J-Median: ~19x</div></div>
+      <div class="kpi-card"><div class="kpi-label">EPS (TTM)</div><div class="kpi-value">$17.78</div><div class="kpi-sub">FY25: $18.50</div></div>
+      <div class="kpi-card"><div class="kpi-label">Op. Marge</div><div class="kpi-value">14.0%</div><div class="kpi-sub">FY25 Trough</div></div>
+      <div class="kpi-card"><div class="kpi-label">ROE</div><div class="kpi-value">19.6%</div><div class="kpi-sub">Cyclical Low</div></div>
+      <div class="kpi-card"><div class="kpi-label">Dividende</div><div class="kpi-value">1.15%</div><div class="kpi-sub">$6.48 jährlich</div></div>
+      <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value" style="font-size:18px;">21.05.2026</div><div class="kpi-sub">Q2 FY2026</div></div>
+    </div>
+
+    <!-- SEKTION 1: GESCHÄFTSMODELL -->
+    <div class="section" id="s1">
+      <div class="section-header">
+        <div class="section-number">1</div>
+        <div class="section-title">Geschäftsmodell</div>
+        <div class="section-note">Quellen ≤ 9 Monate</div>
+      </div>
+      <div class="section-body">
+        <p>Deere &amp; Company ist mit Sitz in Moline, Illinois der weltweit größte Hersteller von Landmaschinen und ein bedeutender Anbieter von Bau- und Forstausrüstung. Das 1837 gegründete Unternehmen erwirtschaftete im Geschäftsjahr 2025 Nettoumsätze von $38,9 Mrd. und ist über vier Segmente organisiert: Production &amp; Precision Agriculture (PPA, ~41% der Equipment-Umsätze, Großtraktoren, Mähdrescher, Spritzen, Sätechnik), Small Agriculture &amp; Turf (SAT, ~26%, Kompakttraktoren, Rasen- und Gartentechnik), Construction &amp; Forestry (C&amp;F, ~33%, Baggerlader, Bulldozer, Forstausrüstung), sowie die Tochter Financial Services (FS), die Händler- und Endkundenfinanzierungen bereitstellt und damit ein wichtiges captive Margenpolster bildet.</p>
+
+        <p>Das Kerngeschäft ist hardware-zentriert: Deere verkauft hochpreisige Maschinen (Großtraktoren $500k–$1M+, Mähdrescher $700k+) über ein dichtes Händlernetz mit über 2.000 Standorten allein in Nordamerika und Reichweite in mehr als 100 Ländern. Die Revenue-Streams umfassen Neuequipment-Verkäufe (zyklisch), Ersatzteile und Service (stabiler und höher-margig), und zunehmend Software- bzw. Technologie-Abonnements im Bereich Precision Ag (JDLink Boost Satellitenkonnektivität, Precision Essentials Bundles, See &amp; Spray, Operations Center). Die Financial-Services-Sparte stellt $244 Mio. Q1-Nettogewinn (Q1 FY2026) und federt zyklische Schwankungen ab.</p>
+
+        <p>Die Kostenstruktur ist Capex-intensiv: Deere investiert kontinuierlich rund $2,5 Mrd. p.a. in F&amp;E und Capex und hält große Produktionsstätten in den USA (Waterloo, Moline, Dubuque), Deutschland (Mannheim/Zweibrücken), Brasilien und Indien. Die Bruttomarge lag im FY25 bei 27,0% (Tief im 5-Jahres-Vergleich, Median 27,8%), wobei einzelne Quartale wie Q2 FY2025 39,3% erreichten. Die operative Marge der Equipment-Operations fiel im Q1 FY2026 auf 5,9% (Q1 normalerweise schwach), für PPA sogar auf 4,4% — ein klares Zeichen, dass wir im zyklischen Tief stehen.</p>
+
+        <p>Strategisch verfolgt Deere seit Juni 2020 die "Smart Industrial Strategy": die Transformation vom reinen Maschinenbauer zum Technologie-Plattform-Anbieter. Auf dem Investor Day im Dezember 2025 in NYC bekräftigte CEO John May das Ziel, bis 2030 jährlich 10% Umsatzwachstum zu erreichen (Equipment-Umsatz $63 Mrd. ggü. $38,9 Mrd. in FY25), getrieben durch Adoption von Precision-Ag-Lösungen und einen wachsenden Anteil wiederkehrender Software-Einnahmen (Ziel: 10% des Umsatzes bis 2030 = $5–6 Mrd.). Die geografische Verteilung des Umsatzes liegt bei rund 60% USA/Kanada, 17% Europa, 14% Lateinamerika und 9% Rest der Welt.</p>
+
+        <div class="source">Quellen: Deere 4Q25 Earnings Release (26.11.2025); Deere Investor Day Transcript (08.12.2025); Morningstar DE Stock Profile; PRNewswire Q1 FY2026 (19.02.2026); deere.com/en/news/ (Mai 2026)</div>
+      </div>
+    </div>
+
+    <!-- SEKTION 2: BURGGRABEN -->
+    <div class="section" id="s2">
+      <div class="section-header">
+        <div class="section-number">2</div>
+        <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+        <div class="section-score">Score: 9/10</div>
+      </div>
+      <div class="section-body">
+        <p>Deere besitzt einen der breitesten und tiefsten Burggräben im gesamten Industriesektor. Marktanteile von 50%+ bei großen Traktoren und Mähdreschern in Nordamerika sind das Resultat eines über 188 Jahre aufgebauten Markenwerts — die "John Deere"-Marke hat in den USA praktisch ikonischen Status bei Farmern. Das Händlernetz mit über 2.000 Standorten in Nordamerika ist ein praktisch nicht-replizierbarer Strukturvorteil: Wettbewerber wie CNH oder AGCO müssten Milliarden investieren, um eine vergleichbare physische Service- und Vertriebspräsenz aufzubauen. Switching Costs sind extrem hoch — Farmer, die einmal in das Deere-Ökosystem investiert haben (Maschinen, Software, Ersatzteile), wechseln ungern, weil Effizienz-Verluste und Schulungskosten anfallen würden.</p>
+
+        <p>Der entscheidende moderne Burggraben — und gleichzeitig die Kernthese dieser Analyse — ist die <span class="pill">Precision-Ag-Plattform</span>. Deere hat mit dem John Deere Operations Center die de-facto-Daten-Plattform für die Landwirtschaft aufgebaut: über 1 Million verbundene Maschinen, 500 Mio. "engaged acres" weltweit (eine Fläche etwa dreimal so groß wie Frankreich). Das ist ein Daten-Vorsprung, der mit jedem Jahr wächst — und der Netzwerkeffekte erzeugt: je mehr Daten, desto bessere Modelle für See &amp; Spray (KI-gesteuerte Spot-Spraying-Technologie, die nur dort Herbizide ausbringt, wo tatsächlich Unkräuter wachsen), für Harvest Settings Automation (KI-gesteuerte Mähdrescher) und für autonome Operationen. See &amp; Spray hat 2025 in den USA und Brasilien Farmern über 31 Millionen Gallonen Herbizid-Mix gespart — ein direkt messbarer Wertbeitrag, der zukünftige Subscription-Modelle rechtfertigt.</p>
+
+        <p>Die zweite Generation der Perception System Autonomy Kits, vorgestellt auf der CES 2025 und in 2026 in größerem Umfang ausgerollt, ermöglicht autonome Operationen für Tillage, Orchard-Spraying, Construction (autonome 460 P-Tier Articulated Dump Trucks für Quarry-Anwendungen) und sogar Landscaping (autonome batterie-elektrische Zero-Turn-Mähmaschinen). Die Kits sind Retrofit-fähig für Modelle ab 2017/2020 und basieren auf der Bear-Flag-Robotics-Übernahme von 2021 ($250 Mio.) und Blue River Technology. Im Q3 FY2025 berichtete Deere über 5.000 globale Orders für JDLink Boost (Starlink-basierte Konnektivität) und 21.000 Orders für Precision Essentials — eine signifikante Adoption-Welle.</p>
+
+        <p>Schwachstellen: Erstens das Right-to-Repair-Risiko — Deere hat im April 2026 eine $99-Mio.-Vergleichsregelung mit US-Behörden über die multidistrict "Right to Repair"-Klage erzielt. Die Tatsache, dass Farmer und Behörden gegen den Service-Monopol-Vorwurf vorgehen, zeigt: Teile des Burggrabens basieren auf einer Service-Lock-in-Position, die regulatorisch unter Druck steht. Zweitens ist die Technologie laut Morningstar "nicht so schwer zu replizieren" — AGCO mit der PTx Trimble JV verfolgt einen ähnlichen Ansatz, allerdings mit geringerer Skalierung. Drittens: die Adoptions-Rate der Tier-1-Automation-Pakete beträgt mittlerweile 80% bei neuen Mähdreschern (laut Q1 FY2026 Earnings Call) — das ist sehr hoch, lässt aber wenig Spielraum für weiteres Wachstum durch Penetration und macht die Strategie zunehmend abhängig von Add-on-Software-Subscriptions.</p>
+
+        <p><strong>Begründung Score 9/10:</strong> Marktführerschaft, Markenstärke, Händlernetzwerk, Daten-Vorsprung und das größte F&amp;E-Budget der Branche sind herausragend. Abzug von 1 Punkt für regulatorische Right-to-Repair-Risiken und die Tatsache, dass die Precision-Ag-Technologie zwar führend, aber nicht uneinholbar ist.</p>
+
+        <div class="source">Quellen: Deere Investor Day Transcript Dec 2025 (johndeere.com); Q1 FY2026 Earnings Call (19.02.2026); Upstream Ag Insights (13.12.2025); AgTechNavigator (09.12.2025); Simply Wall St (12.04.2026); CES 2025 Press Release (06.01.2025); Morningstar DE Stock Profile (2026)</div>
+      </div>
+    </div>
+
+    <!-- SEKTION 3: LETZTE 4 QUARTALE -->
+    <div class="section" id="s3">
+      <div class="section-header">
+        <div class="section-number">3</div>
+        <div class="section-title">Letzte 4 Quartale: Operative Entwicklung</div>
+        <div class="section-score">Score: 7/10 · Beat-Ratio: 4/4</div>
+      </div>
+      <div class="section-body">
+        <p>Deere meldet vier Quartale in Folge mit Beat — sowohl auf der EPS- als auch der Revenue-Seite. Der trügerische Aspekt: Diese Beats wurden durchgängig mit niedrigen Analysten-Schätzungen erzielt, die das volle Ausmaß des Down-Cycles vorweggenommen hatten. Absolut betrachtet sind alle vier Quartale durch deutlich rückläufige Nettogewinne gegenüber dem Vorjahr gekennzeichnet — eine klassische Trough-Phase. Das nächste Q2 FY2026 wird am 21.05.2026 (in 2 Tagen!) veröffentlicht, EPS-Konsens $5.70–5.76, was ggü. Q2 FY25 ($6.64) einen weiteren Rückgang von ~14% bedeuten würde.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Quartal</th><th>Revenue</th><th>YoY</th><th>EPS</th><th>YoY</th><th>Konsens-EPS</th><th>Beat/Miss</th><th>Marktreaktion</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>Q2 FY2025</strong><br><span style="color:var(--text-muted);font-size:11px;">15.05.2025</span></td>
+                <td>$12.76 Mrd.</td>
+                <td><span class="miss">-16%</span></td>
+                <td>$6.64</td>
+                <td><span class="miss">-22%</span></td>
+                <td>$5.58</td>
+                <td><span class="beat">Beat +$1.06 (+19%)</span></td>
+                <td><span class="badge badge-green">+3.7%</span></td>
+              </tr>
+              <tr>
+                <td><strong>Q3 FY2025</strong><br><span style="color:var(--text-muted);font-size:11px;">14.08.2025</span></td>
+                <td>$12.02 Mrd.</td>
+                <td><span class="miss">-9%</span></td>
+                <td>$4.75</td>
+                <td><span class="miss">-24%</span></td>
+                <td>$4.58</td>
+                <td><span class="beat">Beat +$0.17 (+4%)</span></td>
+                <td><span class="badge badge-red">-7.9% (Tariff-Schock)</span></td>
+              </tr>
+              <tr>
+                <td><strong>Q4 FY2025</strong><br><span style="color:var(--text-muted);font-size:11px;">26.11.2025</span></td>
+                <td>$12.39 Mrd.</td>
+                <td><span class="beat">+11%</span></td>
+                <td>$3.93</td>
+                <td><span class="miss">-14%</span></td>
+                <td>$3.85</td>
+                <td><span class="beat">Beat +$0.08 (+2%)</span></td>
+                <td><span class="badge badge-red">-5.0% (FY26 Outlook)</span></td>
+              </tr>
+              <tr>
+                <td><strong>Q1 FY2026</strong><br><span style="color:var(--text-muted);font-size:11px;">19.02.2026</span></td>
+                <td>$9.61 Mrd.</td>
+                <td><span class="beat">+13%</span></td>
+                <td>$2.42</td>
+                <td><span class="miss">-25%</span></td>
+                <td>$2.02</td>
+                <td><span class="beat">Beat +$0.40 (+20%)</span></td>
+                <td><span class="badge badge-green">+11.8% (Outlook-Raise!)</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Wichtige Management-Statements und Beobachtungen</h3>
+        <p><strong>Q1 FY2026 (Februar 2026):</strong> CEO John May bekräftigte: "2026 represents the bottom of the current cycle and provides us with a strong foundation for accelerated growth going forward." Deere hob die FY2026-Nettogewinn-Guidance von $4.0–4.75 Mrd. auf $4.5–5.0 Mrd. an — der erste positive Hinweis seit langem. Die Aktie stieg an diesem Tag 11.8%. PPA-Operating-Margin kollabierte allerdings auf 4.4% (vs. 11% Vorjahr) durch Tariffs ($1.2 Mrd. erwartet für FY26 vs. $600 Mio. in FY25), höhere Garantiekosten und ungünstigen geografischen Mix (Brasilien-Lastig).</p>
+
+        <p><strong>Q4 FY2025 (November 2025):</strong> Die FY26-Initial-Guidance ($4.0–4.75 Mrd. Nettogewinn) enttäuschte den Markt scharf — Wall-Street-Erwartung lag bei $5.2–5.3 Mrd. Der Tariff-Outlook verdoppelte sich auf $1.2 Mrd. und löste den Aktien-Drop aus. Positiv: New-Field-Inventory für 220+ HP Traktoren erreichte den tiefsten Stand seit 17 Jahren — ein klares Indiz für Inventory-Bottom.</p>
+
+        <p><strong>Q3 FY2025 (August 2025):</strong> Trotz Beat fiel die Aktie 7.95% wegen Tariff-Schock ($200 Mio. nur in Q3, $600 Mio. FY25-Forecast) und Sorgen um den Cycle. Erste Erwähnung der 5.000 JDLink-Boost-Orders und 21.000 Precision-Essentials-Orders — wichtige Tech-Adoption-Metrik.</p>
+
+        <p><strong>Q2 FY2025 (Mai 2025):</strong> Massiver EPS-Beat ($6.64 vs. $5.58 Konsens), aber Revenue immer noch -16% YoY. Erstes klares Signal, dass die operative Exzellenz auch in einem Down-Cycle EPS überraschend stützen kann.</p>
+
+        <h3>Beat-Ratio &amp; Konsistenz</h3>
+        <p>4/4 Quartale Beat, durchschnittliche EPS-Überraschung +11%, mit dem höchsten Beat-Spike im Q1 FY26 (+20%). Die Marktreaktion war drei von vier Mal negativ trotz Beat — ein klassisches Muster für zyklische Aktien, bei denen Forward-Guidance wichtiger ist als Backward-Looking-Results.</p>
+
+        <div class="source">Quellen: Deere Investor Relations (deere.com/en/news/); 4Q25, 3Q25, 2Q25 Earnings Releases (deere.com); Investing.com Q4 2025 Earnings Call Transcript (26.11.2025); ValueTheMarkets (23.02.2026); CNBC John Deere Q3 2025 (14.08.2025); MarketBeat (15.05.2025)</div>
+      </div>
+    </div>
+
+    <!-- SEKTION 4: WACHSTUMSEINORDNUNG -->
+    <div class="section" id="s4">
+      <div class="section-header">
+        <div class="section-number">4</div>
+        <div class="section-title">Wachstumseinordnung</div>
+        <div class="section-score">Score: 6/10</div>
+      </div>
+      <div class="section-body">
+        <p>Die Wachstumsstory von Deere ist aktuell durch den schweren Ag-Down-Cycle dominiert: FY2025 Revenue $45.7 Mrd. (-12% YoY), FY2024 $51.7 Mrd., FY2023 $61.3 Mrd. — also kumulativ etwa -25% vom Peak. Für FY2026 erwarten Analysten weitere Schwäche (~$41.2 Mrd., -10%), bevor ab FY2027 (~$44.7 Mrd., +8.5%) und FY2028 ($45.1 Mrd. nach Deere-eigenen Annahmen) die Erholung einsetzt. Deeres eigenes Ziel: 10% CAGR bis FY2030 auf $63 Mrd. Equipment-Umsatz — eine sehr ambitionierte Zahl, die starke Cycle-Recovery + Tech-Driven-Growth voraussetzt.</p>
+
+        <h3>Segmentwachstum (FY2026 Guidance je Segment)</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Segment</th><th>FY2025 Net Sales</th><th>FY2026 Guidance YoY</th><th>FY2026 Op. Margin</th><th>Treiber</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Production &amp; Precision Ag</strong></td><td>~$15.8 Mrd.</td><td><span class="miss">-5% bis -10%</span></td><td>11–13% (FY25: 15.4%)</td><td>Großtraktoren-Schwäche, Tariffs</td></tr>
+              <tr><td><strong>Small Ag &amp; Turf</strong></td><td>$10.2 Mrd.</td><td><span class="beat">+15%</span></td><td>13.5–15%</td><td>Erholung Compact, Turf-Markt</td></tr>
+              <tr><td><strong>Construction &amp; Forestry</strong></td><td>~$11.5 Mrd.</td><td><span class="beat">+15%</span></td><td>9–11%</td><td>US-Infrastruktur, Datacenter</td></tr>
+              <tr><td><strong>Financial Services</strong></td><td>$890 Mio. (Net Inc.)</td><td><span class="miss">~$840 Mio.</span></td><td>-</td><td>Höhere Risikokosten Brasilien</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Geografische Verteilung</h3>
+        <div class="geo-grid">
+          <div class="geo-card">
+            <div class="geo-region">USA &amp; Kanada</div>
+            <div class="geo-pct">60%</div>
+            <div class="geo-note">Large Ag -15-20% FY26, Trough</div>
+          </div>
+          <div class="geo-card">
+            <div class="geo-region">Europa</div>
+            <div class="geo-pct">17%</div>
+            <div class="geo-note">Flat bis +5% FY26</div>
+          </div>
+          <div class="geo-card">
+            <div class="geo-region">Lateinamerika</div>
+            <div class="geo-pct">14%</div>
+            <div class="geo-note">Brasilien -5%, schwach</div>
+          </div>
+          <div class="geo-card">
+            <div class="geo-region">Rest der Welt</div>
+            <div class="geo-pct">9%</div>
+            <div class="geo-note">Asien flat bis -5%</div>
+          </div>
+        </div>
+
+        <h3>Strukturelle Wachstumstreiber (FY2027+)</h3>
+        <p>Erstens, die <strong>Precision-Ag-Adoption-Welle</strong>: 80% der neuen Mähdrescher-Bestellungen enthalten das Tier-1-Automation-Paket (Stand Q1 FY2026). See &amp; Spray expandiert über Herbizide hinaus auf Fungizide, Insektizide und Dünger. JDLink Boost (Starlink) erschließt rurale Konnektivität in Brasilien und USA. Diese Bereiche haben höhere Margen als Hardware-Verkauf.</p>
+
+        <p>Zweitens, der <strong>$150 Mrd. Incremental Addressable Market</strong>: Deere hat mit "Trapped Value"-Konzept identifiziert, dass die Branche $150 Mrd. an wertschöpfenden Effizienz-Gewinnen einfahren könnte, die heute nicht realisiert werden. Beispiel: ein 7.400-Acre-Modellbetrieb in Mato Grosso (Brasilien) mit Soja/Mais-Doppelfruchtfolge erzielt durch Deere-Technologien einen geschätzten Mehrgewinn von $200k–500k jährlich. Bei kompletter Adoption all dieser Acres entstünde ein Wertschaffungspotenzial von >$5 Mrd. für Deere.</p>
+
+        <p>Drittens, das <strong>Recurring-Revenue-Ziel von 10% bis 2030</strong>: Bei Equipment-Umsatz $63 Mrd. wäre das ein Software/Service-Stream von $6 Mrd., der heute nahe Null ist. Das wäre ein fundamentaler Re-Rating-Treiber für die Aktie (höhere Multiples für Recurring-Revenue-Anteile).</p>
+
+        <h3>Reifegrad-Einschätzung</h3>
+        <p>Deere ist eindeutig ein <strong>Mature Cyclical mit Tech-Transformation-Wette</strong>. Hyper-Growth-Phasen gab es zuletzt FY2021–FY2023 (Crop Super-Cycle), seitdem zyklischer Drawdown. Die Frage ist nicht, ob Wachstum zurückkommt — sondern wann (FY2027? FY2028?) und ob die Tech-Transformation die strukturelle Cyclicality reduzieren kann. Letzteres ist der zentrale Investment-Case.</p>
+
+        <p><strong>Begründung Score 6/10:</strong> Aktuell negatives Wachstum, aber strukturelle Treiber intakt. Re-Rating-Potenzial durch Precision-Ag-Mix-Shift, aber Cycle-Recovery-Timing unsicher.</p>
+
+        <div class="source">Quellen: Deere 4Q25 Earnings Release; Q1 FY2026 Earnings Call (19.02.2026); Manufacturing Dive (10.12.2025); Investor Day Transcript Dec 2025; Morningstar (2026); StockAnalysis.com Forecasts</div>
+      </div>
+    </div>
+
+    <!-- SEKTION 5: BEWERTUNG -->
+    <div class="section" id="s5">
+      <div class="section-header">
+        <div class="section-number">5</div>
+        <div class="section-title">Bewertung &amp; Multiples</div>
+        <div class="section-score">Score: 4/10</div>
+      </div>
+      <div class="section-body">
+        <p>Die Bewertung von Deere ist <strong>der schwächste Punkt</strong> der aktuellen Investment-Story. Bei $564.49 und EPS TTM $17.78 ergibt sich ein P/E von ~33x — das ist 71% über dem 10-Jahres-Median von 18.7x und sogar 28% über dem 4-Quartals-Durchschnitt von 25.9x. Selbst auf das normalisierte FY2027-EPS von ~$26 (Konsens) berechnet liegt das Forward-P/E noch bei rund 22x, was historisch eher am oberen Ende der Range liegt.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Multiple</th><th>Aktuell (TTM)</th><th>Forward (FY26E)</th><th>Forward (FY27E)</th><th>10J-Median</th><th>Einschätzung</th></tr></thead>
+            <tbody>
+              <tr><td>P/E</td><td>33.1x</td><td>~27x</td><td>~21.5x</td><td>18.7x</td><td><span class="miss">Teuer</span></td></tr>
+              <tr><td>P/S</td><td>3.3x</td><td>~3.6x</td><td>~3.4x</td><td>2.5x</td><td><span class="miss">Teuer</span></td></tr>
+              <tr><td>EV/EBITDA</td><td>~17x</td><td>~14x</td><td>~12x</td><td>~12x</td><td><span class="neutral">Fair</span></td></tr>
+              <tr><td>P/B</td><td>~5.6x</td><td>-</td><td>-</td><td>~4.5x</td><td><span class="neutral">Leicht über Median</span></td></tr>
+              <tr><td>PEG (Cycle-adjusted)</td><td>~2.2x</td><td>-</td><td>-</td><td>-</td><td><span class="miss">Hoch</span></td></tr>
+              <tr><td>Dividendenrendite</td><td>1.15%</td><td>~1.2%</td><td>-</td><td>~1.3%</td><td><span class="neutral">Niedrig</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Bull/Bear-Bewertungs-Interpretation</h3>
+        <p><strong>Bull-Sicht (Multiple-Re-Rating gerechtfertigt):</strong> Wenn Precision Ag wirklich 10% Recurring Revenue bis 2030 erreicht, wäre das Multiple-Niveau gerechtfertigt — Software/SaaS-Anteile rechtfertigen P/Es von 25–35x. Jefferies argumentiert, dass Deere am Cycle-Trough trades — Peak-Earnings-Schätzung für nächsten Cycle: 75% Revenue-Wachstum (65% Volumen + 10% Preis), Inkrementelle Marge 35% — was ein Peak-EPS von $35–40 ergeben könnte. Bei Peak-Multiple 15x ergibt sich ein Zielkurs von $525–600 — fair zur heutigen Bewertung.</p>
+
+        <p><strong>Bear-Sicht (Multiple-Compression bevorstehend):</strong> Historisch tradet Deere zwischen 10x (Trough-P/E) und 20x (Peak-P/E). Aktuelles TTM-P/E von 33x ist nahe historisches Allzeithoch (38.4x Jan 2018). Selbst Bullish-Case Peak-EPS $35 mit historischem Peak-Multiple 20x → $700 — also nur 24% Upside auf 4–5 Jahre. Das Risk/Reward ist ungünstig, falls Cycle länger braucht.</p>
+
+        <h3>Analysten-Konsens (Stand Mai 2026)</h3>
+        <p>Bei 22 Analysten Median-Kursziel $533–655 (je nach Quelle), Range $462–793. 13 Buy / 11 Hold / 0–1 Sell. Die Spannweite ist außergewöhnlich groß ($462–793 = 71% Differenz), was die fundamentale Uneinigkeit über das Tempo der Cycle-Recovery widerspiegelt. Wichtige Anpassungen seit Q1 FY26: Barclays +Overweight, Ziel von $530 auf $640 (1.4.2026); JPMorgan Hold, Ziel $525 → $550 (10.4.2026); Jefferies Upgrade auf Hold (Ziel $550, 8.4.2026). Wells Fargo $750, DA Davidson $775, Truist $793, UBS $775, Raymond James $765 — sehr breite Verteilung.</p>
+
+        <p><strong>Begründung Score 4/10:</strong> Die Bewertung pricet bereits eine perfekte Cycle-Recovery + Tech-Transformation ein. Bei einer Hold-Empfehlung-Tendenz ist ein Score von 4/10 angemessen — nicht extrem teuer, aber kein Margin of Safety, eher das Gegenteil.</p>
+
+        <div class="source">Quellen: FullRatio.com P/E (12.05.2026); StockAnalysis.com Statistics (Mai 2026); Wisesheets.io (Mai 2026); Investing.com Jefferies Note (08.04.2026); TipRanks Analyst Targets; GuruFocus (April 2026)</div>
+      </div>
+    </div>
+
+    <!-- SEKTION 6: CASHFLOW -->
+    <div class="section" id="s6">
+      <div class="section-header">
+        <div class="section-number">6</div>
+        <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+        <div class="section-score">Score: 8/10</div>
+      </div>
+      <div class="section-body">
+        <p>Trotz des Down-Cycles bleibt die Cashflow- und Margenqualität von Deere bemerkenswert solide. TTM Operating Cash Flow $7.7 Mrd., Capex $4.1 Mrd., FCF $3.58 Mrd. — bei einer Market Cap von $152 Mrd. ergibt sich ein FCF-Yield von ~2.4%. Die FCF-Konversion (FCF/Net Income) liegt bei rund 75%, was für ein Capex-intensives Industrieunternehmen sehr respektabel ist. Für FY2026 hat Deere die Cashflow-Guidance der Equipment-Operations auf $4.5–5.5 Mrd. angehoben (von zuvor $4.0–5.0 Mrd.).</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Kennzahl</th><th>TTM</th><th>FY2025</th><th>FY2024</th><th>FY2023 (Peak)</th><th>Trend</th></tr></thead>
+            <tbody>
+              <tr><td>Revenue</td><td>$46.7 Mrd.</td><td>$45.7 Mrd.</td><td>$51.7 Mrd.</td><td>$61.3 Mrd.</td><td><span class="miss">Cyclical Down</span></td></tr>
+              <tr><td>Gross Margin</td><td>26.3%</td><td>27.0%</td><td>29.5%</td><td>30.6%</td><td><span class="miss">Komprimiert</span></td></tr>
+              <tr><td>Operating Margin</td><td>14.0%</td><td>11.0–14%</td><td>17.1%</td><td>21.6%</td><td><span class="miss">Cycle-Lows</span></td></tr>
+              <tr><td>Net Margin</td><td>10.3%</td><td>11.0%</td><td>13.7%</td><td>16.4%</td><td><span class="miss">Aber positiv</span></td></tr>
+              <tr><td>ROE</td><td>19.6%</td><td>20.1%</td><td>32.7%</td><td>47.3%</td><td><span class="neutral">Solide trotz Trough</span></td></tr>
+              <tr><td>ROIC</td><td>6.0%</td><td>~7%</td><td>~13%</td><td>~17%</td><td><span class="miss">Cycle-Komprimiert</span></td></tr>
+              <tr><td>FCF</td><td>$3.6 Mrd.</td><td>~$5 Mrd.</td><td>$7.2 Mrd.</td><td>$8.6 Mrd.</td><td><span class="neutral">Solider Trough-Floor</span></td></tr>
+              <tr><td>Net Debt</td><td>$58 Mrd.</td><td>-</td><td>-</td><td>-</td><td><span class="miss">Hoch (FS-Captive)</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Verschuldung &amp; Bilanzqualität</h3>
+        <p>Die hohe Verschuldung von $63 Mrd. brutto / $58 Mrd. netto ist <strong>strukturell bedingt</strong>, nicht alarmierend: John Deere Financial — die captive Finanzierungstochter — vergibt Endkunden- und Händlerkredite und hat dementsprechend einen großen Receivables-Bestand (über $40 Mrd.), gegen den eine entsprechende Verschuldung steht. Der Equipment-Operations-Teil hat hingegen eine moderate Netto-Verschuldung. Debt/EBITDA des Equipment-Geschäfts liegt bei rund 1.5x — sehr komfortabel. Interest Coverage Ratio &gt;10x.</p>
+
+        <h3>Kapital-Allokation</h3>
+        <p>Deere hat in Q1 FY2026 $302 Mio. in Aktienrückkäufe getätigt — auch im Down-Cycle. Über die letzten 5 Jahre wurden über $15 Mrd. an Buybacks und Dividenden ausgeschüttet. Der quartalsweise Dividende von $1.62 (Yield 1.15%) wurde 56 Jahre in Folge gezahlt — Dividend Aristocrat-Status. Die Reinvestitionsstrategie in F&amp;E (über $2.5 Mrd. p.a. selbst im Trough) zeigt langfristige Disziplin: Deere "invests through the cycle" — historisch ein Vorteil ggü. zyklischeren Wettbewerbern.</p>
+
+        <h3>Bedenken</h3>
+        <p>Erstens, die Bruttomarge ist von 30.6% (FY2023) auf 27.0% (FY2025) gefallen — bei Wiederholung dieser Kompression könnten die Margen weiter unter Druck geraten. Zweitens, Garantiekosten und Tariffs ($1.2 Mrd. FY26) belasten die PPA-Margen am stärksten und sind nur teilweise mitigierbar. Drittens, ROIC von 6.0% ist für eine Kapitalkosten-Hürde (~8–9%) unterhalb des Sweet-Spots — typisches Cycle-Trough-Bild, aber Re-Investment muss perfekt sein.</p>
+
+        <p><strong>Begründung Score 8/10:</strong> Trotz Down-Cycle bleibt Deere FCF-positiv mit Top-Margenqualität in der Industrie. Captive-Finanzierung ist ein strategisches Asset. ROE über 19% selbst am Trough ist exzellent. Abzug für hohe Capex-Intensität und cycle-bedingte Margin-Compression.</p>
+
+        <div class="source">Quellen: StockAnalysis.com DE Statistics (Mai 2026); GuruFocus DE Gross Margin (Mai 2026); MacroTrends DE Operating Margin; AlphaQuery; Deere 4Q25 Earnings Release; Simply Wall St DE Past Performance (Mai 2026); Finbox DE Gross Profit (2026)</div>
+      </div>
+    </div>
+
+    <!-- SEKTION 7: PEERS -->
+    <div class="section" id="s7">
+      <div class="section-header">
+        <div class="section-number">7</div>
+        <div class="section-title">Peer-Vergleich</div>
+        <div class="section-score">Score: 8/10</div>
+      </div>
+      <div class="section-body">
+        <p>Im Peer-Vergleich mit CNH Industrial (direktester Wettbewerber), AGCO (Pure-Play Landtechnik, Fendt), Kubota (asiatischer Wettbewerber) und Trimble (Precision-Ag-Tech-Specialist) zeigt sich Deere als klarer Branchenführer mit deutlich besserer Profitabilität — allerdings auch zu deutlichem Bewertungs-Premium. Im Down-Cycle sind die Margen-Unterschiede besonders ausgeprägt: Deere PPA Op. Margin 11–13% Guidance FY26 vs. CNH Ag Op. Margin 4.5–5.5% (Guidance) vs. AGCO Adj. Op. Margin Q1 FY26 ~7%.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Kennzahl</th><th>Deere (DE)</th><th>CNH Industrial</th><th>AGCO</th><th>Trimble (TRMB)</th><th>Kubota (6326.T)</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Market Cap</strong></td><td>$152 Mrd.</td><td>~$13 Mrd.</td><td>$10 Mrd.</td><td>$16 Mrd.</td><td>~$15 Mrd.</td></tr>
+              <tr><td>Revenue TTM</td><td>$46.7 Mrd.</td><td>~$15 Mrd.</td><td>$10.5 Mrd. (FY26E)</td><td>$3.6 Mrd.</td><td>~$17 Mrd.</td></tr>
+              <tr><td>Q1 FY26 Growth</td><td><span class="beat">+13%</span></td><td><span class="neutral">0%</span></td><td><span class="beat">+14.3%</span></td><td>-</td><td>-</td></tr>
+              <tr><td>Q1 FY26 EPS</td><td>$2.42 (beat +20%)</td><td>$0.01 (collapse)</td><td>$0.94 (beat +114%)</td><td>-</td><td>-</td></tr>
+              <tr><td>P/E TTM</td><td>33x</td><td>~30x</td><td>14.2x</td><td>~39x</td><td>~13x</td></tr>
+              <tr><td>Op. Margin (FY26E)</td><td>~14%</td><td>2.5–3.5%</td><td>~7–8%</td><td>~15%</td><td>~8%</td></tr>
+              <tr><td>FY26 EPS-Guidance</td><td>$5.70 Q2</td><td>$0.35–0.45 (FY)</td><td>~$6.00 (FY)</td><td>-</td><td>-</td></tr>
+              <tr><td>Precision Ag Stärke</td><td><span class="beat">Marktführer</span></td><td><span class="neutral">Mittlere</span></td><td><span class="neutral">JV PTx Trimble</span></td><td><span class="beat">Pure-Play</span></td><td><span class="miss">Schwach</span></td></tr>
+              <tr><td>Geografie</td><td>60% NA</td><td>Diversifiziert</td><td>57% EU</td><td>Diversifiziert</td><td>50% Asien</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Strategische Unterschiede</h3>
+        <p><strong>Deere vs. CNH Industrial:</strong> CNH (Case IH, New Holland) ist mit Market Cap $13 Mrd. zwar viel kleiner, aber gleich diversifiziert (Ag + Construction). Q1 FY26 zeigte die ganze Schwäche: Net Income kollabierte auf $10 Mio. (-92% YoY), Adj. EBIT der Industrial Activities sogar negativ (-$45 Mio.). CNH leidet stärker unter Brasilien-Exposure und Tariffs als Deere. Deere hat in beide Segmenten höhere Marktanteile, bessere Operational Leverage und einen strukturell höheren Free Cash Flow.</p>
+
+        <p><strong>Deere vs. AGCO:</strong> AGCO ist mit Q1 FY26 +14.3% Revenue und EPS Beat +114% der überraschende Outperformer im Down-Cycle, hauptsächlich weil das Vorjahresergebnis sehr tief war. AGCO P/E von 14.2x ist deutlich attraktiver als Deere 33x. Wichtig: AGCOs PTx Trimble JV (Premier-Partner Trimble) ist die direkte strategische Antwort auf Deeres Precision-Ag-Vorsprung — aber mit Open-Architecture (auch für Fremdmaschinen kompatibel) statt Deeres geschlossenem Ökosystem. Das könnte langfristig Marktanteile bei Mixed-Fleet-Farmern bringen. AGCOs Margenziel 2029: 14–15% Adj. Op. Margin — wenn das gelingt, schließt AGCO die Lücke zu Deere.</p>
+
+        <p><strong>Deere vs. Trimble:</strong> Trimble ist ein Software-Pure-Play mit Margen >15% und einem klaren Tech-Premium-Multiple (P/E 39x). Nach dem AGCO-JV (PTx Trimble) ist Trimble allerdings nur noch eingeschränkt unabhängiger Konkurrent. Strategisch interessant: Trimble könnte als Acquisition-Target für Deere oder einen anderen Player infrage kommen, falls Deere den Anschluss zur "offenen" Precision-Ag-Welt herstellen wollte.</p>
+
+        <p><strong>Deere vs. Kubota:</strong> Kubota dominiert APAC (besonders Japan, Indien) und Small-Tractor-Segmente. Mit P/E ~13x deutlich günstiger als Deere. Wenig Overlap im Großtraktor-Markt — Kubota ist eher Wettbewerber im Small-Ag-Bereich (wo Deere stark wachsen will). Kubotas Precision-Ag-Strategie ist deutlich weniger entwickelt.</p>
+
+        <h3>Marktanteile Großtraktoren NA</h3>
+        <p>Im 100+ PTO HP Segment hat Deere stabile ~55% Marktanteil (laut Q3 FY2025 Earnings Call: Deere outperformed industry — Industrie -28%, Deere weniger), gefolgt von CNH ~25%, AGCO ~10%, Kubota/Sonstige ~10%. Dealer-Inventory für Large Tractors lag Q4 FY25 bei 31% — historisch niedrig — was Deere die strategische Flexibilität gibt, im Recovery-Cycle Preise zu halten oder zu erhöhen.</p>
+
+        <p><strong>Begründung Score 8/10:</strong> Klare Marktführerschaft, höhere Margen, bessere Bilanzqualität und überlegene Tech-Plattform als Peers. Bewertungs-Premium ist gerechtfertigt, aber AGCO/Trimble-Konkurrenz wächst.</p>
+
+        <div class="source">Quellen: CNH Q1 2026 Form 8-K (30.04.2026); SEC Filings AGCO Q1 2026 (05.05.2026); StockAnalysis.com AGCO; Investing.com AGCO Q1 2026 Slides; PitchBook Trimble Profile (17.04.2026); Public.com Trimble Market Cap; GlobeNewswire Precision Ag Market Report (11.03.2026); Deere Q3 2025 Earnings Call Transcript (14.08.2025)</div>
+      </div>
+    </div>
+
+    <!-- SEKTION 8: NEWS -->
+    <div class="section" id="s8">
+      <div class="section-header">
+        <div class="section-number">8</div>
+        <div class="section-title">Aktuelle News &amp; Events</div>
+        <div class="section-note">Quellen ≤ 3 Monate</div>
+      </div>
+      <div class="section-body">
+
+        <h3>Ebene 1: Unternehmen</h3>
+        <div class="event-item">
+          <div class="event-dot dot-green"></div>
+          <div>
+            <div class="event-label">19.02.2026 – Q1 FY2026 Earnings Beat &amp; Guidance Raise <span class="badge badge-green">Sehr Positiv</span></div>
+            <div class="event-text">Deere meldete EPS $2.42 (vs. Konsens $2.02, +20%) und Revenue $9.61 Mrd. (+13% YoY). Wichtiger: FY26-Nettogewinn-Guidance auf $4.5–5.0 Mrd. angehoben (von $4.0–4.75 Mrd.). CEO May: "2026 marks the bottom of the cycle." Aktie sprang +11.8% am Tag. Quelle: PRNewswire, deere.com Investor Relations (19.02.2026)</div>
+          </div>
+        </div>
+        <div class="event-item">
+          <div class="event-dot dot-green"></div>
+          <div>
+            <div class="event-label">18.02.2026 – Tenna Acquisition geschlossen <span class="badge badge-green">Positiv</span></div>
+            <div class="event-text">Deere schloss die Übernahme der Fleet-Intelligence-Plattform Tenna ab — ergänzt das digitale Construction-Portfolio. Tenna bleibt als unabhängige Marke aktiv. Quelle: ValueTheMarkets (23.02.2026)</div>
+          </div>
+        </div>
+        <div class="event-item">
+          <div class="event-dot dot-yellow"></div>
+          <div>
+            <div class="event-label">08.04.2026 – Right-to-Repair Vergleich $99 Mio. <span class="badge badge-yellow">Neutral</span></div>
+            <div class="event-text">Deere einigte sich in der multidistrict "Right to Repair"-Klage auf einen Settlement-Fonds von $99 Mio. Beseitigt rechtliche Unsicherheit, kostet aber etwas vom Service-Margenpolster. Quelle: TipRanks DE Stock News (April 2026)</div>
+          </div>
+        </div>
+        <div class="event-item">
+          <div class="event-dot dot-green"></div>
+          <div>
+            <div class="event-label">08.04.2026 – Jefferies Upgrade auf Hold <span class="badge badge-green">Positiv</span></div>
+            <div class="event-text">Jefferies (Stephen Volkmann) hob das Rating von Underperform auf Hold bei Kursziel $550 — argumentiert mit Cycle-Bottom-Thesis und der Sicht auf "limited downside" nach -15% Pullback seit Februar-High. Aktie reagierte mit +5%. Quelle: Investing.com (08.04.2026); GuruFocus (09.04.2026)</div>
+          </div>
+        </div>
+        <div class="event-item">
+          <div class="event-dot dot-green"></div>
+          <div>
+            <div class="event-label">01.04.2026 – Barclays raised target to $640 <span class="badge badge-green">Positiv</span></div>
+            <div class="event-text">Barclays hob Kursziel von $530 auf $640 (Overweight bestätigt). Quelle: GuruFocus Analyst Ratings (April 2026)</div>
+          </div>
+        </div>
+        <div class="event-item">
+          <div class="event-dot dot-yellow"></div>
+          <div>
+            <div class="event-label">01.05.2026 – Brent Norwood als neuer CFO <span class="badge badge-yellow">Neutral</span></div>
+            <div class="event-text">Brent Norwood (20+ Jahre Deere-Erfahrung) wurde zum neuen CFO ernannt, ersetzt Josh Jepsen. Interner Wechsel, signalisiert Kontinuität. Quelle: TipRanks (01.05.2026); Yahoo Finance Simply Wall St (Mai 2026)</div>
+          </div>
+        </div>
+        <div class="event-item">
+          <div class="event-dot dot-green"></div>
+          <div>
+            <div class="event-label">08.12.2025 – Investor Day NYSE <span class="badge badge-green">Positiv</span></div>
+            <div class="event-text">Deere präsentierte das 10%-CAGR-Ziel bis 2030 ($63 Mrd. Equipment-Revenue) und bekräftigte die 10%-Recurring-Revenue-Ambition. Operations Center deckt 500 Mio. Acres und 1 Mio. verbundene Maschinen. Quelle: Manufacturing Dive (10.12.2025); Upstream Ag Insights (13.12.2025)</div>
+          </div>
+        </div>
+
+        <h3>Ebene 2: Branche</h3>
+        <div class="event-item">
+          <div class="event-dot dot-green"></div>
+          <div>
+            <div class="event-label">Q1 FY2026 – AGCO Massiv-Beat <span class="badge badge-green">Positiv für Sektor</span></div>
+            <div class="event-text">AGCO meldete für Q1 FY26 +14.3% Revenue Growth und EPS Beat +114%. PTx Trimble JV-Integration läuft auf Vollgas. Industrie-Erholungssignal über Deere hinaus. Quelle: Investing.com (Mai 2026)</div>
+          </div>
+        </div>
+        <div class="event-item">
+          <div class="event-dot dot-red"></div>
+          <div>
+            <div class="event-label">30.04.2026 – CNH Industrial Net Income kollabiert <span class="badge badge-red">Negativ</span></div>
+            <div class="event-text">CNH Q1 FY26 Net Income $10 Mio. (-92% YoY), Industrial Activities Adj. EBIT -$45 Mio. Zeigt: Cycle-Bottom hat noch nicht alle Player erreicht. Quelle: SEC Filing 8-K (30.04.2026)</div>
+          </div>
+        </div>
+        <div class="event-item">
+          <div class="event-dot dot-green"></div>
+          <div>
+            <div class="event-label">Nov 2025 – Agritechnica Hannover 2025 <span class="badge badge-green">Positiv</span></div>
+            <div class="event-text">Deere zeigte die nächste Generation 9RX Articulated Tracked Tractor (640–830 HP) mit 16-Kamera-Second-Generation-Autonomie. Massive Aufmerksamkeit in der europäischen Fachpresse. Quelle: Tractor Tuesday Blog (11.11.2025)</div>
+          </div>
+        </div>
+
+        <h3>Ebene 3: Makro</h3>
+        <div class="event-item">
+          <div class="event-dot dot-yellow"></div>
+          <div>
+            <div class="event-label">08.12.2025 – Trump-$12 Mrd. Farmer-Bridge-Hilfen <span class="badge badge-yellow">Gemischt</span></div>
+            <div class="event-text">Trump kündigte $12 Mrd. Farmer-Bridge-Hilfen wegen Trade-Disruptions an ($11 Mrd. Row Crops, $1 Mrd. Specialty Crops, Auszahlung Ende Februar 2026). Soll Farm-Einkommen stützen — ABER: Trump kommunizierte gleichzeitig, dass Tractor Makers (incl. Deere) Preise senken sollten. Quelle: Reuters via ts2.tech (Dezember 2025)</div>
+          </div>
+        </div>
+        <div class="event-item">
+          <div class="event-dot dot-red"></div>
+          <div>
+            <div class="event-label">FY2026 – Tariff-Belastung verdoppelt auf $1.2 Mrd. <span class="badge badge-red">Negativ</span></div>
+            <div class="event-text">Tariff-Kosten verdoppeln sich von ~$600 Mio. FY25 auf $1.2 Mrd. FY26 (steel/aluminum tariffs, expanded Section 232 measures). Belastet PPA-Margen am stärksten. Quelle: Q1 FY2026 Earnings Call (19.02.2026); Benzinga (27.11.2025)</div>
+          </div>
+        </div>
+        <div class="event-item">
+          <div class="event-dot dot-red"></div>
+          <div>
+            <div class="event-label">2026 – US-Farm-Income-Outlook -15% <span class="badge badge-red">Negativ</span></div>
+            <div class="event-text">USDA prognostiziert für 2026 ein um -15% niedrigeres Farm-Einkommen ggü. 2025 wegen niedriger Commodity-Preise, höherer Input-Kosten und Trade-Volatilität. Drückt Bestellbereitschaft für Large Ag Equipment. Quelle: Jefferies-Note via Investing.com (08.04.2026)</div>
+          </div>
+        </div>
+        <div class="event-item">
+          <div class="event-dot dot-yellow"></div>
+          <div>
+            <div class="event-label">Q4 2025 – China-Crop-Deal <span class="badge badge-yellow">Gemischt</span></div>
+            <div class="event-text">USA und China kündigten Wieder-Aufnahme von US-Agrar-Importen an (12 Mio. t Sojabohnen geplant), aber bisher nur 2 Mio. t realisiert (Stand Q1 FY26). Hoffnungsträger, aber nicht ausreichend für Cycle-Turn. Quelle: Bloomberg via Yahoo Finance (26.11.2025)</div>
+          </div>
+        </div>
+
+        <div class="source">Quellen: Multiple News Items aggregiert aus PRNewswire, deere.com Investor Relations, Investing.com, TipRanks, Reuters, Bloomberg, USDA, SEC Filings (Stand: Mai 2026)</div>
+      </div>
+    </div>
+
+    <!-- SEKTION 9: TECHNISCHE ANALYSE -->
+    <div class="section" id="s9">
+      <div class="section-header">
+        <div class="section-number">9</div>
+        <div class="section-title">Technische Analyse</div>
+        <div class="section-score">Score: 5/10</div>
+      </div>
+      <div class="section-body">
+
+        <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));">
+          <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$564.49</div><div class="kpi-sub">18.05.2026</div></div>
+          <div class="kpi-card"><div class="kpi-label">SMA 5</div><div class="kpi-value">$573</div><div class="kpi-sub"><span class="badge badge-red">Unter</span></div></div>
+          <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value">$571</div><div class="kpi-sub"><span class="badge badge-red">Unter</span></div></div>
+          <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value">$591</div><div class="kpi-sub"><span class="badge badge-red">Deutlich unter</span></div></div>
+          <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value">~47</div><div class="kpi-sub">Neutral</div></div>
+          <div class="kpi-card"><div class="kpi-label">52W High</div><div class="kpi-value">$674.19</div><div class="kpi-sub">19.02.2026 (ATH)</div></div>
+          <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value">≈-0.8</div><div class="kpi-sub">Neutral/Schwach</div></div>
+        </div>
+
+        <h3>Trend &amp; Charttechnik</h3>
+        <p>Deere notiert am 18.05.2026 bei $564.49, rund 16% unter dem 52-Wochen- (und gleichzeitig Allzeit-) Hoch von $674.19, das am 19.02.2026 direkt nach dem starken Q1-Earnings-Beat und Guidance-Raise erreicht wurde. Seitdem hat die Aktie 15%+ korrigiert, getrieben durch (a) Tariff-Sorgen, (b) verschlechterte US-Farm-Income-Outlooks und (c) generelles Profit-Taking nach starkem 6-Monats-Run.</p>
+
+        <p>Charttechnisch ist die Lage <strong>gemischt-leicht-negativ</strong>: Der Kurs liegt unter SMA 50 ($571) und SMA 200 ($591), was klassisch als bearish gilt. Die SMA 200 als wichtigste Trend-Linie hat sich bei rund $591 gefestigt — wird sie nachhaltig durchbrochen nach oben, wäre das ein starkes Bull-Signal. Solange darunter, bleibt der mittelfristige Trend angeschlagen. Wichtige Support-Levels: $540–545 (50%-Retracement vom Februar-High), darunter $490–500 (kritisch). Resistance: $600 (psychologisch), $620 (50-Tage-Hoch), $674 (ATH).</p>
+
+        <h3>Indikatoren</h3>
+        <p>RSI(14) bei ~47 ist neutral — weder überkauft noch überverkauft. Anders als im Februar (RSI 75+ → klares Sell-Signal an der Spitze) gibt der RSI heute kein klares Momentum-Signal. MACD bei -0.8 schwach negativ, aber nahe Null — könnte bald wieder dreh-bereit sein, wenn Q2-Earnings überraschen. Bollinger Bands (25, $565–608) zeigen die Aktie nahe Lower Band — leichter Kauf-Hinweis aus mean-reversion-Sicht.</p>
+
+        <h3>Volumen &amp; Marktstimmung</h3>
+        <p>Short Interest moderat bei 1.7% der ausstehenden Aktien (Mai 2026) — keine extremen Short-Positionen. TradingView-Technical-Rating: aktuell "Buy" (1-Wochen-Trend), Monthly "Strong Buy" — wobei die Daily-View bei "Neutral" liegt. Insgesamt zeigt der Chart einen <strong>Konsolidierungs-Pattern nach starker Rally</strong>, mit moderatem Risiko nach unten ($520-Range) und gutem Upside-Potenzial bei positiven Q2-Katalysatoren.</p>
+
+        <h3>Wichtigste Levels für die nächsten 1–3 Monate</h3>
+        <p><strong>Support:</strong> $545 (kritisch), $520 (Pull-Back-Risiko), $490 (Worst-Case bei Q2-Miss). <strong>Resistance:</strong> $590 (SMA 200), $620 (50-Tage-Hoch), $674 (ATH-Test bei Strong-Q2).</p>
+
+        <p><strong>Begründung Score 5/10:</strong> Mixed Signals — Aktie unter den wichtigen MAs, aber RSI neutral und kein Momentum-Sell. Technisch eher "warten" als kaufen oder verkaufen. Q2-Earnings (21.05.2026) wird der Schlüsselauslöser.</p>
+
+        <div class="source">Quellen: Investing.com DE Technical (Mai 2026); Financhill.com (April 2026); TradingView NYSE-DE Technicals; TradingKey.com (15.05.2026); Barchart.com DE Technical</div>
+      </div>
+    </div>
+
+    <!-- SEKTION 10: RISIKEN & CHANCEN -->
+    <div class="section" id="s10">
+      <div class="section-header">
+        <div class="section-number">10</div>
+        <div class="section-title">Risiken &amp; Chancen</div>
+        <div class="section-score">Score: 6/10 (invertiert)</div>
+      </div>
+      <div class="section-body">
+
+        <h3>10a) Strukturelle &amp; zyklische Risiken</h3>
+
+        <div class="risk-item">
+          <div class="risk-header">
+            <div class="risk-title">⚡ Langgezogener Ag-Down-Cycle</div>
+            <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
+          </div>
+          <div class="event-text">Risiko, dass der Down-Cycle länger dauert als von Management prognostiziert (2026 als "Bottom"). USDA prognostiziert weitere -15% Farm-Income 2026. Falls Crop-Preise auch 2026/2027 niedrig bleiben, könnte Cycle-Recovery ins FY2028 verschoben werden. Auswirkung: EPS könnte 2 Jahre länger im $15–18-Bereich bleiben statt erwartete Recovery auf $25–30. Wahrscheinlichkeit: 35%.</div>
+        </div>
+
+        <div class="risk-item">
+          <div class="risk-header">
+            <div class="risk-title">⚡ Tariff-Eskalation</div>
+            <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel-Hoch</span></div>
+          </div>
+          <div class="event-text">$1.2 Mrd. Tariff-Belastung FY26 ist bereits doppelt so hoch wie FY25. Section-232-Erweiterung im August 2025 für Steel/Aluminum/India-Imports verschärft die Lage. Bei weiterer Eskalation könnten zusätzliche $500–800 Mio. Belastung pro Jahr entstehen — direkt margin-zehrend in PPA-Segment. Wahrscheinlichkeit: 40%.</div>
+        </div>
+
+        <div class="risk-item">
+          <div class="risk-header">
+            <div class="risk-title">⚡ Wettbewerbsdruck AGCO/PTx Trimble + CNH</div>
+            <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+          </div>
+          <div class="event-text">AGCOs PTx Trimble JV bietet Open-Architecture Precision Ag (für gemischte Flotten) und gewinnt nach Q1 FY26 Beat (+114% EPS) Momentum. Falls AGCO-Margenziel 14–15% bis 2029 erreicht wird, schließt es zu Deere auf. Ähnlich bei CNH mit Raven-Industries-Akquisition. Wahrscheinlichkeit struktureller Marktanteilsverlust: 25%.</div>
+        </div>
+
+        <div class="risk-item">
+          <div class="risk-header">
+            <div class="risk-title">⚡ Right-to-Repair-Regulierung</div>
+            <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
+          </div>
+          <div class="event-text">$99-Mio.-Settlement von April 2026 beendet aktuelle US-Multi-District-Klage, aber Right-to-Repair-Gesetzgebung in mehreren US-Bundesstaaten (Colorado, etc.) und EU bleibt offen. Drohung: Margen-Verlust im hochmarginigen Service-/Ersatzteile-Geschäft (~30% der Op-Profite). Wahrscheinlichkeit weiterer regulatorischer Verschärfung: 50%.</div>
+        </div>
+
+        <div class="risk-item">
+          <div class="risk-header">
+            <div class="risk-title">⚡ Hohe Bewertung — Multiple-Compression</div>
+            <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel-Hoch</span></div>
+          </div>
+          <div class="event-text">P/E 33x ist 71% über 10J-Median. Falls Cycle-Recovery sich verzögert oder Tech-Transformation langsamer voranschreitet als erhofft, droht Multiple-Compression auf 22–25x — bei TTM-EPS $17.78 → Zielpreis $390–445 (-22% bis -30%). Wahrscheinlichkeit: 30%.</div>
+        </div>
+
+        <h3>10b) AI-Risiko &amp; technologische Disruption</h3>
+        <p>Im Gegensatz zu Software-Unternehmen, die durch generative AI disrupted werden könnten, ist Deere ein <strong>Profiteur des AI-Trends</strong>: KI ermöglicht Precision Ag (See &amp; Spray, autonome Operationen, Harvest Settings Automation). Risiko ist eher die <strong>technologische Open-Source-Bewegung</strong>: falls Open-Source-Autonomie-Software (z.B. von Carbon Robotics, Solinftec) Standards setzt, könnte Deeres geschlossenes Ökosystem an Wert verlieren. Auch Right-to-Repair-Regulierung könnte Drittanbieter-Software auf Deere-Hardware ermöglichen.</p>
+
+        <p><strong>Bullishes Szenario AI:</strong> Deere monetarisiert die KI-Tech über Subscription-Modelle, erreicht 10% Recurring Revenue bis 2030 ($6 Mrd.) — das wäre eine SaaS-ähnliche Premium-Bewertung wert (P/S 5–7x für diesen Anteil) und würde das Multiple langfristig stützen. <strong>Bärisches Szenario AI:</strong> Open-Standards erzwingen Interoperabilität, AGCO/Trimble bauen vergleichbare Plattformen, Deere kann max. 2–3% Recurring Revenue erreichen — der Tech-Premium-Multiple verflüchtigt sich.</p>
+
+        <h3>10c) Chancen</h3>
+        <p><strong>Cycle-Recovery FY27–28:</strong> Bei 75% Trough-to-Peak-Revenue-Wachstum (historischer Durchschnitt) wären Equipment-Revenues $68 Mrd. erreichbar, mit Peak-EPS $32–40. Bei 12–15x Peak-Multiple → Zielkurs $480–600 (also +/-0% Upside auf 4–5 Jahre).</p>
+
+        <p><strong>Precision Ag Subscription-Modell:</strong> Sollte See &amp; Spray + Operations Center + JDLink Boost + Autonomy Kits zusammen 10% des Umsatzes als Recurring-Revenue generieren (≈ $6 Mrd.), wäre dieser Anteil $30–40 Mrd. wert (5–7x P/S) — entspricht $110–145 pro Aktie zusätzlichem Wert über den heutigen Kurs hinaus.</p>
+
+        <p><strong>Construction/Infrastruktur-Boom:</strong> US-Infrastructure Investment Act, Datacenter-Bauwelle (AI), Rental-Fleet-Replenishment treiben das C&amp;F-Segment (Guidance +15% in FY26). Bei ~30% Anteil an Op-Profit hat C&amp;F einen unterschätzten Recovery-Hebel.</p>
+
+        <h3>10d) Red Flags &amp; Dealbreaker</h3>
+        <p><strong>Red Flags:</strong> (1) PPA-Op-Margin Crash Q1 FY26 auf 4.4% (von 11% Vorjahr) — sollte sich in Q2/Q3 NICHT weiter verschlechtern. (2) Brasilien-Sales-Weakness — könnte ein struktureller, nicht zyklischer Effekt sein. (3) Bruttomarge unter 27% (FY25 Tief) — historisch sehr niedrig.</p>
+
+        <p><strong>Dealbreaker:</strong> Keine. Deere hat keine existenzbedrohenden Risiken. Selbst im Worst-Case (verlängerter Cycle bis FY29) bleibt das Unternehmen profitabel mit ROE 15%+ und FCF $3+ Mrd. Die Marktführerschaft, das Händlernetzwerk und das captive Financial-Services-Geschäft sind robust.</p>
+
+        <p><strong>Begründung Score 6/10 (invertiert):</strong> Mehrere mittelhohe zyklische und regulatorische Risiken (Cycle-Length, Tariffs, Right-to-Repair), aber keine Existenz-Bedrohung. Tech-Disruption-Risiko niedrig. 6/10 reflektiert "moderate Risiken, gut managebar".</p>
+
+        <div class="source">Quellen: Deere 4Q25 Earnings Release; USDA Farm Income Outlook 2026; Jefferies Note (08.04.2026); Multiple Analyst Reports; CNH Q1 2026 Filing</div>
+      </div>
+    </div>
+
+    <!-- SEKTION 11: SCORING -->
+    <div class="section" id="s11">
+      <div class="section-header">
+        <div class="section-number">11</div>
+        <div class="section-title">Scoring-Übersicht &amp; User-spezifische Analyse</div>
+        <div class="section-score">Ø Gesamtscore: 6.6/10</div>
+      </div>
+      <div class="section-body">
+
+        <h3>Gesamt-Scoring</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Kategorie</th><th>Score</th><th>Visualisierung</th><th>Begründung</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>Burggraben (§2)</strong></td>
+                <td>9/10</td>
+                <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td>
+                <td>Marktführer, Daten-Vorsprung, Händlernetz, F&amp;E-Stärke</td>
+              </tr>
+              <tr>
+                <td><strong>Operative Entw. 4Q (§3)</strong></td>
+                <td>7/10</td>
+                <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td>
+                <td>4/4 Beats, aber YoY-Rückgang. Guidance-Raise positiv.</td>
+              </tr>
+              <tr>
+                <td><strong>Wachstum (§4)</strong></td>
+                <td>6/10</td>
+                <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+                <td>Aktuell negativ, aber 10%-CAGR-Ziel bis 2030 und Precision-Ag-Tailwinds</td>
+              </tr>
+              <tr>
+                <td><strong>Bewertung (§5)</strong></td>
+                <td>4/10</td>
+                <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td>
+                <td>P/E 33x = 71% über 10J-Median. Wenig Margin of Safety.</td>
+              </tr>
+              <tr>
+                <td><strong>Cashflow/Kapital (§6)</strong></td>
+                <td>8/10</td>
+                <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+                <td>FCF $3.6 Mrd., ROE 19.6% selbst am Trough, 56J Dividend-History</td>
+              </tr>
+              <tr>
+                <td><strong>Peer-Vergleich (§7)</strong></td>
+                <td>8/10</td>
+                <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td>
+                <td>Klar überlegen ggü. CNH, Margen-Premium vs. AGCO</td>
+              </tr>
+              <tr>
+                <td><strong>Technisch (§9)</strong></td>
+                <td>5/10</td>
+                <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td>
+                <td>Unter SMA 50/200, aber RSI neutral. Mixed Signals.</td>
+              </tr>
+              <tr>
+                <td><strong>Risiken invertiert (§10)</strong></td>
+                <td>6/10</td>
+                <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td>
+                <td>Mehrere zyklische Risiken, aber kein Dealbreaker</td>
+              </tr>
+              <tr style="background:rgba(34,197,94,0.08);">
+                <td><strong>⌀ Gesamtscore</strong></td>
+                <td><strong>6.6/10</strong></td>
+                <td>
+                  <div class="score-bar">
+                    <div class="score-bar-track">
+                      <div class="score-bar-fill" style="width:66%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
+                    </div>
+                    <span class="score-num" style="color:var(--primary);">6.6</span>
+                  </div>
+                </td>
+                <td>Solides Unternehmen mit klarem Burggraben, aber Bewertungs-Premium und Cycle-Timing-Risiko</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>User-spezifische Analyse: Precision Ag / Autonomy als Burggraben</h3>
+
+        <p>Die These des Users — <strong>Precision Ag / Autonomy als Burggraben für See &amp; Spray, autonome Traktoren und Software-Subscription-Modell</strong> — wird durch die Analyse <strong>überwiegend bestätigt</strong>, mit einigen wichtigen Differenzierungen:</p>
+
+        <p><strong>Stärken der These (bestätigt):</strong></p>
+        <ul style="margin-left:20px;margin-bottom:12px;">
+          <li><strong>Operations Center als Daten-Lock-in:</strong> 500 Mio. Engaged Acres, 1 Mio. verbundene Maschinen — eine de-facto-Industrie-Plattform, die kein Wettbewerber kurzfristig nachbauen kann. Das ist der echte Burggraben.</li>
+          <li><strong>See &amp; Spray Wertschöpfung beweist Geschäftsmodell:</strong> 31 Mio. Gallonen Herbizid-Mix-Ersparnis 2025 = harter, messbarer ROI für Farmer. Schafft die Bezahl-Bereitschaft für Subscription-Modelle.</li>
+          <li><strong>Autonomie-Adoption beschleunigt:</strong> 80% der neuen Mähdrescher-Orders mit Tier-1-Automation (Q1 FY26). Limited-Quantity 2nd-Gen Autonomy Kits in 2026, Full-Scale ab 2027.</li>
+          <li><strong>Recurring-Revenue-Ziel klar definiert:</strong> 10% bis 2030 ($5–6 Mrd.) ist die richtige strategische Stoßrichtung — wenn erreicht, fundamentale Re-Rating-Story.</li>
+        </ul>
+
+        <p><strong>Einschränkungen / Risiken der These (zu beachten):</strong></p>
+        <ul style="margin-left:20px;margin-bottom:12px;">
+          <li><strong>Subscription-Revenue ist heute noch unbedeutend:</strong> Die 10%-Recurring-Quote ist ein 2030-Ziel. Heute liegt Recurring-Software-Revenue bei geschätzt &lt;1% des Gesamtumsatzes. Der Tech-Multiple-Premium ist in der aktuellen Bewertung bereits zu großen Teilen eingepreist (P/E 33x), aber die Performance muss noch geliefert werden.</li>
+          <li><strong>AGCO/Trimble PTx-Allianz ist eine reale Bedrohung:</strong> Open-Architecture vs. Deeres Walled Garden — wenn Mixed-Fleet-Farmer (~30% des Marktes) PTx Trimble bevorzugen, könnte Deere wichtige Markt-Anteile bei Software-Adoption verlieren.</li>
+          <li><strong>Right-to-Repair untergräbt Service-Lock-in teilweise:</strong> Der Service- und Ersatzteile-Burggraben — heute mit ~30% der Op-Profite ein wichtiger Stabilisator — ist regulatorisch unter Druck. Settlement $99 Mio. (April 2026) ist ein Vorläufer.</li>
+          <li><strong>Autonomie ist ROI-abhängig:</strong> Autonomous Tractor lohnt sich erst ab ~10.000 Acres (laut Deere-Manager Mike Porter), in 2026 mit -15% Farm-Income-Outlook ist die Investitionsbereitschaft begrenzt. Adoption könnte langsamer kommen als die Bewertung impliziert.</li>
+        </ul>
+
+        <p><strong>Anpassungen der Scores aufgrund der User-Analyse:</strong></p>
+        <ul style="margin-left:20px;margin-bottom:12px;">
+          <li>Burggraben-Score bleibt bei 9/10 (User-These bestätigt grundsätzlich)</li>
+          <li>Wachstum-Score bleibt bei 6/10 (Tech-Tailwinds eingepreist, aber Cycle-Risiko überwiegt kurzfristig)</li>
+          <li>Risiken-Score bleibt bei 6/10 (Open-Architecture-Wettbewerb durch AGCO/Trimble explizit in Sektion 10 aufgenommen)</li>
+        </ul>
+
+        <p><strong>Kern-Erkenntnis aus User-These:</strong> Precision Ag ist real, messbar und strategisch hochkritisch. Die These ist überzeugend für 5–10-Jahres-Horizonte. Die Krux liegt im <strong>Bewertungs-Timing</strong>: Bei P/E 33x ist die Tech-Story bereits weitgehend eingepreist. Der Investment-Case funktioniert vor allem dann, wenn man bereit ist, durch eine 1–2-jährige Cycle-Trough-Phase zu halten — denn das Re-Rating wird erst bei messbaren Recurring-Revenue-Zahlen (z.B. 2028, wenn 5%-Quote überschritten) breitenwirksam.</p>
+
+        <div class="source">Quellen: Synthese aus Sektionen 2, 4, 7, 10; Deere Investor Day Transcript Dec 2025; Upstream Ag Insights; AgTechNavigator (Dezember 2025); Farm Progress (Februar 2026)</div>
+      </div>
+    </div>
+
+    <!-- SEKTION 12: FAZIT -->
+    <div class="section" id="s12">
+      <div class="section-header">
+        <div class="section-number">12</div>
+        <div class="section-title">Fazit – Investment-These</div>
+        <div class="section-note">Score-konsolidiert: 6.6/10</div>
+      </div>
+      <div class="section-body">
+
+        <h3>Bullisches vs. Bärisches Narrativ</h3>
+
+        <div class="bull-bear-grid">
+          <div class="bull-card">
+            <h4>🐂 Das Bullische Narrativ</h4>
+            <p><strong>Säule 1 – Cycle-Bottom als strategischer Einstiegspunkt:</strong> Management hat in Q4 FY25 und Q1 FY26 unmissverständlich kommuniziert: "2026 marks the bottom of the current cycle." Die Q1-FY26-Guidance wurde von $4.0–4.75 Mrd. auf $4.5–5.0 Mrd. angehoben — der erste positive Wechsel seit 2 Jahren. Field-Inventory für 220+ HP-Traktoren auf 17-Jahres-Tief, Used-Combine-Bestände -25% von Frühjahr 2024. Das sind harte Signale für Cycle-Turn ab FY27. Historisch sind 75% Trough-to-Peak-Revenue-Wachstum normal (laut Jefferies), bei Peak-EPS $32–40 und Peak-Multiple 15–20x ergeben sich Zielwerte von $480–800.</p>
+            <p><strong>Säule 2 – Precision-Ag-Plattform mit echtem Burggraben:</strong> Operations Center mit 500 Mio. Acres und 1 Mio. Maschinen ist die de-facto Industrie-Plattform — Netzwerkeffekte verstärken sich mit jedem Jahr. See &amp; Spray sparte Farmern 31 Mio. Gallonen Herbizid 2025 (harter ROI). 80% neuer Mähdrescher mit Tier-1-Automation. Operating Margins bei voller Cycle-Recovery: PPA 18–20%, gestützt durch margin-stärkere Software-Komponenten. 10%-Recurring-Revenue-Ziel bis 2030 ($6 Mrd.) wäre eine fundamentale SaaS-Story wert mit Premium-Multiple.</p>
+            <p><strong>Säule 3 – Captive Quality &amp; Defensive Characteristics:</strong> Selbst am tiefsten Cycle-Tief seit 2018 erzielt Deere ROE 19.6%, FCF $3.6 Mrd., Op-Margin 14%. Financial Services federt zyklische Schwankungen ab. Buybacks selbst im Trough ($302 Mio. in Q1 FY26). 56 Jahre konsekutive Dividend-Zahlungen. C&amp;F-Segment (+15% YoY FY26-Guidance) bietet Diversifikations-Hebel via US-Infrastruktur-Boom und Datacenter-Bauten.</p>
+          </div>
+          <div class="bear-card">
+            <h4>🐻 Das Bärische Narrativ</h4>
+            <p><strong>Risiko 1 – Cycle-Recovery könnte länger dauern:</strong> USDA prognostiziert für 2026 weitere -15% Farm-Income-Rückgang. Crop-Preise bleiben gedrückt (China-Importe nur 2 von 12 Mio. t. Sojabohnen realisiert). Falls FY2026 NICHT der Bottom ist, sondern erst FY2027 oder FY2028 — was sehr realistische 30–35% Wahrscheinlichkeit hat — wären weitere 2 Jahre mit EPS $15–18 möglich. Bei P/E 33x heute = übermäßiger Preis für deferred Earnings. Multiple-Compression auf 22–25x → Kurs $400–445 (-21% bis -29%).</p>
+            <p><strong>Risiko 2 – Tariffs &amp; geopolitische Frikionen:</strong> $1.2 Mrd. Tariff-Belastung in FY26 ist eine Verdoppelung ggü. FY25 ($600 Mio.). Section-232-Erweiterung August 2025 traf Deere unerwartet hart. PPA-Op-Margin kollabierte auf 4.4% in Q1 FY26 — falls Tariffs eskalieren statt mitigieren, könnte Marge auf 2–3% weiter fallen, was $300–500 Mio. zusätzlichen Margin-Druck erzeugt. Trump fordert gleichzeitig niedrigere Tractor-Preise — Margin-Squeeze von beiden Seiten.</p>
+            <p><strong>Risiko 3 – Bewertung lässt keinen Spielraum:</strong> P/E 33x = 71% über 10-Jahres-Median (18.7x). Historischer Peak-P/E lag bei 38x — nahe aktuellem Niveau, aber damals war Deere noch nicht mit so hohen Tariffs/Right-to-Repair-Risiken konfrontiert. Bei Cycle-Bottom-EPS $17 und historischem Bottom-P/E (10–12x) wäre Fair Value $170–204 — also -64% bis -70% Downside im Worst Case. Selbst moderate Multiple-Compression auf 25x = $445 (-21%). Jefferies' eigenes $550-Ziel liegt UNTER aktuellem Kurs.</p>
+          </div>
+        </div>
+
+        <h3>Eigene Einschätzung (ausgewogen)</h3>
+
+        <p>Das bullische Narrativ ist <strong>strategisch überzeugend</strong>, aber das bärische Narrativ enthält <strong>kurzfristig sehr valide Bewertungs- und Tariff-Risiken</strong>. Die Precision-Ag-Transformation ist real und der Burggraben ist substanziell — das spricht für langfristige Outperformance ggü. CNH und teils auch AGCO. Operations Center, See &amp; Spray, Autonomy-Kits und das Händlernetzwerk sind echte, schwer replizierbare Wettbewerbsvorteile, die in einer Welt mit Labor-Knappheit und Effizienz-Druck zunehmend wertvoller werden.</p>
+
+        <p>ABER: Die aktuelle Bewertung von P/E 33x preist diese Transformation bereits zu erheblichem Teil ein. Damit Deere von hier aus signifikant outperformen kann, müssen <strong>drei Bedingungen gleichzeitig</strong> erfüllt sein: (1) FY2026 IST der Cycle-Bottom (nicht später), (2) Tariffs verschärfen sich nicht weiter, (3) Recurring-Revenue-Story wird in den nächsten 18 Monaten quantitativ sichtbar. Die Wahrscheinlichkeit, dass ALLE drei gleichzeitig eintreten, schätze ich auf 40–45%.</p>
+
+        <p>Risk/Reward: <strong>Downside -15% bis -25%</strong> (Cycle länger, Multiple-Compression auf 25x), <strong>Upside +20% bis +35%</strong> (Recovery FY27 + Tech-Re-Rating). Das ist ein Risk/Reward von etwa 1:1 bis 1:1.5 — für ein hochqualitatives Unternehmen okay, aber nicht überzeugend für einen aggressiven Einstieg jetzt. Das Rating <strong>HALTEN</strong> reflektiert genau diese Balance: bestehende Positionen behalten, aber kein Aufstocken zum aktuellen Kurs. Für Neueinstieg: warten auf $510–530 (besseres Risk/Reward) oder Klarheit zu Q2/Q3-Earnings-Trajektorie.</p>
+
+        <h3>Zeithorizont-Einschätzung</h3>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>Kurzfristig (0–6 Mo.)</strong></td>
+                <td>Q2 FY26 Earnings 21.05.2026; Cycle-Bottom-Confirmation; potenzielle Tariff-Deals</td>
+                <td>Q2-Miss; Tariff-Eskalation; Farm-Income weiter rückläufig</td>
+                <td><span class="badge badge-yellow">Halten / Beobachten</span></td>
+              </tr>
+              <tr>
+                <td><strong>Mittelfristig (6–24 Mo.)</strong></td>
+                <td>FY27-Recovery-Beginn; Investor Day 2026; Recurring-Revenue-Quote sichtbar; C&amp;F-Boom</td>
+                <td>Cycle-Verzögerung auf FY28; AGCO/Trimble gewinnen Marktanteile</td>
+                <td><span class="badge badge-yellow">Halten, evtl. tranchiert aufstocken bei $510-530</span></td>
+              </tr>
+              <tr>
+                <td><strong>Langfristig (2–5 J.)</strong></td>
+                <td>Peak-Cycle-Earnings $32–40; 10%-Recurring-Revenue erreicht; Autonomie-Plattform monetarisiert</td>
+                <td>Open-Source-Disruption; Right-to-Repair-Verschärfung; struktureller Margin-Verlust</td>
+                <td><span class="badge badge-green">Quality-Buy &amp; Hold</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Kernthese (Zusammenfassung)</h3>
+
+        <p>Deere &amp; Company ist ein hochqualitatives, marktführendes Industrieunternehmen mit echtem strukturellem Burggraben (Operations Center, Händlernetz, Precision-Ag-Daten) und einer überzeugenden Tech-Transformations-Story (See &amp; Spray, Autonomie, 10%-Recurring-Revenue-Ziel bis 2030). Das aktuelle Quartal markiert wahrscheinlich den Cycle-Bottom, mit Management-Confirmation und niedrigsten Inventories seit 17 Jahren. ABER: Die Bewertung von P/E 33x (71% über 10J-Median) preist diese positive Story bereits weitgehend ein und lässt wenig Margin of Safety. Tariff-Belastung von $1.2 Mrd. FY26 und USDA -15% Farm-Income-Outlook bleiben kurzfristige Belastungsfaktoren. Risk/Reward für Neuengagement zum heutigen Kurs ist bei 1:1 bis 1:1.5 nicht attraktiv genug für aggressiven Einstieg.</p>
+
+        <div class="rating-box">
+          <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN</div></div>
+          <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$550–620</div></div>
+          <div class="rating-item"><label>Zeithorizont</label><div class="val">2–5 Jahre</div></div>
+          <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">-18%</div></div>
+          <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+10–20%</div></div>
+          <div class="rating-item"><label>Risk/Reward</label><div class="val">1:1</div></div>
+        </div>
+
+        <h3>Was falsifiziert die These?</h3>
+
+        <div class="trigger-grid">
+          <div class="trigger-card sell">
+            <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+            <ul class="trigger-list">
+              <li>Q2 FY26 (21.05.26) Miss + Guidance-Senkung → Cycle-Bottom-These widerlegt → Position reduzieren</li>
+              <li>PPA-Op-Margin fällt unter 4% im FY26 → struktureller Margin-Crash signalisiert</li>
+              <li>Tariff-Belastung steigt über $1.5 Mrd. FY27 → Multiple-Compression unvermeidlich</li>
+              <li>FY27-Recovery wird Q3 FY26 nicht bestätigt → 25% reduzieren</li>
+              <li>Right-to-Repair-Federal-Legislation in USA → fundamentaler Burggraben-Verlust</li>
+            </ul>
+          </div>
+          <div class="trigger-card buy">
+            <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+            <ul class="trigger-list">
+              <li>Q2 FY26 Beat + erneute Guidance-Erhöhung → Cycle-Bottom confirmed → tranchiert nachkaufen</li>
+              <li>Recurring-Revenue-Quote &gt;3% bestätigt im FY26 Q3/Q4 → Re-Rating-Beginn</li>
+              <li>Tariff-Deals reduzieren $1.2 Mrd. auf &lt;$800 Mio. → +$300 Mio. EPS-Hebel</li>
+              <li>Kurs fällt auf $510–530 → Risk/Reward verbessert sich deutlich → Einstieg</li>
+              <li>China-Sojabohnen-Käufe erreichen 8+ Mio. t in 2026 → Farm-Income-Stütze</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>Welcher Anlegertyp passt?</h3>
+
+        <div class="investor-grid">
+          <div class="investor-yes">
+            <h5>✅ Geeignet für</h5>
+            <ul>
+              <li>Quality-Growth-Investoren mit 3–5+ Jahres-Horizont</li>
+              <li>Cycle-Investors, die auf Recovery FY27+ setzen</li>
+              <li>Dividend-Growth-Investoren (56J Dividend History)</li>
+              <li>Tech-Transformation-Wetten mit "Industrial 4.0"-Thema</li>
+              <li>Bestandshalter, die durch den Trough halten</li>
+            </ul>
+          </div>
+          <div class="investor-no">
+            <h5>❌ NICHT geeignet für</h5>
+            <ul>
+              <li>Value-Investoren (P/E 33x = 71% über Median)</li>
+              <li>Kurzfristige Trader (Q2-Risiko + Tariff-Unsicherheit)</li>
+              <li>Konservative Income-Investoren (Yield nur 1.15%)</li>
+              <li>Risk-Averse Investors (Cycle + Tariff-Doppelrisiko)</li>
+              <li>Aggressive Neuengagements zum aktuellen Kurs</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>Empfohlener Einstieg</h3>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / Tranchiert</span></td><td>Abwarten auf Q2-Earnings (21.05.) oder Pullback unter $530</td></tr>
+              <tr><td><strong>Moderat</strong></td><td><span class="badge badge-yellow">Halten / Bei $530 nachlegen</span></td><td>Bestand halten; 25%-Tranche bei $530, weitere bei $510</td></tr>
+              <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-yellow">Halten</span></td><td>Aktuelles Risk/Reward 1:1 nicht überzeugend genug für aggressive Position</td></tr>
+              <tr><td><strong>Langfristig (5J+)</strong></td><td><span class="badge badge-green">Tranchiert aufbauen</span></td><td>Quality-Compounder mit Tech-Story, Bestand halten + Schwächen nutzen</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="source">Quellen: Synthese der Sektionen 1–11 dieser Analyse; Jefferies-Note (08.04.2026); Investor Day Transcript (Dezember 2025); Q1 FY2026 Earnings Call (19.02.2026)</div>
+      </div>
+    </div>
+
+    <!-- SEKTION 13: OUTLOOK -->
+    <div class="section" id="s13">
+      <div class="section-header">
+        <div class="section-number">13</div>
+        <div class="section-title">Outlook – Anstehende Events &amp; Wenn/Dann</div>
+        <div class="section-note">Konkrete Trigger</div>
+      </div>
+      <div class="section-body">
+
+        <div class="outlook-card">
+          <h4>📊 Event 1: Q2 FY2026 Earnings – 21.05.2026 (in 2 Tagen!)</h4>
+          <p>Deere meldet die Zahlen zum Quartal ending 03.05.2026 vor US-Markteröffnung. Konsens-EPS $5.70–5.76 (vs. Q2 FY25 $6.64, also -14% YoY). Konsens-Revenue ~$11.5 Mrd. (vs. $12.76 Mrd. Q2 FY25). Schlüsselthemen: (a) PPA-Op-Margin-Recovery von Q1-Tief 4.4%, (b) FY26-Guidance-Update — wird Management die $4.5–5.0 Mrd. Nettogewinn-Range halten oder erhöhen?, (c) Tariff-Mitigation-Progress, (d) Precision-Ag-Adoption-Metriken (Recurring-Revenue-Hinweise).</p>
+          <div class="when-then">
+            <strong>Wenn:</strong> EPS &gt; $6.20 + Revenue &gt;$11.8 Mrd. + Guidance auf $4.7–5.2 Mrd. angehoben → Cycle-Bottom-Confirmation, +5–10% Tageskurs erwartet → kurzfristig nachkaufen bzw. Bestand aufstocken auf 100%.<br><br>
+            <strong>Wenn:</strong> EPS zwischen $5.50–6.20 und Guidance unverändert → Neutral, Konsolidierung erwartet → Bestand halten, nichts ändern.<br><br>
+            <strong>Wenn:</strong> EPS &lt; $5.40 oder Guidance gesenkt (&lt;$4.5 Mrd.) oder PPA-Op-Margin unter 4% → Cycle-Bottom-These angeschlagen, -8–12% Tageskurs erwartet → Position um 25% reduzieren, weiter Q3 abwarten.
+          </div>
+        </div>
+
+        <div class="outlook-card">
+          <h4>📊 Event 2: Q3 FY2026 Earnings – voraussichtlich 14.08.2026</h4>
+          <p>Wichtigste Daten zur Validation der Cycle-Bottom-These. Q3 ist saisonal die wichtigste Quartal für Large-Ag-Equipment (Mähdrescher-Verkäufe vor US-Ernte). Frühe Ankündigung der "Early Order Program"-Ergebnisse für FY27 Large-Tractor-Modelle. Schlüsselindikator: Order-Buch für 8R/9R-Tractors für die Frühjahrs-2027-Saison.</p>
+          <div class="when-then">
+            <strong>Wenn:</strong> Large-Tractor-Order-Buch &gt;15% über FY26-Level + erste Hinweise auf Recurring-Revenue-Wachstum (z.B. JDLink-Subscriptions &gt;100k aktive Nutzer) → starkes FY27-Recovery-Signal → Position auf 110% aufstocken, evtl. zusätzliche Tranche bei $580.<br><br>
+            <strong>Wenn:</strong> Order-Buch flat oder leicht über FY26 → erwartete Cycle-Bottom, aber keine Beschleunigung → Bestand halten, weiter Q4 abwarten.<br><br>
+            <strong>Wenn:</strong> Order-Buch fällt YoY oder Recurring-Revenue-Quote stagnierend &lt;2% → Cycle-Verzögerung wahrscheinlich → Position auf 75% reduzieren, langfristige Hold-Anteile behalten.
+          </div>
+        </div>
+
+        <div class="outlook-card">
+          <h4>📊 Event 3: Investor Day 2026 + CES 2027 – voraussichtlich Dezember 2026 / Januar 2027</h4>
+          <p>Auf dem nächsten Investor Day (üblicherweise Dezember) wird Deere die FY27-Guidance, neue Recurring-Revenue-Zahlen (idealerweise &gt;3% des Equipment-Umsatzes als erste Milestone-Bestätigung des 10%-2030-Ziels) sowie strategische Updates zur Autonomie-Kommerzialisierung präsentieren. Parallel CES Januar 2027 mit neuen Tech-Announcements. Diese beiden Events bestimmen, ob die Tech-Story-Re-Rating-Welle 2027 beginnen kann.</p>
+          <div class="when-then">
+            <strong>Wenn:</strong> Recurring-Revenue-Quote &gt;3% bestätigt + autonomous Tractor-Verkäufe &gt;5.000 Einheiten in FY26 + FY27-Guidance &gt;$5.5 Mrd. Nettogewinn → Tech-Multiple-Expansion eingeleitet, Zielkurs $700–800 in 12–18 Monaten → aktiv nachkaufen, Position auf 120% aufbauen.<br><br>
+            <strong>Wenn:</strong> Recurring-Revenue &lt;2% und Autonomy-Adoption verzögert (Skalierungsprobleme der 2nd-Gen-Kits) → Tech-Story stockt, P/E-Multiple bleibt unter Druck → Position auf 80% reduzieren, Cycle-Recovery alleine reicht für aktuelle Bewertung nicht.<br><br>
+            <strong>Wenn:</strong> Right-to-Repair-Federal-Legislation kommt durch oder AGCO-Marktanteilsverlust messbar → fundamentaler Burggraben-Verlust → Position auf 50% reduzieren, Re-Evaluation des Investment-Cases erforderlich.
+          </div>
+        </div>
+
+        <div class="source">Quellen: Deere Investor Relations Calendar; Yahoo Finance Earnings Estimate; Public.com Earnings Schedule; eigene Outlook-Synthese basierend auf Sektionen 1–12</div>
+      </div>
+    </div>
+
+    <div class="disclaimer">
+      ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken und stellt keine Anlageberatung oder Aufforderung zum Kauf oder Verkauf von Wertpapieren dar. Alle Angaben basieren auf öffentlich zugänglichen Quellen (Stand: 19. Mai 2026) und wurden nach bestem Wissen erstellt, jedoch ohne Gewähr auf Vollständigkeit oder Korrektheit. Aktienkurse, Bewertungen und Geschäftslage können sich schnell ändern. Jede Investitionsentscheidung sollte auf eigener Recherche, individueller Risikotragfähigkeit und ggf. einer professionellen Anlageberatung basieren. Der Autor übernimmt keine Haftung für Verluste, die aus der Nutzung dieser Analyse entstehen können.
+    </div>
+  </div>
+</body>
+</html>
