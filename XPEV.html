@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XPEV – Aktienanalyse Canvas v2.2</title>
+<style>
+:root{
+  --primary:#FF6900;--primary-dark:#cc5400;--bg:#0f0f12;--bg-card:#1a1a1f;--bg-card2:#22222a;
+  --border:#2e2e38;--text:#e8e8ec;--text-muted:#888898;--text-dim:#555566;
+  --green:#22c55e;--red:#ef4444;--yellow:#f59e0b;--blue:#3b82f6;--purple:#8b5cf6;--teal:#14b8a6;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+.header{background:linear-gradient(135deg,#1a0800 0%,#2a1000 40%,#0f0f12 100%);border-bottom:1px solid var(--primary);padding:36px 40px 28px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;}
+.header-left h1{font-size:32px;font-weight:700;color:white;letter-spacing:-0.5px;}
+.header-left h1 span{color:var(--primary);}
+.header-left .subtitle{color:var(--text-muted);font-size:14px;margin-top:4px;}
+.header-right{text-align:right;}
+.price-tag{font-size:38px;font-weight:800;color:var(--primary);line-height:1;}
+.price-meta{color:var(--text-muted);font-size:13px;margin-top:4px;}
+.price-change{display:inline-block;padding:2px 8px;border-radius:4px;font-size:13px;font-weight:600;margin-top:4px;}
+.price-change.up{background:rgba(34,197,94,0.15);color:var(--green);}
+.price-change.down{background:rgba(239,68,68,0.15);color:var(--red);}
+.nav{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:100;}
+.nav a{color:var(--text-muted);text-decoration:none;padding:14px 16px;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.2s;}
+.nav a:hover{color:var(--primary);border-bottom-color:var(--primary);}
+.main{max-width:1100px;margin:0 auto;padding:32px 40px 60px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px;}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.kpi-value{font-size:22px;font-weight:700;color:white;margin-top:4px;}
+.kpi-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.kpi-value.green{color:var(--green);}.kpi-value.red{color:var(--red);}.kpi-value.orange{color:var(--primary);}
+.section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden;}
+.section-header{background:var(--bg-card2);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.section-number{background:var(--primary);color:white;width:28px;height:28px;border-radius:6px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-title{font-size:16px;font-weight:700;color:white;}
+.section-score{margin-left:auto;font-size:14px;font-weight:700;color:var(--primary);}
+.section-note{font-size:12px;color:var(--text-dim);background:rgba(46,46,56,0.4);border-radius:4px;padding:4px 10px;margin-left:auto;}
+.section-body{padding:20px 24px;}
+p{margin-bottom:12px;color:var(--text);}p:last-child{margin-bottom:0;}
+h3{font-size:14px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 8px;}h3:first-child{margin-top:0;}
+.table-wrap{overflow-x:auto;margin:16px 0;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--bg-card2);color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:10px 12px;border-bottom:1px solid rgba(46,46,56,0.5);color:var(--text);}
+tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,105,0,0.04);}
+.beat{color:var(--green);font-weight:600;}.miss{color:var(--red);font-weight:600;}.neutral{color:var(--yellow);font-weight:600;}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}
+.badge-green{background:rgba(34,197,94,0.15);color:var(--green);}
+.badge-red{background:rgba(239,68,68,0.15);color:var(--red);}
+.badge-yellow{background:rgba(245,158,11,0.15);color:var(--yellow);}
+.badge-blue{background:rgba(59,130,246,0.15);color:var(--blue);}
+.badge-orange{background:rgba(255,105,0,0.15);color:var(--primary);}
+.event-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(46,46,56,0.5);align-items:flex-start;}
+.event-item:last-child{border-bottom:none;}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0;}
+.dot-green{background:var(--green);}.dot-red{background:var(--red);}.dot-yellow{background:var(--yellow);}
+.event-label{font-weight:600;color:white;}
+.event-text{font-size:14px;color:var(--text);}
+.risk-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.risk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px;flex-wrap:wrap;}
+.risk-title{font-weight:600;color:white;font-size:14px;}
+.score-bar{display:flex;align-items:center;gap:10px;}
+.score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#ff9500);}
+.score-num{font-weight:700;color:var(--primary);font-size:15px;min-width:32px;}
+.bull-bear-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:700px){.bull-bear-grid{grid-template-columns:1fr;}}
+.bull-card{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:16px;}
+.bear-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:16px;}
+.bull-card h4{color:var(--green);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.bear-card h4{color:var(--red);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.rating-box{background:linear-gradient(135deg,rgba(255,105,0,0.12),rgba(255,105,0,0.04));border:1px solid rgba(255,105,0,0.3);border-radius:12px;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:20px 0;}
+.rating-item label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;display:block;margin-bottom:4px;}
+.rating-item .val{font-size:20px;font-weight:800;color:white;}
+.rating-item .val.buy{color:var(--green);}.rating-item .val.hold{color:var(--yellow);}.rating-item .val.sell{color:var(--red);}
+.trigger-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+@media(max-width:700px){.trigger-grid{grid-template-columns:1fr;}}
+.trigger-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.trigger-card h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.trigger-card.buy h5{color:var(--green);}.trigger-card.sell h5{color:var(--red);}
+.trigger-list{font-size:13px;color:var(--text);list-style:none;padding:0;}
+.trigger-list li{margin-bottom:6px;padding-left:14px;position:relative;}
+.trigger-list li::before{content:"→";position:absolute;left:0;}
+.investor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+@media(max-width:600px){.investor-grid{grid-template-columns:1fr;}}
+.investor-yes{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px;}
+.investor-no{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:12px;}
+.investor-yes h5{color:var(--green);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-no h5{color:var(--red);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-yes li,.investor-no li{font-size:13px;color:var(--text);margin-bottom:4px;list-style:none;padding-left:14px;position:relative;}
+.investor-yes li::before{content:"✓";position:absolute;left:0;color:var(--green);}
+.investor-no li::before{content:"✗";position:absolute;left:0;color:var(--red);}
+.geo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0;}
+.geo-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.geo-region{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.geo-pct{font-size:20px;font-weight:700;color:white;}
+.geo-note{font-size:12px;color:var(--text-muted);}
+.outlook-card{background:var(--bg-card2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:16px;margin-bottom:14px;}
+.outlook-card h4{color:white;font-size:14px;margin-bottom:8px;}
+.outlook-card .when-then{font-size:13px;color:var(--text);margin-top:8px;}
+.outlook-card .when-then strong{color:var(--primary);}
+.source{font-size:11px;color:var(--text-dim);margin-top:12px;padding-top:10px;border-top:1px solid rgba(46,46,56,0.5);}
+.source a{color:var(--text-dim);}
+.disclaimer{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text-dim);margin-top:32px;}
+.alert-box{background:rgba(255,105,0,0.08);border:1px solid rgba(255,105,0,0.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px;}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+.pill{display:inline-block;background:rgba(255,105,0,0.12);color:var(--primary);border-radius:4px;padding:1px 7px;font-size:13px;font-weight:600;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>XPeng <span>XPEV / 9868.HK</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 29. Mai 2026 · NYSE / HKEX · Sektor: Smart-EV &amp; Physical AI</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-orange">Smart EV / Physical AI</span>
+      <span class="badge badge-blue">ADAS-Leader: VLA 2.0 + Turing-Chip</span>
+      <span class="badge badge-yellow">Transitionsjahr 2026</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$16,55</div>
+    <div class="price-meta">Schlusskurs 29.05.2026 · NYSE (ADS)</div>
+    <div class="price-change down">▼ –20% YTD 2026</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">52W: $15,38 – $28,24</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">$16,55</div><div class="kpi-sub">USD · 29.05.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value">~$16 Mrd.</div><div class="kpi-sub">≈956 Mio. ADS</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/S (TTM)</div><div class="kpi-value orange">~1,5x</div><div class="kpi-sub">vs. Tesla ~14x</div></div>
+    <div class="kpi-card"><div class="kpi-label">Bruttomarge Q1/26</div><div class="kpi-value green">20,6%</div><div class="kpi-sub">+5,0 pp YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">Auslieferungen 2025</div><div class="kpi-value">429.445</div><div class="kpi-sub">+125,9% YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">Cash-Position</div><div class="kpi-value">RMB 42,1 Mrd.</div><div class="kpi-sub">≈$6,1 Mrd. (31.03.26)</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value" style="font-size:18px;">Q2 ~Aug 26</div><div class="kpi-sub">Guidance 100–106k</div></div>
+    <div class="kpi-card"><div class="kpi-label">Konsens</div><div class="kpi-value green" style="font-size:18px;">BUY</div><div class="kpi-sub">Ziel ~$23–26</div></div>
+  </div>
+
+  <!-- ============ S1 ============ -->
+  <div class="section" id="s1">
+    <div class="section-header"><div class="section-number">1</div><div class="section-title">Geschäftsmodell</div><div class="section-note">Quellen ≤ 6–9 Monate</div></div>
+    <div class="section-body">
+      <p>XPeng ist ein chinesischer Hersteller intelligenter Elektrofahrzeuge mit Sitz in Guangzhou, der sich zunehmend als „Physical-AI"-Unternehmen positioniert. Das Kerngeschäft ist der Verkauf rein batterieelektrischer Fahrzeuge im mittleren bis gehobenen Preissegment – von der Einstiegslimousine MONA M03 über die Coupé-SUVs G6/G9 und die Sportlimousine P7/P7+ bis zum siebensitzigen MPV X9. Die Listenpreise reichen je nach Modell von rund 120.000 bis 420.000 RMB. Im Geschäftsjahr 2025 lieferte XPeng 429.445 Fahrzeuge aus (+125,9% gegenüber Vorjahr) und ist damit unter den chinesischen EV-Startups einer der volumenstärksten Anbieter.</p>
+      <p>Die Erlösstruktur teilt sich in zwei Ströme: Fahrzeugverkäufe machten 2025 rund RMB 68,4 Mrd. (≈89% des Umsatzes) aus, der Rest entfällt auf „Services &amp; Others" (RMB 8,3 Mrd.). Letzterer Block ist strategisch wichtiger als seine Größe vermuten lässt: Er enthält hochmargige technische F&amp;E-Dienstleistungen, die XPeng an die Volkswagen-Gruppe erbringt (Plattform-, Software- und E/E-Architektur-Kooperation), Ersatzteile, ein eigenes Schnellladenetz sowie den Handel mit CO₂-Zertifikaten. Dieser Software-/Technologie-Strang ist der Hebel, über den XPeng aus einem reinen Autobauer ein Technologie-Lizenzgeber werden will.</p>
+      <p>Die Kostenstruktur ist klassisch capex-intensiv (eigene Fertigung, Ladeinfrastruktur, Vertriebsnetz mit 733 Stores in 256 Städten per Q1/2026), wird aber durch eine ungewöhnlich tiefe vertikale Integration in der Software ergänzt: XPeng entwickelt seinen Fahrassistenz-Chip (Turing), das Fahrmodell (VLA 2.0) und das Fahrzeug-Betriebssystem (XOS) selbst. Diese Eigenentwicklung erlaubt es, F&amp;E-Investitionen über mehrere Produktlinien zu amortisieren – Fahrzeuge, Robotaxis, humanoide Roboter (IRON) und über die Beteiligung Aridge sogar Flugautos.</p>
+      <p>Die Unit Economics sind in Bewegung: Die Fahrzeugmarge stieg von 8,3% (2024) auf 12,8% (2025), die Bruttomarge von 14,3% auf 18,9%. Im vierten Quartal 2025 erzielte XPeng erstmals überhaupt einen Quartalsgewinn (RMB 0,38 Mrd.). Damit ist das Geschäftsmodell tragfähiger als bei vielen Wettbewerbern, bleibt aber fundamental ein noch verlustträchtiger Autohersteller in einem brutalen Preiskampf, dessen Aufwertung von der Monetarisierung der AI-Optionalität abhängt.</p>
+      <div class="source">Quellen: XPENG Form 6-K Q4/FY2025 &amp; Q1/2026, sec.gov (20.03. &amp; 28.05.2026); stockanalysis.com (Mai 2026); CnEVPost (24.02.2026).</div>
+    </div>
+  </div>
+
+  <!-- ============ S2 ============ -->
+  <div class="section" id="s2">
+    <div class="section-header"><div class="section-number">2</div><div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div><div class="section-score">Score: 6/10</div></div>
+    <div class="section-body">
+      <p>XPengs stärkster Wettbewerbsvorteil ist ein technologischer Vorsprung beim autonomen Fahren. Der hauseigene Turing-Chip liefert bis zu 3.000 TOPS Rechenleistung – deutlich mehr als Teslas HW4 – und treibt das End-to-End-Modell VLA 2.0 (Vision-Language-Action), das ohne LiDAR und ohne hochauflösende Karten auskommt und Reaktionslatenzen unter 80 Millisekunden erreicht. Morgan-Stanley-Analysten, die das System Anfang März 2026 testeten, zeigten sich überrascht, wie schnell der Abstand zu Tesla geschrumpft ist. In XPengs eigenen Vergleichsdaten benötigte Teslas FSD V13.2.9 auf einer 20-km-Stadtroute fünf Eingriffe, VLA 2.0 nur einen.</p>
+      <p>Der wohl härteste externe Beleg für den Burggraben: Volkswagen ist der erste kommerzielle Kunde für VLA 2.0 und den Turing-Chip – das erste Mal, dass ein westlicher Top-Automobilkonzern chinesische Autonomie-Software im großen Stil übernimmt. Dieser Lizenz-Deal schafft eine Switching-Cost-Komponente, die im reinen Fahrzeuggeschäft fehlt: Hat ein OEM seine Modellplattform auf XPengs Stack aufgebaut, ist ein Wechsel teuer. Hinzu kommt die vertikale Integration aus eigenem Chip plus eigenem Modell, die Skalenvorteile in der F&amp;E ermöglicht.</p>
+      <p>Kritisch betrachtet ist dieser Burggraben jedoch angreifbar. Markenmacht und Preissetzungsmacht im Endkundengeschäft sind gering – im chinesischen Massenmarkt sind die Wechselkosten für Käufer niedrig, und ein Großteil der Nachfrage wird über Rabatte gesteuert. Beim autonomen Fahren konkurrieren BYD (mit „God's Eye" und Huawei-Technik), Li Auto, NIO und Tesla gleichzeitig; ein heute bestehender Vorsprung kann sich in 12–18 Monaten verflüchtigen. Der öffentliche „Wette"-Charakter (CEO He Xiaopeng hat zugesagt, dass VLA bis 30.08.2026 das Niveau von Teslas FSD v14.2 erreicht) verdeutlicht, wie eng das Rennen ist.</p>
+      <p>Fazit: Echter, durch den VW-Deal extern validierter Technologievorsprung, aber kein uneinnehmbarer Graben. Score 6/10 – differenziert, aber bestreitbar und ohne klassische Marken-/Preissetzungsmacht.</p>
+      <div class="source">Quellen: Electrek (29.04.2026); Startup Fortune (26.04.2026); CnEVPost (24.02.2026); thenewswheel.com (15.11.2025).</div>
+    </div>
+  </div>
+
+  <!-- ============ S3 ============ -->
+  <div class="section" id="s3">
+    <div class="section-header"><div class="section-number">3</div><div class="section-title">Letzte 4 Quartale</div><div class="section-score">Beat-Ratio: 2/4</div></div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Da XPeng an NYSE/HKEX notiert, sind keine finviz.com-Kennzahlen für US-Peers direkt vergleichbar. Alle Werte stammen aus den XPENG-6-K-Originalmeldungen (sec.gov), ergänzt durch Benzinga/Yahoo Finance (Stand: 28./29.05.2026). Beträge in RMB; USD-Umrechnung ≈ 6,9–7,0 RMB/USD.</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>Q2/25</th><th>Q3/25</th><th>Q4/25</th><th>Q1/26</th></tr></thead>
+          <tbody>
+            <tr><td>Auslieferungen</td><td>103.181</td><td>116.007</td><td>116.249</td><td class="miss">62.682</td></tr>
+            <tr><td>Gesamtumsatz (RMB)</td><td>18,27 Mrd.</td><td>20,38 Mrd.</td><td>22,25 Mrd.</td><td class="miss">13,03 Mrd.</td></tr>
+            <tr><td>Umsatz YoY</td><td class="beat">+125,3%</td><td class="beat">+101,8%</td><td class="beat">+38,2%</td><td class="miss">–17,6%</td></tr>
+            <tr><td>Bruttomarge</td><td>17,3%</td><td>20,1%</td><td class="beat">21,3%</td><td class="beat">20,6%</td></tr>
+            <tr><td>Fahrzeugmarge</td><td>14,3%</td><td>13,1%</td><td>13,0%</td><td class="neutral">12,1%</td></tr>
+            <tr><td>Nettoergebnis (RMB)</td><td>Verlust</td><td>Verlust</td><td class="beat">+0,38 Mrd.</td><td class="miss">–1,78 Mrd.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Die vier Quartale erzählen eine Geschichte von Höhenflug und abruptem Einbruch. Von Q2 bis Q4 2025 lief XPeng auf Rekordniveau: drei Quartale in Folge über 100.000 Auslieferungen, im Q4/2025 mit RMB 0,38 Mrd. der <strong>erste Quartalsgewinn der Firmengeschichte</strong> und eine Rekord-Bruttomarge von 21,3%. Dann brach Q1/2026 ein – die Auslieferungen halbierten sich quartalsweise auf 62.682 (–46% QoQ), der Umsatz fiel auf RMB 13,03 Mrd. (–41,4% QoQ, –17,6% YoY), und der Nettoverlust kehrte mit RMB 1,78 Mrd. zurück (Vorjahresquartal: –0,66 Mrd.).</p>
+      <p>Ursache war eine Kombination aus Modellzyklus-Übergang (Auslauf älterer Versionen, Anlauf neuer Modelle), Saisonalität rund um das chinesische Neujahr und einem Einbruch der Februar-Auslieferungen um rund 50%. Bemerkenswert: Trotz halbiertem Volumen hielt die Bruttomarge mit 20,6% (+5,0 pp YoY) erstaunlich stabil – ein Beleg für strukturelle Kostensenkungen. Die operative Verlustausweitung auf RMB 1,87 Mrd. resultierte aus Fixkosten-Deleverage plus hohen F&amp;E-Ausgaben (¥7 Mrd. Physical-AI-Budget 2026). Beim bereinigten Verlust je ADS (RMB 1,76) verfehlte XPeng den Konsens (–1,12). Stichtag nächste Quartalsergebnisse (Q2/2026): voraussichtlich Mitte August 2026.</p>
+      <div class="source">Quellen: XPENG 6-K Q2/Q3/Q4 2025 &amp; Q1/2026, sec.gov; Benzinga (28.05.2026); Yahoo Finance (28.05.2026).</div>
+    </div>
+  </div>
+
+  <!-- ============ S4 ============ -->
+  <div class="section" id="s4">
+    <div class="section-header"><div class="section-number">4</div><div class="section-title">Wachstumseinordnung</div><div class="section-score">Score: 6/10</div></div>
+    <div class="section-body">
+      <p>Auf Jahressicht war das Wachstum explosiv: 2025 stiegen die Auslieferungen um 125,9% auf 429.445 Fahrzeuge, der Umsatz um 87,7% auf RMB 76,72 Mrd. (2024: RMB 40,87 Mrd.). Wichtig ist die Profitabilitätsqualität dieses Wachstums – es war nicht durch M&amp;A oder Bilanztricks „aufgeblasen", sondern durch echtes Volumen und gleichzeitige Margenexpansion getragen: Die Bruttomarge stieg im selben Zeitraum von 14,3% auf 18,9%, die Profitabilität wuchs also schneller als der Umsatz.</p>
+      <p>2026 ist jedoch erkennbar ein <strong>Übergangsjahr</strong>. Mit dem Q1-Einbruch drehte das YoY-Umsatzwachstum erstmals seit Jahren negativ (–17,6%). Die Q2-Guidance (100.000–106.000 Auslieferungen) impliziert YoY nur noch –3% bis +3% – die Hyper-Growth-Phase ist vorerst in eine „Verdauungsphase" übergegangen, in der neue Modelle (G9L im Q3, MONA L05/L03, Next P7) das Volumen im zweiten Halbjahr wieder anschieben sollen.</p>
+      <p>Der mit Abstand dynamischste Wachstumstreiber ist das Auslandsgeschäft. Der Export legte 2025 um rund 96% auf 45.008 Einheiten zu; im April 2026 erreichte er mit 6.006 Fahrzeugen einen Monatsrekord (+62% YoY), in Jan–Apr 2026 summierte er sich auf 17.563 (+55%). Für 2026 peilt XPeng über 90.000 Auslandsauslieferungen an (rund 15% der Produktion), bis 2030 sogar 1 Mio. – und erwartet, dass dann über 70% der Konzerngewinne von außerhalb Chinas kommen.</p>
+      <h3>Geografische Verteilung &amp; Treiber</h3>
+      <div class="geo-grid">
+        <div class="geo-card"><div class="geo-region">China (Kernmarkt)</div><div class="geo-pct">~85%</div><div class="geo-note">Brutaler Preiskampf, sinkende YoY-Dynamik</div></div>
+        <div class="geo-card"><div class="geo-region">Europa</div><div class="geo-pct">wachsend</div><div class="geo-note">Lokalfertigung (Magna Steyr AT), VW-Werk in Gesprächen</div></div>
+        <div class="geo-card"><div class="geo-region">Naher Osten / SOA</div><div class="geo-pct">wachsend</div><div class="geo-note">Schlüsselmärkte für 90k-Exportziel</div></div>
+        <div class="geo-card"><div class="geo-region">Export gesamt 2026e</div><div class="geo-pct">&gt;90.000</div><div class="geo-note">Verdopplung ggü. 2025</div></div>
+      </div>
+      <p>Reifegrad: vom Hyper-Growth (2025) in einen „Growth-at-Scale mit Übergangsdelle" (2026). Die langfristigen Treiber bleiben intakt, doch das Volumen ist – wie der Februar-Einbruch zeigte – fragil und modellzyklusabhängig. Score 6/10.</p>
+      <div class="source">Quellen: XPENG 6-K FY2025; CnEVPost (14.05.2026); Electrek (14.05.2026); ad-hoc-news.de (24.02.2026); mexc.com (27.01.2026).</div>
+    </div>
+  </div>
+
+  <!-- ============ S5 ============ -->
+  <div class="section" id="s5">
+    <div class="section-header"><div class="section-number">5</div><div class="section-title">Bewertung &amp; Multiples</div><div class="section-score">Score: 6/10</div></div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> XPeng notiert an NYSE/HKEX; klassische finviz-Multiples sind durch die Verlustlage teils n/a. Werte aus stockanalysis.com, Morningstar, Public.com, Simply Wall St (Stand: Mai 2026).</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Multiple</th><th>XPeng</th><th>Einordnung</th></tr></thead>
+          <tbody>
+            <tr><td>P/E (TTM)</td><td class="neutral">n/a (Verlust)</td><td>noch keine nachhaltige Gewinnbasis</td></tr>
+            <tr><td>Forward P/E</td><td>dreistellig</td><td>nur minimale Gewinnerwartung eingepreist</td></tr>
+            <tr><td>P/S (TTM)</td><td class="beat">~1,5x</td><td>günstig für „Tech"-Narrativ</td></tr>
+            <tr><td>EV/Sales</td><td>~1,3x</td><td>EV ~$15 Mrd. / Umsatz ~$11 Mrd.</td></tr>
+            <tr><td>Beta</td><td>1,20</td><td>überdurchschnittlich volatil</td></tr>
+            <tr><td>Analystenziel</td><td class="beat">~$23–26</td><td>+40–55% Upside, Konsens „Buy"</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Die zentrale Bewertungsfrage des Users – „nach der Rally noch attraktiv oder zu teuer?" – muss präzisiert werden: XPeng kommt nicht von einer Rally, sondern ist 2026 bereits über 20% gefallen und notiert nahe dem 52-Wochen-Tief. Auf Umsatzbasis ist die Aktie mit ~1,5x P/S <strong>nicht teuer</strong> – sie liegt etwa auf BYD-Niveau (~1,1x) und weit unter Tesla (~14x). Anders ausgedrückt: Die AI-/Robotaxi-/Roboter-Optionalität ist im Kurs kaum eingepreist, weil der Markt XPeng vorrangig als verlustträchtigen Autobauer bewertet.</p>
+      <p>Die Kehrseite: Es gibt schlicht keine belastbare Gewinnbasis. Der einzige Quartalsgewinn (Q4/2025) wurde in Q1/2026 sofort wieder umgekehrt. Die Bewertungsdispersion der Analysten ist entsprechend extrem – Simply Wall St führt einen Analysten-Fair-Value von rund $28 neben einem DCF-Wert von nur ~$8. Für risikobereite Anleger ist die Aktie auf Sum-of-Parts-/Optionalitätsbasis attraktiv, auf Basis nahfristiger Erträge jedoch teuer. Score 6/10.</p>
+      <div class="source">Quellen: stockanalysis.com (Mai 2026); Morningstar (26.05.2026); Public.com (13.05.2026); MoneyCheck (26.05.2026); Simply Wall St.</div>
+    </div>
+  </div>
+
+  <!-- ============ S6 ============ -->
+  <div class="section" id="s6">
+    <div class="section-header"><div class="section-number">6</div><div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div><div class="section-score">Score: 6/10</div></div>
+    <div class="section-body">
+      <p>Die größte fundamentale Stärke XPengs ist die Bilanz. Zum 31.03.2026 verfügte das Unternehmen über eine Liquiditätsposition von RMB 42,09 Mrd. (≈$6,1 Mrd.) – ein erheblicher Puffer, der die Verlustphase und das hohe F&amp;E-Programm finanziert, ohne dass kurzfristig ein existenzieller Kapitalbedarf besteht. Damit hat XPeng „Durchhaltevermögen" in einem Preiskampf, der schwächere Wettbewerber zur Aufgabe zwingt.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>2024</th><th>2025</th><th>Q1/2026</th></tr></thead>
+          <tbody>
+            <tr><td>Bruttomarge</td><td>14,3%</td><td class="beat">18,9%</td><td>20,6%</td></tr>
+            <tr><td>Fahrzeugmarge</td><td>8,3%</td><td class="beat">12,8%</td><td>12,1%</td></tr>
+            <tr><td>Nettoergebnis (RMB)</td><td class="miss">–5,79 Mrd.</td><td class="neutral">–1,14 Mrd.</td><td class="miss">–1,78 Mrd.</td></tr>
+            <tr><td>Cash-Position (RMB)</td><td>41,96 Mrd.</td><td>47,66 Mrd.</td><td>42,09 Mrd.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Die Margenentwicklung ist beeindruckend: Innerhalb von zwei Jahren stieg die Fahrzeugmarge von 8,3% auf zuletzt ~12–13%, die Bruttomarge überschritt die 20%-Marke. Der Nettoverlust schrumpfte 2025 auf RMB 1,14 Mrd. (von –5,79 Mrd.), non-GAAP sogar auf nur –0,46 Mrd. Treiber sind Kostensenkungen, Skaleneffekte, ein besserer Modellmix und der hochmargige Technologie-Service für Volkswagen.</p>
+      <p>Die Warnsignale stehen jedoch auf der Ergebnisseite: Erstens ist die Profitabilität volumenabhängig – Q1/2026 zeigte, wie schnell der operative Verlust bei einem Volumeneinbruch wieder ausweitet. Zweitens wies das Management im Q1-Call ausdrücklich auf neue Margenrisiken hin: steigende Speicherchip- und Batteriekosten drückten die Fahrzeugmarge quartalsweise. Drittens fehlt ein konsistent positiver Free Cashflow. Kapitalqualität: solide finanziert, aber Earnings noch nicht „echt" im Sinne nachhaltiger Eigenfinanzierung. Score 6/10.</p>
+      <div class="source">Quellen: XPENG 6-K FY2024/FY2025 &amp; Q1/2026, sec.gov; Benzinga (28.05.2026, Margendruck durch Chip-/Batteriekosten).</div>
+    </div>
+  </div>
+
+  <!-- ============ S7 ============ -->
+  <div class="section" id="s7">
+    <div class="section-header"><div class="section-number">7</div><div class="section-title">Peer-Vergleich: BYD, Tesla, Geely</div><div class="section-score">Score: 6/10</div></div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>XPeng</th><th>BYD</th><th>Tesla</th><th>Geely</th></tr></thead>
+          <tbody>
+            <tr><td>Market Cap</td><td>~$16 Mrd.</td><td>~$130 Mrd.</td><td>~$1,4 Bio.</td><td>~$30–40 Mrd.</td></tr>
+            <tr><td>Absatz 2025</td><td>429k (+126%)</td><td>2,26 Mio. EV (+28%)</td><td>1,64 Mio. (–9%)</td><td>3,02 Mio. (+39%)</td></tr>
+            <tr><td>Bruttomarge (Auto)</td><td>~19–21%</td><td>~18–20%</td><td>~21% (Q1/26)</td><td>~16%</td></tr>
+            <tr><td>Nettomarge</td><td class="miss">negativ</td><td class="beat">~4,2%</td><td class="beat">~5%</td><td class="beat">~4,9%</td></tr>
+            <tr><td>P/S (TTM)</td><td>~1,5x</td><td>~1,1x</td><td>~14x</td><td>~0,5x</td></tr>
+            <tr><td>P/E</td><td>n/a</td><td>~18x</td><td>~384x (TTM)</td><td>~9–10x</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Quantitativ ist XPeng der kleinste und einzige defizitäre Anbieter dieser Gruppe. BYD und Geely sind hochprofitabel, vertikal integriert und zu niedrigeren Multiples bewertet; Tesla ist eine eigene Bewertungsklasse, deren Kurs vor allem Autonomie-Software und Robotaxi/Optimus einpreist (Forward-P/E über 200). Geely wirkt mit P/E ~9–10x und ~4,9% Nettomarge der „Value"-Fall, BYD der profitable Skalenführer.</p>
+      <p>Qualitativ jedoch schlägt XPeng über seinem Gewicht – ausgerechnet beim entscheidenden Differenzierungsmerkmal des chinesischen Marktes, dem intelligenten Fahren. Dass Volkswagen XPengs VLA-2.0-Stack und Turing-Chip lizenziert (und nicht BYDs oder Teslas Lösung), ist die stärkste qualitative Aussage des gesamten Vergleichs: Ein westlicher OEM stuft XPengs Autonomie-Technik als best-in-class für seine Zwecke ein. BYD kontert mit unerreichter Kostenführerschaft und Batterie-Eigenfertigung (Blade), Tesla mit Daten- und Energiespeicher-Margen, Geely mit profitabler Breite. XPengs Wette ist, dass Technologieführerschaft beim AD langfristig in Marge und Lizenzerlöse umschlägt. Score 6/10.</p>
+      <div class="source">Quellen: 24/7 Wall St. (19.05.2026); Globe and Mail/Investing.com (26.09.2025); CleanTechnica (30.03.2026); carnewschina.com (16.07.2025); finviz.com (2026).</div>
+    </div>
+  </div>
+
+  <!-- ============ S8 ============ -->
+  <div class="section" id="s8">
+    <div class="section-header"><div class="section-number">8</div><div class="section-title">Aktuelle News &amp; Events</div><div class="section-note">Quellen ≤ 3 Monate</div></div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">28.05.2026 – Q1-Zahlen: Umsatz/Volumen brechen ein, Marge hält <span class="badge badge-yellow">Gemischt</span></div><div class="event-text">Auslieferungen 62.682, Nettoverlust RMB 1,78 Mrd.; Bruttomarge aber stabil bei 20,6%. Q2-Guidance solide (100–106k). Aktie stieg leicht. Quelle: Benzinga/TipRanks, 28.05.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">18.05.2026 – Chinas erstes serienproduziertes Robotaxi <span class="badge badge-green">Positiv</span></div><div class="event-text">XPeng startet Massenfertigung des GX-Robotaxis (L4, reine Vision, VLA 2.0). Pilotbetrieb H2/2026, fahrerlos ab Anfang 2027. Quelle: PRNewswire/Interesting Engineering, 18.05.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">14.05.2026 – Gespräche über VW-Werk in Europa <span class="badge badge-green">Positiv</span></div><div class="event-text">XPeng verhandelt über Kauf einer Fabrik in Europa; Exporte im April mit 6.006 Einheiten auf Rekord (+62% YoY). Quelle: Electrek/CnEVPost, 14.05.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">20.03.2026 – Erster Quartalsgewinn der Firmengeschichte <span class="badge badge-green">Positiv</span></div><div class="event-text">Q4/2025: Nettogewinn RMB 0,38 Mrd., Rekord-Bruttomarge 21,3%. Quelle: XPENG 6-K, sec.gov, 20.03.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">13.03.2026 – VW &amp; XPeng starten ID.UNYX 08-Produktion <span class="badge badge-green">Positiv</span></div><div class="event-text">Erstes gemeinsam entwickeltes Serienmodell läuft in China an – VW-China-Comeback-Strategie. Quelle: Reuters/Benzinga, 13.03.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">02.–03.03.2026 – Februar-Auslieferungen –50%, 52W-Tief, Anwaltsuntersuchung <span class="badge badge-red">Negativ</span></div><div class="event-text">Februar-Absatz brach ~50% ein; Aktie auf 52-Wochen-Tief. Pomerantz LLP leitet Investor-Untersuchung ein. Quelle: Benzinga/GlobeNewswire, 02.–03.03.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">~28.05.2026 – Hedgefonds verkauft kompletten Anteil <span class="badge badge-red">Negativ</span></div><div class="event-text">Ein Hedgefonds stieß seine gesamte XPEV-Position ab (Stimmungssignal). Quelle: The Motley Fool, 29.05.2026.</div></div></div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">21.05.2026 – Tesla bringt FSD (Supervised) nach China <span class="badge badge-yellow">Wettbewerb</span></div><div class="event-text">Vollzulassung für Q3/2026 angepeilt; direkter Angriff auf XPengs AD-Narrativ. Quelle: CNBC/TipRanks, 21.05.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">Q1/2026 – Preiskampf eskaliert, BYD-Rabatte auf Rekord <span class="badge badge-red">Negativ</span></div><div class="event-text">BYD-Durchschnittsrabatt im März auf rekordhohe ~10%; Geely/Chery ziehen nach. Quelle: Automotive World/Bloomberg, 24.04.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">März 2026 – Stellantis sucht chinesische Partner für Europa <span class="badge badge-yellow">Gemischt</span></div><div class="event-text">Stellantis prüft Deals mit Xiaomi/XPeng zur Auslastung europäischer Werke. Quelle: GuruFocus/Bloomberg, März 2026.</div></div></div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">2026 – „Anti-Involution"-Regulierung in China <span class="badge badge-yellow">Gemischt</span></div><div class="event-text">Behörden gehen gegen Unter-Kosten-Preise vor; könnte mittelfristig Margen stabilisieren, kurzfristig kaum Wirkung. Quelle: AsiaFinancial/Carscoops, 12/2025–04/2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">2026 – EU-/Brasilien-Zölle auf chinesische BEVs <span class="badge badge-red">Negativ</span></div><div class="event-text">Ausgleichszölle belasten Exportökonomie; treiben Lokalisierung in Europa. Quelle: Automotive World, 24.04.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">2026 – Überkapazität ~50% Auslastung <span class="badge badge-red">Negativ</span></div><div class="event-text">Chinas Kapazität ~55,5 Mio. Fahrzeuge bei ~23 Mio. Inlandsabsatz; von 129 EV-Marken dürften bis 2030 nur ~15 überleben. Quelle: Automotive World/kavout.com, 2026.</div></div></div>
+      <p style="margin-top:10px;font-size:13px;color:var(--text-muted);">Hinweis: Die Bullish/Bearish-Synthese erfolgt nicht hier, sondern in Sektion 12 mit voller Kenntnis aus Risiken, Chancen und Technik.</p>
+      <div class="source">Quellen: siehe Inline-Angaben (Reuters, Bloomberg, CNBC, Electrek, CnEVPost, Benzinga, sec.gov), Feb–Mai 2026.</div>
+    </div>
+  </div>
+
+  <!-- ============ S9 ============ -->
+  <div class="section" id="s9">
+    <div class="section-header"><div class="section-number">9</div><div class="section-title">Technische Analyse</div><div class="section-score">Score: 4/10</div></div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value" style="font-size:18px;">$16,55</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value red" style="font-size:18px;">~$16,1</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value red" style="font-size:18px;">~$17,3</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value red" style="font-size:18px;">~$19,8</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value" style="font-size:18px;">~36</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Hoch</div><div class="kpi-value" style="font-size:18px;">$28,24</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value red" style="font-size:18px;">negativ</div></div>
+      </div>
+      <p>Das technische Bild ist kurzfristig klar bärisch. Der Kurs notiert unter allen relevanten gleitenden Durchschnitten (SMA 20/50/200) – ein „strong sell"-Setup nach klassischer Lesart. Seit Jahresanfang liegt die Aktie über 20% im Minus und bewegt sich nahe dem 52-Wochen-Tief von $15,38. Der RSI um 36 signalisiert eine fast überverkaufte Lage, der MACD ist negativ.</p>
+      <p>Zwei Nuancen relativieren das Bild: Erstens deuten die längeren Zeitfenster (Wochen-/Monatssignale) bei einzelnen Anbietern eher auf „Buy/Strong Buy" – ein Hinweis darauf, dass die übergeordnete Struktur weniger kaputt ist als der Tagestrend. Zweitens fiel die Reaktion auf die Q1-Zahlen trotz Umsatzeinbruch positiv aus (Kurs leicht im Plus), was auf eine mögliche Bodenbildung um die $15–16-Zone hindeutet. Wichtige Marken: Unterstützung am 52W-Tief ~$15,40 (Bruch wäre bärisch), Widerstände bei der SMA 50 (~$17,3) und der SMA 200 (~$19,8). Solange $19,8 nicht zurückerobert wird, bleibt der übergeordnete Trend abwärtsgerichtet. Score 4/10.</p>
+      <div class="source">Quellen: Financhill (20.05.2026); Investing.com Technicals; Google Finance/CNN (27.–28.05.2026); stockinvest.us.</div>
+    </div>
+  </div>
+
+  <!-- ============ S10 ============ -->
+  <div class="section" id="s10">
+    <div class="section-header"><div class="section-number">10</div><div class="section-title">Risiken &amp; Chancen</div><div class="section-score">Risiko-Score: 4/10</div></div>
+    <div class="section-body">
+      <h3>9a) Strukturelle &amp; zyklische Risiken</h3>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ China-Preiskampf &amp; Überkapazität („Involution")</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div><div class="event-text">Bei ~50% Branchenauslastung und rekordhohen Rabatten (BYD ~10%) bleibt der Margendruck strukturell. Wahrscheinlichkeit: hoch/anhaltend.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Volumen-Volatilität / Modellzyklus-Risiko</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div><div class="event-text">Februar-Einbruch –50%, Q1 –46% QoQ zeigen die Abhängigkeit von einzelnen Launches. Ein verzögerter H2-Ramp würde die Gewinnschwelle erneut verfehlen.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ EU-Zölle &amp; Protektionismus</div><div><span class="badge badge-yellow">Mittel–Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">Ausgleichszölle bedrohen die Exportökonomie; Lokalfertigung (Magna Steyr, ggf. VW-Werk) mildert, kostet aber Capex und Zeit.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Input-Kosteninflation (Speicherchips, Batterien)</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div></div><div class="event-text">Im Q1-Call explizit als QoQ-Margendrücker genannt – ein neues, von KI-Nachfrage getriebenes Risiko für die Fahrzeugmarge.</div></div>
+      <h3>9b) AI-/AV-Risiko (hochrelevant)</h3>
+      <p><strong>Bullisches Szenario:</strong> XPengs AD-Vorsprung (Turing 3.000 TOPS, VLA 2.0) und der VW-Lizenzdeal führen zu einer Neubewertung weg vom „Autobauer"- hin zum „AI-Plattform"-Multiple; Robotaxi und humanoide Roboter (IRON, Serienstart Ende 2026 geplant) eröffnen komplett neue Erlöspools.</p>
+      <p><strong>Bärisches Szenario:</strong> Autonomes Fahren kommoditisiert – BYD/Huawei, Li, NIO und ein in China zugelassenes Tesla-FSD holen auf; Robotaxi-Regulierung und Sicherheitsnachweis verzögern die Monetarisierung bis weit in 2027+. He Xiaopengs öffentliche Wette (VLA = FSD v14.2 bis 30.08.2026) ist ein binäres Reputationsrisiko.</p>
+      <h3>9c) Chancen</h3>
+      <p>Neue Modelle im H2/2026 (G9L, MONA L05/L03, Next P7), Robotaxi-Kommerzialisierung, humanoide Roboter, Technologie-Lizenzierung an VW (und potenziell Stellantis), Europa-Lokalisierung sowie die Flugauto-Beteiligung Aridge (~$200 Mio. Finanzierung, möglicher HK-IPO) bilden einen breiten Optionalitäts-Fächer, der im aktuellen Kurs kaum bezahlt ist.</p>
+      <h3>9d) Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> Q1-Volumeneinbruch, ausgeweiteter operativer Verlust, Hedgefonds-Ausstieg, Anwalts-Untersuchung, öffentliche CEO-Wette. <strong>Dealbreaker:</strong> aktuell keiner mit Existenzbedrohung – die Cash-Position von ~$6,1 Mrd. puffert. Ein echter Dealbreaker wäre erst ein dauerhaftes Unvermögen, Volumen profitabel zu skalieren. Gesamt-Risiko-Score (invertiert, 10 = kein Risiko): <strong>4/10</strong>.</p>
+      <div class="source">Quellen: Benzinga (28.05.2026); Automotive World (24.04.2026); SCMP (14.03.2026, Aridge); CNBC (21.05.2026); GlobeNewswire (03.03.2026).</div>
+    </div>
+  </div>
+
+  <!-- ============ S11 ============ -->
+  <div class="section" id="s11">
+    <div class="section-header"><div class="section-number">11</div><div class="section-title">User-Analysen &amp; Scoring</div><div class="section-score">Ø 5,5/10</div></div>
+    <div class="section-body">
+      <h3>Prüfung der vier User-Thesen</h3>
+      <p><strong>1) ADAS/Robotaxi vs. BYD &amp; Tesla:</strong> XPeng hat unter den chinesischen Pure-Plays die wohl stärkste AD-Architektur, extern durch den VW-Deal validiert. „Bestehen" gegen Tesla (Datenvorsprung, FSD) und BYD (Skala + Huawei) ist plausibel auf Augenhöhe – „gewinnen" ist nicht gesichert. Bestätigt den Burggraben-Score (6/10), rechtfertigt aber keine Anhebung, da der Vorsprung bestreitbar und die Monetarisierung noch jung ist.</p>
+      <p><strong>2) Bewertung nach „Rally":</strong> Faktisch ist die Aktie 2026 gefallen, nicht gestiegen. Mit ~1,5x P/S ist sie nicht teuer; die AI-Optionalität ist kaum eingepreist. „Günstig" ist sie aber nur, wenn man an den H2-Volumen-Rebound und die Optionalität glaubt. Bestätigt Bewertungs-Score 6/10.</p>
+      <p><strong>3) Margen-Turnaround nachhaltig?</strong> Die <em>Brutto</em>marge-Wende (14,3% → 18,9% → 20,6%) ist real und strukturell. Die <em>Netto-/operative</em> Profitabilität ist es noch nicht – sie wurde erst einmal (Q4/25) erreicht und sofort wieder verloren; neue Chip-/Batteriekosten drücken. Differenziertes Ja zur Bruttomarge, Nein zur Ergebnis-Nachhaltigkeit. Konsistent mit Cashflow-Score 6/10.</p>
+      <p><strong>4) Export/Europa vs. China-Preiskampf:</strong> Der Export (+55% YTD, VW-Lokalisierung, Ziel 90k/2026 → 1 Mio./2030) ist der glaubwürdigste nahfristige Wachstumsausgleich zum China-Preiskampf und stützt klar die Bull-Seite. Stärkt Wachstums-Score, ohne ihn anzuheben (Zoll-/Capex-Risiko).</p>
+      <p style="font-size:13px;color:var(--text-muted);">Ergebnis: Die User-Analysen sind konsistent mit der bisherigen Bewertung; keine Score-Anpassung erforderlich (transparent dokumentiert).</p>
+      <h3>Gesamt-Scoring</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Visualisierung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td>Geschäftsmodell</td><td><strong>7</strong>/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Klar, zwei Erlösströme, AI-Optionalität</td></tr>
+            <tr><td>Burggraben</td><td><strong>6</strong>/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>AD-Vorsprung + VW-Validierung, aber bestreitbar</td></tr>
+            <tr><td>Operative Entwicklung (4Q)</td><td><strong>5</strong>/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Q4-Rekord, dann Q1-Einbruch; volatil</td></tr>
+            <tr><td>Wachstum</td><td><strong>6</strong>/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Hyper-Growth 2025, Übergangsdelle 2026, Export-Treiber</td></tr>
+            <tr><td>Bewertung</td><td><strong>6</strong>/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>~1,5x P/S günstig, aber keine Gewinnbasis</td></tr>
+            <tr><td>Cashflow &amp; Kapitalqualität</td><td><strong>6</strong>/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>$6,1 Mrd. Cash, Margen steigen, FCF noch lückenhaft</td></tr>
+            <tr><td>Risiken (invertiert)</td><td><strong>4</strong>/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td><td>Preiskampf, Volumenrisiko, Zölle, Verluste</td></tr>
+            <tr><td>Technische Analyse</td><td><strong>4</strong>/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td><td>Unter allen SMAs, Abwärtstrend, RSI ~36</td></tr>
+            <tr style="background:rgba(255,105,0,0.08);"><td><strong>⌀ Gesamtscore</strong></td><td><strong>5,5</strong>/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:55%;background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">5,5</span></div></td><td>Hohe Optionalität trifft auf reales Ausführungs- und Marktrisiko</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Eigene Aggregation aus Sektionen 1–10; Datenbasis sec.gov, stockanalysis.com, Analystenberichte (Mai 2026).</div>
+    </div>
+  </div>
+
+  <!-- ============ S12 ============ -->
+  <div class="section" id="s12">
+    <div class="section-header"><div class="section-number">12</div><div class="section-title">Fazit – Investment-These</div><div class="section-score">HALTEN</div></div>
+    <div class="section-body">
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p>Säule 1 – AI-Führerschaft mit externer Validierung: XPeng besitzt mit dem Turing-Chip (bis 3.000 TOPS) und VLA 2.0 die technologisch fortschrittlichste Autonomie-Plattform unter Chinas EV-Startups. Dass Volkswagen genau diesen Stack lizenziert, ist der seltene Fall, in dem ein westlicher OEM chinesische Kern-AI als best-in-class einkauft – ein potenzieller Lizenz-Erlöspool jenseits des Autoverkaufs.</p>
+          <p>Säule 2 – Strukturelle Margen- und Export-Wende: Die Bruttomarge kletterte von 14,3% (2024) auf 20,6% (Q1/26), Q4/2025 brachte den ersten Quartalsgewinn. Parallel explodiert der Export (+55% YTD, Ziel 90k/2026, 1 Mio./2030) und liefert einen glaubwürdigen Ausgleich zum China-Preiskampf.</p>
+          <p>Säule 3 – Bewertung mit gratis Optionalität: Bei ~1,5x P/S ist die AI-/Robotaxi-/Roboter-Story kaum eingepreist. Analystenkonsens „Buy" mit ~$23–26 Ziel impliziert +40–55%; eine erfolgreiche Neubewertung Richtung „Physical-AI-Plattform" hätte deutlich mehr Hebel.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p>Risiko 1 – Preiskampf frisst die Marge: Bei ~50% Branchenauslastung und BYD-Rabatten von ~10% bleibt der Druck strukturell. Steigende Speicherchip- und Batteriekosten drückten die Fahrzeugmarge bereits in Q1/26 – fällt sie unter ~18%, verschiebt sich die Gewinnschwelle erneut.</p>
+          <p>Risiko 2 – Volumen ist fragil: Der Februar-Einbruch (–50%) und Q1 (–46% QoQ) zeigen, wie stark XPeng von einzelnen Launches abhängt. Verfehlt der H2-Modellramp, kehrt der Nettoverlust dauerhaft zurück – 2026 wäre dann kein Übergangs-, sondern ein Stagnationsjahr.</p>
+          <p>Risiko 3 – AD kommoditisiert &amp; Technik schwach: Ein in China zugelassenes Tesla-FSD (Q3/26 angepeilt) plus BYD/Huawei könnten den Vorsprung relativieren. Charttechnisch notiert XPEV unter allen SMAs nahe dem 52W-Tief – Timing-Risiko. Die öffentliche CEO-Wette (30.08.26) ist ein binäres Reputationsereignis.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung (ausgewogen)</h3>
+      <p>Das bullische Narrativ ist substanzieller, weil es auf harten Belegen ruht – der VW-Lizenzdeal und die von 14,3% auf über 20% gestiegene Bruttomarge sind keine Versprechen, sondern Fakten. Gleichzeitig enthält das bärische Narrativ valide, nicht wegzudiskutierende Punkte: Die Netto-Profitabilität ist eben gerade <em>nicht</em> nachhaltig, und der Q1-Einbruch hat gezeigt, wie schnell die Story kippt.</p>
+      <p>Entscheidend ist die Asymmetrie: XPeng wird als verlustträchtiger Autobauer bewertet (~1,5x P/S), besitzt aber die Optionalität eines AI-Plattformunternehmens. Wer an die Monetarisierung von AD-Software, Robotaxi und Robotern glaubt, bekommt diese Optionalität derzeit fast geschenkt. Wer nur das Autogeschäft sieht, bezahlt für anhaltende Verluste in einem Preiskrieg. Risk/Reward auf 2–3 Jahre: rund –21% Downside (Bruch unter $15,40 Richtung ~$13) vs. +33% Upside (Zielkurs ~$22), bei Erfolg der AI-Wette deutlich mehr.</p>
+      <p>Honest about uncertainty: Ich könnte falsch liegen, falls (a) Tesla-FSD in China XPengs AD-Vorsprung schneller egalisiert als erwartet, oder (b) der Preiskampf die Marge trotz Skaleneffekten dauerhaft unter Druck hält. Daher lautet das Rating <strong>HALTEN</strong> mit Aufstockungs-Triggern – kein klares KAUFEN (wegen Verlustlage, Volumenrisiko und bärischer Technik), aber auch kein VERKAUFEN (wegen günstigem P/S, Cash-Festung und realer Optionalität).</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Katalysatoren / Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kurz (0–6 M)</strong></td><td>Q2-Auslieferungen, VLA-Benchmark (30.08.), Tesla-FSD-China-Zulassung; bärische Technik</td><td><span class="badge badge-yellow">Abwarten / Tranchiert</span></td></tr>
+            <tr><td><strong>Mittel (6–24 M)</strong></td><td>H2-Modellramp (G9L, MONA L05/L03), Robotaxi-Pilot, Export 10k/Monat, VW-Werk</td><td><span class="badge badge-orange">Tranchiert aufbauen</span></td></tr>
+            <tr><td><strong>Lang (2–5 J)</strong></td><td>Physical-AI-Monetarisierung, IRON-Roboter, Lizenzerlöse, 1 Mio. Export</td><td><span class="badge badge-green">Halten / Optionalität</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>XPeng ist eine Optionalitäts-Wette: ein technologisch führender Autonomie-Spezialist im Körper eines noch verlustträchtigen Autobauers, finanziert durch eine Cash-Festung von ~$6,1 Mrd. Das Autogeschäft rechtfertigt den Kurs allein kaum – die AI-, Robotaxi- und Lizenz-Optionalität schon, ist aber kaum eingepreist. 2026 ist ein Übergangsjahr; das Investment-Urteil hängt am H2-Volumen-Rebound und an konkreten Belegen, dass aus Technologieführerschaft Marge und Lizenzerlöse werden.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$20–24</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–3 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–21%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+33%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:1,6</div></div>
+      </div>
+
+      <h3>Was falsifiziert die These?</h3>
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Q2/Q3-Auslieferungen bleiben &lt;90k pro Quartal → Volumen-Wende gescheitert</li>
+            <li>Bruttomarge fällt unter ~18% (Chip-/Batteriekosten) → Margenwende kippt</li>
+            <li>Tesla-FSD erhält Q3/26 Vollzulassung in China und übertrifft VLA klar → AD-Vorsprung erodiert</li>
+            <li>Kurs schließt nachhaltig unter $15,40 (52W-Tief) → technischer Bruch</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Q2 ≥100k + H2-Modelle treiben Monatsvolumen wieder &gt;40k bei ~20% GM</li>
+            <li>VLA 2.0 erreicht/übertrifft FSD-Niveau (30.08.) und FSD-China-Zulassung verzögert</li>
+            <li>Robotaxi-Pilot startet planmäßig + Export erreicht 10k/Monat (Q4/26)</li>
+            <li>Kurs erobert SMA 200 (~$19,8) zurück → Trendwende</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Welcher Anlegertyp passt?</h3>
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul><li>Risikobereite Growth-/Tech-Investoren</li><li>Thematische AI-/Autonomie-Wetten</li><li>Langfrist-Anleger mit 2–5 J Horizont</li><li>Contrarians (Kauf nahe 52W-Tief)</li></ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul><li>Value-Investoren (keine Gewinnbasis)</li><li>Income-Investoren (keine Dividende)</li><li>Risikoaverse / Kapitalerhalt</li><li>Kurzfrist-Trader gegen den Trend</li></ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten</span></td><td>Erst Q2-Volumen + Margenstabilität abwarten</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>Startposition jetzt, Aufstockung nach H2-Bestätigung</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-orange">Antizyklisch sammeln</span></td><td>R/R ~1:1,6 nahe 52W-Tief, enges Stop unter $15,40</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>Physical-AI-Optionalität als Kernthema</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Synthese aus Sektionen 1–11; Analystenziele (Macquarie, BofA, Citi, DBS, JPMorgan), Mai 2026.</div>
+    </div>
+  </div>
+
+  <!-- ============ S13 ============ -->
+  <div class="section" id="s13">
+    <div class="section-header"><div class="section-number">13</div><div class="section-title">Outlook – die 3 wichtigsten anstehenden Events</div><div class="section-note">Wenn/Dann-Logik</div></div>
+    <div class="section-body">
+      <div class="outlook-card">
+        <h4>📊 Event 1: VLA-2.0-Benchmark &amp; Tesla-FSD-China-Zulassung – Q3/2026 (Stichtag 30.08.2026)</h4>
+        <p>He Xiaopengs öffentliche Wette: VLA 2.0 soll bis 30.08.2026 das Niveau von Teslas FSD v14.2 erreichen. Parallel strebt Tesla die FSD-Vollzulassung in China für Q3/2026 an. Dieses Doppelevent entscheidet über die Glaubwürdigkeit des AD-Führerschafts-Narrativs.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> VLA 2.0 unabhängig als gleichwertig/überlegen bestätigt wird UND die FSD-China-Zulassung verzögert/eingeschränkt bleibt → AD-These intakt, Re-Rating-Potenzial → nachkaufen.<br><br>
+          <strong>Wenn:</strong> Tesla die volle FSD-China-Zulassung erhält und im Realbetrieb klar überzeugt → XPengs Vorsprung erodiert → Position reduzieren.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>📊 Event 2: Q2-Auslieferungen + H2-Modellramp – August 2026 / H2 2026</h4>
+        <p>Die Q2-Zahlen (Guidance 100–106k) und der Anlauf von G9L (Q3), MONA L05/L03 und Next P7 zeigen, ob die Volumen-/Margenwende real ist oder ob Q1 der Beginn einer Stagnation war.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Q2 ≥100k landet UND H2-Modelle das Monatsvolumen zurück auf &gt;40k bei stabiler ~20%-Bruttomarge bringen → Turnaround bestätigt → Upgrade Richtung KAUFEN.<br><br>
+          <strong>Wenn:</strong> Auslieferungen unter ~90k/Quartal bleiben UND die Bruttomarge unter ~18% rutscht → Übergang scheitert → reduzieren.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>📊 Event 3: Robotaxi-Pilot + Export-Skalierung + VW-Werksdeal – H2 2026 / Q4 2026</h4>
+        <p>Start des Robotaxi-Pilotbetriebs (H2/26), das angepeilte Exportniveau von 10.000+ Einheiten/Monat im Q4 und ein möglicher Kauf eines VW-Werks in Europa sind die Bausteine der „Physical-AI + Global"-Story.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Robotaxi-Pilot startet planmäßig UND Export erreicht 10k/Monat UND ein europäischer Werksdeal wird unterzeichnet → Optionalität beginnt sich einzupreisen → nachkaufen.<br><br>
+          <strong>Wenn:</strong> Robotaxi rutscht auf 2027+ UND EU-Zölle/Regulierung bremsen den Export → Optionalität abgewertet → halten/abwarten.
+        </div>
+      </div>
+      <div class="source">Quellen: Electrek (29.04.2026); CNBC (21.05.2026); XPENG Q1-2026-Call (29.05.2026); CnEVPost/Reuters (Mai 2026).</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken und stellt keine Anlageberatung, Kauf- oder Verkaufsempfehlung dar. Aktien sind mit erheblichen Risiken bis zum Totalverlust verbunden; chinesische ADRs bergen zusätzliche regulatorische und Delisting-Risiken. Alle Daten wurden nach bestem Wissen aus öffentlichen Quellen (sec.gov, Unternehmens-IR, Reuters, Bloomberg, CNBC, Electrek, CnEVPost, stockanalysis.com u.a., Stand Mai 2026) zusammengetragen, ohne Gewähr für Richtigkeit oder Vollständigkeit. Treffen Sie Anlageentscheidungen stets eigenverantwortlich bzw. mit einem lizenzierten Berater.</div>
+
+</div>
+</body>
+</html>
