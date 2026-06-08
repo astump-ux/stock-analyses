@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAAB-B – Aktienanalyse Canvas v2.2</title>
+<style>
+:root{
+  --primary:#14b8a6; --primary-dark:#0d9488;
+  --bg:#0f0f12; --bg-card:#1a1a1f; --bg-card2:#22222a; --border:#2e2e38;
+  --text:#e8e8ec; --text-muted:#888898; --text-dim:#555566;
+  --green:#22c55e; --red:#ef4444; --yellow:#f59e0b; --blue:#3b82f6; --purple:#8b5cf6; --teal:#14b8a6;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+.header{background:linear-gradient(135deg,#001a18 0%,#002820 40%,#0f0f12 100%);border-bottom:1px solid var(--primary);padding:36px 40px 28px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;}
+.header-left h1{font-size:32px;font-weight:700;color:white;letter-spacing:-0.5px;}
+.header-left h1 span{color:var(--primary);}
+.header-left .subtitle{color:var(--text-muted);font-size:14px;margin-top:4px;}
+.header-right{text-align:right;}
+.price-tag{font-size:38px;font-weight:800;color:var(--primary);line-height:1;}
+.price-meta{color:var(--text-muted);font-size:13px;margin-top:4px;}
+.price-change{display:inline-block;padding:2px 8px;border-radius:4px;font-size:13px;font-weight:600;margin-top:4px;}
+.price-change.up{background:rgba(34,197,94,0.15);color:var(--green);}
+.price-change.down{background:rgba(239,68,68,0.15);color:var(--red);}
+.nav{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:100;}
+.nav a{color:var(--text-muted);text-decoration:none;padding:14px 16px;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.2s;}
+.nav a:hover{color:var(--primary);border-bottom-color:var(--primary);}
+.main{max-width:1100px;margin:0 auto;padding:32px 40px 60px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px;}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.kpi-value{font-size:22px;font-weight:700;color:white;margin-top:4px;}
+.kpi-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.kpi-value.green{color:var(--green);}.kpi-value.red{color:var(--red);}.kpi-value.orange{color:var(--primary);}
+.section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden;}
+.section-header{background:var(--bg-card2);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.section-number{background:var(--primary);color:white;width:28px;height:28px;border-radius:6px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-title{font-size:16px;font-weight:700;color:white;}
+.section-score{margin-left:auto;font-size:14px;font-weight:700;color:var(--primary);}
+.section-note{font-size:12px;color:var(--text-dim);background:rgba(46,46,56,0.4);border-radius:4px;padding:4px 10px;margin-left:auto;}
+.section-body{padding:20px 24px;}
+p{margin-bottom:12px;color:var(--text);}p:last-child{margin-bottom:0;}
+h3{font-size:14px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 8px;}h3:first-child{margin-top:0;}
+.table-wrap{overflow-x:auto;margin:16px 0;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--bg-card2);color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:10px 12px;border-bottom:1px solid rgba(46,46,56,0.5);color:var(--text);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(20,184,166,0.04);}
+.beat{color:var(--green);font-weight:600;}.miss{color:var(--red);font-weight:600;}.neutral{color:var(--yellow);font-weight:600;}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}
+.badge-green{background:rgba(34,197,94,0.15);color:var(--green);}
+.badge-red{background:rgba(239,68,68,0.15);color:var(--red);}
+.badge-yellow{background:rgba(245,158,11,0.15);color:var(--yellow);}
+.badge-blue{background:rgba(59,130,246,0.15);color:var(--blue);}
+.badge-orange{background:rgba(20,184,166,0.15);color:var(--primary);}
+.event-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(46,46,56,0.5);align-items:flex-start;}
+.event-item:last-child{border-bottom:none;}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0;}
+.dot-green{background:var(--green);}.dot-red{background:var(--red);}.dot-yellow{background:var(--yellow);}
+.event-label{font-weight:600;color:white;}
+.event-text{font-size:14px;color:var(--text);}
+.risk-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.risk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.risk-title{font-weight:600;color:white;font-size:14px;}
+.score-bar{display:flex;align-items:center;gap:10px;}
+.score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#2dd4bf);}
+.score-num{font-weight:700;color:var(--primary);font-size:15px;min-width:32px;}
+.bull-bear-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:700px){.bull-bear-grid{grid-template-columns:1fr;}}
+.bull-card{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:16px;}
+.bear-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:16px;}
+.bull-card h4{color:var(--green);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.bear-card h4{color:var(--red);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.rating-box{background:linear-gradient(135deg,rgba(20,184,166,0.12),rgba(20,184,166,0.04));border:1px solid rgba(20,184,166,0.3);border-radius:12px;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:20px 0;}
+.rating-item label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;display:block;margin-bottom:4px;}
+.rating-item .val{font-size:20px;font-weight:800;color:white;}
+.rating-item .val.buy{color:var(--green);}.rating-item .val.hold{color:var(--yellow);}.rating-item .val.sell{color:var(--red);}
+.trigger-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+@media(max-width:700px){.trigger-grid{grid-template-columns:1fr;}}
+.trigger-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.trigger-card h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.trigger-card.buy h5{color:var(--green);}.trigger-card.sell h5{color:var(--red);}
+.trigger-list{font-size:13px;color:var(--text);list-style:none;padding:0;}
+.trigger-list li{margin-bottom:6px;padding-left:14px;position:relative;}
+.trigger-list li::before{content:"→";position:absolute;left:0;}
+.investor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+@media(max-width:600px){.investor-grid{grid-template-columns:1fr;}}
+.investor-yes{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px;}
+.investor-no{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:12px;}
+.investor-yes h5{color:var(--green);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-no h5{color:var(--red);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-yes li,.investor-no li{font-size:13px;color:var(--text);margin-bottom:4px;list-style:none;padding-left:14px;position:relative;}
+.investor-yes li::before{content:"✓";position:absolute;left:0;color:var(--green);}
+.investor-no li::before{content:"✗";position:absolute;left:0;color:var(--red);}
+.geo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0;}
+.geo-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.geo-region{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.geo-pct{font-size:20px;font-weight:700;color:white;}
+.geo-note{font-size:12px;color:var(--text-muted);}
+.outlook-card{background:var(--bg-card2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:16px;margin-bottom:14px;}
+.outlook-card h4{color:white;font-size:14px;margin-bottom:8px;}
+.outlook-card .when-then{font-size:13px;color:var(--text);margin-top:8px;}
+.outlook-card .when-then strong{color:var(--primary);}
+.source{font-size:11px;color:var(--text-dim);margin-top:12px;padding-top:10px;border-top:1px solid rgba(46,46,56,0.5);}
+.source a{color:var(--text-dim);}
+.disclaimer{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text-dim);margin-top:32px;}
+.alert-box{background:rgba(20,184,166,0.08);border:1px solid rgba(20,184,166,0.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px;}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+.pill{display:inline-block;background:rgba(20,184,166,0.12);color:var(--primary);border-radius:4px;padding:1px 7px;font-size:13px;font-weight:600;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Saab AB <span>SAAB-B.ST</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 8. Juni 2026 · Nasdaq Stockholm · Sektor: Defense / Aerospace</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-orange">Gripen / Aeronautics</span>
+      <span class="badge badge-blue">Surveillance / EW</span>
+      <span class="badge badge-yellow">Dynamics / C-UAS</span>
+      <span class="badge badge-green">Naval / Autonomy</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">SEK 520</div>
+    <div class="price-meta">Schlusskurs 05.06.2026 · Nasdaq Stockholm</div>
+    <div class="price-change down">▼ −30 % vs. ATH (Jan '26)</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">52W: 426,6 – 748,8 SEK</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value">SEK 520</div><div class="kpi-sub">05.06.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value">~280 Mrd</div><div class="kpi-sub">SEK (~€25 Mrd)</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/E (TTM / Fwd)</div><div class="kpi-value red">45 / 35</div><div class="kpi-sub">EPS TTM SEK 12,0</div></div>
+    <div class="kpi-card"><div class="kpi-label">EV/EBITDA</div><div class="kpi-value red">~27×</div><div class="kpi-sub">PEG ~1,05</div></div>
+    <div class="kpi-card"><div class="kpi-label">EBIT-Marge</div><div class="kpi-value orange">~10 %</div><div class="kpi-sub">Trend steigend</div></div>
+    <div class="kpi-card"><div class="kpi-label">ROE</div><div class="kpi-value">15,7 %</div><div class="kpi-sub">ROIC ~14 %</div></div>
+    <div class="kpi-card"><div class="kpi-label">Auftragsbestand</div><div class="kpi-value green">~274 Mrd</div><div class="kpi-sub">SEK · 73 % intl.</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value">17.07.26</div><div class="kpi-sub">Q2 2026</div></div>
+  </div>
+
+  <!-- ============ S1 ============ -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6–9 Monate</div>
+    </div>
+    <div class="section-body">
+      <p>Saab AB ist ein schwedischer Verteidigungs- und Luftfahrtkonzern mit rund 28.700 Mitarbeitern und einem Jahresumsatz 2025 von SEK 79,2 Mrd. (rund €7 Mrd.). Verwechslungsgefahr besteht zur längst insolventen Automarke „Saab Automobile" – das börsennotierte Saab AB ist ein reiner Defense-/Security-Konzern und hat mit dem Autohersteller seit dessen Abspaltung nichts mehr zu tun. Das Unternehmen verkauft in über 100 Länder und ist Teil der nationalen Verteidigungsfähigkeit mehrerer Staaten.</p>
+      <p>Das Geschäft ist in fünf Geschäftsbereiche gegliedert: <span class="pill">Aeronautics</span> (Gripen-Kampfflugzeug, Saab-Anteil am Boeing-T-7A-Trainer, unbemannte Systeme), <span class="pill">Dynamics</span> (Lenkflugkörper, Panzerabwehr/Carl-Gustaf, Counter-UAS, Signaturmanagement), <span class="pill">Surveillance</span> (Radar, elektronische Kampfführung, GlobalEye-Frühwarnsystem, Gefechtsführung/C4I), der zum 1. April 2026 neu gebildete Bereich <span class="pill">Naval</span> (vormals Kockums + Naval Combat Systems: U-Boote, Überwasserschiffe, autonome Unterwasser- und Überwasserfahrzeuge, Torpedos) sowie die Beratungstochter <span class="pill">Combitech</span>.</p>
+      <p>Die Erlösmodelle sind überwiegend langfristige Regierungs- und Verteidigungsaufträge mit mehrjährigen Liefer- und Wartungsverträgen – das erzeugt hohe Visibilität (Auftragsbestand ~SEK 274 Mrd., über das 3-fache des Jahresumsatzes) und gleichzeitig lange Vorlaufzeiten und Kapitalintensität. Kunden sind nationale Streitkräfte und Beschaffungsbehörden (B2G), ergänzt um zivile Sicherheit. Saab positioniert sich als nicht-US-amerikanische, souveräne Alternative – ein Vorteil bei Kunden, die ihre Abhängigkeit von US-Firmen reduzieren wollen (z. B. Kanada).</p>
+      <p>Die Kostenstruktur ist Capex-intensiv: Saab investiert aktuell SEK 8–10 Mrd. pro Jahr in Kapazitätsaufbau (neue Werke in Schweden, den USA und Indien). Das drückt kurzfristig den Free Cashflow, soll aber den Rekord-Auftragsbestand in Umsatz wandeln. Unit Economics: Bruttomarge ~22 %, EBIT-Marge auf dem Weg zu 10 %+ – für einen Plattform- und Systemintegrator solide, aber strukturell unter margenstärkeren Sensor-Spezialisten wie Hensoldt oder dem hochskalierenden Rheinmetall.</p>
+      <div class="source">Quellen: Saab Year-End Report 2025 (05.02.2026); Saab Q1 2026 (23.04.2026); Yahoo Finance / CNBC Unternehmensprofil (06.2026); stockanalysis.com (06.2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ S2 ============ -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben & Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <p>Saabs Burggraben ruht auf wenigen, aber sehr tiefen Säulen. Erstens <strong>Souveränitäts-Positionierung</strong>: Mit dem Gripen besitzt Saab eines der wenigen westlichen Kampfflugzeuge außerhalb der USA, das ohne US-Exportkontroll-Vetos („ITAR-frei" in weiten Teilen) angeboten werden kann. In einer Welt, in der Länder wie Kanada explizit ihre Abhängigkeit von US-Rüstungsfirmen senken wollen, ist das ein struktureller Vorteil – sichtbar an Kanadas Entscheidung, mit Saab statt Boeing über das AEW&C-Programm (GlobalEye) zu verhandeln.</p>
+      <p>Zweitens <strong>hohe Switching Costs und Lock-in</strong>: Wer einmal Gripen, GlobalEye oder ein Kockums-U-Boot beschafft, bindet sich über Jahrzehnte an Wartung, Upgrades, Training und Munition. Das erzeugt wiederkehrende, margenstarke Folgeumsätze. Drittens <strong>technologischer Vorsprung in Nischen</strong>: GlobalEye (Frühwarnung) und die Arexis-EW-Suite (jetzt auf deutschen Eurofightern) gelten als Weltklasse; im U-Boot-Bau (Stirling-AIP) ist Kockums führend.</p>
+      <p>Kritisch zu sehen ist die Größenrelation: Saab ist mit ~€7 Mrd. Umsatz deutlich kleiner als BAE, Thales oder das hochskalierende Rheinmetall. Im für diese Analyse zentralen Drohnen-/Autonomy-Feld ist der Burggraben <em>uneinheitlich</em>: Im High-End (KI-Autonomie für Kampfjets via „Centaur"/Project Beyond, Counter-UAS „Loke", maritime Autonomie) hat Saab echte Vorsprünge – bei günstigen, in Masse produzierten Loitering Munitions („Kamikaze-Drohnen") jedoch keinen eigenen Burggraben, da Saab dort schlicht kein eigenes Serienprodukt hat (siehe Sektion 7 & 11). Der Burggraben ist also tief, aber thematisch schmal.</p>
+      <div class="source">Quellen: Saab Newsroom (Canada AEW&C, 27.05.2026; Arexis/Eurofighter, 14.11.2025); Helsing/Saab Project Beyond (Janes, 11.06.2025); Reuters/Breaking Defense (06.2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ S3 ============ -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Wachstum 4/4 ≥ 18 % organisch</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Da SAAB-B an der Nasdaq Stockholm notiert, sind keine finviz.com-Daten verfügbar. Kennzahlen stammen aus den offiziellen Saab-Quartalsberichten, investing.com, stockanalysis.com und CNBC (Stand: 06.2026). Nächste Quartalszahlen: <strong>Q2 2026 am 17.07.2026.</strong></div>
+      <p>Saab liefert seit Quartalen außergewöhnliches organisches Wachstum bei gleichzeitig steigender Marge. „Beat/Miss vs. Konsens" ist bei einem schwedischen Defense-Wert weniger das Steuerungssignal als bei US-Aktien; entscheidend sind organisches Wachstum vs. eigene Guidance (die 2025 zweimal angehoben wurde) und die Margenentwicklung. Auffällig: Die Aeronautics-Marge steht wegen Anlaufkosten des T-7A-Programms unter Druck.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl (SEK Mio.)</th><th>Q2 2025</th><th>Q3 2025</th><th>Q4 2025</th><th>Q1 2026</th></tr></thead>
+          <tbody>
+            <tr><td>Umsatz</td><td>19.786</td><td>15.871</td><td>27.697</td><td>19.164</td></tr>
+            <tr><td>Organisches Wachstum</td><td class="beat">+32 %</td><td class="beat">+18,3 %</td><td class="beat">+34,5 %</td><td class="beat">+23,6 %</td></tr>
+            <tr><td>EBITDA-Marge</td><td>14,3 %</td><td>13,7 %</td><td>15,2 %</td><td>14,3 %</td></tr>
+            <tr><td>EBIT</td><td>1.977</td><td>1.374</td><td>3.261*</td><td>1.920</td></tr>
+            <tr><td>EBIT-Marge</td><td>10,0 %</td><td class="miss">8,7 %</td><td>11,8 %*</td><td>10,0 %</td></tr>
+            <tr><td>EPS (SEK)</td><td>2,83</td><td>~2,0</td><td>4,73</td><td>2,65</td></tr>
+            <tr><td>Order Bookings</td><td>28.403</td><td>20.861</td><td class="beat">100.111</td><td>18.243</td></tr>
+            <tr><td>Book-to-Bill</td><td>~1,4</td><td>~1,3</td><td class="beat">~3,6</td><td class="miss">~0,95</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>*Q4 2025 enthält einen Veräußerungsgewinn (Saab TransponderTech, SEK 336 Mio.); bereinigt lag das EBIT bei SEK 2.925 Mio. / Marge 10,6 %. Der Order-Sprung in Q4 (SEK 100 Mrd.) wurde wesentlich vom Colombia-Gripen-Vertrag (€3,1 Mrd.) und weiteren Großorders getragen. In Q1 2026 fiel der Auftragseingang erwartungsgemäß zurück (Book-to-Bill < 1) – nach einem Rekordquartal normal, aber ein Punkt für die Bären. Management-Aussage: Nachfrage bleibt hoch, v. a. Deutschland, Polen, Nordics; Hauptherausforderung ist die Lieferketten-Resilienz.</p>
+      <div class="source">Quellen: Saab Q2 2025 (18.07.2025); Q3 2025 (24.10.2025); Year-End 2025 (05.02.2026); Q1 2026 (23.04.2026); Quartr-Zusammenfassungen</div>
+    </div>
+  </div>
+
+  <!-- ============ S4 ============ -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <p>Saab befindet sich klar in einer Hyper-Growth-Phase, getragen vom europäischen Aufrüstungszyklus. Umsatz 2023 ~SEK 51,6 Mrd. → 2024 SEK 63,8 Mrd. (+23 % organisch) → 2025 SEK 79,2 Mrd. (+24 %). Das Management hat das Mittelfrist-Ziel (2023–2027) für organisches Wachstum von 18 % auf <strong>~22 % CAGR</strong> angehoben – ein selten gesehenes Upgrade in der Verteidigungsindustrie. Wichtig: Das Wachstum ist überwiegend organisch und auftragsgetrieben, nicht durch M&A oder Accounting aufgebläht – ein Qualitätsmerkmal.</p>
+      <h3>Segmente</h3>
+      <p>Wachstumstreiber sind <strong>Dynamics</strong> (Q2 2025 +73 %; Munition, Carl-Gustaf, Counter-UAS) und <strong>Surveillance</strong> (Radar, EW; Q1 2026 +32 % Umsatz, +52 % Operating Income). <strong>Aeronautics</strong> wächst (Gripen-Hochlauf von ~15 auf perspektivisch 20–30 Jets/Jahr), leidet aber an Margendruck durch T-7A-Anlaufkosten und FX. Der neue Bereich <strong>Naval</strong> bündelt U-Boote und maritime Autonomie und hat mit Polens U-Boot-Programm „Orka" (Preferred Supplier) einen Großhebel.</p>
+      <h3>Geografische Verteilung (Auftragsbestand)</h3>
+      <div class="geo-grid">
+        <div class="geo-card"><div class="geo-region">International</div><div class="geo-pct">73 %</div><div class="geo-note">des Backlogs (Q3 2025)</div></div>
+        <div class="geo-card"><div class="geo-region">Europa</div><div class="geo-pct">Kern</div><div class="geo-note">DE, PL, Nordics – stärkste Nachfrage</div></div>
+        <div class="geo-card"><div class="geo-region">Lateinamerika</div><div class="geo-pct">Hoch</div><div class="geo-note">Brasilien, Colombia (Gripen)</div></div>
+        <div class="geo-card"><div class="geo-region">Asien/Pazifik</div><div class="geo-pct">Wachsend</div><div class="geo-note">Thailand, Philippinen/Peru (Pipeline)</div></div>
+      </div>
+      <p>Reifegrad: „Growth-at-Scale" – das Wachstum ist real, breit und mit Margenexpansion verbunden (EBIT wächst schneller als Umsatz). Hauptfrage für die Nachhaltigkeit ist weniger das „Ob" der Nachfrage als die <strong>Kapazitäts- und Lieferketten-Ausführung</strong> sowie die Frage, wie lange der Aufrüstungs-Superzyklus anhält (siehe Makro-Risiken).</p>
+      <div class="source">Quellen: Saab Year-End 2025; Finimize SAABF Snapshot (08.09.2025); Saab Q1 2026 Earnings Call (Yahoo, 24.04.2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ S5 ============ -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung & Multiples</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Keine finviz.com-Daten für die Stockholm-Notierung. Multiples aus stockanalysis.com, investing.com und gurufocus (Stand: 06.2026).</div>
+      <p>Saab ist nach dem massiven Lauf 2024/25 ein klarer Wachstumsteuer-Fall, kein Value. Das Papier hat sich von SEK 11,40 (2009) und ~SEK 246 (Jahresende 2024) bis auf ein Allzeithoch von <strong>SEK 748,8 (19.01.2026)</strong> bewegt und konsolidiert seither (aktuell ~SEK 520). Auf Basis Stockholm-Notierung liegt das KGV (TTM) bei ~45, Forward bei ~35, EV/EBITDA bei ~27× und das PEG bei ~1,05.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Multiple</th><th>Saab</th><th>5-J-Schnitt Saab</th><th>Einordnung</th></tr></thead>
+          <tbody>
+            <tr><td>P/E (TTM)</td><td>~45×</td><td>~42×</td><td class="neutral">leicht über eigenem Schnitt</td></tr>
+            <tr><td>P/E (Forward)</td><td>~35×</td><td>–</td><td class="neutral">hoch, aber Wachstum getragen</td></tr>
+            <tr><td>EV/EBITDA (TTM)</td><td>~27×</td><td>Median ~19×</td><td class="miss">deutlich über Historie</td></tr>
+            <tr><td>PEG</td><td>~1,05</td><td>–</td><td class="neutral">fair bei ~22 % CAGR</td></tr>
+            <tr><td>Dividendenrendite</td><td>~0,5 %</td><td>–</td><td class="miss">kein Income-Wert</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Im Peer-Kontext (Details Sektion 7) ist Saab nicht teurer als der Sektor: Rheinmetall handelt zu ~31× Forward-P/E und EV/EBITDA ~27–29×, Hensoldt zu EV/EBITDA ~25×. Saabs PEG von ~1,05 ist gegenüber Rheinmetalls ~0,74 jedoch <em>relativ unattraktiv</em>, weil Rheinmetall 2026 mit +40–45 % Umsatz fast doppelt so schnell wächst. Analysten-Konsens: „Halten", mittleres Kursziel ~SEK 574 (~+10 %), Spanne von SEK 310/400 (Sell) bis SEK 780 (UBS, Buy). Fazit: Die Bewertung ist nach der Korrektur weniger überzogen, aber das Papier preist weiterhin anhaltend exzellente Ausführung ein.</p>
+      <div class="source">Quellen: stockanalysis.com SAAB.B Statistics (06.2026); gurufocus EV/EBITDA; investing.com; MarketScreener Analystenkonsens (06.2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ S6 ============ -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen & Kapitalqualität</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <p>Die Profitabilität ist hochwertig und verbessert sich: ROE ~15,7 %, ROIC ~14 %, EBIT-Marge auf dem Weg zu 10 %+, Bruttomarge ~22 % (Q3 2025: 22,9 %). Die Bilanz ist exzellent – Saab ist faktisch nettoschuldenfrei (Netto-Liquidität ~SEK 4 Mrd., Net-Debt/EBITDA ~0,1×). Das gibt Spielraum für den Kapazitätsausbau und mögliche Zukäufe ohne Bilanzstress.</p>
+      <p>Der Schwachpunkt ist der <strong>Free Cashflow</strong>. Wegen der hohen Investitionen (SEK 8–10 Mrd./Jahr) war der operative Cashflow in der ersten Jahreshälfte 2025 negativ; in Q1 2026 war der FCF mit ~−SEK 0,3 Mrd. erneut leicht negativ (auch durch Steuerzahlungen). Das wird typischerweise im vierten Quartal durch große Kundenzahlungen ausgeglichen (Q4 2025: operativer Cashflow SEK 6,3 Mrd.). Das Mittelfrist-Ziel ist eine kumulierte Cash-Conversion > 60 %.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>Wert</th><th>Kommentar</th></tr></thead>
+          <tbody>
+            <tr><td>Bruttomarge</td><td>~22 %</td><td>Plattform-/Integrator-typisch</td></tr>
+            <tr><td>EBIT-Marge (FY25-Trend)</td><td>~10 %</td><td>steigend, op. Hebelwirkung</td></tr>
+            <tr><td>ROE / ROIC</td><td>15,7 % / 14 %</td><td>solide Kapitalqualität</td></tr>
+            <tr><td>Net-Debt/EBITDA</td><td>~0,1×</td><td class="beat">faktisch netto-cash</td></tr>
+            <tr><td>FCF</td><td>schwach/volatil</td><td class="miss">Capex-Phase drückt</td></tr>
+            <tr><td>Dividende 2025</td><td>SEK 2,40</td><td>+20 % YoY, Rendite ~0,5 %</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Bewertung: Die „Earnings" sind echt (kein Accounting-Trick), aber der hohe Capex bedeutet, dass die FCF-Qualität dem Gewinnwachstum derzeit hinterherhinkt. Wer Saab kauft, kauft die Wette, dass der Rekord-Backlog in den kommenden Jahren in deutlich höheren Free Cashflow umschlägt.</p>
+      <div class="source">Quellen: Saab Q1 2026 & Year-End 2025; stockanalysis.com SAAB.B Statistics (06.2026); CNBC SAAB.B-SE (06.2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ S7 ============ -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich (Fokus: Drohnen & Autonomous Warfare)</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <p>Da die Kernfrage dieser Analyse die Wettbewerbsstärke im Drohnen-/Autonomy-Bereich ist, kombiniert dieser Vergleich Bewertungs-/Finanzkennzahlen mit einer qualitativen Einordnung der Drohnen-Portfolios. Schwerpunkt-Peers: <strong>Rheinmetall</strong> und <strong>Hensoldt</strong>, ergänzt um den US-Drohnen-Pure-Play <strong>AeroVironment</strong>.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>Saab</th><th>Rheinmetall</th><th>Hensoldt</th><th>AeroVironment</th></tr></thead>
+          <tbody>
+            <tr><td>Market Cap</td><td>~€25 Mrd</td><td>~€60–65 Mrd</td><td>~€8,5 Mrd</td><td>~$13,7 Mrd</td></tr>
+            <tr><td>Umsatzwachstum</td><td>+24 % (org.)</td><td class="beat">+40–45 % (2026e)</td><td>~+15 % (Kern)</td><td>hoch</td></tr>
+            <tr><td>EBIT-/op. Marge</td><td>~10 %</td><td class="beat">~18,5 %</td><td>adj. EBITDA 16–19 %</td><td>moderat</td></tr>
+            <tr><td>P/E (Forward)</td><td>~35×</td><td>~31×</td><td>hoch (~30×+)</td><td class="miss">~85×</td></tr>
+            <tr><td>EV/EBITDA</td><td>~27×</td><td>~27–29×</td><td>~25×</td><td>hoch</td></tr>
+            <tr><td>PEG</td><td>~1,05</td><td class="beat">~0,74</td><td>–</td><td>–</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Qualitativ: Wo steht Saab bei Drohnen & Autonomie?</h3>
+      <p><strong>Saabs Stärken (High-End-Autonomie):</strong> KI-Luftkampf via „Centaur"/Project Beyond mit Helsing (autonome Beyond-Visual-Range-Manöver auf Gripen E – ein Vorzeigeprojekt, das viele Peers in dieser Reife nicht haben); Counter-UAS „Loke" (mehrschichtige, kosteneffiziente Drohnenabwehr, von Schweden bereits beauftragt); die ISR-VTOL-Drohne Skeldar V-200 (etabliert bei mehreren Marinen für Minenabwehr/Aufklärung); erstklassige EW (Arexis); maritime Autonomie (Kockums/Naval, NATO-MANGROVE-Konsortium für unbemannte Unterwassersysteme) sowie ein unbemannter Stealth-Demonstrator (Erstflug für 2026 geplant).</p>
+      <p><strong>Saabs Lücke (Mass/Strike-Drohnen):</strong> Hier ist Saab <em>kein</em> Marktführer. Rheinmetall baut aggressiv eine Serienfertigung von Loitering Munitions auf (eigene FV-014, HERO über RWM Italia/UVision, Barracuda mit Anduril, LUNA NG, plus Counter-Drone-Systeme Skyranger/Skyspotter und Laser) – Kapazitätsziel bis zu 500–1.000 Drohnen/Monat. Hensoldt ist der Sensor-/Counter-UAS-Spezialist (Xpeller, mit überlegener Radar-Klassifikation). Reine Drohnen-/KI-Player wie Helsing (HX-2, CA-1 Europa, privat) oder AeroVironment (Switchblade) besetzen die „precision mass"-Nische. Saab liefert die KI für den Kampfjet (Centaur) – die Drohne selbst (HX-2) gehört aber Helsing.</p>
+      <p><strong>Fazit des Vergleichs:</strong> Saab ist im <em>hochwertigen</em> Autonomy-Segment (C-UAS, EW, KI-auf-Plattform, maritime Autonomie) wettbewerbsfähig bis führend, aber für eine reine „billige-Massen-Drohnen"-These die <strong>falsche Adresse</strong> – dafür sind Rheinmetall, Hensoldt oder Pure-Plays direkter. Saab ist eher ein „Premium-Systeme + souveräne Plattform + KI-on-Platform"-Wert als ein Drohnen-Disruptor.</p>
+      <div class="source">Quellen: multiples.vc (Rheinmetall/Hensoldt, 06.2026); Defense News (Rheinmetall FV-014, 10.09.2025); Rheinmetall/Hensoldt Newsrooms; macrotrends Peer-Tabelle (AVAV); Helsing/Saab Releases (06.2025–11.2025)</div>
+    </div>
+  </div>
+
+  <!-- ============ S8 ============ -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News & Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate (+ Schlüssel-Events)</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">27.05.2026 – Kanada: Saab Preferred Supplier für AEW&C (GlobalEye) + Teaming mit CAE <span class="badge badge-green">Positiv</span></div><div class="event-text">Kanada wählt Saabs GlobalEye statt Boeing und will US-Abhängigkeit reduzieren – starke strategische Bestätigung. Quelle: Saab/Reuters.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">14.11.2025 – Colombia: Gripen E/F-Vertrag €3,1 Mrd. (17 Jets, 2026–2032) <span class="badge badge-green">Positiv</span></div><div class="event-text">4. Betreiber der neuesten Gripen-Variante; impliziter Stückwert ~€182 Mio. – über früheren Exportpaketen. Quelle: Saab/Breaking Defense.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">2025/26 – Ukraine-Rahmenvereinbarung: Option 100–150 Gripen E <span class="badge badge-green">Positiv (Optionalität)</span></div><div class="event-text">Potenziell größter Einzelhebel des Backlogs – aber an Kriegsverlauf/Finanzierung gekoppelt und damit unsicher. Quelle: WSJ/Breaking Defense.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">02.04.2026 – Counter-UAS „Loke": FMV-Order (~$273 Mio.) <span class="badge badge-green">Positiv (Drohnen-relevant)</span></div><div class="event-text">Mobile, modulare Drohnenabwehr für Schweden, Lieferung 2027–2028 – stützt direkt die Autonomy-These. Quelle: Saab/Army-Technology.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">14.11.2025 – Arexis EW für deutsche Eurofighter (Airbus), €549 Mio. <span class="badge badge-green">Positiv</span></div><div class="event-text">Bestätigt Weltklasse-Position in elektronischer Kampfführung. Quelle: Saab.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">01.04.2026 – Neuer Geschäftsbereich „Naval" <span class="badge badge-yellow">Strukturell/Neutral</span></div><div class="event-text">Kockums + Naval Combat Systems gebündelt; Fokus Polen-U-Boot „Orka". Quelle: Aerotime.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">23.04.2026 – Aeronautics-Marge unter Druck (Q1) <span class="badge badge-red">Negativ</span></div><div class="event-text">EBIT −11 %, Marge 6,3 % (von 8,1 %) wegen T-7A-Anlaufkosten, R&D-Abschreibung, FX. Quelle: Aerotime.</div></div></div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">„Future of Warfare"-Debatte <span class="badge badge-yellow">Gemischt</span></div><div class="event-text">Ukraine/Iran zeigen: günstige Drohnen mit kurzen Vorlaufzeiten fordern das teure Legacy-Modell heraus. Saab-Manager räumen Bedarf an billigeren Drohnenabwehr-Effektoren ein (APKWS auf Gripen). Quelle: Business Insider/Reuters.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">Rheinmetall & Helsing skalieren Massen-Drohnenproduktion <span class="badge badge-red">Wettbewerbsdruck</span></div><div class="event-text">Im Strike-Drohnen-/Loitering-Segment ziehen Peers davon – Saab hat hier kein eigenes Serienprodukt. Quelle: Defense News/Aerotime.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">Entkopplung von US-Rüstung <span class="badge badge-green">Rückenwind</span></div><div class="event-text">Kanada/europäische Staaten suchen souveräne Alternativen – spielt Saab in die Hände. Quelle: Reuters.</div></div></div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">NATO: 5 % BIP-Verteidigungsziel bis 2035; Schweden +SEK 300 Mrd. <span class="badge badge-green">Starker Rückenwind</span></div><div class="event-text">Struktureller Nachfrage-Superzyklus. Quelle: Saab Q2 2025 / NATO-Gipfel.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">Ukraine-Friedensgespräche & Bewertungs-Sorgen <span class="badge badge-red">Negativ</span></div><div class="event-text">Europäische Defense-Aktien fielen auf Friedenssignale; 2026 Gewinnmitnahmen und „selektivere" Anleger. Quelle: stockanalysis.com/Reuters.</div></div></div>
+      <p style="font-size:12px;color:var(--text-dim);margin-top:8px;">Hinweis: Das Bull/Bear-Narrativ wird vollständig in Sektion 12 ausgearbeitet.</p>
+      <div class="source">Quellen: Saab/Rheinmetall/Hensoldt Newsrooms; Reuters, WSJ, Breaking Defense, Defense News, Aerotime, Army-Technology (11.2025–06.2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ S9 ============ -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value">~520</div><div class="kpi-sub">SEK</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50 (~)</div><div class="kpi-value red">~555</div><div class="kpi-sub">Kurs darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value red">~661</div><div class="kpi-sub">Kurs deutlich darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI</div><div class="kpi-value">~45</div><div class="kpi-sub">neutral</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value red">Verkauf</div><div class="kpi-sub">3-Monats</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Hoch</div><div class="kpi-value">748,8</div><div class="kpi-sub">19.01.2026 (ATH)</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Tief</div><div class="kpi-value">426,6</div><div class="kpi-sub">18.05.2026</div></div>
+      </div>
+      <p>Charttechnisch ist Saab nach dem Allzeithoch von SEK 748,8 (Januar 2026) in eine ausgedehnte Korrektur übergegangen und notiert aktuell rund 30 % darunter. Der Kurs liegt <strong>klar unter der 200-Tage-Linie (~SEK 661)</strong> und unter der mittelfristigen Linie – das ist ein übergeordnetes Verkaufssignal und spricht für einen intakten kurz-/mittelfristigen Abwärts- bis Seitwärtstrend.</p>
+      <p>Kurzfristige Unterstützung liegt bei ~SEK 505 (kurzfristige MA) und am 52-Wochen-Tief ~SEK 427. Widerstände: ~SEK 576 (mittelfristige MA) und darüber die 200-Tage-Linie ~SEK 661. Die Signale sind über die Zeitebenen gemischt (Tages-Signal eher Verkauf/Neutral, Monats-Signal eher Kauf) – typisch für eine Konsolidierung nach einem starken Lauf. Für langfristige Investoren ist das eher eine Beobachtungs- als eine akute Verkaufssituation; für Trader ist die Lage unter dem 200er-MA technisch unattraktiv.</p>
+      <div class="source">Quellen: investing.com Technical (SAAB-B, 06.2026); stockinvest.us (02.06.2026); TradingView OMXSTO:SAAB_B (06.2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ S10 ============ -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken & Chancen</div>
+      <div class="section-score">Score: 6/10 (invertiert)</div>
+    </div>
+    <div class="section-body">
+      <h3>10a) Strukturelle & zyklische Risiken</h3>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Bewertungsrisiko</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div><div class="event-text">P/E ~45, EV/EBITDA ~27× preisen anhaltend 20 %+ Wachstum ein. Jede Wachstums-/Margenenttäuschung kann eine kräftige Multiple-Kompression auslösen. Wahrscheinlichkeit: mittel-hoch.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Frieden in der Ukraine / De-Eskalation</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div><div class="event-text">Ein belastbarer Waffenstillstand würde das Order-Momentum bremsen, die Ukraine-Gripen-Option entwerten und die Sektor-Multiples drücken. Defense-Aktien reagierten bereits sensibel auf Friedenssignale. Wahrscheinlichkeit: unklar, aber materiell.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Aeronautics-/T-7A-Ausführung</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">Anlaufkosten und Marge im Aeronautics-Segment unter Druck; Gripen-Hochlauf (15 → 20–30/Jahr) ist operativ anspruchsvoll. Wahrscheinlichkeit: laufend.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ FX & Exportlizenzen</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">SEK/USD/EUR-Effekte (in Q1 spürbar); Exportgenehmigungen für LatAm/Ukraine können Aufträge verschieben.</div></div>
+
+      <h3>10b) KI-/Autonomie-Risiko (zentral für die These)</h3>
+      <p>Für Saab ist KI/Autonomie überwiegend eine <strong>Chance</strong> (Centaur, Project Beyond, Loke-C-UAS, maritime Autonomie). Das bärische Szenario: KI-native Anbieter günstiger Massendrohnen (Helsing, Anduril, ukrainische Hersteller) verschieben den Wert weg von teuren bemannten Plattformen hin zu „precision mass". Da Saab in dieser Kategorie kein eigenes Serienprodukt hat, droht ein struktureller Verlust von Marktanteil und Bewertungs-Premium, falls sich der Markt schneller Richtung billiger, attrierbarer Systeme dreht als Saab seine High-End-Nischen verteidigen kann. Bullisches Szenario: Saabs KI-on-Platform-Vorsprung (Gripen + Centaur), C-UAS „Loke" und der unbemannte Stealth-Demonstrator sichern den High-End – und billige Drohnen erhöhen sogar die Nachfrage nach Saabs Drohnenabwehr.</p>
+
+      <h3>10c) Chancen</h3>
+      <p>Ukraine-Gripen-Großauftrag (100–150 Jets), Skalierung der C-UAS-„Loke"-Plattform in den Export, Polen-U-Boot „Orka", Kanada-AEW&C, sowie M&A-Upside durch die starke Bilanz (Saab könnte sich eine Massen-Drohnen-Kapazität zukaufen und so die Lücke zu Rheinmetall schließen).</p>
+
+      <h3>10d) Red Flags & Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> nachlassende Aeronautics-Marge, wiederholt negativer FCF, Book-to-Bill < 1 über mehrere Quartale. <strong>Dealbreaker:</strong> Keine existenzbedrohenden Risiken erkennbar – Bilanz und Backlog sind robust. Hauptrisiko ist nicht das Überleben, sondern die <em>Bewertung</em>.</p>
+      <div class="source">Quellen: Saab Q1 2026; Finimize (Risiken); Reuters (Friedensgespräche/Defense-Sektor); eigene Einordnung</div>
+    </div>
+  </div>
+
+  <!-- ============ S11 ============ -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring</div>
+      <div class="section-score">Ø 6,8/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Visualisierung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td>Geschäftsmodell</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>Diversifiziert, sticky, souveräne Nischen (Gripen, GlobalEye, U-Boote)</td></tr>
+            <tr><td>Burggraben</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>Tief, aber thematisch schmal; schwach bei Massen-Drohnen</td></tr>
+            <tr><td>Operative Entwicklung (4Q)</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>4/4 Quartale ≥18 % organisch, Margenexpansion</td></tr>
+            <tr><td>Wachstum</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>~22 % CAGR-Ziel, Rekord-Backlog, Export-Optionalität</td></tr>
+            <tr><td>Bewertung</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>P/E 45, EV/EBITDA 27×; PEG ~1,05 fair, aber kein Schnäppchen</td></tr>
+            <tr><td>Cashflow & Kapitalqualität</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Top-Bilanz/ROE, aber Capex-Phase drückt FCF</td></tr>
+            <tr><td>Risiken (invertiert)</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Bewertung + Friedens-/Disruptionsrisiko</td></tr>
+            <tr><td>Technische Analyse</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Unter 200-Tage-Linie, Korrektur nach ATH</td></tr>
+            <tr style="background:rgba(20,184,166,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>6,8/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:68%;background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">6,8</span></div></td>
+              <td>Qualitäts-Compounder mit echten Nischen – aber teuer und nur teilweise eine „Drohnen-These"</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>User-spezifische Fragestellung: Drohnen-/Autonomy-Stärke vs. Peers</h3>
+      <p>Die These „Saab als Drohnen-/Autonomous-Warfare-Champion" hält einer kritischen Prüfung nur <strong>teilweise</strong> stand. Logisch konsistent ist sie für das High-End: Bei KI-Luftkampf (Centaur/Project Beyond), Counter-UAS (Loke), elektronischer Kampfführung (Arexis) und maritimer Autonomie ist Saab wettbewerbsfähig bis führend – das stützt die Burggraben- und Wachstums-Scores. Sie ist jedoch <em>nicht</em> konsistent für das Segment günstiger Massen-/Strike-Drohnen: Dort fehlt Saab ein eigenes Serienprodukt, während Rheinmetall (FV-014, HERO, Barracuda) und Pure-Plays (Helsing, AeroVironment) die Kategorie besetzen. Da die Argumente die bestehende Analyse bestätigen (kein wirklich neues, gegenteiliges Faktum), erfolgt <strong>keine</strong> Score-Anpassung – der Drohnen-Aspekt ist bereits in Burggraben (8) und Peer-Score (7) eingepreist.</p>
+      <div class="source">Quellen: Synthese aus Sektionen 1–10; Helsing/Saab- und Rheinmetall-Releases (06.2025–02.2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ S12 ============ -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-score">HALTEN</div>
+    </div>
+    <div class="section-body">
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 – Struktureller Superzyklus:</strong> NATO-Ziel 5 % BIP bis 2035, Schweden +SEK 300 Mrd. Der Auftragsbestand von ~SEK 274 Mrd. (73 % international, &gt;3× Jahresumsatz) gibt mehrjährige Visibilität. Das organische Wachstum lag 4 Quartale in Folge bei 18–34 %, das Mittelfrist-Ziel wurde auf ~22 % CAGR angehoben.</p>
+          <p><strong>Säule 2 – Souveräne Nischen + KI-Vorsprung:</strong> Gripen ist eine der wenigen nicht-US-Kampfjet-Optionen (Colombia €3,1 Mrd., Thailand, Ukraine-Option 100–150 Jets, Kanada-AEW&C). Der Centaur-KI-Vorsprung (mit Helsing) und Loke-C-UAS positionieren Saab im wachsenden Autonomy-Markt. Nettoschuldenfreie Bilanz (Net-Debt/EBITDA ~0,1×) erlaubt Investitionen und Zukäufe.</p>
+          <p><strong>Säule 3 – Margenhebel:</strong> EBIT-Marge auf dem Weg zu 10 %+, EBIT wächst schneller als Umsatz. PEG ~1,05 ist bei ~22 % Wachstum vertretbar; nach der 30 %-Korrektur vom ATH ist das Papier weniger überhitzt.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 – Bewertung:</strong> P/E ~45 / EV/EBITDA ~27× preisen Perfektion ein. Fällt das organische Wachstum unter ~18 % oder enttäuscht die Marge, droht eine deutliche Multiple-Kompression. Relativ zu Rheinmetall (PEG ~0,74, +40–45 % Wachstum) ist Saab wachstumsbereinigt teurer.</p>
+          <p><strong>Risiko 2 – „Future of Warfare"-Disruption:</strong> Günstige Massendrohnen unterlaufen das teure Plattform-Modell. Saab hat <em>keine</em> eigene Massen-Loitering-Munition – im Kern der gestellten These ist Saab also ein Follower, nicht Leader. Verschiebt sich der Markt schneller Richtung „precision mass", erodiert das Premium.</p>
+          <p><strong>Risiko 3 – Frieden & Technik:</strong> Ein Ukraine-Waffenstillstand würde Order-Momentum und Multiples drücken und die Gripen-Option entwerten. Charttechnisch notiert das Papier unter der 200-Tage-Linie (~SEK 661) mit MACD-Verkaufssignal – Timing-Risiko.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung (ausgewogen)</h3>
+      <p>Das bullische Narrativ ist fundamental tragfähig: Saab ist ein echter Qualitäts-Compounder mit souveränen Monopol-nahen Nischen (Gripen, GlobalEye, U-Boote, EW) und einem glaubwürdigen KI-/Autonomie-Profil über die Helsing-Partnerschaft. Das bärische Narrativ enthält aber zwei valide, harte Punkte: erstens die Bewertung, die kaum Fehlertoleranz lässt, und zweitens – speziell zur gestellten These – die Tatsache, dass Saab gerade <em>nicht</em> die beste Adresse ist, um auf günstige Massen-/Strike-Drohnen zu setzen.</p>
+      <p>Wer die Drohnen-/Autonomous-Warfare-These spielen will, sollte ehrlich differenzieren: Für KI-auf-Plattform, Drohnenabwehr und maritime Autonomie ist Saab stark. Für „precision mass"/Loitering Munitions sind <strong>Rheinmetall, Hensoldt oder Pure-Plays (Helsing/Anduril/AeroVironment)</strong> die direkteren Vehikel. Risk/Reward auf 12–18 Monate erscheint mit ~−20 % Downside (Richtung 52W-Tief / Friedens-Szenario) vs. ~+20 % Upside (Ukraine-Order/Konsens-Ziel ~SEK 574) etwa ausgewogen – daher <strong>HALTEN</strong>. Ich könnte falsch liegen, falls die Ukraine-Gripen-Order früher und größer kommt als erwartet (klarer Re-Rating-Trigger) – oder falls die Drohnen-Disruption die Legacy-Plattformen schneller entwertet als hier unterstellt.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Katalysatoren / Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kurzfristig (0–6 M)</strong></td><td>Q2-Zahlen 17.07.; unter 200-Tage-MA; Friedens-Schlagzeilen</td><td><span class="badge badge-yellow">Halten / Schwäche abwarten</span></td></tr>
+            <tr><td><strong>Mittelfristig (6–24 M)</strong></td><td>Ukraine-Gripen-Order, Kanada-AEW&C, Loke-Export, FCF-Wende</td><td><span class="badge badge-orange">Halten, bei Triggern aufstocken</span></td></tr>
+            <tr><td><strong>Langfristig (2–5 J)</strong></td><td>Aufrüstungs-Superzyklus, KI-/Autonomy-Skalierung</td><td><span class="badge badge-green">Qualität halten</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese (Zusammenfassung)</h3>
+      <p>Saab ist ein hochwertiger europäischer Defense-Compounder mit souveränen Nischen und glaubwürdiger KI-/Autonomie-Position – aber die Aktie ist auf anhaltende Spitzen-Ausführung gepreist, und die spezifische „Drohnen-Leadership"-These trägt nur im High-End (C-UAS, EW, KI-auf-Plattform), nicht bei Massen-Strike-Drohnen. Solides Halten; Nachkaufkandidat bei charttechnischer Schwäche oder konkreten Order-Triggern.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">SEK 520–620</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–3 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">−20 %</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+20 %</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val" style="color:var(--yellow);">~1:1</div></div>
+      </div>
+
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Belastbarer Ukraine-Waffenstillstand → Order-Momentum &amp; Multiple fallen</li>
+            <li>Organisches Wachstum &lt; 18 % oder Aeronautics-Marge dauerhaft &lt; 7 %</li>
+            <li>Bruch unter SEK 427 (52W-Tief) → technische Schwäche bestätigt</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Verbindliche Ukraine-Gripen-Order (≥ 50 Jets) → Backlog-Sprung</li>
+            <li>Loke-C-UAS skaliert in Export ODER Zukauf einer Massen-Drohnen-Kapazität</li>
+            <li>FCF-/Cash-Conversion &gt; 60 % bestätigt + Rückeroberung 200-Tage-MA</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul><li>Quality-Growth-Investoren</li><li>Europa-Souveränitäts-Thematik</li><li>Langfrist-Defense-Halter (Netto-Cash-Exposure)</li></ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul><li>Value-Investoren (zu teuer)</li><li>Reine „billige-Drohnen"-These (→ Rheinmetall/Helsing/AVAV)</li><li>Income-Investoren (~0,5 % Rendite) &amp; kurzfristige Trader</li></ul>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / Tranchiert</span></td><td>Abwarten auf Q2-Zahlen und Rückkehr über 200-Tage-MA</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>Erste Tranche bei Schwäche Richtung SEK 460–490</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-yellow">Halten / auf Trigger</span></td><td>Aufstocken nur bei konkretem Ukraine-/Order-Katalysator</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>Struktureller Aufrüstungs- &amp; Autonomy-Trend</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Synthese aller Sektionen; MarketScreener-Konsens (SEK 574); UBS (SEK 780 Buy) / Citi (Neutral); eigene Einschätzung (06.2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ S13 ============ -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook</div>
+      <div class="section-note">3 Schlüssel-Events · Wenn/Dann</div>
+    </div>
+    <div class="section-body">
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q2-2026-Zahlen – 17. Juli 2026</h4>
+        <p>Erster Test, ob der Margen-Hebel hält und die Aeronautics-Belastung (T-7A) nachlässt.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> organisches Wachstum &gt; 20 % UND Aeronautics-Marge erholt sich Richtung ≥ 8 % → Ausführung bestätigt, bei charttechnischer Schwäche tranchiert aufstocken.<br><br>
+          <strong>Wenn:</strong> organisches Wachstum &lt; 18 % ODER Aeronautics-Marge erneut &lt; 7 % → Position halten/reduzieren, da die hohe Bewertung wenig Fehlertoleranz lässt.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>📊 Event 2: Ukraine-Gripen – verbindliche Order (nächste 6–12 Monate)</h4>
+        <p>Die Rahmenvereinbarung über bis zu 100–150 Gripen E ist der größte einzelne Backlog-Hebel – aber an Kriegsverlauf und Finanzierung gekoppelt.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> eine verbindliche Bestellung über ≥ 50 Gripen E unterzeichnet wird → erheblicher Backlog-Sprung und Guidance-Anhebung → Upgrade-Kandidat Richtung KAUFEN.<br><br>
+          <strong>Wenn:</strong> der Rahmen stockt oder ein Waffenstillstand die Option einfriert → Reduktion erwägen, da Order-Momentum und Multiple de-raten.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>📊 Event 3: Drohnen-/Autonomy-Strategie (12–18 Monate)</h4>
+        <p>Entscheidend für die gestellte These: Schließt Saab die Lücke bei Massen-/Strike-Drohnen?</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Saab die C-UAS-„Loke" in große Exportaufträge skaliert ODER eine Massen-Loitering-Munition zukauft/launcht (Lücke vs. Rheinmetall/Helsing geschlossen) → Stärkung der Drohnen-These, Re-Rating-Potenzial.<br><br>
+          <strong>Wenn:</strong> die Billig-Drohnen-Disruption beschleunigt und Saab reiner High-End-Anbieter bleibt → struktureller De-Rating-Druck; These nur über Hochwert-Nischen tragfähig.
+        </div>
+      </div>
+      <div class="source">Quellen: Saab Investor Relations (Earnings-Kalender 17.07.2026); Breaking Defense (Ukraine-Gripen); Saab/Rheinmetall/Helsing Releases; eigene Ableitung</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken und stellt keine Anlageberatung, Kauf- oder Verkaufsempfehlung dar. Ich bin kein lizenzierter Anlageberater. Alle Kennzahlen wurden nach bestem Wissen aus öffentlichen Quellen (Stand: 8. Juni 2026) recherchiert, können aber Fehler enthalten oder veraltet sein; Kurs- und Bewertungsdaten schwanken. Investitionen in Aktien sind mit dem Risiko des Totalverlusts verbunden. Jede Anlageentscheidung sollte auf eigener Recherche und ggf. professioneller Beratung beruhen.</div>
+</div>
+</body>
+</html>
