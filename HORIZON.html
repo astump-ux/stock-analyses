@@ -3,1644 +3,570 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Horizon Robotics (9660.HK) – Aktienanalyse v2 | Mai 2026</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<title>HORIZON – Aktienanalyse Canvas v2.2</title>
 <style>
-  :root {
-    --bg: #090c10;
-    --surface: #0f1318;
-    --surface2: #151b22;
-    --border: #1e2730;
-    --border2: #252f3a;
-    --accent: #00d4aa;
-    --accent2: #0099ff;
-    --accent3: #ff6b35;
-    --gold: #f4b942;
-    --text: #d4dce8;
-    --text-dim: #7a8ba0;
-    --text-bright: #edf2f7;
-    --green: #22c55e;
-    --red: #ef4444;
-    --yellow: #eab308;
-    --purple: #a855f7;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    line-height: 1.7;
-    overflow-x: hidden;
-  }
-
-  /* NOISE TEXTURE OVERLAY */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.4;
-  }
-
-  /* HEADER */
-  .header {
-    position: relative;
-    background: linear-gradient(135deg, #0a1628 0%, #0d1f15 50%, #0a1020 100%);
-    border-bottom: 1px solid var(--border2);
-    padding: 60px 0 50px;
-    overflow: hidden;
-  }
-
-  .header::before {
-    content: '';
-    position: absolute;
-    top: -100px;
-    right: -100px;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(0,212,170,0.07) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .header::after {
-    content: '';
-    position: absolute;
-    bottom: -80px;
-    left: 30%;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(0,153,255,0.05) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .header-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 40px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .ticker-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: rgba(0,212,170,0.08);
-    border: 1px solid rgba(0,212,170,0.25);
-    border-radius: 4px;
-    padding: 6px 14px;
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--accent);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 20px;
-  }
-
-  .ticker-badge::before {
-    content: '';
-    width: 7px;
-    height: 7px;
-    background: var(--accent);
-    border-radius: 50%;
-    animation: pulse-dot 2s infinite;
-  }
-
-  @keyframes pulse-dot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.8); }
-  }
-
-  .header h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: 52px;
-    font-weight: 800;
-    color: var(--text-bright);
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-    margin-bottom: 12px;
-  }
-
-  .header h1 span {
-    color: var(--accent);
-  }
-
-  .header-subtitle {
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    color: var(--text-dim);
-    letter-spacing: 0.05em;
-    margin-bottom: 32px;
-  }
-
-  .header-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 24px;
-  }
-
-  .meta-item {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-
-  .meta-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-
-  .meta-value {
-    font-family: 'DM Mono', monospace;
-    font-size: 14px;
-    color: var(--text-bright);
-    font-weight: 500;
-  }
-
-  .meta-value.green { color: var(--green); }
-  .meta-value.gold { color: var(--gold); }
-
-  /* RATING BANNER */
-  .rating-banner {
-    background: linear-gradient(90deg, rgba(0,212,170,0.08) 0%, transparent 100%);
-    border-left: 3px solid var(--accent);
-    padding: 18px 40px;
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 40px;
-    flex-wrap: wrap;
-  }
-
-  .rating-tag {
-    font-family: 'Syne', sans-serif;
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: 0.05em;
-  }
-
-  .rating-items {
-    display: flex;
-    gap: 32px;
-    flex-wrap: wrap;
-  }
-
-  .rating-item {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .rating-item-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-
-  .rating-item-val {
-    font-family: 'DM Mono', monospace;
-    font-size: 15px;
-    color: var(--text-bright);
-    font-weight: 500;
-  }
-
-  /* NAV */
-  .toc {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(9,12,16,0.95);
-    border-bottom: 1px solid var(--border);
-    backdrop-filter: blur(12px);
-    padding: 0 40px;
-  }
-
-  .toc-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    gap: 0;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .toc-inner::-webkit-scrollbar { display: none; }
-
-  .toc-item {
-    flex-shrink: 0;
-    padding: 14px 18px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--text-dim);
-    text-decoration: none;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-  }
-
-  .toc-item:hover {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-  }
-
-  /* MAIN LAYOUT */
-  .main {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 40px 80px;
-  }
-
-  /* SECTION */
-  .section {
-    margin-top: 64px;
-    animation: fadeIn 0.5s ease both;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .section-header {
-    display: flex;
-    align-items: baseline;
-    gap: 16px;
-    margin-bottom: 28px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .section-num {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--accent);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 4px 10px;
-    background: rgba(0,212,170,0.06);
-    border: 1px solid rgba(0,212,170,0.15);
-    border-radius: 3px;
-    flex-shrink: 0;
-  }
-
-  .section-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--text-bright);
-    letter-spacing: -0.01em;
-  }
-
-  .section-score {
-    margin-left: auto;
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    flex-shrink: 0;
-  }
-
-  /* SCORE PILLS */
-  .score-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    font-weight: 500;
-  }
-
-  .score-high { background: rgba(34,197,94,0.1); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
-  .score-mid { background: rgba(234,179,8,0.1); color: var(--yellow); border: 1px solid rgba(234,179,8,0.2); }
-  .score-low { background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
-  .score-ok { background: rgba(0,153,255,0.1); color: var(--accent2); border: 1px solid rgba(0,153,255,0.2); }
-
-  /* TEXT CONTENT */
-  .prose p {
-    margin-bottom: 16px;
-    color: var(--text);
-    font-weight: 300;
-    font-size: 15px;
-  }
-
-  .prose p:last-child { margin-bottom: 0; }
-
-  .prose strong {
-    color: var(--text-bright);
-    font-weight: 500;
-  }
-
-  /* TABLES */
-  .table-wrap {
-    overflow-x: auto;
-    margin: 24px 0;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13.5px;
-  }
-
-  thead tr {
-    background: var(--surface2);
-  }
-
-  thead th {
-    padding: 12px 16px;
-    text-align: left;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-dim);
-    border-bottom: 1px solid var(--border2);
-    white-space: nowrap;
-  }
-
-  tbody tr {
-    border-bottom: 1px solid var(--border);
-    transition: background 0.15s;
-  }
-
-  tbody tr:last-child { border-bottom: none; }
-
-  tbody tr:hover { background: rgba(255,255,255,0.02); }
-
-  td {
-    padding: 11px 16px;
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    color: var(--text);
-  }
-
-  td:first-child {
-    color: var(--text-bright);
-    font-weight: 500;
-  }
-
-  td.highlight { color: var(--accent); font-weight: 500; }
-  td.green { color: var(--green); }
-  td.red { color: var(--red); }
-  td.yellow { color: var(--yellow); }
-  td.bold { color: var(--text-bright); font-weight: 500; }
-
-  /* SCORE TABLE */
-  .score-table td:nth-child(2) { font-weight: 700; }
-
-  /* CARDS */
-  .card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 16px;
-    margin: 24px 0;
-  }
-
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 20px;
-    transition: border-color 0.2s;
-  }
-
-  .card:hover { border-color: var(--border2); }
-
-  .card-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-dim);
-    margin-bottom: 8px;
-  }
-
-  .card-value {
-    font-family: 'Syne', sans-serif;
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--text-bright);
-    line-height: 1.2;
-    margin-bottom: 4px;
-  }
-
-  .card-sub {
-    font-size: 12px;
-    color: var(--text-dim);
-  }
-
-  /* NEWS EVENTS */
-  .event-list { margin: 20px 0; }
-
-  .event-group-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--text-dim);
-    padding: 10px 0 6px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 12px;
-    margin-top: 24px;
-  }
-
-  .event-item {
-    display: flex;
-    gap: 14px;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(30,39,48,0.5);
-    align-items: flex-start;
-  }
-
-  .event-badge {
-    flex-shrink: 0;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    font-weight: 500;
-    padding: 3px 8px;
-    border-radius: 3px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-top: 2px;
-  }
-
-  .badge-pos { background: rgba(34,197,94,0.1); color: var(--green); border: 1px solid rgba(34,197,94,0.15); }
-  .badge-neg { background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.15); }
-  .badge-neu { background: rgba(122,139,160,0.1); color: var(--text-dim); border: 1px solid rgba(122,139,160,0.15); }
-
-  .event-text { font-size: 13.5px; color: var(--text); line-height: 1.5; }
-  .event-text strong { color: var(--text-bright); }
-
-  /* RISK BLOCKS */
-  .risk-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin: 20px 0;
-  }
-
-  @media (max-width: 700px) { .risk-grid { grid-template-columns: 1fr; } }
-
-  .risk-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 18px;
-  }
-
-  .risk-card.high { border-left: 3px solid var(--red); }
-  .risk-card.mid { border-left: 3px solid var(--yellow); }
-  .risk-card.low { border-left: 3px solid var(--green); }
-  .risk-card.chance { border-left: 3px solid var(--accent); }
-
-  .risk-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text-bright);
-    margin-bottom: 6px;
-  }
-
-  .risk-severity {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 8px;
-  }
-
-  .sev-high { color: var(--red); }
-  .sev-mid { color: var(--yellow); }
-  .sev-low { color: var(--green); }
-
-  .risk-text { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
-
-  /* NARRATIVE BLOCKS */
-  .narrative {
-    margin: 24px 0;
-    border-radius: 8px;
-    overflow: hidden;
-  }
-
-  .narrative-header {
-    padding: 14px 24px;
-    font-family: 'Syne', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .narrative-bull .narrative-header {
-    background: rgba(34,197,94,0.08);
-    border: 1px solid rgba(34,197,94,0.15);
-    color: var(--green);
-    border-bottom: none;
-    border-radius: 8px 8px 0 0;
-  }
-
-  .narrative-bear .narrative-header {
-    background: rgba(239,68,68,0.08);
-    border: 1px solid rgba(239,68,68,0.15);
-    color: var(--red);
-    border-bottom: none;
-    border-radius: 8px 8px 0 0;
-  }
-
-  .narrative-own .narrative-header {
-    background: rgba(0,153,255,0.08);
-    border: 1px solid rgba(0,153,255,0.15);
-    color: var(--accent2);
-    border-bottom: none;
-    border-radius: 8px 8px 0 0;
-  }
-
-  .narrative-body {
-    padding: 20px 24px;
-    font-size: 14.5px;
-    line-height: 1.75;
-  }
-
-  .narrative-bull .narrative-body {
-    background: rgba(34,197,94,0.03);
-    border: 1px solid rgba(34,197,94,0.15);
-    border-top: none;
-    border-radius: 0 0 8px 8px;
-  }
-
-  .narrative-bear .narrative-body {
-    background: rgba(239,68,68,0.03);
-    border: 1px solid rgba(239,68,68,0.15);
-    border-top: none;
-    border-radius: 0 0 8px 8px;
-  }
-
-  .narrative-own .narrative-body {
-    background: rgba(0,153,255,0.03);
-    border: 1px solid rgba(0,153,255,0.15);
-    border-top: none;
-    border-radius: 0 0 8px 8px;
-  }
-
-  .narrative-body p { margin-bottom: 14px; }
-  .narrative-body p:last-child { margin-bottom: 0; }
-  .narrative-body strong { color: var(--text-bright); font-weight: 500; }
-
-  /* TRIGGER BLOCKS */
-  .trigger-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin: 20px 0;
-  }
-
-  @media (max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
-
-  .trigger-block {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 18px;
-  }
-
-  .trigger-block.bear { border-top: 2px solid var(--red); }
-  .trigger-block.bull { border-top: 2px solid var(--green); }
-
-  .trigger-title {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 12px;
-  }
-
-  .trigger-title.bear { color: var(--red); }
-  .trigger-title.bull { color: var(--green); }
-
-  .trigger-list { list-style: none; }
-
-  .trigger-list li {
-    font-size: 13px;
-    color: var(--text);
-    padding: 6px 0;
-    border-bottom: 1px solid var(--border);
-    padding-left: 16px;
-    position: relative;
-  }
-
-  .trigger-list li:last-child { border-bottom: none; }
-
-  .trigger-list li::before {
-    content: '→';
-    position: absolute;
-    left: 0;
-    font-family: 'DM Mono', monospace;
-  }
-
-  .trigger-list.bear li::before { color: var(--red); }
-  .trigger-list.bull li::before { color: var(--green); }
-
-  /* OUTLOOK BOXES */
-  .outlook-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 24px;
-    margin-bottom: 16px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .outlook-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 3px;
-    height: 100%;
-  }
-
-  .outlook-item:nth-child(1)::before { background: var(--accent); }
-  .outlook-item:nth-child(2)::before { background: var(--gold); }
-  .outlook-item:nth-child(3)::before { background: var(--purple); }
-
-  .outlook-num {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--text-dim);
-    margin-bottom: 8px;
-  }
-
-  .outlook-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--text-bright);
-    margin-bottom: 14px;
-  }
-
-  .outlook-body { font-size: 13.5px; color: var(--text); line-height: 1.65; }
-  .outlook-body p { margin-bottom: 10px; }
-  .outlook-body strong { color: var(--text-bright); font-weight: 500; }
-
-  .wenn-dann {
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: 6px;
-    padding: 12px 16px;
-    margin-top: 12px;
-    font-size: 13px;
-  }
-
-  .wenn-dann .wenn {
-    color: var(--gold);
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 4px;
-  }
-
-  .wenn-dann .dann {
-    color: var(--text);
-    line-height: 1.5;
-  }
-
-  /* HORIZON LABELS */
-  .horizon-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin: 20px 0;
-  }
-
-  @media (max-width: 700px) { .horizon-grid { grid-template-columns: 1fr; } }
-
-  .horizon-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 18px;
-  }
-
-  .horizon-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-dim);
-    margin-bottom: 8px;
-  }
-
-  .horizon-period {
-    font-family: 'Syne', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text-bright);
-    margin-bottom: 10px;
-  }
-
-  .horizon-text { font-size: 13px; color: var(--text); line-height: 1.5; }
-  .horizon-text strong { color: var(--text-bright); }
-
-  /* SOURCE */
-  .source {
-    margin-top: 20px;
-    padding: 10px 14px;
-    background: rgba(255,255,255,0.02);
-    border-left: 2px solid var(--border2);
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--text-dim);
-    line-height: 1.6;
-  }
-
-  .source::before {
-    content: 'Quellen: ';
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-size: 10px;
-  }
-
-  /* DISCLAIMER */
-  .disclaimer {
-    margin-top: 64px;
-    padding: 20px 24px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--text-dim);
-    line-height: 1.6;
-  }
-
-  /* DIVIDER */
-  .divider {
-    height: 1px;
-    background: linear-gradient(90deg, var(--border), transparent);
-    margin: 40px 0;
-  }
-
-  /* AI FOCUS TAG */
-  .focus-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(168,85,247,0.08);
-    border: 1px solid rgba(168,85,247,0.2);
-    border-radius: 4px;
-    padding: 4px 10px;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: var(--purple);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 16px;
-  }
-
-  /* INLINE HIGHLIGHT */
-  .hl { color: var(--accent); font-weight: 500; }
-  .hl-gold { color: var(--gold); font-weight: 500; }
-  .hl-red { color: var(--red); font-weight: 500; }
-
-  /* INVESTOR TABLE */
-  .inv-table td:first-child { color: var(--text-bright); }
-  .inv-table td:nth-child(2) { color: var(--accent); font-weight: 500; }
-
-  /* SCROLLBAR */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-
-  @media (max-width: 768px) {
-    .header h1 { font-size: 34px; }
-    .main, .header-inner { padding-left: 20px; padding-right: 20px; }
-    .toc { padding: 0 20px; }
-    .rating-banner { padding: 16px 20px; }
-  }
+:root{
+  --primary:#FF6900; --primary-dark:#cc5400;
+  --bg:#0f0f12; --bg-card:#1a1a1f; --bg-card2:#22222a; --border:#2e2e38;
+  --text:#e8e8ec; --text-muted:#888898; --text-dim:#555566;
+  --green:#22c55e; --red:#ef4444; --yellow:#f59e0b; --blue:#3b82f6; --purple:#8b5cf6; --teal:#14b8a6;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+.header{background:linear-gradient(135deg,#1a0800 0%,#2a1000 40%,#0f0f12 100%);border-bottom:1px solid var(--primary);padding:36px 40px 28px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;}
+.header-left h1{font-size:32px;font-weight:700;color:white;letter-spacing:-0.5px;}
+.header-left h1 span{color:var(--primary);}
+.header-left .subtitle{color:var(--text-muted);font-size:14px;margin-top:4px;}
+.header-right{text-align:right;}
+.price-tag{font-size:38px;font-weight:800;color:var(--primary);line-height:1;}
+.price-meta{color:var(--text-muted);font-size:13px;margin-top:4px;}
+.price-change{display:inline-block;padding:2px 8px;border-radius:4px;font-size:13px;font-weight:600;margin-top:4px;}
+.price-change.up{background:rgba(34,197,94,0.15);color:var(--green);}
+.price-change.down{background:rgba(239,68,68,0.15);color:var(--red);}
+.nav{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:100;}
+.nav a{color:var(--text-muted);text-decoration:none;padding:14px 16px;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.2s;}
+.nav a:hover{color:var(--primary);border-bottom-color:var(--primary);}
+.main{max-width:1100px;margin:0 auto;padding:32px 40px 60px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px;}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.kpi-value{font-size:22px;font-weight:700;color:white;margin-top:4px;}
+.kpi-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.kpi-value.green{color:var(--green);} .kpi-value.red{color:var(--red);} .kpi-value.orange{color:var(--primary);}
+.section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden;}
+.section-header{background:var(--bg-card2);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.section-number{background:var(--primary);color:white;width:28px;height:28px;border-radius:6px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-title{font-size:16px;font-weight:700;color:white;}
+.section-score{margin-left:auto;font-size:14px;font-weight:700;color:var(--primary);}
+.section-note{font-size:12px;color:var(--text-dim);background:rgba(46,46,56,0.4);border-radius:4px;padding:4px 10px;margin-left:auto;}
+.section-body{padding:20px 24px;}
+p{margin-bottom:12px;color:var(--text);} p:last-child{margin-bottom:0;}
+h3{font-size:14px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 8px;} h3:first-child{margin-top:0;}
+.table-wrap{overflow-x:auto;margin:16px 0;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--bg-card2);color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:10px 12px;border-bottom:1px solid rgba(46,46,56,0.5);color:var(--text);}
+tr:last-child td{border-bottom:none;} tr:hover td{background:rgba(255,105,0,0.04);}
+.beat{color:var(--green);font-weight:600;} .miss{color:var(--red);font-weight:600;} .neutral{color:var(--yellow);font-weight:600;}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}
+.badge-green{background:rgba(34,197,94,0.15);color:var(--green);}
+.badge-red{background:rgba(239,68,68,0.15);color:var(--red);}
+.badge-yellow{background:rgba(245,158,11,0.15);color:var(--yellow);}
+.badge-blue{background:rgba(59,130,246,0.15);color:var(--blue);}
+.badge-orange{background:rgba(255,105,0,0.15);color:var(--primary);}
+.event-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(46,46,56,0.5);align-items:flex-start;}
+.event-item:last-child{border-bottom:none;}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0;}
+.dot-green{background:var(--green);} .dot-red{background:var(--red);} .dot-yellow{background:var(--yellow);}
+.event-label{font-weight:600;color:white;}
+.event-text{font-size:14px;color:var(--text);}
+.risk-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.risk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.risk-title{font-weight:600;color:white;font-size:14px;}
+.score-bar{display:flex;align-items:center;gap:10px;}
+.score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#ff9500);}
+.score-num{font-weight:700;color:var(--primary);font-size:15px;min-width:32px;}
+.bull-bear-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:700px){.bull-bear-grid{grid-template-columns:1fr;}}
+.bull-card{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:16px;}
+.bear-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:16px;}
+.bull-card h4{color:var(--green);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.bear-card h4{color:var(--red);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.rating-box{background:linear-gradient(135deg,rgba(255,105,0,0.12),rgba(255,105,0,0.04));border:1px solid rgba(255,105,0,0.3);border-radius:12px;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:20px 0;}
+.rating-item label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;display:block;margin-bottom:4px;}
+.rating-item .val{font-size:20px;font-weight:800;color:white;}
+.rating-item .val.buy{color:var(--green);} .rating-item .val.hold{color:var(--yellow);} .rating-item .val.sell{color:var(--red);}
+.trigger-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+@media(max-width:700px){.trigger-grid{grid-template-columns:1fr;}}
+.trigger-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.trigger-card h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.trigger-card.buy h5{color:var(--green);} .trigger-card.sell h5{color:var(--red);}
+.trigger-list{font-size:13px;color:var(--text);list-style:none;padding:0;}
+.trigger-list li{margin-bottom:6px;padding-left:14px;position:relative;}
+.trigger-list li::before{content:"→";position:absolute;left:0;}
+.investor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+@media(max-width:600px){.investor-grid{grid-template-columns:1fr;}}
+.investor-yes{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px;}
+.investor-no{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:12px;}
+.investor-yes h5{color:var(--green);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-no h5{color:var(--red);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-yes li,.investor-no li{font-size:13px;color:var(--text);margin-bottom:4px;list-style:none;padding-left:14px;position:relative;}
+.investor-yes li::before{content:"✓";position:absolute;left:0;color:var(--green);}
+.investor-no li::before{content:"✗";position:absolute;left:0;color:var(--red);}
+.geo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0;}
+.geo-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.geo-region{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.geo-pct{font-size:20px;font-weight:700;color:white;}
+.geo-note{font-size:12px;color:var(--text-muted);}
+.outlook-card{background:var(--bg-card2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:16px;margin-bottom:14px;}
+.outlook-card h4{color:white;font-size:14px;margin-bottom:8px;}
+.outlook-card .when-then{font-size:13px;color:var(--text);margin-top:8px;}
+.outlook-card .when-then strong{color:var(--primary);}
+.source{font-size:11px;color:var(--text-dim);margin-top:12px;padding-top:10px;border-top:1px solid rgba(46,46,56,0.5);}
+.source a{color:var(--text-dim);}
+.disclaimer{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text-dim);margin-top:32px;}
+.alert-box{background:rgba(255,105,0,0.08);border:1px solid rgba(255,105,0,0.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px;}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+.pill{display:inline-block;background:rgba(255,105,0,0.12);color:var(--primary);border-radius:4px;padding:1px 7px;font-size:13px;font-weight:600;}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="header">
-  <div class="header-inner">
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
-      <div class="ticker-badge">HKEX: 9660.HK &nbsp;|&nbsp; Aktienanalyse Canvas v2.2</div>
-      <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(244,185,66,0.08); border:1px solid rgba(244,185,66,0.25); border-radius:4px; padding:6px 14px; font-family:'DM Mono',monospace; font-size:12px; color:var(--gold); letter-spacing:0.06em;">⟳ UPDATE: Mai 2026 — FY2025-Ergebnisse + 3 Monate neue News</div>
+  <div class="header-left">
+    <h1>Horizon Robotics <span>9660.HK</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 08. Juni 2026 · HKEX · Sektor: Halbleiter / Smart-Driving SoC</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-orange">China ADAS/AD SoC</span>
+      <span class="badge badge-blue">Journey-Chip-Familie</span>
+      <span class="badge badge-yellow">Pre-Profit / Cash-Burn</span>
     </div>
-    <h1>Horizon <span>Robotics</span></h1>
-    <div class="header-subtitle">AUTOMATED DRIVING SOLUTIONS · CHINA AI CHIP · IPO OCT 2024</div>
-    <div class="header-meta">
-      <div class="meta-item">
-        <span class="meta-label">Update-Datum</span>
-        <span class="meta-value">14. Mai 2026</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-label">Aktueller Kurs</span>
-        <span class="meta-value" style="color:var(--red)">HK$6,77</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-label">Market Cap</span>
-        <span class="meta-value">~HKD 103 Mrd. / ~US$13 Mrd.</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-label">Gesamtscore</span>
-        <span class="meta-value gold">6,6 / 10 ↑</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-label">52W Range</span>
-        <span class="meta-value">HK$4,80 – HK$11,32</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-label">Nächste Earnings</span>
-        <span class="meta-value green">27. Aug 2026 (H1 2026)</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-label">FY2025 Umsatz (gemeldet)</span>
-        <span class="meta-value green">CNY 3,76 Mrd. (+57,7%)</span>
-      </div>
-    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">HK$ 5,30</div>
+    <div class="price-meta">Schlusskurs 03.06.2026 · HKEX</div>
+    <div class="price-change down">▼ nahe 52W-Tief</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">52W: 5,07 – 11,32</div>
   </div>
 </div>
 
-<!-- RATING BANNER -->
-<div class="rating-banner">
-  <div class="rating-tag">☑ KAUFEN — Attraktiverer Einstieg</div>
-  <div class="rating-items">
-    <div class="rating-item">
-      <span class="rating-item-label">Zielkurs</span>
-      <span class="rating-item-val">HK$12,00 – 15,00</span>
-    </div>
-    <div class="rating-item">
-      <span class="rating-item-label">Akt. Kurs (14. Mai)</span>
-      <span class="rating-item-val" style="color:var(--red)">HK$6,77</span>
-    </div>
-    <div class="rating-item">
-      <span class="rating-item-label">Upside zum Ø-Ziel</span>
-      <span class="rating-item-val" style="color:var(--green)">+74% (HK$11,80 Konsens)</span>
-    </div>
-    <div class="rating-item">
-      <span class="rating-item-label">FY2025 Umsatz ✓ Beat</span>
-      <span class="rating-item-val" style="color:var(--green)">CNY 3,76 Mrd. vs. 3,5E (+7%)</span>
-    </div>
-    <div class="rating-item">
-      <span class="rating-item-label">Analysten (Konsens)</span>
-      <span class="rating-item-val">22× Strong Buy · Ø HK$11,80</span>
-    </div>
-    <div class="rating-item">
-      <span class="rating-item-label">P/S (2025A)</span>
-      <span class="rating-item-val">~20x (vs. 37x Feb-Analyse)</span>
-    </div>
-  </div>
-</div>
-
-<!-- NAV -->
-<nav class="toc">
-  <div class="toc-inner">
-    <a class="toc-item" href="#s1">1 · Geschäftsmodell</a>
-    <a class="toc-item" href="#s2">2 · Burggraben</a>
-    <a class="toc-item" href="#s3">3 · Quartale</a>
-    <a class="toc-item" href="#s4">4 · Wachstum</a>
-    <a class="toc-item" href="#s5">5 · Bewertung</a>
-    <a class="toc-item" href="#s6">6 · Cashflow</a>
-    <a class="toc-item" href="#s7">7 · Peer-Vergleich</a>
-    <a class="toc-item" href="#s8">8 · News</a>
-    <a class="toc-item" href="#s9">9 · Technisch</a>
-    <a class="toc-item" href="#s10">10 · Risiken</a>
-    <a class="toc-item" href="#s11">11 · Scoring</a>
-    <a class="toc-item" href="#s12">12 · Fazit</a>
-    <a class="toc-item" href="#s13">13 · Outlook</a>
-  </div>
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
 </nav>
 
 <div class="main">
 
-<!-- SECTION 1 -->
-<section class="section" id="s1">
-  <div class="section-header">
-    <span class="section-num">01</span>
-    <h2 class="section-title">Geschäftsmodell</h2>
-    <span class="score-pill score-high">8 / 10</span>
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">HK$ 5,30</div><div class="kpi-sub">HKEX · 03.06.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Marktkap.</div><div class="kpi-value">~HK$ 80 Mrd.</div><div class="kpi-sub">≈ $10,3 Mrd.</div></div>
+    <div class="kpi-card"><div class="kpi-label">Umsatz FY25</div><div class="kpi-value orange">RMB 3,76 Mrd.</div><div class="kpi-sub">+57,7% YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nettoergebnis FY25</div><div class="kpi-value red">–RMB 10,5 Mrd.</div><div class="kpi-sub">Fair-Value + R&amp;D</div></div>
+    <div class="kpi-card"><div class="kpi-label">Bruttomarge Auto</div><div class="kpi-value green">67,2%</div><div class="kpi-sub">FY2025</div></div>
+    <div class="kpi-card"><div class="kpi-label">R&amp;D / Umsatz</div><div class="kpi-value red">137%</div><div class="kpi-sub">RMB 5,15 Mrd.</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value">27.08.2026</div><div class="kpi-sub">H1 2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Konsens</div><div class="kpi-value green">Strong Buy</div><div class="kpi-sub">Ziel ~HK$ 11–12</div></div>
   </div>
-  <div class="prose">
-    <p>Horizon Robotics wurde 2015 von <strong>Yu Kai</strong>, einem renommierten Deep-Learning-Wissenschaftler und ehemaligen Leiter des Baidu Institute of Deep Learning, in Beijing gegründet. Das Unternehmen positioniert sich als führender Anbieter vollständig integrierter intelligenter Fahrlösungen für Pkw in China – mit dem Anspruch, Chip-Hardware und Software-Stack aus einer Hand zu liefern.</p>
-    <p>Das Kerngeschäft umfasst zwei Segmente. Im <strong>Automotive-Solutions-Segment</strong>, dem mit Abstand wichtigsten Umsatztreiber, bietet Horizon eine aufsteigende Produktpalette: von <strong>Horizon Mono</strong> (einfaches ADAS), über <strong>Horizon Pilot</strong> (Highway-Autopilot, NOA) bis hin zu <strong>Horizon SuperDrive (HSD)</strong>, dem vollständigen Urban-Autonomous-Driving-System, das seit 2025 in Massenproduktion geht. Das Rückgrat dieser Produktpalette ist die proprietäre <strong>Journey-Chip-Serie</strong>, aktuell in der sechsten Generation (Journey 6) mit bis zu 560 TOPS Rechenleistung beim Flaggschiff-Chip J6P.</p>
-    <p>Die Umsatzstruktur ist doppelspurig: Einerseits <strong>Produktlösungen</strong> (Solution Delivery), d.h. der Verkauf integrierter Hardware-Software-Pakete an OEMs (~50% des H1-2025-Umsatzes), andererseits <strong>Lizenz- und Serviceumsätze</strong>, bei denen OEMs Horizons Algorithmen, Toolchains und Entwicklungsplattformen (OpenExplorer, AIDI, TogetheROS) lizenzieren. Letzteres ist margenträchtiger und kennzeichnet Horizons Ambition als Plattformanbieter.</p>
-    <p>Die Kostenstruktur ist <strong>kapitalleicht im Produktionsbereich</strong> (fabless – Fertigung zu 100% über TSMC auf 7nm-Prozess), aber extrem F&E-intensiv (F&E-Quote ~132% des Umsatzes 2024). Kunden sind alle Top-10-chinesischen Automobilhersteller, darunter BYD, Li Auto, Geely, Chery, Chang'an sowie internationale OEMs wie Volkswagen und Hyundai – über <strong>310 Fahrzeugmodelle</strong> haben Journey-Chips designiert.</p>
-  </div>
-  <div class="source">Horizon Robotics IR (en.horizon.auto), Annual Report Review (futunn.com, Jul 2025), Dr Wealth (Feb 2026), Yahoo Finance Profil</div>
-</section>
 
-<!-- SECTION 2 -->
-<section class="section" id="s2">
-  <div class="section-header">
-    <span class="section-num">02</span>
-    <h2 class="section-title">Burggraben &amp; Wettbewerbsvorteile</h2>
-    <span class="score-pill score-high">7 / 10</span>
-  </div>
-  <div class="card-grid">
-    <div class="card">
-      <div class="card-label">Netzwerkeffekte</div>
-      <div class="card-value">7<span style="font-size:16px;color:var(--text-dim)">/10</span></div>
-      <div class="card-sub">OpenExplorer-Ökosystem im Aufbau; Plattform-Dynamik analog Android im Entstehen</div>
+  <!-- ===================== S1 ===================== -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6–9 Monate</div>
     </div>
-    <div class="card">
-      <div class="card-label">Switching Costs</div>
-      <div class="card-value">8<span style="font-size:16px;color:var(--text-dim)">/10</span></div>
-      <div class="card-sub">2–4 Jahre OEM-Entwicklungszyklen; 310+ Modell-Designations = struktureller Lock-in</div>
-    </div>
-    <div class="card">
-      <div class="card-label">Brand Power</div>
-      <div class="card-value">7<span style="font-size:16px;color:var(--text-dim)">/10</span></div>
-      <div class="card-sub">>40% ADAS-Marktanteil China; VW-Investment €2,4 Mrd.; ASPICE-CL2 zertifiziert</div>
-    </div>
-    <div class="card">
-      <div class="card-label">Tech-Vorsprung</div>
-      <div class="card-value">8<span style="font-size:16px;color:var(--text-dim)">/10</span></div>
-      <div class="card-sub">BPU-Nash ~85% Effizienz; J6P 560 TOPS bei 30W – deutlich effizienter als NVIDIA Orin</div>
-    </div>
-  </div>
-  <div class="prose">
-    <p>Horizons BPU-Nash-Architektur ist speziell auf Transformer-Modelle optimiert und erreicht laut Unternehmensangaben eine Recheneffizienz von ~85%, gegenüber 30–40% bei NVIDIA. Der Journey 6P liefert 560 TOPS auf 30W, was eine vergleichbare Performance zu NVIDIAs Thor bei deutlich niedrigerem Energieverbrauch und Kosten ermöglicht. <strong>Schwachpunkt:</strong> 100% Abhängigkeit von TSMC-Fertigung ist geopolitisch ein strukturelles Risiko, das nicht kurzfristig diversifizierbar ist.</p>
-    <p>Die TSMC-Abhängigkeit bleibt die klarste Achillesferse. Zudem könnte BYD langfristig eigene In-House-Chips entwickeln und die Horizon-Abhängigkeit reduzieren – aktuell zeigen die Signale das Gegenteil, aber dies ist ein Risiko auf dem 3–5-Jahres-Horizont.</p>
-  </div>
-  <div class="source">Longbridge Research (Jul 2025), Digitimes (Nov 2025), Dr Wealth (Feb 2026), CMBI Research PDF</div>
-</section>
-
-<!-- SECTION 3 -->
-<section class="section" id="s3">
-  <div class="section-header">
-    <span class="section-num">03</span>
-    <h2 class="section-title">Letzte 4 Berichtsperioden</h2>
-    <span class="score-pill score-high">7 / 10</span>
-  </div>
-  <div class="prose">
-    <p><strong>FY2025 gemeldet am 19. März 2026.</strong> Nächste Ergebnisveröffentlichung: <strong>27. August 2026</strong> (H1 2026). EPS in H2 2024/FY2025 war ein negativer Überraschungsausreißer: −0,46 HKD vs. geschätzter −0,31 HKD (−46% Surprise), was kurzfristig Kursdruck erzeugte. Hintergrund: erhöhte R&D-Ausgaben (+63,3%) und fair-value-bedingte Verluste auf Vorzugsaktien und Wandelanleihe.</p>
-  </div>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Periode</th>
-          <th>Umsatz (CNY)</th>
-          <th>YoY-Wachstum</th>
-          <th>Bruttomarge Auto-Seg.</th>
-          <th>Nettoverlust (adj.)</th>
-          <th>Kernaussage</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>H2 2023</td>
-          <td>~870 Mio.</td>
-          <td class="yellow">Basis</td>
-          <td>~71%</td>
-          <td class="red">Tief negativ</td>
-          <td>Lizenzwachstum</td>
-        </tr>
-        <tr>
-          <td>H1 2024</td>
-          <td>~935 Mio.</td>
-          <td class="green">+152% YoY</td>
-          <td>~79%</td>
-          <td class="red">–5.098 Mio.</td>
-          <td>VW-Boost, Lizenzen explodieren</td>
-        </tr>
-        <tr>
-          <td>H2 2024</td>
-          <td>~1.450 Mio.</td>
-          <td class="green">+55% YoY</td>
-          <td>~77%</td>
-          <td class="yellow">Einmaleffekt*</td>
-          <td>Journey-6-Ramp</td>
-        </tr>
-        <tr style="background:rgba(0,212,170,0.04)">
-          <td class="highlight">FY2025 ✓ GEMELDET</td>
-          <td class="highlight">3.758 Mio.</td>
-          <td class="green">+57,7% YoY</td>
-          <td class="green">67,2%</td>
-          <td class="red">–10.469 Mio.**</td>
-          <td>J6-Skalierung, HSD-Rollout, ADAS 47,7%</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="prose">
-    <p style="font-size:12px; color:var(--text-dim)">* H2-2024-Net-Income positiv durch Einmaleffekt (Vorzugsaktien-Umbewertung nach IPO). ** FY2025-Nettoverlust RMB 10,469 Mrd. primär durch: (1) R&D-Ausgaben +63,3%, (2) RMB 6,664 Mrd. Fair-Value-Verluste auf Wandelanleihe und Vorzugsaktien (nicht-cash, IPO-bedingt). Operativer Kern-Burn deutlich niedriger.</p>
-    <p><strong>FY2025 Highlights im Detail:</strong> Die Jahresergebnisse übertreffen den Konsens beim Umsatz (CNY 3,76 Mrd. vs. CNY 3,5 Mrd. Erwartung, +7% Beat). Besonders bemerkenswert: Produktlösungs-Umsatz verdoppelte sich auf <strong>CNY 1,62 Mrd. (+144% YoY)</strong>, was den Anteil am Gesamtumsatz von 28% (2024) auf 43% (2025) erhöht. Automotive-Segment-Bruttomarge: 67,2%. ADAS-Marktanteil bei chinesischen Inlandsmarken: <strong>47,7%</strong>. HSD-Einheiten: <strong>22.000+ Einheiten</strong> in Massenproduktion, 83% der relevanten Modell-Verkäufe mit HSD ausgestattet. Midto-High-End-Shipments: 45% der Gesamtshipments, <strong>4,8x das Vorjahresvolumen</strong>. ASP-Anstieg: +75% YoY.</p>
-  </div>
-  <div class="source">Quartr H2/FY2025 Earnings Summary (Mär 2026), Gasgoo (19. Mär 2026), BigGo Finance (19./20. Mär 2026), HKEX Annual Report Filing</div>
-</section>
-
-<!-- SECTION 4 -->
-<section class="section" id="s4">
-  <div class="section-header">
-    <span class="section-num">04</span>
-    <h2 class="section-title">Wachstumseinordnung</h2>
-    <span class="score-pill score-high">9 / 10</span>
-  </div>
-  <div class="focus-tag">▲ User-Fokus: Wachstum &amp; Skalierbarkeit — Update Mai 2026</div>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Jahr</th>
-          <th>Umsatz (CNY Mrd.)</th>
-          <th>YoY-Wachstum</th>
-          <th>Kommentar</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>2022</td><td>0,91</td><td class="yellow">Basis</td><td>Basisjahr</td></tr>
-        <tr><td>2023</td><td>1,55</td><td class="green">+71%</td><td>Lizenzboom</td></tr>
-        <tr><td>2024</td><td>2,38</td><td class="green">+54%</td><td>VW-Effekt, J5-Skalierung</td></tr>
-        <tr style="background:rgba(0,212,170,0.04)">
-          <td class="highlight">2025 ✓ Gemeldet</td>
-          <td class="highlight">3,76</td>
-          <td class="green">+57,7%</td>
-          <td>J6-Ramp, HSD-Rollout, +7% Beat vs. Konsens</td>
-        </tr>
-        <tr><td>2026E</td><td>~5,5–6,0</td><td class="green">~46–60%</td><td>SOC +35%, HSD 400K, Agentic Car SoC/OS</td></tr>
-        <tr><td>2027E</td><td>~8,0–9,0</td><td class="green">~45–55%</td><td>Profitabilitätswende; J7-Plattform, Robotaxi</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="prose">
-    <p>Das Umsatzwachstum von <strong>+57,7% in 2025 (CNY 3,76 Mrd.)</strong> übertrifft den Konsens und bestätigt die Wachstumsthese. CEO Yu Kai erwartet explizit einen <strong>60% CAGR in den kommenden Jahren</strong>. Die Zusammensetzung des Wachstums hat sich qualitativ verbessert: Produktlösungs-Umsatz verdoppelte sich auf +144% YoY auf CNY 1,62 Mrd. – ein strukturell positives Signal, da dieser Umsatzteil höhere Skalierbarkeit hat als reine Lizenzumsätze.</p>
-    <p>Die <strong>2026 Management-Guidance</strong> ist klar und messbar: (1) SOC-Shipments +35% auf ~5,4 Mio. Einheiten; (2) Anteil Advanced SOCs steigt auf >55% der Gesamtshipments; (3) HSD-Shipments ~400.000 Einheiten (vs. 22.000 in 2025 – ein 18x-Sprung); (4) Launch HSD 2.0 und Agentic Car SoC/OS; (5) Robotaxi-Pilot-Operationen Q3 2026; (6) Journey 7-Plattform-Ankündigung mit neuer Riemann-BPU-Architektur.</p>
-    <p>Der <strong>ASP-Anstieg von +75% YoY in 2025</strong> ist besonders bemerkenswert und übersteigt frühere Erwartungen. Er reflektiert den Mix-Shift hin zu J6M/J6H/J6P-Chips und dem Hochlauf von HSD. Die NOA-Demokratisierung – urbanes NOA jetzt auf einem einzigen J6M-Chip für Fahrzeuge ab RMB 150.000, mit Ziel RMB 100.000 – ist der stärkste strukturelle Wachstumstreiber für 2026–2027.</p>
-  </div>
-  <div class="source">Quartr FY2025 Earnings Summary (Mär 2026), BigGo Finance (20. Mär 2026), Gasgoo (19. Mär 2026), GuruFocus Earnings Call Highlights</div>
-</section>
-
-<!-- SECTION 5 -->
-<section class="section" id="s5">
-  <div class="section-header">
-    <span class="section-num">05</span>
-    <h2 class="section-title">Bewertung &amp; Multiples</h2>
-    <span class="score-pill score-ok">6 / 10 ↑</span>
-      </thead>
-      <tbody>
-        <tr><td>Kurs</td><td class="red">HK$6,77</td><td>–40% vom ATH; –29% vs. Feb-Analyse (HK$9,55)</td></tr>
-        <tr><td>P/S (2025A)</td><td class="yellow">~20x</td><td>Deutlich attraktiver als 37x in Feb (HK$9,55)</td></tr>
-        <tr><td>P/S (2026E)</td><td class="yellow">~14x</td><td>Auf Basis CNY 5,5–6,0 Mrd. Umsatz</td></tr>
-        <tr><td>P/S (2027E)</td><td class="green">~8–9x</td><td>Auf Basis CNY 8–9 Mrd. Umsatz; nähert sich fairer Bewertung</td></tr>
-        <tr><td>EV/Revenue 2025A</td><td class="yellow">~14x</td><td>Abzgl. Cash (geschätzt ~CNY 14–15 Mrd. nach H2 2025 Burn)</td></tr>
-        <tr><td>P/E (TTM)</td><td class="red">Negativ</td><td>Profitabilität erst 2027E; EPS –0,93 HKD</td></tr>
-        <tr><td>P/E (2027E)</td><td class="yellow">~45–55x</td><td>Moderater als Feb-Schätzung dank Kursschwäche</td></tr>
-        <tr><td>Analystenkonsens-Ziel</td><td class="green">HK$11,80</td><td>22 Analysten, Strong Buy, +74% Upside zum akt. Kurs</td></tr>
-        <tr><td>Oberes Analysten-Ziel</td><td class="green">HK$15,30–15,48</td><td>+127% Upside zum akt. Kurs</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="prose">
-    <p>Der Kursrückgang von HK$9,55 (Feb-Analyse) auf HK$6,77 (aktuell) hat die Bewertung deutlich attraktiver gemacht. Das P/S-Multiple auf 2025A-Basis sank von ~37x auf ~20x – noch immer eine Premium-Bewertung, aber mit deutlich mehr Sicherheitsmarge. Der <strong>Upside zum Analystenkonsens von HK$11,80 beträgt nun +74%</strong> – vs. +29% in der Februar-Analyse.</p>
-    <p>Kritisch ist die Ursache des Kursrückgangs zu verstehen: Der EPS-Ausreißer (−0,46 HKD vs. −0,31 HKD erwartet) ist primär durch <strong>nicht-cash-wirksame Bilanzierungseffekte</strong> bedingt (RMB 6,664 Mrd. fair-value-bedingte Verluste auf Wandelanleihe und Vorzugsaktien) und nicht durch operative Schwäche. Das operative Umsatzwachstum von +57,7% übertraf die Erwartungen. Investoren, die diesen Unterschied verstehen, erhalten aktuell einen besseren Einstieg in die fundamentale Wachstumsgeschichte.</p>
-  </div>
-  <div class="source">TradingView 9660 (Mai 2026), Meyka (Mai 2026), Investing.com, BigGo Finance (Mär 2026)</div>
-</section>
-
-<!-- SECTION 6 -->
-<section class="section" id="s6">
-  <div class="section-header">
-    <span class="section-num">06</span>
-    <h2 class="section-title">Cashflow, Margen &amp; Kapitalqualität</h2>
-    <span class="score-pill score-ok">5 / 10</span>
-  </div>
-  <div class="card-grid">
-    <div class="card">
-      <div class="card-label">Cash-Position (Jun 2025)</div>
-      <div class="card-value" style="color:var(--green)">CNY 16,1 Mrd.</div>
-      <div class="card-sub">~90% der IPO-Erlöse erhalten; Cash-Runway >3 Jahre</div>
-    </div>
-    <div class="card">
-      <div class="card-label">Current Ratio (2024)</div>
-      <div class="card-value" style="color:var(--green)">13,5x</div>
-      <div class="card-sub">Außergewöhnlich starke Liquiditätssituation</div>
-    </div>
-    <div class="card">
-      <div class="card-label">Bruttomarge H1 2025</div>
-      <div class="card-value" style="color:var(--yellow)">65,4%</div>
-      <div class="card-sub">Rückgang von ~79% (H1 2024) durch mehr Chip-Hardware-Anteil</div>
-    </div>
-    <div class="card">
-      <div class="card-label">Debt/Equity</div>
-      <div class="card-value" style="color:var(--green)">~6,4%</div>
-      <div class="card-sub">Minimal verschuldet; fabless Modell = kein Capex-Druck</div>
-    </div>
-  </div>
-  <div class="prose">
-    <p>Die Bilanz ist Horizons größte Stärke neben dem Wachstum. Mit CNY 16,1 Mrd. Cash und minimalem Debt/Equity (~6,4%) hat das Unternehmen eine außergewöhnlich solide Finanzierungsbasis. Bei einem operativen Burn von ca. CNY 5 Mrd./Jahr ergibt sich eine Cash-Runway von über 3 Jahren – genug, um die Profitabilitätswende 2027 ohne externe Finanzierung zu erreichen.</p>
-    <p>Der Rückgang der Bruttomarge von ~79% (H1 2024) auf 65,4% (H1 2025) ist strukturell und erwartet: Der wachsende Anteil von Hardware-Chip-Verkäufen (ca. 50% des H1-2025-Umsatzes) bringt naturgemäß niedrigere Margen als reine Lizenzumsätze. Langfristig stabilisieren sich die Margen laut CMBI-Konsens über 50%. Der operative Verlust ist real und tief – wird aber primär durch hohe F&E-Ausgaben und aktienbasierte Vergütungen getrieben, nicht durch strukturell schlechtes Economics.</p>
-  </div>
-  <div class="source">Futunn Annual Review (Jul 2025), Quartr H1 2025 Summary, ainvest.com (Aug 2025), AlphaSpread</div>
-</section>
-
-<!-- SECTION 7 -->
-<section class="section" id="s7">
-  <div class="section-header">
-    <span class="section-num">07</span>
-    <h2 class="section-title">Peer-Vergleich</h2>
-    <span class="score-pill score-high">7 / 10</span>
-  </div>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Unternehmen</th>
-          <th>Ticker</th>
-          <th>Revenue (2024)</th>
-          <th>Rev-Wachstum</th>
-          <th>Bruttomarge</th>
-          <th>Market Cap</th>
-          <th>P/S FWD</th>
-          <th>Profitabilität</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="highlight">Horizon Robotics</td>
-          <td>9660.HK</td>
-          <td>CNY 2,38 Mrd.</td>
-          <td class="green">+54%</td>
-          <td>~77%</td>
-          <td>~$17,5 Mrd.</td>
-          <td class="red">~37x</td>
-          <td class="red">Verlust</td>
-        </tr>
-        <tr>
-          <td>Mobileye</td>
-          <td>MBLY</td>
-          <td>$1,89 Mrd.</td>
-          <td class="yellow">+15%</td>
-          <td>~48%</td>
-          <td>~$7,1 Mrd.</td>
-          <td class="green">~3,7x</td>
-          <td class="yellow">kl. op. Verlust</td>
-        </tr>
-        <tr>
-          <td>Black Sesame</td>
-          <td>2533.HK</td>
-          <td>~CNY 0,5 Mrd.</td>
-          <td class="green">+40%</td>
-          <td>N/A</td>
-          <td>~$1,5 Mrd.</td>
-          <td class="yellow">~20x</td>
-          <td class="red">Tiefe Verluste</td>
-        </tr>
-        <tr>
-          <td>Cambricon</td>
-          <td>688256.SS</td>
-          <td>CNY 1,17 Mrd.</td>
-          <td class="green">+66%</td>
-          <td>~57%</td>
-          <td>~$66 Mrd.</td>
-          <td class="red">~85x</td>
-          <td class="yellow">Gewinn H1 2025</td>
-        </tr>
-        <tr>
-          <td>NVIDIA (Auto-Segment)</td>
-          <td>NVDA</td>
-          <td>~$5 Mrd. (Auto)</td>
-          <td class="green">>100%</td>
-          <td>>75%</td>
-          <td>~$2.900 Mrd.</td>
-          <td>N/A</td>
-          <td class="green">Hochprofitabel</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="prose">
-    <p>Horizon ist innerhalb der Automotive-AI-Peer-Gruppe klar führend in China. <strong>Mobileye</strong> hat ein deutlich reifereres Profitabilitätsprofil und ist vergleichsweise günstig bewertet – leidet aber unter China-Problemen und verlorenem Marktanteil an Horizon. <strong>Cambricons</strong> extremes Bewertungsniveau (~85x P/S) reflektiert Spekulationsprämien im chinesischen A-Share-Markt rund um das "Chinas NVIDIA"-Narrativ; der Fokus liegt auf Cloud-KI, nicht Automotive. <strong>Black Sesame</strong> ist frühphasiger mit deutlich geringerer OEM-Penetration.</p>
-    <p>Horizons Wettbewerbsvorteil gegenüber NVIDIA im chinesischen Markt: ~RMB 1.000 niedrigere Kosten pro Fahrzeug bei Journey 6 vs. NVIDIA Orin, tiefere OEM-Integration, lokale Regulierungsexpertise und staatliche Rückendeckung. Gegenüber Huawei (ADS 3.0) ist Horizon als neutraler Technologieanbieter strategisch weniger bedrohlich für OEMs, die eigene Stacks aufbauen wollen.</p>
-  </div>
-  <div class="source">StockAnalysis MBLY (Jan 2026), PitchBook Cambricon (Feb 2026), 36kr/BST Interim Report (Aug 2025), CMBI Research</div>
-</section>
-
-<!-- SECTION 8 -->
-<section class="section" id="s8">
-  <div class="section-header">
-    <span class="section-num">08</span>
-    <h2 class="section-title">Aktuelle News &amp; Events</h2>
-  </div>
-  <div style="background:rgba(244,185,66,0.06); border:1px solid rgba(244,185,66,0.2); border-radius:6px; padding:12px 16px; margin-bottom:20px; font-size:13px;">
-    <span style="color:var(--gold); font-family:'DM Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.1em;">UPDATE: Letzte 3 Monate (Feb–Mai 2026)</span><br>
-    <span style="color:var(--text)">Diese Sektion wurde vollständig mit den neuesten Entwicklungen aktualisiert. Schwerpunkt: FY2025-Ergebnisse, VW-Strategiepivot und neue Wettbewerbsdynamik.</span>
-  </div>
-  <div class="event-list">
-    <div class="event-group-label">Ebene 1 — Unternehmen (Feb–Mai 2026)</div>
-
-    <div class="event-item">
-      <span class="event-badge badge-pos">✓ Beat</span>
-      <span class="event-text"><strong>FY2025 Ergebnisse (19. März 2026):</strong> Umsatz CNY 3,758 Mrd. (+57,7% YoY), +7% über Konsenserwartung (CNY 3,5 Mrd.). Produkt-Lösungs-Umsatz +144% auf CNY 1,62 Mrd. Automotive-Bruttomarge 67,2%. <span style="color:var(--green)">Operativer Kern positiv überraschend.</span></span>
-    </div>
-    <div class="event-item">
-      <span class="event-badge badge-neg">EPS Miss</span>
-      <span class="event-text"><strong>EPS-Überraschung (negativ, nicht-cash):</strong> −0,46 HKD vs. −0,31 HKD erwartet (−46%). Ursache: RMB 6,664 Mrd. Fair-Value-Verluste auf Wandelanleihe/Vorzugsaktien (nicht-operativ, IPO-bedingt) + R&D-Erhöhung +63,3%. Operativer Kern unbeeinträchtigt. Kursreaktion: deutlicher Rückgang auf HK$6,77-Niveau.</span>
-    </div>
-    <div class="event-item">
-      <span class="event-badge badge-pos">Positiv</span>
-      <span class="event-text"><strong>Journey 7 + Riemann-BPU-Ankündigung (Mär 2026):</strong> Horizon kündigt nächste Generation der Hardware-Plattform an. Die neue "Riemann Architecture" BPU soll globale Leader im autonomen Fahren benchmarken. Journey 7 wird 2026 angekündigt.</span>
-    </div>
-    <div class="event-item">
-      <span class="event-badge badge-pos">Positiv</span>
-      <span class="event-text"><strong>Agentic Car SoC/OS (2026-Launch):</strong> Horizon kündigt ein vollständiges "Agentic CAR"-Betriebssystem inkl. eigenem SoC an – Cockpit-Fahrfusions-Plattform. Potenziell signifikante ASP-Erweiterung durch Cockpit-Upsell zu ADAS-Kunden.</span>
-    </div>
-    <div class="event-item">
-      <span class="event-badge badge-pos">Positiv</span>
-      <span class="event-text"><strong>Robotaxi-Pilot Q3 2026:</strong> Horizon bereitet L4-Robotaxi-Pilotoperationen mit Ökosystem-Partnern vor – Start Q3 2026. HSD-Lösung als technologische Basis. Erstmals echtes L4-Revenue-Potenzial auf der Roadmap.</span>
-    </div>
-    <div class="event-item">
-      <span class="event-badge badge-pos">Positiv</span>
-      <span class="event-text"><strong>HSD-Skalierung: 83% Attachment Rate:</strong> Bei Modellen, die HSD anbieten, entscheiden sich 83% der Käufer für HSD-Ausstattung. Zeigt hohe Zahlungsbereitschaft und OEM-Vertrauen. 2026-Target: ~400.000 HSD-Einheiten (18x YoY).</span>
-    </div>
-    <div class="event-item">
-      <span class="event-badge badge-pos">Positiv</span>
-      <span class="event-text"><strong>Share Awards (Apr 2026):</strong> Horizon gewährt 59 Mio. Class-B-Aktien-Awards unter Post-IPO-Plan. Leichte Verwässerung, signalisiert aber Management-Commitment zum langfristigen Unternehmenswachstum.</span>
-    </div>
-    <div class="event-item">
-      <span class="event-badge badge-pos">Positiv</span>
-      <span class="event-text"><strong>Analyst-Ratings (Apr 2026):</strong> UBS, Daiwa halten Buy-Rating. Neue Buy-Empfehlungen durch TipRanks im April 2026. Analystenkonsens: 22× Strong Buy, Ø Kursziel HK$11,80 (+74% Upside).</span>
-    </div>
-
-    <div class="event-group-label">Ebene 2 — Branche &amp; Wettbewerb (Hochrelevant: letzter Burggraben-Update)</div>
-
-    <div class="event-item">
-      <span class="event-badge badge-pos">Moat ↑</span>
-      <span class="event-text"><strong>VW ditcht NVIDIA – pivot zu Horizon/Xpeng (März 2026):</strong> Volkswagen produziert seit 13. März 2026 seinen ersten vollelektrischen SUV ID. UNYX 08 mit Xpeng-Chip – <em>explizit ohne NVIDIA</em>. VW-Manager bestätigt: "Wir arbeiten mit Xpeng-Chips sowie Horizon." Carizon entwickelt proprietären SoC (500–700 TOPS, Lieferung in 3–5 Jahren). Strukturell: VW-Ökosystem zunehmend auf lokale chinesische Chip-Anbieter angewiesen. <span style="color:var(--green)">Massive Moat-Verstärkung für Horizon.</span></span>
-    </div>
-    <div class="event-item">
-      <span class="event-badge badge-pos">Moat ↑</span>
-      <span class="event-text"><strong>Carizon Phase 2: Eigener SoC-Entwicklung (Nov 2025–Mär 2026):</strong> Carizon beginnt offiziell Phase 2 – eigenständige SoC-Entwicklung (500–700 TOPS, 3–5 Jahre Lieferung). L2+ ADAS auf VW-Plattformen ab 2026 in Serienproduktion. VW plant 20 neue Modelle in China in 2026, 50 bis 2030 – Horizon als technologischer Rückgrat der Mehrzahl dieser Plattformen.</span>
-    </div>
-    <div class="event-item">
-      <span class="event-badge badge-neg">Wettbewerb</span>
-      <span class="event-text"><strong>Huawei-Marktanteilslücke auf 0,8 Prozentpunkte geschrumpft:</strong> Im Mid-to-High-End-Segment: Horizon 14,4% vs. Huawei 15,2% – Abstand war laut älterer Daten deutlich größer. Positiv: Horizon holt auf. Risiko: Huawei hat Skalenvorteile und ein sehr aggressives Wachstumsteam.</span>
-    </div>
-    <div class="event-item">
-      <span class="event-badge badge-pos">Moat ↑</span>
-      <span class="event-text"><strong>NOA auf Single-Chip J6M offiziell lieferbar:</strong> End-to-end urbanes NOA auf einem einzigen J6M-Chip – das ist ein signifikanter Kostenvorteil gegenüber Multi-Chip-Lösungen (NVIDIA Orin erfordert oft 2+ Chips). Ziel: Skalierung von RMB 150.000 auf RMB 100.000-Fahrzeugsegment in 2026–2027.</span>
-    </div>
-    <div class="event-item">
-      <span class="event-badge badge-neu">Neutral</span>
-      <span class="event-text"><strong>D-Robotics-Dekonsolidierung:</strong> Horizon verliert Kontrolle über Tochter D-Robotics (Verwässerung von ~70% auf ~40% durch externe Finanzierungsrunden). D-Robotics wird nicht mehr als Tochter konsolidiert – reduziert Bilanzrisiko, aber auch Konsolidierungs-Upsell aus D-Robotics-Verlusten.</span>
-    </div>
-
-    <div class="event-group-label">Ebene 3 — Makro</div>
-
-    <div class="event-item">
-      <span class="event-badge badge-pos">Positiv</span>
-      <span class="event-text"><strong>China NEV-Boom 2026:</strong> China EV-Markt bleibt strukturell stark trotz "survival test" für schwächere Anbieter (CNBC, Dez 2025). Konsolidierung zugunsten stärkerer OEMs (BYD, Li Auto, Geely, Chery) – direktes Vorteil für Horizon, der bei diesen Gewinnern überrepräsentiert ist.</span>
-    </div>
-    <div class="event-item">
-      <span class="event-badge badge-neg">Risiko</span>
-      <span class="event-text"><strong>US-China Handelsspannungen / Technologierestriktionen (2026):</strong> US-Zölle und Exportkontrollen erhöhen allgemeinen China-Tech-Selloff-Druck. TSMC-Abhängigkeit bleibt das strukturelle Tail-Risk. Aktuelle Kursschwäche teilweise durch geopolitischen Druck auf China-Tech-Sektor generell.</span>
-    </div>
-    <div class="event-item">
-      <span class="event-badge badge-neu">Neutral</span>
-      <span class="event-text"><strong>Memory-Preis-Risiko (kurzfristig):</strong> Management nannte Memory-Preisschwankungen als kurzfristigen Gegenwind. Horizon hat Supply-Preise mit Lieferanten fixiert, um Risiken zu mitigieren – Risiko vorhanden, aber gemanaged.</span>
-    </div>
-  </div>
-  <div class="source">Gasgoo (19. Mär 2026), BigGo Finance (19./20. Mär 2026), CNBC China Connection Newsletter (16. Mär 2026), CnEVPost (Nov 2025), Quartr Earnings Summary (Mär 2026), TipRanks/CNBC (Apr 2026), Top Gear (Apr 2025)</div>
-</section>
-
-<!-- SECTION 9 -->
-<section class="section" id="s9">
-  <div class="section-header">
-    <span class="section-num">09</span>
-    <h2 class="section-title">Technische Analyse</h2>
-    <span class="score-pill score-low">4 / 10 ↓</span>
-      <div class="card-value" style="color:var(--red)">HK$6,77</div>
-      <div class="card-sub">–40% vom ATH HK$11,32 (Sep 2025); –18,9% YTD 2026</div>
-    </div>
-    <div class="card">
-      <div class="card-label">52-Wochen-Range</div>
-      <div class="card-value">4,80 – 11,32</div>
-      <div class="card-sub">+70% seit IPO (HK$3,99); jetzt unter 50d+200d SMA</div>
-    </div>
-    <div class="card">
-      <div class="card-label">50d-SMA / 200d-SMA</div>
-      <div class="card-value" style="color:var(--red)">7,46 / 8,32</div>
-      <div class="card-sub">Kurs unter beiden MAs — technisch bärisch kurzfristig</div>
-    </div>
-    <div class="card">
-      <div class="card-label">Beta / RSI</div>
-      <div class="card-value" style="color:var(--yellow)">1,53 / ~47</div>
-      <div class="card-sub">RSI neutral (47); weder über- noch unterkauft; Beta gesunken</div>
-    </div>
-  </div>
-  <div class="prose">
-    <p>Die technische Ausgangslage hat sich seit der Februar-Analyse deutlich verändert. Der Kursrückgang von HK$9,55 auf HK$6,77 (−29%) hat die Aktie unter beide gleitenden Durchschnitte gedrückt: <strong>50d-SMA HK$7,46 und 200d-SMA HK$8,32</strong> liegen beide über dem aktuellen Kurs – ein klassisches technisch schwaches Signal. Beta hat sich von 1,84 auf 1,53 leicht reduziert, was auf etwas geringere relative Volatilität hindeutet.</p>
-    <p>Der RSI von ~47 signalisiert neutrale bis leicht überverkaufte Bedingungen, ohne extremen Druck in eine Richtung. Das Handelsvolumen zeigte zuletzt Phasen erhöhter institutioneller Aktivität (128M Shares am 11. Mai 2026 vs. 119M Ø), was auf Positionsbereinigungen nach dem EPS-Miss hindeutet. Der langfristige Trend seit IPO bleibt positiv (+70%), aber die kurzfristige Momentumsituation ist herausfordernd.</p>
-    <p><strong>Key Levels:</strong> Support bei HK$5,80–6,50 (52W-Low-Bereich HK$4,80, Gap-Levels). Widerstand bei HK$7,46 (50d-SMA), HK$8,32 (200d-SMA), HK$8,33–8,88 (untere Analystenziele). Analystenkonsens HK$11,80 als mittelfristiges Ziel. Aus technischer Sicht bietet der aktuelle Bereich eine potenzielle Akkumulations-Zone für langfristige Investoren – sofern der fundamentale Wachstumspfad bestätigt wird.</p>
-  </div>
-  <div class="source">TradingView 9660 (Mai 2026), Meyka (1./8./11. Mai 2026), Investing.com (Apr 2026)</div>
-</section>
-
-<!-- SECTION 10 -->
-<section class="section" id="s10">
-  <div class="section-header">
-    <span class="section-num">10</span>
-    <h2 class="section-title">Risiken &amp; Chancen</h2>
-    <span class="score-pill score-ok">5 / 10</span>
-  </div>
-  <div class="focus-tag">▲ User-Fokus: AI/AV-Exposure &amp; Disruption-Risiko</div>
-
-  <div style="font-family:'DM Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-dim); margin: 20px 0 12px;">9a + 9b — Strukturelle, zyklische &amp; AI/AV-Risiken</div>
-  <div class="risk-grid">
-    <div class="risk-card high">
-      <div class="risk-title">TSMC-Abhängigkeit / Geopolitik</div>
-      <div class="risk-severity sev-high">Schweregrad: HOCH · Wahrscheinlichkeit: 10–15%</div>
-      <div class="risk-text">100% Fabless auf TSMC Taiwan. Im Extremfall Produktionsstopp 6–12 Monate – existenzbedrohend. Nicht kurzfristig diversifizierbar.</div>
-    </div>
-    <div class="risk-card mid">
-      <div class="risk-title">BYD In-House Chip-Entwicklung</div>
-      <div class="risk-severity sev-mid">Schweregrad: MITTEL · Wahrscheinlichkeit: Mittel (3–5J)</div>
-      <div class="risk-text">BYD (~30–35% der OEM-Basis) entwickelt eigene Chips. Senior-Ingenieur von Horizon abgeworben. Aktuell kooperativ, aber langfristiges Desintermediation-Risiko.</div>
-    </div>
-    <div class="risk-card mid">
-      <div class="risk-title">Margendruck durch Hardware-Mix</div>
-      <div class="risk-severity sev-mid">Schweregrad: MITTEL · Wahrscheinlichkeit: Hoch</div>
-      <div class="risk-text">Wachsender Chip-Hardware-Anteil (~50% H1 2025) drückt Bruttomarge von ~79% auf 65%. Falls Lizenzumsätze nicht skalieren: Margendruck anhaltend.</div>
-    </div>
-    <div class="risk-card mid">
-      <div class="risk-title">Huawei ADS / Hochend-Wettbewerb</div>
-      <div class="risk-severity sev-mid">Schweregrad: MITTEL · Wahrscheinlichkeit: Mittel</div>
-      <div class="risk-text">Huawei ADS 3.0 und XPeng-Eigenentwicklungen intensivieren den Premium-ADS-Wettbewerb. Marktanteilsdruck im Hochend-Segment möglich.</div>
+    <div class="section-body">
+      <p>Horizon Robotics ist Chinas führender Anbieter von Chips und Software für assistiertes und autonomes Fahren (ADAS/AD) im Pkw-Bereich. Das Herzstück ist die <span class="pill">Journey</span>-Chipfamilie (BPU-Architektur) – vom Einsteiger-Frontkamera-System „Horizon Mono" über das Autobahn-/Park-System „Horizon Pilot" bis zum urbanen High-End-System „Horizon SuperDrive" (HSD). Verkauft wird sowohl reine Hardware (SoCs) als auch das integrierte Hardware-Software-Gesamtpaket inklusive Lizenzen und Entwicklungsdienstleistungen.</p>
+      <p>Die Kunden sind nahezu ausschließlich Automobilhersteller (B2B): Das Ökosystem umfasst über 40 OEMs und Marken, darunter alle Top-10-Hersteller Chinas, sowie das Joint Venture CARIZON mit Volkswagen. Der zweite, deutlich kleinere Bereich „Non-Automotive Solutions" liefert Edge-AI-Chips für Geräte wie Rasenmäher, Fitness-Spiegel oder Luftreiniger – strategisch nachrangig.</p>
+      <p>Die Erlöse stammen aus drei Strömen: Produktverkäufen (SoCs/Module), Lizenz- und Service-Umsätzen sowie zunehmend aus den höherpreisigen, integrierten NOA-Lösungen (Navigate-on-Autopilot). Das Geschäft ist im Kern „asset-light" – die Fertigung der Chips erfolgt bei externen Foundries –, doch der Engpass ist nicht Capex, sondern die enormen F&amp;E-Aufwendungen, die das Modell de facto kapitalintensiv im Sinne des Cash-Verbrauchs machen.</p>
+      <p>Die Unit Economics sind zweigeteilt: Auf Bruttoebene ist das Automotive-Geschäft mit 67,2% Marge hochattraktiv (Software- und Lizenzcharakter). Auf Konzernebene verbrennt das Unternehmen jedoch enorm viel Geld, weil die F&amp;E-Ausgaben 2025 bei 137% des Umsatzes lagen. Das Modell skaliert über Stückzahlen und vor allem über steigende Durchschnittspreise je Fahrzeug (höherwertige NOA-Systeme statt einfacher Frontkameras).</p>
+      <div class="source">Quellen: Horizon Robotics IR / FY2025-Ergebnisse (19.03.2026); Yahoo Finance Unternehmensprofil (03.06.2026); Gasgoo (18.04.2025).</div>
     </div>
   </div>
 
-  <div style="font-family:'DM Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent); margin: 24px 0 12px;">9c — Chancen</div>
-  <div class="risk-grid">
-    <div class="risk-card chance">
-      <div class="risk-title">Urban NOA im Massenmarkt</div>
-      <div class="risk-text">Demokratisierung von NOA auf RMB 100.000–150.000-Fahrzeuge (BYD-Einstieg Feb 2025). Direkte Addressable-Volume-Expansion um Faktor 3–5.</div>
+  <!-- ===================== S2 ===================== -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 5/10</div>
     </div>
-    <div class="risk-card chance">
-      <div class="risk-title">HSD/SuperDrive-Skalierung</div>
-      <div class="risk-text">Hochmarginiges ADS-Segment in Massenproduktion seit Q3 2025. Ziel CNY 1,3 Mrd. Umsatz bis 2025 (5x YoY). Stärkstes Profitabilitätshebel.</div>
-    </div>
-    <div class="risk-card chance">
-      <div class="risk-title">Internationale Expansion</div>
-      <div class="risk-text">Bosch (Q1 2026), japanische OEMs (>7,5 Mio. Lifecycle), Carizon-JV mit VW. Erstes ernsthaftes Internationalisierungspotential.</div>
-    </div>
-    <div class="risk-card chance">
-      <div class="risk-title">China Policy Tailwind</div>
-      <div class="risk-text">Ziel 100% lokale Automotive-Chip-Produktion bis 2027. NVIDIA-Exportbeschränkungen stärken lokale Anbieter strukturell.</div>
+    <div class="section-body">
+      <p>Horizons Burggraben beruht auf vier Säulen – von denen aktuell genau die wertvollsten unter Druck geraten. <strong>Erstens Skalen- und Erfahrungsvorteil:</strong> über 4 Mio. ausgelieferte Journey-Chips kumuliert, 310+ Design-Wins, 200+ Modelle auf der Straße und alle Top-10-OEMs Chinas als Kunden. Diese installierte Basis und Serienreife sind ein echter Vorsprung gegenüber jüngeren Wettbewerbern.</p>
+      <p><strong>Zweitens Switching Costs:</strong> Ein einmal integriertes ADAS-System ist über Software-Hardware-Co-Optimierung tief in die Fahrzeugarchitektur eingebettet; ein Wechsel mitten im Modellzyklus ist teuer. Allerdings sind diese Wechselkosten <em>modellgebunden</em> – bei jeder neuen Plattform-Generation steht die Lieferantenentscheidung neu zur Disposition, und genau hier greifen die Wettbewerber an.</p>
+      <p><strong>Drittens technologischer Vorsprung im Mittelsegment:</strong> Horizon ist preislich und in der Stückzahl-Reife im Massen- und Mittelklassemarkt stark. Der Marktanteils-Abstand zu Huawei verengte sich 2025 auf 0,8 Prozentpunkte. <strong>Viertens Ökosystem/Toolchain:</strong> entwicklerfreundliche SW-Stacks und Algorithmen.</p>
+      <p>Die kritische Schwachstelle: Der Burggraben ist im High-End dünn und an beiden Enden bedroht. Oben drängt NVIDIA mit Orin/Thor und der Hyperion-Plattform; Huawei kontert mit einem geschlossenen „Chip + Algorithmus + Cloud"-Vollstack. Unten beginnen die größten Kunden (BYD, XPeng, Li Auto), eigene Chips zu bauen – wer 4 Mio. Fahrzeuge im Jahr verkauft, erreicht die Skalenschwelle für die Eigenentwicklung selbst. Ein Burggraben, dessen Wassergraben die eigenen Kunden gerade trockenlegen, verdient keinen hohen Score. Daher Abwertung auf <strong>5/10</strong> (zuvor höher eingeschätzt).</p>
+      <div class="source">Quellen: BigGo Finance / FY2025-Auswertung (19.–23.03.2026); Horizon IR (FY2025); Caixin Global (01.06.2026).</div>
     </div>
   </div>
 
-  <div style="font-family:'DM Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--red); margin: 24px 0 12px;">9d — Red Flags &amp; Dealbreaker</div>
-  <div class="prose">
-    <p><strong>Red Flags (beobachten):</strong> Signifikanter Rückgang der Lizenz/Service-Umsätze als Zeichen von Wettbewerbsdruck; Verlangsamung neuer Model-Designations; Bruttomarge dauerhaft unter 55%.</p>
-    <p><strong>Dealbreaker (existenzbedrohend):</strong> TSMC-Produktionsstopp infolge US-Exportkontrollen; vollständiger BYD-Ausstieg aus Horizon-Technologie; H1-2026-Umsatz signifikant unter CNY 2 Mrd. bei weiterem Cash-Burn >CNY 5 Mrd./HJ.</p>
-  </div>
-</section>
-
-<!-- SECTION 11 - SCORING -->
-<section class="section" id="s11">
-  <div class="section-header">
-    <span class="section-num">11</span>
-    <h2 class="section-title">Scoring-Tabelle</h2>
-  </div>
-  <div class="table-wrap">
-    <table class="score-table">
-      <thead>
-        <tr>
-          <th>Kategorie</th>
-          <th>Score</th>
-          <th>Begründung</th>
-          <th>Änderung</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>Geschäftsmodell</td><td class="green">8/10</td><td>Agentic Car SoC/OS erweitert TAM; Plattform-Ansatz bestätigt</td><td class="yellow">= unverändert</td></tr>
-        <tr><td>Burggraben</td><td class="green">8/10</td><td>VW-Pivot zu lokalen Chips; Huawei-Lücke 0,8pp; NOA Single-Chip J6M</td><td class="green">↑ von 7</td></tr>
-        <tr><td>Operative Entwicklung</td><td class="green">8/10</td><td>FY2025 +7% Umsatz-Beat; Product-Lösungs +144%; ASP +75%</td><td class="green">↑ von 7</td></tr>
-        <tr><td>Wachstum</td><td class="green">9/10</td><td>FY2025 +57,7% bestätigt; 60% CAGR-Guidance; HSD 18x YoY 2026E</td><td class="yellow">= unverändert</td></tr>
-        <tr><td>Bewertung</td><td class="yellow">6/10</td><td>P/S 2025A ~20x; P/S 2026E ~14x — deutlich attraktiver nach Kursrückgang</td><td class="green">↑ von 4</td></tr>
-        <tr><td>Cashflow / Margen</td><td class="yellow">5/10</td><td>Auto-Bruttomarge 67,2%; R&D-Burn +63%; nicht-cash-Verluste verzerren Bild</td><td class="yellow">= unverändert</td></tr>
-        <tr><td>Risiken (invertiert)</td><td class="yellow">5/10</td><td>TSMC-Risiko bleibt; EPS-Volatilität durch Bilanzierungseffekte neu sichtbar</td><td class="yellow">= unverändert</td></tr>
-        <tr><td>Technische Analyse</td><td class="red">4/10</td><td>Unter 50d+200d SMA; −19% YTD; kurzfristig bärisch, langfristig Akkumulation</td><td class="red">↓ von 6</td></tr>
-        <tr>
-          <td style="color:var(--text-bright); font-weight:700">Ø Gesamtscore</td>
-          <td style="color:var(--gold); font-weight:700; font-size:16px">6,6/10 ↑</td>
-          <td>Fundamentaler Ausblick verbessert; Bewertung attraktiver; Technik schwach</td>
-          <td class="green">↑ von 6,4</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="divider"></div>
-
-  <!-- USER-SPECIFIC -->
-  <div style="font-family:'Syne',sans-serif; font-size:18px; font-weight:700; color:var(--text-bright); margin-bottom:16px;">Sektion 11: User-spezifische Analyse — Update Mai 2026</div>
-  <div class="focus-tag">Fokus 1: AI/AV-Exposure — VW-Pivot stärkt Moat erheblich</div>
-  <div class="prose">
-    <p>Der VW-Strategiepivot von März 2026 ist die wichtigste Moat-Bestätigung der letzten 3 Monate. Volkswagen produziert seit dem 13. März 2026 seinen ersten vollelektrischen SUV mit lokalen chinesischen Chips (<em>explizit ohne NVIDIA</em>) und Carizon beginnt offiziell mit der eigenständigen SoC-Entwicklung (500–700 TOPS, 3–5 Jahre). Das ist keine inkrementelle Partnerschaftsnachricht – es ist eine strategische Aussage, dass einer der größten globalen OEMs seine Chip-Versorgungskette für China-Fahrzeuge vollständig auf lokale Anbieter verlagert, mit Horizon als primärem Technologiepartner.</p>
-    <p>Die Huawei-Marktanteilslücke im Mid-to-High-End-Segment ist auf 0,8 Prozentpunkte geschrumpft (Horizon 14,4% vs. Huawei 15,2%). Noch im frühen 2025 war diese Lücke deutlich größer. Gleichzeitig hat Horizon das Kunststück vollbracht, urbanes NOA auf einem einzelnen J6M-Chip zu liefern – strukturell billiger als Huaweis Multi-Chip-Lösungen. Der AI/AV-Moat ist stärker als in der Februaranalyse eingeschätzt. Score-Adjustment: Burggraben von 7 auf 8 erhöht.</p>
-  </div>
-  <div class="focus-tag" style="margin-top:16px;">Fokus 2: Wachstums- &amp; Skalierbarkeitsbestätigung durch FY2025</div>
-  <div class="prose">
-    <p>Die FY2025-Ergebnisse haben die Wachstumsthese operativ bestätigt: +57,7% Umsatzwachstum (+7% über Konsens), ASP +75% YoY, Produktlösungs-Umsatz +144%, HSD 83% Attachment Rate bei relevanten Modellen. Der CEO-Guidance von 60% CAGR erscheint angesichts dieser Execution-Qualität glaubwürdig, nicht optimistisch. Die 2026-Roadmap – HSD 400K Einheiten (18x), Agentic Car SoC/OS, Robotaxi-Pilot Q3 – eröffnet potenziell neue Umsatzkategorien jenseits des Kern-ADAS-Geschäfts.</p>
-    <p>Der kritische Einwand der Februaranalyse (R&D-Kostenentwicklung) hat sich teilweise bestätigt: R&D stieg um +63,3% in 2025. Die Profitabilitätswende verschiebt sich damit möglicherweise leicht über 2027 hinaus, wenn der R&D-Anstieg strukturell bleibt. Positiver Gegenpunkt: Die F&E-Ausgaben werden durch ein messbar stärkeres Produkt-Portfolio (Journey 7, Agentic Car SoC, Robotaxi) begründet – kein blinder Burn.</p>
-  </div>
-</section>
-
-<!-- SECTION 12 - FAZIT -->
-<section class="section" id="s12">
-  <div class="section-header">
-    <span class="section-num">12</span>
-    <h2 class="section-title">Fazit – Investment-These</h2>
-  </div>
-
-  <div class="narrative narrative-bull">
-    <div class="narrative-header">▲ Das Bullische Narrativ</div>
-    <div class="narrative-body">
-      <p>Das bullische Narrativ für Horizon Robotics ruht auf drei strukturellen Säulen. <strong>Erstens</strong> ist die Wachstumsdynamik außergewöhnlich und organisch: Umsatz wuchs von CNY 906 Mio. (2022) auf CNY 2,384 Mrd. (2024) – CAGR von ~57% – getrieben nicht durch M&A, sondern durch echte Marktpenetration. Der Blended-ASP stieg in H1 2025 um ~70% YoY, da OEMs von einfachen ADAS-Chips auf vollständige urbane Autonomie-Lösungen (HSD/J6P) upgraden. Dies ist eine Premiumisierung der Produktmix – strukturell margenverbessernd auf mittlere Sicht.</p>
-      <p><strong>Zweitens</strong> ist Horizons Wettbewerbsposition im chinesischen Markt einzigartig und zunehmend befestigt: >40% ADAS-Marktanteil, >310 designierte Modelle, Kundenbasis aller Top-10-OEMs. Die globale Validierung durch Volkswagen (€2,4 Mrd. Investment), Bosch (MoU April 2025), DENSO und japanische OEMs zeigt, dass Horizons Technologie auch international als Premium-Automotive-Plattform anerkannt wird. China-Policy-Rückenwind (100% lokale Chip-Produktion bis 2027) und NVIDIA-Exportbeschränkungen schaffen ein strukturell begünstigtes Wettbewerbsumfeld.</p>
-      <p><strong>Drittens</strong> ist die Bewertung nach Abzug der CNY 16,1 Mrd. Cash-Position (EV/Revenue 2027E von ~14x) für ein Technologie-Hyper-Growth-Unternehmen bei 50%+ CAGR nicht außergewöhnlich – zumal mit einer Profitabilitätswende 2027 am Horizont. Die starke Bilanz sichert den Weg dorthin ohne externe Finanzierung.</p>
+  <!-- ===================== S3 ===================== -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Operative Entwicklung (letzte Berichtsperioden)</div>
+      <div class="section-score">Umsatz-Beat / EPS-Miss</div>
     </div>
-  </div>
-
-  <div class="narrative narrative-bear" style="margin-top:16px;">
-    <div class="narrative-header">▼ Das Bärische Narrativ</div>
-    <div class="narrative-body">
-      <p>Das bärische Narrativ konzentriert sich auf drei Hauptrisiken. <strong>Erstens</strong> ist das geopolitische TSMC-Risiko real und strukturell unlösbar. Horizon ist zu 100% von TSMC Taiwan abhängig – nicht diversifizierbar. Im Falle einer Taiwan-Krise oder verschärfter US-Exportkontrollen auf TSMC kollabiert die gesamte Chip-Lieferkette. Dies ist ein Tail-Risk, aber kein theoretisches Szenario mehr (Wahrscheinlichkeit 10–15%).</p>
-      <p><strong>Zweitens</strong> besteht das strukturelle Risiko der OEM-Desintermediation. BYD (~30% des Umsatzes) hat bereits In-House-Chip-Ambitionen artikuliert und einen Senior-Ingenieur von Horizon abgeworben. Sollte BYD 50% seiner Horizon-Beziehung in-house verlagern, würden CNY 400–600 Mio. Umsatz gefährdet und die Profitabilitätswende um 1–2 Jahre verschoben. Huawei ADS 3.0 und XPengs Eigenentwicklungen setzen das High-End-Segment zusätzlich unter Druck.</p>
-      <p><strong>Drittens</strong> ist die Bewertung anspruchsvoll: Bei P/S 37x (2025E) preist die Aktie bereits einen reibungslosen Ausführungspfad ein. Jede operative Enttäuschung – Verlangsamung der Shipment-Guidance, Margenkompression unter 55%, HSD-Verzögerung – könnte zu deutlicher Bewertungskorrektur führen. Die Aktie ist mit Beta 1,84 hochvolatil; bei allgemeinem China-Tech-Selloff ist ein Rückfall auf HK$6–7 nicht unwahrscheinlich.</p>
-    </div>
-  </div>
-
-  <div class="narrative narrative-own" style="margin-top:16px;">
-    <div class="narrative-header">◈ Eigene Einschätzung</div>
-    <div class="narrative-body">
-      <p>Das bullische Narrativ überzeugt in seiner strukturellen Dimension stärker als das bärische, aber die Bewertung lässt wenig Fehlertoleranz. Die Wachstumsdynamik ist real und fundamental getrieben – keine konjunkturelle Story. Der entscheidende Unterschied zu anderen pre-profit Wachstumsunternehmen ist die <strong>außergewöhnlich starke Bilanz</strong> (CNY 16,1 Mrd. Cash) und die fabless-Struktur, die den Break-even 2027 mit hoher Sicherheit erreichbar macht.</p>
-      <p>Das Risk/Reward bei aktuellem Kurs (~HK$9,55): <strong style="color:var(--red)">Downside ~25–30%</strong> auf ~HK$6,80–7,00 (technischer Support), <strong style="color:var(--green)">Upside +40–60%</strong> auf HK$12,19–15,30 (12–18 Monate), und <strong style="color:var(--green)">+70–130%</strong> in einem 3-Jahres-Szenario bei Profitabilitätswende 2027. Ich könnte falsch liegen, weil der BYD-Desintermediation-Effekt schneller eintritt als erwartet oder das allgemeine Zinsumfeld im HK-Markt Bewertungsmultiples komprimiert.</p>
-      <p>Geeignet für <strong>Quality-Growth- und Technology-Thematic-Investoren</strong> mit 2–4 Jahres-Horizont, die China-Klumpenrisiko und hohe Volatilität akzeptieren können.</p>
-    </div>
-  </div>
-
-  <div style="margin-top:28px; font-family:'Syne',sans-serif; font-size:17px; font-weight:700; color:var(--text-bright); margin-bottom:14px;">Zeithorizont-Einschätzung</div>
-  <div class="horizon-grid">
-    <div class="horizon-card">
-      <div class="horizon-label">Kurzfristig</div>
-      <div class="horizon-period">0–6 Monate</div>
-      <div class="horizon-text">Kritischer Katalysator: <strong>Jahresergebnis 2025 am 23. März 2026</strong>. Bei Umsatz >CNY 3,3 Mrd. + HSD-Bestätigung → Richtung ATH HK$11,32. Enttäuschung → HK$7,50–8,00. <strong>Empfehlung: Abwarten, dann tranchiert einsteigen.</strong></div>
-    </div>
-    <div class="horizon-card">
-      <div class="horizon-label">Mittelfristig</div>
-      <div class="horizon-period">6–24 Monate</div>
-      <div class="horizon-text">J6-Ramp, HSD-Scale, erste internationale Beiträge (Bosch, Japan). Katalysator: NOA >50% China. Risiko: BYD-In-House-Ankündigung. <strong>Empfehlung: Kernposition bei &lt;HK$8,50.</strong></div>
-    </div>
-    <div class="horizon-card">
-      <div class="horizon-label">Langfristig</div>
-      <div class="horizon-period">2–5 Jahre</div>
-      <div class="horizon-text">Profitabilitätswende 2027 ist der Value-Unlock. F&E-Quote auf &lt;80% sinkend bei 40%+ Wachstum = massiver operativer Hebel. Zielkurs <strong>HK$15–20</strong>. <strong>Empfehlung: Kaufen &amp; Halten.</strong></div>
-    </div>
-  </div>
-
-  <div class="trigger-grid" style="margin-top:24px;">
-    <div class="trigger-block bear">
-      <div class="trigger-title bear">▼ Bearish Trigger → Verkaufen</div>
-      <ul class="trigger-list bear">
-        <li>H1 2026 Umsatz &lt;CNY 2,2 Mrd. (27. Aug 2026): Wachstumsverlangsamung</li>
-        <li>HSD-Shipments 2026 deutlich unter 400K-Guidance ohne klare Erklärung</li>
-        <li>BYD kündigt offiziell Abkehr von Horizon-Chips für >2 Modellreihen an</li>
-        <li>TSMC-Exportbeschränkungen auf Horizon-Chips durch US-Regierung</li>
-      </ul>
-    </div>
-    <div class="trigger-block bull">
-      <div class="trigger-title bull">▲ Bullish Trigger → Nachkaufen</div>
-      <ul class="trigger-list bull">
-        <li>H1 2026 Umsatz >CNY 2,5 Mrd. (+35% YoY): Guidance-Konfirmation</li>
-        <li>Robotaxi-Pilot Q3 2026 startet wie angekündigt — L4-Revenue sichtbar</li>
-        <li>Agentic Car SoC/OS first customer win angekündigt</li>
-        <li>NOA-Penetration China >50% in H1 2026 Branchendaten</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="table-wrap" style="margin-top:24px;">
-    <table class="inv-table">
-      <thead>
-        <tr><th>Investorentyp</th><th>Empfehlung (Kurs HK$6,77)</th><th>Begründung</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Konservativ</td>
-          <td>Kleiner Erstaufbau</td>
-          <td>Bewertung jetzt attraktiver; warten auf H1-2026-Bestätigung (27. Aug) für Aufstockung</td>
-        </tr>
-        <tr>
-          <td>Wachstumsorientiert</td>
-          <td>Tranchiert kaufen (50% jetzt)</td>
-          <td>FY2025 bestätigt Execution; +74% Upside zum Konsens; 50% nach Aug-Ergebnis</td>
-        </tr>
-        <tr>
-          <td>Spekulativ / Aggressiv</td>
-          <td>Übergewichten</td>
-          <td>HK$6,77 ist attraktivster Einstieg seit HK$5-Niveau; Robotaxi-Catalyst Q3 2026</td>
-        </tr>
-        <tr>
-          <td>Value / Income</td>
-          <td style="color:var(--red)">Nicht geeignet</td>
-          <td>Kein Value (P/S 20x), keine Dividende; auch bei HK$6,77 kein klassisches Value</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<!-- SECTION 13 - OUTLOOK -->
-<section class="section" id="s13">
-  <div class="section-header">
-    <span class="section-num">13</span>
-    <h2 class="section-title">Outlook – Die 3 wichtigsten anstehenden Events</h2>
-  </div>
-
-  <div class="outlook-item">
-    <div class="outlook-num">Event 01 · Hochkritisch</div>
-    <div class="outlook-title">H1 2026 Ergebnisse — 27. August 2026</div>
-    <div class="outlook-body">
-      <p>Das erste Halbjahresergebnis nach dem enttäuschenden EPS in FY2025 wird entscheidend sein. Drei Metriken sind entscheidend: (1) Umsatz H1 2026 (Markterwartung: ~CNY 2,2–2,5 Mrd., +40–60% YoY auf H1 2025 CNY 1,57 Mrd.); (2) HSD-Shipments: Ist das 400K-Jahrestarget auf Kurs? (3) Adjustierter Non-IFRS-Verlust: Zeigt der Trend in Richtung niedrigerem operativem Burn?</p>
-      <div class="wenn-dann">
-        <div class="wenn">✓ Wenn positiv:</div>
-        <div class="dann">H1 2026 Umsatz >CNY 2,5 Mrd. UND HSD >100K Einheiten sichtbar → CEO-Guidance von 60% CAGR validiert → Aggressiver Aufbau der Position gerechtfertigt. Marktreaktion: Re-Rating Richtung HK$9–10.</div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Da 9660 an der HKEX notiert ist, sind keine finviz.com-Daten verfügbar und es wird <strong>halbjährlich</strong> berichtet (nicht quartalsweise). Alle Kennzahlen stammen aus den Horizon-IR-Geschäftsberichten, investing.com, TradingView und Yahoo Finance (Stand: 03.–08.06.2026).</p></div>
+      <p>Die zuletzt gemeldeten Jahresergebnisse 2025 (19.03.2026) zeigen das zentrale Spannungsfeld: starkes Umsatzwachstum bei gleichzeitig explodierendem Verlust. Der Umsatz stieg um 57,7% auf RMB 3,758 Mrd. (~$545 Mio.), getragen vom Hochlauf höherwertiger NOA-Systeme. Gleichzeitig schlug das Ergebnis von einem Nettogewinn von RMB 2,347 Mrd. (2024) in einen Nettoverlust von RMB 10,469 Mrd. um – maßgeblich durch nicht-zahlungswirksame Fair-Value-Effekte auf Wandelanleihen/Finanzverbindlichkeiten sowie den F&amp;E-Schub.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>FY2024</th><th>FY2025</th><th>YoY</th><th>Einordnung</th></tr></thead>
+          <tbody>
+            <tr><td>Umsatz</td><td>RMB 2,38 Mrd.</td><td>RMB 3,76 Mrd.</td><td class="beat">+57,7%</td><td class="beat">Beat (Konsens ~3,60 Mrd.)</td></tr>
+            <tr><td>Bruttomarge (Auto)</td><td>~69%</td><td>67,2%</td><td class="neutral">–</td><td>weiterhin sehr hoch</td></tr>
+            <tr><td>F&amp;E-Aufwand</td><td>RMB 3,16 Mrd.</td><td>RMB 5,15 Mrd.</td><td class="miss">+63,3%</td><td class="miss">137% des Umsatzes</td></tr>
+            <tr><td>Operatives Ergebnis</td><td>–RMB 2,15 Mrd.</td><td>–RMB 3,34 Mrd.</td><td class="miss">–55,7%</td><td class="miss">Verlust ausgeweitet</td></tr>
+            <tr><td>Nettoergebnis</td><td>+RMB 2,35 Mrd.</td><td>–RMB 10,47 Mrd.</td><td class="miss">Swing</td><td>v.a. Fair-Value-Effekte</td></tr>
+            <tr><td>Journey-Auslieferungen</td><td>2,89 Mio.</td><td>4,01 Mio.</td><td class="beat">+38,8%</td><td class="beat">Mid/High-NOA ~5x</td></tr>
+          </tbody>
+        </table>
       </div>
-      <div class="wenn-dann" style="margin-top:8px;">
-        <div class="wenn" style="color:var(--red)">✗ Wenn negativ:</div>
-        <div class="dann">Umsatz &lt;CNY 2,0 Mrd. oder HSD-Hochlauf deutlich hinter Guidance → Profitabilitätswende 2027 in Frage gestellt → Position auf 30–50% reduzieren.</div>
-      </div>
+      <p><strong>Beat/Miss-Bilanz:</strong> Beim letzten Halbjahresbericht lag der Umsatz mit 2,44 Mrd. HKD über der Erwartung (2,27 Mrd. HKD) – ein Umsatz-Beat. Das Ergebnis je Aktie verfehlte jedoch mit –0,46 HKD die Schätzung von –0,31 HKD deutlich (–46% Überraschung). Die Marktreaktion auf die Jahreszahlen war negativ: Die Aktie gab in der Folge mehrfach um 3,5–5% nach, da der Markt den Cash-Burn und die ausgeweiteten Verluste stärker gewichtete als das Top-Line-Wachstum. <strong>Stichtag nächste Ergebnisse: 27.08.2026 (H1 2026).</strong></p>
+      <div class="source">Quellen: BigGo Finance (19.–20.03.2026); Simply Wall St (FY2026-Forecast, 06/2026); TradingView 9660 (06/2026); Horizon IR FY2025.</div>
     </div>
   </div>
 
-  <div class="outlook-item">
-    <div class="outlook-num">Event 02 · Strategischer Meilenstein</div>
-    <div class="outlook-title">L4 Robotaxi-Pilot mit Ökosystem-Partnern — Q3 2026 (Jul–Sep)</div>
-    <div class="outlook-body">
-      <p>Horizon hat erstmals einen echten L4-Robotaxi-Pilot für Q3 2026 angekündigt – basierend auf der HSD-Lösung. Dies öffnet potenziell eine völlig neue Revenue-Kategorie jenseits der OEM-ADAS-Lizenzen: Software-as-a-Service-Modelle für Flottenbetreiber. Horizon wäre damit der erste chinesische Automotive-Chip-Anbieter mit direktem Robotaxi-Engagement.</p>
-      <div class="wenn-dann">
-        <div class="wenn">✓ Wenn positiv:</div>
-        <div class="dann">Robotaxi-Pilot startet wie angekündigt in Q3 2026 mit mindestens einem benannten Ökosystem-Partner und öffentlichen Testfahrten → L4-Narrativ bekommt glaubwürdige Zeitlinie → Bewertungs-Re-Rating auf höhere Multiples gerechtfertigt (P/S 25–30x auf 2026E). Aggressiv nachkaufen.</div>
+  <!-- ===================== S4 ===================== -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <p>Das Wachstum ist auf der Top-Line beeindruckend und mehrheitlich „echt" – also organisch, nicht durch M&amp;A oder Accounting aufgebläht. Nach +53,6% (2024) folgten +57,7% (2025); für 2026 stellt CEO Yu Kai eine weitere Beschleunigung des Automotive-Umsatzes auf rund +60% in Aussicht, bei einer Bruttomarge weiterhin über 60%. Der Konsens modelliert FY2026-Umsatz von ~RMB 6,1 Mrd.</p>
+      <p>Der eigentliche Werttreiber ist der <strong>Mix-Shift</strong>: Die Auslieferungen mittlerer/hoher NOA-Lösungen stiegen 2025 um nahezu das Fünffache und machten 45% der Auslieferungen aus. Yu Kai betonte, dass künftig der höhere <em>Durchschnittspreis je Fahrzeug</em> stärker zum Wachstum beitragen werde als die reine Stückzahl – HSD-Auslieferungen sollen 2026 rund 400.000 Einheiten erreichen, sechs weitere Modelle gehen in Serie. Das ist die qualitativ hochwertigste Form von Wachstum (Wertschöpfung statt Volumen).</p>
+      <p>Der Reifegrad ist „Hyper-Growth mit Profitabilitätslücke": hohe Wachstumsraten, aber operativer Hebel noch nicht greifbar, da F&amp;E schneller wächst als der Umsatz. Die größte Wachstumsschwäche ist die <strong>geografische Konzentration</strong>.</p>
+      <h3>Geografische Verteilung</h3>
+      <div class="geo-grid">
+        <div class="geo-card"><div class="geo-region">China (Inland)</div><div class="geo-pct">~95%</div><div class="geo-note">nahezu gesamter Umsatz</div></div>
+        <div class="geo-card"><div class="geo-region">International</div><div class="geo-pct">&lt;5%</div><div class="geo-note">Hochlauf langsam</div></div>
+        <div class="geo-card"><div class="geo-region">Vektor: VW/CARIZON</div><div class="geo-pct">2026e</div><div class="geo-note">erste VW-Modelle in Serie</div></div>
       </div>
-      <div class="wenn-dann" style="margin-top:8px;">
-        <div class="wenn" style="color:var(--red)">✗ Wenn negativ:</div>
-        <div class="dann">Robotaxi-Pilot wird auf 2027 verschoben ohne klare Begründung → L4-Roadmap-Glaubwürdigkeit sinkt → keine unmittelbaren Konsequenzen für ADAS-Kerngeschäft, aber Bewertungs-Multiple-Expansion schwieriger.</div>
-      </div>
+      <p>Die Abhängigkeit vom chinesischen Markt ist Risiko und Chance zugleich: maximaler Rückenwind durch den weltweit schnellsten Smart-Driving-Markt, aber praktisch kein geografischer Hedge. Die internationale Diversifikation hängt fast allein am VW/CARIZON-Strang.</p>
+      <div class="source">Quellen: BigGo Finance / FY2025-Earnings-Call (19.–23.03.2026); Simply Wall St Forecast (06/2026).</div>
     </div>
   </div>
 
-  <div class="outlook-item">
-    <div class="outlook-num">Event 03 · Moat-Verifikation</div>
-    <div class="outlook-title">Journey 7 + Riemann-BPU Ankündigung — H2 2026</div>
-    <div class="outlook-body">
-      <p>Horizon hat eine neue Chip-Generation (Journey 7) mit der "Riemann Architecture" BPU angekündigt, die "globale Leader im autonomen Fahren benchmarken" soll. Dies ist die entscheidende technologische Antwort auf NVIDIAs Thor-Plattform (700 TOPS) und Huaweis nächste Generation. Die Qualität dieser Ankündigung – konkrete TOPS, Effizienz-Metriken, erste OEM-Designs – wird bestimmen, ob Horizon seinen technologischen Vorsprung aufrechterhalten kann.</p>
-      <div class="wenn-dann">
-        <div class="wenn">✓ Wenn positiv:</div>
-        <div class="dann">Journey 7 überbietet NVIDIAs Thor-Nachfolger in Effizienz-per-TOPS bei niedrigerem Preis UND erste OEM-Designations werden angekündigt → Technologischer Moat für 2028–2030 gesichert → Langfristige Investment-These erheblich gestärkt.</div>
+  <!-- ===================== S5 ===================== -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Als HKEX-Titel ohne finviz-Coverage; Multiples aus investing.com, eToro, Simply Wall St (Stand 03.–08.06.2026). Klassische Gewinn-Multiples sind wegen der Verluste nicht aussagekräftig.</div>
+      <p>Bei einem Kurs von HK$ 5,30 liegt die Marktkapitalisierung bei rund HK$ 80 Mrd. (~$10,3 Mrd.). Ein KGV existiert nicht – das EPS ist mit –0,93 HKD negativ, ROE und ROA sind negativ. Die einzig sinnvolle Multiple-Brille ist das Umsatzmultiple.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>Wert</th><th>Einordnung</th></tr></thead>
+          <tbody>
+            <tr><td>KGV (TTM/FWD)</td><td>negativ</td><td>Verlustphase</td></tr>
+            <tr><td>P/S (auf FY2025)</td><td>~19–20x</td><td class="miss">hoch absolut</td></tr>
+            <tr><td>P/S (auf FY2026e ~RMB 6,1 Mrd.)</td><td>~12x</td><td class="neutral">wächst hinein</td></tr>
+            <tr><td>Kurs vs. 52W-Hoch</td><td>–53%</td><td class="beat">deutliche De-Rating</td></tr>
+            <tr><td>Analysten-Kursziel (Ø)</td><td>~HK$ 11,2</td><td class="beat">+110% Upside</td></tr>
+          </tbody>
+        </table>
       </div>
-      <div class="wenn-dann" style="margin-top:8px;">
-        <div class="wenn" style="color:var(--red)">✗ Wenn enttäuschend:</div>
-        <div class="dann">Journey 7 bleibt inkrementell und erreicht keine Top-Benchmark-Position vs. NVIDIA/Huawei → Technologische Differenzierung gerät unter Druck → Burggraben-Score würde von 8 auf 6–7 reduziert werden.</div>
-      </div>
+      <p>Die Bewertung ist <em>relativ</em> günstiger geworden – der Kurs hat sich gegenüber dem 52-Wochen-Hoch (11,32) mehr als halbiert, das P/S auf Basis der 2026er-Erwartung liegt nur noch bei ~12x. Absolut bleibt ein 12er-Umsatzmultiple für ein Unternehmen, das pro Umsatz-Yuan 1,37 Yuan F&amp;E verbrennt und dessen High-End-Burggraben angegriffen wird, jedoch ambitioniert. Die Wall Street ist mit 22 Kauf- und 0 Verkaufsempfehlungen extrem bullisch (Ziel ~HK$ 11–12) – ein Konsens, der die Disruptionsrisiken aus Sektion 9b m.E. unterschätzt. Score 5/10: keine Schnäppchen-Bewertung, aber auch nicht mehr die Euphorie-Bewertung vom IPO.</p>
+      <div class="source">Quellen: investing.com 9660 (03.06.2026); eToro 9660 (06/2026); Meyka/Simply Wall St (05–06/2026).</div>
     </div>
   </div>
 
-  <div class="source">Quartr FY2025 Earnings Summary (Mär 2026), BigGo Finance (Mär 2026), TradingView (Mai 2026), Horizon IR Roadmap-Statements</div>
-</section>
+  <!-- ===================== S6 ===================== -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 4/10</div>
+    </div>
+    <div class="section-body">
+      <p>Hier liegt die größte Schwäche der Investmentstory. Auf der Margenseite ist das Bild exzellent: Die Automotive-Bruttomarge von 67,2% unterstreicht den Software-/Lizenzcharakter und die Preissetzungsmacht im Mittelsegment. Doch unterhalb der Bruttomarge kippt das Bild dramatisch.</p>
+      <p>Der F&amp;E-Aufwand erreichte RMB 5,15 Mrd. (+63,3%) und damit 137% des Umsatzes – das Unternehmen gibt für Forschung mehr aus, als es einnimmt. Daraus resultierte ein operativer Verlust von RMB 3,34 Mrd. (bereinigt –RMB 2,37 Mrd.) und ein klar negativer operativer Cashflow. Der ausgewiesene Nettoverlust von RMB 10,47 Mrd. ist zwar zum Großteil ein nicht-zahlungswirksamer Fair-Value-Effekt auf Wandelanleihen (also kein echter Cash-Abfluss), doch der zugrundeliegende Cash-Burn aus dem operativen Geschäft ist real und beträchtlich.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>FY2025</th><th>Bewertung</th></tr></thead>
+          <tbody>
+            <tr><td>Bruttomarge (Auto)</td><td>67,2%</td><td class="beat">Top</td></tr>
+            <tr><td>F&amp;E / Umsatz</td><td>137%</td><td class="miss">extrem</td></tr>
+            <tr><td>Operativer Cashflow</td><td>negativ</td><td class="miss">Cash-Burn</td></tr>
+            <tr><td>FCF-Konversion</td><td>negativ</td><td class="miss">n/a in Verlustphase</td></tr>
+            <tr><td>Verschuldung</td><td>moderat, IPO-Cash-Polster</td><td class="neutral">Reichweite begrenzt</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Die zentrale Frage ist die Cash-Reichweite: Horizon zehrt vom IPO-Erlös (Oktober 2024). Hält der Burn-Pfad an, rückt eine erneute Kapitalmaßnahme (Verwässerung) in mittlerer Frist in den Bereich des Möglichen. Solange der operative Hebel nicht greift, ist die Kapitalqualität schwach – daher 4/10. Positiv: Das Management framt den Burn als bewusste strategische Wahl zum Aufbau von Basismodellen und technologischem Burggraben.</p>
+      <div class="source">Quellen: BigGo Finance (19.–20.03.2026); FY2025 Earnings Call Transcript (19.03.2026); Meyka 9660 (05/2026).</div>
+    </div>
+  </div>
 
-<div class="disclaimer">
-  <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich Informationszwecken und stellt keine Anlageberatung dar. Alle Angaben basieren auf öffentlich verfügbaren Daten bis Mai 2026. Investitionen in Wertpapiere sind mit Risiken verbunden, inklusive dem möglichen Totalverlust des eingesetzten Kapitals. Aktienanalyse Canvas v2.2 · Originalanalyse: 27. Februar 2026 · Update: 14. Mai 2026.
+  <!-- ===================== S7 ===================== -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <p>Der Peer-Vergleich (gewählte Gruppe: MBLY, NVDA-Automotive, QCOM-Automotive, AMBA, Black Sesame) zeigt Horizon als wachstumsstärksten, aber unprofitabelsten Pure-Player neben dem ebenfalls verlustträchtigen China-Rivalen Black Sesame – während die westlichen Giganten profitabel sind, aber im Auto nur ein Segment fahren.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Unternehmen</th><th>Umsatz (FY25)</th><th>Wachstum</th><th>Marktkap.</th><th>Profitabilität</th><th>Fokus</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Horizon (9660.HK)</strong></td><td>RMB 3,76 Mrd. (~$545M)</td><td class="beat">+57,7%</td><td>~$10,3 Mrd.</td><td class="miss">Nettoverlust</td><td>China ADAS/AD SoC+SW</td></tr>
+            <tr><td>Mobileye (MBLY)</td><td>$1,89 Mrd.</td><td class="neutral">+15%</td><td>~$14 Mrd.</td><td class="neutral">~breakeven (adj.)</td><td>Global ADAS/AV (EyeQ)</td></tr>
+            <tr><td>NVIDIA – Auto (NVDA)</td><td>Auto ~$1,7–2 Mrd.*</td><td class="beat">+stark</td><td>~$4 Bio.</td><td class="beat">hochprofitabel</td><td>High-End AV (Orin/Thor/Hyperion)</td></tr>
+            <tr><td>Qualcomm – Auto (QCOM)</td><td>Auto ~$4 Mrd.*</td><td class="beat">+stark</td><td>~$180 Mrd.</td><td class="beat">hochprofitabel</td><td>Snapdragon Ride/Cockpit</td></tr>
+            <tr><td>Ambarella (AMBA)</td><td>~$0,34 Mrd.</td><td class="neutral">moderat</td><td>~$3 Mrd.</td><td class="neutral">~breakeven</td><td>Edge-AI Vision SoC</td></tr>
+            <tr><td>Black Sesame (2533.HK)</td><td>CNY 822 Mio. (~$115M)</td><td class="beat">+73%</td><td>~HK$ 12,5 Mrd.</td><td class="miss">Nettoverlust</td><td>China AV SoC (Huashan/Wudang)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>*NVDA und QCOM sind diversifizierte Giganten; Automotive ist nur ein – wenn auch schnell wachsendes – Segment. Marktkapitalisierungen ca.-Werte (06/2026).</p>
+      <p><strong>Qualitative Einordnung:</strong> Horizon ist innerhalb Chinas der klare Massenmarkt-Champion (alle Top-10-OEMs, 310+ Design-Wins) und damit Black Sesame in Umsatz und Reife deutlich voraus. Gegen Mobileye punktet Horizon mit weit höherem Wachstum, verliert aber bei Profitabilität und globaler Reichweite (Mobileye-Pipeline allein $24,5 Mrd. über 8 Jahre, alle Top-10-Kunden global). Im High-End ist NVIDIA mit der Hyperion/Thor-Plattform der Maßstab, an dem Horizons SuperDrive gemessen wird – hier ist Horizon Herausforderer, nicht Platzhirsch. Der strategisch wichtigste Unterschied: Horizons Kunden (BYD, XPeng, Li) bauen zunehmend eigene Chips – ein struktureller Nachteil, den die westlichen Peers in dieser Schärfe (noch) nicht haben.</p>
+      <div class="source">Quellen: Mobileye 8-K FY2025 &amp; 10-Q Q1/2026 (SEC); Caixin Global (01.06.2026); Simply Wall St 2533 (04/2026); TIKR/Ambarella (06/2026); companiesmarketcap.</div>
+    </div>
+  </div>
+
+  <!-- ===================== S8 ===================== -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">19.03.2026 – Jahresergebnisse 2025 <span class="badge badge-yellow">Gemischt</span></div><div class="event-text">Umsatz +57,7% (Beat), aber Nettoverlust RMB 10,47 Mrd. und EPS-Miss. Aktie reagierte negativ. Quelle: BigGo / IR.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">FY2025 – HSD in Serie, Marktanteils-Gap zu Huawei auf 0,8 pp <span class="badge badge-green">Positiv</span></div><div class="event-text">Mid/High-NOA-Auslieferungen ~5x; 2026 ~400.000 HSD-Einheiten und 6 neue Serienmodelle erwartet. Quelle: BigGo (20.03.2026).</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">19.05./10.06.2026 – Virtuelle Hauptversammlung (AGM) <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Genehmigung der Abschlüsse und Board-Mandate. Quelle: TipRanks (19.05.2026).</div></div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">Mai–Juni 2026 – Kurs am 52W-Tief <span class="badge badge-red">Negativ</span></div><div class="event-text">Profitabilitäts- und Cash-Burn-Sorgen drücken die Aktie unter HK$ 5,50; YTD-Performance negativ. Quelle: Meyka / Simply Wall St.</div></div></div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">16.03.2026 – NVIDIA GTC: BYD &amp; Geely auf DRIVE Hyperion/Thor (L4) <span class="badge badge-red">Negativ</span></div><div class="event-text">Zwei der größten China-OEMs entwickeln L4-Programme auf NVIDIAs Plattform – direkter Druck auf Horizons High-End. Quelle: NVIDIA Newsroom / TechNode (16.–17.03.2026).</div></div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">01.06.2026 – BYD stellt eigenen 4nm-Chip Xuanji A3 (700 TOPS) vor <span class="badge badge-red">Negativ</span></div><div class="event-text">In Serie; XPeng (Turing) und Li Auto (MAHE M100) ebenfalls auf Eigenchips. „Kunden werden Konkurrenten." Quelle: Caixin Global (01.06.2026).</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">16.03.2026 – VW treibt Fahrassistenz „ohne NVIDIA" voran (via CARIZON) <span class="badge badge-green">Positiv</span></div><div class="event-text">Mehrere VW-Modelle mit CARIZON/HSD-Technik gehen 2026 in Serie – Beleg für Horizons Relevanz auch bei westlichen OEMs. Quelle: CNBC (16.03.2026).</div></div></div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">2026 – Chinas EV-Markt im „Survival Test" <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Preiskampf und Konsolidierung der OEM-Landschaft erhöhen den Margendruck entlang der Lieferkette. Quelle: CNBC (30.12.2025).</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">2026 – Geopolitik / Export-Restriktionen <span class="badge badge-yellow">Neutral</span></div><div class="event-text">US-China-Spannungen bleiben Hintergrundrisiko für Foundry-Zugang und Auslandsexpansion. Quelle: diverse (06/2026).</div></div></div>
+      <div class="source">Quellen: NVIDIA Newsroom (16.03.2026); TechNode (17.03.2026); Caixin Global (01.06.2026); CNBC (16.03./30.12.2025); TipRanks (05/2026).</div>
+    </div>
+  </div>
+
+  <!-- ===================== S9 ===================== -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 3/10</div>
+    </div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">5,30</div><div class="kpi-sub">HKD</div></div>
+        <div class="kpi-card"><div class="kpi-label">Trend</div><div class="kpi-value red">Abwärts</div><div class="kpi-sub">seit März</div></div>
+        <div class="kpi-card"><div class="kpi-label">vs. SMA50</div><div class="kpi-value red">darunter</div><div class="kpi-sub">~6,6–8,6</div></div>
+        <div class="kpi-card"><div class="kpi-label">vs. SMA200</div><div class="kpi-value red">darunter</div><div class="kpi-sub">~9,5</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI(14)</div><div class="kpi-value yellow">schwach</div><div class="kpi-sub">Richtung oversold</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Tief</div><div class="kpi-value">5,07</div><div class="kpi-sub">Support</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Hoch</div><div class="kpi-value">11,32</div><div class="kpi-sub">–53%</div></div>
+      </div>
+      <p>Das Chartbild ist klar bärisch. Der Kurs ist von rund 7,6 HKD (März) auf ~5,30 HKD gefallen und notiert damit nur knapp über dem 52-Wochen-Tief von 5,07 – und deutlich unter allen wichtigen gleitenden Durchschnitten (SMA20/50/200). Der primäre Trend zeigt nach unten; jede Erholung wurde zuletzt verkauft.</p>
+      <p>Die entscheidende Unterstützung liegt im Bereich 5,07–5,30 (52W-Tief). Ein nachhaltiger Bruch darunter würde die Tür zu einer Neubewertung Richtung 4,00–4,50 öffnen. Auf der Oberseite sind die heruntergekommenen MAs (zuerst ~6,5, dann ~8,5–9,5) starke Widerstände – eine Trendwende bräuchte eine Rückeroberung dieser Zonen mit Volumen. Der RSI nähert sich dem überverkauften Bereich, was kurzfristige Gegenbewegungen ermöglicht, den Abwärtstrend aber nicht aufhebt. Für kurzfristig orientierte Anleger ist das ein klares Timing-Risiko. Score 3/10.</p>
+      <div class="source">Quellen: investing.com 9660-Technicals (06/2026); TradingView 9660 (06/2026); eToro/Meyka (05–06/2026). MA-Werte je nach Quelle/Stichtag.</div>
+    </div>
+  </div>
+
+  <!-- ===================== S10 ===================== -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 3/10</div>
+    </div>
+    <div class="section-body">
+      <h3>9a) Strukturelle &amp; zyklische Risiken</h3>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ High-End-Disruption durch NVIDIA (Thor/Hyperion)</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div><div class="event-text">BYD &amp; Geely bauen L4-Programme auf NVIDIA. Verliert Horizon das High-End, bleibt es im margenärmeren Mittelsegment gefangen. Wahrscheinlichkeit: hoch.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Kunden werden Konkurrenten (OEM-Eigenchips)</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div><div class="event-text">BYD (Xuanji A3), XPeng (Turing), Li Auto (MAHE M100) ersetzen Zukauf-Chips schrittweise. Großkunden mit &gt;1 Mio. Fahrzeugen erreichen die Eigenentwicklungs-Schwelle. Wahrscheinlichkeit: hoch.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Huawei-Vollstack (Chip+Algorithmus+Cloud)</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">Geschlossenes Ökosystem mit Marktanteilsführung; Abstand zu Horizon zuletzt nur 0,8 pp. Wahrscheinlichkeit: mittel-hoch.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Cash-Burn &amp; mögliche Verwässerung</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">F&amp;E bei 137% des Umsatzes; greift der operative Hebel nicht, droht mittelfristig eine Kapitalmaßnahme. Wahrscheinlichkeit: mittel.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ China-Konzentration / Geopolitik</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">~95% Inlandsumsatz; kaum geografischer Hedge, Export-/Foundry-Risiken. Wahrscheinlichkeit: mittel.</div></div>
+
+      <h3>9b) AI-Risiko &amp; technologische Disruption (Fokus dieser Analyse)</h3>
+      <p>Dies ist die Kernfrage des Updates. Horizons Geschäftsmodell wird durch zwei AI-getriebene Kräfte zugleich verändert. <strong>Bärisches Szenario:</strong> Der High-End-Compute-Markt konsolidiert sich auf NVIDIA (Thor) und Huawei, während die volumenstärksten Kunden ihre Mittelklasse-Chips selbst entwickeln. Horizon würde dann zwischen einem nicht erreichbaren High-End und einem wegbrechenden Volumengeschäft zerrieben – die installierte Basis von 4 Mio. Chips wäre eine Momentaufnahme, kein Burggraben. In diesem Szenario stagniert der Umsatz ab 2027/28, und die Profitabilität rückt in weite Ferne.</p>
+      <p><strong>Bullisches Szenario:</strong> Smart Driving wird Standardausstattung über die <em>gesamte</em> Modellpalette – ein massiv wachsender Gesamtmarkt, in dem nicht jeder OEM die F&amp;E für eigene Chips über alle Preisklassen stemmen kann. Eigenentwicklung lohnt sich nur für die größten Hersteller und nur in Top-Modellen; die „lange Mitte" des Marktes bleibt ein Merchant-Silicon-Geschäft, das Horizon mit seiner Toolchain, Serienreife und Kostenführerschaft bedient. HSD (auf Journey 6) liefert glaubwürdig urbanes NOA; Journey 7 zielt 2027 auf Tesla-Niveau. Die VW/CARIZON-Achse zeigt, dass selbst westliche OEMs Horizon NVIDIA vorziehen können.</p>
+
+      <h3>9c) Chancen</h3>
+      <p>Mix-Shift zu höherpreisigen NOA-Systemen (höherer ASP je Fahrzeug); HSD-Hochlauf auf ~400.000 Einheiten 2026; „Agentic CAR" SoC/OS als nächste Produktkategorie; internationale Expansion über CARIZON; potenzielle Margenwende, sobald der F&amp;E-Anteil am Umsatz sinkt.</p>
+
+      <h3>9d) Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags:</strong> F&amp;E &gt; Umsatz; negativer operativer Cashflow; extreme Kundenkonzentration mit gleichzeitiger Vertikalisierung der Kunden; nicht-zahlungswirksamer, aber riesiger Buchverlust, der die Berichterstattung verzerrt. <strong>Dealbreaker (Verkauf):</strong> wenn zwei oder mehr Top-3-Kunden öffentlich auf Eigenchips/NVIDIA für ihre Volumenmodelle umstellen <em>und</em> das Umsatzwachstum unter 30% fällt.</p>
+      <p>Wegen der Häufung struktureller Hoch-Risiken (invertierter Score, 10 = kein Risiko): <strong>3/10</strong>.</p>
+      <div class="source">Quellen: Caixin Global (01.06.2026); NVIDIA Newsroom (16.03.2026); BigGo Finance (03/2026); Li Auto 6-K (05/2026); Horizon IR FY2025.</div>
+    </div>
+  </div>
+
+  <!-- ===================== S11 ===================== -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring</div>
+      <div class="section-score">Ø 5,0/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Visualisierung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td>Geschäftsmodell</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Klares, skalierbares SoC+SW-Modell, aber Auto-/China-lastig</td></tr>
+            <tr><td>Burggraben</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Skala &amp; Design-Wins real, High-End-Moat angegriffen</td></tr>
+            <tr><td>Operative Entwicklung (4Q)</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Umsatz-Beat, aber EPS-Miss &amp; Verlust ausgeweitet</td></tr>
+            <tr><td>Wachstum</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>+57,7%, Mix-Shift zu NOA, aber Profitlücke</td></tr>
+            <tr><td>Bewertung</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>De-Rating –53%, aber ~12x P/S(2026e) ist nicht billig</td></tr>
+            <tr><td>Cashflow</td><td>4/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td><td>Top-Bruttomarge, aber F&amp;E 137% &amp; Cash-Burn</td></tr>
+            <tr><td>Risiken (invertiert)</td><td>3/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:30%"></div></div><span class="score-num">3</span></div></td><td>NVIDIA + OEM-Eigenchips + Cash-Burn = hohes Risiko</td></tr>
+            <tr><td>Technische Analyse</td><td>3/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:30%"></div></div><span class="score-num">3</span></div></td><td>Abwärtstrend, am 52W-Tief, unter allen MAs</td></tr>
+            <tr style="background:rgba(255,105,0,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td>
+              <td><strong>5,0/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%;background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">5,0</span></div></td>
+              <td>Hohe Wachstumsqualität trifft auf erodierenden Moat &amp; Cash-Burn</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Änderung vs. Voranalyse:</strong> Burggraben und Risiken wurden gegenüber dem Stand März/Mai 2026 nach unten angepasst – die Disruptions-These (NVIDIA Thor in China, BYD/XPeng/Li-Eigenchips) hat sich von einem theoretischen zu einem sichtbar materialisierenden Risiko entwickelt.</p>
+      <div class="source">Quellen: Eigene Einschätzung auf Basis der Sektionen 1–10 (Stand 08.06.2026).</div>
+    </div>
+  </div>
+
+  <!-- ===================== S12 ===================== -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-score">HALTEN</div>
+    </div>
+    <div class="section-body">
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p>Säule 1: Wachstumsqualität. Der Umsatz wuchs +57,7% auf RMB 3,76 Mrd., und 2026 soll der Auto-Umsatz um weitere ~60% zulegen – getrieben nicht durch billige Stückzahlen, sondern durch den Mix-Shift zu hochwertigen NOA-Systemen (mittlere/hohe NOA-Auslieferungen ~5x, 45% Anteil). Höherer ASP je Fahrzeug ist die hochwertigste Wachstumsform.</p>
+          <p>Säule 2: Struktureller Marktzugang. 310+ Design-Wins, 200+ Modelle auf der Straße, alle Top-10-OEMs Chinas, 67,2% Auto-Bruttomarge und das VW/CARIZON-JV (mehrere Modelle 2026 in Serie) belegen tiefe Verankerung. Der Abstand zu Huawei schrumpfte auf 0,8 pp. Smart Driving wird Standard – der Gesamtmarkt explodiert.</p>
+          <p>Säule 3: Bewertung &amp; Sentiment. Der Kurs hat sich gegenüber dem Hoch (11,32) mehr als halbiert; das P/S(2026e) liegt bei ~12x. Die Wall Street ist mit 22 Kauf-/0 Verkaufsempfehlungen und einem Ø-Ziel von ~HK$ 11 extrem konstruktiv (+110% Upside). Greift der operative Hebel, ist das Re-Rating-Potenzial erheblich.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p>Risiko 1: High-End-Disruption. BYD und Geely bauen ihre L4-Programme auf NVIDIA DRIVE Hyperion/Thor (GTC, 16.03.2026). Verliert Horizon das High-End an NVIDIA und Huawei, bleibt es im margenärmeren Mittelfeld – der teuerste Teil der Story bricht weg.</p>
+          <p>Risiko 2: Kunden werden Konkurrenten. BYD (Xuanji A3, 700 TOPS, in Serie ab 06/2026), XPeng (Turing, ~alle Modelle bis 04/2026) und Li Auto (MAHE M100 im neuen L9) ersetzen Zukauf-Chips. Wer Millionen Fahrzeuge verkauft, baut selbst – Horizons Volumenbasis ist damit angreifbar.</p>
+          <p>Risiko 3: Cash-Burn &amp; Technik. F&amp;E bei 137% des Umsatzes, negativer operativer Cashflow, Nettoverlust RMB 10,5 Mrd.; mittelfristig droht Verwässerung. Charttechnisch am 52W-Tief, unter allen MAs – ein P/S von ~12x ist nicht billig, falls das Wachstum durch die Kundenvertikalisierung unter 30% fällt.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung (ausgewogen)</h3>
+      <p>Beide Narrative haben Substanz, doch das bärische trifft präziser den Kern dieser Analyse. Horizon bleibt ein außergewöhnliches Wachstumsunternehmen mit echtem Marktzugang – aber die spezifische These, nach der gefragt wurde (Disruption durch NVIDIA Thor und OEM-Eigenchips), hat sich 2026 von einer Sorge zu einer Tatsache entwickelt. Das ist der Grund, warum die Aktie trotz +57,7% Umsatzwachstum am 52-Wochen-Tief steht: Der Markt bepreist nicht das vergangene Wachstum, sondern die Frage, wem die nächste Generation der China-Smart-Driving-Wertschöpfung gehört.</p>
+      <p>Entscheidend ist die Differenzierung: Im <em>High-End</em> und bei den <em>größten Volumen-OEMs</em> ist Horizons Position strukturell bedroht. In der <em>„langen Mitte"</em> – kleinere und mittlere OEMs, mittlere Preisklassen, wo Eigenentwicklung sich nie rechnet – ist Horizon weiterhin der natürliche Merchant-Silicon-Champion. Die Investmentfrage reduziert sich darauf, ob dieses Mittelfeld groß und margenstark genug ist, um Cash-Burn in Profitabilität zu drehen, bevor die Großkunden abwandern.</p>
+      <p>Risk/Reward: ca. –25% Downside (Bruch des 52W-Tiefs Richtung ~HK$ 4,00 bei weiterem Burn/Verwässerung) vs. +40–110% Upside (HSD-Hochlauf + Margenwende, Street-Ziel ~HK$ 11). Das Chance/Risiko-Verhältnis ist attraktiv, aber asymmetrisch in der <em>Wahrscheinlichkeit</em>: Die Disruptionsrisiken sind unmittelbar, der Profit-Hebel liegt Jahre entfernt. Ich könnte falsch liegen, falls Smart Driving so schnell zur Vollausstattung wird, dass Horizons Mittelfeld-Volumen die Großkunden-Abwanderung mehr als kompensiert.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Katalysatoren / Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kurzfristig (0–6 M)</strong></td><td>H1-2026-Earnings (27.08.), Cash-Burn, Charttechnik am Tief</td><td><span class="badge badge-yellow">Halten / nicht nachkaufen</span></td></tr>
+            <tr><td><strong>Mittelfristig (6–24 M)</strong></td><td>HSD-Hochlauf (~400k), Eigenchip-Verdrängung, F&amp;E-Quote</td><td><span class="badge badge-yellow">Beobachten, an Stärke reduzieren</span></td></tr>
+            <tr><td><strong>Langfristig (2–5 J)</strong></td><td>Journey 7 / „Agentic CAR", Margenwende, Marktstandard-Durchdringung</td><td><span class="badge badge-orange">Spekulativ tranchiert</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese (Zusammenfassung)</h3>
+      <p>Horizon Robotics ist Chinas Smart-Driving-Champion mit erstklassigem Wachstum und Marktzugang – aber sein wertvollster Burggraben (das High-End und die Großvolumen-Kunden) wird zeitgleich von NVIDIA/Huawei und den eigenen Kunden angegriffen. Solange der Cash-Burn (F&amp;E 137% des Umsatzes) anhält und unklar ist, ob das margenstarke Mittelfeld die Großkunden-Vertikalisierung kompensiert, überwiegt die Vorsicht. <strong>HALTEN</strong> – kein Verkauf wegen der starken Wachstums- und Design-Win-Basis, aber kein Kauf, solange die Disruptions-These sich beschleunigt statt abklingt.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">HK$ 6,00–7,50</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–3 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–25%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+42%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:1,7</div></div>
+      </div>
+
+      <h3>Was falsifiziert die These?</h3>
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>≥2 Top-3-Kunden stellen Volumenmodelle auf Eigenchips/NVIDIA um → reduzieren</li>
+            <li>Umsatzwachstum fällt unter 30% YoY → verkaufen</li>
+            <li>Nachhaltiger Bruch unter HK$ 5,07 (52W-Tief) → Position reduzieren</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>HSD-Auslieferungen erreichen/übertreffen ~400k 2026 → aufbauen</li>
+            <li>F&amp;E-Quote fällt klar unter 100% des Umsatzes (Margenwende) → nachkaufen</li>
+            <li>Neuer Top-10-OEM-Design-Win für High-End (HSD/Journey 7) → aufbauen</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Welcher Anlegertyp passt?</h3>
+      <div class="investor-grid">
+        <div class="investor-yes"><h5>✅ Geeignet für</h5><ul><li>Risikobereite Growth-/Thematik-Investoren (China-AV)</li><li>Langfristanleger mit hoher Volatilitätstoleranz</li><li>Contrarians, die auf das Mittelfeld-Szenario setzen</li></ul></div>
+        <div class="investor-no"><h5>❌ NICHT geeignet für</h5><ul><li>Value-/Income-Investoren (keine Gewinne, keine Dividende)</li><li>Kurzfristige Trader (Abwärtstrend)</li><li>Anleger ohne Toleranz für Verwässerungsrisiko</li></ul></div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten</span></td><td>Erst Margenwende / Trendwende abwarten</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-yellow">Halten, nicht aufstocken</span></td><td>Bestand halten, neue Käufe nur bei Triggern</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-orange">Kleine Tranche am Tief</span></td><td>R/R am 52W-Tief, enger Stop unter 5,07</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-orange">Spekulativ tranchiert</span></td><td>Nur, wenn Mittelfeld-These überzeugt</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Synthese der Sektionen 1–11; investing.com / Simply Wall St Konsens (06/2026).</div>
+    </div>
+  </div>
+
+  <!-- ===================== S13 ===================== -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook</div>
+      <div class="section-note">3 entscheidende Events</div>
+    </div>
+    <div class="section-body">
+      <div class="outlook-card">
+        <h4>📊 Event 1: H1-2026-Halbjahresergebnisse – voraussichtlich 27.08.2026</h4>
+        <p>Der erste Stresstest der 2026er-Guidance (+60% Auto-Umsatz, GM &gt;60%, ~400k HSD). Entscheidend ist nicht nur das Top-Line-Wachstum, sondern die F&amp;E-Quote als Profitabilitäts-Indikator.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Auto-Umsatz ≥+55% YoY <em>und</em> die F&amp;E-Quote sinkt erkennbar Richtung &lt;120% des Umsatzes → Margenwende beginnt sich abzuzeichnen, kleine Aufstockung gerechtfertigt.<br><br>
+          <strong>Wenn:</strong> Wachstum verlangsamt sich unter 40% <em>oder</em> der Cash-Burn beschleunigt → Disruptions-/Burn-These bestätigt, Position reduzieren.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>📊 Event 2: HSD-Auslieferungs- &amp; Design-Win-Updates – laufend H2 2026</h4>
+        <p>HSD (Journey 6) ist Horizons High-End-Antwort auf NVIDIA/Huawei. Der Hochlauf auf ~400.000 Einheiten und neue High-End-Design-Wins entscheiden, ob Horizon das margenstarke Segment verteidigt.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> HSD erreicht/übertrifft ~400k <em>und</em> mindestens ein neuer Top-10-OEM gewinnt HSD/Journey 7 → High-End-Moat intakt, bullischer als der Markt erwartet.<br><br>
+          <strong>Wenn:</strong> ein weiterer Großkunde wechselt zu NVIDIA Thor oder Eigenchip für sein High-End → Kernthese gefährdet, Reduktion.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>📊 Event 3: OEM-Eigenchip-Hochlauf (BYD/XPeng/Li) – 2026/2027</h4>
+        <p>Der direkteste Test der Disruptions-These: Wie schnell ersetzen die Großkunden zugekaufte Chips durch Xuanji A3, Turing &amp; MAHE M100 – und über welche Preisklassen hinweg?</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Eigenchips bleiben auf die Top-Modelle der größten OEMs beschränkt, während Horizon das breite Mittelfeld behält → das Mittelfeld-Szenario greift, langfristig konstruktiv.<br><br>
+          <strong>Wenn:</strong> Eigenchips diffundieren in die Volumen-/Mittelklasse <em>oder</em> ≥2 Top-3-Kunden reduzieren Horizon-Bezug deutlich → struktureller Schaden, Verkaufssignal.
+        </div>
+      </div>
+      <div class="source">Quellen: TradingView/Simply Wall St (Earnings-Termin 27.08.2026); Horizon IR FY2025-Guidance; Caixin Global (01.06.2026); NVIDIA Newsroom (16.03.2026).</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung dar. Sie wurde nicht von einem lizenzierten Anlageberater erstellt. Alle Angaben beruhen auf öffentlich verfügbaren Daten bis zum 08. Juni 2026 und können fehlerhaft oder veraltet sein. Investitionen in Wertpapiere – insbesondere in unprofitable Wachstumsunternehmen – sind mit hohen Risiken bis zum Totalverlust verbunden. Treffe eigene Entscheidungen bzw. konsultiere einen lizenzierten Berater. Aktienanalyse Canvas v2.2 · Update: 08. Juni 2026.</div>
 </div>
-
-</div><!-- /main -->
-
 </body>
 </html>
