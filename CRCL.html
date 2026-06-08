@@ -5,125 +5,110 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CRCL – Aktienanalyse Canvas v2.2</title>
 <style>
-:root {
-  --primary: #8b5cf6;
-  --primary-dark: #6d28d9;
-  --bg: #0f0f12;
-  --bg-card: #1a1a1f;
-  --bg-card2: #22222a;
-  --border: #2e2e38;
-  --text: #e8e8ec;
-  --text-muted: #888898;
-  --text-dim: #555566;
-  --green: #22c55e;
-  --red: #ef4444;
-  --yellow: #f59e0b;
-  --blue: #3b82f6;
+:root{
+  --primary:#8b5cf6; --primary-dark:#6d28d9;
+  --bg:#0f0f12; --bg-card:#1a1a1f; --bg-card2:#22222a; --border:#2e2e38;
+  --text:#e8e8ec; --text-muted:#888898; --text-dim:#555566;
+  --green:#22c55e; --red:#ef4444; --yellow:#f59e0b; --blue:#3b82f6; --purple:#8b5cf6; --teal:#14b8a6;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
-.header { background: linear-gradient(135deg, #0e0018 0%, #1a0028 40%, #0f0f12 100%); border-bottom: 1px solid var(--primary); padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; }
-.header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
-.header-left h1 span { color: var(--primary); }
-.header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
-.header-right { text-align: right; }
-.price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
-.price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
-.price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
-.price-change.up   { background: rgba(34,197,94,0.15); color: var(--green); }
-.price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
-.nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100; }
-.nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
-.nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
-.main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
-.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
-.kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
-.kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-.kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
-.kpi-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-.kpi-value.green  { color: var(--green); }
-.kpi-value.red    { color: var(--red); }
-.kpi-value.orange { color: var(--primary); }
-.section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
-.section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
-.section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.section-title  { font-size: 16px; font-weight: 700; color: white; }
-.section-score  { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
-.section-note   { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
-.section-body   { padding: 20px 24px; }
-p { margin-bottom: 12px; color: var(--text); }
-p:last-child { margin-bottom: 0; }
-h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
-h3:first-child { margin-top: 0; }
-.table-wrap { overflow-x: auto; margin: 16px 0; }
-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
-tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(139,92,246,0.04); }
-.beat { color: var(--green); font-weight: 600; }
-.miss { color: var(--red); font-weight: 600; }
-.neutral { color: var(--yellow); font-weight: 600; }
-.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
-.badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
-.badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
-.badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
-.badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
-.badge-orange { background: rgba(139,92,246,0.15); color: var(--primary); }
-.event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
-.event-item:last-child { border-bottom: none; }
-.event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
-.dot-green { background: var(--green); }
-.dot-red { background: var(--red); }
-.dot-yellow { background: var(--yellow); }
-.event-label { font-weight: 600; color: white; }
-.event-text { font-size: 14px; color: var(--text); }
-.risk-item { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
-.risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.risk-title { font-weight: 600; color: white; font-size: 14px; }
-.score-bar { display: flex; align-items: center; gap: 10px; }
-.score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-.score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #c084fc); }
-.score-num { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
-.bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-@media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
-.bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
-.bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
-.bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-.bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-.rating-box { background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(139,92,246,0.04)); border: 1px solid rgba(139,92,246,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
-.rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
-.rating-item .val { font-size: 20px; font-weight: 800; color: white; }
-.rating-item .val.buy { color: var(--green); }
-.rating-item .val.hold { color: var(--yellow); }
-.rating-item .val.sell { color: var(--red); }
-.trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
-@media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
-.trigger-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
-.trigger-card h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-.trigger-card.buy h5 { color: var(--green); }
-.trigger-card.sell h5 { color: var(--red); }
-.trigger-list { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
-.trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
-.trigger-list li::before { content: "→"; position: absolute; left: 0; }
-.investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
-@media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
-.investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
-.investor-no { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
-.investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
-.investor-no h5 { color: var(--red); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
-.investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
-.investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
-.investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
-.outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
-.outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
-.outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
-.outlook-card .when-then strong { color: var(--primary); }
-.source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
-.source a { color: var(--text-dim); }
-.disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
-.alert-box { background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
-.pill { display: inline-block; background: rgba(139,92,246,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+.header{background:linear-gradient(135deg,#0e0018 0%,#1a0028 40%,#0f0f12 100%);border-bottom:1px solid var(--primary);padding:36px 40px 28px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;}
+.header-left h1{font-size:32px;font-weight:700;color:#fff;letter-spacing:-0.5px;}
+.header-left h1 span{color:var(--primary);}
+.header-left .subtitle{color:var(--text-muted);font-size:14px;margin-top:4px;}
+.header-right{text-align:right;}
+.price-tag{font-size:38px;font-weight:800;color:var(--primary);line-height:1;}
+.price-meta{color:var(--text-muted);font-size:13px;margin-top:4px;}
+.price-change{display:inline-block;padding:2px 8px;border-radius:4px;font-size:13px;font-weight:600;margin-top:4px;}
+.price-change.up{background:rgba(34,197,94,0.15);color:var(--green);}
+.price-change.down{background:rgba(239,68,68,0.15);color:var(--red);}
+.nav{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:100;}
+.nav a{color:var(--text-muted);text-decoration:none;padding:14px 16px;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;}
+.nav a:hover{color:var(--primary);border-bottom-color:var(--primary);}
+.main{max-width:1100px;margin:0 auto;padding:32px 40px 60px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px;}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;}
+.kpi-value{font-size:22px;font-weight:700;color:#fff;margin-top:4px;}
+.kpi-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.kpi-value.green{color:var(--green);}.kpi-value.red{color:var(--red);}.kpi-value.orange{color:var(--primary);}
+.section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden;}
+.section-header{background:var(--bg-card2);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.section-number{background:var(--primary);color:#fff;width:28px;height:28px;border-radius:6px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-title{font-size:16px;font-weight:700;color:#fff;}
+.section-score{margin-left:auto;font-size:14px;font-weight:700;color:var(--primary);}
+.section-note{font-size:12px;color:var(--text-dim);background:rgba(46,46,56,0.4);border-radius:4px;padding:4px 10px;margin-left:auto;}
+.section-body{padding:20px 24px;}
+p{margin-bottom:12px;color:var(--text);}p:last-child{margin-bottom:0;}
+h3{font-size:14px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;margin:20px 0 8px;}h3:first-child{margin-top:0;}
+.table-wrap{overflow-x:auto;margin:16px 0;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--bg-card2);color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:10px 12px;border-bottom:1px solid rgba(46,46,56,0.5);color:var(--text);}
+tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(139,92,246,0.05);}
+.beat{color:var(--green);font-weight:600;}.miss{color:var(--red);font-weight:600;}.neutral{color:var(--yellow);font-weight:600;}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}
+.badge-green{background:rgba(34,197,94,0.15);color:var(--green);}
+.badge-red{background:rgba(239,68,68,0.15);color:var(--red);}
+.badge-yellow{background:rgba(245,158,11,0.15);color:var(--yellow);}
+.badge-blue{background:rgba(59,130,246,0.15);color:var(--blue);}
+.badge-orange{background:rgba(139,92,246,0.15);color:var(--primary);}
+.event-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(46,46,56,0.5);align-items:flex-start;}
+.event-item:last-child{border-bottom:none;}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0;}
+.dot-green{background:var(--green);}.dot-red{background:var(--red);}.dot-yellow{background:var(--yellow);}
+.event-label{font-weight:600;color:#fff;}
+.event-text{font-size:14px;color:var(--text);}
+.risk-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.risk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.risk-title{font-weight:600;color:#fff;font-size:14px;}
+.score-bar{display:flex;align-items:center;gap:10px;}
+.score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#a78bfa);}
+.score-num{font-weight:700;color:var(--primary);font-size:15px;min-width:32px;}
+.bull-bear-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:700px){.bull-bear-grid{grid-template-columns:1fr;}}
+.bull-card{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:16px;}
+.bear-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:16px;}
+.bull-card h4{color:var(--green);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:.5px;}
+.bear-card h4{color:var(--red);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:.5px;}
+.rating-box{background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(139,92,246,0.04));border:1px solid rgba(139,92,246,0.3);border-radius:12px;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:20px 0;}
+.rating-item label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:.5px;display:block;margin-bottom:4px;}
+.rating-item .val{font-size:20px;font-weight:800;color:#fff;}
+.rating-item .val.buy{color:var(--green);}.rating-item .val.hold{color:var(--yellow);}.rating-item .val.sell{color:var(--red);}
+.trigger-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+@media(max-width:700px){.trigger-grid{grid-template-columns:1fr;}}
+.trigger-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.trigger-card h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+.trigger-card.buy h5{color:var(--green);}.trigger-card.sell h5{color:var(--red);}
+.trigger-list{font-size:13px;color:var(--text);list-style:none;padding:0;}
+.trigger-list li{margin-bottom:6px;padding-left:14px;position:relative;}
+.trigger-list li::before{content:"→";position:absolute;left:0;}
+.investor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+@media(max-width:600px){.investor-grid{grid-template-columns:1fr;}}
+.investor-yes{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px;}
+.investor-no{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:12px;}
+.investor-yes h5{color:var(--green);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-no h5{color:var(--red);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-yes li,.investor-no li{font-size:13px;color:var(--text);margin-bottom:4px;list-style:none;padding-left:14px;position:relative;}
+.investor-yes li::before{content:"✓";position:absolute;left:0;color:var(--green);}
+.investor-no li::before{content:"✗";position:absolute;left:0;color:var(--red);}
+.geo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0;}
+.geo-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.geo-region{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;}
+.geo-pct{font-size:20px;font-weight:700;color:#fff;}
+.geo-note{font-size:12px;color:var(--text-muted);}
+.outlook-card{background:var(--bg-card2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:16px;margin-bottom:14px;}
+.outlook-card h4{color:#fff;font-size:14px;margin-bottom:8px;}
+.outlook-card .when-then{font-size:13px;color:var(--text);margin-top:8px;}
+.outlook-card .when-then strong{color:var(--primary);}
+.source{font-size:11px;color:var(--text-dim);margin-top:12px;padding-top:10px;border-top:1px solid rgba(46,46,56,0.5);}
+.source a{color:var(--text-dim);}
+.disclaimer{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text-dim);margin-top:32px;}
+.alert-box{background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px;}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+.pill{display:inline-block;background:rgba(139,92,246,0.12);color:var(--primary);border-radius:4px;padding:1px 7px;font-size:13px;font-weight:600;}
 </style>
 </head>
 <body>
@@ -131,18 +116,19 @@ tr:hover td { background: rgba(139,92,246,0.04); }
 <div class="header">
   <div class="header-left">
     <h1>Circle Internet Group <span>CRCL.NYSE</span></h1>
-    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 16. Mai 2026 · NYSE · Sektor: Fintech / Stablecoin Infrastructure</div>
-    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-      <span class="badge badge-orange">USDC Issuer</span>
-      <span class="badge badge-blue">Stablecoin Network</span>
-      <span class="badge badge-yellow">Post-IPO Volatility</span>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 08. Juni 2026 · NYSE · Sektor: Fintech / Stablecoin Infrastructure</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-orange">USDC #2 Stablecoin</span>
+      <span class="badge badge-blue">Reserve-Income-Modell</span>
+      <span class="badge badge-green">GENIUS Act</span>
+      <span class="badge badge-yellow">ARC L1 (Beta 2026)</span>
     </div>
   </div>
   <div class="header-right">
-    <div class="price-tag">$114.00</div>
-    <div class="price-meta">Schlusskurs 15.05.2026 · NYSE</div>
-    <div class="price-change down">▼ −7,98% (−$9,88) Tag · −8,4% Woche</div>
-    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $31,00 – $298,99</div>
+    <div class="price-tag">$80,27</div>
+    <div class="price-meta">Schlusskurs 05.06.2026 · NYSE</div>
+    <div class="price-change down">▼ −9,8 % (05.06.)</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">52W: $49,90 – $298,99</div>
   </div>
 </div>
 
@@ -165,419 +151,386 @@ tr:hover td { background: rgba(139,92,246,0.04); }
 <div class="main">
 
   <div class="kpi-grid" style="margin-top:24px;">
-    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">$114,00</div><div class="kpi-sub">USD · 15.05.2026</div></div>
-    <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value">$28,3 Mrd</div><div class="kpi-sub">Post-IPO Q2 2025</div></div>
-    <div class="kpi-card"><div class="kpi-label">P/E (TTM)</div><div class="kpi-value orange">~80x</div><div class="kpi-sub">SBC-belastet</div></div>
-    <div class="kpi-card"><div class="kpi-label">USDC Circulation</div><div class="kpi-value">$77,0 Mrd</div><div class="kpi-sub">+28% YoY</div></div>
-    <div class="kpi-card"><div class="kpi-label">Adj. EBITDA Q1'26</div><div class="kpi-value green">$151 Mio</div><div class="kpi-sub">+24% YoY · 22% Marge</div></div>
-    <div class="kpi-card"><div class="kpi-label">Q1 Revenue</div><div class="kpi-value">$694 Mio</div><div class="kpi-sub">+20% YoY · Miss vs $715</div></div>
-    <div class="kpi-card"><div class="kpi-label">Onchain Vol Q1</div><div class="kpi-value green">$21,5 Bio</div><div class="kpi-sub">+263% YoY</div></div>
-    <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value" style="font-size:16px;">Aug 2026</div><div class="kpi-sub">Q2 2026 Report</div></div>
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">$80,27</div><div class="kpi-sub">USD · 05.06.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value">~$19,9 Mrd</div><div class="kpi-sub">248,6 Mio Aktien</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/Sales (TTM)</div><div class="kpi-value orange">~7,0x</div><div class="kpi-sub">EV/Sales ~6,4x</div></div>
+    <div class="kpi-card"><div class="kpi-label">EV/adj. EBITDA</div><div class="kpi-value">~30x</div><div class="kpi-sub">TTM</div></div>
+    <div class="kpi-card"><div class="kpi-label">Adj. EBITDA-Marge</div><div class="kpi-value green">53 %</div><div class="kpi-sub">Q1'26</div></div>
+    <div class="kpi-card"><div class="kpi-label">USDC Umlauf</div><div class="kpi-value">$77,0 Mrd</div><div class="kpi-sub">Q1'26 · +28 % YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">Marktanteil</div><div class="kpi-value">~24 %</div><div class="kpi-sub">#2 hinter USDT (~59 %)</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value" style="font-size:18px;">18.08.2026</div><div class="kpi-sub">Q2'26</div></div>
   </div>
 
+  <div class="alert-box">⚠️ <strong>Update-Hinweis:</strong> Diese Analyse aktualisiert die Version vom 16.05.2026 (Kurs $114, Rating HALTEN, Ø 6,5). Fokus dieses Updates gemäß Fragestellung: <strong>Stablecoin-Adoption seit Januar 2026</strong>, <strong>Wettbewerbs-Moat ggü. anderen Stablecoin-Anbietern</strong> sowie die <strong>relative Bewertung</strong>. Der Kurs ist seither um ~30 % gefallen (Krypto-Risk-off, Wettbewerbssorgen, Zinssenkungserwartungen).</div>
+
+  <!-- ============ SEKTION 1 ============ -->
   <div class="section" id="s1">
-    <div class="section-header"><div class="section-number">1</div><div class="section-title">Geschäftsmodell</div><div class="section-score">Score: 8/10</div></div>
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
     <div class="section-body">
-      <p>Circle Internet Group ist Emittent und Verwalter des USDC-Stablecoins (US-Dollar) sowie des kleineren EURC (Euro). Der Kerngeschäftsmodell ist konzeptionell einfach: USDC ist ein Token, der 1:1 durch kurzlaufende US-Treasuries und Cash gedeckt ist. Circle hält diese Reserven, verdient darauf risikofreie Zinsen (Reserve Income), und teilt einen erheblichen Teil davon mit Distributionspartnern – vor allem Coinbase, das historisch ~50% des USDC-Bestands hält und somit ~50% der dort generierten Reserveeinnahmen erhält.</p>
-      <p>Q1 2026 zeigt klar die Risiken dieses Modells: Von $694 Mio Total Revenue & Reserve Income entfallen $653 Mio (94%) auf Reserve Income, also reine Zinserträge auf $77 Mrd Reserven. Die Reserverate sank YoY um 66 Basispunkte auf 3,5%, was direkt auf niedrigere SOFR und somit gefallene Fed-Sätze zurückzuführen ist. Die Distribution Costs (an Coinbase und andere Partner) lagen bei ~$406 Mio, sodass die RLDC-Marge (Revenue Less Distribution Cost) bei 41,4% landete – immerhin 1,5pp über Vorjahr.</p>
-      <p>Zweite und wachsende Säule ist der „Agent Stack" und die Arc-Blockchain. Circle baut eine stablecoin-native Layer-1, deren Token im Mai 2026 in einer Privatplatzierung 740 Mio Stück zu $0,30 verkaufte ($222 Mio Brutto-Erlös, $3 Mrd FDV). Das ist signifikant: Apollo, BlackRock, ARK Invest, a16z crypto und Standard Chartered sind investiert. Daneben gibt es „Other Revenue" ($42 Mio, +2x YoY) aus Circle Payments Network (CPN, $8,3 Mrd annualisiertes Volumen), Managed Payments (April-Launch für Banken), Tokenized Money Market Fund USYC ($3 Mrd AUM, +300% YoY) und das EURC ($358 Mio Outstandings, +2x YoY).</p>
-      <p>Die Unit Economics sind aufgrund der Zinsabhängigkeit volatil: Jeder 25-bps-Senkung der Fed-Funds-Rate reduziert das Reserve Income (bei konstanten Reserven) um ~$190 Mio annualisiert. Compensiert werden muss das durch (a) USDC-Wachstum (Volumen × Rate) und (b) Diversifizierung in zinsunabhängige Revenue-Streams wie CPN, Arc, Agent Stack.</p>
-      <div class="source">Quellen: Circle Q1 2026 Earnings Release (Businesswire, 11.05.2026); Q1 Earnings Call Transcript (Motley Fool, Globe&Mail, 11.05.2026); CRCL 8-K Filing (StockTitan, 11.05.2026)</div>
+      <p>Circle ist der Emittent des USD-Stablecoins <strong>USDC</strong> (sowie des Euro-Stablecoins EURC). Das Geschäftsmodell ist im Kern ein <strong>Reserve-Income-Modell</strong>: Für jeden im Umlauf befindlichen USDC hält Circle 1:1 hochliquide Reserven – überwiegend kurzlaufende US-Staatsanleihen im BlackRock Circle Reserve Fund sowie Bankguthaben – und vereinnahmt die darauf anfallenden Zinsen. Im Geschäftsjahr 2025 stammten $2,637 Mrd der gesamten $2,747 Mrd Umsatz- und Reserveerträge aus genau dieser Reserveverzinsung; sonstige Erlöse (Subscription, Transaktionsgebühren) trugen nur $110 Mio bei. Das Modell ist damit hochgradig zinssensitiv und skaliert mit der USDC-Umlaufmenge, nicht mit dem Kryptopreis.</p>
+      <p>Strategisch organisiert sich Circle in drei Säulen: (1) <strong>Arc Blockchain & Developer Infrastructure</strong> – eine eigene Layer-1-Kette plus Interoperabilitäts-Tools wie CCTP und Gateway; (2) <strong>Circle Digital Assets & Services</strong> – USDC, EURC, das tokenisierte Treasury-Produkt USYC sowie Partner-Stablecoins über das xReserve-Programm; (3) <strong>Circle Applications</strong> – u. a. das Circle Payments Network (CPN) und das Circle-Account-Banking-Interface. Kundensegmente sind Krypto-Börsen, Fintechs, Zahlungsdienstleister und zunehmend traditionelle Finanzinstitute.</p>
+      <p>Die zentrale ökonomische Eigenheit – und gleichzeitig Schwäche – ist die <strong>Distributionsstruktur</strong>: Circle gibt mehr als die Hälfte seiner Reserveerträge an Vertriebspartner ab. Coinbase erhält 100 % der Reserveerträge auf USDC, das auf der Coinbase-Plattform gehalten wird, plus 50 % der Erträge aus allen übrigen Kanälen. 2024 flossen $908 Mio der gesamten Distributionskosten von $1,01 Mrd allein an Coinbase – rund $0,54 je verdientem Umsatzdollar. Das Modell ist also asset-light und skalierbar, die einbehaltene Marge ist aber strukturell gedeckelt.</p>
+      <p>Unit Economics (vereinfacht): Bei ~$77 Mrd USDC-Umlauf und einer effektiven Reserverendite um ~4 % ergeben sich grob ~$3,0 Mrd Brutto-Reserveerträge p. a., von denen nach Distributionskosten weniger als die Hälfte bei Circle verbleibt. Jeder zusätzliche Milliarden-USDC ist hochmarginal, aber der Ertrag pro Token sinkt mit fallenden Zinsen und steigender Coinbase-Konzentration.</p>
+      <div class="source">Quellen: Circle Q1'26 Press Release, circle.com/pressroom (11.05.2026); Circle FY2025 Report; insights4vc „Inside Circle's Stablecoin Economics" (19.03.2026); Decrypt S-1-Analyse; Morningstar CRCL-Profil (06.2026).</div>
     </div>
   </div>
 
+  <!-- ============ SEKTION 2 ============ -->
   <div class="section" id="s2">
-    <div class="section-header"><div class="section-number">2</div><div class="section-title">Burggraben & Wettbewerbsvorteile</div><div class="section-score">Score: 7/10</div></div>
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben & Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
     <div class="section-body">
-      <p><strong>Netzwerkeffekte (stark):</strong> USDC ist nach Tether (USDT) der zweitgrößte Stablecoin nach Marktkapitalisierung, dominiert aber zunehmend die regulierten westlichen Märkte. Laut Visa-Daten entfallen 63% aller realwirtschaftlichen Stablecoin-Transaktionen auf USDC, und ~80% der Onchain-Dollar-Aktivität läuft über USDC. Das ist ein klassischer Netzwerkeffekt: Mehr Wallets/Exchanges/Apps integrieren USDC, weil die Liquidität dort am tiefsten ist – und genau das zieht weitere Integrationen an.</p>
-      <p><strong>Regulatorischer Burggraben (sehr stark, asymmetrisch):</strong> Circle ist im Gegensatz zu Tether vollständig reguliert (Money Transmitter Licenses in fast allen US-Staaten, EU MiCA-konform). Mit dem GENIUS Act (Juni 2025 verabschiedet, schafft Bundesrecht für Stablecoins) und dem anstehenden CLARITY Act (erwartet H2 2026) wird der regulatorische Vorsprung zum Burggraben: Tether bleibt offshore, US-Institutionelle dürfen aber nur compliant Stablecoins nutzen. Erebor Bank, Arbor Bank, Kyriba – Treasury- und B2B-Anwendungen wandern strukturell zu Circle.</p>
-      <p><strong>Brand & Partnerschaften:</strong> Meta nutzt USDC für Creator-Auszahlungen, DoorDash für Fahrerzahlungen, Polymarket für Funding & Settlement. Das sind hochsichtbare „Lighthouse-Cases", die das Vertrauen weiter zementieren. Auch DTCC testet tokenisierte Wertpapier-Settlements mit USDC.</p>
-      <p><strong>Schwächen des Burggrabens:</strong> Die strukturelle Abhängigkeit von Coinbase ist real und unangenehm – Coinbase erhält 100% der Reserveeinnahmen auf den von ihm gehaltenen USDC-Beständen, und kürzlich hat Coinbase seine eigene Stablecoin-Strategie (über USDC hinaus) ausgebaut. Außerdem stehen mehrere bankgestützte Stablecoins am Start (JPM Coin, geplante Konsortien). Das größte Risiko bleibt die mögliche „Bankifizierung" – wenn Banken eigene Stablecoins emittieren dürfen und das per Gesetz pari mit USDC stehen, schmilzt der Vorsprung schnell.</p>
-      <div class="source">Quellen: Q1 2026 Earnings Call (Allaire/Visa-Daten); Wells Fargo CRCL Note (CNBC, 05.05.2026); StockTitan 8-K, 11.05.2026</div>
+      <p><strong>Regulatorischer Vorsprung (stärkster Moat-Faktor).</strong> USDC gilt als der „Compliance-Stablecoin": vollständige 1:1-Deckung mit hochliquiden Aktiva, monatliche Attestierung (inzwischen durch Deloitte), Regulierung über 20+ Chains und enge Ausrichtung am US-amerikanischen GENIUS Act. Während Tether unter dem GENIUS Act für US-Endkunden faktisch eine US-Banklizenz oder -Partnerschaft benötigt, ist Circle bereits regelkonform aufgestellt. In einem Markt, der von einer Grauzone zu einem lizenzierten, auditierten Finanzinstrument wird, ist das ein realer Startvorteil.</p>
+      <p><strong>Netzwerkeffekte & Transaktionsdominanz.</strong> CEO Jeremy Allaire betont, USDC mache rund 80 % der Dollar-Digitalwährungs-<em>Transaktionen</em> aus – gemessen am On-Chain-Volumen ($21,5 Bio in Q1'26, +263 % YoY) ist USDC das mit Abstand aktivste regulierte Dollar-Token. USDC ist tief in DeFi, Börsen (~29 % des Binance-Spot-Volumens) und in Coinbases Base-Netzwerk ($3,7 Mrd USDC) verankert. Für integrierte Enterprises entstehen über CCTP/Gateway echte Wechselkosten.</p>
+      <p><strong>Schwächen des Burggrabens (kritisch).</strong> Erstens die <strong>Distributionsabhängigkeit</strong> von Coinbase: Circle kann den Vertrag nicht ohne Coinbases Zustimmung verlassen, er verlängert sich automatisch um Drei-Jahres-Perioden, und >50 % der Reserveerträge fließen ab. Zweitens die <strong>Marktanteilsdynamik</strong>: USDT bleibt mit ~$190 Mrd und ~59 % klar Marktführer und hat im April 2026 erstmals seit vier Monaten wieder Anteile zurückgewonnen, während USDCs Umlauf quartalsweise nahezu stagniert. Drittens eine <strong>Welle neuer, gut kapitalisierter Wettbewerber</strong> (siehe Sektion 7/8): Stripes Tempo (mit Visa als Validator), eine geplante Stablecoin-Plattform von Visa/Mastercard/Stripe, SoFiUSD als erster bank-emittierter Consumer-Stablecoin sowie weitere Bank-Stablecoins, die der GENIUS Act ausdrücklich ermöglicht.</p>
+      <p>Fazit: Der Moat ist vorhanden – regulatorische Glaubwürdigkeit plus Transaktions-Netzwerk –, aber er <strong>verengt sich</strong>. Die Herabstufung von 7 auf 6 reflektiert das deutlich intensivere Wettbewerbsumfeld seit der letzten Analyse.</p>
+      <div class="source">Quellen: CNBC „Squawk Box" Allaire-Interview (11.05.2026); CoinDesk April-2026-Stablecoin-Report; Bitrue „Stablecoin Trends May 2026"; popularfintech „Why everyone is wrong about Circle" (27.11.2025); Decrypt/insights4vc Coinbase-Revenue-Share.</div>
     </div>
   </div>
 
+  <!-- ============ SEKTION 3 ============ -->
   <div class="section" id="s3">
-    <div class="section-header"><div class="section-number">3</div><div class="section-title">Letzte 4 Quartale</div><div class="section-score">Beat-Ratio: 3/4 EPS · 2/4 Revenue</div></div>
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Beat-Ratio EPS: 4/4 · Umsatz gemischt</div>
+    </div>
     <div class="section-body">
-      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Circle ging im Juni 2025 an die Börse. Vergleichsbasis Q1/Q2 2025 ist eingeschränkt, da Pre-IPO-Daten teils restated wurden. Folgende Zahlen aus Q1'26 8-K Filing (Tabelle der letzten 5 Quartale).</div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Quartal</th><th>Revenue</th><th>YoY</th><th>Adj. EBITDA</th><th>Net Income</th><th>USDC Circ.</th><th>Reaktion</th></tr></thead>
+          <thead><tr><th>Quartal</th><th>Umsatz & Reserveertrag</th><th>YoY</th><th>USDC-Umlauf (Periodenende)</th><th>Net Income (fortgef.)</th><th>Adj. EBITDA</th></tr></thead>
           <tbody>
-            <tr><td><strong>Q1 2026</strong></td><td>$694 Mio</td><td class="beat">+20%</td><td>$151 Mio</td><td>$55 Mio</td><td>$77,0 Mrd</td><td class="miss">−7,98% Beat EPS / Miss Revenue</td></tr>
-            <tr><td>Q4 2025</td><td>$770 Mio</td><td class="beat">+44%</td><td>$140 Mio</td><td>$133 Mio</td><td>$76,5 Mrd</td><td class="beat">+10% am Tag</td></tr>
-            <tr><td>Q3 2025</td><td>$709 Mio</td><td class="beat">+38%</td><td>$122 Mio</td><td>$214 Mio</td><td>$74,5 Mrd</td><td class="neutral">+2%</td></tr>
-            <tr><td>Q2 2025</td><td>$658 Mio</td><td class="beat">+53%</td><td>$117 Mio</td><td>$162 Mio</td><td>$68,2 Mrd</td><td class="beat">IPO-Quartal: +175% seit IPO</td></tr>
-            <tr><td>Q1 2025</td><td>$578 Mio</td><td>–</td><td>$122 Mio</td><td>$65 Mio</td><td>$60,0 Mrd</td><td>–</td></tr>
+            <tr><td>Q2'25</td><td>~$658 Mio</td><td class="beat">+50 %*</td><td>~$61 Mrd</td><td class="miss">−$482 Mio**</td><td>~$130 Mio</td></tr>
+            <tr><td>Q3'25</td><td>$740 Mio</td><td class="beat">+66 %</td><td>$73,7 Mrd</td><td class="beat">$214 Mio (+202 %)</td><td>~$155 Mio</td></tr>
+            <tr><td>Q4'25</td><td>$770 Mio</td><td class="beat">+77 %</td><td>$75,3 Mrd</td><td class="neutral">FY25 −$70 Mio**</td><td>$167 Mio (+412 %)</td></tr>
+            <tr><td><strong>Q1'26</strong></td><td><strong>$694 Mio</strong></td><td class="neutral">+20 %</td><td><strong>$77,0 Mrd</strong> (+28 %)</td><td class="miss">$55 Mio (−15 %)</td><td>$151 Mio (+24 %)</td></tr>
           </tbody>
         </table>
       </div>
-      <p><strong>Wichtigste Beobachtungen Q1 2026:</strong> Revenue fiel sequenziell um 10% (von $770 auf $694 Mio), getrieben durch die niedrigere Reserverate (3,5% vs ~4,2% in Q4'25) und ein flat sequenzielles USDC-Circulation. Das ist die deutlichste Schwäche des Modells: Wenn Onchain-Volumina explodieren (+263% YoY), die Circulation aber stagniert, weil der Krypto-Markt nachgibt (−45% seit Oktober 2025), bekommen wir Margin-Komprimierung statt Wachstum.</p>
-      <p><strong>Adjusted EBITDA $151 Mio (+24% YoY)</strong> war der Lichtblick – die RLDC-Marge konnte trotz fallender Zinsen um 1,5pp auf 41,4% steigen, weil On-Platform-USDC bei Circle Gateway/Wallets statt bei Coinbase deutlich profitabler ist. <strong>Net Income $55 Mio (−15% YoY)</strong> spiegelt den Post-IPO SBC-Aufwand ($70 Mio höher YoY) wider. Adj. EPS $0,21 schlug Konsens $0,19.</p>
-      <p>Wichtige Management-Statements: Guidance 2026 unverändert (USDC CAGR 40%, RLDC 38-40%), Arc-Token-Erträge sind <em>nicht</em> in der Guidance enthalten und werden auf den Q2-Call (August) quantifiziert. Marktreaktion am Tag: Premarket +8%, dann Drehung auf −5%, weil das Revenue-Miss schwerer wog als der EBITDA-Beat.</p>
-      <div class="source">Quellen: Circle Q1 2026 Earnings Release & Presentation (Businesswire, 11.05.2026); TIKR Q1 2026 Recap (15.05.2026); Rollingout Analyse (11.05.2026)</div>
+      <p>* Reserveertrag Q2'25 +50 % YoY. ** Net Loss in Q2'25 / FY25 maßgeblich durch nicht-zahlungswirksame Effekte: $424 Mio IPO-bezogene Stock-Based Compensation sowie Fair-Value-Effekte aus der Wandelanleihe.</p>
+      <p>Die <strong>operative Botschaft ist zweischneidig</strong>. Einerseits hält die Profitabilität: Adj. EBITDA wuchs in Q1'26 um 24 % auf $151 Mio (Marge ~53 %), das bereinigte EPS von $0,21 übertraf den Konsens ($0,18). Andererseits hat sich das <strong>Umsatzwachstum drastisch verlangsamt</strong> – von +77 % (Q4'25) auf nur noch +20 % (Q1'26) –, der Umsatz von $694 Mio verfehlte die Erwartung ($714,9 Mio) um 2,9 %, das Net Income sank um 15 % YoY (höhere SBC und +32 % Opex), und der USDC-Umlauf legte QoQ nur von $75,3 auf $77,0 Mrd zu (~+2,3 %). Das Management adressierte explizit die „flat USDC circulation"-Sorge und stellte Effizienzfokus in Aussicht.</p>
+      <p>Marktreaktion: Trotz des Umsatz-Miss sprang die Aktie am Earnings-Tag ~16 % (Schub durch die ARC-Token-Presale-Ankündigung). <strong>Stichtag nächste Quartalsergebnisse (Q2'26): 18.08.2026</strong> – die dann ausgewiesene USDC-Umlauf- und Reserverendite-Entwicklung ist der entscheidende Datenpunkt für die These.</p>
+      <div class="source">Quellen: Circle Q1'26 Press Release (11.05.2026); StockTitan CRCL-News; Investing.com / Google Finance (Stand 05.06.2026); finviz.com Key Metrics (Stand 08.06.2026).</div>
     </div>
   </div>
 
+  <!-- ============ SEKTION 4 ============ -->
   <div class="section" id="s4">
-    <div class="section-header"><div class="section-number">4</div><div class="section-title">Wachstumseinordnung</div><div class="section-score">Score: 7/10</div></div>
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
     <div class="section-body">
-      <h3>Wachstums-Trajektorie</h3>
-      <p>Circle steht an einem Inflection Point. Das Kerngeschäft (USDC-Reserve-Income) wächst zwar weiter, aber langsamer als angenommen: USDC-Circulation +28% YoY ist solide, sequenziell aber 0%. Management bekräftigte das Multi-Year-Ziel von 40% CAGR – das setzt deutliche Beschleunigung in H2 2026 voraus (Krypto-Rebound, CLARITY-Act-Klarheit, institutionelle Adoption).</p>
-      <p>Die <strong>echte Wachstumsstory liegt in „Other Revenue"</strong>: $42 Mio in Q1'26 (+100% YoY), getrieben von CPN-Volumen ($8,3 Mrd annualisiert, +17% QoQ), Agent Wallets, Nanopayments und USYC. Full-Year-Guidance für Other Revenue: $160 Mio (Mittelpunkt). Wenn das skaliert, reduziert sich die Zinsabhängigkeit drastisch.</p>
-      <h3>Profitabilitätswachstum</h3>
-      <p>Adj. EBITDA wuchs +24% YoY auf $151 Mio, schneller als Revenue (+20%). RLDC-Marge zog 130bps QoQ und 150bps YoY an. Die operative Hebelwirkung funktioniert – allerdings nur, wenn die Reserveerträge stabil bleiben.</p>
-      <h3>Onchain-Volumen-Boom</h3>
-      <p>Die Verzehnfachung der Transaktionsvolumina ($21,5 Bio in Q1'26, +263% YoY) bei nur 0% sequenziellem Circulation-Wachstum bedeutet: USDC wird signifikant produktiver eingesetzt. Velocity (Vol/Circulation) stieg von 7x auf 27x. Das ist das Vorzeigeargument für „echte" Adoption (B2B, Treasury, Agentic AI Payments) statt rein spekulativer Halterei.</p>
-      <h3>Reifegrad</h3>
-      <p>Hyper-Growth-Phase, aber mit Volatilität. Das Geschäft ist zinszyklisch wie eine Bank – nur ohne Bankregulierung (noch). Reifegrad: „Maturing Hyper-Growth" mit klarem Optionalitäts-Wert aus Arc/Agent/USYC.</p>
-      <div class="source">Quellen: Q1 2026 Earnings Call Transcript (Allaire/Fox-Geen); StockTitan 8-K; CRCL Investor Relations (investor.circle.com)</div>
+      <p><strong>USDC-Umlauf (Kernmetrik).</strong> $44 Mrd (YE 2024) → $75,3 Mrd (YE 2025, +72 %) → $77,0 Mrd (Q1'26). Das ist über mehrere Jahre eindrucksvoll, doch die YoY-Wachstumsrate hat sich von +108 % (Q3'25) über +72 % (Q4'25) auf +28 % (Q1'26) verlangsamt, und quartalsweise stagniert der Umlauf praktisch. Das On-Chain-Transaktionsvolumen wächst dagegen weiter explosiv (+263 % YoY in Q1'26), was für Nutzungsintensität spricht – aber nicht für mehr einbehaltene Reserven.</p>
+      <h3>Adoption seit Januar 2026 – Industrie vs. USDC-Anteil</h3>
+      <p>Der Gesamtmarkt boomt: Die Stablecoin-Marktkapitalisierung stieg von $308,6 Mrd (Januar 2026) auf ein Allzeithoch von ~$321 Mrd (April, dritter Monatsrekord in Folge) und ~$323 Mrd Anfang Mai. Das ist genau die Kernfrage der These – und der Befund ist ernüchternd für Circle: <strong>USDC partizipiert am Marktwachstum, gewinnt aber keine Anteile</strong>. Im April hat ausgerechnet USDT mit dem größten absoluten Dollar-Zuwachs seit Oktober 2025 ($5,7 Mrd) Marktanteile zurückerobert.</p>
+      <div class="geo-grid">
+        <div class="geo-card"><div class="geo-region">USDT (Tether)</div><div class="geo-pct">~59 %</div><div class="geo-note">~$190 Mrd · ATH · Anteil ↑</div></div>
+        <div class="geo-card"><div class="geo-region">USDC (Circle)</div><div class="geo-pct">~24 %</div><div class="geo-note">~$77 Mrd · Anteil seitwärts</div></div>
+        <div class="geo-card"><div class="geo-region">USDe (Ethena)</div><div class="geo-pct">~1 %</div><div class="geo-note">$3,8 Mrd · 7 Monate ↓</div></div>
+        <div class="geo-card"><div class="geo-region">PYUSD (PayPal)</div><div class="geo-pct">~1 %</div><div class="geo-note">$3,4 Mrd · stagniert</div></div>
+        <div class="geo-card"><div class="geo-region">USDG / RLUSD u. a.</div><div class="geo-pct">~15 %</div><div class="geo-note">Newcomer · klein, schnell</div></div>
+      </div>
+      <p><strong>Geografische Expansion.</strong> Das Wachstum verlagert sich in Schwellenmärkte mit hoher Friktion im klassischen Finanzsystem: Afrika-Kooperation mit Sasai Fintech/Cassava (24.03.2026), Cross-Border-Partnerschaft mit Nium, und konkrete USDC-Nutzung in Märkten wie Vietnam, die ARC nach dem Mainnet adressieren soll. <strong>Profitabilitätswachstum vs. Umsatz:</strong> Adj. EBITDA wächst zuletzt schneller als Net Income (operativer Hebel), aber der Reservezins-Rückgang (−103 bps YoY bereits in Q2'25 sichtbar) bremst die Top-Line strukturell.</p>
+      <p>Das Wachstum ist „echt" (organisch, nicht M&A-getrieben), aber <strong>reift sichtbar</strong> und ist zinsabhängig. Herabstufung von 7 auf 6.</p>
+      <div class="source">Quellen: CoinDesk Stablecoin-Report April 2026 (07.05.2026); KuCoin Stablecoin-Flows (05.2026); stablecoininsider.org „Trends 2026"; Circle Q1'26 IR; bitcoinfoundation.org (21.04.2026); finviz.com (Stand 08.06.2026).</div>
     </div>
   </div>
 
+  <!-- ============ SEKTION 5 ============ -->
   <div class="section" id="s5">
-    <div class="section-header"><div class="section-number">5</div><div class="section-title">Bewertung & Multiples</div><div class="section-score">Score: 5/10</div></div>
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung & Multiples</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
     <div class="section-body">
-      <p>Die Bewertung ist nach dem starken Rückgang vom 52W-Hoch ($298,99) auf $114 deutlich rationaler geworden, aber immer noch nicht günstig. Aktuelle Kennzahlen (15.05.2026, Stockanalysis/Investing.com):</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Kennzahl</th><th>CRCL (15.05.26)</th><th>Sektor-Median</th><th>Einordnung</th></tr></thead>
+          <thead><tr><th>Kennzahl</th><th>Wert (@ ~$80)</th><th>Einordnung</th></tr></thead>
           <tbody>
-            <tr><td>Market Cap</td><td>$28,3 Mrd</td><td>–</td><td>Mid-Cap</td></tr>
-            <tr><td>P/E (TTM, GAAP)</td><td class="miss">~80x (volatil)</td><td>~28x</td><td class="miss">Premium-bewertet</td></tr>
-            <tr><td>P/E (Adj.)</td><td>~38x</td><td>~22x</td><td class="neutral">Premium, aber tragbar</td></tr>
-            <tr><td>P/Sales (TTM)</td><td>~9,3x</td><td>~5x</td><td class="miss">Hoch</td></tr>
-            <tr><td>EV/EBITDA</td><td>~45x</td><td>~18x</td><td class="miss">Sehr hoch</td></tr>
-            <tr><td>Morningstar Fair Value</td><td>$96 (Q-Rating)</td><td>–</td><td class="neutral">−16% zu aktuellem Kurs</td></tr>
-            <tr><td>Analyst-Konsens 12M-PT</td><td>$140,85 (12 Buy, 2 Sell)</td><td>–</td><td class="beat">+23,5% Upside</td></tr>
+            <tr><td>Market Cap</td><td>~$19,9 Mrd</td><td>248,6 Mio Aktien (+178 % YoY durch IPO)</td></tr>
+            <tr><td>Enterprise Value</td><td>~$18,4 Mrd</td><td>Net Cash ~$1,50 Mrd ($6,04/Aktie)</td></tr>
+            <tr><td>P/Sales (TTM)</td><td class="neutral">~7,0x</td><td>TTM-Umsatz $2,86 Mrd</td></tr>
+            <tr><td>EV/Sales (TTM)</td><td class="neutral">~6,4x</td><td>nach -30 % deutlich entspannt</td></tr>
+            <tr><td>EV/adj. EBITDA (TTM)</td><td class="neutral">~30x</td><td>adj. EBITDA TTM ~$0,6 Mrd</td></tr>
+            <tr><td>P/E (GAAP, TTM)</td><td class="miss">n. a. (Verlust)</td><td>TTM EPS −$0,07 (IPO-SBC verzerrt)</td></tr>
+            <tr><td>P/E (Forward)</td><td class="miss">~50–57x</td><td>Guidance EPS $0,27–0,44/Qtl</td></tr>
+            <tr><td>Konsens-Kursziel</td><td class="beat">$145,80</td><td>Spanne $65–243 · Rating „Buy"</td></tr>
           </tbody>
         </table>
       </div>
-      <h3>Recent Analyst Target Adjustments (12.-13.05.2026, post Q1)</h3>
-      <ul style="list-style:none; padding-left:14px;">
-        <li>→ JPMorgan: $112 → $155 (+38%)</li>
-        <li>→ Needham: $130 → $150 (+15%)</li>
-        <li>→ Mizuho: $120 → $135 (+13%, Neutral)</li>
-        <li>→ Compass Point: $77 → $97 (+26%)</li>
-        <li>→ Deutsche Bank: $83 → $101 (+22%)</li>
-        <li>→ Clear Street: $152 → $157 (+3%)</li>
-      </ul>
-      <p>Die Re-Rating-Welle nach Q1 ist klar bullish – fast alle Häuser haben Targets erhöht, getrieben durch den Arc-Token-Erlös ($222 Mio Cash, $3 Mrd Network-Valuation) und die Agent-Stack-Optionalität. Compass Point von $77 auf $97 (immer noch Sell/Underperform) ist die einzige weiter skeptische Stimme.</p>
-      <p><strong>Eigene Einordnung:</strong> Mit P/E adj. ~38x ist CRCL gepreist für 30%+ EPS-CAGR und wachsende Other-Revenue-Anteile. Das ist machbar, wenn (a) die Fed nicht 100bps senkt und (b) Arc/Agent Stack 2027 monetarisiert. Beides nicht garantiert. Bei P/S 9,3x ist die Aktie definitiv kein Value-Play.</p>
-      <div class="source">Quellen: stockanalysis.com/stocks/crcl, investing.com/equities/circle-internet-group-inc, Morningstar (15.05.2026); TipRanks/TheFly Analyst-Updates (12.-13.05.2026)</div>
+      <p>Nach dem Kurssturz von $114 (15.05.) auf ~$80 (05.06.) und ~73 % unter dem Allzeithoch von $298,99 (Juni 2025) hat sich die <strong>Bewertung spürbar normalisiert</strong>, ist aber nicht billig. Bei ~7x Umsatz und ~30x EV/adj. EBITDA preist der Markt weiterhin substanzielles Wachstum ein – in einem Geschäft, dessen Top-Line zu ~99 % vom Reservezins abhängt und das in eine Zinssenkungsphase läuft. Morningstar weist auf eine deutliche Prämie zum Fair-Value-Schätzwert hin.</p>
+      <p>Die GAAP-P/E ist durch die IPO-bedingte SBC ($424 Mio) und Wandelanleihen-Bewertung nicht aussagekräftig; ökonomisch relevanter ist die FCF-/EV-Sales-Betrachtung. <strong>Aufwertung von 5 auf 6:</strong> Der Rücksetzer verbessert das Chance-Risiko-Verhältnis, ohne die strukturellen Margenrisiken aufzulösen.</p>
+      <div class="source">Quellen: stockanalysis.com/stocks/crcl/statistics (05.2026); Robinhood/CNBC Quote (Stand 05.06.2026); Yahoo Finance; Morningstar; finviz.com (Stand 08.06.2026).</div>
     </div>
   </div>
 
+  <!-- ============ SEKTION 6 ============ -->
   <div class="section" id="s6">
-    <div class="section-header"><div class="section-number">6</div><div class="section-title">Cashflow, Margen & Kapitalqualität</div><div class="section-score">Score: 7/10</div></div>
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen & Kapitalqualität</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
     <div class="section-body">
-      <p>Circles Cashflow-Profil ist eigentümlich – es ähnelt mehr einem Asset Manager als einem Software-Unternehmen. Der Free Cashflow wird im Wesentlichen durch das Reserveeinkommen abzüglich der Distribution Costs an Coinbase et al. bestimmt.</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Metrik</th><th>Q1 2026</th><th>Q1 2025</th><th>YoY</th></tr></thead>
+          <thead><tr><th>Kennzahl (TTM/aktuell)</th><th>Wert</th><th>Kommentar</th></tr></thead>
           <tbody>
-            <tr><td>Reserve Return Rate</td><td class="miss">3,50%</td><td>4,16%</td><td class="miss">−66bps</td></tr>
-            <tr><td>RLDC-Marge</td><td class="beat">41,4%</td><td>39,9%</td><td class="beat">+150bps</td></tr>
-            <tr><td>Adj. EBITDA-Marge</td><td class="beat">21,8%</td><td>21,1%</td><td class="beat">+70bps</td></tr>
-            <tr><td>Net Income Marge</td><td class="miss">7,9%</td><td>11,2%</td><td class="miss">−330bps</td></tr>
-            <tr><td>Adj. OpEx Wachstum</td><td>+32%</td><td>–</td><td class="miss">>Revenue Wachstum</td></tr>
-            <tr><td>GAAP OpEx Wachstum</td><td>+76%</td><td>–</td><td class="miss">Post-IPO SBC</td></tr>
-            <tr><td>Cash + Equivalents</td><td>$1,1 Mrd</td><td>$0,8 Mrd</td><td>+38%</td></tr>
-            <tr><td>Stablecoin Deposits (Reserves)</td><td>$76,8 Mrd</td><td>$60,3 Mrd</td><td>+27%</td></tr>
+            <tr><td>Operativer Cashflow</td><td class="beat">$506,6 Mio</td><td>solide, cash-generativ</td></tr>
+            <tr><td>Capex</td><td>−$15,9 Mio</td><td>asset-light (~0,6 % vom Umsatz)</td></tr>
+            <tr><td>Free Cash Flow</td><td class="beat">$490,7 Mio</td><td>hohe FCF-Konversion</td></tr>
+            <tr><td>Adj. EBITDA-Marge</td><td class="beat">~53 %</td><td>Q1'26</td></tr>
+            <tr><td>Distributionskostenquote</td><td class="neutral">~37 % vom Umsatz</td><td>überwiegend an Coinbase</td></tr>
+            <tr><td>Net Cash</td><td class="beat">$1,50 Mrd</td><td>Schulden nur $14,8 Mio · D/E 0,0</td></tr>
+            <tr><td>ROE / ROIC</td><td class="miss">−3,0 % / −7,6 %</td><td>durch IPO-SBC/Verluste gedrückt</td></tr>
           </tbody>
         </table>
       </div>
-      <p><strong>Reserveeinnahme-Sensitivität:</strong> Bei ~$77 Mrd Reserven entspricht jede 25bp Fed-Zinssenkung ca. $190 Mio annualisiertem Revenue (vor Distribution-Share). Selbst nach 50% Coinbase-Sharing trifft das CRCL mit ~$95 Mio annualisiert pro 25bp. Bei 100bp Cuts in den nächsten 12M (möglich angesichts SOFR-Trajektorie) wären das −$380 Mio annualisiert – materiell.</p>
-      <p><strong>Andere Stärken:</strong> Keine Verschuldung. Stabile Cash-Generierung. $222 Mio Cash-Inflow aus Arc-Token-Presale (Mai 2026) verbessert die Liquidität. Kein Buyback-Programm bisher, was bei einem so volatilen Post-IPO-Titel sinnvoll wäre.</p>
-      <div class="source">Quellen: Q1'26 8-K Filing; stockanalysis.com; The Globe and Mail Q1 Call Highlights (11.05.2026)</div>
+      <p>Die <strong>Cash-Qualität ist hoch</strong>: Der FCF von ~$491 Mio ist real, das Modell asset-light, die Bilanz mit $1,5 Mrd Net Cash und faktisch ohne Schulden grundsolide. Die negativen GAAP-Renditen (ROE/ROIC) sind primär ein Artefakt der IPO-bedingten Stock-Based Compensation und der Wandelanleihen-Bewertung, nicht der operativen Ertragskraft – der Reserveertrag selbst ist echter Zinscashflow.</p>
+      <p>Wermutstropfen: Es gibt weder Dividende noch nennenswerte Aktienrückkäufe; die Aktienzahl ist durch den IPO und SBC um 178 % YoY gestiegen (Verwässerung). Die Marge bleibt durch die Distributionsstruktur und die Zinsabhängigkeit gedeckelt. Score unverändert 7.</p>
+      <div class="source">Quellen: stockanalysis.com/stocks/crcl/statistics (05.2026); Circle FY2025/Q1'26 IR; coinmetrics „State of the Network" (Distributionskosten); finviz.com (Stand 08.06.2026).</div>
     </div>
   </div>
 
+  <!-- ============ SEKTION 7 ============ -->
   <div class="section" id="s7">
-    <div class="section-header"><div class="section-number">7</div><div class="section-title">Peer-Vergleich</div><div class="section-score">Relativ: Mittel</div></div>
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
     <div class="section-body">
-      <p>Peer-Vergleich mit der nutzergewählten Gruppe: Coinbase (COIN, Krypto-Exchange + USDC-Partner), PayPal (PYPL, Payments-Veteran mit PYUSD-Stablecoin), Block (SQ, ehem. Square, Crypto-Adjacent) und Tether (privat, USDT-Emittent – als Benchmark).</p>
+      <h3>A) Stablecoin-Anbieter (operativ) – kein börsennotierter Pure-Play außer Circle</h3>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Unternehmen</th><th>Market Cap</th><th>Rev Growth</th><th>EBITDA-Marge</th><th>P/E</th><th>Stablecoin-Bezug</th></tr></thead>
+          <thead><tr><th>Emittent</th><th>Stablecoin</th><th>Umlauf</th><th>Anteil</th><th>Profil / Ökonomie</th></tr></thead>
           <tbody>
-            <tr><td><strong>Circle (CRCL)</strong></td><td>$28,3 Mrd</td><td>+20%</td><td>22%</td><td>~38x (adj)</td><td>USDC Issuer</td></tr>
-            <tr><td>Coinbase (COIN)</td><td>~$72 Mrd</td><td>+15%</td><td>~32%</td><td>~22x</td><td>USDC Partner (~50% Reserves)</td></tr>
-            <tr><td>PayPal (PYPL)</td><td>~$65 Mrd</td><td>+5%</td><td>20%</td><td>~12x</td><td>PYUSD (Marginal)</td></tr>
-            <tr><td>Block (SQ/XYZ)</td><td>~$45 Mrd</td><td>+8%</td><td>15%</td><td>~16x</td><td>Bitcoin-affin, kein eigener Stablecoin</td></tr>
-            <tr><td>Tether (privat)</td><td>~$160-200 Mrd (geschätzt)</td><td>+25%</td><td>>70% (geschätzt)</td><td>n/a</td><td>USDT Issuer (Offshore)</td></tr>
+            <tr><td>Tether <span class="badge badge-yellow">privat</span></td><td>USDT / USAT</td><td>~$190 Mrd</td><td>~59 %</td><td>Marktführer; extrem profitabel (kein Coinbase-Split, hält BTC/Gold); baut „Stable"-L1; USAT für US-Markt; tether.wallet</td></tr>
+            <tr><td><strong>Circle</strong> <span class="badge badge-orange">CRCL</span></td><td>USDC / EURC</td><td>~$77 Mrd</td><td>~24 %</td><td>am stärksten reguliert/auditiert; >50 % Ertrag an Coinbase; baut ARC-L1</td></tr>
+            <tr><td>PayPal <span class="badge badge-blue">PYPL</span></td><td>PYUSD</td><td>~$3,4 Mrd</td><td>~1 %</td><td>gewinnt keine Anteile; Nebenprodukt</td></tr>
+            <tr><td>Ethena</td><td>USDe</td><td>~$3,8 Mrd</td><td>~1 %</td><td>yield-bearing; nach KelpDAO-Exploit eingebrochen</td></tr>
+            <tr><td>SoFi <span class="badge badge-blue">SOFI</span></td><td>SoFiUSD</td><td>neu</td><td>—</td><td>erster bank-emittierter Consumer-Coin (via BitGo, 05.2026)</td></tr>
           </tbody>
         </table>
       </div>
-      <p><strong>Strategische Unterschiede:</strong> Circle ist das einzige reine USDC-Play und das einzige <em>regulierte</em> börsennotierte Stablecoin-Unternehmen. Coinbase profitiert von USDC-Reserves, hat aber strukturell eine schwankendere Revenue-Mischung (Trading-Gebühren). Tether dominiert offshore und in Asien, ist aber für US-Institutionelle nicht nutzbar – das ist Circles strategischer Hebel.</p>
-      <p><strong>Bewertungs-Diskrepanz:</strong> Coinbase wird mit P/E 22x gehandelt, CRCL mit 38x. Das Premium für CRCL ist gerechtfertigt, wenn man die strukturelle Asymmetrie (Stablecoin als Plattform vs Exchange als Marktplatz) anerkennt – aber nur, wenn Arc/Agent-Optionalität liefert.</p>
-      <div class="source">Quellen: stockanalysis.com (alle Peer-Daten), Q1 2026 Filings; Tether-Daten geschätzt (Wells Fargo Bericht, CNBC 05.05.2026)</div>
+      <p><strong>Qualitativ:</strong> Circles Vorteile gegenüber Stablecoin-Peers sind regulatorische Glaubwürdigkeit, Transaktionsdominanz (~80 % der Dollar-Digital-Transaktionen) und die Transparenz eines börsennotierten Emittenten. Der entscheidende Nachteil gegenüber Tether: Circle ist deutlich kleiner und – wegen des Coinbase-Splits – pro Token weit weniger profitabel. Tether verdient an jedem USDT-Dollar nahezu den vollen Reservezins, Circle weniger als die Hälfte.</p>
+
+      <h3>B) Relative Bewertung – börsennotierte Krypto-/Fintech-Vergleichswerte</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Unternehmen</th><th>Kurs (05.–08.06.)</th><th>Market Cap</th><th>P/Sales</th><th>P/E</th><th>Bezug zu USDC</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Circle (CRCL)</strong></td><td>~$80</td><td>~$19,9 Mrd</td><td class="miss">~7,0x</td><td>n. a.</td><td>USDC-Emittent</td></tr>
+            <tr><td>Coinbase (COIN)</td><td>~$152</td><td>~$38 Mrd</td><td class="beat">niedriger</td><td class="beat">profitabel (FY24 NI $2,6 Mrd)</td><td>kassiert ~50 % der USDC-Erträge</td></tr>
+            <tr><td>PayPal (PYPL)</td><td>—</td><td>~$60 Mrd</td><td class="beat">~2x</td><td class="beat">niedrig (~13x)</td><td>PYUSD (klein)</td></tr>
+            <tr><td>Robinhood (HOOD)</td><td>~$81</td><td>~$74 Mrd</td><td>höher</td><td class="neutral">~40x</td><td>Krypto-Trading</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Pointiert: CRCL handelt mit ~7x Umsatz mit Abstand am teuersten der Gruppe – während <strong>Coinbase</strong>, das die Hälfte der USDC-Ökonomie ohne Emissions- oder Reserverisiko abschöpft, profitabel und zu niedrigerem Multiple notiert. Wer rein auf die USDC-Wertschöpfung setzen will, bekommt bei COIN ein günstigeres, profitableres Exposure – ein wichtiges Gegenargument zur reinen CRCL-These. Score 6 (war 7): relative Prämie bleibt trotz Korrektur bestehen.</p>
+      <div class="source">Quellen: DeFiLlama/CoinGecko (Anteile, Stand 05.2026); Robinhood/CNBC Quotes COIN/HOOD (07.–08.06.2026); Coinbase Q1'26 Shareholder Letter (SEC 8-K); PayPal Q1'26 (SEC 8-K, 05.05.2026); finviz.com.</div>
     </div>
   </div>
 
+  <!-- ============ SEKTION 8 ============ -->
   <div class="section" id="s8">
-    <div class="section-header"><div class="section-number">8</div><div class="section-title">Aktuelle News & Events (letzte 3 Monate)</div></div>
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News & Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
     <div class="section-body">
       <h3>Ebene 1: Unternehmen</h3>
-      <div class="event-item">
-        <div class="event-dot dot-yellow"></div>
-        <div>
-          <div class="event-label">11.05.2026 – Q1 2026 Earnings: Mixed <span class="badge badge-yellow">Neutral</span></div>
-          <div class="event-text">EPS $0,21 schlug Konsens $0,19, Revenue $694 Mio verfehlte $715 Mio. USDC-Circ. flat sequenziell. Aktie nach initialem +8% Premarket auf -8% am Tag gedreht. Quelle: Businesswire/CNBC, 11.05.2026.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">11.05.2026 – $222 Mio Arc-Token Presale <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">740 Mio Arc-Tokens zu $0,30 an Apollo, BlackRock, ARK Invest, a16z, Standard Chartered, IDG, Janus Henderson u.a. → $3 Mrd FDV. Stark als Validierungssignal für Arc-Blockchain-Strategie. Quelle: Circle Pressroom, 11.05.2026.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">11.05.2026 – Launch „Agent Stack" für AI-Payments <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">Circle CLI, Agent Wallets, Agent Marketplace (500+ Endpoints), Nanopayments ($0,000001). USDC dominiert mit 99,8% Anteil im x402-AI-Agentenprotokoll. Strategische Frühpositionierung im Agentic-Economy-Trend. Quelle: Circle Pressroom, 11.05.2026.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">April 2026 – Launch CPN Managed Payments <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">PSPs, Fintechs und Banken können Stablecoin-Zahlungen abwickeln, ohne Digital Assets selbst zu halten. Senkt Adoption-Hürde dramatisch. CPN-Volumen +17% QoQ. Quelle: Circle Pressroom.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">März-Mai 2026 – Lighthouse Integrations <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">Meta (USDC Creator-Payouts), DoorDash (Driver Payments), Polymarket (Funding/Settlement), Erebor Bank (24/7-Banking), DTCC (Tokenized Securities Test). Verbreitert die Use-Cases jenseits von Krypto-Trading.</div>
-        </div>
-      </div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">11.05.2026 – Q1'26-Zahlen + ARC-Token-Presale <span class="badge badge-green">Positiv</span></div><div class="event-text">EPS-Beat, Umsatz-Miss; ARC-Presale: $222 Mio bei $3 Mrd FDV von a16z, Apollo, ARK, BlackRock, ICE, Standard Chartered u. a. Aktie am Tag +16 %. Quelle: CNBC/Circle IR.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">27.05.2026 – Partnerschaft mit Nium <span class="badge badge-green">Positiv</span></div><div class="event-text">USDC für grenzüberschreitende Zahlungen. Quelle: StockTitan/CNN-News-Feed.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Mai 2026 – Eintritt in den Wrapped-Bitcoin-Markt <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Circle stößt in einen von Coinbase/BitGo besetzten Markt vor. Quelle: bitcoinfoundation.org.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">05.06.2026 – Mizuho senkt Kursziel auf $85 (von $135), „Neutral" <span class="badge badge-red">Negativ</span></div><div class="event-text">Im Zuge des Krypto-Abverkaufs. Quelle: TipRanks/CNBC.</div></div></div>
 
       <h3>Ebene 2: Branche</h3>
-      <div class="event-item">
-        <div class="event-dot dot-red"></div>
-        <div>
-          <div class="event-label">Q1 2026 – Krypto-Markt-Rückgang −45% seit Okt 2025 <span class="badge badge-red">Negativ</span></div>
-          <div class="event-text">Bitcoin und breitere Digital-Asset-Märkte korrigieren stark. USDC-Circulation hielt sich aber resilient (flat sequenziell), während Trading-Volumina fielen – belegt steigende Real-Economy-Nutzung.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-yellow"></div>
-        <div>
-          <div class="event-label">02.04.2026 – Coinbase kommt regulatorische Hürde näher <span class="badge badge-yellow">Neutral</span></div>
-          <div class="event-text">CNBC: Coinbase erhält weitere Lizenzen für eigene Stablecoin-Aktivitäten – langfristig potenzielle Konkurrenz für Circle, aktuell Distributionspartner mit ~50% Reserve-Sharing. Quelle: CNBC, 02.04.2026.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">März-Mai 2026 – Tokenized Money Market Funds boomen <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">USYC wächst auf $3 Mrd AUM (+300% YoY), wird laut Circle größter tokenisierter MMF weltweit. BlackRock BUIDL, Ondo USDY und Konkurrenten ziehen ebenfalls Volumen.</div>
-        </div>
-      </div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">03.06.2026 – Visa/Mastercard/Stripe vor Stablecoin-Plattform; Coinbase könnte beitreten <span class="badge badge-red">Negativ</span></div><div class="event-text">CoinDesk-Bericht (Ian Allison); CRCL fiel rund 11 % bzw. weitere 2 %. Direkter Frontalangriff auf Circles Zahlungsambitionen. Quelle: Motley Fool/CoinDesk.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">27.05.2026 – SoFi launcht ersten bank-emittierten Consumer-Stablecoin <span class="badge badge-red">Negativ</span></div><div class="event-text">SoFiUSD via BitGo „Stablecoin-as-a-Service". Quelle: TipRanks Crypto Currents.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">14.04.2026 – Tether-Offensive + Visa als Tempo-Validator <span class="badge badge-red">Negativ</span></div><div class="event-text">Tether startet tether.wallet & USAT (US-Push), baut „Stable"-L1; Visa wird Anchor-Validator von Stripes Tempo. Quelle: CoinGeek/Decrypt.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">GENIUS Act in Kraft – Umsetzungsregeln fällig 18.07.2026 <span class="badge badge-yellow">Gemischt</span></div><div class="event-text">1:1-HQLA-Deckung & Audits Pflicht; Banken dürfen Stablecoins emittieren/verwahren → Rückenwind für Compliance-Leader, aber neue Bank-Konkurrenz. CLARITY Act (Marktstruktur) im Senatsausschuss; Coinbase zog Unterstützung der jüngsten Version zurück. Quelle: Bitrue/bitcoinfoundation.</div></div></div>
 
       <h3>Ebene 3: Makro</h3>
-      <div class="event-item">
-        <div class="event-dot dot-red"></div>
-        <div>
-          <div class="event-label">Q1-Q2 2026 – Fed-Zinssenkungs-Erwartungen verstärken sich <span class="badge badge-red">Negativ</span></div>
-          <div class="event-text">SOFR fällt, Reserve-Return-Rate sank in Q1 schon von 4,16% auf 3,50%. Weitere 25-50bps Cuts in 2026 erwartet → direkte EBITDA-Belastung. Quelle: FOMC-Statements, FedWatch Tool.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">2025-2026 – GENIUS Act in Kraft, CLARITY Act erwartet H2 2026 <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">GENIUS Act schafft Bundesrecht für Payment-Stablecoins. CLARITY Act soll Token-Klassifizierung (Commodity vs Security) regeln und damit Arc-Token-Geschäftsmodell legitimieren.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-yellow"></div>
-        <div>
-          <div class="event-label">13.05.2026 – Stablecoin Vote in Kongress steht an <span class="badge badge-yellow">Neutral</span></div>
-          <div class="event-text">Hochrelevant für die Adoption – Markt beobachtet. Quelle: TipRanks, 13.05.2026.</div>
-        </div>
-      </div>
-      <div class="source">Quellen: Circle Pressroom, CNBC, Businesswire, TipRanks, Reuters (alle Datumsangaben März-Mai 2026)</div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">05.06.2026 – Bitcoin erstmals seit Okt 2024 unter $60.000 <span class="badge badge-red">Negativ</span></div><div class="event-text">BTC −26 % im Monat; breiter Krypto-Risk-off; CRCL & COIN stark abverkauft. Quelle: TipRanks/Benzinga.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">Zinssenkungsumfeld <span class="badge badge-red">Negativ (strukturell)</span></div><div class="event-text">Fallende Leitzinsen drücken direkt die Reserverendite – Circles ~99 %-Umsatzquelle. Quelle: coinmetrics/Branchenanalysen.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">Stablecoin-Markt auf ATH ~$321–323 Mrd <span class="badge badge-green">Positiv (langfristig)</span></div><div class="event-text">Prognosen: Verzehnfachung auf ~$3 Bio bis 2030 (u. a. US-Treasury/Coinbase-Deck). Quelle: CoinDesk/Coinbase Q1'26.</div></div></div>
+      <p style="margin-top:10px;font-size:13px;color:var(--text-muted);">Hinweis: Das Bull-/Bear-Narrativ wird in Sektion 12 vertieft – hier nur Eventbewertung.</p>
+      <div class="source">Quellen: CNBC/CNN CRCL-News-Feed; CoinDesk (03.06./05.2026); Motley Fool (03.06.2026); TipRanks; CoinGeek (15.04.2026); Bitrue (05.2026).</div>
     </div>
   </div>
 
+  <!-- ============ SEKTION 9 ============ -->
   <div class="section" id="s9">
-    <div class="section-header"><div class="section-number">9</div><div class="section-title">Technische Analyse</div><div class="section-score">Score: 4/10</div></div>
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 3/10</div>
+    </div>
     <div class="section-body">
-      <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));">
-        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value">$114,00</div></div>
-        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value">~$125</div></div>
-        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value">~$118</div></div>
-        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value">~$155</div></div>
-        <div class="kpi-card"><div class="kpi-label">RSI(14)</div><div class="kpi-value orange">~42</div></div>
-        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value">$298,99</div></div>
-        <div class="kpi-card"><div class="kpi-label">52W-Low</div><div class="kpi-value">$31,00</div></div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-bottom:16px;">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">$80,27</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value" style="font-size:18px;">~$114,6</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value" style="font-size:18px;">~$105,9</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value" style="font-size:18px;">~$102,8</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value" style="font-size:18px;">~32 (überverk.)</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value" style="font-size:18px;">$298,99</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value red" style="font-size:18px;">negativ</div></div>
       </div>
-      <p><strong>Trend:</strong> Kurzfristig abwärts seit dem Q1-Earnings (15. Mai: −7,98% Tagesverlust). Mittelfristig hat CRCL nach dem Crash auf $31 (Februar 2026) eine Bodenbildung um $50-90 gefunden und sich auf $114-125 erholt. Aktueller Kurs liegt unter SMA20/50, aber deutlich über SMA200 (welcher noch durch das IPO-Hoch von 2025 inflationär nach oben gezogen ist).</p>
-      <p><strong>Investing.com Technical Summary (15.05.2026):</strong> 5min Strong Sell, 1h Strong Sell, 1d Neutral, 1w Strong Buy, 1m Neutral. Kurzfristig schwach, mittelfristig konstruktiv.</p>
-      <p><strong>Support/Resistance:</strong> Unterstützungen bei $108 (Earnings-Tief) und $90 (Pivotzone aus April). Widerstand bei $125 (SMA50, Q1-Pre-Earnings-Niveau) und $150 (gleitende Resistance, JPM-Target).</p>
-      <p><strong>Volumen:</strong> 17,9M Tagesvolumen am Earnings-Tag (vs 24,5M Durchschnitt) – kein klassisches Capitulation-Selling, eher kontrolliertes Profit-Taking nach dem 68%-YTD-Anstieg.</p>
-      <p><strong>Eigene Einschätzung:</strong> Die Aktie hat enormes Beta zu Krypto und Fed-Sentiment. Charttechnik ist <em>nicht</em> der primäre Treiber, aber für Trader: Unter $105 würde sich das Bild eintrüben; über $130 mit Volumen wäre die Rückkehr in den Aufwärtskanal bestätigt.</p>
-      <div class="source">Quellen: investing.com Technical Summary, stockanalysis.com, tradingview.com (15.05.2026)</div>
+      <p>Das technische Bild hat sich seit der letzten Analyse <strong>klar verschlechtert</strong>. Der Kurs notiert bei ~$80 jetzt <strong>unter allen wichtigen gleitenden Durchschnitten</strong> – Anfang Juni lagen SMA-20 (~$114,6), SMA-50 (~$105,9) und der entscheidende SMA-200 (~$102,8) noch über dem Kurs, die Junikorrektur hat den 200-Tage-Support durchschlagen. Investing.com weist für das Tages- bis Wochensignal „Strong Sell" aus; der RSI dürfte nach zwei scharfen Abwärtstagen im überverkauften Bereich liegen.</p>
+      <p><strong>Levels:</strong> Unterstützung bei ~$58–60 (Annäherung an die 52-Wochen-Tief-Zone), darunter $49,90 (52W-Tief, Feb'26). Widerstände: ~$102 (SMA-200), darüber das Cluster ~$106–115 (SMA-50/20). Das Volumen war beim Abverkauf erhöht (24,7 Mio vs. 15,3 Mio Ø). Solange der Kurs unter dem 200-Tage-Schnitt bleibt, ist der mittelfristige Trend abwärts gerichtet – Score von 4 auf 3 gesenkt.</p>
+      <div class="source">Quellen: Investing.com Technicals (Stand 05.06.2026); TradersUnion CRCL-Technik (~02.06.2026); TradingView NYSE:CRCL; finviz.com (Stand 08.06.2026).</div>
     </div>
   </div>
 
+  <!-- ============ SEKTION 10 ============ -->
   <div class="section" id="s10">
-    <div class="section-header"><div class="section-number">10</div><div class="section-title">Risiken & Chancen</div><div class="section-score">Score: 5/10</div></div>
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken & Chancen</div>
+      <div class="section-score">Score: 5/10 (invertiert)</div>
+    </div>
     <div class="section-body">
-      <h3>Strukturelle & zyklische Risiken</h3>
-      <div class="risk-item">
-        <div class="risk-header"><div class="risk-title">⚡ Zinsrisiko (Fed-Cuts)</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div>
-        <div class="event-text">94% des Revenues sind Reserve Income, direkt zinsgekoppelt. 100bp Fed-Cuts in 12M würden ~$760 Mio Brutto-Revenue (~$380 Mio post-distribution) annualisiert kosten. Wahrscheinlichkeit: 60-70%.</div>
-      </div>
-      <div class="risk-item">
-        <div class="risk-header"><div class="risk-title">⚡ Coinbase-Konzentration</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div>
-        <div class="event-text">~50% der USDC-Reserven werden bei Coinbase gehalten – Circle teilt 100% der dort generierten Reserveeinkommen. Coinbase baut zudem eigene Stablecoin-Strategie aus. Falls Coinbase USDC-Anteil reduziert oder Term-Sheet renegotiert, dramatischer Hit. Wahrscheinlichkeit: 30%.</div>
-      </div>
-      <div class="risk-item">
-        <div class="risk-header"><div class="risk-title">⚡ Bank-Stablecoin-Konkurrenz</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div>
-        <div class="event-text">JPMorgan, Bank of America, Citi und Konsortien planen eigene Stablecoins nach GENIUS Act. Banken haben Kundenstamm, Lizenzen und Bilanz. Wahrscheinlichkeit hoher Marktanteil bis 2028: 40%.</div>
-      </div>
-      <div class="risk-item">
-        <div class="risk-header"><div class="risk-title">⚡ Arc-Token-Umsetzungsrisiko</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div></div>
-        <div class="event-text">Arc Mainnet steht bevor, aber Layer-1-Adoption ist hochgradig kompetitiv (Solana, Ethereum, Base). $3 Mrd FDV bei 740 Mio Tokens ist sportlich. Token-Vesting könnte zu Verkaufsdruck führen.</div>
-      </div>
-      <div class="risk-item">
-        <div class="risk-header"><div class="risk-title">⚡ De-Pegging / Reserve Run</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-red">Auswirkung: Existentiell</span></div></div>
-        <div class="event-text">Im März 2023 verlor USDC kurzzeitig sein Peg ($0,87) durch SVB-Exposure. Heute sind Reserven besser diversifiziert, aber ein massiver Run bleibt theoretisch möglich. Wahrscheinlichkeit: <5%, aber Schaden bei Eintritt: 60-90%.</div>
-      </div>
+      <h3>9a) Strukturelle & zyklische Risiken</h3>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Zinsrisiko (Kern)</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-red">Auswirkung: Hoch</span></div></div><div class="event-text">~99 % des Umsatzes sind Reserveerträge. Jede Leitzinssenkung um 100 bps kostet bei ~$77 Mrd Umlauf grob ~$0,77 Mrd Bruttoertrag p. a. (vor Distributionssplit). In einer Zinssenkungsphase ist das das dominante Risiko. Wahrscheinlichkeit: hoch.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Wettbewerb / Anteilsverlust</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div><div class="event-text">Tether-US-Offensive (USAT), Visa/Mastercard/Stripe-Plattform, SoFiUSD & weitere Bank-Stablecoins, Coinbase Base. USDC-Anteil stagniert bei ~24 %. Wahrscheinlichkeit: hoch.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Distributionsabhängigkeit Coinbase</div><div><span class="badge badge-orange">Mittel-Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">>50 % der Reserveerträge fließen an Coinbase, kein Ausstieg ohne dessen Zustimmung, automatische Verlängerung. Steigende USDC-Konzentration auf Coinbase erhöht den Abfluss.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Regulatorische Umsetzung</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div></div><div class="event-text">GENIUS-Act-Umsetzungsregeln (18.07.2026) netto positiv, aber sie öffnen Banken den Markt. CLARITY-Act-Unsicherheit. Compliance-Kosten steigen.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Krypto-Zyklus</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div></div><div class="event-text">BTC-Absturz unter $60k dämpft On-Chain-Aktivität und USDC-Nachfrage; Aktie korreliert kurzfristig mit Krypto-Sentiment.</div></div>
 
-      <h3>AI-Risiko & Chance</h3>
-      <p>Circle ist <strong>Nutznießer</strong> des AI-Booms, kein Opfer. Die These: AI-Agents brauchen native, programmierbare, internetfähige Zahlungs-Infrastruktur. USDC ist bereits dominante Currency in agentischen Zahlungsprotokollen (99,8% des x402-Volumens). Bullisches Szenario: AI-Agent-Economy generiert in 2028+ 10-100x heutiges USDC-Transaktionsvolumen. Bärisches Szenario: Andere Stablecoins (PYUSD, MakerDAO-Coin, Bank-Konsortien) holen auf.</p>
+      <h3>9b) AI- & technologische Disruption</h3>
+      <p><strong>Bullisch:</strong> Stablecoins gelten als „native Abwicklungsschicht" der entstehenden Agenten-Ökonomie. ARC nutzt USDC als Gas-Token – ideal für maschinelle/agentische Zahlungen, da kein volatiler Token bilanziert werden muss. Über 100 Großinstitute (BlackRock, Goldman, Visa, Deutsche Bank, State Street, AWS) testeten ARC bereits im Testnet. <strong>Bärisch:</strong> Die Emission selbst commoditisiert sich; spezialisierte Ketten (Stripe Tempo, Tether Stable) und Bank-Coins könnten die Infrastrukturschicht fragmentieren.</p>
 
-      <h3>Chancen</h3>
-      <p>(1) CLARITY Act Verabschiedung schafft regulatorische Klarheit für institutionelle Adoption. (2) Arc Mainnet Launch könnte zusätzliche $200-500 Mio jährliches Revenue erzeugen (Settlement Fees, Validierungseinnahmen). (3) USYC und tokenisierte MMFs als neuer Ertragspfeiler (zinsunabhängiger als Reserve-Yield). (4) Internationale Expansion (Korea, Latam, EU mit EURC).</p>
+      <h3>9c) Chancen</h3>
+      <p>ARC-Mainnet-Beta (Sommer 2026) mit potenziellen Infrastruktur-/Gebührenerlösen; Circle Payments Network (CPN); USYC (tokenisierte Treasuries); Emerging-Market-Adoption; der GENIUS Act legitimiert USDC als reguliertes Instrument und kann Bank-/Treasury-Mittel onchain ziehen; Diversifikation weg vom reinen Reserveertrag.</p>
 
-      <h3>Red Flags & Dealbreaker</h3>
-      <p><strong>Red Flags:</strong> Q1 Revenue-Miss, niedrigere Reserverate, hohe Bewertung trotz Zinszyklus. <strong>Keine Dealbreaker</strong> – Circle bleibt finanziell solide ohne Verschuldung.</p>
-      <div class="source">Quellen: Q1 2026 Earnings Release (Forward-Looking Risks Sektion); Wells Fargo Note (05.05.2026); SEC Risk Factors</div>
+      <h3>9d) Red Flags & Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> QoQ-Stagnation des USDC-Umlaufs; rückläufiges Net Income trotz Umsatzplus; Insider-Verkäufe (u. a. CFO Fox-Geen); 9,2 % Short-Interest. <strong>Dealbreaker:</strong> kein existenzbedrohendes Einzelrisiko – aber die Kombination aus Zinssenkungen + Wettbewerbsdruck könnte die einbehaltene Marge strukturell deckeln. Gesamt-Risikoscore 5/10 (invertiert, unverändert: moderat-hoch).</p>
+      <div class="source">Quellen: Circle Q1'26 IR; CoinGecko/Decrypt zu ARC (12.2025–05.2026); natecue.com ARC-Analyse (05.2026); stockanalysis.com (Short-Interest); Google Finance Insider-Transaktionen.</div>
     </div>
   </div>
 
+  <!-- ============ SEKTION 11 ============ -->
   <div class="section" id="s11">
-    <div class="section-header"><div class="section-number">11</div><div class="section-title">Scoring</div><div class="section-score">Ø 6,5/10</div></div>
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring</div>
+      <div class="section-score">Ø 5,8/10</div>
+    </div>
     <div class="section-body">
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Kategorie</th><th>Score</th><th>Visualisierung</th><th>Begründung</th></tr></thead>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Visualisierung</th><th>Begründung</th><th>Δ vs. 16.05.</th></tr></thead>
           <tbody>
-            <tr><td>Geschäftsmodell</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>Klares Modell, hohes Skalierungspotenzial, aber Zinsabhängigkeit</td></tr>
-            <tr><td>Burggraben</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Regulatorisch und Netzwerk-stark, aber Bank-Konkurrenz im Aufbau</td></tr>
-            <tr><td>Operative Entwicklung (4Q)</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Solide, aber Q1'26 mit Revenue-Miss; sequenzielle Schwäche</td></tr>
-            <tr><td>Wachstum</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>+20% Rev, +24% EBITDA, Other Rev +100% – aber Circulation flat</td></tr>
-            <tr><td>Bewertung</td><td><strong>5/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Nach −62% vom Hoch fair, aber P/E 38x adj. weiter premium</td></tr>
-            <tr><td>Cashflow & Qualität</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Keine Schulden, $1,1 Mrd Cash, $222 Mio Arc-Inflow; Marge stabil</td></tr>
-            <tr><td>Risiken (invertiert)</td><td><strong>5/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Hohes Zins- und Coinbase-Konzentrationsrisiko</td></tr>
-            <tr><td>Technische Analyse</td><td><strong>4/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td><td>Unter SMA20/50; Earnings-Drift abwärts; volatil</td></tr>
-            <tr style="background:rgba(139,92,246,0.08);">
-              <td><strong>⌀ Gesamtscore</strong></td>
-              <td><strong>6,1/10</strong></td>
-              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:61%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">6,1</span></div></td>
-              <td>Solides Geschäft mit hoher Optionalität, aber Zinszyklus belastet</td>
-            </tr>
+            <tr><td>Geschäftsmodell</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Skalierbar, aber zinsabhängig & Coinbase-gedeckelt</td><td><span class="badge badge-red">↓ 8</span></td></tr>
+            <tr><td>Burggraben</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Regulatorischer Vorsprung real, aber Wettbewerb verengt ihn</td><td><span class="badge badge-red">↓ 7</span></td></tr>
+            <tr><td>Operative Entwicklung (4Q)</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>EPS-Beat, aber Umsatz-Miss & NI −15 %</td><td><span class="badge badge-yellow">= 6</span></td></tr>
+            <tr><td>Wachstum</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Umlauf stagniert QoQ, Anteil seitwärts</td><td><span class="badge badge-red">↓ 7</span></td></tr>
+            <tr><td>Bewertung</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Nach −30 % günstiger, aber ~7x Sales nicht billig</td><td><span class="badge badge-green">↑ 5</span></td></tr>
+            <tr><td>Cashflow & Qualität</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>FCF ~$491 Mio, Net Cash $1,5 Mrd</td><td><span class="badge badge-yellow">= 7</span></td></tr>
+            <tr><td>Peer-Vergleich</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Prämie ggü. COIN/PYPL trotz Korrektur</td><td><span class="badge badge-red">↓ 7</span></td></tr>
+            <tr><td>Risiken (invertiert)</td><td><strong>5/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Zins + Wettbewerb = moderat-hoch</td><td><span class="badge badge-yellow">= 5</span></td></tr>
+            <tr><td>Technische Analyse</td><td><strong>3/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:30%"></div></div><span class="score-num">3</span></div></td><td>Unter allen MAs, „Strong Sell"</td><td><span class="badge badge-red">↓ 4</span></td></tr>
+            <tr style="background:rgba(139,92,246,0.08);"><td><strong>⌀ Gesamtscore</strong></td><td><strong>5,8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:58%;background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">5,8</span></div></td><td>Verschlechterung ggü. 6,5 – Wettbewerb & Technik belasten, Bewertung entlastet</td><td><span class="badge badge-red">↓ 6,5</span></td></tr>
           </tbody>
         </table>
       </div>
-      <div class="source">Quellen: Synthese aller Sektionen 1-10</div>
+      <div class="source">Quellen: Eigene Synthese aus Sektionen 1–10; Vergleichswerte aus Analyse v2.2 vom 16.05.2026.</div>
     </div>
   </div>
 
+  <!-- ============ SEKTION 12 ============ -->
   <div class="section" id="s12">
-    <div class="section-header"><div class="section-number">12</div><div class="section-title">Fazit – Investment-These</div><div class="section-score">HALTEN / TRANCHIERT</div></div>
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-score">HALTEN</div>
+    </div>
     <div class="section-body">
-
       <div class="bull-bear-grid">
         <div class="bull-card">
           <h4>🐂 Das Bullische Narrativ</h4>
-          <p><strong>Säule 1 – Strukturelles USDC-Wachstum:</strong> Onchain-Transaktionsvolumen +263% YoY auf $21,5 Bio bei nur 0% sequenziellem Circulation-Wachstum belegt einen fundamentalen Shift: USDC wird produktiv eingesetzt, nicht spekulativ gehalten. Bei 40% Long-Term-Circulation-CAGR und Stabilisierung der Zinsen kann das Reserve Income trotz Cuts ab 2027 wieder wachsen.</p>
-          <p><strong>Säule 2 – Other Revenue Optionalität:</strong> CPN ($8,3 Mrd annualisiert, +17% QoQ), USYC ($3 Mrd AUM, +300% YoY), Agent Stack (99,8% x402-Anteil) und EURC bauen einen zinsunabhängigen Revenue-Stack auf. Other Revenue +100% YoY auf $42 Mio; Guidance $160 Mio FY26 – mit Arc-Mainnet-Launch potenziell $250-500 Mio FY27.</p>
-          <p><strong>Säule 3 – Bewertung & Re-Rating-Welle:</strong> JPM, Needham, Mizuho, Compass Point, Deutsche Bank haben nach Q1 die Targets im Schnitt 20%+ angehoben. Konsens-12M-PT $140,85 = +23,5% Upside. Bei P/E adj. 38x und 30%+ EBITDA-Wachstum (FY26-FY27) ist die PEG-Ratio fair. Arc-Token-Validierung durch BlackRock/Apollo signalisiert institutionelle Anerkennung.</p>
+          <p><strong>Säule 1 – Compliance-Champion in regulierter Welt.</strong> Mit dem in Kraft getretenen GENIUS Act (Umsetzungsregeln 18.07.2026) verschiebt sich der Markt von der Grauzone zu lizenzierten, auditierten Instrumenten. USDC ist genau dafür gebaut: 1:1-HQLA-Deckung, Deloitte-Attestierung, 20+ Chains. Wo Tether eine US-Banklizenz braucht, ist Circle schon da.</p>
+          <p><strong>Säule 2 – Transaktionsdominanz + ARC-Optionalität.</strong> USDC macht ~80 % der Dollar-Digital-Transaktionen aus ($21,5 Bio On-Chain-Volumen in Q1'26, +263 %). Mit ARC (Mainnet-Beta Sommer 2026, $3 Mrd Netzwerkbewertung, 100+ testende Großinstitute) wird Circle vom Chain-Kunden zum Infrastruktur-Anbieter – ein potenzieller zweiter Ertragspfeiler jenseits des Reservezinses.</p>
+          <p><strong>Säule 3 – Bewertungs-Reset.</strong> Nach −73 % vom ATH und −30 % seit der letzten Analyse handelt CRCL bei ~7x Umsatz mit $1,5 Mrd Net Cash, ~$491 Mio FCF und ~53 % adj. EBITDA-Marge. Konsens-Kursziel $145,80 (+~80 %); selbst konservativere Ziele ($110–125) lassen Luft.</p>
         </div>
         <div class="bear-card">
           <h4>🐻 Das Bärische Narrativ</h4>
-          <p><strong>Risiko 1 – Zinszyklus dominiert kurzfristig:</strong> 94% Revenue-Konzentration auf Reserve Income macht CRCL faktisch zu einem Zinsderivat. Reserve-Rate sank Q1 schon um 66bps. Bei 100bp weiteren Cuts in 2026: ~$380 Mio annualisierter Hit nach Distribution-Share – das frisst die +24% EBITDA-Wachstum mehrfach auf.</p>
-          <p><strong>Risiko 2 – Coinbase-Konzentration als strukturelle Schwachstelle:</strong> Coinbase erhält 100% des Reserve-Income auf seinen USDC-Beständen (~50% der Reserven). Coinbase baut gleichzeitig eigene Stablecoin-Strategie aus. Renegotiation oder Mix-Shift Richtung Coinbase-eigener Coin würde CRCL strukturell schaden. Compass Point bleibt mit Sell-Rating bei $97 PT skeptisch.</p>
-          <p><strong>Risiko 3 – Bewertung trotz Crash nicht günstig:</strong> P/S 9,3x und EV/EBITDA 45x sind selbst nach −62% vom Hoch deutlich über Sektor-Median. Bei verlangsamendem Wachstum oder Zinscut-Schock kann der Multiple weiter komprimieren. Tornadoartige Bank-Stablecoin-Konkurrenz nach GENIUS Act steht erst am Anfang – JPM Coin, Citi USTs etc. könnten Marktanteile in 24-36 Monaten signifikant verschieben.</p>
+          <p><strong>Risiko 1 – Zinsfalle.</strong> ~99 % des Umsatzes sind Reserveerträge. In einer Zinssenkungsphase schrumpft die Top-Line direkt: −100 bps ≈ ~$0,77 Mrd weniger Bruttoertrag (vor Coinbase-Split). Das Geschäft ist ein Zins-Taker, kein Pricing-Setter.</p>
+          <p><strong>Risiko 2 – Anteil stagniert, Wettbewerb explodiert.</strong> USDCs Umlauf legt QoQ kaum zu (+2,3 %), während USDT wieder Anteile gewinnt ($190 Mrd ATH). Gleichzeitig drängen Visa/Mastercard/Stripe (CRCL −11 % am 03.06.), SoFiUSD, Tether-US und Bank-Stablecoins in den Markt. Der Moat verengt sich messbar.</p>
+          <p><strong>Risiko 3 – Coinbase-Leakage + Technik.</strong> >50 % der Erträge fließen unkündbar an Coinbase – das ironische Gegenargument: COIN bietet günstigeres, profitableres USDC-Exposure. Technisch ist CRCL unter alle MAs (inkl. 200-Tage) gefallen, Tagessignal „Strong Sell". ~7x Sales sind für ein zinssensitives Geschäft mit nachlassendem Wachstum nicht billig.</p>
         </div>
       </div>
 
-      <h3>Eigene Einschätzung</h3>
-      <p>Das bullische Narrativ ist substanziell, aber ein <strong>kurzfristiges bärisches Risiko (Zinscuts in 2026) dominiert die nächsten 6-12 Monate</strong>. CRCL ist im Kern ein Quality-Plattform-Unternehmen mit echtem Burggraben, aber strukturell mit einem Asset-Manager-Modell gekoppelt, das vom Zinszyklus diktiert wird. Die Re-Rating-Welle der Analysten signalisiert, dass die Wall Street den langfristigen Optionalitätswert (Arc, Agent Stack, USYC) anerkennt – aber Q2 und Q3 Reports werden zwei aufeinanderfolgende sequenzielle Revenue-Drücker zeigen, wenn die Fed wie erwartet senkt.</p>
-      <p>Die Aktie steht bei $114 etwa −16% unter Morningstar Fair Value ($96 quantitativ) und −23% unter Analyst-Konsens ($140). Das ist Risk/Reward asymmetrisch nach oben, aber mit hoher Volatilität – CRCL hat in 9 Monaten zwischen $31 und $299 gehandelt. Geeignet für Investoren, die Volatilität tolerieren und an die langfristige Stablecoin-These glauben. NICHT geeignet für: Dividenden-Investoren, kurzfristige Buy-the-Earnings-Trader, oder Anleger mit weniger als 18 Monaten Horizont.</p>
-      <p><strong>Risk/Reward:</strong> −25% Downside (zurück auf $85, Pivot aus März/April) vs +35% Upside (Konsens $140-150). Bei einem Mehrjahres-Horizont (2-3 Jahre) öffnen sich asymmetrische Upside-Szenarien (Arc Token-Floor + USDC-CAGR > 40%): potenziell +80-120% auf $200-250.</p>
+      <h3>Eigene Einschätzung (ausgewogen)</h3>
+      <p>Kurzfristig hat das <strong>bärische Narrativ den Wind im Rücken</strong>: Wachstumsstagnation, neue Wettbewerber und der Zinspfad treffen exakt die verwundbarsten Stellen des Modells, und die Technik bestätigt den Abwärtsdruck. Genau hier setzt die Fragestellung an – und die Antwort ist unbequem: Seit Januar 2026 wächst der <em>Markt</em>, nicht aber USDCs <em>Anteil</em>. Der Moat ist real (Regulierung, Transaktions-Netzwerk), aber er ist enger als noch im Mai.</p>
+      <p>Mittel- bis langfristig hat das <strong>bullische Narrativ strukturelle Substanz</strong>: Der GENIUS Act bevorzugt Compliance-Leader, ARC liefert echte Optionalität jenseits des Reservezinses, und die Bilanz ist grundsolide. Entscheidend ist der Bewertungs-Reset: Bei ~$80 ist das Chance-Risiko-Verhältnis deutlich besser als bei $114. Risk/Reward: ~−28 % Downside (~$58) vs. +40–56 % Upside ($110–125 auf 12–18 Monate).</p>
+      <p><strong>Demut:</strong> Ich könnte falsch liegen, wenn (a) der ARC-Infrastruktur-Ertrag schneller materialisiert als erwartet und USDC durch institutionelle Adoption wieder Anteile gewinnt – dann ist ~7x Sales günstig; oder umgekehrt (b) die Zinssenkungen tiefer ausfallen und die neuen Plattformen USDC aus dem Zahlungsverkehr verdrängen – dann sind auch $58 kein Boden.</p>
 
       <h3>Zeithorizont-Einschätzung</h3>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+          <thead><tr><th>Horizont</th><th>Katalysatoren / Risiken</th><th>Empfehlung</th></tr></thead>
           <tbody>
-            <tr><td><strong>Kurzfristig (0-6M)</strong></td><td>CLARITY Act, Q2 Earnings, Arc Mainnet</td><td>Zinscut-Reaktion, weitere Q2 Misses, Krypto-Korrektur</td><td>Tranchieren, nicht voll einsteigen</td></tr>
-            <tr><td><strong>Mittelfristig (6-24M)</strong></td><td>Arc Token-Monetarisierung, USYC-Skalierung, USDC > $100 Mrd</td><td>Bank-Stablecoin-Konkurrenz, Coinbase-Renegotiation</td><td>Aufbauen bei Schwäche < $100</td></tr>
-            <tr><td><strong>Langfristig (2-5J)</strong></td><td>Agentic Economy mit USDC als Standard, Globale Stablecoin-Adoption</td><td>Regulatorischer Reversal, Konkurrenz von Tech-Giganten (Meta, X)</td><td>Buy & Hold bei klarer These</td></tr>
+            <tr><td><strong>Kurz (0–6 M)</strong></td><td>Krypto-Risk-off, Zinspfad, Wettbewerbs-Newsflow, Technik unter 200-MA</td><td><span class="badge badge-yellow">Abwarten / Tranchiert</span></td></tr>
+            <tr><td><strong>Mittel (6–24 M)</strong></td><td>ARC-Mainnet, GENIUS-Umsetzung, USDC-Anteilstrend, Q2/Q3-Zahlen</td><td><span class="badge badge-orange">Tranchiert aufbauen</span></td></tr>
+            <tr><td><strong>Lang (2–5 J)</strong></td><td>Stablecoin-Markt → ~$3 Bio (2030), Infrastruktur-Diversifikation</td><td><span class="badge badge-green">Halten / Kaufen</span></td></tr>
           </tbody>
         </table>
       </div>
 
       <h3>Kernthese</h3>
-      <p>Circle ist der börsennotierte Reinplay auf das wachsende, regulierte Stablecoin-Ökosystem. Die Kombination aus dominanter Markstellung (63% Real-Economy-Transaktionen), Optionalität (Arc, Agent Stack, USYC) und post-Q1-Crash-Bewertung macht die Aktie auf 2-3-Jahres-Sicht attraktiv. Auf 6-12-Monats-Sicht ist die Aktie aber stark zins- und sentiment-abhängig. <strong>Empfehlung: HALTEN bei Positionen, TRANCHIERT KAUFEN bei Schwäche unter $105.</strong></p>
+      <p>Circle ist der regulatorisch bestpositionierte börsennotierte Stablecoin-Emittent mit echtem Transaktions-Netzwerk und ARC-Optionalität – aber ein zinsabhängiges Geschäft, das seinen Marktanteil aktuell nicht ausbaut und dessen Moat von einer Welle neuer Wettbewerber angegriffen wird. Nach dem Kursrücksetzer ist die Bewertung kein Hindernis mehr, doch ein klares Kaufsignal fehlt, solange USDC-Umlauf und Reserverendite nicht drehen. Daher <strong>HALTEN mit Tranchiert-Kaufen-Bias</strong> für langfristige Anleger.</p>
 
       <div class="rating-box">
         <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN / TRANCHIERT KAUFEN</div></div>
-        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$140–155</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$110–125</div></div>
         <div class="rating-item"><label>Zeithorizont</label><div class="val">2–3 Jahre</div></div>
-        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">−25% (~$85)</div></div>
-        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+35% ($140–155)</div></div>
-        <div class="rating-item"><label>Risk/Reward</label><div class="val">1:1,4</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">−28 % (~$58)</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+44 % (~$115)</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:1,6</div></div>
       </div>
 
+      <h3>Was falsifiziert die These?</h3>
       <div class="trigger-grid">
         <div class="trigger-card sell">
           <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
           <ul class="trigger-list">
-            <li>Kurs schließt unter $90 → Reduzieren</li>
-            <li>Q2'26 Revenue verfehlt zweimal in Folge → Verkaufen</li>
-            <li>Reserve-Rate fällt unter 3,0% (Fed Cut > 75bp) → Reduzieren</li>
-            <li>Coinbase kündigt eigenen institutionellen Stablecoin → Reduzieren</li>
+            <li>USDC-Umlauf in Q2'26 (&lt;$78 Mrd) erneut stagnierend bei gleichzeitig fallender Reserverendite → reduzieren</li>
+            <li>Visa/Mastercard/Stripe-Plattform startet mit großen Händlern → strukturelle Anteilsgefahr</li>
+            <li>Kurs schließt nachhaltig unter $58 (52W-Tief-Zone) → Stop überdenken</li>
           </ul>
         </div>
         <div class="trigger-card buy">
           <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
           <ul class="trigger-list">
-            <li>Kurs unter $100 mit stabilem Fundamental → Nachkaufen</li>
-            <li>USDC-Circulation > $90 Mrd → Position aufbauen</li>
-            <li>Arc Mainnet-Launch + erste Settlement-Fees → Nachkaufen</li>
-            <li>CLARITY Act verabschiedet → Position erhöhen</li>
+            <li>USDC-Umlauf &gt;$82 Mrd (Re-Acceleration) + stabile RLDC-Marge → nachkaufen</li>
+            <li>ARC-Mainnet live mit messbarer institutioneller TVL/Gebühren → aufbauen</li>
+            <li>Kurs zurück über SMA-200 (~$102) bei steigendem Volumen → Trendwende bestätigt</li>
           </ul>
         </div>
       </div>
 
+      <h3>Welcher Anlegertyp passt?</h3>
       <div class="investor-grid">
         <div class="investor-yes">
           <h5>✅ Geeignet für</h5>
-          <ul>
-            <li>Growth Investors (3+ Jahre)</li>
-            <li>Krypto/Fintech-bullish, will reguliertes Pure-Play</li>
-            <li>Optionalitäts-Investoren (Arc/Agent als Lottery-Ticket)</li>
-            <li>Anleger mit hoher Volatilitätstoleranz</li>
-          </ul>
+          <ul><li>Thematische Growth-Investoren (Stablecoin-Infrastruktur)</li><li>Contrarian / Antizykliker nach −73 % vom ATH</li><li>Langfristige Anleger (2–5 J) mit Volatilitätstoleranz</li></ul>
         </div>
         <div class="investor-no">
           <h5>❌ NICHT geeignet für</h5>
-          <ul>
-            <li>Value Investors (P/S 9,3x ist nicht billig)</li>
-            <li>Income Investors (keine Dividende)</li>
-            <li>Kurzfristige Trader unter 6 Monaten Horizont</li>
-            <li>Anleger mit niedriger Risikotoleranz</li>
-          </ul>
+          <ul><li>Value-Investoren (~7x Sales)</li><li>Income-Investoren (keine Dividende)</li><li>Risikoaverse / kurzfristige Trader (hohe Vola, Krypto-Korrelation)</li></ul>
         </div>
       </div>
 
@@ -586,51 +539,55 @@ tr:hover td { background: rgba(139,92,246,0.04); }
         <table>
           <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
           <tbody>
-            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten</span></td><td>Bis Q2 Earnings (August) abwarten – Zinscut-Impact wird sichtbar</td></tr>
-            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>30% jetzt bei $114, 30% bei $100, 40% bei $90 oder Q2 Beat</td></tr>
-            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Bauen aus</span></td><td>−62% Drawdown bietet Eintrittspunkt; Volatilität nutzen</td></tr>
-            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen & Halten</span></td><td>Stablecoin-Mega-Trend, Plattform-Burggraben</td></tr>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten</span></td><td>Bestätigung der USDC-Trendwende (Q2'26) abwarten</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert</span></td><td>z. B. ⅓ jetzt, ⅓ nach Q2-Zahlen, ⅓ bei ARC-Mainnet</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-orange">Antizyklisch starten</span></td><td>R/R ~1:1,6 bei ~$80, überverkaufte Technik</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Aufbauen & Halten</span></td><td>Strukturthema Stablecoin → $3 Bio bis 2030</td></tr>
           </tbody>
         </table>
       </div>
-      <div class="source">Quellen: Synthese aller Sektionen 1-11; Analyst Consensus (Investing.com, 15.05.2026)</div>
+      <div class="source">Quellen: Synthese Sektionen 1–11; Analystenziele Investing.com/Yahoo (Stand 05.06.2026).</div>
     </div>
   </div>
 
+  <!-- ============ SEKTION 13 ============ -->
   <div class="section" id="s13">
-    <div class="section-header"><div class="section-number">13</div><div class="section-title">Outlook – Anstehende Events</div></div>
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook</div>
+      <div class="section-note">3 entscheidende Events</div>
+    </div>
     <div class="section-body">
       <div class="outlook-card">
-        <h4>📊 Event 1: Q2 2026 Earnings – voraussichtlich Anfang August 2026</h4>
-        <p>Erster vollständiger Quartalsbericht nach dem Q1-Miss. Im Fokus: Sequenzielle Entwicklung der Reserve-Return-Rate (Folge eventueller Fed-Cuts), USDC-Circulation-Wachstum nach dem flat sequenziellen Q1, sowie erste Indikationen zu Arc-Token-Auswirkungen auf P&L.</p>
+        <h4>📊 Event 1: Q2'26-Quartalsergebnisse – voraussichtlich 18.08.2026</h4>
+        <p>Der entscheidende Datenpunkt für die These: USDC-Umlaufentwicklung und Reserverendite. Genau hier zeigt sich, ob die Adoptionsstagnation seit Januar 2026 nur eine Pause oder ein Trend ist.</p>
         <div class="when-then">
-          <strong>Wenn:</strong> Q2 Revenue ≥ $700 Mio (Konsens $733 Mio) UND USDC-Circulation steigt sequenziell um >5% auf >$81 Mrd → starkes Bull-Signal, das die These „Onchain-Adoption kompensiert Zinscuts" bestätigt. → bei Kurs <$130 nachkaufen.<br><br>
-          <strong>Wenn:</strong> Q2 Revenue < $670 Mio UND/ODER USDC-Circulation weiter flat → Bear-Bestätigung. Reserveerträge können den Zinszyklus nicht überkompensieren. → Position auf max. 50% reduzieren, Re-Entry erst nach Stabilisierung.
+          <strong>Wenn:</strong> USDC-Umlauf &gt;$82 Mrd (klare Re-Acceleration, +&gt;6 % QoQ) <em>und</em> RLDC-Marge stabil → das Anteilsverlust-Risiko entschärft sich, kurzfristig nachkaufen.<br><br>
+          <strong>Wenn:</strong> USDC-Umlauf flach/&lt;$78 Mrd <em>und</em> Reserverendite weiter rückläufig → die Bear-Case bestätigt sich, Anteile reduzieren bzw. Einstieg verschieben.
         </div>
       </div>
-
       <div class="outlook-card">
-        <h4>📊 Event 2: Arc Mainnet Launch – voraussichtlich Q3 2026</h4>
-        <p>Circle's eigene Layer-1-Blockchain (Arc) approaching Mainnet nach erfolgreichem Testnet. Der $222 Mio Token-Presale hat $3 Mrd FDV angesetzt – Mainnet wird die erste echte Bewährungsprobe. Tokenomics, Validierungsmodell, DApp-Adoption und Settlement-Fee-Revenue sind alle noch nicht in Guidance.</p>
+        <h4>📊 Event 2: GENIUS-Act-Umsetzungsregeln (18.07.2026) + ARC-Mainnet-Beta (Sommer 2026)</h4>
+        <p>Das regulatorische Feintuning entscheidet, wie leicht Banken eigene Stablecoins ausgeben dürfen; ARC entscheidet, ob Circle ein zweites Ertragsbein jenseits des Reservezinses aufbaut.</p>
         <div class="when-then">
-          <strong>Wenn:</strong> Mainnet startet pünktlich, ≥10 große DApps zur Mainnet-Eröffnung (DeFi, Payments, Tokenisierung) UND erste Settlement-Fees in $10+ Mio annualisierter Run-Rate → starkes positives Signal. → Position weiter aufbauen, da Arc das größte Optionalitäts-Element wird.<br><br>
-          <strong>Wenn:</strong> Launch verzögert >Q4 2026 ODER Token verliert >50% gegen Presale-Preis $0,30 → strategisches Risiko, dass Arc nicht das Komplement zu USDC wird, das gehofft. → Position halten, aber Investment-These als „pure USDC" neu kalibrieren.
+          <strong>Wenn:</strong> Regeln bevorzugen etablierte, voll-regulierte Emittenten <em>und</em> ARC-Mainnet startet mit messbarer institutioneller Nutzung → strukturell bullisch, Position aufbauen.<br><br>
+          <strong>Wenn:</strong> Regeln öffnen Banken breit den Markt <em>und</em> ARC-Mainnet verzögert sich → Moat-Erosion, defensiv bleiben.
         </div>
       </div>
-
       <div class="outlook-card">
-        <h4>📊 Event 3: CLARITY Act Verabschiedung – erwartet H2 2026</h4>
-        <p>Der CLARITY Act soll die letzten regulatorischen Unklarheiten zu Krypto-Token-Klassifizierung (Commodity vs Security) auflösen. Direkt relevant für Arc-Token und USYC. Verabschiedung würde institutionelle Adoption (Pensionsfonds, Versicherungen, Bankreserven) signifikant beschleunigen.</p>
+        <h4>📊 Event 3: Fed-Zinspfad & Start der Visa/Mastercard/Stripe-Stablecoin-Plattform</h4>
+        <p>Zwei externe Hebel auf Marge (Zins) und Marktanteil (Wettbewerbsplattform), beide mit unmittelbarer Kurswirkung.</p>
         <div class="when-then">
-          <strong>Wenn:</strong> CLARITY Act wird im Q3/Q4 2026 verabschiedet UND erlaubt Tokenisierung von Securities → struktureller Tailwind für USYC (Tokenized MMF) und Arc (Settlement Layer). → Position aufbauen, da Circle einer der größten Profiteure regulatorischer Klarheit ist.<br><br>
-          <strong>Wenn:</strong> CLARITY Act stirbt im Senat oder wird stark verwässert → institutionelle Adoption verzögert sich um 1-2 Jahre. Circle bleibt im aktuellen regulatorischen Rahmen. → Position halten, aber Long-Term-Wachstumserwartungen senken.
+          <strong>Wenn:</strong> Fed pausiert/senkt langsamer als erwartet <em>und</em> die Konkurrenzplattform verzögert sich oder bleibt nischig → Margen- und Anteilsentlastung, halten/aufstocken.<br><br>
+          <strong>Wenn:</strong> Aggressive Zinssenkungen <em>und</em> Plattform-Launch mit großen Händlern/Coinbase-Beteiligung → doppelter Druck auf Marge und Volumen, reduzieren.
         </div>
       </div>
-      <div class="source">Quellen: Q1 2026 Earnings Call Guidance; Circle Pressroom; US Congress legislative agenda 2026</div>
+      <div class="source">Quellen: Circle IR (Earnings-Termin); Bitrue/Decrypt (GENIUS Act, ARC); CoinDesk (Visa/Mastercard/Stripe, 03.06.2026); Makro-Konsens (Stand 08.06.2026).</div>
     </div>
   </div>
 
-  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageempfehlung dar. Aktien können erhebliche Verluste verursachen. Bitte konsultieren Sie einen qualifizierten Finanzberater vor jeder Investitionsentscheidung. Alle Daten Stand 15.-16.05.2026, basierend auf öffentlich verfügbaren Quellen.</div>
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich Informations- und Bildungszwecken und stellt keine Anlageberatung, Kauf- oder Verkaufsempfehlung dar. Stablecoin- und Krypto-nahe Aktien sind hochvolatil. Alle Kennzahlen Stand 08.06.2026 aus öffentlichen Quellen (Circle IR, SEC-Filings, finviz.com, Investing.com, CoinDesk, DeFiLlama); Preisdaten können bei Live-Abruf abweichen. Keine Gewähr für Richtigkeit/Vollständigkeit. Jeder Anleger trifft seine Entscheidungen eigenverantwortlich.</div>
+
 </div>
 </body>
 </html>
