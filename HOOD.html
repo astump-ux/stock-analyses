@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HOOD – Aktienanalyse Canvas v2.2</title>
+<style>
+:root{
+  --primary:#8b5cf6; --primary-dark:#6d28d9;
+  --bg:#0f0f12; --bg-card:#1a1a1f; --bg-card2:#22222a; --border:#2e2e38;
+  --text:#e8e8ec; --text-muted:#888898; --text-dim:#555566;
+  --green:#22c55e; --red:#ef4444; --yellow:#f59e0b; --blue:#3b82f6; --purple:#8b5cf6; --teal:#14b8a6;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+.header{background:linear-gradient(135deg,#0e0018 0%,#1a0028 40%,#0f0f12 100%);border-bottom:1px solid var(--primary);padding:36px 40px 28px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;}
+.header-left h1{font-size:32px;font-weight:700;color:white;letter-spacing:-0.5px;}
+.header-left h1 span{color:var(--primary);}
+.header-left .subtitle{color:var(--text-muted);font-size:14px;margin-top:4px;}
+.header-right{text-align:right;}
+.price-tag{font-size:38px;font-weight:800;color:var(--primary);line-height:1;}
+.price-meta{color:var(--text-muted);font-size:13px;margin-top:4px;}
+.price-change{display:inline-block;padding:2px 8px;border-radius:4px;font-size:13px;font-weight:600;margin-top:4px;}
+.price-change.up{background:rgba(34,197,94,0.15);color:var(--green);}
+.price-change.down{background:rgba(239,68,68,0.15);color:var(--red);}
+.nav{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:100;}
+.nav a{color:var(--text-muted);text-decoration:none;padding:14px 16px;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;}
+.nav a:hover{color:var(--primary);border-bottom-color:var(--primary);}
+.main{max-width:1100px;margin:0 auto;padding:32px 40px 60px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px;}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;}
+.kpi-value{font-size:22px;font-weight:700;color:white;margin-top:4px;}
+.kpi-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.kpi-value.green{color:var(--green);} .kpi-value.red{color:var(--red);} .kpi-value.orange{color:var(--primary);}
+.section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden;}
+.section-header{background:var(--bg-card2);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.section-number{background:var(--primary);color:white;width:28px;height:28px;border-radius:6px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-title{font-size:16px;font-weight:700;color:white;}
+.section-score{margin-left:auto;font-size:14px;font-weight:700;color:var(--primary);}
+.section-note{font-size:12px;color:var(--text-dim);background:rgba(46,46,56,0.4);border-radius:4px;padding:4px 10px;margin-left:auto;}
+.section-body{padding:20px 24px;}
+p{margin-bottom:12px;color:var(--text);} p:last-child{margin-bottom:0;}
+h3{font-size:14px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;margin:20px 0 8px;} h3:first-child{margin-top:0;}
+.table-wrap{overflow-x:auto;margin:16px 0;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--bg-card2);color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:10px 12px;border-bottom:1px solid rgba(46,46,56,0.5);color:var(--text);}
+tr:last-child td{border-bottom:none;} tr:hover td{background:rgba(139,92,246,0.04);}
+.beat{color:var(--green);font-weight:600;} .miss{color:var(--red);font-weight:600;} .neutral{color:var(--yellow);font-weight:600;}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}
+.badge-green{background:rgba(34,197,94,0.15);color:var(--green);}
+.badge-red{background:rgba(239,68,68,0.15);color:var(--red);}
+.badge-yellow{background:rgba(245,158,11,0.15);color:var(--yellow);}
+.badge-blue{background:rgba(59,130,246,0.15);color:var(--blue);}
+.badge-orange{background:rgba(139,92,246,0.15);color:var(--primary);}
+.event-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(46,46,56,0.5);align-items:flex-start;}
+.event-item:last-child{border-bottom:none;}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0;}
+.dot-green{background:var(--green);} .dot-red{background:var(--red);} .dot-yellow{background:var(--yellow);}
+.event-label{font-weight:600;color:white;} .event-text{font-size:14px;color:var(--text);}
+.risk-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.risk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px;flex-wrap:wrap;}
+.risk-title{font-weight:600;color:white;font-size:14px;}
+.score-bar{display:flex;align-items:center;gap:10px;}
+.score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#a78bfa);}
+.score-num{font-weight:700;color:var(--primary);font-size:15px;min-width:32px;}
+.bull-bear-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:700px){.bull-bear-grid{grid-template-columns:1fr;}}
+.bull-card{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:16px;}
+.bear-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:16px;}
+.bull-card h4{color:var(--green);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:.5px;}
+.bear-card h4{color:var(--red);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:.5px;}
+.rating-box{background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(139,92,246,0.04));border:1px solid rgba(139,92,246,0.3);border-radius:12px;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:20px 0;}
+.rating-item label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:.5px;display:block;margin-bottom:4px;}
+.rating-item .val{font-size:20px;font-weight:800;color:white;}
+.rating-item .val.buy{color:var(--green);} .rating-item .val.hold{color:var(--yellow);} .rating-item .val.sell{color:var(--red);}
+.trigger-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+@media(max-width:700px){.trigger-grid{grid-template-columns:1fr;}}
+.trigger-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.trigger-card h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+.trigger-card.buy h5{color:var(--green);} .trigger-card.sell h5{color:var(--red);}
+.trigger-list{font-size:13px;color:var(--text);list-style:none;padding:0;}
+.trigger-list li{margin-bottom:6px;padding-left:14px;position:relative;}
+.trigger-list li::before{content:"→";position:absolute;left:0;}
+.investor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+@media(max-width:600px){.investor-grid{grid-template-columns:1fr;}}
+.investor-yes{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px;}
+.investor-no{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:12px;}
+.investor-yes h5{color:var(--green);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-no h5{color:var(--red);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-yes li,.investor-no li{font-size:13px;color:var(--text);margin-bottom:4px;list-style:none;padding-left:14px;position:relative;}
+.investor-yes li::before{content:"✓";position:absolute;left:0;color:var(--green);}
+.investor-no li::before{content:"✗";position:absolute;left:0;color:var(--red);}
+.geo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0;}
+.geo-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.geo-region{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;}
+.geo-pct{font-size:20px;font-weight:700;color:white;}
+.geo-note{font-size:12px;color:var(--text-muted);}
+.outlook-card{background:var(--bg-card2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:16px;margin-bottom:14px;}
+.outlook-card h4{color:white;font-size:14px;margin-bottom:8px;}
+.outlook-card .when-then{font-size:13px;color:var(--text);margin-top:8px;}
+.outlook-card .when-then strong{color:var(--primary);}
+.source{font-size:11px;color:var(--text-dim);margin-top:12px;padding-top:10px;border-top:1px solid rgba(46,46,56,0.5);}
+.source a{color:var(--text-dim);}
+.disclaimer{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text-dim);margin-top:32px;}
+.alert-box{background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px;}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+.pill{display:inline-block;background:rgba(139,92,246,0.12);color:var(--primary);border-radius:4px;padding:1px 7px;font-size:13px;font-weight:600;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Robinhood Markets <span>HOOD.NASDAQ</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 14. Juni 2026 · NASDAQ · Sektor: Financials / Capital Markets</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-orange">Retail-Broker</span>
+      <span class="badge badge-blue">Krypto &amp; Prediction Markets</span>
+      <span class="badge badge-green">Financial Super App</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$93.19</div>
+    <div class="price-meta">Schlusskurs 12.06.2026 · NASDAQ</div>
+    <div class="price-change up">▲ +28% (12 Monate) · ‑39% unter ATH</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">52W: $63.52 – $153.86</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$93.19</div><div class="kpi-sub">USD · 12.06.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Marktkap.</div><div class="kpi-value">~$83 Mrd.</div><div class="kpi-sub">~890 Mio. Aktien</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/E (TTM)</div><div class="kpi-value red">~44x</div><div class="kpi-sub">FWD ~42–44x</div></div>
+    <div class="kpi-card"><div class="kpi-label">EV/EBITDA</div><div class="kpi-value red">~24x</div><div class="kpi-sub">EV/Sales ~12x</div></div>
+    <div class="kpi-card"><div class="kpi-label">Adj. EBITDA-Marge</div><div class="kpi-value green">~50%</div><div class="kpi-sub">Q1 2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">ROE</div><div class="kpi-value green">~22%</div><div class="kpi-sub">Netto-Marge ~42%</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value">~Ende Juli</div><div class="kpi-sub">Q2 2026 (vorl.)</div></div>
+    <div class="kpi-card"><div class="kpi-label">Beta</div><div class="kpi-value red">~2.35</div><div class="kpi-sub">hohe Volatilität</div></div>
+  </div>
+
+  <!-- ============ SEKTION 1 ============ -->
+  <div class="section" id="s1">
+    <div class="section-header"><div class="section-number">1</div><div class="section-title">Geschäftsmodell</div><div class="section-score">Score: 8/10</div></div>
+    <div class="section-body">
+      <p>Robinhood betreibt eine provisionsfreie Trading- und Finanzplattform für US-Privatanleger, die sich seit dem Aktien-/ETF-/Options-/Krypto-Brokerage zu einer breit aufgestellten „Financial Super App" entwickelt. Das Kerngeschäft ist B2C: Die App senkt die Einstiegshürde für junge, mobile Anleger und monetarisiert deren Aktivität – nicht über klassische Gebühren, sondern über drei Hebel.</p>
+      <p>Erstens <strong>Transaction-based Revenue</strong>: Payment for Order Flow (PFOF) aus Aktien-, Options- und Krypto-Trades sowie Event-Contract-Rebates. Im ersten Quartal 2026 steuerte dieser Block $623 Mio. (58% des Umsatzes) bei, davon Optionen $260 Mio., Krypto $134 Mio., Aktien $82 Mio. und „Other"/Event-Contracts $147 Mio. Zweitens <strong>Net Interest Revenue</strong>: Zinserträge aus Cash-Sweep, Margin-Krediten und Wertpapierleihe ($359 Mio. in Q1 2026, +24% YoY) – die stabilere, wiederkehrende Komponente. Drittens <strong>Subscriptions &amp; Other</strong>: Robinhood Gold ($50 Mio., +32%) mit 4,3 Mio. Abonnenten, plus Erlöse aus Banking, Strategies und der Gold Card.</p>
+      <p>Die Kostenstruktur ist <strong>asset-light und hoch skalierbar</strong>: Eine einzige Technologieplattform bedient ~27,4 Mio. Funded Customers; zusätzliche Trades verursachen kaum Grenzkosten. Das erklärt die ~95% Bruttomarge und ~50% Adjusted-EBITDA-Marge. Der Capex ist minimal (<$25 Mio. p.a.), Wachstumskosten fließen vor allem in Marketing, Akquisitionen (Bitstamp, TradePMR, WonderFi) und Personal.</p>
+      <p>Strategisch zentral für die These: Robinhood diversifiziert die Erlösbasis aggressiv. Das Management nannte zuletzt <span class="pill">11 Geschäftslinien mit jeweils &gt;$100 Mio. annualisiertem Umsatz</span> – darunter Prediction Markets, Bitstamp (institutionelles Krypto), Robinhood Strategies (digitale Vermögensverwaltung), Robinhood Banking, die Gold Card, Robinhood Legend (aktive Trader) sowie Tokenisierung (Stock Tokens in der EU, eigene „Robinhood Chain"). Damit verschiebt sich das Modell von „Trader monetarisieren" hin zu „gesamte Finanzbedürfnisse der Kunden bedienen".</p>
+      <div class="source">Quellen: Robinhood Q1 2026 Pressemitteilung &amp; 8-K (28.04.2026, investors.robinhood.com); Q4/FY2025 Results (10.02.2026); KuCoin/LeverageShares Q1-Analysen (Mai 2026).</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 2 ============ -->
+  <div class="section" id="s2">
+    <div class="section-header"><div class="section-number">2</div><div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div><div class="section-score">Score: 6/10</div></div>
+    <div class="section-body">
+      <p><strong>Marke &amp; UX:</strong> Robinhood besitzt die stärkste Marke unter jungen US-Privatanlegern und eine UX, die das Trading „gamifiziert" hat. Das ist ein realer, aber weicher Vorteil – er erzeugt Reichweite und niedrige Kundenakquisitionskosten, schützt aber kaum vor Preiswettbewerb, da provisionsfreies Trading inzwischen Branchenstandard ist (Schwab, Fidelity, Webull).</p>
+      <p><strong>Switching Costs (steigend):</strong> Der eigentlich interessante Burggraben entsteht erst jetzt. Mit Retirement-Accounts (IRA-Match), Robinhood Gold, der Gold Card, Banking und automatisierter Vermögensverwaltung (Strategies) wandelt sich der oberflächliche Trading-Account in eine klebrige Hauptbankbeziehung. Total Platform Assets stiegen YoY um 39% auf $307 Mrd. (Q1 2026) und im Mai 2026 bereits auf $377 Mrd. Je mehr Vermögen und je mehr Produkte pro Kunde, desto höher die Wechselkosten. ARPU stieg auf $157 (+8% YoY).</p>
+      <p><strong>Scale-Vorteile:</strong> Die Plattformökonomie wirkt – Fixkostendegression liefert die hohe Marge. Im Brokerage-Geschäft ist Skala jedoch kein exklusiver Vorteil: Schwab verwaltet ein Vielfaches an Assets, IBKR hat die günstigere Kostenbasis. Robinhoods Skala ist relevant, aber nicht dominant.</p>
+      <p><strong>Technologischer Vorsprung:</strong> Hohe Produktgeschwindigkeit (Legend, Prediction Markets, Tokenisierung, Perpetual Futures) ist ein echtes Differenzierungsmerkmal gegenüber trägen Inkumbenten. Die Schwachstelle bleibt strukturell: Ein erheblicher Erlösanteil hängt an PFOF und damit an regulatorischem Wohlwollen (siehe SEC-Order-Protection-Rule-Debatte) sowie an der Risikobereitschaft der Retail-Kundschaft. Der Moat ist im Aufbau, aber noch nicht „breit und tief".</p>
+      <div class="source">Quellen: Robinhood Q1 2026 8-K; Q4 2025 Earnings Call (Vlad Tenev, „Financial Super App"); TipRanks „May metrics" ($377B, 09.06.2026); Motley Fool Brokerage-Vergleich (27.05.2026).</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 3 ============ -->
+  <div class="section" id="s3">
+    <div class="section-header"><div class="section-number">3</div><div class="section-title">Letzte 4 Quartale</div><div class="section-score">Beat-Ratio: 2/4 (+ 1 gemischt)</div></div>
+    <div class="section-body">
+      <p>Die vier zurückliegenden Quartale erzählen die Kernfrage der These in einer Zahlenreihe: explosives Wachstum in der Krypto-Hausse 2025 – und ein abruptes Abflachen, als der Krypto-Zyklus drehte. Q1 2026 (Stichtag 31.03.2026) verfehlte sowohl Umsatz- als auch EPS-Konsens; die zuvor makellose Beat-Serie riss.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>Q2 2025</th><th>Q3 2025</th><th>Q4 2025</th><th>Q1 2026</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Umsatz</strong></td><td>$989M <span class="beat">+45%</span></td><td>$1,27 Mrd. <span class="beat">+100%</span></td><td>$1,28 Mrd. <span class="beat">+27%</span></td><td>$1,07 Mrd. <span class="neutral">+15%</span></td></tr>
+            <tr><td>Transaction Rev.</td><td>$539M</td><td>~$730M</td><td>$776M (+15%)</td><td>$623M (+7%)</td></tr>
+            <tr><td>davon Krypto</td><td>~$160M</td><td>$268M <span class="beat">+300%</span></td><td>$221M <span class="miss">‑38%</span></td><td>$134M <span class="miss">‑47%</span></td></tr>
+            <tr><td>davon Optionen</td><td>$265M</td><td>$304M (+50%)</td><td>$314M (+41%)</td><td>$260M (+8%)</td></tr>
+            <tr><td>davon „Other"/Events</td><td>—</td><td>~$36M</td><td>$147M (+300%)</td><td>$147M <span class="beat">+320%</span></td></tr>
+            <tr><td>Net Interest Rev.</td><td>~$304M</td><td>~$370M</td><td>$411M (+39%)</td><td>$359M (+24%)</td></tr>
+            <tr><td>Net Income</td><td>$386M (+105%)</td><td>$556M (+271%)</td><td>$605M <span class="miss">‑34%*</span></td><td>$346M (+3%)</td></tr>
+            <tr><td>EPS (verwässert)</td><td>$0.42 (adj.)</td><td>$0.61 (+259%)</td><td>$0.66 <span class="miss">‑35%*</span></td><td>$0.38 (+3%)</td></tr>
+            <tr><td>Adj. EBITDA</td><td>~$650M</td><td>$742M (+177%)</td><td>$761M (+24%)</td><td>$534M (+14%)</td></tr>
+            <tr><td>vs. Konsens</td><td class="beat">Beat</td><td class="beat">Beat</td><td class="neutral">EPS Beat / Umsatz Miss</td><td class="miss">Miss (Umsatz &amp; EPS)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>*</strong> Der YoY-Rückgang von Net Income/EPS in Q4 2025 ist optisch: Q4 2024 enthielt einen Steuervorteil von $0.47/Aktie. Operativ war Q4 2025 ein Rekordquartal. Entscheidend ist der <strong>sequenzielle Bruch</strong>: Vom Rekord-Q4 ($1,28 Mrd.) zum Q1 2026 ($1,07 Mrd.) fiel der Umsatz um ‑16% QoQ und das Net Income von $605M auf $346M – fast ausschließlich getrieben vom Krypto-Einbruch (‑47%). Genau das ist der empirische Kern der Zyklus-Frage.</p>
+      <p><strong>Management-Statements:</strong> CEO Tenev betont die Super-App-Vision und Produktgeschwindigkeit; CFO Verma verwies auf einen „guten Start" in Q2 mit hohen Aktien-/Options-Volumina. Wichtigste Kennzahlen Q1 2026: Funded Customers 27,4 Mio. (+6%), Gold-Abos 4,3 Mio. (+36%), Margin-Buch $17,0 Mrd. (+93%), Net Deposits $17,7 Mrd. <strong>Marktreaktion:</strong> ‑9% nachbörslich am Earnings-Tag (28.04.2026). <strong>Nächste Quartalszahlen (Q2 2026):</strong> voraussichtlich Ende Juli 2026.</p>
+      <div class="source">Quellen: Robinhood 8-K Q2/Q3/Q4 2025 &amp; Q1 2026 (investors.robinhood.com); Zacks/Yahoo Finance Earnings-Berichte (28.–29.04.2026); finviz.com (Kennzahlen, Stand 13.06.2026).</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 4 ============ -->
+  <div class="section" id="s4">
+    <div class="section-header"><div class="section-number">4</div><div class="section-title">Wachstumseinordnung</div><div class="section-score">Score: 8/10</div></div>
+    <div class="section-body">
+      <p><strong>Umsatzwachstum:</strong> Robinhood verbuchte 2025 ein Rekordjahr mit $4,5 Mrd. Umsatz (+52% YoY), Net Income $1,9 Mrd. und EPS $2,05. Über drei Jahre war das Wachstum spektakulär, aber sehr ungleichmäßig: Es korreliert eng mit den Krypto- und Marktzyklen. Die Verlangsamung auf +15% in Q1 2026 zeigt, wie stark der Top-Line von der Risikobereitschaft der Retail-Anleger abhängt.</p>
+      <p><strong>Segment-Wachstum (Q1 2026 YoY):</strong> Das eigentliche Diversifikationssignal liegt in der Streuung der Wachstumsraten – Krypto ‑47%, aber Event-Contracts/„Other" +320%, Aktien +46%, Net Interest +24%, Gold +32%. Dass der Gesamtumsatz trotz eines Krypto-Halbierungseffekts noch +15% wuchs, ist der stärkste Beleg, dass die Diversifikation real wirkt.</p>
+      <h3>Geschäftslinien / „Diversifikations-Bausteine"</h3>
+      <div class="geo-grid">
+        <div class="geo-card"><div class="geo-region">Prediction Markets</div><div class="geo-pct">8,8 Mrd.</div><div class="geo-note">Event-Contracts Q1 (Rekord); World-Cup-Katalysator</div></div>
+        <div class="geo-card"><div class="geo-region">Net Interest</div><div class="geo-pct">$359M</div><div class="geo-note">+24%; Margin-Buch $17 Mrd. (+93%)</div></div>
+        <div class="geo-card"><div class="geo-region">Robinhood Gold</div><div class="geo-pct">4,3 Mio.</div><div class="geo-note">Abonnenten +36%; $50M Rev (+32%)</div></div>
+        <div class="geo-card"><div class="geo-region">Strategies (Advisory)</div><div class="geo-pct">&gt;180k</div><div class="geo-note">Digitale Vermögensverwaltung</div></div>
+        <div class="geo-card"><div class="geo-region">Banking / Gold Card</div><div class="geo-pct">300k+</div><div class="geo-note">Gold-Card-Kunden; Banking im Rollout</div></div>
+        <div class="geo-card"><div class="geo-region">Tokenisierung</div><div class="geo-pct">200+</div><div class="geo-note">EU Stock Tokens; „Robinhood Chain"</div></div>
+      </div>
+      <p><strong>Geografie:</strong> Robinhood ist überwiegend US-zentriert, expandiert aber: 30 europäische Länder, Krypto-Staking und Stock Tokens in der EU, Bitstamp (international/institutionell) und – via WonderFi – die kanadischen Börsen Bitbuy/Coinsquare. Die internationale Expansion ist eine Chance, aber noch ein kleiner Umsatzanteil und regulatorisch heikel (OpenAI bezeichnete Robinhoods EU-Tokens als „nicht autorisiert").</p>
+      <p><strong>Reifegrad &amp; Qualität:</strong> Das Profitabilitätswachstum übertrifft im Mehrjahresvergleich das Umsatzwachstum (operative Hebelwirkung) – ein Qualitätsmerkmal. Der Haken: Das Wachstum ist „at scale", aber konjunktur- und zyklusabhängig, und ein Teil der jüngsten Beschleunigung ist M&amp;A-getrieben (Bitstamp, TradePMR, WonderFi). Echtes organisches, zyklusunabhängiges Wachstum kommt zunehmend aus Net Interest, Gold und Prediction Markets.</p>
+      <div class="source">Quellen: Robinhood FY2025 &amp; Q1 2026 Results; Q2/Q3 2025 8-K (EU-Expansion, „To Catch a Token", Juni 2025); RWA Times / CoinMarketCap Pre-IPO-Report (Juni 2026).</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 5 ============ -->
+  <div class="section" id="s5">
+    <div class="section-header"><div class="section-number">5</div><div class="section-title">Bewertung &amp; Multiples</div><div class="section-score">Score: 4/10</div></div>
+    <div class="section-body">
+      <p>Die kurze Antwort: HOOD ist nach der Erholungsrally <strong>teuer</strong>. Bei ~$93 und einem TTM-EPS von ~$2,06 liegt das KGV bei ~44x, das Forward-KGV bei ~42–44x. Der PEG liegt je nach Quelle bei ~2,0–2,4 – also deutlich über 1, was bei einem zyklischen, gerade verlangsamenden Geschäft schwer zu rechtfertigen ist.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Multiple</th><th>HOOD (aktuell)</th><th>5-Jahres-Kontext / Branche</th></tr></thead>
+          <tbody>
+            <tr><td>P/E (TTM)</td><td>~44x</td><td>Capital-Markets-Median ~14–16x</td></tr>
+            <tr><td>P/E (Forward)</td><td>~42–44x</td><td>SCHW ~17x, IBKR ~30x</td></tr>
+            <tr><td>PEG</td><td>~2,0–2,4</td><td>3-Jahres-Schnitt ~0,77 (deutlich gestiegen)</td></tr>
+            <tr><td>EV/EBITDA</td><td>~24x</td><td>hoch für Brokerage</td></tr>
+            <tr><td>EV/Sales</td><td>~12x</td><td>Premium-Bewertung</td></tr>
+            <tr><td>P/Book</td><td>~6–7x</td><td>gesunken von ~15x (Q3 2025)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Historischer Vergleich:</strong> Die Aktie notiert ~39% unter dem Allzeithoch von ~$153 (Okt. 2025) und hat von ihrem Mai-Tief (~$63) bereits ~+48% zugelegt. Die Korrektur hat das Multiple zwar von extremen Niveaus entlastet (P/B von ~15x auf ~6,7x), aber das Ertragsmultiple bleibt ambitioniert, weil das Net Income QoQ gefallen ist – der Nenner schrumpft schneller, als der Kurs fiel.</p>
+      <p><strong>Externe Einordnung:</strong> GuruFocus stuft HOOD als „significantly overvalued" ein (GF-Value ~$62 vs. Kurs); das Forward-KGV liegt ~170% über dem Branchenmedian. Gleichzeitig heben Analysten die Kursziele an (Goldman Sachs $108, Buy; Mizuho $115) – die Sell-Side preist die Super-App-Optionalität und die PDT-Regel-Aufhebung ein. Fazit: Die Qualität rechtfertigt einen Aufschlag, aber bei ~44x KGV und PEG &gt;2 ist wenig Fehlertoleranz eingepreist. Das Bewertungsrisiko ist der schwächste Punkt der These.</p>
+      <div class="source">Quellen: finviz.com / stockanalysis.com / fullratio.com (Stand 12.–13.06.2026); GuruFocus (06.06.2026); Goldman Sachs PT $108 (10.06.2026); Mizuho PT $115; MacroTrends KGV-Historie.</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 6 ============ -->
+  <div class="section" id="s6">
+    <div class="section-header"><div class="section-number">6</div><div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div><div class="section-score">Score: 8/10</div></div>
+    <div class="section-body">
+      <p>Auf der Qualitätsseite überzeugt Robinhood. Die Margen sind außergewöhnlich: Bruttomarge ~95%, operative Marge ~47%, Netto-Marge ~42%, Adjusted-EBITDA-Marge ~50% (Q1 2026). Der freie Cashflow ist robust (FY2025 ~$1,6 Mrd.; auf TTM-Basis je nach Quelle bis ~$3,0 Mrd.), der Capex vernachlässigbar – ein lehrbuchmäßiges asset-light-Modell.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>Wert</th><th>Kommentar</th></tr></thead>
+          <tbody>
+            <tr><td>Bruttomarge</td><td>~95%</td><td>Plattform-Ökonomie</td></tr>
+            <tr><td>Operative Marge</td><td>~47%</td><td>starke operative Hebelwirkung</td></tr>
+            <tr><td>Adj. EBITDA-Marge</td><td>~50%</td><td>zyklusverstärkt (Q1 2026)</td></tr>
+            <tr><td>ROE / ROA</td><td>~22% / ~5%</td><td>solide</td></tr>
+            <tr><td>Free Cash Flow</td><td>~$1,6–3,0 Mrd.</td><td>hohe Cash-Konversion</td></tr>
+            <tr><td>Cash</td><td>~$5,0 Mrd.</td><td>Netto-Cash-Position</td></tr>
+            <tr><td>Verschuldung</td><td>keine klassische</td><td>Margin-Funding ist operativ</td></tr>
+            <tr><td>Buybacks</td><td>$1,2 Mrd. kumuliert</td><td>Q1 2026: $250M @ ~$81</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Sind die Earnings „echt"?</strong> Im Wesentlichen ja – es handelt sich um cash-generatives, margenstarkes Geschäft ohne aggressive Bilanzierungstricks. Der Vorbehalt zur Profitabilitäts-These: Die 50%-EBITDA-Marge ist <strong>teilweise zyklusgetragen</strong>. Krypto-Trades haben sehr hohe Inkrementalmargen; fällt das Krypto-Volumen, verschwindet hochmargiger Umsatz, während die Opex (Q1 2026 +18% durch Marketing &amp; Akquisitionen) und SBC ($92 Mio., inkl. $13 Mio. CFO-Wechsel) bestehen bleiben. Genau deshalb wuchs das Net Income in Q1 2026 nur +3% bei +15% Umsatz. Die strukturell hochwertigeren, wiederkehrenden Ertragsquellen (Net Interest, Gold-Abos) stützen die Marge – aber das ausgewiesene Margenniveau atmet mit dem Zyklus.</p>
+      <div class="source">Quellen: fullratio.com / stockanalysis.com (FY2025 &amp; TTM); Robinhood Q1 2026 8-K (Opex, SBC, Buybacks); finviz.com (Stand 13.06.2026).</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 7 ============ -->
+  <div class="section" id="s7">
+    <div class="section-header"><div class="section-number">7</div><div class="section-title">Peer-Vergleich</div><div class="section-score">Score: 6/10</div></div>
+    <div class="section-body">
+      <p>Im gewählten Peer-Set positioniert sich HOOD als das Wachstums- und Margenwunder – zum mit Abstand höchsten Preis. Die Peers decken bewusst drei Achsen ab: Krypto-Overlap (COIN), Scale &amp; Stabilität (SCHW), Profitabilität pur (IBKR) und Fintech-Banking (SOFI).</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Unternehmen</th><th>Marktkap.</th><th>Umsatz-/EPS-Wachstum</th><th>Fwd P/E</th><th>Profil</th></tr></thead>
+          <tbody>
+            <tr><td><strong>HOOD</strong></td><td>~$83 Mrd.</td><td>+15% Q1 / +52% FY25</td><td class="miss">~44x</td><td>Höchstes Wachstum &amp; Marge, teuerstes Multiple, zyklisch</td></tr>
+            <tr><td>COIN (Coinbase)</td><td>~$60–70 Mrd.</td><td>Tx-Rev. ~+2% FY25</td><td>~30–40x</td><td>Reinster Krypto-Proxy; Q1 2026 Volumen ‑54%, klarer Miss</td></tr>
+            <tr><td>SCHW (Schwab)</td><td>~$154 Mrd.</td><td>EPS '26 ~+16%</td><td class="beat">~17x</td><td>Scale-Leader, $10B+ Assets, günstigstes Multiple, stabil</td></tr>
+            <tr><td>IBKR (Interactive)</td><td>~$90–100 Mrd.</td><td>EPS '26 ~+8%</td><td>~30x</td><td>Margenstärkster Broker; NII $904M; global, nüchtern</td></tr>
+            <tr><td>SOFI</td><td>~$21 Mrd.</td><td>Umsatz '26 ~+30%</td><td class="miss">~49x</td><td>Fintech-Bank, dünnere Margen, teuerste Wachstumsstory</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Qualitative Einordnung:</strong> Gegenüber <strong>COIN</strong> ist HOOD der bessere Diversifikator – Coinbase ist im Q1-2026-Krypto-Einbruch (Volumen ‑54%) deutlich härter getroffen worden, weil ihm der nicht-Krypto-Puffer (Optionen, Net Interest, Gold) fehlt. HOODs „Krypto kann ‑47% fallen und der Umsatz wächst trotzdem +15%" ist genau der Vorteil, den COIN nicht hat.</p>
+      <p>Gegenüber <strong>SCHW</strong> und <strong>IBKR</strong> verliert HOOD beim Preis und bei der Stabilität: Schwab ist mit ~17x Forward-KGV und einer riesigen, klebrigen Asset-Basis das defensive Investment; IBKR ist der disziplinierteste, margenstärkste Broker für ernsthafte Trader mit globaler Reichweite. Beide wachsen langsamer, sind aber konjunkturrobuster. <strong>SOFI</strong> ist die einzige Peer, die noch teurer (~49x) und gleichzeitig margenärmer ist – HOOD wirkt im direkten Vergleich qualitativ überlegen, aber beide handeln „für perfekte Execution".</p>
+      <p>Netto: HOOD hat das beste Wachstums-/Margenprofil der Gruppe, aber das schwächste Bewertungs-Risk/Reward. Wer Krypto-Optionalität mit Diversifikations-Puffer will, nimmt HOOD statt COIN; wer Ruhe und Bewertung will, nimmt SCHW.</p>
+      <div class="source">Quellen: Zacks/TradingView Broker-Vergleich (SCHW/IBKR, Nov. 2025); IBKR 1Q2026 8-K (21.04.2026); Coinbase Q4'25/Q1'26 8-K &amp; 10-Q; 24/7 Wall St. (SOFI, 28.04.2026); companiesmarketcap.com / stockanalysis.com (Marktkap., 06/2026). Marktkap. COIN/IBKR approximativ.</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 8 ============ -->
+  <div class="section" id="s8">
+    <div class="section-header"><div class="section-number">8</div><div class="section-title">Aktuelle News &amp; Events</div><div class="section-note">Quellen ≤ 3 Monate</div></div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">09.06.2026 – IPO-Underwriter-Zulassung <span class="badge badge-green">Positiv</span></div><div class="event-text">Robinhood Securities erhält Zulassung als IPO-Underwriter; CEO Tenev will das Underwriting „disrupten" und Retail-Allokationen sichern. Erlöse sind deal-, nicht trading-abhängig – reduziert die Zyklusabhängigkeit. Quelle: TipRanks/RWA Times, 09.06.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">12.06.2026 – SpaceX-IPO ($SPCX) <span class="badge badge-green">Positiv</span></div><div class="event-text">Größter Börsengang der Geschichte (Bewertung ~$1,77 Bio.); Robinhood verteilte SPCX-Aktien per Zufallslotterie an Retail-Kunden, „record-breaking traffic" (kurzzeitige Latenzprobleme). Starkes Engagement-Signal. Quelle: CNBC/Benzinga, 12.06.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">09.06.2026 – Insider-Käufe ~$35,3 Mio. <span class="badge badge-green">Positiv</span></div><div class="event-text">Ein Director kaufte $20,2 Mio., weitere Insider-Käufe summieren sich auf ~$35,3 Mio. Vertrauenssignal nahe der Tiefs. Quelle: TipRanks, 09.06.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">28.04.2026 – Q1-2026-Earnings-Miss <span class="badge badge-red">Negativ</span></div><div class="event-text">Umsatz $1,07 Mrd. und EPS $0,38 verfehlten den Konsens; Krypto-Erlöse ‑47%. Aktie ‑9% nachbörslich. Quelle: Zacks/Yahoo Finance.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Anf. Juni 2026 – WonderFi-Akquisition ($180M) <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Übernahme der kanadischen Krypto-Börsen Bitbuy/Coinsquare; internationale Krypto-Expansion, aber erhöht Krypto-Exposure. Quelle: RWA Times.</div></div></div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">14.04.2026 – SEC streicht Pattern-Day-Trader-Regel <span class="badge badge-green">Positiv</span></div><div class="event-text">Die $25.000-Mindestkapitalgrenze für aktive Trader entfällt (ersetzt durch Echtzeit-Margin-Checks). ~25% der Funded Accounts lagen darunter – mehr Turnover, PFOF, Options-Flow und Margin. HOOD +7,6%; Mizuho PT $115. Quelle: heygotrade/TipRanks.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">Juni 2026 – FIFA-WM-2026-Prediction-Markets <span class="badge badge-green">Positiv</span></div><div class="event-text">WM in Nordamerika; Prediction-Market-Industrie als möglicher Hauptprofiteur. Direkter Rückenwind für HOODs Event-Contracts-Segment (+320% YoY). Quelle: TipRanks.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Juni 2026 – Pre-IPO-Tokenisierung / Perpetual Futures <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Wettbewerb um Pre-IPO-Zugang (Kraken, Bybit xStocks, Hyperliquid-Perps); HOOD positioniert sich via Underwriting &amp; Tokenisierung, aber regulatorisch unklar. Quelle: CoinMarketCap Pre-IPO-Report.</div></div></div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Juni 2026 – SEC-Vorschlag: Order-Protection-Rule streichen <span class="badge badge-yellow">Neutral/Risiko</span></div><div class="event-text">Regulatorische Bewegung mit potenzieller Wirkung auf Marktstruktur und PFOF-Ökonomik. Doppelschneidig für HOODs Transaktionserlöse. Quelle: Investing.com.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">2026 – Zinsen &amp; Krypto-Zyklus <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Sinkende Kurzfristzinsen bremsen das Net-Interest-Wachstum; der Krypto-Zyklus bleibt der dominierende Schwankungstreiber der Quartalsergebnisse. Quelle: Robinhood 8-K-Kommentare.</div></div></div>
+      <div class="alert-box">ℹ️ <strong>Hinweis:</strong> Das ausführliche Bull-/Bear-Narrativ folgt in Sektion 12 – mit der vollen Kenntnis aus Risiken, Chancen und technischer Analyse.</div>
+      <div class="source">Quellen: CNBC, TipRanks, CNN Markets, Benzinga, RWA Times, CoinMarketCap (alle Juni 2026); Investing.com; heygotrade (Mai 2026).</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 9 ============ -->
+  <div class="section" id="s9">
+    <div class="section-header"><div class="section-number">9</div><div class="section-title">Technische Analyse</div><div class="section-score">Score: 6/10</div></div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange" style="font-size:18px;">$93.19</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value green" style="font-size:18px;">~$82</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value green" style="font-size:18px;">~$84</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value yellow" style="font-size:18px;color:var(--yellow);">~$100</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value" style="font-size:18px;">~62</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value red" style="font-size:18px;">$153.86</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value green" style="font-size:18px;">bullish gedreht</div></div>
+      </div>
+      <p><strong>Trend:</strong> Nach einem brutalen Abverkauf von ~$153 (ATH Okt. 2025) auf ~$63 (Tief Mai 2026, ‑59%) läuft seit Mitte Mai eine kräftige Erholungsrally (~+48%). Der Kurs hat die SMA 20 und SMA 50 zurückerobert und testet nun die <strong>200-Tage-Linie (~$100)</strong> – der entscheidende mittelfristige Widerstand. Solange dieser nicht nachhaltig zurückerobert ist, bleibt der übergeordnete Trend angeschlagen.</p>
+      <p><strong>Momentum:</strong> Der RSI ist von oversold (~40 im Mai) auf ~60–65 gestiegen – Aufwärtsmomentum intakt, aber nicht mehr überverkauft; bei ~$100 droht kurzfristige Überhitzung. Der MACD hat nach dem Tief bullish gekreuzt. Aggregierte Signaldienste (Investing.com) zeigen über alle gleitenden Durchschnitte „Strong Buy", was die kurzfristige Erholungsdynamik widerspiegelt – aber Vorsicht: Diese Signale waren am Tief ebenso bärisch.</p>
+      <p><strong>Support/Resistance:</strong> Unterstützungen bei ~$82 (Ausbruch/SMA-Cluster), ~$73 und ~$63 (52W-Tief). Widerstände bei ~$96 (jüngstes Hoch), ~$100 (200-Tage-Linie + psychologisch), darüber ~$120 und schließlich das ATH bei $153,86. Die hohe Volatilität (ATR ~$3,9; Beta ~2,35) bedeutet: Setups funktionieren in beide Richtungen schnell. Technisch ist das Bild „konstruktive Erholung, aber an einer wichtigen Entscheidungslinie".</p>
+      <div class="source">Quellen: ChartMill, Financhill, SwingTradeBot, Investing.com Technicals (Mai–Juni 2026); Investing.com/Yahoo Kursdaten (Stand 12.06.2026). MA-/RSI-Werte gerundet, da Kurs sich jüngst stark bewegt hat.</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 10 ============ -->
+  <div class="section" id="s10">
+    <div class="section-header"><div class="section-number">10</div><div class="section-title">Risiken &amp; Chancen</div><div class="section-score">Score: 5/10 (invertiert)</div></div>
+    <div class="section-body">
+      <h3>10a) Strukturelle &amp; zyklische Risiken</h3>
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">⚡ Krypto-/Zyklus-Abhängigkeit</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div>
+        <div class="event-text">Krypto- und Risk-on-Volumina treiben die sequenziellen Ergebnisse. Q1 2026 zeigte: ‑47% Krypto kostete ‑16% Umsatz QoQ und fast die Hälfte des Net Income. Wahrscheinlichkeit eines erneuten Krypto-Drawdowns: hoch (zyklisches Asset). Trotz Diversifikation bleibt dies der dominante Schwankungstreiber.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">⚖️ Regulatorik (PFOF / Order-Protection-Rule)</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div>
+        <div class="event-text">Ein wesentlicher Transaktions-Erlösanteil hängt an PFOF. SEC-Vorhaben (Order Protection Rule, ältere PFOF-Debatten) könnten die Ökonomik treffen. Schwer zu quantifizieren, aber bei adverser Regulierung könnten zweistellige Prozentpunkte des Transaktions-Umsatzes betroffen sein.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">💰 Bewertungsrisiko</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div>
+        <div class="event-text">~44x KGV, PEG &gt;2 bei verlangsamendem, zyklischem Wachstum. Eine Enttäuschung (z.B. ein weiterer Krypto-Quartals-Miss) trifft auf wenig Bewertungspuffer – Multiple-Kompression ist das realistischste Verlustszenario.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">🏦 Wettbewerb &amp; Zinssensitivität</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div>
+        <div class="event-text">Schwab/Fidelity/IBKR konkurrieren um dieselben Assets; sinkende Kurzfristzinsen bremsen das Net-Interest-Wachstum (zweitgrößte Erlössäule).</div>
+      </div>
+      <h3>10b) AI- &amp; Technologie-Disruption</h3>
+      <p>Robinhood ist eher Profiteur als Opfer von AI: AI-gestützte Advisory (Strategies), Personalisierung und Effizienz (nur ~2.300 Mitarbeiter bei ~$4,6 Mrd. Umsatz) stützen die Marge. Das eigentliche Tech-Risiko ist die <strong>Disruption durch Krypto-native/On-chain-Rails</strong>: Tokenisierte Aktien, Pre-IPO-Perps und On-chain-Prediction-Markets könnten Teile der Wertschöpfung an Krypto-Börsen (Kraken, Hyperliquid, Coinbase) abwandern lassen. Bullisches Szenario: HOOD wird selbst zur On-chain-Infrastruktur (Robinhood Chain, Tokenisierung) und vereinnahmt diese Flows. Bärisch: Robinhood verteidigt nur und verliert margenstarke Order-Flows an offenere Protokolle.</p>
+      <h3>10c) Chancen</h3>
+      <p>Underwriting (deal-basierte, trading-unabhängige Erlöse), Prediction Markets (WM-/Wahl-Katalysatoren), Banking &amp; Gold Card (Lifetime-Value pro Kunde), internationale Expansion und die PDT-Regel-Aufhebung (mehr aktive Trader). Jede dieser Linien reduziert mittelfristig die Krypto-Abhängigkeit.</p>
+      <h3>10d) Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> Hohe SBC ($92M/Q), M&amp;A-getriebenes Wachstum, hohe Insider-/Institutionellen-Fluktuation, Beta 2,35. <strong>Dealbreaker:</strong> Keine existenzbedrohenden – das Unternehmen ist profitabel, schuldenfrei und cash-stark. Ein regulatorisches PFOF-Verbot wäre der schwerste denkbare Schlag, ist aber kein Basisszenario.</p>
+      <div class="source">Quellen: Robinhood Q1 2026 8-K; SEC-Order-Protection-Rule-Vorschlag (Investing.com, Juni 2026); CoinMarketCap Pre-IPO-Report; finviz.com (Beta, SBC).</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 11 ============ -->
+  <div class="section" id="s11">
+    <div class="section-header"><div class="section-number">11</div><div class="section-title">Scoring</div><div class="section-score">Ø 6,1/10</div></div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Visualisierung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td>Geschäftsmodell</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>Capital-light, skalierbar, breit diversifizierend</td></tr>
+            <tr><td>Burggraben</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Marke + steigende Switching-Costs, aber commoditized</td></tr>
+            <tr><td>Operative Entw. (4Q)</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Rekord-2025, aber Q1-2026-Miss &amp; QoQ-Bruch</td></tr>
+            <tr><td>Wachstum</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>+52% FY25, 11+ Geschäftslinien, aber zyklisch</td></tr>
+            <tr><td>Bewertung</td><td>4/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td><td>~44x KGV, PEG &gt;2, „significantly overvalued"</td></tr>
+            <tr><td>Cashflow &amp; Kapital</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>~50% EBITDA-Marge, FCF stark, schuldenfrei</td></tr>
+            <tr><td>Risiken (invertiert)</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Zyklus, PFOF-Regulatorik, Bewertung, Beta 2,35</td></tr>
+            <tr><td>Technische Analyse</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Erholungsrally, testet 200-Tage-Linie</td></tr>
+            <tr><td>Peer-Vergleich</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Bestes Wachstum/Marge, schlechtestes Bew.-R/R</td></tr>
+            <tr style="background:rgba(139,92,246,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td><td><strong>6,1/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:61%;background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">6,1</span></div></td>
+              <td>Hohe Qualität, aber teuer &amp; zyklisch → HALTEN</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Der Durchschnitt von 6,1/10 fasst die These zusammen: Geschäftsmodell, Wachstum und Kapitalqualität sind erstklassig (je 8), gebremst von einer ambitionierten Bewertung (4) und erhöhtem Zyklus-/Regulatorik-Risiko (5). Es ist ein Qualitätsunternehmen zu einem Preis, der wenig Fehlertoleranz lässt.</p>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 12 ============ -->
+  <div class="section" id="s12">
+    <div class="section-header"><div class="section-number">12</div><div class="section-title">Fazit – Investment-These</div></div>
+    <div class="section-body">
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 – Die Diversifikation wirkt empirisch.</strong> Der stärkste Bull-Punkt liegt direkt in den Q1-2026-Zahlen: Krypto-Erlöse halbierten sich (‑47% auf $134M), und dennoch wuchs der Gesamtumsatz +15%, weil Event-Contracts (+320%), Aktien (+46%), Net Interest (+24%) und Gold (+32%) den Ausfall auffingen. Vor zwei Jahren wäre ein solcher Krypto-Einbruch verheerend gewesen; heute ist er ein Dämpfer. 11+ Geschäftslinien mit je &gt;$100M annualisiert sind ein realer Strukturwandel.</p>
+          <p><strong>Säule 2 – Strukturelle Profitabilität &amp; neue, zyklusunabhängige Erlöse.</strong> ~50% Adj.-EBITDA-Marge, ~95% Bruttomarge, ~$1,6–3,0 Mrd. FCF, schuldenfrei, ~$5 Mrd. Cash und laufende Buybacks. Die neuen Linien sind teils trading-unabhängig: Die IPO-Underwriter-Zulassung (Juni 2026) liefert deal-basierte Gebühren, Net Interest und Gold sind wiederkehrend. Platform Assets stiegen bis Mai 2026 auf $377 Mrd.</p>
+          <p><strong>Säule 3 – Optionalität &amp; Katalysatoren.</strong> PDT-Regel-Aufhebung (mehr aktive Trader), WM-2026-Prediction-Markets, SpaceX-IPO-Engagement, Tokenisierung/Robinhood Chain. Die Sell-Side hebt Ziele an (Goldman $108, Mizuho $115). Bei intaktem Bull-Markt ist das ATH bei $153 die langfristige Referenz.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 – Der Zyklus dominiert weiterhin die Quartale.</strong> Trotz Diversifikation fiel der Umsatz QoQ um ‑16% und das Net Income von $605M auf $346M, sobald Krypto drehte. Net Interest ist zinssensitiv (sinkende Kurzfristzinsen = Gegenwind), Prediction Markets sind selbst eventgetrieben (WM, Wahlen) und damit lumpy. Die „Zyklusfestigkeit" ist besser als früher, aber nicht erreicht.</p>
+          <p><strong>Risiko 2 – Die Profitabilität ist teils zyklusgetragen.</strong> Hochmargige Krypto-Trades blähen die 50%-EBITDA-Marge in guten Quartalen auf; fällt das Volumen, bleibt die Opex (+18% YoY) bestehen und das Net Income wuchs nur +3%. Das Margenniveau atmet mit dem Zyklus – es ist nicht rein strukturell.</p>
+          <p><strong>Risiko 3 – Bewertung &amp; Regulatorik.</strong> ~44x KGV und PEG &gt;2 bei verlangsamendem Wachstum lassen kaum Puffer; GuruFocus sieht ~33% Überbewertung. Ein PFOF-feindlicher SEC-Schritt (Order Protection Rule) träfe die größte Erlössäule. Technisch steht der Kurs nach +48%-Rally an der 200-Tage-Linie – das Timing-Risiko ist erhöht.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung (ausgewogen)</h3>
+      <p>Beide Thesenfragen lassen sich nüchtern beantworten. <strong>Zur Zyklusfestigkeit:</strong> Der Revenue-Mix ist messbar robuster geworden – das ist kein Marketing, sondern in Q1 2026 bewiesen (Krypto ‑47%, Umsatz +15%). Aber „robuster" ist nicht „zyklusfest": Sequenziell schwankt das Geschäft weiterhin stark, weil sowohl Krypto als auch Net Interest und Prediction Markets je eigene Zyklen haben. <strong>Zur Profitabilität:</strong> Der Margendurchbruch ist real und strukturell unterfüttert (operative Hebelwirkung, wiederkehrende NII + Abos), aber das ausgewiesene 50%-Niveau ist im oberen Zyklus-Bereich überzeichnet.</p>
+      <p>Per Saldo überzeugt das bullische Narrativ qualitativ – es ist ein echtes Qualitätsunternehmen mit Optionalität. Doch das bärische Narrativ gewinnt beim entscheidenden Punkt: <strong>Preis und Einstiegszeitpunkt.</strong> Nach ~+48% Rally an einem charttechnischen Widerstand, bei ~44x KGV und mit dem nächsten potenziell krypto-belasteten Quartal vor der Tür, ist das Risk/Reward auf aktuellem Niveau nicht attraktiv. Ich könnte falsch liegen, falls der Krypto-/Risk-on-Zyklus 2026 erneut dreht und HOODs Diversifikation gleichzeitig die Marge stabilisiert – dann läuft die Aktie schnell Richtung $120+.</p>
+      <p><strong>Risk/Reward auf ~$93:</strong> ‑25% Downside (Richtung $70 / Erholungs-Ausbruchszone) vs. +18% Upside (Richtung $110). Das spricht für Halten/Tranchieren, nicht für aggressives Kaufen am Widerstand.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Einschätzung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kurzfristig (0–6M)</strong></td><td><span class="badge badge-yellow">Halten / Volatil</span></td><td>200-Tage-Linie als Widerstand; Q2-2026-Earnings (Ende Juli) als Krypto-Test</td></tr>
+            <tr><td><strong>Mittelfristig (6–24M)</strong></td><td><span class="badge badge-yellow">Halten / Tranchiert</span></td><td>Diversifikations-Beweis muss über mehrere Quartale halten; Bewertung muss ins Wachstum „hineinwachsen"</td></tr>
+            <tr><td><strong>Langfristig (2–5J)</strong></td><td><span class="badge badge-green">Konstruktiv</span></td><td>Super-App-These &amp; Asset-Wachstum intakt – attraktiver bei Schwäche &lt;$80</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>Robinhood hat sich vom reinen Trading-Broker zu einer diversifizierten, hochprofitablen Finanzplattform gewandelt – und Q1 2026 hat bewiesen, dass die Diversifikation einen Krypto-Crash abfedern kann. Das rechtfertigt langfristig einen Qualitätsaufschlag. Auf dem aktuellen Niveau (~44x KGV, nach starker Rally, an der 200-Tage-Linie, vor einem zyklisch unsicheren Quartal) ist jedoch zu wenig Fehlertoleranz eingepreist. <strong>HALTEN</strong> mit Aufstockungsbereitschaft bei Kursschwäche.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$90–110</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–3 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">‑25%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+18%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val" style="color:var(--yellow);">~1:0,7</div></div>
+      </div>
+
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Zweiter Quartals-Miss in Folge mit erneut fallenden Nicht-Krypto-Erlösen → These „Diversifikation" gebrochen</li>
+            <li>Adverser SEC-Beschluss zu PFOF / Order Protection Rule → Erlössäule strukturell bedroht</li>
+            <li>Bruch unter ~$73 mit Volumen → technischer Trendbruch</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Q2 2026: Nicht-Krypto-Erlöse wachsen weiter zweistellig trotz schwachem Krypto → Zyklusfestigkeit bestätigt</li>
+            <li>Nachhaltiger Tagesschluss über 200-Tage-Linie (~$100) → Trendwende</li>
+            <li>Rücksetzer in die $75–80-Zone bei intakten Fundamentaldaten → besseres Risk/Reward</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul><li>Growth-Investoren mit Volatilitätstoleranz</li><li>Langfrist-Anleger (Super-App-These)</li><li>Anleger, die Krypto-Optionalität mit Puffer wollen</li></ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul><li>Value-Investoren (zu teuer)</li><li>Income-Investoren (keine Dividende)</li><li>Risikoscheue / kurzfristige Trader am Widerstand</li></ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten</span></td><td>Auf Q2-Bestätigung &amp; Rücksetzer &lt;$80 warten</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert</span></td><td>Kleine Startposition, Aufstockung bei Schwäche</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-yellow">Halten</span></td><td>Bestehende Position halten; R/R am Widerstand mäßig</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Aufbauen</span></td><td>Super-App-Wachstumsthema über 3–5 Jahre</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Synthese der Sektionen 1–11; Robinhood Q1 2026 8-K; finviz.com / stockanalysis.com / GuruFocus; Goldman Sachs / Mizuho Kursziele (Juni 2026).</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 13 ============ -->
+  <div class="section" id="s13">
+    <div class="section-header"><div class="section-number">13</div><div class="section-title">Outlook</div></div>
+    <div class="section-body">
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q2-2026-Quartalsergebnisse – voraussichtlich Ende Juli 2026</h4>
+        <p>Der direkteste Test der Zyklusfestigkeits-These. Entscheidend ist nicht das Krypto-Ergebnis selbst, sondern ob die Nicht-Krypto-Erlöse (Optionen, Aktien, Net Interest, Event-Contracts, Gold) auch bei schwachem Krypto weiter zweistellig wachsen.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Nicht-Krypto-Transaktions- + Net-Interest-Erlöse zusammen YoY zweistellig wachsen UND der Gesamtumsatz mindestens den Konsens trifft (trotz möglicher Krypto-Schwäche) → Diversifikations-These bestätigt, kurzfristig in Schwächephasen nachkaufen.<br><br>
+          <strong>Wenn:</strong> Auch die Nicht-Krypto-Linien verlangsamen sich und der Umsatz verfehlt erneut → Zyklusfestigkeit widerlegt, Position reduzieren bzw. nicht aufstocken.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>⚖️ Event 2: SEC-Entscheidung zur Order-Protection-Rule / PFOF-Rahmen – 2H 2026</h4>
+        <p>Die regulatorische Marktstruktur-Debatte betrifft direkt die größte Erlössäule (Transaction/PFOF). Der Ausgang ist binär für einen relevanten Umsatzanteil.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Die Regeländerung PFOF unangetastet lässt oder Robinhoods Ökonomik sogar verbessert (z.B. mehr Wettbewerb bei Ausführung) → Risikoabschlag entfällt, Bewertung kann sich normalisieren, konstruktiver werden.<br><br>
+          <strong>Wenn:</strong> Ein PFOF-feindlicher Beschluss fällt → strukturelle Margenbelastung, Reduktion erwägen, bis die Erlös-Substitution (Net Interest, Subscriptions, Underwriting) quantifizierbar ist.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>🚀 Event 3: Underwriting-/Tokenisierungs-Pipeline (OpenAI/Anthropic-IPOs, Robinhood Chain) – 2026/2027</h4>
+        <p>Die neuen, trading-unabhängigen Erlösquellen (IPO-Underwriting, Tokenisierung) sind der Schlüssel zur echten Entkopplung vom Krypto-Zyklus. Nach SpaceX stehen weitere Mega-Listings im Raum.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Robinhood bei kommenden Mega-IPOs eine relevante Underwriting-/Allokationsrolle einnimmt und Tokenisierung regulatorisch tragfähig skaliert → struktureller Re-Rating-Treiber, langfristige Position aufbauen.<br><br>
+          <strong>Wenn:</strong> Underwriting bleibt symbolisch und Tokenisierung stößt auf regulatorische/rechtliche Blockaden (vgl. „OpenAI nicht autorisiert") → die Entkopplungs-These verzögert sich, Geduld bzw. Abwarten günstigerer Kurse.
+        </div>
+      </div>
+      <div class="source">Quellen: Robinhood IR-Kalender (Q2-2026-Termin geschätzt); SEC-Vorschlag Order Protection Rule (Investing.com, Juni 2026); RWA Times / CoinMarketCap Pre-IPO-Report (Juni 2026).</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken und stellt keine Anlageberatung, Kauf-/Verkaufsempfehlung oder Aufforderung zum Handel dar. Alle Angaben beruhen auf öffentlich zugänglichen Quellen (Stand 14.06.2026) und können fehlerhaft, unvollständig oder überholt sein; Kennzahlen wurden teils gerundet/geschätzt. Aktieninvestments sind mit erheblichen Risiken bis zum Totalverlust verbunden. Der Autor übernimmt keine Haftung. Treffen Sie Anlageentscheidungen stets eigenverantwortlich bzw. mit einem lizenzierten Berater.</div>
+
+</div>
+</body>
+</html>
