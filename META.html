@@ -3,151 +3,133 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Meta META – Aktienanalyse Canvas v2.2</title>
+<title>META – Aktienanalyse Canvas v2.2</title>
 <style>
-:root {
-  --primary: #1877F2;
-  --primary-dark: #145dbf;
-  --bg: #0f0f12;
-  --bg-card: #1a1a1f;
-  --bg-card2: #22222a;
-  --border: #2e2e38;
-  --text: #e8e8ec;
-  --text-muted: #888898;
-  --text-dim: #555566;
-  --green: #22c55e;
-  --red: #ef4444;
-  --yellow: #f59e0b;
-  --blue: #3b82f6;
-  --purple: #8b5cf6;
-  --teal: #14b8a6;
+:root{
+  --primary:#FF6900; --primary-dark:#cc5400; --bg:#0f0f12; --bg-card:#1a1a1f;
+  --bg-card2:#22222a; --border:#2e2e38; --text:#e8e8ec; --text-muted:#888898;
+  --text-dim:#555566; --green:#22c55e; --red:#ef4444; --yellow:#f59e0b;
+  --blue:#3b82f6; --purple:#8b5cf6; --teal:#14b8a6;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
-.header { background: linear-gradient(135deg, #0a1f3d 0%, #143875 40%, #0f0f12 100%); border-bottom: 1px solid var(--primary); padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; }
-.header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
-.header-left h1 span { color: var(--primary); }
-.header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
-.header-right { text-align: right; }
-.price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
-.price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
-.price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
-.price-change.up { background: rgba(34,197,94,0.15); color: var(--green); }
-.price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
-.nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100; }
-.nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
-.nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
-.main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
-.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
-.kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
-.kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-.kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
-.kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-.kpi-value.green { color: var(--green); }
-.kpi-value.red { color: var(--red); }
-.kpi-value.orange { color: var(--primary); }
-.section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
-.section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
-.section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.section-title { font-size: 16px; font-weight: 700; color: white; }
-.section-score { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
-.section-note { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
-.section-body { padding: 20px 24px; }
-p { margin-bottom: 12px; color: var(--text); }
-p:last-child { margin-bottom: 0; }
-h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
-h3:first-child { margin-top: 0; }
-.table-wrap { overflow-x: auto; margin: 16px 0; }
-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
-tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(24,119,242,0.04); }
-.beat { color: var(--green); font-weight: 600; }
-.miss { color: var(--red); font-weight: 600; }
-.neutral { color: var(--yellow); font-weight: 600; }
-.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
-.badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
-.badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
-.badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
-.badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
-.badge-orange { background: rgba(24,119,242,0.15); color: var(--primary); }
-.event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
-.event-item:last-child { border-bottom: none; }
-.event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
-.dot-green { background: var(--green); }
-.dot-red { background: var(--red); }
-.dot-yellow { background: var(--yellow); }
-.event-label { font-weight: 600; color: white; }
-.event-text { font-size: 14px; color: var(--text); }
-.risk-item { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
-.risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.risk-title { font-weight: 600; color: white; font-size: 14px; }
-.score-bar { display: flex; align-items: center; gap: 10px; }
-.score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-.score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #66a9ff); }
-.score-num { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
-.bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-@media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
-.bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
-.bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
-.bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-.bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-.rating-box { background: linear-gradient(135deg, rgba(24,119,242,0.12), rgba(24,119,242,0.04)); border: 1px solid rgba(24,119,242,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
-.rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
-.rating-item .val { font-size: 20px; font-weight: 800; color: white; }
-.rating-item .val.buy { color: var(--green); }
-.rating-item .val.hold { color: var(--yellow); }
-.rating-item .val.sell { color: var(--red); }
-.trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
-@media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
-.trigger-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
-.trigger-card h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-.trigger-card.buy h5 { color: var(--green); }
-.trigger-card.sell h5 { color: var(--red); }
-.trigger-list { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
-.trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
-.trigger-list li::before { content: "→"; position: absolute; left: 0; }
-.investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
-@media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
-.investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
-.investor-no { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
-.investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
-.investor-no h5 { color: var(--red); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
-.investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
-.investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
-.investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
-.geo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
-.geo-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
-.geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-.geo-pct { font-size: 20px; font-weight: 700; color: white; }
-.geo-note { font-size: 12px; color: var(--text-muted); }
-.outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
-.outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
-.outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
-.outlook-card .when-then strong { color: var(--primary); }
-.source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
-.disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+.header{background:linear-gradient(135deg,#1a0800 0%,#2a1000 40%,#0f0f12 100%);border-bottom:1px solid var(--primary);padding:36px 40px 28px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;}
+.header-left h1{font-size:32px;font-weight:700;color:white;letter-spacing:-0.5px;}
+.header-left h1 span{color:var(--primary);}
+.header-left .subtitle{color:var(--text-muted);font-size:14px;margin-top:4px;}
+.header-right{text-align:right;}
+.price-tag{font-size:38px;font-weight:800;color:var(--primary);line-height:1;}
+.price-meta{color:var(--text-muted);font-size:13px;margin-top:4px;}
+.price-change{display:inline-block;padding:2px 8px;border-radius:4px;font-size:13px;font-weight:600;margin-top:4px;}
+.price-change.up{background:rgba(34,197,94,0.15);color:var(--green);}
+.price-change.down{background:rgba(239,68,68,0.15);color:var(--red);}
+.nav{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:100;}
+.nav a{color:var(--text-muted);text-decoration:none;padding:14px 16px;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.2s;}
+.nav a:hover{color:var(--primary);border-bottom-color:var(--primary);}
+.main{max-width:1100px;margin:0 auto;padding:32px 40px 60px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px;}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.kpi-value{font-size:22px;font-weight:700;color:white;margin-top:4px;}
+.kpi-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.kpi-value.green{color:var(--green);}.kpi-value.red{color:var(--red);}.kpi-value.orange{color:var(--primary);}
+.section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden;}
+.section-header{background:var(--bg-card2);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.section-number{background:var(--primary);color:white;width:28px;height:28px;border-radius:6px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-title{font-size:16px;font-weight:700;color:white;}
+.section-score{margin-left:auto;font-size:14px;font-weight:700;color:var(--primary);}
+.section-note{font-size:12px;color:var(--text-dim);background:rgba(46,46,56,0.4);border-radius:4px;padding:4px 10px;margin-left:auto;}
+.section-body{padding:20px 24px;}
+p{margin-bottom:12px;color:var(--text);}p:last-child{margin-bottom:0;}
+h3{font-size:14px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 8px;}
+h3:first-child{margin-top:0;}
+.table-wrap{overflow-x:auto;margin:16px 0;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--bg-card2);color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:10px 12px;border-bottom:1px solid rgba(46,46,56,0.5);color:var(--text);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,105,0,0.04);}
+.beat{color:var(--green);font-weight:600;}.miss{color:var(--red);font-weight:600;}.neutral{color:var(--yellow);font-weight:600;}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}
+.badge-green{background:rgba(34,197,94,0.15);color:var(--green);}
+.badge-red{background:rgba(239,68,68,0.15);color:var(--red);}
+.badge-yellow{background:rgba(245,158,11,0.15);color:var(--yellow);}
+.badge-blue{background:rgba(59,130,246,0.15);color:var(--blue);}
+.badge-orange{background:rgba(255,105,0,0.15);color:var(--primary);}
+.event-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(46,46,56,0.5);align-items:flex-start;}
+.event-item:last-child{border-bottom:none;}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0;}
+.dot-green{background:var(--green);}.dot-red{background:var(--red);}.dot-yellow{background:var(--yellow);}
+.event-label{font-weight:600;color:white;}
+.event-text{font-size:14px;color:var(--text);}
+.risk-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.risk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.risk-title{font-weight:600;color:white;font-size:14px;}
+.score-bar{display:flex;align-items:center;gap:10px;}
+.score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#ff9500);}
+.score-num{font-weight:700;color:var(--primary);font-size:15px;min-width:32px;}
+.bull-bear-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:700px){.bull-bear-grid{grid-template-columns:1fr;}}
+.bull-card{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:16px;}
+.bear-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:16px;}
+.bull-card h4{color:var(--green);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.bear-card h4{color:var(--red);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.rating-box{background:linear-gradient(135deg,rgba(255,105,0,0.12),rgba(255,105,0,0.04));border:1px solid rgba(255,105,0,0.3);border-radius:12px;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:20px 0;}
+.rating-item label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;display:block;margin-bottom:4px;}
+.rating-item .val{font-size:20px;font-weight:800;color:white;}
+.rating-item .val.buy{color:var(--green);}.rating-item .val.hold{color:var(--yellow);}.rating-item .val.sell{color:var(--red);}
+.trigger-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+@media(max-width:700px){.trigger-grid{grid-template-columns:1fr;}}
+.trigger-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.trigger-card h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.trigger-card.buy h5{color:var(--green);}.trigger-card.sell h5{color:var(--red);}
+.trigger-list{font-size:13px;color:var(--text);list-style:none;padding:0;}
+.trigger-list li{margin-bottom:6px;padding-left:14px;position:relative;}
+.trigger-list li::before{content:"→";position:absolute;left:0;}
+.investor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+@media(max-width:600px){.investor-grid{grid-template-columns:1fr;}}
+.investor-yes{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px;}
+.investor-no{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:12px;}
+.investor-yes h5{color:var(--green);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-no h5{color:var(--red);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-yes li,.investor-no li{font-size:13px;color:var(--text);margin-bottom:4px;list-style:none;padding-left:14px;position:relative;}
+.investor-yes li::before{content:"✓";position:absolute;left:0;color:var(--green);}
+.investor-no li::before{content:"✗";position:absolute;left:0;color:var(--red);}
+.geo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0;}
+.geo-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.geo-region{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.geo-pct{font-size:20px;font-weight:700;color:white;}
+.geo-note{font-size:12px;color:var(--text-muted);}
+.outlook-card{background:var(--bg-card2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:16px;margin-bottom:14px;}
+.outlook-card h4{color:white;font-size:14px;margin-bottom:8px;}
+.outlook-card .when-then{font-size:13px;color:var(--text);margin-top:8px;}
+.outlook-card .when-then strong{color:var(--primary);}
+.source{font-size:11px;color:var(--text-dim);margin-top:12px;padding-top:10px;border-top:1px solid rgba(46,46,56,0.5);}
+.source a{color:var(--text-dim);}
+.disclaimer{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text-dim);margin-top:32px;}
+.alert-box{background:rgba(255,105,0,0.08);border:1px solid rgba(255,105,0,0.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px;}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+.pill{display:inline-block;background:rgba(255,105,0,0.12);color:var(--primary);border-radius:4px;padding:1px 7px;font-size:13px;font-weight:600;}
 </style>
 </head>
 <body>
 
 <div class="header">
   <div class="header-left">
-    <h1>Meta Platforms, Inc. <span>META</span></h1>
-    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 14.05.2026 · NASDAQ · Sektor: Communication Services / Social Media</div>
-    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-      <span class="badge badge-orange">AI-Ads</span>
-      <span class="badge badge-blue">Llama 4/5</span>
+    <h1>Meta Platforms <span>META.NASDAQ</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 30. Juni 2026 · NASDAQ · Sektor: Communication Services / Digitale Werbung &amp; Social Media</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-orange">Family of Apps</span>
+      <span class="badge badge-blue">AI-Infrastruktur</span>
       <span class="badge badge-yellow">Reality Labs</span>
-      <span class="badge badge-green">3.56B DAU</span>
     </div>
   </div>
   <div class="header-right">
-    <div class="price-tag">~$610</div>
-    <div class="price-meta">Schlusskurs ~14.05.2026 · NASDAQ</div>
-    <div class="price-change down">▼ –13% von Q1-Hoch</div>
-    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: ~$480 – $747</div>
+    <div class="price-tag">$550</div>
+    <div class="price-meta">Schlusskurs 26.06.2026 · NASDAQ (aktuell ~$543)</div>
+    <div class="price-change down">▼ −13% YTD · −30% vs. ATH</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">52W: ~$481 – $796</div>
   </div>
 </div>
 
@@ -162,7 +144,7 @@ tr:hover td { background: rgba(24,119,242,0.04); }
   <a href="#s8">8. News</a>
   <a href="#s9">9. Technisch</a>
   <a href="#s10">10. Risiken</a>
-  <a href="#s11">11. Scoring</a>
+  <a href="#s11">11. Thesen-Analyse</a>
   <a href="#s12">12. Fazit</a>
   <a href="#s13">13. Outlook</a>
 </nav>
@@ -170,62 +152,49 @@ tr:hover td { background: rgba(24,119,242,0.04); }
 <div class="main">
 
   <div class="kpi-grid" style="margin-top:24px;">
-    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">~$610</div><div class="kpi-sub">USD · 14.05.2026</div></div>
-    <div class="kpi-card"><div class="kpi-label">Marktkap.</div><div class="kpi-value">~$1.55T</div><div class="kpi-sub">Mega-Cap</div></div>
-    <div class="kpi-card"><div class="kpi-label">P/E TTM</div><div class="kpi-value">~26x</div><div class="kpi-sub">moderat</div></div>
-    <div class="kpi-card"><div class="kpi-label">Fwd P/E</div><div class="kpi-value green">~22x</div><div class="kpi-sub">5J-Ø: 21.6x</div></div>
-    <div class="kpi-card"><div class="kpi-label">Op-Marge Q1</div><div class="kpi-value green">41%</div><div class="kpi-sub">höchste Big-Tech (excl. MSFT)</div></div>
-    <div class="kpi-card"><div class="kpi-label">Revenue Q1 YoY</div><div class="kpi-value green">+33%</div><div class="kpi-sub">schnellster Pace</div></div>
-    <div class="kpi-card"><div class="kpi-label">Capex 2026e</div><div class="kpi-value red">$125–145B</div><div class="kpi-sub">erhöht +$10B</div></div>
-    <div class="kpi-card"><div class="kpi-label">Reality Labs Loss</div><div class="kpi-value red">$4.0B/Q</div><div class="kpi-sub">$16B p.a. Burn</div></div>
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">$550</div><div class="kpi-sub">USD · 26.06.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Marktkap.</div><div class="kpi-value">$1,40 Bio.</div><div class="kpi-sub">Mega-Cap</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/E (TTM)</div><div class="kpi-value">20,0</div><div class="kpi-sub">Fwd: 17,5</div></div>
+    <div class="kpi-card"><div class="kpi-label">PEG</div><div class="kpi-value green">0,80</div><div class="kpi-sub">günstig f. Wachstum</div></div>
+    <div class="kpi-card"><div class="kpi-label">EV/EBITDA</div><div class="kpi-value">12,6</div><div class="kpi-sub">TTM</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nettomarge</div><div class="kpi-value orange">33%</div><div class="kpi-sub">ROE 33%</div></div>
+    <div class="kpi-card"><div class="kpi-label">Umsatz 2026E</div><div class="kpi-value">~$253 Mrd.</div><div class="kpi-sub">+24% YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value" style="font-size:18px;">29.07.2026</div><div class="kpi-sub">Q2 2026</div></div>
   </div>
 
-  <!-- S1 -->
+  <!-- ===================== SEKTION 1 ===================== -->
   <div class="section" id="s1">
     <div class="section-header">
       <div class="section-number">1</div>
       <div class="section-title">Geschäftsmodell</div>
-      <div class="section-note">Quellen ≤ 6 Monate</div>
+      <div class="section-note">Quellen ≤ 6–9 Monate</div>
     </div>
     <div class="section-body">
-      <h3>Zwei Segmente: Family of Apps + Reality Labs</h3>
-      <p>Meta erwirtschaftete im Q1 2026 Umsätze von <strong>$56.3 Mrd. (+33% YoY)</strong> – das schnellste Wachstum seit der 2021-Spitze. <strong>Family of Apps</strong> (FoA: Facebook, Instagram, WhatsApp, Messenger, Threads) generierte $55.9 Mrd. Umsatz (+33%) und $26.9 Mrd. Op-Income (48% Marge!). <strong>Reality Labs</strong> (RL: Quest VR, Ray-Ban Smart Glasses, Orion AR) erzielte nur $402 Mio. Umsatz (-2% YoY) und einen <strong>$4.0 Mrd. Operating-Loss</strong>. Die FoA-Erlöse sind zu >98% Werbung – ein extrem konzentriertes Geschäftsmodell.</p>
-
-      <h3>Revenue-Streams & Unit Economics</h3>
-      <p>Q1 2026 Ad-Impressions wuchsen +19% YoY, durchschnittlicher Preis pro Ad +12% YoY – beide Hebel zogen gleichzeitig, ein außergewöhnlicher Setup. Das ist der direkte Beweis, dass AI-getriebene Ad-Targeting-Verbesserungen (Andromeda-System, Advantage+) reale Monetarisierungs-Effizienz liefern. <strong>3.56 Mrd. Daily Active Users (DAU)</strong> über die FoA-Plattformen im März 2026 – größtes Engagement-Asset der Welt. Reality Labs bleibt strategische Wette mit jährlich ~$16 Mrd. Burn auf zukünftige Computing-Plattform (AR/VR/Smart Glasses).</p>
-
-      <h3>Strategischer Pivot: Personal Superintelligence + Llama-Ökosystem</h3>
-      <p>Zuckerbergs Strategie für 2026: <strong>"Personal Superintelligence"</strong> – jedem Nutzer ein persönlicher AI-Assistent. <strong>Meta AI</strong> nähert sich 1 Mrd. Nutzern (eines der am schnellsten wachsenden Consumer-AI-Produkte). <strong>Llama-Open-Source-Ökosystem</strong> macht Meta zur Open-Source-Antwort auf OpenAI/Anthropic – Llama 4 in 2025, Llama 5 in Vorbereitung. Daily AI Glasses Users haben sich YoY verdreifacht. Business-AI-Conversations skalierten von 1M auf 10M wöchentlich nur in Q1 2026 – frühe Monetisierungs-Signale für AI-Agents im Enterprise-Bereich.</p>
-
-      <div class="source">Quellen: META Q1 2026 8-K (29.04.2026); Q1 2026 Earnings Call Transcript; Investing.com Q1 Slides; TIKR Q1 Analysis (04/2026); Bitget News (13.05.2026).</div>
+      <p>Meta ist im Kern eine der effizientesten Werbemaschinen der Geschichte. Rund 98 % des Umsatzes stammen aus digitaler Werbung innerhalb der „Family of Apps" (FoA): Facebook, Instagram, WhatsApp, Messenger und Threads. Das Unternehmen verkauft nicht Inhalte, sondern Aufmerksamkeit – konkret die Möglichkeit, eine Werbebotschaft an präzise definierte Nutzersegmente auszuspielen. Die Bezahlung erfolgt im Auktionsmodell (CPM/CPC), wobei der Preis aus dem Zusammenspiel von Impressionen (Anzeigenmenge) und Preis-pro-Anzeige entsteht.</p>
+      <p>Das Geschäft ist überwiegend B2B in der Monetarisierung (Werbekunden zahlen), aber B2C in der Reichweite: Im Dezember 2025 erreichte Meta durchschnittlich 3,58 Mrd. täglich aktive Menschen (DAP, +7 % YoY) – fast die Hälfte der Menschheit nutzt mindestens eine Meta-App täglich. Die Kundenbasis reicht von Kleinunternehmen (SMB), die das Rückgrat der Werbeeinnahmen bilden, bis zu globalen Markenkonzernen. Diese Diversifikation über Millionen von Werbekunden macht den Umsatz robuster als bei stark konzentrierten Plattformen.</p>
+      <p>Die Kostenstruktur ist historisch asset-light gewesen, kippt nun aber in eine capex-intensive Phase: Meta baut für 2026 KI-Infrastruktur im Volumen von 125–145 Mrd. USD auf (Rechenzentren, GPUs, eigene MTIA-Chips). Die operative Marge (FoA) liegt weiterhin in den 40er-Prozentbereichen, doch die wachsenden Abschreibungen aus dem Infrastruktur-Aufbau drücken zunehmend auf den Free Cashflow. Die Unit Economics sind exzellent: Bei einem ARPU, der in den USA/Kanada ein Vielfaches der Schwellenländer beträgt, generiert jeder zusätzliche aktive Nutzer einen hohen inkrementellen Werbe-Deckungsbeitrag.</p>
+      <p>Das zweite Segment, Reality Labs (VR/AR, Quest-Headsets, KI-Brillen), ist ein strukturell defizitärer Zukunftswetten-Bereich: Q1 2026 erzielte es nur 402 Mio. USD Umsatz bei 4,03 Mrd. USD operativem Verlust. Reality Labs ist heute ein Klotz am Bein – das Management erwartet den Verlust-Höhepunkt 2026, danach soll er sinken.</p>
+      <div class="source">Quellen: Meta Q4-2025- &amp; Q1-2026-Earnings-Release/IR (Jan/Apr 2026); CNBC, Reuters (Apr 2026); Yahoo Finance Kennzahlen (26.06.2026)</div>
     </div>
   </div>
 
-  <!-- S2 -->
+  <!-- ===================== SEKTION 2 ===================== -->
   <div class="section" id="s2">
     <div class="section-header">
       <div class="section-number">2</div>
-      <div class="section-title">Burggraben & Wettbewerbsvorteile</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
       <div class="section-score">Score: 9/10</div>
     </div>
     <div class="section-body">
-      <h3>Netzwerk-Effekt-Moat: 3.56B DAU + Multi-Plattform-Lock-in</h3>
-      <p>Metas primärer Moat ist der unerreichbare <strong>Network-Effekt von 3.56 Mrd. DAU</strong> – mehr als jede andere Plattform der Welt. WhatsApp ist Standard-Messenger in DE/IN/LatAm/Großteil EU; Instagram dominiert Visual-Social; Facebook bleibt Lokale-Community-Plattform; Threads als Twitter/X-Alternative gewinnt Traction. Diese Multi-App-Strategie macht Meta zum quasi-unverzichtbaren Layer für Consumer-Digital-Engagement.</p>
-
-      <h3>AI-Ads-Moat: Andromeda + Targeting-Precision</h3>
-      <p>Q1 2026 zeigt empirisch den AI-Ads-Moat: 33% Umsatzwachstum bei gleichzeitig 19% Impression-Wachstum UND 12% Preis-Wachstum – das ist das beste AI-ROI-Ergebnis in Big-Tech. Andromeda (proprietäres Ad-Ranking-System mit Llama) verbessert Targeting-Präzision messbar; Advantage+ AI-Campaign-Tools werden von >70% der Top-Advertiser genutzt. Im Vergleich: GOOGL Search-Revenue +19%, AMZN Ads +24%, META FoA-Ads +33% – Meta wächst <strong>signifikant schneller</strong> als andere Ads-Plattformen.</p>
-
-      <h3>Open-Source-AI-Strategie: Llama-Ökosystem</h3>
-      <p>Llama ist die einzige große Open-Source-Frontier-Modell-Familie. Strategischer Vorteil: Llama-Adopter (Startups, Forschung, Enterprise) ernähren das Ökosystem ohne Lizenzgebühren, was Meta breite Verbreitung und Innovations-Beiträge bringt. Llama 4 in 2025 launched, Llama 5 mit "Superintelligence-Caliber"-Capabilities in 2026/2027 erwartet. Zuckerberg gründete <strong>Meta Superintelligence Labs (MSL)</strong> und akquirierte Moltbook (AI-Agents-Social-Network).</p>
-
-      <h3>Schwächen & Verwundbarkeiten</h3>
-      <p>(1) <strong>Ads-Konzentration</strong>: 98% Umsatz aus Werbung – kein Cloud, kein SaaS, keine Hardware-Monetisierung. Single-Point-of-Failure-Risiko. (2) <strong>Reality Labs Burn</strong>: $16B/Jahr Operating-Loss mit nicht-existierender Profitabilitäts-Roadmap. (3) <strong>Regulatorische Druck</strong>: EU-DMA, US-FTC-Klage zum Instagram/WhatsApp-Spinoff, Privacy-Regulation. (4) <strong>Politische Plattform-Risiken</strong>: User-Disruptions in Iran/Russland im Q1 2026 zeigten Vulnerabilität.</p>
-
-      <div class="source">Quellen: META Q1 2026 Earnings; TIKR Andromeda Analysis (04/2026); FinancialContent Llama-Review (03/2026); TECHi META Stock Analysis (04/2026).</div>
+      <p><strong>Netzwerkeffekte (sehr stark):</strong> Mit ~3,58 Mrd. DAP besitzt Meta den größten sozialen Graphen der Welt. Der Wert jeder App steigt mit jedem zusätzlichen Nutzer – Freunde, Familie, Communities und Unternehmen sind dort, weil alle anderen auch dort sind. Dieser Effekt ist über zwei Jahrzehnte gewachsen und kaum replizierbar.</p>
+      <p><strong>Daten- und Algorithmen-Moat (stark, KI-getrieben):</strong> Metas eigentlicher Vorsprung liegt heute im KI-gestützten Empfehlungs- und Anzeigen-Ranking. Die Modellvereinheitlichung unter „Lattice" hob die Anzeigenqualität in Q4 2025 um 12 % YoY; die neuen Modelle Lattice und GEM steigerten in Q1 2026 die Conversion-Rate von Anzeigen messbar um über 6 %. Reels-Watchtime auf Instagram wuchs zweistellig, getrieben durch bessere KI-Empfehlungen. Dieser geschlossene Kreislauf aus Engagement-Daten → besseres Targeting → höhere Werbe-ROI → mehr Budget ist der Kern des Burggrabens.</p>
+      <p><strong>Skalenvorteile (stark):</strong> Bei über 200 Mrd. USD Jahresumsatz kann Meta KI-Forschung, Infrastruktur und Anzeigen-Tools auf eine Nutzerbasis verteilen, die kein Wettbewerber außer Google erreicht. Die 8 Mio. Advertiser, die bereits GenAI-Werbekreativ-Tools nutzen, profitieren von einem Schwungrad, das kleinere Plattformen (Snap, Pinterest) nicht finanzieren können.</p>
+      <p><strong>Switching Costs (mittel):</strong> Für Werbekunden sind die Wechselkosten geringer als bei Enterprise-Software – ein Budget lässt sich kurzfristig zu TikTok oder Amazon verschieben. Die Stärke liegt nicht in vertraglicher Bindung, sondern in der überlegenen Performance: Solange Metas ROAS (Return on Ad Spend) führend ist, bleibt das Budget. <strong>Schwachstelle:</strong> Genau hier setzt die KI-Disruptionsthese an – sollte ein Wettbewerber die Conversion-Effizienz überflügeln, ist der Moat angreifbarer als der von Googles Such-Intent-Monopol.</p>
+      <div class="source">Quellen: Meta Q4-2025-/Q1-2026-Earnings-Call-Transcripts (IR); Futurum, eMarketer (Jan–Apr 2026); TechCrunch (Apr 2026)</div>
     </div>
   </div>
 
-  <!-- S3 -->
+  <!-- ===================== SEKTION 3 ===================== -->
   <div class="section" id="s3">
     <div class="section-header">
       <div class="section-number">3</div>
@@ -233,531 +202,394 @@ tr:hover td { background: rgba(24,119,242,0.04); }
       <div class="section-score">Beat-Ratio: 4/4</div>
     </div>
     <div class="section-body">
-      <p>Vier aufeinanderfolgende Beats mit beschleunigendem Ads-Wachstum. Nächste Earnings: <strong>Ende Juli 2026 (Q2 2026)</strong>.</p>
-
+      <p>Meta hat in allen vier zuletzt berichteten Quartalen sowohl Umsatz als auch bereinigtes EPS übertroffen. Auffällig: Die Umsatzwachstumsrate <em>beschleunigte</em> sich über das Jahr von 22 % auf 33 % – ungewöhnlich für ein Unternehmen dieser Größe. Zwei Quartale waren durch Steuer-Sondereffekte aus dem „One Big Beautiful Bill Act" (OBBBA) verzerrt: Q3 2025 mit einer einmaligen, nicht zahlungswirksamen Steuerbelastung von 15,93 Mrd. USD, Q1 2026 mit einem gegenläufigen Steuervorteil von 8,03 Mrd. USD. Die Aktienkursreaktionen waren paradox: Trotz Beats fiel die Aktie nach Q3 2025 und Q1 2026 – jeweils wegen der Capex-Sorgen, nicht wegen des operativen Geschäfts.</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Quartal</th><th>Revenue</th><th>YoY</th><th>EPS</th><th>Konsens</th><th>Op-Marge</th><th>RL Loss</th><th>Result</th></tr></thead>
+          <thead><tr><th>Quartal</th><th>Umsatz</th><th>YoY</th><th>Op. Income</th><th>EPS (GAAP)</th><th>EPS bereinigt</th><th>Beat/Miss</th><th>Kursreaktion</th></tr></thead>
           <tbody>
-            <tr><td><strong>Q2 2025</strong></td><td>$47.5B</td><td class="beat">+22%</td><td>$5.16</td><td>$4.73</td><td>43%</td><td>$4.4B</td><td class="beat">BEAT</td></tr>
-            <tr><td><strong>Q3 2025</strong></td><td>$50.6B</td><td class="beat">+19%</td><td>$5.06*</td><td>$5.36</td><td>40%*</td><td>$4.4B</td><td class="neutral">MIXED*</td></tr>
-            <tr><td><strong>Q4 2025</strong></td><td>$58.1B</td><td class="beat">+21%</td><td>$8.02</td><td>$7.13</td><td>48%</td><td>$5.0B</td><td class="beat">BEAT</td></tr>
-            <tr><td><strong>Q1 2026</strong></td><td>$56.3B</td><td class="beat">+33%</td><td>$10.44</td><td>$6.65</td><td>41%</td><td>$4.0B</td><td class="beat">BEAT</td></tr>
+            <tr><td>Q2 2025</td><td>$47,5 Mrd.</td><td class="beat">+22%</td><td>$20,5 Mrd. (43%)</td><td>$7,14</td><td>$7,14 (vs. $5,92)</td><td><span class="badge badge-green">Beat</span></td><td class="beat">+10%</td></tr>
+            <tr><td>Q3 2025</td><td>$51,2 Mrd.</td><td class="beat">+26%</td><td>~$20 Mrd.</td><td>$1,05*</td><td>$7,25 (vs. $6,71)</td><td><span class="badge badge-green">Beat</span></td><td class="miss">−9%</td></tr>
+            <tr><td>Q4 2025</td><td>$59,9 Mrd.</td><td class="beat">+24%</td><td>$24,7 Mrd. (41%)</td><td>$8,88</td><td>$8,88 (vs. $8,23)</td><td><span class="badge badge-green">Beat</span></td><td class="beat">+10%</td></tr>
+            <tr><td>Q1 2026</td><td>$56,3 Mrd.</td><td class="beat">+33%</td><td>$22,9 Mrd. (+30%)</td><td>$10,44**</td><td>$7,31 (vs. $6,79)</td><td><span class="badge badge-green">Beat</span></td><td class="miss">−6 bis −7%</td></tr>
           </tbody>
         </table>
       </div>
-      <p style="font-size:12px; color:var(--text-muted);">* Q3 2025 belastet durch nicht-Cash R&D-Tax-Charge. Q1 2026 EPS $10.44 inkl. $8.03B One-Time-Tax-Benefit (organisch ~$6.50, immer noch deutlich über Konsens).</p>
-
-      <h3>Q1 2026 Highlights & Management-Statements</h3>
-      <p>Zuckerberg: "<em>Personal Superintelligence ist unser Nordstern für die nächsten 10 Jahre</em>". Q1 Highlights: <strong>Ad-Revenue +33% YoY</strong> (schnellste seit 2021), Impressions +19%, Preise +12%, Op-Marge 41% trotz Capex-Anstieg. Q2 Guidance: $58–61 Mrd. Revenue (+22–28% YoY). 2026 Capex auf $125–145 Mrd. erhöht (von $115–135 Mrd., +$10B), davon hauptsächlich Memory-Kosten-Inflation. Custom Silicon (mit Broadcom) >1 GW geplant. Mai 2026: angekündigte <strong>Personalreduktion</strong> für leaner operating model.</p>
-
-      <div class="source">Quellen: META 8-K Filings Q2-Q4 2025 + Q1 2026 (sec.gov); Q1 2026 Earnings Call (29.04.2026); investor.atmeta.com; gurufocus.com.</div>
+      <p style="font-size:13px;color:var(--text-muted);">* Q3 2025 GAAP-EPS gedrückt durch einmalige Steuerbelastung von 15,93 Mrd. USD (OBBBA); Netto-Gewinn ex-Effekt ~18,6 Mrd. USD. ** Q1 2026 GAAP-EPS erhöht durch Steuervorteil von 8,03 Mrd. USD; bereinigtes EPS $7,31.</p>
+      <p><strong>Operative Treiber:</strong> Die Anzeigen-Impressionen wuchsen über die vier Quartale um +11 % / +14 % / +18 % / +19 %, der durchschnittliche Preis pro Anzeige um +9 % / +10 % / +6 % / +12 %. Die Kombination aus +19 % Impressionen und +12 % Preis in Q1 2026 war der stärkste Werbe-Doppelwert seit mehreren Quartalen. Reality Labs blieb der sichtbare Bremsklotz (Q1 2026: 402 Mio. USD Umsatz / −4,03 Mrd. USD Verlust).</p>
+      <p><strong>Stichtag nächste Zahlen:</strong> Q2 2026 wird am <span class="pill">29. Juli 2026</span> (nach Börsenschluss) berichtet. Konsens: ~$60,2 Mrd. Umsatz, ~$7,2 EPS. Eigene Guidance: $58–61 Mrd.</p>
+      <div class="source">Quellen: Meta IR Earnings Releases Q2/Q3/Q4 2025 &amp; Q1 2026; CNBC, Fortune, Variety, AlphaStreet (Jul 2025–Apr 2026); TradingView/TipRanks Konsens (Jun 2026)</div>
     </div>
   </div>
 
-  <!-- S4 -->
+  <!-- ===================== SEKTION 4 ===================== -->
   <div class="section" id="s4">
     <div class="section-header">
       <div class="section-number">4</div>
       <div class="section-title">Wachstumseinordnung</div>
-      <div class="section-score">Score: 10/10</div>
+      <div class="section-score">Score: 8/10</div>
     </div>
     <div class="section-body">
-      <h3>Schnellster Mega-Cap in 2026: +33% YoY</h3>
-      <p>FY2025 Konzernumsatz: <strong>$201.0 Mrd. (+22% YoY)</strong>. Q1 2026 Beschleunigung auf <strong>+33%</strong> – das ist das schnellste Wachstum unter allen Mega-Caps. Reifegrad: <strong>"Re-Acceleration durch AI-Layer-Integration"</strong> – ein 22 Jahre altes Unternehmen mit $200B+ Umsatz wächst plötzlich wieder schneller als zur 2021-Spitze.</p>
-
-      <h3>Segment-Wachstum (Q1 2026 YoY)</h3>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Segment</th><th>Revenue Q1'26</th><th>YoY</th><th>Op-Marge</th><th>Treiber</th></tr></thead>
-          <tbody>
-            <tr><td><strong>Family of Apps (FoA)</strong></td><td><strong>$55.9B</strong></td><td class="beat"><strong>+33%</strong></td><td><strong>48%</strong></td><td>Andromeda AI-Ads, Reels-Monetisierung, WhatsApp-Business</td></tr>
-            <tr><td>– Ad-Revenue (Sub-Segment)</td><td>$55.0B</td><td class="beat">+33%</td><td>—</td><td>Impressions +19% + Preise +12%</td></tr>
-            <tr><td>Reality Labs</td><td>$402M</td><td class="miss">-2%</td><td>-1000%+</td><td>AI Glasses verdreifacht YoY, Quest schwach</td></tr>
-            <tr><td><em>Konsolidiert</em></td><td>$56.3B</td><td class="beat">+33%</td><td>41%</td><td>FoA dominant, RL belastet</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h3>Geografische Ad-Pricing-Power (Q1 2026)</h3>
+      <p>Der Gesamtumsatz wuchs von ~$135 Mrd. (2023) über ~$165 Mrd. (2024) auf $200,97 Mrd. (2025, +22 %). Für 2026 liegt der Konsens bei ~$253 Mrd. (+24–26 %). Bemerkenswert ist die Beschleunigung statt der erwarteten Verlangsamung – getrieben durch KI-bedingte Effizienzgewinne im Anzeigen-Stack, nicht durch neue Geschäftsfelder. Das Wachstum ist „echt" (organisch, nicht durch große M&amp;A inflationiert) und überwiegend profitabel: Das operative Ergebnis wuchs in Q1 2026 mit +30 % nahezu im Gleichschritt mit dem Umsatz, trotz steigender Infrastrukturkosten.</p>
+      <p><strong>Profitabilitätsqualität:</strong> Die Reife-Einordnung ist „Growth-at-Scale" – kein Hyper-Growth-Startup mehr, aber deutlich dynamischer als ein klassischer Mega-Cap. Der Engpass für künftiges Margenwachstum sind die Abschreibungen aus dem Capex-Aufbau, nicht die operative Effizienz des Kerngeschäfts.</p>
+      <h3>Geografische Verteilung (Anzeigenumsatz, ca.)</h3>
       <div class="geo-grid">
-        <div class="geo-card"><div class="geo-region">USA/Kanada</div><div class="geo-pct">+14%</div><div class="geo-note">Ad-Preis-Wachstum</div></div>
-        <div class="geo-card"><div class="geo-region">Europa</div><div class="geo-pct">+19%</div><div class="geo-note">Stärkstes Preis-Wachstum</div></div>
-        <div class="geo-card"><div class="geo-region">Asia-Pacific</div><div class="geo-pct">+5%</div><div class="geo-note">Schwächste Region</div></div>
-        <div class="geo-card"><div class="geo-region">Rest of World</div><div class="geo-pct">+18%</div><div class="geo-note">Emerging-Markets Boost</div></div>
-        <div class="geo-card"><div class="geo-region">3.56B DAU</div><div class="geo-pct">+1% YoY</div><div class="geo-note">Saturiert, Engagement-Boost durch AI</div></div>
+        <div class="geo-card"><div class="geo-region">USA &amp; Kanada</div><div class="geo-pct">~44%</div><div class="geo-note">höchster ARPU, reifer Markt</div></div>
+        <div class="geo-card"><div class="geo-region">Europa</div><div class="geo-pct">~23%</div><div class="geo-note">Regulierungsrisiko (DMA/DSA)</div></div>
+        <div class="geo-card"><div class="geo-region">Asien-Pazifik</div><div class="geo-pct">~21%</div><div class="geo-note">höchstes Mengenwachstum, niedrig. ARPU</div></div>
+        <div class="geo-card"><div class="geo-region">Rest der Welt</div><div class="geo-pct">~12%</div><div class="geo-note">Monetarisierungs-Headroom</div></div>
       </div>
-
-      <h3>Profitabilität: Top-Tier mit Capex-Druck</h3>
-      <p>Op-Income Q1 2026: $22.9 Mrd. (+30% YoY). Op-Marge 41% – stabil hoch trotz Capex-Eskalation, FoA-Marge 48% (höher als MSFT Productivity). Net Income $26.8 Mrd. (+34% YoY), allerdings teilweise durch $8B One-Time-Tax-Benefit getrieben. EPS $10.44.</p>
-
-      <div class="source">Quellen: META Q1 2026 Earnings Release (29.04.2026); Investing.com Q1 Slides (04/2026); eigene Berechnungen.</div>
+      <p>Das Mengenwachstum kommt überwiegend aus niedriger monetarisierten Regionen (APAC, RoW), während USA/Kanada/Europa die Erlösbasis tragen. Das ist Chance (Monetarisierungs-Aufholpotenzial) und Risiko (Abhängigkeit vom US-Markt für die Marge, EU-Regulierung als Klumpenrisiko) zugleich.</p>
+      <div class="source">Quellen: Meta FY2025-Ergebnisse (IR, Jan 2026); eMarketer-Prognose (Apr 2026); Simply Wall St Konsens FY2026 (Jun 2026)</div>
     </div>
   </div>
 
-  <!-- S5 -->
+  <!-- ===================== SEKTION 5 ===================== -->
   <div class="section" id="s5">
     <div class="section-header">
       <div class="section-number">5</div>
-      <div class="section-title">Bewertung & Multiples</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
       <div class="section-score">Score: 8/10</div>
     </div>
     <div class="section-body">
-      <h3>Günstigste Mega-Cap-Bewertung relativ zu Wachstum</h3>
-      <p>Bei aktuellem Kurs ~$610 handelt META mit <strong>Forward P/E ~22x</strong> bei +33% Wachstum – das ist der niedrigste PEG aller Mega-Caps. P/E TTM ~26x ist unter dem 5-Jahres-Schnitt von ~27x. Trotz spektakulärer Q1-Performance ist die Aktie <strong>nach der Q1-Reaktion -13% von Q1-Hoch gefallen</strong>, getrieben durch Capex-Schock und Reality-Labs-Skepsis.</p>
-
+      <p>Nach dem ~30%-Kursrückgang vom Allzeithoch handelt META heute zu Multiples, die für ein mit 24–33 % wachsendes Unternehmen mit 33 % Nettomarge bemerkenswert moderat sind. Der entscheidende Punkt: Die <strong>PEG-Ratio von ~0,80</strong> signalisiert, dass das Wachstum nicht vollständig eingepreist ist – META ist relativ zur Wachstumsrate der günstigste der großen Werbe-Mega-Caps.</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Metrik</th><th>META (heute)</th><th>5J-Ø</th><th>Einordnung</th></tr></thead>
+          <thead><tr><th>Kennzahl</th><th>META (TTM/Fwd)</th><th>5-Jahres-Schnitt (ca.)</th><th>Einordnung</th></tr></thead>
           <tbody>
-            <tr><td>P/E TTM</td><td>~26x</td><td>~27x</td><td class="neutral">Auf Schnitt</td></tr>
-            <tr><td>Forward P/E (FY26)</td><td>~22x</td><td>~21.6x</td><td class="neutral">Leicht über Schnitt</td></tr>
-            <tr><td>P/Sales TTM</td><td>~8.5x</td><td>~7x</td><td class="miss">Über Schnitt</td></tr>
-            <tr><td>EV/EBITDA (Fwd)</td><td>~14x</td><td>~13x</td><td class="neutral">Auf Schnitt</td></tr>
-            <tr><td>PEG (Fwd)</td><td>~0.7x</td><td>~1.2x</td><td class="beat">Sehr günstig vs. Wachstum</td></tr>
-            <tr><td>FCF Yield TTM</td><td>~3.2%</td><td>~3%</td><td class="beat">Solid</td></tr>
-            <tr><td>Dividende</td><td>0.35%</td><td>—</td><td class="neutral">Initiated 2024</td></tr>
+            <tr><td>P/E (TTM)</td><td>20,0</td><td>~24–26</td><td class="beat">unter historischem Schnitt</td></tr>
+            <tr><td>P/E (Forward)</td><td>17,5</td><td>~22</td><td class="beat">günstig</td></tr>
+            <tr><td>PEG</td><td>0,80</td><td>~1,4</td><td class="beat">attraktiv</td></tr>
+            <tr><td>EV/EBITDA</td><td>12,6</td><td>~14–16</td><td class="beat">moderat</td></tr>
+            <tr><td>P/Sales</td><td>6,6</td><td>~7–8</td><td class="neutral">fair</td></tr>
+            <tr><td>Dividendenrendite</td><td>~0,3%</td><td>—</td><td class="neutral">symbolisch</td></tr>
           </tbody>
         </table>
       </div>
-
-      <h3>Peer-Vergleich (Forward P/E)</h3>
-      <p>META Fwd P/E ~22x vs. MSFT 23x, GOOGL 22x, AMZN 26x, AAPL 30x. Bei <strong>+33% Wachstum</strong> ist METAs PEG (~0.7x) deutlich attraktiver als alle Peers (MSFT ~1.3x, GOOGL ~1.0x, AMZN ~1.5x). Analysten-Konsens-Zielkurs ~$838 (42 Analysten Strong Buy, Mai 2026) = +37% Upside.</p>
-
-      <h3>Bewertungs-Risiken</h3>
-      <p>Größtes Risiko: Q1 2026 +33% war u.a. durch FX (Tailwind +4pp) und einfache YoY-Vergleichsbasis getrieben. Q2-Guidance impliziert +22-28% (immer noch stark). Wenn Wachstum auf 18–20% verlangsamt + Capex-Druck steigt, könnte PEG auf 1.2x normalisieren = Kurs $480–520 (–15% bis –22%).</p>
-
-      <div class="source">Quellen: intellectia.ai (META Fwd P/E 22.05, 2026); FX Leaders (02.05.2026); TechIA Analysis (04/2026); Barchart (META Konsens-Ziel $747 / $838 in neuesten Updates).</div>
+      <p><strong>Peer-relativ:</strong> Alphabet handelt zu ~25x Gewinn bei ~12 % Wachstum; AppLovin zu ~53x bei +24 %; Meta zu 17,5x (fwd) bei +24 %. Auf Wachstums-bereinigter Basis ist Meta damit deutlich günstiger als beide. Die zentrale Bewertungsfrage ist nicht das Multiple, sondern ob der freie Cashflow durch den Capex-Schub dauerhaft komprimiert bleibt (siehe Sektion 6) – der Markt bepreist genau diese Unsicherheit als Discount.</p>
+      <div class="source">Quellen: Yahoo Finance/Macrotrends Kennzahlen (26.06.2026); Simply Wall St, Motley Fool Peer-Vergleiche (Apr–Jun 2026)</div>
     </div>
   </div>
 
-  <!-- S6 -->
+  <!-- ===================== SEKTION 6 ===================== -->
   <div class="section" id="s6">
     <div class="section-header">
       <div class="section-number">6</div>
-      <div class="section-title">Cashflow, Margen & Kapitalqualität</div>
-      <div class="section-score">Score: 8/10</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 7/10</div>
     </div>
     <div class="section-body">
-      <h3>Stark profitabel, FCF unter Capex-Druck aber positiv</h3>
-      <p>Q1 2026: Operating Cashflow $32.2 Mrd., Capex $19.8 Mrd., <strong>FCF $12.4 Mrd.</strong> – im Gegensatz zu AMZN (FCF auf $1.2B kollabiert) und MSFT (FCF unter Druck) hält Meta noch ein gesundes FCF-Niveau. FY2026 Total Expenses Guidance unverändert $162–169 Mrd., Capex auf $125–145 Mrd. erhöht (von $115–135 Mrd.). 2026-Op-Income wird >2025-Niveau ($83.3 Mrd.) erwartet.</p>
-
+      <p>Hier liegt der eigentliche Streitpunkt der Investmentthese. Operativ ist Meta eine Cash-Maschine: 2025 lag der operative Cashflow bei ~115 Mrd. USD. Doch der <strong>Free Cashflow ist durch den Capex-Aufbau massiv komprimiert</strong>: Q4 2025 nur $14,1 Mrd. FCF, Q1 2026 nur $12,4 Mrd. – bei operativem Cashflow von $32,2 Mrd. allein in Q1. Der Capex sprang von $72,2 Mrd. (2025) auf eine Guidance von $125–145 Mrd. (2026), also nahezu eine Verdopplung.</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Metrik</th><th>FY2024</th><th>FY2025</th><th>Q1 2026</th><th>Trend</th></tr></thead>
+          <thead><tr><th>Kennzahl</th><th>Wert (TTM / aktuell)</th><th>Einordnung</th></tr></thead>
           <tbody>
-            <tr><td>Operating Cashflow</td><td>$91B</td><td>$110B+</td><td>$32.2B/Q</td><td class="beat">↑↑</td></tr>
-            <tr><td>Capex</td><td>$39B</td><td>$72B</td><td>$19.8B/Q</td><td class="miss">↑↑</td></tr>
-            <tr><td>FCF</td><td>$52B</td><td>$45B</td><td>$12.4B/Q</td><td class="neutral">→</td></tr>
-            <tr><td>Operating Margin</td><td>42%</td><td>41%</td><td>41%</td><td class="beat">stabil</td></tr>
-            <tr><td>Net Income</td><td>$62B</td><td>$60.5B</td><td>$26.8B/Q*</td><td class="beat">↑</td></tr>
-            <tr><td>ROE</td><td>35%</td><td>38%</td><td>~40%</td><td class="beat">↑</td></tr>
+            <tr><td>Operativer Cashflow (2025)</td><td>~$115 Mrd.</td><td class="beat">exzellent</td></tr>
+            <tr><td>Free Cashflow (Levered, TTM)</td><td>~$25,6 Mrd.</td><td class="miss">durch Capex gedrückt</td></tr>
+            <tr><td>Capex 2026 (Guidance)</td><td>$125–145 Mrd.</td><td class="miss">~Verdopplung vs. 2025</td></tr>
+            <tr><td>Nettomarge</td><td>~33%</td><td class="beat">sehr hoch</td></tr>
+            <tr><td>EBITDA-Marge</td><td>~51%</td><td class="beat">erstklassig</td></tr>
+            <tr><td>ROE</td><td>~33%</td><td class="beat">hervorragend</td></tr>
+            <tr><td>Cash &amp; Wertpapiere</td><td>$81,2 Mrd.</td><td class="beat">starke Bilanz</td></tr>
+            <tr><td>Debt/Equity</td><td>~36%</td><td class="neutral">moderat (steigend)</td></tr>
+            <tr><td>Aktienrückkäufe 2025</td><td>$26,3 Mrd.</td><td class="beat">aktionärsfreundlich</td></tr>
           </tbody>
         </table>
       </div>
-      <p style="font-size:12px; color:var(--text-muted);">* Q1 2026 NI inkl. $8.03B One-Time-Tax-Benefit; organisch ~$18.7B (+24% YoY).</p>
-
-      <h3>Kapitalrückflüsse & Bilanz</h3>
-      <p>Meta startete 2024 erstmals Dividenden-Programm ($0.50/Quartal aktuell, Yield 0.35%). Buybacks weiterhin sehr aktiv: ~$30 Mrd. p.a. FCF-Yield 3%+ deutlich besser als andere Mega-Caps. Cash & Marketable Securities $81 Mrd., Debt $58.7 Mrd. (gestiegen für Capex-Finanzierung). $107 Mrd. Step-Up in Contractual Commitments in Q1 (Multi-Year Cloud-Deals + Infrastructure Purchase Agreements) – das ist Forward-Backlog für künftige Capex-Verpflichtungen.</p>
-
-      <div class="source">Quellen: META Q1 2026 8-K (29.04.2026); FY24/25 10-K Filings; gurufocus.com Q1 Highlights.</div>
+      <p>Die „Earnings-Qualität" ist solide – die GAAP-Gewinne sind durch echten operativen Cashflow gedeckt, die Steuer-Sondereffekte (OBBBA) sind nicht-zahlungswirksam und gleichen sich über die Zeit aus. Das Risiko liegt nicht in der Gewinnqualität, sondern im <em>Timing</em>: Höherer Capex heute bedeutet niedrigeren FCF, höhere Abschreibungen über Jahre und einen verzögerten Return on Investment. Solange der Payback-Zeithorizont der KI-Investitionen unklar bleibt, wirkt der Capex als Bewertungsbremse – auch bei starkem Umsatzwachstum. Positiv: Meta finanziert dies aus eigener Kraft und kündigte an, das operative Ergebnis 2026 über dem von 2025 zu halten.</p>
+      <div class="source">Quellen: Meta Q4-2025-/Q1-2026-Earnings (IR); Fortune, StockTitan, Yahoo Finance (Apr–Jun 2026)</div>
     </div>
   </div>
 
-  <!-- S7 -->
+  <!-- ===================== SEKTION 7 ===================== -->
   <div class="section" id="s7">
     <div class="section-header">
       <div class="section-number">7</div>
-      <div class="section-title">Peer-Vergleich</div>
-      <div class="section-score">Score: 9/10</div>
+      <div class="section-title">Peer-Vergleich: Alternativen für Consumer-Ad-Budgets</div>
+      <div class="section-score">Score: 8/10</div>
     </div>
     <div class="section-body">
-      <h3>Digital-Ads-Peers + Mega-Cap-AI-Companions</h3>
+      <p>Die für diese Analyse relevante Peer-Gruppe sind nicht „Social-Media-Aktien", sondern die <strong>Alternativen, zwischen denen ein Käufer von Consumer-Werbung sein Budget verteilen kann</strong>. Der Markt ist ein Triopol: Meta, Google und Amazon vereinen 2026 voraussichtlich ~62 % des weltweiten digitalen Werbeumsatzes. Der entscheidende Befund: <strong>Meta überholt laut eMarketer 2026 erstmals Google im globalen Werbeumsatz</strong> ($243,5 Mrd. vs. $239,5 Mrd.) – getrieben durch Wachstumsbeschleunigung, während Googles Anteil seit 2021 sinkt.</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Unternehmen</th><th>MCap</th><th>Revenue Growth (TTM)</th><th>Op-Marge</th><th>Fwd P/E</th><th>AI-Position</th></tr></thead>
+          <thead><tr><th>Plattform</th><th>Ad-Umsatz 2025→2026E</th><th>Wachstum 2026E</th><th>Globaler Ad-Share 2026E</th><th>Bewertung</th><th>Charakter für Buyer</th></tr></thead>
           <tbody>
-            <tr><td><strong>META</strong></td><td>$1.55T</td><td class="beat">+25%</td><td>41%</td><td>22x</td><td>Llama Open-Source + Andromeda + MSL</td></tr>
-            <tr><td>GOOGL</td><td>$4.86T</td><td class="beat">+18%</td><td>36%</td><td>22x</td><td>Gemini 3 + Cloud + Search-AI</td></tr>
-            <tr><td>SNAP</td><td>~$15B</td><td class="neutral">+10%</td><td>~3%</td><td>~70x</td><td>My AI Chatbot, Marginal</td></tr>
-            <tr><td>PINS</td><td>~$22B</td><td class="neutral">+12%</td><td>~10%</td><td>~25x</td><td>AI-Powered Recommendations</td></tr>
-            <tr><td>TTD (Trade Desk)</td><td>~$45B</td><td class="neutral">+14%</td><td>~17%</td><td>~30x</td><td>Kokai AI für CTV-Ads</td></tr>
+            <tr><td><strong>Meta</strong></td><td>$196→$243 Mrd.</td><td class="beat">+24%</td><td>26,8%</td><td>Fwd P/E 17,5 / PEG 0,80</td><td>Demand-Gen, Social Graph, höchste Reichweite</td></tr>
+            <tr><td><strong>Alphabet / Google</strong></td><td>$214→$240 Mrd.</td><td class="neutral">~12%</td><td>26,4%</td><td>~P/E 25x</td><td>Intent-Capture (Search/YouTube)</td></tr>
+            <tr><td><strong>Amazon</strong></td><td>$68,6→$82 Mrd.</td><td class="beat">+20%</td><td>~9%</td><td>Konglomerat</td><td>Retail Media, Kaufabsicht am POS</td></tr>
+            <tr><td><strong>TikTok (ByteDance)</strong></td><td>US >$17 Mrd.</td><td class="beat">zweistellig</td><td>4,8%</td><td>privat</td><td>Entertainment/Discovery, junge Zielgruppe</td></tr>
+            <tr><td><strong>AppLovin</strong></td><td>Mobile/Performance</td><td class="beat">+24%</td><td>Mobile-Fokus</td><td>P/E ~53x, 85% EBITDA-Marge</td><td>Performance/App-Install, expandiert in E-Commerce/CTV</td></tr>
+            <tr><td><strong>Reddit</strong></td><td>klein, schnell</td><td class="beat">~30%+</td><td><1%</td><td>hoch bewertet</td><td>Community/GEO-Profiteur, KI-Daten</td></tr>
+            <tr><td><strong>Pinterest</strong></td><td>Nische</td><td class="neutral">~16%</td><td><1%</td><td>moderat</td><td>Shopping-Intent, Inspirationsphase</td></tr>
+            <tr><td><strong>Snap</strong></td><td>klein</td><td class="miss">niedrig</td><td><1%</td><td>unprofitabel</td><td>junge Nische, strukturell schwach</td></tr>
           </tbody>
         </table>
       </div>
-
-      <h3>Qualitative Unterschiede</h3>
-      <p><strong>META vs GOOGL:</strong> Beide sind Ads-Giants, aber Strukturen unterschiedlich: META wächst schneller (+33% vs +19% Search), aber GOOGL hat Cloud-Diversifikation. Beide bei Fwd P/E 22x – META hat das bessere Wachstum-Setup, GOOGL den breiteren Burggraben. <strong>META ist der "Pure-Play-Ads-AI-Trade"</strong>.</p>
-      <p><strong>META vs SNAP/PINS:</strong> Strukturell unbedeutender Wettbewerb auf Mega-Cap-Niveau – beide kämpfen mit Profitabilität, während META 41% Op-Marge zeigt. META gewinnt kontinuierlich Marktanteile von kleineren Ad-Plattformen.</p>
-      <p><strong>META vs TTD:</strong> TTD ist ein anderes Geschäft (Demand-Side-Platform für Programmatic), aber Konkurrent für Werbe-Budgets. TTD bei P/E 30x ist deutlich teurer ohne strukturellen Burggraben.</p>
-
-      <div class="source">Quellen: Yahoo Finance Multi-Ticker (13.05.2026); intellectia.ai META Profile; Barchart META Analyst-Consensus.</div>
+      <p><strong>Qualitative Einordnung:</strong> Google und Meta greifen denselben Markt aus entgegengesetzten Richtungen an – Google besitzt die <em>Intent-Ebene</em> (der Nutzer sucht aktiv und signalisiert Kaufabsicht), Meta den <em>Social Graph</em> (Nachfrage-Generierung, bevor der Nutzer überhaupt sucht). Amazon ist der gefährlichste strukturelle Aufsteiger: Retail Media ist das am schnellsten wachsende Segment (+14 % p.a.), weil Amazon Werbung direkt am Kaufpunkt mit echten Transaktionsdaten verbindet – ein Vorteil, den weder Meta noch Google in dieser Reinform haben.</p>
+      <p>TikTok bleibt nach dem Abschluss des US-Eigentümer-Deals (Oracle/Silver Lake/MGX, Januar 2026) ein stabiler, dauerhafter Wettbewerber um junge Zielgruppen und Entertainment-Budgets – das früher diskutierte Ban-Szenario, das Meta Reels-Marktanteile zugespielt hätte, ist <strong>vom Tisch</strong>. AppLovin ist im Performance-/Mobile-Segment der aggressivste Herausforderer mit überlegenem Wachstum, aber kleinerer Reichweite. Metas relative Stärke: Es ist der einzige Anbieter, der höchste Reichweite, beschleunigtes Wachstum <em>und</em> die günstigste Bewertung kombiniert.</p>
+      <div class="source">Quellen: eMarketer (13.04.2026); Warc, The Drum (Nov 2025); Marketing Dive, Marketing-Interactive (Apr 2026); Motley Fool, 24/7 Wall St (Mai/Jun 2026); Bloomberg/TechCrunch TikTok-Deal (Jan 2026)</div>
     </div>
   </div>
 
-  <!-- S8 -->
+  <!-- ===================== SEKTION 8 ===================== -->
   <div class="section" id="s8">
     <div class="section-header">
       <div class="section-number">8</div>
-      <div class="section-title">Aktuelle News & Events (letzte 3 Monate)</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
       <div class="section-note">Quellen ≤ 3 Monate</div>
     </div>
     <div class="section-body">
-
       <h3>Ebene 1: Unternehmen</h3>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">29.04.2026 – Q1 2026 Blowout: Revenue +33% YoY <span class="badge badge-green">Sehr Positiv</span></div>
-          <div class="event-text">Revenue $56.3B (+33%), EPS $10.44 (vs. $6.65 Konsens, +57% Beat), Op-Marge 41%, Ad-Impressions +19%, Preise +12%, Op-Income $22.9B (+30%). Quelle: SEC 8-K (29.04.2026), Stocktitan.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-red"></div>
-        <div>
-          <div class="event-label">29.04.2026 – Capex 2026 auf $125–145B erhöht <span class="badge badge-red">Negativ</span></div>
-          <div class="event-text">Capex-Range von $115–135B auf $125–145B angehoben (+$10B). Hauptgrund: höhere Memory-Kosten + zusätzliche Datacenter-Kapazität. Stock -7% nach Bell. Quelle: 24/7 Wall St (29.04.2026).</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-yellow"></div>
-        <div>
-          <div class="event-label">05/2026 – Personalreduktion angekündigt <span class="badge badge-yellow">Gemischt</span></div>
-          <div class="event-text">Meta plant Layoffs in Mai 2026 für leaner operating model und um Infrastruktur-Capex zu kompensieren. Q1 ended mit 77,900 Headcount (-1% von Q4). Zuckerbergs Effizienz-Pivot setzt sich fort. Quelle: alpha-sense.com.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">Q1 2026 – Meta AI nähert sich 1 Mrd. Nutzern <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">Meta AI Consumer-Assistent (über alle FoA-Apps integriert) erreicht fast 1 Mrd. Nutzer – eines der am schnellsten wachsenden Consumer-AI-Produkte je. Business-AI-Chats +10x in einem Quartal. Quelle: Bitget News (13.05.2026), TIKR.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">Q1 2026 – Meta Superintelligence Labs (MSL) gegründet + Moltbook-Akquisition <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">Zuckerberg gründete MSL für AGI-Forschung. Moltbook (AI-Agents-Social-Network) akquiriert; Founders Matt Schlicht + Ben Parr joinen MSL. Strategie: Llama 5 mit "Superintelligence-Caliber" anvisiert. Quelle: intellectia.ai (META Profile 2026).</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-yellow"></div>
-        <div>
-          <div class="event-label">Q1 2026 – Custom Silicon mit Broadcom: >1 GW geplant <span class="badge badge-yellow">Neutral</span></div>
-          <div class="event-text">Meta rollt >1 GW Custom Silicon in Partnerschaft mit Broadcom aus (MTIA-Chips), plus signifikante AMD-Chips zur Komplementierung neuer NVIDIA-Systeme. Reduziert NVIDIA-Abhängigkeit langfristig. Quelle: alpha-sense.com.</div>
-        </div>
-      </div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">29.04.2026 – Capex-Guidance auf $125–145 Mrd. angehoben <span class="badge badge-red">Negativ (kurzfristig)</span></div><div class="event-text">Trotz Umsatz-Beat (+33 %) fiel die Aktie ~6–7 %, da die Capex-Erhöhung den FCF-Ausblick belastet. Quelle: Fortune, CNBC, Apr 2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">Juni 2026 – Meta Business Agent global auf WhatsApp/Instagram <span class="badge badge-green">Positiv</span></div><div class="event-text">KI-Agent für Kundenservice mit Token-basiertem Pricing global ausgerollt; >1 Mio. Unternehmen aktiv, 10 Mio. Business-AI-Konversationen/Woche (10x in 90 Tagen). Quelle: TechCrunch, Meta IR, Jun 2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Juni 2026 – Neue KI-Brillen-Linie ab $299 <span class="badge badge-yellow">Neutral/Positiv</span></div><div class="event-text">Deutlich günstigere Smart Glasses; flankiert durch ~3 % Beteiligung an EssilorLuxottica (Jul 2025). Quelle: Yahoo Finance, Jun 2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Jun 2026 – Google limitiert Metas Zugang zu Gemini-Modellen <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Meta wollte mehr Gemini-Compute, als Google liefern konnte; deutet auf Metas externe Compute-Engpässe hin. Quelle: FT/TipRanks, Jun 2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Jun 2026 – Generative KI ersetzt menschliche Content-Moderation <span class="badge badge-yellow">Neutral (Kostensenkung / Reputationsrisiko)</span></div><div class="event-text">Meta setzt verstärkt LLMs zur Inhaltsprüfung ein. Quelle: FT/TipRanks, Jun 2026.</div></div></div>
 
       <h3>Ebene 2: Branche</h3>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">Q1 2026 – AI-Ads dominieren Branche <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">META Ad-Revenue +33% vs. GOOGL Search +19% vs. AMZN Ads +24% – Meta gewinnt deutlich Marktanteile im Digital-Ads-Markt. Andromeda + Advantage+ AI-Tools setzen neue Standards.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-yellow"></div>
-        <div>
-          <div class="event-label">Q1 2026 – AR Smart Glasses Industrie-Boom <span class="badge badge-yellow">Strategisch</span></div>
-          <div class="event-text">Meta Ray-Ban Smart Glasses: AI-Glasses-Nutzer YoY verdreifacht. EssilorLuxottica-Partnerschaft + Orion AR-Brille gewinnen Traction. Konkurrenz: Apple Vision Pro, Google AR-Initiative.</div>
-        </div>
-      </div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">Mai/Jun 2026 – OpenAI baut ChatGPT-Werbenetzwerk aus <span class="badge badge-red">Negativ (mittelfristig)</span></div><div class="event-text">Partnerschaften mit Criteo, Skai, Pacvue, LiveRamp; ~20 % der Chats mit Kaufabsicht; KI-vermittelte Conversion teils ~2x klassischer Suche. Quelle: eMarketer, Marketing Dive, Jun 2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Mai 2026 – Google führt „Conversational Discovery Ads" &amp; Universal Cart ein <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Anzeigen direkt in KI-Antworten, agentischer Checkout. Trifft v. a. Googles eigenes Such-Geschäft. Quelle: Google Marketing Live, Mai 2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">Jan 2026 – TikTok-US-Deal geschlossen <span class="badge badge-green">Positiv für Stabilität</span></div><div class="event-text">Oracle-Konsortium übernimmt US-Kontrolle; Wettbewerb stabilisiert sich, Ban-Risiko entfällt. Quelle: Bloomberg, Jan 2026.</div></div></div>
 
       <h3>Ebene 3: Makro</h3>
-      <div class="event-item">
-        <div class="event-dot dot-yellow"></div>
-        <div>
-          <div class="event-label">Q1 2026 – EU DMA + UK CMA Druck <span class="badge badge-yellow">Risiko</span></div>
-          <div class="event-text">EU-DMA-Compliance-Anforderungen, UK-CMA-Untersuchungen zu Mobile-Ad-Praktiken, US-FTC Klage zu Instagram/WhatsApp-Spinoff verbleibt bestehen. Quelle: Bitget News (05/2026).</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-yellow"></div>
-        <div>
-          <div class="event-label">Q1 2026 – Iran/Russia User-Disruptions <span class="badge badge-yellow">Neutral</span></div>
-          <div class="event-text">3.56B DAU im März leicht unter Dezember-Niveau wegen Internet-Disruptions in Iran und WhatsApp-Restrictions in Russland. Quelle: alpha-sense.com.</div>
-        </div>
-      </div>
-
-      <div class="source">Quellen: META Q1 2026 Earnings (29.04.2026); SEC 8-K; Stocktitan; 24/7 Wall St (29.04.2026); alpha-sense.com; Bitget News (13.05.2026); TIKR (04/2026).</div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Jun 2026 – Trump droht mit 100 % Zoll auf EU-Digitalsteuern <span class="badge badge-yellow">Neutral/Risiko</span></div><div class="event-text">Eskalierende Handels-/Regulierungsspannungen EU–USA betreffen Metas Europageschäft. Quelle: TipRanks, Jun 2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Mai/Jun 2026 – „Mag-7"-Selloff, KI-Capex-Skepsis <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Investoren rotieren wegen Infrastrukturkosten aus großen Tech-Werten; META nahe 52-Wochen-Tief. Quelle: TradingView, CNN Markets, Jun 2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">2025/26 – OBBBA-Steuerreform <span class="badge badge-yellow">Neutral (netto positiv)</span></div><div class="event-text">Sofortabschreibung von R&amp;D/Capex senkt künftige US-Cash-Steuern; kurzfristig Bilanz-Volatilität. Quelle: Meta 10-Q, Nov 2025.</div></div></div>
+      <p style="font-size:13px;color:var(--text-muted);margin-top:8px;">Hinweis: Das Bullish-/Bearish-Narrativ wird nicht hier, sondern vollständig in Sektion 12 entwickelt.</p>
+      <div class="source">Quellen: CNBC, Fortune, FT/TipRanks, eMarketer, Marketing Dive, Bloomberg, CNN Markets (Jan–Jun 2026)</div>
     </div>
   </div>
 
-  <!-- S9 -->
+  <!-- ===================== SEKTION 9 ===================== -->
   <div class="section" id="s9">
     <div class="section-header">
       <div class="section-number">9</div>
       <div class="section-title">Technische Analyse</div>
-      <div class="section-score">Score: 6/10</div>
+      <div class="section-score">Score: 4/10</div>
     </div>
     <div class="section-body">
-      <h3>Pull-Back nach Capex-Schock</h3>
-      <p>META fiel nach Q1 2026 Earnings -7% intraday auf $608–612, danach Konsolidierung zwischen $590–630. Aktueller Kurs ~$610. Von Q4 2025 ATH (~$747) sind das -18%. Trotzdem über allen wichtigen MAs (außer SMA20). Mittel- und langfristiger Trend intakt, kurzfristig in Konsolidierung.</p>
-
-      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));">
-        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value">~$610</div></div>
-        <div class="kpi-card"><div class="kpi-label">SMA20</div><div class="kpi-value">~$640</div></div>
-        <div class="kpi-card"><div class="kpi-label">SMA50</div><div class="kpi-value">~$655</div></div>
-        <div class="kpi-card"><div class="kpi-label">SMA200</div><div class="kpi-value">~$620</div></div>
-        <div class="kpi-card"><div class="kpi-label">RSI(14)</div><div class="kpi-value neutral">~42</div></div>
-        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value">$747</div></div>
-        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value red">- negativ</div></div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red" style="font-size:18px;">~$543–550</div></div>
+        <div class="kpi-card"><div class="kpi-label">Trend</div><div class="kpi-value red" style="font-size:18px;">Abwärts</div></div>
+        <div class="kpi-card"><div class="kpi-label">vs. SMA200</div><div class="kpi-value red" style="font-size:18px;">darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Hoch</div><div class="kpi-value" style="font-size:18px;">$796</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Tief</div><div class="kpi-value" style="font-size:18px;">~$481</div></div>
+        <div class="kpi-card"><div class="kpi-label">Beta</div><div class="kpi-value" style="font-size:18px;">1,7</div></div>
+        <div class="kpi-card"><div class="kpi-label">Support</div><div class="kpi-value orange" style="font-size:18px;">~$481</div></div>
       </div>
-
-      <h3>Levels & Setup</h3>
-      <p>Wichtige Support-Levels: <strong>$590 (lokales Tief), $560 (Q4-Konsolidierungs-Range), $480 (52W-Tief)</strong>. Resistance: $640 (SMA20), $670 (lokal), $747 (ATH). RSI ~42 neutral, MACD negativ. Mean-Reversion-Setup: bei Halt über $590 wahrscheinlich Bounce auf $660+; bei Bruch unter $590 droht weiterer Rückgang auf $540–560.</p>
-
-      <div class="source">Quellen: FX Leaders META Forecast (02.05.2026); TradingKey META Analysis (07.05.2026); eigene Schätzungen.</div>
+      <p>Das technische Bild ist klar das schwächste Element der Analyse. META befindet sich seit dem Allzeithoch (~$796 im August 2025) in einem mehrstufigen Abwärtstrend und notiert ~30 % unter dem Hoch, nahe dem 52-Wochen-Tief. Der Kurs liegt unter der 200-Tage-Linie, der Monatstrend ist negativ (~−10 %). Auslöser war nicht das operative Geschäft, sondern die wiederholte Capex-Eskalation und die allgemeine „Mag-7"-KI-Skepsis.</p>
+      <p>Positiv aus Sicht eines Einstiegs: Der Kurs nähert sich einer mehrfach getesteten Unterstützungszone um ~$481 (langfristige aufsteigende Trendlinie / „Protected Low"). Bei hoher Volatilität (Beta ~1,7) ist die Aktie ein klassischer „Falling-Knife"-Kandidat – technisch ist Vorsicht geboten, fundamental entsteht hier jedoch eine Bewertungs-Gelegenheit. Eine technische Bestätigung (Rückeroberung der 50-Tage-Linie, Stabilisierung über $560) wäre für trendfolgende Investoren das sauberere Signal.</p>
+      <div class="source">Quellen: TradingView, Macrotrends, Yahoo Finance (Jun 2026)</div>
     </div>
   </div>
 
-  <!-- S10 -->
+  <!-- ===================== SEKTION 10 ===================== -->
   <div class="section" id="s10">
     <div class="section-header">
       <div class="section-number">10</div>
-      <div class="section-title">Risiken & Chancen</div>
-      <div class="section-score">Score: 6/10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 6/10 (invertiert)</div>
     </div>
     <div class="section-body">
-      <h3>Strukturelle & zyklische Risiken</h3>
+      <h3>10a) Strukturelle &amp; zyklische Risiken</h3>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Capex-ROI / FCF-Kompression</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div><div class="event-text">$125–145 Mrd. Capex 2026 ohne quantifizierten Umsatz-Offset. Falls der KI-Payback ausbleibt, bleibt der FCF jahrelang gedrückt und das Multiple unter Druck. Wahrscheinlichkeit: mittel-hoch.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ EU-Regulierung (DMA/DSA, Digitalsteuern)</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">~23 % des Umsatzes aus Europa; mögliche Strafen, Werbe-Einschränkungen, Handelskonflikt (US–EU-Zolldrohung). Wahrscheinlichkeit: hoch (laufend).</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Reality-Labs-Verluste</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">~$20 Mrd.+ Jahresverlust; Höhepunkt 2026 erwartet. Strukturelle „Wette ohne Payback-Datum". Wahrscheinlichkeit: hoch (anhaltend), aber bilanziell verkraftbar.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Werbe-Zyklik &amp; Makro</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div><div class="event-text">Werbung ist konjunktursensibel; Rezession/Zoll-Schocks träfen SMB-Budgets zuerst. Wahrscheinlichkeit: mittel.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Rechtliche Verfahren (Kinderschutz)</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">Verschärfte Gesetze zu Jugendschutz (Kalifornien, Australien verdoppelt Strafen); Reputations- und Haftungsrisiko. Wahrscheinlichkeit: hoch (laufend).</div></div>
 
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">💰 Reality Labs $16B/Jahr-Burn ohne klare Profitabilitäts-Roadmap</div>
-          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
-        </div>
-        <div class="event-text">RL-Operating-Loss $4B/Quartal, $16B/Jahr, kumuliert bereits >$70 Mrd. seit 2020. Kein Pfad zur Profitabilität sichtbar. Allerdings: AI Glasses verdreifacht YoY – wenn Orion AR-Brille 2027 launched, könnte Story drehen. Wahrscheinlichkeit Profitabilität bis 2028: ~25%.</div>
-      </div>
+      <h3>10b) AI-Risiko &amp; technologische Disruption</h3>
+      <p>Metas Geschäftsmodell wird durch KI doppelt verändert. <strong>Bullisches Szenario:</strong> KI ist primär ein Effizienz-Beschleuniger für Metas eigenes Anzeigensystem (Conversion +6 %, GenAI-Kreativ-Tools für 8 Mio. Advertiser) – Meta gewinnt Werbeanteile. <strong>Bärisches Szenario:</strong> Agentische Commerce-Systeme (KI-Agenten, die selbst kaufen) und KI-native Werbenetzwerke (ChatGPT-Ads) disintermediieren den Funnel. Wichtige Differenzierung: Die KI-Such-Disruption trifft Googles Intent-Geschäft (sinkende Klickraten in AI Overviews) <em>direkter</em> als Metas Demand-Generation. Meta ist also relativ besser geschützt – aber nicht immun (siehe Sektion 11).</p>
 
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">📊 Capex-Eskalation $125–145B + zukünftige Erhöhungen</div>
-          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
-        </div>
-        <div class="event-text">Capex-Range bereits zweimal erhöht. Zuckerberg signalisierte FY2027 weiter steigend. Wenn AI-ROI nicht klar messbar wird, droht Multiple-Compression. Wahrscheinlichkeit Capex 2027 >$170B: ~70%.</div>
-      </div>
+      <h3>10c) Chancen</h3>
+      <p>Monetarisierung von WhatsApp/Business Messaging und Threads (Barclays: +$6 Mrd. 2026, +$19 Mrd. 2027), Business-AI mit Token-Pricing, KI-Brillen als neue Hardware-Kategorie, weiterer ARPU-Aufholeffekt in APAC/RoW. Details in Sektion 11.</p>
 
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">⚖️ EU DMA + FTC-Klage (Instagram/WhatsApp-Spinoff)</div>
-          <div><span class="badge badge-orange">Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
-        </div>
-        <div class="event-text">FTC fordert seit 2020 Spinoff von Instagram und WhatsApp wegen Antitrust-Bedenken. Trial-Vorbereitung läuft. Falls Trial verloren, struktureller Spinoff möglich – das wäre verheerend, da Instagram allein ~$70B Revenue p.a. erzeugt. Wahrscheinlichkeit Trial-Loss: ~25–30%.</div>
-      </div>
-
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">📉 Ads-Markt-Zyklik (Single-Point-of-Failure)</div>
-          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
-        </div>
-        <div class="event-text">98% des Umsatzes kommen aus Werbung – wenn US-Rezession einsetzt, droht Ad-Demand-Einbruch wie 2022 (Aktie damals -75%). META ist deutlich zyklischer als MSFT/GOOGL.</div>
-      </div>
-
-      <h3>AI-Risiko & technologische Disruption</h3>
-      <p>Bullisches AI-Szenario: Llama-Open-Source-Strategie macht Meta zum Open-Source-Anchor; Andromeda + Advantage+ verbessern Ad-Targeting nachhaltig; Meta AI 1B+ Nutzer als Consumer-AI-Disruption. Bärisches Szenario: Falls OpenAI/Anthropic Frontier-Models so weit voraus sind, dass Llama strukturell zurückfällt, schwächt das Metas AI-Story. Zudem: Wenn AR-Brille nicht zündet, war $70B+ Reality-Labs-Burn umsonst.</p>
-
-      <h3>Chancen</h3>
-      <p>(1) <strong>AI-Ads-Monetisierungs-Hebel</strong>: Andromeda zeigt erst die Spitze – wenn Konversion-Optimierung +10% YoY anhält, drohen 20%+ Operating-Income-Steigerungen. (2) <strong>WhatsApp-Business-Monetisierung</strong>: 200M+ Business-Profile, Business-AI-Chats +10x in Q1; potenzieller $20B+ Revenue-Stream bis 2028. (3) <strong>Smart Glasses Renaissance</strong>: Ray-Ban Meta Glasses Volumen +3x YoY, Orion AR-Brille 2027 Launch könnte Reality Labs umdrehen. (4) <strong>Threads-Monetisierung</strong>: 200M+ MAUs noch nicht monetarisiert.</p>
-
-      <h3>Red Flags & Dealbreaker</h3>
-      <p>Hauptsächlicher Red Flag: Wenn Q2 2026 Wachstum unter 22% YoY fällt UND Reality-Labs-Loss weiter eskaliert UND Capex weiter erhöht wird, wäre das Setup-Verschlechterung. Andererseits: Solange Ads-Wachstum >20% bleibt, bleibt META eine der besten Risk/Reward-Optionen in Big-Tech.</p>
-
-      <div class="source">Quellen: FTC vs. Meta Court Docket; EU DMA Updates (Q1 2026); META Q1 2026 Earnings; eigene Szenarioanalyse.</div>
+      <h3>10d) Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> wiederholte Capex-Erhöhungen ohne Umsatz-Quantifizierung; Compute-Engpässe (Google-Gemini-Limit); Reputationsrisiken durch KI-Moderation. <strong>Dealbreaker (würden Investment-These kippen):</strong> nachhaltige Verlangsamung des Anzeigen-Wachstums unter ~10 % bei gleichzeitig weiter steigendem Capex – derzeit nicht erkennbar.</p>
+      <div class="source">Quellen: Meta IR; Fortune, FT/TipRanks, eMarketer, Reuters (Apr–Jun 2026)</div>
     </div>
   </div>
 
-  <!-- S11 -->
+  <!-- ===================== SEKTION 11 ===================== -->
   <div class="section" id="s11">
     <div class="section-header">
       <div class="section-number">11</div>
-      <div class="section-title">Scoring</div>
-      <div class="section-score">Ø 7.9/10</div>
+      <div class="section-title">Thesen-Analyse (User-spezifisch)</div>
+      <div class="section-score">Kern der Analyse</div>
     </div>
     <div class="section-body">
+      <h3>These 1: Detaillierter Vergleich mit den Alternativen für Consumer-Ad-Buyer</h3>
+      <p>Aus Sicht eines Werbebudget-Verantwortlichen ist die zentrale Frage: „Wo erziele ich den besten Return on Ad Spend (ROAS)?" Die Alternativen unterscheiden sich nicht nur in Reichweite, sondern strukturell in der Funnel-Position:</p>
+      <p><strong>Meta = Demand Generation.</strong> Werbung unterbricht den Nutzer im Feed/Reels und <em>erzeugt</em> Nachfrage, bevor eine Kaufabsicht besteht. Stärke: unübertroffene Reichweite (3,58 Mrd. DAP) und überlegenes KI-Targeting. Schwäche: kein direkter Kaufabsichts-Kontext wie bei Google/Amazon.</p>
+      <p><strong>Google = Intent Capture.</strong> Der Nutzer sucht aktiv und signalisiert Absicht. Höchste Conversion-Wahrscheinlichkeit pro Klick – aber genau dieses Modell wird durch AI Overviews erodiert (sinkende Klickraten, weniger Anzeigen-Realestate).</p>
+      <p><strong>Amazon = Retail Media am Kaufpunkt.</strong> Das gefährlichste strukturelle Wachstum: Werbung direkt neben dem „Kaufen"-Button mit echten Transaktionsdaten. Amazons US-Anteil steigt von 13,9 % (2025) auf 17,3 % (2026) und nähert sich Meta (20,9 %). Für Performance-/Commerce-Budgets ist Amazon die direkteste Meta-Alternative.</p>
+      <p><strong>TikTok = Entertainment/Discovery.</strong> Stärkster Wettbewerber um Aufmerksamkeit junger Zielgruppen und Reels-vergleichbare Formate. Nach dem US-Deal stabilisiert, US-Ad-Umsatz >$17 Mrd. 2026 (~$1 von $7 Social-Ad-Dollar). <strong>AppLovin</strong> dominiert Performance/Mobile-Install; <strong>Reddit/Pinterest</strong> sind Intent-Nischen. Der Kernbefund für die These: Trotz mehr Alternativen <em>gewinnt</em> Meta aktuell Budgetanteile, weil die KI-getriebene ROAS-Verbesserung Werbegeld auf die Plattform zieht – eMarketer bescheinigt Meta 2026 die globale Werbe-Führung.</p>
+
+      <h3>These 2: Gefährliche Entwicklungen durch AI bei Wettbewerbern</h3>
+      <p><strong>Die größte strukturelle Gefahr ist nicht ein einzelner Wettbewerber, sondern agentische Commerce.</strong> Wenn KI-Agenten (ChatGPT, Gemini, Amazons Rufus) zunehmend selbst Produkte recherchieren und kaufen, verschiebt sich der Kaufentscheid weg vom werbefinanzierten Feed hin zur KI-Antwort. Konkrete Bedrohungsvektoren:</p>
+      <p><strong>(a) OpenAI/ChatGPT-Ads:</strong> Das ist die akuteste neue Front. OpenAI baut seit Anfang 2026 systematisch ein Commerce-Werbenetzwerk auf (Criteo, Skai, Pacvue, LiveRamp). ~20 % der Chats tragen direkte Kaufabsicht; KI-vermittelte Conversion-Raten erreichen in Kategorien wie Elektronik/Home teils das Doppelte klassischer Suche. Ziel: $1 Mrd. „Free-User-Monetarisierung" 2026 → bis $25 Mrd. 2029. Das greift Werbebudgets an der Intent-Schwelle an – mittelfristig auch Metas Mid-Funnel.</p>
+      <p><strong>(b) Google AI Overviews / „Conversational Ads":</strong> Trifft primär Google selbst (Klickraten für bezahlte Anzeigen ohne AIO fielen messbar), zeigt aber das Muster: Anzeigen wandern in die KI-Antwort, der Klick zur Website (und damit Metas Rolle als Traffic-Quelle) schrumpft.</p>
+      <p><strong>(c) Amazon Rufus / Retail-Media-KI:</strong> KI-gestützte Produktempfehlung mit Transaktionsdaten – am gefährlichsten für Metas Commerce-Werbung.</p>
+      <p><strong>Einordnung:</strong> Meta ist relativ besser positioniert als Google, weil Demand-Generation im Feed weniger leicht durch eine KI-Antwort zu ersetzen ist als ein Such-Klick. Metas Gegenstrategie ist offensiv: eigener agentischer Assistent (Muse-Spark-Modell), „Hatch"-Agent, agentisches Shopping in Instagram. <strong>Aber</strong>: Sollte sich Kaufverhalten massiv in KI-Chat-Interfaces verlagern, ist auch Metas Funnel angreifbar – das ist das zentrale Langfristrisiko der These.</p>
+
+      <h3>These 3: Realistische neue Wachstumsfelder &amp; Wachstumsraten (3 Jahre)</h3>
+      <p>Realistische, bereits angelaufene Wachstumsfelder (keine Spekulation):</p>
+      <p><strong>1. Business Messaging / WhatsApp-Monetarisierung:</strong> >1 Mrd. Business-Threads täglich, 200 Mio. Business-Nutzer, Token-Pricing für Business-AI. Barclays schätzt inkrementelle Werbeerlöse aus WhatsApp + Threads auf bis zu $6 Mrd. (2026) und $19 Mrd. (2027) – Top-Line-Schub bis ~$25 Mrd. Evercore hält WhatsApp Business für fähig, Instagram Shops GMV bis 2027 zu übertreffen.</p>
+      <p><strong>2. Business-AI / Enterprise-Services:</strong> 10 Mio. Konversationen/Woche (10x in 90 Tagen), Übergang von kostenlos zu Abo/Token-Pricing. Ein echtes neues, margenstarkes Erlösmodell jenseits klassischer Werbung.</p>
+      <p><strong>3. GenAI-Werbekreativ-Tools:</strong> 8 Mio. Advertiser nutzen bereits mind. ein Tool – treibt Anzeigenpreis und Werbevolumen (höhere ROAS = mehr Budget).</p>
+      <p><strong>4. KI-Brillen / Wearables:</strong> Neue Hardware-Kategorie ab $299, EssilorLuxottica-Partnerschaft. Heute klein, langfristig potenziell strategisch (Meta AI als ständiger Begleiter).</p>
+      <p><strong>5. Threads-Werbung &amp; APAC-ARPU-Aufholeffekt.</strong></p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Kategorie</th><th>Score</th><th>Visual</th><th>Begründung</th></tr></thead>
+          <thead><tr><th>Jahr</th><th>Umsatz (realistisch)</th><th>Wachstum</th><th>Haupttreiber</th></tr></thead>
           <tbody>
-            <tr><td>Geschäftsmodell</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>FoA dominant + AI-Ads + Llama-Ökosystem. Reality Labs als Drag aber Optionalität</td></tr>
-            <tr><td>Burggraben</td><td><strong>9/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>3.56B DAU, Andromeda AI-Ads, Llama Open-Source, MSL</td></tr>
-            <tr><td>Operative Entwicklung (4Q)</td><td><strong>9/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>4/4 Beats (3 starke), Wachstum von +22% → +33% beschleunigt</td></tr>
-            <tr><td>Wachstum</td><td><strong>10/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:100%"></div></div><span class="score-num">10</span></div></td><td>+33% YoY bei $200B+ Basis ist schnellster Mega-Cap-Pace</td></tr>
-            <tr><td>Bewertung</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>Fwd P/E 22x bei +33% Wachstum = PEG 0.7x (günstigste Mega-Cap)</td></tr>
-            <tr><td>Cashflow</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>FCF $12B/Q stabil trotz Capex-Druck. FCF-Yield 3%+ unter Big-Tech</td></tr>
-            <tr><td>Risiken (invertiert)</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>FTC-Spinoff-Risiko, Ads-Konzentration, RL-Burn, Capex-Eskalation</td></tr>
-            <tr><td>Technische Analyse</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>-18% von ATH, unter SMA20/50, aber über SMA200. Konsolidierung.</td></tr>
-            <tr style="background:rgba(24,119,242,0.08);">
-              <td><strong>⌀ Gesamtscore</strong></td>
-              <td><strong>8.0/10</strong></td>
-              <td>
-                <div class="score-bar">
-                  <div class="score-bar-track">
-                    <div class="score-bar-fill" style="width:80%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
-                  </div>
-                  <span class="score-num" style="color:var(--primary);">8.0</span>
-                </div>
-              </td>
-              <td>Schnellstes Wachstum + günstigste PEG-Bewertung in Mega-Cap-AI</td>
-            </tr>
+            <tr><td>2025 (Ist)</td><td>$201 Mrd.</td><td>+22%</td><td>Kern-Ads, KI-Effizienz</td></tr>
+            <tr><td>2026E</td><td>~$251–253 Mrd.</td><td class="beat">+24–26%</td><td>KI-Conversion, Impressionen, erste WhatsApp/Threads-Beiträge</td></tr>
+            <tr><td>2027E</td><td>~$295–300 Mrd.</td><td class="neutral">+17–19%</td><td>WhatsApp/Threads +$19 Mrd., Business-AI startet Monetarisierung</td></tr>
+            <tr><td>2028E</td><td>~$340–350 Mrd.</td><td class="neutral">+14–17%</td><td>Reife Kern-Ads, Business-AI/Glasses skalieren</td></tr>
           </tbody>
         </table>
       </div>
-      <div class="source">Eigene Berechnung basierend auf Sektionen 1–10. Methodik: Canvas v2.2 Scoring.</div>
+      <p><strong>Fazit der Thesen-Analyse:</strong> Eine realistische 3-Jahres-Wachstumsspanne liegt bei <strong>~15–25 % p.a. mit Verlangsamungstendenz</strong> – 2026 noch beschleunigt durch KI-Effizienz, ab 2027 normalisierend durch Basiseffekte. Die neuen Felder (Messaging, Business-AI) sind real und groß genug, um die Kern-Verlangsamung teilweise zu kompensieren, aber 2027/28 noch ein kleiner Anteil des Gesamtumsatzes. Die Argumente <em>bestätigen</em> die bestehende Bewertung (Wachstums-Score 8, Burggraben-Score 9) und rechtfertigen keine Score-Anpassung nach unten – der KI-Disruptionsvektor ist im Risiko-Score (6) bereits berücksichtigt.</p>
+      <div class="source">Quellen: Barclays via eMarketer (Jan 2026); TechCrunch, WhatsApp Business Blog (Jun 2026); Meta Q1-2026-Call; Simply Wall St Konsens (Jun 2026); eigene Szenario-Schätzung</div>
     </div>
   </div>
 
-  <!-- S12 -->
+  <!-- ===================== SEKTION 12 ===================== -->
   <div class="section" id="s12">
     <div class="section-header">
       <div class="section-number">12</div>
       <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-score">Ø 7,4/10</div>
     </div>
     <div class="section-body">
 
       <div class="bull-bear-grid">
         <div class="bull-card">
           <h4>🐂 Das Bullische Narrativ</h4>
-          <p><strong>Säule 1 – AI-Ads-ROI ist real & quantifiziert:</strong> Q1 2026 Revenue +33% YoY mit Impressions +19% + Preisen +12% – beide Hebel zogen gleichzeitig. Das ist der überzeugendste empirische Beweis für AI-getriebene Ad-Targeting-Verbesserungen in Big-Tech. Op-Marge 41% bei Capex-Eskalation zeigt Profitabilität-Resilienz.</p>
-          <p><strong>Säule 2 – Llama-Ökosystem + Meta AI 1B:</strong> Meta AI nähert sich 1 Mrd. Nutzern (schnellstes Consumer-AI-Wachstum je). Business-AI-Chats von 1M → 10M in einem Quartal. Llama bleibt einzige Open-Source-Frontier-Modell-Familie und ernährt eigene Innovation. MSL + Moltbook-Acquisition zeigen aggressive Talent-Akquisition.</p>
-          <p><strong>Säule 3 – Günstigste Mega-Cap-Bewertung relativ zu Wachstum:</strong> Fwd P/E 22x bei +33% Wachstum = PEG 0.7x. FCF-Yield 3.2% solid, ROE 38–40%. Analysten-Konsens-Zielkurs $747–838 (=22–37% Upside). Im Vergleich zu MSFT, GOOGL, AMZN ist META der attraktivste Bewertungs-Wachstums-Trade.</p>
+          <p>Säule 1 – Beschleunigung statt Verlangsamung: Der Umsatz wuchs zuletzt +33 % (Q1 2026), das schnellste Wachstum seit 2021, getrieben durch +19 % Impressionen und +12 % Anzeigenpreis. KI ist kein Versprechen, sondern liefert bereits messbar (+6 % Conversion, 8 Mio. Advertiser mit GenAI-Tools). eMarketer sieht Meta 2026 erstmals Google im globalen Werbeumsatz überholen.</p>
+          <p>Säule 2 – Neue Erlössäulen werden real: WhatsApp/Business-Messaging und Threads sollen bis 2027 bis zu $25 Mrd. Top-Line beitragen; Business-AI skaliert mit 10 Mio. Konversationen/Woche und Token-Pricing. Diese Felder kompensieren die spätere Kern-Verlangsamung.</p>
+          <p>Säule 3 – Bewertung: Bei Fwd-P/E 17,5 und PEG 0,80 ist META der günstigste der großen Werbe-Mega-Caps relativ zum Wachstum. Bei realistischen ~$32 EPS 2026 und Rückkehr zu einem 22er-Multiple ergibt sich erhebliches Aufwärtspotenzial – Analysten-Konsens ~$827–843 (+50 %).</p>
         </div>
         <div class="bear-card">
           <h4>🐻 Das Bärische Narrativ</h4>
-          <p><strong>Risiko 1 – Reality Labs-Schwarzes-Loch + Capex-Eskalation:</strong> $16B/Jahr RL-Burn ohne klare Profitabilitäts-Roadmap. Capex auf $125–145B erhöht, 2027 weiter steigend. Wenn AI-Ads-ROI sich nicht weiter linear skalieren lässt, droht massive Underutilization der Infrastruktur.</p>
-          <p><strong>Risiko 2 – FTC-Spinoff-Tail-Risk:</strong> FTC fordert seit 2020 Spinoff von Instagram + WhatsApp. Trial-Vorbereitung läuft. Wahrscheinlichkeit Loss ~25–30%. Falls erfolgt, struktureller Wertverlust von potenziell 30%+ des MCap. Plus EU-DMA-Druck, UK-CMA-Untersuchungen.</p>
-          <p><strong>Risiko 3 – Single-Point-of-Failure Ads + Q2-Decel:</strong> 98% Revenue aus Werbung, hochzyklisch. Q1 +33% ist teilweise FX-getrieben (+4pp Tailwind) + einfache YoY-Vergleichsbasis. Q2-Guidance +22–28% impliziert Verlangsamung. Wenn Ad-Markt-Zyklik einsetzt (Rezession), kann Aktie schnell -30% verlieren (Beispiel: 2022 -75%).</p>
+          <p>Risiko 1 – Capex ohne Payback-Datum: $125–145 Mrd. Capex 2026 (~Verdopplung) drücken den FCF von potenziell >$50 Mrd. auf ~$25 Mrd. TTM. Falls der KI-Return ausbleibt, steigen Abschreibungen jahrelang und das Multiple bleibt komprimiert – die Aktie fiel mehrfach <em>trotz</em> Beats.</p>
+          <p>Risiko 2 – KI-Disruption des Funnels: Agentische Commerce und ChatGPT-Ads (Conversion teils ~2x Suche) könnten mittelfristig Werbebudgets an der Intent-Schwelle abziehen. Wenn Kaufentscheide in KI-Chats wandern, ist auch Metas Mid-Funnel angreifbar.</p>
+          <p>Risiko 3 – Regulierung &amp; Reality Labs: ~23 % EU-Umsatz unter DMA/DSA- und Digitalsteuer-Druck (US-Zolldrohung); Reality Labs verbrennt ~$20 Mrd./Jahr mit Verlust-Höhepunkt 2026. Technisch ist die Aktie im Abwärtstrend nahe 52W-Tief – Timing-Risiko.</p>
         </div>
       </div>
 
-      <h3>Eigene Einschätzung</h3>
-      <p>META ist <strong>der schnellstwachsende Mega-Cap</strong> mit der günstigsten PEG-Bewertung. Q1 2026 +33% ist außergewöhnlich, und die AI-Ads-ROI-Story ist empirisch validiert (Impressions + Preise beide +12-19% YoY). Bei $610 ist die Aktie nach -18% von ATH attraktiv – Risk/Reward besser als auf $747. Allerdings: Reality-Labs-Burn und FTC-Tail-Risk sind reale Belastungen, und Q1-Wachstum wird nicht ohne FX-Boost wiederholbar sein. Risk/Reward bei $610: ~18% Downside (auf $480–510) vs. ~30% Upside (auf $780–820 in 12-18 Monaten).</p>
-      <p>Falsche-Annahmen-Demut: Ich könnte falsch liegen, wenn (a) Q2 2026 Wachstum auf unter 18% verlangsamt, (b) FTC Spinoff-Trial verloren wird, (c) US-Rezession Ad-Demand massiv drückt.</p>
+      <h3>Eigene Einschätzung (ausgewogen)</h3>
+      <p>Das bullische Narrativ überzeugt mehr, das bärische enthält aber valide, ernstzunehmende Risiken. Der Kern: Meta liefert operativ außergewöhnlich (beschleunigtes Wachstum, 33 % Nettomarge, 33 % ROE) und ist zugleich günstig bewertet – die Diskrepanz erklärt sich fast vollständig durch <em>einen</em> Faktor: die Unsicherheit über den Return des massiven KI-Capex. Das ist eine Bewertungs-, keine Geschäftsmodell-Frage.</p>
+      <p>Für einen Quality-Growth-Investor mit 2–5-Jahres-Horizont ist das eine attraktive Konstellation: Man kauft ein dominantes, wachsendes Geschäft mit intaktem Burggraben zu einem Discount, der durch kurzfristige Capex-Angst entstanden ist. Das Hauptrisiko (KI-Disintermediation) ist real, aber Meta ist als Demand-Generator strukturell besser geschützt als Google – und investiert offensiv in eigene agentische Lösungen. Risk/Reward bei ~$550: ~−18 % Downside (Support ~$481, schwaches Szenario ~$450) vs. ~+30 % bis +50 % Upside (Zielkurs $660–760, Konsens höher). Demut: Ich könnte falsch liegen, falls der KI-Capex sich als dauerhafte Wertvernichtung erweist oder die Werbe-Konjunktur kippt.</p>
 
       <h3>Zeithorizont-Einschätzung</h3>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Zeithorizont</th><th>Katalysator</th><th>Risiko</th><th>Empfehlung</th></tr></thead>
+          <thead><tr><th>Horizont</th><th>Katalysatoren / Risiken</th><th>Empfehlung</th></tr></thead>
           <tbody>
-            <tr><td><strong>Kurzfristig (0–6M)</strong></td><td>Q2 2026 Earnings (Juli), Llama 5 Launch, Meta Connect (September)</td><td>Technisch unter SMA20/50, Q2-Decel-Risiko</td><td>Aufbauen bei $580–610, aggressiv unter $550</td></tr>
-            <tr><td><strong>Mittelfristig (6–24M)</strong></td><td>Meta AI 1B+, Orion AR-Brille Launch, WhatsApp-Monetisierung</td><td>FTC-Trial, Capex 2027-Eskalation</td><td>Halten / Aufstocken bei klaren Wachstums-Beats</td></tr>
-            <tr><td><strong>Langfristig (2–5J)</strong></td><td>Personal Superintelligence Vision, Smart Glasses Dominanz</td><td>Strukturelle Ads-Markt-Disruption, Reality-Labs-Failure</td><td>Kernposition (Compounder-Halten)</td></tr>
+            <tr><td><strong>Kurzfristig (0–6 M)</strong></td><td>Q2-Zahlen (29.07.), weitere Capex-Signale, „Mag-7"-Sentiment, technische Schwäche</td><td><span class="badge badge-yellow">Volatil – tranchiert</span></td></tr>
+            <tr><td><strong>Mittelfristig (6–24 M)</strong></td><td>WhatsApp/Threads-Monetarisierung, Business-AI-Erlöse, erste KI-Capex-Returns, RL-Verlust-Peak</td><td><span class="badge badge-green">Akkumulieren</span></td></tr>
+            <tr><td><strong>Langfristig (2–5 J)</strong></td><td>KI-Ad-Effizienz-Vorsprung, neue Erlössäulen, Glasses-Kategorie vs. Disintermediations-Risiko</td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td></tr>
           </tbody>
         </table>
       </div>
 
       <h3>Kernthese</h3>
-      <p>Meta bietet aktuell das beste Wachstums-Bewertungs-Profil in Big-Tech: <strong>+33% Umsatzwachstum bei Fwd P/E 22x (PEG 0.7x)</strong>. AI-Ads-ROI ist empirisch validiert, Llama-Ökosystem strukturell wertvoll, Meta AI auf 1B+ Nutzer-Trajektorie. Der jüngste -18% Pullback von ATH bietet attraktiven Einstieg. ABER: Reality-Labs-$16B-Burn und FTC-Spinoff-Tail-Risk sind reale Belastungen, die das Risk/Reward unter MSFT halten. Rating: <strong>KAUFEN</strong> für quality-growth-bewusste Investoren mit hoher Risikotoleranz.</p>
+      <p>Meta ist das am besten positionierte und zugleich günstigste der großen Werbe-Mega-Caps: dominante Reichweite, beschleunigtes KI-getriebenes Wachstum, intakter Burggraben – temporär abgestraft durch Capex-Angst. Wer an die Monetarisierung der KI-Investitionen und der neuen Erlössäulen (Messaging, Business-AI) glaubt, erhält bei PEG 0,80 ein überdurchschnittliches Risk/Reward. Das Hauptrisiko ist die KI-Disintermediation des Werbe-Funnels – beobachtbar, aber für einen Demand-Generator wie Meta weniger akut als für Google.</p>
 
       <div class="rating-box">
         <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
-        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$760–820</div></div>
-        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–4 Jahre</div></div>
-        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–18%</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$660–760</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–3 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">−18%</div></div>
         <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+30%</div></div>
-        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:1.7</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:1,7</div></div>
       </div>
 
+      <h3>Was falsifiziert die These?</h3>
       <div class="trigger-grid">
         <div class="trigger-card sell">
           <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
           <ul class="trigger-list">
-            <li>Q2 2026: Revenue-Wachstum &lt;18% YoY → 25% reduzieren</li>
-            <li>FTC Trial gegen META verloren → 40–50% reduzieren</li>
-            <li>Reality Labs Loss &gt;$5B/Q ohne klare Roadmap → 20% reduzieren</li>
-            <li>Bruch unter $560 → Position halbieren bis Reset</li>
+            <li>Anzeigen-Wachstum fällt nachhaltig unter ~10 % bei weiter steigendem Capex → reduzieren</li>
+            <li>Belastbarer Beleg, dass agentische Commerce/ChatGPT-Ads Meta-Werbebudgets messbar abziehen → reduzieren</li>
+            <li>Capex 2027 erneut deutlich angehoben ohne FCF-/Umsatz-Offset → Position verkleinern</li>
           </ul>
         </div>
         <div class="trigger-card buy">
           <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
           <ul class="trigger-list">
-            <li>Rückschlag auf $540–580 (–6–12%) → aggressiv nachkaufen</li>
-            <li>Q2 2026: Revenue >25% YoY → halten/aufstocken</li>
-            <li>Orion AR-Brille kommerzieller Launch 2027 → RL-Story dreht</li>
-            <li>FTC-Trial gewonnen → +10–15% Relief-Rally</li>
+            <li>Management quantifiziert erstmals KI-Capex-Return / FCF erholt sich → nachkaufen</li>
+            <li>WhatsApp/Business-AI-Erlöse erreichen Milliarden-Run-Rate → aufstocken</li>
+            <li>Technische Stabilisierung über $560 / Rückeroberung 50-Tage-Linie → einsteigen</li>
           </ul>
         </div>
       </div>
 
+      <h3>Welcher Anlegertyp passt?</h3>
       <div class="investor-grid">
         <div class="investor-yes">
           <h5>✅ Geeignet für</h5>
-          <ul>
-            <li>Growth-At-Reasonable-Price-Investoren</li>
-            <li>AI-Ads-Exposure</li>
-            <li>Höhere Risikotoleranz</li>
-            <li>Mega-Cap-Compounder-Diversifikation</li>
-          </ul>
+          <ul><li>Quality-Growth-Investoren (2–5 J)</li><li>GARP (Growth at Reasonable Price)</li><li>Contrarian (Capex-Angst als Chance)</li></ul>
         </div>
         <div class="investor-no">
           <h5>❌ NICHT geeignet für</h5>
-          <ul>
-            <li>Risk-Off / Defensive-Portfolios</li>
-            <li>Income Investoren (0.35% Yield)</li>
-            <li>Anti-Reality-Labs-Burn-Fokus</li>
-            <li>Antitrust-Sensible (FTC-Tail)</li>
-          </ul>
+          <ul><li>Income-Investoren (Rendite ~0,3 %)</li><li>Kurzfristige Trader gegen den Trend</li><li>Anleger ohne Toleranz für Capex-/Regulierungs-Volatilität</li></ul>
         </div>
       </div>
 
+      <h3>Empfohlener Einstieg</h3>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
           <tbody>
-            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Tranchiert warten</span></td><td>Einstieg bei $540–580 attraktiver; FTC-Risk auf Sicht</td></tr>
-            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">50% jetzt, 50% auf Dip</span></td><td>50% jetzt $610, 50% bei $560 oder nach Q2-Print</td></tr>
-            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>PEG 0.7x ist einzigartig in Big-Tech, Quality-Growth-Setup</td></tr>
-            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen & Halten</span></td><td>3.56B DAU + Llama + AI-Ads-Compounding über 5+ Jahre</td></tr>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / Tranchiert</span></td><td>Abwarten auf technische Stabilisierung oder Q2-Zahlen (29.07.)</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>Erste Tranche jetzt (PEG 0,80), Nachkauf bei Support ~$481 oder Capex-Klarheit</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>Risk/Reward 1:1,7 bei ~$550, Bewertungs-Discount durch Capex-Angst</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>Strukturelles KI-Ad-Effizienz-Thema + neue Erlössäulen</td></tr>
           </tbody>
         </table>
       </div>
-
-      <div class="source">Quellen: Synthese aus allen vorherigen Sektionen; eigene Risk/Reward-Kalkulation; Erste Group Buy-Upgrade; 42-Analysten-Konsens (Strong Buy).</div>
+      <div class="source">Quellen: Synthese aus Sektionen 1–11; Analysten-Konsens chartmill/TipRanks/Simply Wall St (Jun 2026); eigene Szenario-Rechnung</div>
     </div>
   </div>
 
-  <!-- S13 -->
+  <!-- ===================== SEKTION 13 ===================== -->
   <div class="section" id="s13">
     <div class="section-header">
       <div class="section-number">13</div>
-      <div class="section-title">Outlook – Anstehende Events</div>
+      <div class="section-title">Outlook – Die 3 wichtigsten anstehenden Events</div>
     </div>
     <div class="section-body">
-
       <div class="outlook-card">
-        <h4>📊 Event 1: Q2 2026 Earnings – Ende Juli 2026</h4>
-        <p>Guidance: $58–61 Mrd. Revenue (+22–28% YoY). Kritische Metriken: (1) Bleibt Ad-Wachstum >22% YoY? (2) Wie skaliert Meta AI (auf 1B+ Nutzer?)? (3) WhatsApp-Business-AI-Monetisierung (1M → 10M weekly chats expanded?)? (4) Reality-Labs-Loss-Trajektorie?</p>
+        <h4>📊 Event 1: Q2-2026-Quartalszahlen – 29. Juli 2026</h4>
+        <p>Der wichtigste kurzfristige Katalysator. Entscheidend ist weniger der Umsatz (Guidance $58–61 Mrd.) als das Verhältnis von Capex-Trajektorie zu Umsatz-Beschleunigung und jede Quantifizierung des KI-Returns.</p>
         <div class="when-then">
-          <strong>Wenn:</strong> Revenue-Wachstum ≥25% YoY + Op-Marge >40% + Meta AI passt 1B Nutzer-Schwelle → Aufstockung, Zielkurs $760–820 in 12 Monaten.<br><br>
-          <strong>Wenn:</strong> Revenue-Wachstum &lt;18% YoY ODER Capex weitere Erhöhung → 25–30% reduzieren, Konsolidierung auf $480–540 wahrscheinlich.
+          <strong>Wenn:</strong> Umsatz im oberen Guidance-Bereich (≥$60 Mrd.), Anzeigenpreis weiter zweistellig <em>und</em> keine erneute Capex-Erhöhung → Bestätigung der These, kurzfristig nachkaufen.<br><br>
+          <strong>Wenn:</strong> Erneute Capex-Anhebung über $145 Mrd. ohne FCF-/Umsatz-Offset oder Anzeigenpreis-Wachstum <6 % → Position reduzieren, Capex-Bremse dominiert.
         </div>
       </div>
-
       <div class="outlook-card">
-        <h4>📊 Event 2: Meta Connect 2026 + Llama 5 + Orion AR-Brille – September 2026</h4>
-        <p>Meta Connect 2026 (jährliche Hardware/Developer-Konferenz) typischerweise im September. Erwartet: Llama 5 Release ("Superintelligence-Caliber" laut Zuckerberg), Quest 4 (oder Quest 3 Pro?), Orion AR-Brille kommerzielles Launch-Window, Smart-Glasses-Updates (Ray-Ban Meta v3).</p>
+        <h4>📊 Event 2: Monetarisierungs-Fortschritt WhatsApp/Business-AI – H2 2026</h4>
+        <p>Übergang der Business-AI von kostenlos zu Token-Pricing/Abo und erste belastbare Erlös-Run-Rates für WhatsApp/Threads-Werbung (Barclays: bis $6 Mrd. 2026). Dies ist der Test, ob die neuen Wachstumsfelder real Umsatz liefern.</p>
         <div class="when-then">
-          <strong>Wenn:</strong> Llama 5 mit deutlich messbarem Performance-Vorsprung über Llama 4 + Orion AR-Brille im Preis-Bereich für Consumer-Adoption → bullish, +10–15% Pop, RL-Story-Drehung.<br><br>
-          <strong>Wenn:</strong> nur inkrementelle Updates ohne klare Differenzierung → neutral, kurze "sell-the-news"-Reaktion, langfristig irrelevant.
+          <strong>Wenn:</strong> Management nennt erstmals eine Milliarden-Run-Rate für Business-Messaging/Business-AI → die Kompensation der Kern-Verlangsamung ist bestätigt, akkumulieren.<br><br>
+          <strong>Wenn:</strong> Monetarisierung verschiebt sich erneut (weiter „kostenlos für Skalierung") ohne Datumshorizont → neue Felder bleiben Option statt Treiber, Geduld/Halten.
         </div>
       </div>
-
       <div class="outlook-card">
-        <h4>📊 Event 3: FTC vs. Meta Antitrust-Trial – Q2-Q4 2026 (laufend)</h4>
-        <p>FTC-Klage zu Instagram + WhatsApp-Spinoff läuft seit 2020. Trial-Vorbereitung intensiviert sich. Mögliche Outcomes: (1) Case-Dismissal (Wahrscheinlichkeit ~20%), (2) Settlement mit Behavioral-Remedies (~50%), (3) Trial-Verlust + strukturelle Spinoff-Anordnung (~25–30%).</p>
+        <h4>📊 Event 3: KI-Such-/Commerce-Disruption – laufend, Schlüsseldaten Q4 2026 / 2027</h4>
+        <p>Reifung von ChatGPT-Ads und agentischer Commerce. Beobachtungsgröße: Verschiebt sich Werbebudget messbar von Demand-Gen-Plattformen zu KI-Antwort-Interfaces? Metas Gegenmaßnahme (agentisches Shopping in Instagram, Muse-Spark-Assistent) muss greifen.</p>
         <div class="when-then">
-          <strong>Wenn:</strong> Case-Dismissal ODER Settlement mit milden Maßnahmen → +8–12% Relief-Rally, Tail-Risk-Removal.<br><br>
-          <strong>Wenn:</strong> Trial-Loss + Spinoff-Anordnung → kurzfristig –20-30% Crash. Aber: SOTP-Bewertung könnte über Spinoff Wert freisetzen (Instagram als eigenständig wertvoll). Strategisch komplex.
+          <strong>Wenn:</strong> Branchendaten zeigen, dass Metas Werbe-Marktanteil trotz KI-Konkurrenz stabil/steigend bleibt (eMarketer-Updates) → struktureller Schutz bestätigt, Halten/Aufstocken.<br><br>
+          <strong>Wenn:</strong> Belastbarer Beleg, dass KI-native Ad-Netzwerke Meta-Budgets im Mid-Funnel abziehen → Disintermediations-These aktiv, Position überdenken.
         </div>
       </div>
-
-      <div class="source">Quellen: META IR Calendar; Meta Connect Schedule; FTC vs. Meta Court Docket; Visible Alpha Konsens-Schätzungen.</div>
+      <div class="source">Quellen: Meta IR Guidance Q1 2026; Barclays/eMarketer (Jan 2026); Marketing Dive, eMarketer ChatGPT-Ads (Jun 2026)</div>
     </div>
   </div>
 
-  <div class="disclaimer">
-    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung dar. Die enthaltenen Informationen wurden aus öffentlich zugänglichen Quellen zusammengetragen und nach bestem Wissen bewertet. Vergangene Wertentwicklungen sind kein verlässlicher Indikator für zukünftige Ergebnisse. Investitionen in Aktien sind mit erheblichen Risiken verbunden, einschließlich des Totalverlusts. Bitte konsultieren Sie vor Investmententscheidungen einen unabhängigen Finanzberater. Stand: 14.05.2026.
-  </div>
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken und stellt keine Anlageberatung, Kauf-/Verkaufsempfehlung oder Aufforderung zum Handel dar. Alle Daten beruhen auf öffentlich zugänglichen Quellen (Stand: 30. Juni 2026) und können Fehler enthalten oder veraltet sein. Kennzahlen wurden u. a. von Yahoo Finance, Macrotrends, eMarketer, Meta Investor Relations sowie diversen Finanzmedien bezogen. Aktieninvestments sind mit dem Risiko des Totalverlusts verbunden. Jeder Anleger ist für seine eigenen Entscheidungen verantwortlich und sollte ggf. einen lizenzierten Berater konsultieren. Der Autor übernimmt keine Haftung für finanzielle Verluste.</div>
 
 </div>
 </body>
