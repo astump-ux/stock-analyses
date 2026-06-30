@@ -3,155 +3,134 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Amazon AMZN – Aktienanalyse Canvas v2.2</title>
+<title>AMZN – Aktienanalyse Canvas v2.2</title>
 <style>
-:root {
-  --primary: #FF9900;
-  --primary-dark: #cc7a00;
-  --bg: #0f0f12;
-  --bg-card: #1a1a1f;
-  --bg-card2: #22222a;
-  --border: #2e2e38;
-  --text: #e8e8ec;
-  --text-muted: #888898;
-  --text-dim: #555566;
-  --green: #22c55e;
-  --red: #ef4444;
-  --yellow: #f59e0b;
-  --blue: #3b82f6;
-  --purple: #8b5cf6;
-  --teal: #14b8a6;
+:root{
+  --primary:#FF6900; --primary-dark:#cc5400;
+  --bg:#0f0f12; --bg-card:#1a1a1f; --bg-card2:#22222a; --border:#2e2e38;
+  --text:#e8e8ec; --text-muted:#888898; --text-dim:#555566;
+  --green:#22c55e; --red:#ef4444; --yellow:#f59e0b; --blue:#3b82f6; --purple:#8b5cf6; --teal:#14b8a6;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
-.header { background: linear-gradient(135deg, #1f1100 0%, #3a1f00 40%, #0f0f12 100%); border-bottom: 1px solid var(--primary); padding: 36px 40px 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; }
-.header-left h1 { font-size: 32px; font-weight: 700; color: white; letter-spacing: -0.5px; }
-.header-left h1 span { color: var(--primary); }
-.header-left .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
-.header-right { text-align: right; }
-.price-tag { font-size: 38px; font-weight: 800; color: var(--primary); line-height: 1; }
-.price-meta { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
-.price-change { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; margin-top: 4px; }
-.price-change.up { background: rgba(34,197,94,0.15); color: var(--green); }
-.price-change.down { background: rgba(239,68,68,0.15); color: var(--red); }
-.nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 100; }
-.nav a { color: var(--text-muted); text-decoration: none; padding: 14px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; }
-.nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
-.main { max-width: 1100px; margin: 0 auto; padding: 32px 40px 60px; }
-.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
-.kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
-.kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-.kpi-value { font-size: 22px; font-weight: 700; color: white; margin-top: 4px; }
-.kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-.kpi-value.green { color: var(--green); }
-.kpi-value.red { color: var(--red); }
-.kpi-value.orange { color: var(--primary); }
-.section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
-.section-header { background: var(--bg-card2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
-.section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.section-title { font-size: 16px; font-weight: 700; color: white; }
-.section-score { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--primary); }
-.section-note { font-size: 12px; color: var(--text-dim); background: rgba(46,46,56,0.4); border-radius: 4px; padding: 4px 10px; margin-left: auto; }
-.section-body { padding: 20px 24px; }
-p { margin-bottom: 12px; color: var(--text); }
-p:last-child { margin-bottom: 0; }
-h3 { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px; }
-h3:first-child { margin-top: 0; }
-.table-wrap { overflow-x: auto; margin: 16px 0; }
-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-th { background: var(--bg-card2); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-td { padding: 10px 12px; border-bottom: 1px solid rgba(46,46,56,0.5); color: var(--text); }
-tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(255,153,0,0.04); }
-.beat { color: var(--green); font-weight: 600; }
-.miss { color: var(--red); font-weight: 600; }
-.neutral { color: var(--yellow); font-weight: 600; }
-.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
-.badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
-.badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
-.badge-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
-.badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
-.badge-orange { background: rgba(255,153,0,0.15); color: var(--primary); }
-.event-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,46,56,0.5); align-items: flex-start; }
-.event-item:last-child { border-bottom: none; }
-.event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
-.dot-green { background: var(--green); }
-.dot-red { background: var(--red); }
-.dot-yellow { background: var(--yellow); }
-.event-label { font-weight: 600; color: white; }
-.event-text { font-size: 14px; color: var(--text); }
-.risk-item { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
-.risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.risk-title { font-weight: 600; color: white; font-size: 14px; }
-.score-bar { display: flex; align-items: center; gap: 10px; }
-.score-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-.score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #ffb84d); }
-.score-num { font-weight: 700; color: var(--primary); font-size: 15px; min-width: 32px; }
-.bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-@media(max-width: 700px) { .bull-bear-grid { grid-template-columns: 1fr; } }
-.bull-card { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 16px; }
-.bear-card { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 16px; }
-.bull-card h4 { color: var(--green); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-.bear-card h4 { color: var(--red); margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-.rating-box { background: linear-gradient(135deg, rgba(255,153,0,0.12), rgba(255,153,0,0.04)); border: 1px solid rgba(255,153,0,0.3); border-radius: 12px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
-.rating-item label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
-.rating-item .val { font-size: 20px; font-weight: 800; color: white; }
-.rating-item .val.buy { color: var(--green); }
-.rating-item .val.hold { color: var(--yellow); }
-.rating-item .val.sell { color: var(--red); }
-.trigger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
-@media(max-width: 700px) { .trigger-grid { grid-template-columns: 1fr; } }
-.trigger-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
-.trigger-card h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-.trigger-card.buy h5 { color: var(--green); }
-.trigger-card.sell h5 { color: var(--red); }
-.trigger-list { font-size: 13px; color: var(--text); list-style: none; padding: 0; }
-.trigger-list li { margin-bottom: 6px; padding-left: 14px; position: relative; }
-.trigger-list li::before { content: "→"; position: absolute; left: 0; }
-.investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
-@media(max-width: 600px) { .investor-grid { grid-template-columns: 1fr; } }
-.investor-yes { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 8px; padding: 12px; }
-.investor-no { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 12px; }
-.investor-yes h5 { color: var(--green); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
-.investor-no h5 { color: var(--red); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
-.investor-yes li, .investor-no li { font-size: 13px; color: var(--text); margin-bottom: 4px; list-style: none; padding-left: 14px; position: relative; }
-.investor-yes li::before { content: "✓"; position: absolute; left: 0; color: var(--green); }
-.investor-no li::before { content: "✗"; position: absolute; left: 0; color: var(--red); }
-.geo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
-.geo-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
-.geo-region { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-.geo-pct { font-size: 20px; font-weight: 700; color: white; }
-.geo-note { font-size: 12px; color: var(--text-muted); }
-.outlook-card { background: var(--bg-card2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; padding: 16px; margin-bottom: 14px; }
-.outlook-card h4 { color: white; font-size: 14px; margin-bottom: 8px; }
-.outlook-card .when-then { font-size: 13px; color: var(--text); margin-top: 8px; }
-.outlook-card .when-then strong { color: var(--primary); }
-.source { font-size: 11px; color: var(--text-dim); margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(46,46,56,0.5); }
-.source a { color: var(--text-dim); }
-.disclaimer { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-size: 12px; color: var(--text-dim); margin-top: 32px; }
-.alert-box { background: rgba(255,153,0,0.08); border: 1px solid rgba(255,153,0,0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
-.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
-.pill { display: inline-block; background: rgba(255,153,0,0.12); color: var(--primary); border-radius: 4px; padding: 1px 7px; font-size: 13px; font-weight: 600; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+.header{background:linear-gradient(135deg,#1a0800 0%,#2a1000 40%,#0f0f12 100%);border-bottom:1px solid var(--primary);padding:36px 40px 28px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;}
+.header-left h1{font-size:32px;font-weight:700;color:white;letter-spacing:-0.5px;}
+.header-left h1 span{color:var(--primary);}
+.header-left .subtitle{color:var(--text-muted);font-size:14px;margin-top:4px;}
+.header-right{text-align:right;}
+.price-tag{font-size:38px;font-weight:800;color:var(--primary);line-height:1;}
+.price-meta{color:var(--text-muted);font-size:13px;margin-top:4px;}
+.price-change{display:inline-block;padding:2px 8px;border-radius:4px;font-size:13px;font-weight:600;margin-top:4px;}
+.price-change.up{background:rgba(34,197,94,0.15);color:var(--green);}
+.price-change.down{background:rgba(239,68,68,0.15);color:var(--red);}
+.nav{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:100;}
+.nav a{color:var(--text-muted);text-decoration:none;padding:14px 16px;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.2s;}
+.nav a:hover{color:var(--primary);border-bottom-color:var(--primary);}
+.main{max-width:1100px;margin:0 auto;padding:32px 40px 60px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px;}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.kpi-value{font-size:22px;font-weight:700;color:white;margin-top:4px;}
+.kpi-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.kpi-value.green{color:var(--green);}.kpi-value.red{color:var(--red);}.kpi-value.orange{color:var(--primary);}
+.section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden;}
+.section-header{background:var(--bg-card2);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.section-number{background:var(--primary);color:white;width:28px;height:28px;border-radius:6px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-title{font-size:16px;font-weight:700;color:white;}
+.section-score{margin-left:auto;font-size:14px;font-weight:700;color:var(--primary);}
+.section-note{font-size:12px;color:var(--text-dim);background:rgba(46,46,56,0.4);border-radius:4px;padding:4px 10px;margin-left:auto;}
+.section-body{padding:20px 24px;}
+p{margin-bottom:12px;color:var(--text);}p:last-child{margin-bottom:0;}
+h3{font-size:14px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 8px;}h3:first-child{margin-top:0;}
+.table-wrap{overflow-x:auto;margin:16px 0;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--bg-card2);color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:10px 12px;border-bottom:1px solid rgba(46,46,56,0.5);color:var(--text);}
+tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,105,0,0.04);}
+.beat{color:var(--green);font-weight:600;}.miss{color:var(--red);font-weight:600;}.neutral{color:var(--yellow);font-weight:600;}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}
+.badge-green{background:rgba(34,197,94,0.15);color:var(--green);}
+.badge-red{background:rgba(239,68,68,0.15);color:var(--red);}
+.badge-yellow{background:rgba(245,158,11,0.15);color:var(--yellow);}
+.badge-blue{background:rgba(59,130,246,0.15);color:var(--blue);}
+.badge-orange{background:rgba(255,105,0,0.15);color:var(--primary);}
+.event-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(46,46,56,0.5);align-items:flex-start;}
+.event-item:last-child{border-bottom:none;}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0;}
+.dot-green{background:var(--green);}.dot-red{background:var(--red);}.dot-yellow{background:var(--yellow);}
+.event-label{font-weight:600;color:white;}
+.event-text{font-size:14px;color:var(--text);}
+.risk-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.risk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.risk-title{font-weight:600;color:white;font-size:14px;}
+.score-bar{display:flex;align-items:center;gap:10px;}
+.score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#ff9500);}
+.score-num{font-weight:700;color:var(--primary);font-size:15px;min-width:32px;}
+.bull-bear-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:700px){.bull-bear-grid{grid-template-columns:1fr;}}
+.bull-card{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:16px;}
+.bear-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:16px;}
+.bull-card h4{color:var(--green);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.bear-card h4{color:var(--red);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.rating-box{background:linear-gradient(135deg,rgba(255,105,0,0.12),rgba(255,105,0,0.04));border:1px solid rgba(255,105,0,0.3);border-radius:12px;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:20px 0;}
+.rating-item label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;display:block;margin-bottom:4px;}
+.rating-item .val{font-size:20px;font-weight:800;color:white;}
+.rating-item .val.buy{color:var(--green);}.rating-item .val.hold{color:var(--yellow);}.rating-item .val.sell{color:var(--red);}
+.trigger-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+@media(max-width:700px){.trigger-grid{grid-template-columns:1fr;}}
+.trigger-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.trigger-card h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.trigger-card.buy h5{color:var(--green);}.trigger-card.sell h5{color:var(--red);}
+.trigger-list{font-size:13px;color:var(--text);list-style:none;padding:0;}
+.trigger-list li{margin-bottom:6px;padding-left:14px;position:relative;}
+.trigger-list li::before{content:"→";position:absolute;left:0;}
+.investor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+@media(max-width:600px){.investor-grid{grid-template-columns:1fr;}}
+.investor-yes{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px;}
+.investor-no{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:12px;}
+.investor-yes h5{color:var(--green);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-no h5{color:var(--red);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-yes li,.investor-no li{font-size:13px;color:var(--text);margin-bottom:4px;list-style:none;padding-left:14px;position:relative;}
+.investor-yes li::before{content:"✓";position:absolute;left:0;color:var(--green);}
+.investor-no li::before{content:"✗";position:absolute;left:0;color:var(--red);}
+.geo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0;}
+.geo-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.geo-region{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.geo-pct{font-size:20px;font-weight:700;color:white;}
+.geo-note{font-size:12px;color:var(--text-muted);}
+.outlook-card{background:var(--bg-card2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:16px;margin-bottom:14px;}
+.outlook-card h4{color:white;font-size:14px;margin-bottom:8px;}
+.outlook-card .when-then{font-size:13px;color:var(--text);margin-top:8px;}
+.outlook-card .when-then strong{color:var(--primary);}
+.source{font-size:11px;color:var(--text-dim);margin-top:12px;padding-top:10px;border-top:1px solid rgba(46,46,56,0.5);}
+.source a{color:var(--text-dim);}
+.disclaimer{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text-dim);margin-top:32px;}
+.alert-box{background:rgba(255,105,0,0.08);border:1px solid rgba(255,105,0,0.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px;}
+.coi-box{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.35);border-radius:8px;padding:14px 16px;margin-bottom:24px;font-size:13px;}
+.coi-box strong{color:var(--yellow);}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+.pill{display:inline-block;background:rgba(255,105,0,0.12);color:var(--primary);border-radius:4px;padding:1px 7px;font-size:13px;font-weight:600;}
 </style>
 </head>
 <body>
 
 <div class="header">
   <div class="header-left">
-    <h1>Amazon.com, Inc. <span>AMZN</span></h1>
-    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 14.05.2026 · NASDAQ · Sektor: Consumer Discretionary / Cloud</div>
-    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-      <span class="badge badge-orange">AWS Cloud/AI</span>
-      <span class="badge badge-blue">E-Commerce</span>
-      <span class="badge badge-yellow">Advertising</span>
-      <span class="badge badge-green">Trainium</span>
+    <h1>Amazon.com <span>AMZN</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 30. Juni 2026 · NASDAQ · Sektor: Consumer Discretionary / Cloud &amp; AI Infrastructure</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-orange">E-Commerce / Marketplace</span>
+      <span class="badge badge-blue">AWS Cloud &amp; AI</span>
+      <span class="badge badge-green">Advertising</span>
+      <span class="badge badge-yellow">Satellites / Leo</span>
     </div>
   </div>
   <div class="header-right">
-    <div class="price-tag">$272.68</div>
-    <div class="price-meta">Schlusskurs 13.05.2026 · NASDAQ</div>
-    <div class="price-change up">▲ +44% (12M)</div>
-    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">52W: $161 – $285</div>
+    <div class="price-tag">$240</div>
+    <div class="price-meta">Schlusskurs 29.06.2026 · NASDAQ</div>
+    <div class="price-change up">▲ +3,2% (Prime-Day-Rekord + AWS-Preiserhöhung)</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">52W: $196,00 – $278,56</div>
   </div>
 </div>
 
@@ -174,599 +153,379 @@ tr:hover td { background: rgba(255,153,0,0.04); }
 <div class="main">
 
   <div class="kpi-grid" style="margin-top:24px;">
-    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$272.68</div><div class="kpi-sub">USD · 08.05.2026</div></div>
-    <div class="kpi-card"><div class="kpi-label">Marktkap.</div><div class="kpi-value">~$2.85T</div><div class="kpi-sub">Mega-Cap</div></div>
-    <div class="kpi-card"><div class="kpi-label">P/E TTM</div><div class="kpi-value">32.1x</div><div class="kpi-sub">3J-Ø: 45x</div></div>
-    <div class="kpi-card"><div class="kpi-label">Fwd P/E</div><div class="kpi-value">26x</div><div class="kpi-sub">historisch günstig</div></div>
-    <div class="kpi-card"><div class="kpi-label">Op-Marge</div><div class="kpi-value green">13.1%</div><div class="kpi-sub">höchste je</div></div>
-    <div class="kpi-card"><div class="kpi-label">AWS ARR</div><div class="kpi-value green">$150B</div><div class="kpi-sub">+28% YoY</div></div>
-    <div class="kpi-card"><div class="kpi-label">Capex 2026e</div><div class="kpi-value red">$165–180B</div><div class="kpi-sub">AI-Druck</div></div>
-    <div class="kpi-card"><div class="kpi-label">FCF TTM</div><div class="kpi-value red">$1.2B</div><div class="kpi-sub">eingebrochen</div></div>
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$240</div><div class="kpi-sub">USD · 29.06.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value">~$2,55 Bio.</div><div class="kpi-sub">10,76 Mrd. Aktien</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/E (normalisiert)</div><div class="kpi-value">~34x</div><div class="kpi-sub">Headline ~28x*</div></div>
+    <div class="kpi-card"><div class="kpi-label">Fwd P/E</div><div class="kpi-value">~28x</div><div class="kpi-sub">NTM-Konsens</div></div>
+    <div class="kpi-card"><div class="kpi-label">EV/EBITDA</div><div class="kpi-value">~16x</div><div class="kpi-sub">EBITDA TTM $164 Mrd.</div></div>
+    <div class="kpi-card"><div class="kpi-label">Bruttomarge</div><div class="kpi-value green">50,6%</div><div class="kpi-sub">TTM</div></div>
+    <div class="kpi-card"><div class="kpi-label">ROE</div><div class="kpi-value green">24,3%</div><div class="kpi-sub">ROIC ~13,5%</div></div>
+    <div class="kpi-card"><div class="kpi-label">AWS Run-Rate</div><div class="kpi-value orange">$150 Mrd.</div><div class="kpi-sub">+28% YoY (Q1'26)</div></div>
   </div>
 
-  <!-- S1 -->
+  <div class="coi-box">
+    ⚠️ <strong>Transparenz-/Interessenkonflikt-Hinweis (Pflicht):</strong> Diese Analyse wurde von Claude (entwickelt von <strong>Anthropic</strong>) erstellt. Amazon ist ein <strong>Großinvestor in Anthropic</strong> und einer der wichtigsten AWS-Kunden Anthropics. Das ist hier nicht nebensächlich: Amazons ausgewiesene Q1-2026-EPS von $2,78 enthalten <strong>$16,8 Mrd. Vorsteuer-Buchgewinne aus dem Anthropic-Stake</strong> (Q3 2025: +$9,5 Mrd.) — also nicht-operative, nicht-zahlungswirksame Mark-to-Market-Effekte, die das Headline-Ergebnis und damit das Headline-KGV künstlich verbilligen. Wo immer im Folgenden AWS/AI oder die Earnings-Qualität bewertet werden, behandle ich Anthropic-bezogene Aussagen wie Angaben einer interessierten Partei und kennzeichne die Verzerrung explizit. Die Schlussfolgerungen sind so gezogen, dass dieser Konflikt das Rating <em>nicht</em> beschönigt.
+  </div>
+
+  <!-- SEKTION 1 -->
   <div class="section" id="s1">
-    <div class="section-header">
-      <div class="section-number">1</div>
-      <div class="section-title">Geschäftsmodell</div>
-      <div class="section-note">Quellen ≤ 6 Monate</div>
-    </div>
+    <div class="section-header"><div class="section-number">1</div><div class="section-title">Geschäftsmodell</div><div class="section-note">Quellen ≤ 6–9 Monate</div></div>
     <div class="section-body">
-      <h3>Drei Säulen: Retail/Marketplace, AWS, Advertising</h3>
-      <p>Amazon erwirtschaftete im Q1 2026 Umsätze von <strong>$181.5 Mrd. (+17% YoY)</strong>. Die Erlöse verteilen sich auf drei Hauptsegmente: <strong>North America Retail</strong> ($104.1 Mrd., +12%) – inkl. eigenes Inventar, Marketplace-Gebühren, Prime-Subscription; <strong>International Retail</strong> ($39.8 Mrd., +19%, FX-bereinigt +11%); <strong>AWS</strong> ($37.6 Mrd., +28%) als Profit-Maschine mit 37.9% Op-Marge und $150 Mrd. ARR. Das Werbegeschäft (Advertising Services) hat im Q1 2026 ein TTM-Volumen von <strong>>$70 Mrd.</strong> erreicht (+24% YoY) – inzwischen die drittwichtigste Säule.</p>
-
-      <h3>Revenue-Streams & Profit-Pools</h3>
-      <p>Amazon ist ein Hybrid-Unternehmen mit zwei sehr unterschiedlichen Profit-Pools: <strong>Retail</strong> arbeitet bei niedrigen einstelligen Margen (NA: 8% Op-Marge in Q1; International ~5%) mit hohem Capital-Turnover, getrieben durch Logistik-Skalierung und FBA. <strong>AWS</strong> liefert ~60% des Konzern-Op-Income bei nur ~20% des Umsatzes, weil es eine 37.9% Op-Marge erzielt ($14.2 Mrd. Op-Income in Q1). <strong>Advertising</strong> ist quasi reine Marge (>80% Bruttomarge), wächst 24% YoY und ist ein "stiller" Mehrwert in Höhe von ~$70 Mrd. p.a. mit fast 100% Profitabilität – das ist Amazons unterschätzter Hidden Asset.</p>
-
-      <h3>Strategischer AI-Pivot: AWS + Trainium + Anthropic</h3>
-      <p>Seit Q3 2025 hat Amazon einen aggressiven AI-Pivot gestartet: Project Rainier ($11 Mrd. AI-Data-Center exklusiv für Anthropic), Trainium-2-Chip-Volumen verdreifacht ($20 Mrd. Run-Rate), und im April 2026 die <strong>$25 Mrd. Anthropic-Investment-Erweiterung</strong> + Anthropics <strong>$100 Mrd. AWS-Commitment</strong> über 10 Jahre angekündigt. Parallel dazu OpenAI-Deal: OpenAI erweiterte $38 Mrd. AWS-Verpflichtung um $100 Mrd. über 8 Jahre, Amazon investiert $50 Mrd. in OpenAI. AWS positioniert sich als <strong>neutraler AI-Infrastruktur-Layer</strong> für ALLE großen LLM-Anbieter – anders als Microsoft (OpenAI-only) oder Alphabet (Gemini-only).</p>
-
-      <div class="source">Quellen: Amazon Q1 2026 8-K (29.04.2026); Q4 2025 Earnings Call (05.02.2026); Sherwood News Anthropic-Deal (04/2026); CNBC AWS Coverage (29.04.2026).</div>
+      <p>Amazon ist kein Einzelunternehmen, sondern ein Konglomerat aus drei sehr unterschiedlich tickenden Maschinen, die in der Konzernbilanz unter drei Segmenten laufen: <span class="pill">North America</span>, <span class="pill">International</span> und <span class="pill">AWS</span>. Die mit Abstand größte Umsatzsäule ist nach wie vor der Handel — eigene Online-Stores, der 3P-Marketplace (Drittanbieter zahlen Verkaufsprovisionen, FBA-Logistikgebühren und Werbung), physische Stores sowie das Abo-Geschäft Prime (über 200 Mio. Mitglieder). Im Q1 2026 entfielen $104,1 Mrd. auf North America und $39,8 Mrd. auf International — zusammen rund 80% des Konzernumsatzes von $181,5 Mrd.</p>
+      <p>Der eigentliche Gewinnmotor ist jedoch <strong>AWS</strong>: Mit nur ~21% des Umsatzes ($37,6 Mrd. im Q1) liefert das Cloud-Segment den Löwenanteil des operativen Ergebnisses ($14,2 Mrd. Segment-Operating-Income, Segmentmarge 37,7%). AWS verkauft Compute, Storage, Datenbanken, KI-Infrastruktur (Bedrock, eigene Trainium-/Graviton-Chips) und tausende Managed Services überwiegend nutzungsbasiert (usage-based) — ein hochmargiges, kapitalintensives Asset-Heavy-Modell mit langfristigen Enterprise-Verträgen (Backlog: $364 Mrd.).</p>
+      <p>Die dritte, leise Maschine ist <strong>Advertising</strong>: $17,2 Mrd. im Q1 (+24% YoY), TTM über $70 Mrd. Hierbei handelt es sich um Sponsored-Product-Listings, Display- und zunehmend Prime-Video-/Twitch-Werbung — ein nahezu reines Margengeschäft, das auf Amazons First-Party-Kaufdaten (Closed-Loop-Attribution) aufsetzt und strukturell schneller wächst als der Handel selbst.</p>
+      <p>Die Unit Economics sind damit zweigeteilt: Das Retail-Geschäft arbeitet mit dünnen Margen (North-America-Segmentmarge ~9%), subventioniert durch Logistik-Skaleneffekte; AWS und Ads sind die Profitpools. Genau diese Mischungsverschiebung hin zu Services ist die zentrale Investment-These — Amazon verdient zunehmend wie ein Software-/Werbekonzern, während die Top-Line noch wie ein Händler aussieht.</p>
+      <div class="source">Quellen: Amazon Q1 2026 Earnings Release/8-K (29.04.2026, ir.aboutamazon.com); Futurum Research Q1 FY2026 (04.05.2026); CNBC AWS Q1 2026 (29.04.2026)</div>
     </div>
   </div>
 
-  <!-- S2 -->
+  <!-- SEKTION 2 -->
   <div class="section" id="s2">
-    <div class="section-header">
-      <div class="section-number">2</div>
-      <div class="section-title">Burggraben & Wettbewerbsvorteile</div>
-      <div class="section-score">Score: 9/10</div>
-    </div>
+    <div class="section-header"><div class="section-number">2</div><div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div><div class="section-score">Score: 9/10</div></div>
     <div class="section-body">
-      <h3>Logistik-Moat: Fulfillment-Netzwerk + Prime</h3>
-      <p>Amazons primärer Retail-Moat ist die <strong>unerreichbare Fulfillment-Infrastruktur</strong>: >175 Fulfillment-Center, Same-Day-Delivery in immer mehr Märkten, im Mai 2026 Rollout von 30-Minuten-Lieferung (Amazon Now) in dutzenden US-Städten. Die <strong>Q1 2026 Unit-Growth +15% (höchste seit COVID-Lockdowns)</strong> beweist, dass das Logistik-Netzwerk Marktanteile weiter konsolidiert. >200 Mio. Prime-Mitglieder weltweit (geschätzt) mit ~70% Renewal-Rate erzeugen einen Customer-Lock-In, den kein Wettbewerber replizieren kann.</p>
-
-      <h3>AWS-Moat: Skalen + Trainium + Multi-Model-Neutralität</h3>
-      <p>AWS ist mit ~30% Cloud-Marktanteil weiterhin der Marktführer (vor Azure ~25%, Google ~13%). Der Burggraben hat sich in den letzten 3 Monaten <strong>strukturell verstärkt</strong>: (1) Trainium-Chips erreichen $20B Run-Rate (Triple-Digit-Wachstum) und bieten eine Alternative zu NVIDIA, was AWS Pricing-Power gibt; (2) Multi-Model-Strategie (Anthropic Claude + OpenAI ChatGPT + Bedrock-Hub) macht AWS zum "Switzerland of AI"; (3) Backlog von <strong>$364 Mrd. (excl. $100B Anthropic-Deal)</strong> – impliziert Wachstum für >2.5 Jahre.</p>
-
-      <h3>Schwächen & Verwundbarkeiten</h3>
-      <p>Drei Burggraben-Risse: (1) <strong>Retail-Margenfragilität</strong> – International-Marge bleibt im niedrigen einstelligen Bereich, anfällig für FX und Tariff-Risiken; (2) <strong>AWS-Marktanteil bröckelt</strong> – während AWS +28% wächst, wächst Google Cloud +63% und Azure ~30% – AWS verliert relativ Marktanteile; (3) <strong>Antitrust-Risiken</strong> – FTC-Klage in den USA seit 2023 läuft weiter, EU-DMA-Druck auf Marketplace-Praktiken, indische CCI-Untersuchungen.</p>
-
-      <div class="source">Quellen: Amazon Q1 2026 Earnings Call; Synergy Research Cloud Market Share Q1 2026; FTC vs. Amazon Court Docket; Yahoo Finance / digitalcommerce360 (04–05/2026).</div>
+      <p><strong>Skalen-/Logistikvorteil (sehr stark):</strong> Amazons Fulfillment-Netzwerk ist der härteste Moat. Mehr als 1 Mrd. Artikel wurden 2026 bereits same-day oder over-night zugestellt; kein DTC-Anbieter und kaum ein Wettbewerber kann diese Dichte und Lieferversprechen-Konsistenz zu vergleichbaren Stückkosten replizieren. Das ist der Grund, warum Drittanbieter trotz hoher Gebühren auf FBA bleiben.</p>
+      <p><strong>Switching Costs &amp; Netzwerkeffekte (stark):</strong> Bei AWS sind die Wechselkosten hoch — Datengravitation, IAM, proprietäre Managed Services und eigene Silizium-Stacks (Trainium2 quasi ausverkauft, Trainium3 fast vollständig subskribiert) binden Enterprises über Jahre. Im Marketplace verstärken sich Käufer und Verkäufer gegenseitig (klassischer Plattform-Netzwerkeffekt), und Prime erhöht die Kauffrequenz und senkt die Abwanderung.</p>
+      <p><strong>Datenvorsprung / Werbe-Moat (stark):</strong> Amazon sitzt auf den granularsten Kaufabsichts- und Transaktionsdaten im Westen. Das treibt nicht nur Ads (Closed-Loop-ROAS, den Google/Meta so nicht bieten), sondern — entscheidend für das nächste Jahrzehnt — auch die <em>Qualität von Shopping-Agenten</em>: Echtzeit-Verfügbarkeit, korrekte Preise und Lieferzeiten sind genau das, woran externe Scraper-Agenten scheitern.</p>
+      <p><strong>Schwachstellen (kritisch):</strong> Erstens ist AWS' <em>Wachstumsvorsprung</em> erodiert — Azure (+40%) und Google Cloud (+48–63%) wachsen prozentual deutlich schneller (auf kleinerer Basis). Zweitens ist der Discovery-Moat des Marketplace angreifbar, wenn Produktsuche in externe KI-Assistenten (ChatGPT, Gemini) abwandert (siehe Sektion 4 &amp; 10). Drittens lädt die schiere Marktmacht permanent Regulierer ein (FTC, EU-DMA). Der Burggraben ist breit und mehrschichtig, aber nicht statisch — er muss aktiv verteidigt werden. Score 9/10.</p>
+      <div class="source">Quellen: TIKR Q1-2026-Analyse (05.05.2026); Amazon Q1 2026 Earnings Release; Forbes „Show Me The Growth" (02.01.2026); Retail Technology Innovation Hub (06.01.2026)</div>
     </div>
   </div>
 
-  <!-- S3 -->
+  <!-- SEKTION 3 -->
   <div class="section" id="s3">
-    <div class="section-header">
-      <div class="section-number">3</div>
-      <div class="section-title">Letzte 4 Quartale</div>
-      <div class="section-score">Beat-Ratio: 4/4</div>
-    </div>
+    <div class="section-header"><div class="section-number">3</div><div class="section-title">Letzte 4 Quartale</div><div class="section-score">Beat-Ratio: Umsatz 4/4 · EPS 3/4</div></div>
     <div class="section-body">
-      <p>Vier aufeinanderfolgende Beats mit beschleunigender AWS-Wachstumsrate. Nächste Earnings: <strong>Ende Juli 2026 (Q2 2026)</strong>.</p>
-
+      <p>Die operative Entwicklung ist das stärkste Argument der Bullen: vier Quartale in Folge mit Umsatz-Beats, eine klare AWS-Reakzeleration (von +17,5% auf +28%) und im Q1 2026 die <strong>höchste operative Marge der Firmengeschichte (13,1%)</strong>. Wichtig für die Earnings-Qualität: Q3 und Q4 2025 enthielten Sonderbelastungen (FTC-Settlement, Severance, Impairments), Q1 2026 hingegen einen <strong>nicht-operativen Sondergewinn</strong> von $16,8 Mrd. aus dem Anthropic-Stake — die EPS von $2,78 überzeichnen die Kerngewinnkraft deutlich (operatives Ergebnis lag „nur" $2,4 Mrd. über der eigenen Guidance-Obergrenze).</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Quartal</th><th>Revenue</th><th>YoY</th><th>EPS</th><th>Konsens-EPS</th><th>AWS Growth</th><th>Op-Marge</th><th>Result</th></tr></thead>
+          <thead><tr><th>Kennzahl</th><th>Q2 2025</th><th>Q3 2025</th><th>Q4 2025</th><th>Q1 2026</th></tr></thead>
           <tbody>
-            <tr><td><strong>Q2 2025</strong></td><td>$167.7B</td><td class="neutral">+13%</td><td>$1.68</td><td>$1.32</td><td>+17%</td><td>11.5%</td><td class="beat">BEAT</td></tr>
-            <tr><td><strong>Q3 2025</strong></td><td>$180.2B</td><td class="neutral">+13%</td><td>$1.95</td><td>$1.57</td><td>+20%</td><td>11.0%</td><td class="beat">BEAT</td></tr>
-            <tr><td><strong>Q4 2025</strong></td><td>$187.8B</td><td class="beat">+10%*</td><td>$1.86</td><td>$1.49</td><td>+24%</td><td>11.3%</td><td class="beat">BEAT</td></tr>
-            <tr><td><strong>Q1 2026</strong></td><td>$181.5B</td><td class="beat">+17%</td><td>$2.78</td><td>$1.64</td><td>+28%</td><td>13.1%</td><td class="beat">BEAT</td></tr>
+            <tr><td>Net Sales</td><td>$167,7 Mrd. <span class="beat">+13%</span></td><td>$180,2 Mrd. <span class="beat">+13%</span></td><td>$213,4 Mrd. <span class="beat">+14%</span></td><td>$181,5 Mrd. <span class="beat">+17%</span></td></tr>
+            <tr><td>AWS</td><td>$30,9 Mrd. (+17,5%)</td><td>$33,0 Mrd. (+20%)</td><td>$35,6 Mrd. (+24%)</td><td>$37,6 Mrd. <span class="beat">(+28%)</span></td></tr>
+            <tr><td>Advertising</td><td>$15,7 Mrd. (+23%)</td><td>≈$17,7 Mrd.* (+~24%)</td><td>$21,3 Mrd. (+23%)</td><td>$17,2 Mrd. (+24%)</td></tr>
+            <tr><td>Operating Income</td><td>$19,2 Mrd.</td><td>$17,4 Mrd. <span class="neutral">(adj. $21,7)</span></td><td>$25,0 Mrd. <span class="neutral">(adj. $27,4)</span></td><td>$23,9 Mrd. <span class="beat">(13,1% Marge)</span></td></tr>
+            <tr><td>EPS (diluted)</td><td>$1,68 <span class="beat">Beat</span></td><td>$1,95 <span class="beat">Beat</span></td><td>$1,95 <span class="miss">EPS knapp Miss</span></td><td>$2,78 <span class="beat">Beat†</span></td></tr>
+            <tr><td>Kursreaktion (Earnings-Tag)</td><td><span class="miss">−8,3%</span> (Q3-Guidance)</td><td>positiv</td><td><span class="miss">−5,5%</span> ($200B-Capex-Schock)</td><td><span class="neutral">−0,8% bis −3%</span> (Capex/FCF)</td></tr>
           </tbody>
         </table>
       </div>
-      <p style="font-size:12px; color:var(--text-muted);">* Q4 2025 inkl. Holiday-Saisonalität. Q1 2026 EPS inkl. $16.8B Pre-Tax-Gain aus Anthropic-Markup (organisch ~$1.45). AWS-Wachstum hat sich seit 6 Quartalen kontinuierlich beschleunigt.</p>
-
-      <h3>Q1 2026 Highlights</h3>
-      <p>Jassy: "<em>It's very unusual for a business to grow this fast on a base this large</em>" – AWS bei $150 Mrd. ARR und +28% YoY ist die schnellste Wachstumsrate seit 15 Quartalen. <strong>AWS AI Revenue Run-Rate >$15 Mrd.</strong>, Trainium-Chip-Business >$20 Mrd. Run-Rate (Triple-Digit-Wachstum). Op-Marge erreichte mit 13.1% das höchste Niveau in der Konzerngeschichte. Q2 2026 Guidance: $194–199 Mrd. (+16–19%), Op-Income $20–24 Mrd. Backlog AWS: $364 Mrd. (excl. dem $100B Anthropic-Deal).</p>
-
-      <div class="source">Quellen: Amazon Q1/Q2/Q3/Q4 8-K Filings (sec.gov); Q1 2026 Earnings Call Transcript (29.04.2026); CNBC, gurufocus.com.</div>
+      <p>Bemerkenswert: Trotz durchweg starker Zahlen reagierte der Kurs mehrfach negativ — der Markt befindet sich in einem „Capex-Panik"-Regime und bestraft die $200-Mrd.-AI-Investitionen und den eingebrochenen Free Cashflow stärker, als er die Margenrekorde belohnt. <span style="color:var(--text-dim);">*Q3-2025-Ad-Umsatz aus TTM-Angaben abgeleitet (≈, nicht von Amazon einzeln ausgewiesen). †Q1-EPS durch $16,8 Mrd. Anthropic-Buchgewinn überzeichnet.</span> Nächster Stichtag: <strong>Q2-2026-Earnings ~30.07.2026</strong>.</p>
+      <div class="source">Quellen: Amazon 8-K Q2/Q3/Q4 2025 &amp; Q1 2026 (SEC, sec.gov); CNBC (31.07.2025, 30.10.2025, 05.02.2026, 29.04.2026); TIKR (05.05.2026); IG (21.10.2025)</div>
     </div>
   </div>
 
-  <!-- S4 -->
+  <!-- SEKTION 4 -->
   <div class="section" id="s4">
-    <div class="section-header">
-      <div class="section-number">4</div>
-      <div class="section-title">Wachstumseinordnung</div>
-      <div class="section-score">Score: 8/10</div>
-    </div>
+    <div class="section-header"><div class="section-number">4</div><div class="section-title">Wachstumseinordnung</div><div class="section-score">Score: 8/10</div></div>
     <div class="section-body">
-      <h3>Operative Beschleunigung trotz Größe</h3>
-      <p>FY2025 Konzernumsatz: <strong>$716.9 Mrd. (+12% YoY)</strong>, Net Income $77.7 Mrd. (+31% YoY). Q1 2026 zeigt eine Beschleunigung auf +17% (FX-bereinigt +15%). Reifegrad: <strong>"Growth-at-Scale"</strong> – Retail wächst im niedrigen zweistelligen Bereich (reife Marktdurchdringung), AWS im hohen 20er-Bereich (Hyper-Growth), Advertising +24% (zweite Hyper-Growth-Welle).</p>
-
-      <h3>Segment-Wachstum (Q1 2026 YoY)</h3>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Segment</th><th>Revenue Q1'26</th><th>YoY</th><th>Op-Marge</th><th>Treiber</th></tr></thead>
-          <tbody>
-            <tr><td>North America</td><td>$104.1B</td><td class="neutral">+12%</td><td>8.0%</td><td>Prime, Unit-Growth +15%, Ads</td></tr>
-            <tr><td>International</td><td>$39.8B</td><td class="beat">+19% (+11% FX-bereinigt)</td><td>~5%</td><td>EU/Indien-Expansion</td></tr>
-            <tr><td><strong>AWS</strong></td><td><strong>$37.6B</strong></td><td class="beat"><strong>+28%</strong></td><td><strong>37.9%</strong></td><td><strong>AI Infrastructure, Bedrock, Trainium</strong></td></tr>
-            <tr><td>Advertising (intern)</td><td>$17.2B</td><td class="beat">+24%</td><td>—</td><td>Sponsored Products, Prime Video Ads, Streaming</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h3>Geografische Verteilung</h3>
+      <p>Der Konzernumsatz wuchs 2025 um 12% auf $716,9 Mrd. und beschleunigte im Q1 2026 auf +17% (FX-getrieben; +15% ex-FX). Die Analysten-Konsensschätzungen liegen bei rund <strong>$808 Mrd. für 2026</strong> und <strong>$902 Mrd. für 2027</strong> — also einer 2-Jahres-CAGR von ~12%. Das ist solides „Growth-at-Scale", kein Hyper-Growth mehr — aber die Qualität des Wachstums verbessert sich, weil die margenstarken Segmente (AWS, Ads) überproportional zulegen.</p>
+      <h3>Segment-/Geografie-Mix (Q1 2026)</h3>
       <div class="geo-grid">
-        <div class="geo-card"><div class="geo-region">USA / Nordamerika</div><div class="geo-pct">~57%</div><div class="geo-note">Kernmarkt, +12% YoY</div></div>
-        <div class="geo-card"><div class="geo-region">International (EU)</div><div class="geo-pct">~16%</div><div class="geo-note">DE/UK/FR dominant</div></div>
-        <div class="geo-card"><div class="geo-region">International (APAC)</div><div class="geo-pct">~6%</div><div class="geo-note">JP/IN/AU – hohes Wachstum Indien</div></div>
-        <div class="geo-card"><div class="geo-region">AWS (global)</div><div class="geo-pct">~21%</div><div class="geo-note">USA dominant, EU/APAC steigend</div></div>
+        <div class="geo-card"><div class="geo-region">North America</div><div class="geo-pct">57%</div><div class="geo-note">$104,1 Mrd. · +12% YoY</div></div>
+        <div class="geo-card"><div class="geo-region">International</div><div class="geo-pct">22%</div><div class="geo-note">$39,8 Mrd. · +19% (FX) / +11% ex-FX</div></div>
+        <div class="geo-card"><div class="geo-region">AWS</div><div class="geo-pct">21%</div><div class="geo-note">$37,6 Mrd. · +28% — Wachstumstreiber</div></div>
       </div>
-
-      <h3>Profitabilität wächst dramatisch</h3>
-      <p>Op-Income Q1 2026: $23.9 Mrd. (+30% YoY). Op-Marge expandierte von 11.5% (Q1'25) auf 13.1% (Q1'26) – +160 bps. Net Income +77% YoY ($30.3B vs. $17.1B) – allerdings stark verzerrt durch $16.8 Mrd. Anthropic-Markup. Organisch (excl. Anthropic-Gains) wuchs Net Income +27%.</p>
-
-      <div class="source">Quellen: Amazon Q1 2026 Earnings Release (29.04.2026); stockanalysis.com FY2025 Daten; eigene Berechnungen.</div>
+      <h3>These 2: Realistische Wachstumsfelder &amp; 3-Jahres-Rate für Amazon</h3>
+      <p>Die zweite Kernfrage — welche realistische aggregierte Wachstumsrate für die nächsten 3 Jahre resultiert. Aus dem Segment-Bottom-up (gewichtet nach Umsatzanteil) ergibt sich ein <strong>Basisszenario von ~12–14% Umsatz-CAGR (2026–2028)</strong>:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Wachstumsfeld</th><th>Reife</th><th>Realist. 3-J.-Wachstum p.a.</th><th>Einordnung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>AWS (Cloud + AI)</strong></td><td>Re-Acceleration</td><td>~20–25%</td><td>Backlog $364 Mrd.; Oppenheimer: ~$3 Mrd. Umsatz je zusätzlichem GW Kapazität</td></tr>
+            <tr><td><strong>Advertising</strong></td><td>Skalierung</td><td>~18–22%</td><td>Hochmargig; Prime-Video/Twitch-Inventar zusätzlich</td></tr>
+            <tr><td>North America Retail</td><td>Mature/Growth</td><td>~9–12%</td><td>Prime, Same-Day, Marketplace, Quick-Commerce</td></tr>
+            <tr><td>International</td><td>Growth</td><td>~11–15%</td><td>Indien (Amazon Now in 300 Städte, $13 Mrd. AWS-Investment)</td></tr>
+            <tr><td>Neue Optionen (Leo, Healthcare, Robotik, Zoox)</td><td>Early</td><td>n/a (Optionswert)</td><td>Vor 2028 kaum umsatzrelevant; Leo-Markt $20–40 Mrd. bis 2030</td></tr>
+            <tr style="background:rgba(255,105,0,0.08);"><td><strong>Konzern aggregiert</strong></td><td>—</td><td><strong>~12–14% (Basis)</strong></td><td>Bull ~15–16% / Bear ~9–10%; Operating Income wächst schneller (high-teens bis ~20%) durch Mix &amp; Margenhebel</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Kritisch gegengelesen: Das Wachstum ist „echt" (organisch, kein Accounting/M&amp;A-Inflation), aber der entscheidende Treiber bleibt AWS. Verlangsamt sich AWS dauerhaft Richtung 15% (während Azure/GCP 30–50% halten), kippt die Konzern-CAGR ins untere Band und die Margenhebel-Story verzögert sich. Die Mischungsverschiebung ist der wahre Hebel: Net Margin soll von ~10,8% (2025) Richtung ~15% (2030) steigen, wenn der Capex-Zyklus in Ertragskraft umschlägt. Score 8/10.</p>
+      <div class="source">Quellen: Amazon Q4-2025-/Q1-2026-Releases; ad-hoc-news Analyst-Konsens (20.04.2026); TIKR „Where the Stock Could Go by 2030" (17.04.2026); Forbes/Oppenheimer (02.01.2026); Simply Wall St (25.06.2026)</div>
     </div>
   </div>
 
-  <!-- S5 -->
+  <!-- SEKTION 5 -->
   <div class="section" id="s5">
-    <div class="section-header">
-      <div class="section-number">5</div>
-      <div class="section-title">Bewertung & Multiples</div>
-      <div class="section-score">Score: 7/10</div>
-    </div>
+    <div class="section-header"><div class="section-number">5</div><div class="section-title">Bewertung &amp; Multiples</div><div class="section-score">Score: 6/10</div></div>
     <div class="section-body">
-      <h3>Historisch günstig, peer-mäßig teurer</h3>
-      <p><strong>P/E TTM 32.1x</strong> ist deutlich unter dem 3-Jahres-Schnitt (45x) und 5-Jahres-Schnitt (47x) – Amazon hat historisch immer hohe P/E-Multiples gehandelt (Median ~50x). Fwd P/E ~26x reflektiert die Profitabilitätsexpansion. Allerdings: Im Peer-Vergleich (Mega-Cap-Tech) ist Amazon nicht mehr besonders günstig.</p>
-
+      <p>Amazon ist weder klar billig noch klar teuer — und die Headline-Kennzahlen sind durch den Anthropic-Buchgewinn verzerrt. Das ausgewiesene Headline-KGV (~28x) nutzt eine durch $16,8 Mrd. Sondergewinn aufgeblähte TTM-EPS; das <strong>normalisierte KGV liegt bei ~34x</strong> (Morningstar). Auf Cashflow-Basis wirkt die Aktie günstiger: ~19x Operating Cashflow.</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Metrik</th><th>AMZN (heute)</th><th>5J-Ø</th><th>Einordnung</th></tr></thead>
+          <thead><tr><th>Multiple</th><th>AMZN aktuell</th><th>5-J.-Schnitt</th><th>Einordnung</th></tr></thead>
           <tbody>
-            <tr><td>P/E TTM</td><td>32.1x</td><td>47.8x</td><td class="beat">Historisch günstig</td></tr>
-            <tr><td>Forward P/E (FY26)</td><td>~26x</td><td>—</td><td class="neutral">Fair für +17% Wachstum</td></tr>
-            <tr><td>P/Sales TTM</td><td>~3.9x</td><td>~3.5x</td><td class="neutral">Leicht über Schnitt</td></tr>
-            <tr><td>EV/EBITDA (Fwd)</td><td>~14–15x</td><td>~16x</td><td class="beat">Attraktiv</td></tr>
-            <tr><td>PEG (Fwd)</td><td>~1.4x</td><td>—</td><td class="neutral">Akzeptabel</td></tr>
-            <tr><td>FCF Yield TTM</td><td>~0.04%</td><td>~1–2%</td><td class="miss">Capex-Druck</td></tr>
-            <tr><td>P/B</td><td>~7.5x</td><td>~10x</td><td class="beat">Günstig</td></tr>
+            <tr><td>P/E (Headline TTM)</td><td>~28x*</td><td>~55x</td><td>*durch Anthropic-Gewinn verbilligt</td></tr>
+            <tr><td>P/E (normalisiert)</td><td>~34x</td><td>—</td><td>aussagekräftiger für Kerngeschäft</td></tr>
+            <tr><td>Forward P/E (NTM)</td><td>~28x</td><td>—</td><td>deutlich unter 10-J.-Schnitt (~97x)</td></tr>
+            <tr><td>PEG</td><td>~1,35</td><td>—</td><td>fair bei ~12–14% Wachstum</td></tr>
+            <tr><td>EV/EBITDA</td><td>~16x</td><td>—</td><td>moderat für Cloud-/Ad-Mix</td></tr>
+            <tr><td>P/Sales</td><td>~3,5x</td><td>—</td><td>günstig vs. reine Cloud-/Ad-Peers</td></tr>
+            <tr><td>P/Operating-CF</td><td>~19x</td><td>—</td><td>attraktiver als KGV suggeriert</td></tr>
           </tbody>
         </table>
       </div>
-
-      <h3>Peer-Vergleich (Forward P/E)</h3>
-      <p>AMZN Fwd P/E ~26x vs. MSFT ~32x, GOOGL ~22x, META ~25x, AAPL ~30x. AMZN ist <strong>fair gepreist</strong> für seine Profitabilitäts-Story, aber GOOGL bietet ein besseres Risk/Reward (Fwd P/E 22x bei vergleichbarem Wachstum). Wichtig: AMZN handelt mit erheblichem <strong>Conglomerate-Diskount</strong> – wenn AWS isoliert bewertet würde (vergleichbar zu MSFT Azure-Bewertung), wäre es allein $1.5–2T wert.</p>
-
-      <h3>Sum-of-Parts-Argument</h3>
-      <p>AWS bei 8x Revenue (vs. MSFT Azure ~12x) = ~$1.2T. Advertising bei 8x Revenue (vs. META 6x) = $560 Mrd. Retail North America bei 1.5x Revenue = $625 Mrd. International Retail bei 1x Revenue = $160 Mrd. <strong>Sum-of-Parts: ~$2.55T (Implied)</strong> vs. aktuelle MCap $2.85T. Markt preist bereits vollständige AWS-Premium-Bewertung ein.</p>
-
-      <div class="source">Quellen: fullratio.com AMZN P/E History (08.05.2026); public.com (01.05.2026); macrotrends.net; eigene SOTP-Berechnung.</div>
+      <p>Einordnung: Auf NTM-Basis (~28x Fwd P/E, PEG ~1,35) ist die Bewertung für einen Wide-Moat-Compounder mit beschleunigender Cloud und einem high-teens Operating-Income-Wachstum <strong>fair, nicht euphorisch</strong> — und liegt klar unter dem eigenen historischen Schnitt. Der Haken: Die Bewertung „funktioniert" nur, wenn der $200-Mrd.-Capex tatsächlich in Margen umschlägt. Das DCF-Argument vieler Häuser (Sum-of-Parts-Discount, AWS als unterbewerteter Kern) ist plausibel, aber nicht risikofrei. Analysten-Konsens-Kursziel: ~$281–312. Score 6/10 (fair bewertet, Headline-Optik mit Vorsicht zu genießen).</p>
+      <div class="source">Quellen: stockanalysis.com, CNBC, Morningstar, financecharts, fullratio (alle 26.–30.06.2026); ad-hoc-news (20.04.2026)</div>
     </div>
   </div>
 
-  <!-- S6 -->
+  <!-- SEKTION 6 -->
   <div class="section" id="s6">
-    <div class="section-header">
-      <div class="section-number">6</div>
-      <div class="section-title">Cashflow, Margen & Kapitalqualität</div>
-      <div class="section-score">Score: 6/10</div>
-    </div>
+    <div class="section-header"><div class="section-number">6</div><div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div><div class="section-score">Score: 6/10</div></div>
     <div class="section-body">
-      <h3>Operativ stark – FCF crash durch Capex-Eskalation</h3>
-      <p>Operating Cashflow TTM Q1 2026: <strong>$148.5 Mrd. (+30% YoY)</strong> – beeindruckend. ABER: FCF TTM auf <strong>$1.2 Mrd. eingebrochen</strong> (vs. ~$50 Mrd. vor 2 Jahren), getrieben durch $59.3 Mrd. höhere Property/Equipment-Investitionen YoY. <strong>Capex Q1 2026: $43.2 Mrd. allein</strong>. Bei aktuellem Run-Rate: FY2026 Capex könnte $165–180 Mrd. erreichen (~25% des Umsatzes).</p>
-
+      <p>Hier liegt die größte aktuelle Schwachstelle. Der <strong>operative Cashflow ist exzellent</strong> ($148,5 Mrd. TTM, +30% YoY) — aber der <strong>Free Cashflow ist auf ~$1,2 Mrd. TTM eingebrochen</strong> (von $38,2 Mrd. ein Jahr zuvor), weil die Sachinvestitionen für AI-Rechenzentren explodiert sind ($43,2 Mrd. Cash-Capex allein im Q1; ~$200 Mrd. geplant für 2026). BofA erwartet negativen FCF bis ins Jahr 2027 hinein.</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Metrik</th><th>FY2024</th><th>FY2025</th><th>TTM Q1'26</th><th>Trend</th></tr></thead>
+          <thead><tr><th>Kennzahl</th><th>Wert</th><th>Kommentar</th></tr></thead>
           <tbody>
-            <tr><td>Operating Cashflow</td><td>$115B</td><td>$140B</td><td>$148.5B</td><td class="beat">↑</td></tr>
-            <tr><td>Capex (Property & Equipment)</td><td>$83B</td><td>$130B+</td><td>$147B+</td><td class="miss">↑↑</td></tr>
-            <tr><td>FCF</td><td>$32B</td><td>$10B</td><td class="miss">$1.2B</td><td class="miss">↓↓</td></tr>
-            <tr><td>Operating Margin</td><td>11%</td><td>11%</td><td>13.1%</td><td class="beat">↑</td></tr>
-            <tr><td>AWS Op-Margin</td><td>37%</td><td>36%</td><td>37.9%</td><td class="beat">→/↑</td></tr>
-            <tr><td>Net Income</td><td>$59B</td><td>$77.7B</td><td>~$95B*</td><td class="beat">↑↑</td></tr>
-            <tr><td>ROE</td><td>25%</td><td>~28%</td><td>~30%</td><td class="beat">↑</td></tr>
+            <tr><td>Operating Cashflow (TTM)</td><td>$148,5 Mrd. (+30%)</td><td>sehr stark</td></tr>
+            <tr><td>Free Cashflow (TTM)</td><td><span class="miss">~$1,2 Mrd.</span></td><td>durch AI-Capex temporär ausgehöhlt</td></tr>
+            <tr><td>Capex 2026 (Plan)</td><td>~$200 Mrd.</td><td>+~60% YoY; v.a. AWS-AI, Trainium, Robotik, Leo</td></tr>
+            <tr><td>Gross / Net Margin</td><td>50,6% / 12,3%</td><td>Net Margin durch Anthropic-Gewinn überzeichnet</td></tr>
+            <tr><td>ROE / ROIC</td><td>24,3% / ~13,5%</td><td>solide Kapitalqualität</td></tr>
+            <tr><td>FCF-Konversion</td><td><span class="miss">sehr niedrig</span></td><td>kehrt erst bei Capex-Normalisierung (2027–28) zurück</td></tr>
+            <tr><td>Buybacks / Dividende</td><td>keine Dividende</td><td>Kapital fließt komplett in Wachstum/Capex</td></tr>
           </tbody>
         </table>
       </div>
-      <p style="font-size:12px; color:var(--text-muted);">* TTM Net Income inkl. mehrerer Anthropic-Mark-to-Market-Gains ($16.8B in Q1'26 + ~$9.5B in Q3'25).</p>
-
-      <h3>Kapitalrückflüsse & Bilanz</h3>
-      <p>Amazon zahlt <strong>keine Dividende</strong> und hat in den letzten 12 Monaten kaum Buybacks durchgeführt (~$10 Mrd.). Alles fließt in Capex (AI-Infrastruktur). Cash & Marketable Securities: ~$95 Mrd. (zum Quartalsende). Long-Term-Debt: ~$55 Mrd. – relativ gering. Debt/Equity ~0.21. Bilanz ist gesund, aber FCF-Konversion (FCF / Net Income) ist auf historisch niedrigen <strong>~1.3%</strong> gefallen (vs. 54% vor 2 Jahren).</p>
-
-      <div class="source">Quellen: Amazon Q1 2026 8-K (sec.gov); Q4 2025 10-K Filing; Yahoo Finance Key Stats (13.05.2026); eigene Berechnungen.</div>
+      <p>Kritisch: Die Earnings sind aktuell <em>nicht durchgängig „echt"</em> im Cash-Sinne — Net Income wird durch nicht-zahlungswirksame Anthropic-Buchgewinne gehoben, während der reale FCF von Abschreibungen und Capex erdrückt wird. Das ist die Kehrseite der Wachstumswette: Erst wenn der AI-Capex in genutzte, monetisierte Kapazität umschlägt (Jassy: „so schnell wir die AI-Kapazität installieren, wird sie monetisiert"), normalisiert sich der FCF. Bis dahin ist die Kapitalqualität hoch, aber die <strong>Cash-Generierung temporär beeinträchtigt</strong>. Score 6/10.</p>
+      <div class="source">Quellen: Amazon Q1-2026-Release (op. CF/FCF TTM); tickeron (15.05.2026); TIKR (05.05.2026); TradingKey Movers (29.06.2026)</div>
     </div>
   </div>
 
-  <!-- S7 -->
+  <!-- SEKTION 7 -->
   <div class="section" id="s7">
-    <div class="section-header">
-      <div class="section-number">7</div>
-      <div class="section-title">Peer-Vergleich</div>
-      <div class="section-score">Score: 7/10</div>
-    </div>
+    <div class="section-header"><div class="section-number">7</div><div class="section-title">Peer-Vergleich</div><div class="section-score">Score: 8/10</div></div>
     <div class="section-body">
-      <h3>Hyperscaler / Mega-Cap-Tech</h3>
+      <p>Die Peer-Gruppe wurde bewusst je Schlachtfeld gewählt: MSFT/GOOGL (Cloud+AI), SHOP (AI-Commerce), WMT (Retail+Retail-Media), META (Advertising). Amazon ist der einzige Konzern, der auf <em>allen</em> Feldern gleichzeitig spielt.</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Unternehmen</th><th>MCap</th><th>Revenue Growth (TTM)</th><th>Op-Marge</th><th>Fwd P/E</th><th>Cloud-Wachstum</th></tr></thead>
+          <thead><tr><th>Unternehmen</th><th>Market Cap</th><th>Kern-Wachstum (jüngstes Q)</th><th>Fwd P/E</th><th>Relevanz für These</th></tr></thead>
           <tbody>
-            <tr><td><strong>AMZN</strong></td><td>$2.85T</td><td class="neutral">+12%</td><td>13%</td><td>26x</td><td>AWS +28%</td></tr>
-            <tr><td>MSFT</td><td>~$3.8T</td><td class="neutral">+15%</td><td>45%</td><td>~32x</td><td>Azure ~30%</td></tr>
-            <tr><td>GOOGL</td><td>~$4.86T</td><td class="beat">+18%</td><td>36%</td><td>~22x</td><td>GCP +63%</td></tr>
-            <tr><td>WMT (Retail-Peer)</td><td>~$680B</td><td class="miss">+5%</td><td>5%</td><td>~36x</td><td>—</td></tr>
-            <tr><td>SHOP (E-Commerce)</td><td>~$160B</td><td class="beat">+22%</td><td>14%</td><td>~70x</td><td>—</td></tr>
+            <tr><td><strong>Amazon (AMZN)</strong></td><td>~$2,55 Bio.</td><td>Konzern +17% · AWS +28% · Ads +24%</td><td>~28x</td><td>Multi-Front, beste Marge im Retail-Mix</td></tr>
+            <tr><td>Microsoft (MSFT)</td><td>~$3,1 Bio.</td><td>Azure +40%</td><td>~30x+</td><td>AWS' härtester Cloud-/AI-Rivale; wächst schneller</td></tr>
+            <tr><td>Alphabet (GOOGL)</td><td>~$4,4 Bio.</td><td>Google Cloud +48–63%</td><td>~25x</td><td>Cloud + Ads + Gemini/UCP-Agenten — Doppel-Front</td></tr>
+            <tr><td>Shopify (SHOP)</td><td>~$0,15–0,2 Bio.</td><td>Umsatz +34% · GMV +35%</td><td>P/S ~9 (sehr teuer)</td><td>AI-Commerce-„Arms-Dealer" für DTC-Händler</td></tr>
+            <tr><td>Walmart (WMT)</td><td>~$1,0 Bio.</td><td>Umsatz +7% · E-Com +26% · Ads +46–50%</td><td>~35x</td><td>Retail-Media-Story; schließt zu Amazon-Ads auf</td></tr>
+            <tr><td>Meta (META)</td><td>~$1,6 Bio.</td><td>Ad-getrieben; Capex-schwer</td><td>~20x</td><td>reiner Ad-Peer; günstiger bewertet</td></tr>
           </tbody>
         </table>
       </div>
-
-      <h3>Qualitative Unterschiede</h3>
-      <p><strong>AMZN vs MSFT:</strong> MSFT hat höhere Margen (45% vs. 13%) und ist stärker AI-pure-play (Azure + OpenAI + Copilot). AMZN hat dafür breitere Diversifikation und schnelleres AWS-Wachstum (+28% vs. ~30% Azure, aber AMZN-Basis größer). MSFT ist die "Quality-Wahl", AMZN die "Optionalitäts-Wahl".</p>
-      <p><strong>AMZN vs GOOGL:</strong> GOOGL Cloud wächst doppelt so schnell (+63% vs +28%), GOOGL Fwd P/E ist günstiger (22x vs 26x). AMZN hat aber den AWS-Marktanteils-Vorsprung (~30% vs. ~13%) und das Logistik-Asset. <strong>GOOGL hat aktuell das bessere Risk/Reward bei Mega-Cap-AI</strong>, AMZN aber das breitere Geschäft.</p>
-      <p><strong>AMZN vs WMT:</strong> Im US-Retail bleibt Amazon der dominante Wachstumsspieler. WMT hat zwar +5% Wachstum und eine wachsende E-Commerce-Operation, aber Amazons Unit-Growth (+15% in Q1'26) zeigt, dass die Marktanteilskonsolidierung weitergeht.</p>
-
-      <div class="source">Quellen: Yahoo Finance Multi-Ticker Comparison (13.05.2026); macrotrends.net; Synergy Research Cloud Market Share Q1 2026.</div>
+      <p><strong>Qualitativ:</strong> AWS bleibt Cloud-Marktführer (~30% Share vs. Azure ~20%, GCP ~13%), aber der prozentuale Wachstumsvorsprung ist verloren — Azure und GCP wachsen schneller. Amazons Konter sind eigene Chips (Trainium/Graviton, $20 Mrd. Run-Rate, bessere Price-Performance) und das breiteste Service-Ökosystem. Bei Ads ist Amazon hinter Google/Meta die klare Nr. 3 — aber mit dem stärksten Kaufabsichts-Datensatz und Closed-Loop-Attribution, weshalb Walmart Connect (+46%) zwar schnell wächst, aber von einer winzigen Basis. Gegenüber SHOP ist Amazon kein direkter Konkurrent, sondern das gegenteilige Modell (Marketplace-Aggregation vs. DTC-Enablement — siehe Sektion 4/10). Auf Cash-Basis (~19x OCF) ist AMZN günstiger als mehrere Peers. Score 8/10.</p>
+      <div class="source">Quellen: TradingKey „Largest Companies" (03.05.2026); CNBC AWS/Azure/GCP (29.–30.04.2026); Walmart 8-K Q1 FY27 (21.05.2026); Investing.com META (01.05.2026); BigGo/PYMNTS SHOP Q1 2026 (05.05.2026)</div>
     </div>
   </div>
 
-  <!-- S8 -->
+  <!-- SEKTION 8 -->
   <div class="section" id="s8">
-    <div class="section-header">
-      <div class="section-number">8</div>
-      <div class="section-title">Aktuelle News & Events (letzte 3 Monate)</div>
-      <div class="section-note">Quellen ≤ 3 Monate</div>
-    </div>
+    <div class="section-header"><div class="section-number">8</div><div class="section-title">Aktuelle News &amp; Events</div><div class="section-note">Quellen ≤ 3 Monate</div></div>
     <div class="section-body">
-
       <h3>Ebene 1: Unternehmen</h3>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">29.04.2026 – Q1 2026 Blowout-Quarter <span class="badge badge-green">Sehr Positiv</span></div>
-          <div class="event-text">Revenue $181.5 Mrd. (+17% YoY), AWS +28% (schnellste Rate seit 15 Quartalen), Op-Marge 13.1% (höchste je). EPS $2.78 vs. Konsens $1.64. Quelle: SEC 8-K (29.04.2026), CNBC.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">04/2026 – Anthropic-Deal-Erweiterung: +$25B Investment + $100B AWS-Commitment <span class="badge badge-green">Sehr Positiv</span></div>
-          <div class="event-text">Amazon committed bis zu $25 Mrd. zusätzliche Anthropic-Investition (auf $33 Mrd. Gesamt), Anthropic committed >$100 Mrd. AWS-Ausgaben über 10 Jahre, inkl. 5 GW Compute-Kapazität via Trainium. Backlog-Booster. Quelle: Sherwood News (04/2026), The Motley Fool (25.04.2026).</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">04/2026 – OpenAI-Deal: $138B AWS-Commitment + $50B Amazon-Investment <span class="badge badge-green">Sehr Positiv</span></div>
-          <div class="event-text">OpenAI erweiterte ursprünglichen $38B AWS-Deal um zusätzliche $100B über 8 Jahre. Amazon plant $50B OpenAI-Investment. AWS positioniert sich als neutraler AI-Layer für alle Frontier-Modelle. Quelle: CNBC AWS Q1 Coverage (29.04.2026).</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-yellow"></div>
-        <div>
-          <div class="event-label">05/2026 – Amazon Now: 30-Minuten-Delivery in Dutzenden US-Städten <span class="badge badge-yellow">Neutral–Positiv</span></div>
-          <div class="event-text">Massive Logistik-Investition in Ultra-Fast-Delivery, eskaliert Konkurrenzkampf gegen Instacart/DoorDash/Uber Eats. Margen-Auswirkung kurzfristig negativ, langfristig Moat-Stärkung. Quelle: TipRanks (12.05.2026).</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">05.02.2026 – Q4 2025 Beat + Capex-Guide $115–135B für 2025 <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">Q4: Revenue $187.8B (+10% mit Holiday-Saisonalität), AWS +24%, EPS $1.86. FY2025 Capex auf $115–135B angehoben. Stock +4% nach Bell. Quelle: CNBC Q4 2025 (05.02.2026).</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-yellow"></div>
-        <div>
-          <div class="event-label">05/2026 – Alexa for Shopping AI-Assistent gelauncht <span class="badge badge-yellow">Neutral</span></div>
-          <div class="event-text">Personalisierter AI-Shopping-Agent, ähnliches Konzept wie Operator/Anthropic Computer-Use. Agentic Commerce ist Jassys Hauptthema für 2026. Quelle: stockanalysis.com / TipRanks.</div>
-        </div>
-      </div>
-
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">29.06.2026 – Prime Day Rekord <span class="badge badge-yellow">Gemischt</span></div><div class="event-text">Prime-Day-Ausgaben erreichten rekordhohe $26,4 Mrd. — aber der durchschnittliche Bestellwert ($47,66) und die Pro-Haushalt-Ausgaben fielen: starkes Volumen, vorsichtiger Konsument. Quelle: Benzinga/TipRanks, 29.06.2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">26.06.2026 – AWS erhöht AI-GPU-Block-Preise <span class="badge badge-green">Positiv</span></div><div class="event-text">AWS hob die Preise für AI-GPU-Kapazität erneut an → Pricing-Power-Signal, löste Analysten-Buy-Rating aus. Quelle: TipRanks, 26.06.2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">29.04.2026 – Q1-2026-Earnings-Beat <span class="badge badge-green">Positiv</span></div><div class="event-text">$181,5 Mrd. Umsatz (+17%), AWS +28% (schnellstes Wachstum seit 15 Quartalen), Rekord-Marge 13,1%. EPS durch $16,8 Mrd. Anthropic-Gewinn überzeichnet. Quelle: Amazon IR, 29.04.2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">13.04.2026 – Globalstar-Übernahme ($11,57 Mrd.) <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Akquisition für Direct-to-Device-Ambitionen von Amazon Leo (Satelliten-Spektrum/Infrastruktur). Abschluss 2027 erwartet. Quelle: Simply Wall St, 25.06.2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">13.05.2026 – „Alexa for Shopping" (Rufus + Alexa+) <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Vereinheitlichung des Rufus-Shopping-Bots (300 Mio. Nutzer) mit Alexa+; defensive Antwort auf externe KI-Shopping-Agenten. Quelle: GeekWire/CNBC, 13.05.2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">Jan. 2026 – ~16.000 Corporate-Entlassungen <span class="badge badge-red">Negativ</span></div><div class="event-text">Stellenabbau „zur Reduzierung von Bürokratie" (nach zuvor ~14.000) — Effizienzdruck, aber auch Signal für KI-bedingte Personalumschichtung. Quelle: Variety, 05.02.2026</div></div></div>
       <h3>Ebene 2: Branche</h3>
-      <div class="event-item">
-        <div class="event-dot dot-yellow"></div>
-        <div>
-          <div class="event-label">Q1 2026 – AWS verliert relative Cloud-Marktanteile <span class="badge badge-yellow">Risiko</span></div>
-          <div class="event-text">AWS +28% vs. Google Cloud +63% vs. Azure ~30%. Während alle wachsen, holt Google Cloud schneller auf. AWS-Marktanteil 30% (Q3'25) bleibt führend, aber strukturell unter Druck.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-green"></div>
-        <div>
-          <div class="event-label">Q1 2026 – AI-Capex-Race favorisiert Hyperscaler <span class="badge badge-green">Positiv</span></div>
-          <div class="event-text">Total Big-Tech AI-Capex 2026 ~$700B – beschleunigte Demand für AWS/Azure/GCP. Trainium gewinnt als NVIDIA-Alternative. AMZN profitiert disproportional.</div>
-        </div>
-      </div>
-
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Agentic Commerce: ACP vs. UCP <span class="badge badge-yellow">Neutral/Risiko</span></div><div class="event-text">OpenAIs ACP (mit Stripe) und Googles UCP (Walmart, Target, Shopify, Etsy) etablieren KI-Shopping-Standards. Amazon bleibt bewusst außen vor und baut proprietär (Rufus/Alexa, Buy for Me). Quelle: Opascope, 16.04.2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">Shopify Q1 2026: GMV $101 Mrd., KI-Traffic +8x <span class="badge badge-red">Wettbewerb</span></div><div class="event-text">SHOP-Umsatz +34%, AI-getriebene Orders +13x; positioniert sich als Commerce-Layer für Agenten. Strukturelle DTC-Alternative zum Marketplace. Quelle: PYMNTS, 05.05.2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Cloud-Rennen: Azure +40%, GCP +48–63% <span class="badge badge-yellow">Wettbewerb</span></div><div class="event-text">AWS (+28%) bleibt Marktführer, wächst aber prozentual langsamer als beide Rivalen. Quelle: CNBC, 29.04.2026</div></div></div>
       <h3>Ebene 3: Makro</h3>
-      <div class="event-item">
-        <div class="event-dot dot-yellow"></div>
-        <div>
-          <div class="event-label">05/2026 – US-Konsument-Stärke gemischt <span class="badge badge-yellow">Neutral</span></div>
-          <div class="event-text">Inflation hartnäckig, aber Unit-Growth +15% bei AMZN zeigt anhaltende E-Commerce-Penetration. Retail-Mix-Shift weg von stationärem Handel hält an.</div>
-        </div>
-      </div>
-      <div class="event-item">
-        <div class="event-dot dot-yellow"></div>
-        <div>
-          <div class="event-label">05/2026 – China-Tariff-Risiko <span class="badge badge-yellow">Risiko</span></div>
-          <div class="event-text">Mögliche Anhebung der China-Tariffs könnte Marketplace-Seller-Margen drücken und Inflation für US-Konsumenten erhöhen.</div>
-        </div>
-      </div>
-
-      <div class="source">Quellen: Amazon Q1 2026 Earnings (29.04.2026); Sherwood News (04/2026); Motley Fool (25.04.2026); CNBC AWS Coverage (29.04.2026); digitalcommerce360.com (30.04.2026); TipRanks (05/2026).</div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">Trump-Zölle &amp; Handelspolitik <span class="badge badge-red">Negativ</span></div><div class="event-text">Zoll-Overhang belastet Retail-Margen; >$20 Mrd. Zoll-Rückerstattungen in Bearbeitung; FBA-Treibstoffzuschlag (3,5%) seit April 2026. Drohung 100% Zoll auf EU-Güter. Quelle: Fortune, 06.01.2026; TipRanks, 26.06.2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">EU-DMA: AWS als „Gatekeeper" <span class="badge badge-red">Negativ</span></div><div class="event-text">Vorläufige DMA-Designation für AWS/Cloud → Auflagen zu Interoperabilität/Daten; Strafen bis 10% des globalen Umsatzes möglich. Quelle: TradingKey, 29.06.2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">„Capex-Panik"-Regime &amp; Zinsen <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Markt bestraft Hyperscaler-Capex (>$700 Mrd. Big-Tech-2026); Fed-Ausblick zuletzt freundlicher. Quelle: levelheadedinvesting, 18.02.2026</div></div></div>
+      <p style="font-size:12px;color:var(--text-dim);margin-top:12px;">Hinweis: Das Bullish/Bearish-Narrativ wird nicht hier, sondern in Sektion 12 (Fazit) mit voller Kenntnis aus Risiken &amp; Technik ausgearbeitet.</p>
+      <div class="source">Quellen: siehe Inline-Angaben; CNN/Robinhood/CNBC Markets (26.–29.06.2026)</div>
     </div>
   </div>
 
-  <!-- S9 -->
+  <!-- SEKTION 9 -->
   <div class="section" id="s9">
-    <div class="section-header">
-      <div class="section-number">9</div>
-      <div class="section-title">Technische Analyse</div>
-      <div class="section-score">Score: 7/10</div>
-    </div>
+    <div class="section-header"><div class="section-number">9</div><div class="section-title">Technische Analyse</div><div class="section-score">Score: 5/10</div></div>
     <div class="section-body">
-      <h3>Solider Uptrend, nahe ATH</h3>
-      <p>AMZN hat seit dem April-2025-Tief (~$160) auf $272 zugelegt (+70%), nach dem Q1 2026 Print am 29.04.2026 sprang die Aktie ~4% intraday. Kurs notiert nahe 52W-High (~$285), über allen wichtigen MAs. Aufwärtstrend intakt, aber nicht überkauft – Konsolidierungspotenzial vorhanden.</p>
-
-      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));">
-        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value">$272.68</div></div>
-        <div class="kpi-card"><div class="kpi-label">SMA20</div><div class="kpi-value">~$256</div></div>
-        <div class="kpi-card"><div class="kpi-label">SMA50</div><div class="kpi-value">~$235</div></div>
-        <div class="kpi-card"><div class="kpi-label">SMA200</div><div class="kpi-value">~$210</div></div>
-        <div class="kpi-card"><div class="kpi-label">RSI(14)</div><div class="kpi-value neutral">~62</div></div>
-        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value">$285</div></div>
-        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value green">+ positiv</div></div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value">$240</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value red">~$250</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value red">~$256</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value green">~$233</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value">~38</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value">$278,56</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value red">negativ</div></div>
       </div>
-
-      <h3>Levels & Setup</h3>
-      <p>Wichtige Support-Levels: <strong>$255 (SMA20), $235 (SMA50), $210 (SMA200)</strong>. Resistance bei $285 (52W-High). Volumen-Profil gesund auf Rallying-Days. RSI im neutralen Bereich (~62) – Raum nach oben. Konsens-Analyst-Zielkurs $306 (TipRanks, 41 Analysten) = ~12% Upside vom aktuellen Kurs.</p>
-
-      <div class="source">Quellen: stockanalysis.com (Anfang Mai 2026); Investing.com Technical; CNN Markets (13.05.2026).</div>
+      <p><strong>Trend:</strong> Kurzfristig angeschlagen, langfristig intakt. Der Kurs notiert <em>unter</em> SMA20/SMA50 (~$250/$256 → bearish), hält sich aber knapp <em>über</em> der 200-Tage-Linie (~$233 → das langfristige Aufwärtsgerüst ist nicht gebrochen). Nach dem Allzeithoch-Schlusskurs von $274,99 (06.05.2026) korrigierte die Aktie rund 12–15%, fand bei ~$233 Halt und sprang zuletzt auf Prime-Day-Rekord und AWS-Preiserhöhung wieder an.</p>
+      <p><strong>Momentum:</strong> RSI(14) bei ~38 — annähernd überverkauft, aber ohne frisches Kaufmomentum; MACD negativ. Die meisten Indikatoren stehen daher auf „Sell/Neutral", einzig die 200-Tage-Linie liefert ein Buy-Signal. Widerstand: ~$253 (SMA50-Zone) und das ATH-Cluster ~$275–279. Unterstützung: ~$233 (SMA200) und das 52W-Tief $196.</p>
+      <p>Fazit Technik: Konsolidierung in der Mitte der weiten 52W-Range ($196–278,56). Für langfristige Anleger eher eine ruhige Akkumulationszone als ein Kaufsignal; für kurzfristige Trader Timing-Risiko, solange Kurs &lt; SMA50 und MACD &lt; 0. Score 5/10 (neutral-schwach, aber langfristiger Support hält).</p>
+      <div class="source">Quellen: Financhill, TipRanks, Investing.com, CNN Markets (alle 25.–30.06.2026); Macrotrends Kurs-Historie</div>
     </div>
   </div>
 
-  <!-- S10 -->
+  <!-- SEKTION 10 -->
   <div class="section" id="s10">
-    <div class="section-header">
-      <div class="section-number">10</div>
-      <div class="section-title">Risiken & Chancen</div>
-      <div class="section-score">Score: 6/10</div>
-    </div>
+    <div class="section-header"><div class="section-number">10</div><div class="section-title">Risiken &amp; Chancen</div><div class="section-score">Score: 6/10 (invertiert)</div></div>
     <div class="section-body">
-      <h3>Strukturelle & zyklische Risiken</h3>
-
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">💰 FCF-Crash durch Capex-Explosion</div>
-          <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div>
-        </div>
-        <div class="event-text">FCF TTM auf $1.2B eingebrochen (von $32B FY2024). Capex bei ~$165–180B/Jahr. Falls AI-Demand zyklisch nachlässt oder Trainium-ROI enttäuscht, droht massive Underutilization. FCF-Yield ~0% ist mit hoher Bewertung schwer zu rechtfertigen. Wahrscheinlichkeit Capex-Cut-Szenario: ~20%.</div>
-      </div>
-
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">⚖️ FTC-Antitrust-Klage</div>
-          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
-        </div>
-        <div class="event-text">FTC-Klage seit September 2023, verhandelt aktuell. Vorwurf: Marketplace-Monopolisierung. Potenzielle Remedies könnten Logistik-Service (FBA) von Marketplace trennen. Entscheidung erwartet 2026/2027. Wahrscheinlichkeit struktureller Remedies: ~15%.</div>
-      </div>
-
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">📉 AWS-Marktanteils-Druck</div>
-          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div>
-        </div>
-        <div class="event-text">Google Cloud wächst mehr als doppelt so schnell (+63% vs +28%). Falls AWS unter 25% Marktanteil fällt (von ~30%), drohen Margenkompression und strategische Probleme. Wahrscheinlichkeit AWS &lt;25% bis 2027: ~30%.</div>
-      </div>
-
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">🌍 China-Tariff & globale Lieferkette</div>
-          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
-        </div>
-        <div class="event-text">Mögliche US-China-Tariff-Eskalation könnte Marketplace-Margen drücken. ~30% der 3P-Seller sind China-basiert. EU-DMA-Druck zusätzlich.</div>
-      </div>
-
-      <div class="risk-item">
-        <div class="risk-header">
-          <div class="risk-title">📊 Bewertung historisch günstig, aber Peer-mäßig fair</div>
-          <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div>
-        </div>
-        <div class="event-text">Multiple-Expansion-Potenzial limitiert – AMZN handelt nicht mehr im historischen Diskount. Sum-of-Parts bei $2.55T vs. MCap $2.85T impliziert keine signifikante Unterbewertung.</div>
-      </div>
-
-      <h3>AI-Risiko & technologische Disruption</h3>
-      <p>Bullisches AI-Szenario: AMZN positioniert sich als neutraler AI-Infrastruktur-Layer für alle Modelle (Anthropic + OpenAI + Llama + Bedrock-Hub). Trainium wird ernsthafte NVIDIA-Alternative. AI-Workloads sind das größte Profitabilitätsturbo für AWS. Bärisches Szenario: AMZN ist im Frontier-Model-Race kein Player, kann strategisch zwischen Anthropic ($183B Bew.) und OpenAI ($500B+) gefangen sein.</p>
-
-      <h3>Chancen</h3>
-      <p>(1) <strong>Advertising-Hyperscale</strong>: Q1 Ads-Run-Rate >$70B (+24% YoY) – das ist Hidden Asset mit ~80% Bruttomarge. Wenn Ads bis 2027 $100B+ erreicht, sind das +$30B High-Margin-Revenue. (2) <strong>Trainium-Externalisierung</strong>: Bei $20B Run-Rate aktuell, mögliches $50–100B Business bis 2027. (3) <strong>Agentic Commerce</strong>: Alexa for Shopping + Amazon Now (30-Min-Delivery) könnten neue Wachstumsphase auslösen. (4) <strong>Healthcare/Pharmacy</strong>: One Medical + Amazon Pharmacy weiterhin Subscale, aber Optionalität.</p>
-
-      <h3>Red Flags & Dealbreaker</h3>
-      <p>Keine Dealbreaker. Red Flag: Falls Q2 2026 AWS-Wachstum unter 25% YoY fällt (von 28%), wäre das ein erstes Warnsignal dass die AI-Tailwinds-Story stalled. Weiterer Red Flag: FCF-Konversion bleibt unter 5% – langfristig untragbar bei aktueller Bewertung.</p>
-
-      <div class="source">Quellen: FTC vs. Amazon Court Docket; EU DMA Updates (2025–2026); Amazon Q1 2026 Earnings; eigene Szenarioanalyse.</div>
+      <h3>10a) Strukturelle &amp; zyklische Risiken</h3>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Capex-/FCF-Risiko</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div><div class="event-text">$200 Mrd. Capex 2026 drückt FCF auf ~$1,2 Mrd. Bleibt die KI-Auslastung hinter den Erwartungen, drohen unterausgelastete, teure Anlagen und steigende Abschreibungen → Margendruck 2027–28. Wahrscheinlichkeit: mittel.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ AWS-Wettbewerbs-Deceleration</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div><div class="event-text">AWS liefert 50–70% des operativen Gewinns bei nur ~17% Umsatz. Verliert es Wachstumsführung an Azure/GCP dauerhaft (15% vs. 30–50%), kippt die gesamte Bull-These. Wahrscheinlichkeit: mittel.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Regulatorik (FTC, EU-DMA, Antitrust)</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">$2,5 Mrd. FTC-Settlement (Prime) abgeschlossen; EU-DMA-„Gatekeeper" für AWS (Strafen bis 10% Umsatz); laufende FTC-Antitrust-Klage gg. Marketplace-Praktiken. Wahrscheinlichkeit fortlaufender Belastungen: hoch.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Zölle &amp; Konsumschwäche</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div></div><div class="event-text">Zölle verteuern China-bezogene 3P-Ware und Retail-Inputs; sinkender Prime-Day-Durchschnittsbon signalisiert vorsichtigeren Konsum. Wahrscheinlichkeit: mittel-hoch.</div></div>
+      <h3>10b) AI-Risiko &amp; agentische Disruption (These 1: Wie gefährlich ist Shopify?)</h3>
+      <p><strong>Bärisches Szenario:</strong> Wenn Produkt-<em>Discovery</em> dauerhaft in externe KI-Assistenten (ChatGPT ~900 Mio. Wochen-Nutzer, Gemini, Perplexity, Copilot) abwandert und Bestellungen über offene Protokolle (UCP/ACP) zu <strong>Shopify-/Walmart-betriebenen DTC-Checkouts</strong> geroutet werden, erodiert Amazons Discovery-Moat. Genau das macht Shopify gefährlich: SHOP ist nicht Amazons direkter Retail-Rivale, sondern der „Arms-Dealer", der >1 Mrd. Produkte agenten-lesbar strukturiert, die UCP-Rails stellt und über Shop Pay den Checkout kapert (KI-Traffic +8x, KI-Orders +13x). Bedroht sind Amazons margenstärkste Pools: 3P-Seller-Services (~$53 Mrd./Q) und Ads (>$70 Mrd./Jahr). Deloitte: 81% der Retail-Manager erwarten, dass GenAI bis 2027 die Markentreue schwächt.</p>
+      <p><strong>Bullisches Szenario (warum die Gefahr begrenzt ist):</strong> Erstens sind Amazons Profitpools AWS + Ads, nicht die Retail-Marge — selbst bei teilweiser Discovery-Disruption bleibt die Ertragsstruktur robust. Zweitens funktioniert agentisches Shopping nur mit exakten Echtzeit-Daten (Verfügbarkeit, Preis, Lieferzeit) — genau dort scheitern Scraper, und genau dort hat Amazon den besten Datensatz; OpenAI musste Instant Checkout im März 2026 mangels Traktion zurückfahren. Drittens verteidigt Amazon aktiv: Alexa for Shopping (300 Mio. Nutzer, Konversion +60%), Buy for Me/Shop Direct über Amazon hinaus, und juristisch (Perplexity-Klage, Comet-Browser per Gericht blockiert). Viertens: Laut Forrester wollen nur ~1/3 der Konsumenten überhaupt über eine „Answer Engine" bezahlen — die Adoption hat reale Reibung.</p>
+      <p><strong>Eigene Einordnung:</strong> Shopify ist über 3–5 Jahre eine <em>reale strukturelle Bedrohung für Amazons Retail-Discovery- und 3P-Marketplace-Flywheel</em>, aber <strong>keine existenzielle Bedrohung für Amazons Gewinnmaschine (AWS + Ads)</strong>. Die Gefahr ist „am Rand" (Long-Tail-DTC, Verschiebung des Discovery-Orts) ernst, im Kern überschaubar — und Amazon hedged offensiv. Wer SHOP als „Amazon-Killer" framt, überzeichnet; wer die Discovery-Verschiebung ignoriert, unterschätzt.</p>
+      <h3>10c) Chancen</h3>
+      <p>AWS-Margenhebel bei steigender AI-Auslastung (Oppenheimer: +$3 Mrd. je GW); Ads-Skalierung über Prime Video/Twitch; Amazon Leo (Markt $20–40 Mrd. bis 2030, FCC-Deadline 30.07.2026); Healthcare (One Medical + Amazon Pharmacy); Logistics-as-a-Service (ASCS/LTL-Freight an Dritte); Robotik &amp; Zoox-Robotaxi als Multi-Milliarden-Optionen ab 2028–30.</p>
+      <h3>10d) Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> FCF nahe null trotz Rekord-OCF; Earnings durch Anthropic-Buchgewinne geschönt; AWS-Wachstumsvorsprung verloren; sinkender Prime-Day-Bon. <strong>Dealbreaker:</strong> derzeit keiner — kein existenzbedrohendes Einzelrisiko; die Bilanz (D/E ~0,5, Interest Coverage hoch) trägt $1–2 Mrd. Zusatzkosten problemlos. Gesamt-Risikoscore 6/10 (moderat-erhöht, invertiert: 10 = kein Risiko).</p>
+      <div class="source">Quellen: Opascope/Modern Retail/Retail Dive (Jan.–Apr. 2026); GeekWire (13.05.2026); Forbes (02.01.2026); TradingKey (29.06.2026); Forrester/Deloitte-Surveys (in o.g. Quellen zitiert)</div>
     </div>
   </div>
 
-  <!-- S11 -->
+  <!-- SEKTION 11 -->
   <div class="section" id="s11">
-    <div class="section-header">
-      <div class="section-number">11</div>
-      <div class="section-title">Scoring</div>
-      <div class="section-score">Ø 7.4/10</div>
-    </div>
+    <div class="section-header"><div class="section-number">11</div><div class="section-title">Scoring &amp; user-spezifische Analysen</div><div class="section-score">Ø 7,2/10</div></div>
     <div class="section-body">
+      <div class="alert-box">⚠️ <strong>User-spezifische Konsistenzprüfung:</strong> Beide Fragestellungen sind in die Scores eingearbeitet — These 1 (Shopify/AI-Disruption) drückt v.a. Burggraben &amp; Risiken (Sektion 2/10), These 2 (Wachstumsfelder/3-J.-Rate) ist quantifiziert in Sektion 4. Ergebnis: Die Shopify-Bedrohung rechtfertigt <em>keinen</em> Abschlag auf den Burggraben-Score (bleibt 9/10), weil sie Amazons Profitpools nicht trifft; sie erhöht aber das Risiko-Gewicht. Die 3-Jahres-Wachstumsrate (~12–14% Basis) stützt den Wachstums-Score 8/10.</div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Kategorie</th><th>Score</th><th>Visual</th><th>Begründung</th></tr></thead>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Visualisierung</th><th>Begründung (Kurz)</th></tr></thead>
           <tbody>
-            <tr><td>Geschäftsmodell</td><td><strong>9/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>Drei diversifizierte Säulen: Retail + AWS + Ads, alle weltklasse</td></tr>
-            <tr><td>Burggraben</td><td><strong>9/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>Logistik + AWS-Marktanteil + Trainium + Multi-Model-AI-Strategie</td></tr>
-            <tr><td>Operative Entwicklung (4Q)</td><td><strong>9/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>4/4 Beats, AWS-Beschleunigung von +17% → +28% in 4 Quartalen</td></tr>
-            <tr><td>Wachstum</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>+17% bei $700B+ Basis. AWS +28%, Ads +24%, Retail stabil</td></tr>
-            <tr><td>Bewertung</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>P/E 32x deutlich unter 5J-Schnitt 47x. Fwd P/E 26x fair</td></tr>
-            <tr><td>Cashflow</td><td><strong>5/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>OCF +30% stark, aber FCF auf $1.2B kollabiert. FCF-Konversion miserabel.</td></tr>
-            <tr><td>Risiken (invertiert)</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>FTC-Klage, Capex-Eskalation, AWS-Marktanteils-Druck</td></tr>
-            <tr><td>Technische Analyse</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Uptrend intakt, RSI ~62 neutral, Konsens-Zielkurs +12%</td></tr>
-            <tr style="background:rgba(255,153,0,0.08);">
-              <td><strong>⌀ Gesamtscore</strong></td>
-              <td><strong>7.5/10</strong></td>
-              <td>
-                <div class="score-bar">
-                  <div class="score-bar-track">
-                    <div class="score-bar-fill" style="width:75%; background:linear-gradient(90deg,var(--primary),#ffd700);"></div>
-                  </div>
-                  <span class="score-num" style="color:var(--primary);">7.5</span>
-                </div>
-              </td>
-              <td>Hochwertiger Compounder, AWS-AI-Story strukturell stark, aber FCF-Belastung dämpft</td>
-            </tr>
+            <tr><td>Geschäftsmodell</td><td><strong>9/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>Drei mächtige Engines; Services-Mix steigt</td></tr>
+            <tr><td>Burggraben</td><td><strong>9/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>Logistik/Prime/AWS-Skala + Datenmoat</td></tr>
+            <tr><td>Operative Entwicklung (4Q)</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>Umsatz 4/4 Beat, AWS-Reaccel., Rekordmarge</td></tr>
+            <tr><td>Wachstum</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>~12–14% CAGR; AWS+Ads überproportional</td></tr>
+            <tr><td>Bewertung</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Fair (Fwd ~28x); Headline durch Anthropic verzerrt</td></tr>
+            <tr><td>Cashflow &amp; Kapitalqualität</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>OCF top, FCF durch Capex erdrückt</td></tr>
+            <tr><td>Peer-Vergleich</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>Multi-Front-Sieger; Cloud-Wachstumsgap als Watch</td></tr>
+            <tr><td>Risiken (invertiert)</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Capex/Regulatorik/Agentik; nicht existenziell</td></tr>
+            <tr><td>Technische Analyse</td><td><strong>5/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>&lt; SMA50, am SMA200, RSI ~38, MACD neg.</td></tr>
+            <tr style="background:rgba(255,105,0,0.08);"><td><strong>⌀ Gesamtscore</strong></td><td><strong>7,2/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:72%;background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">7,2</span></div></td><td>Quality-Compounder mit fairer Bewertung &amp; kurzfristigen Cash-/Technik-Schwächen</td></tr>
           </tbody>
         </table>
       </div>
-      <div class="source">Eigene Berechnung basierend auf Sektionen 1–10. Methodik: Canvas v2.2 Scoring.</div>
+      <div class="source">Quellen: Aggregation Sektionen 1–10. Erneuter Transparenzhinweis: Bewertungs-/Cashflow-Scores berücksichtigen explizit die Anthropic-bedingte Earnings-Verzerrung (siehe COI-Box oben).</div>
     </div>
   </div>
 
-  <!-- S12 -->
+  <!-- SEKTION 12 -->
   <div class="section" id="s12">
-    <div class="section-header">
-      <div class="section-number">12</div>
-      <div class="section-title">Fazit – Investment-These</div>
-    </div>
+    <div class="section-header"><div class="section-number">12</div><div class="section-title">Fazit – Investment-These</div><div class="section-score">KAUFEN (tranchiert)</div></div>
     <div class="section-body">
-
       <div class="bull-bear-grid">
         <div class="bull-card">
           <h4>🐂 Das Bullische Narrativ</h4>
-          <p><strong>Säule 1 – AWS-Reacceleration ist real:</strong> AWS +17% → +20% → +24% → +28% YoY über 4 Quartale. Jassy: "fastest growth in 15 quarters auf einer sehr großen Basis." Bei $150B ARR und 37.9% Op-Marge erzeugt AWS allein ~$57B Op-Income p.a. – das alleine rechtfertigt $1.5T MCap.</p>
-          <p><strong>Säule 2 – Multi-Model-AI-Switzerland:</strong> Anthropic-Deal ($100B AWS) + OpenAI-Deal ($138B AWS) machen AWS zum neutralen AI-Infrastruktur-Layer für alle Frontier-Models. Trainium-Chips ($20B Run-Rate, Triple-Digit-Wachstum) reduzieren NVIDIA-Abhängigkeit. AWS-Backlog $364B (excl. Anthropic) impliziert >2.5 Jahre Wachstum gesichert.</p>
-          <p><strong>Säule 3 – Bewertung historisch günstig:</strong> P/E 32x ist 30%+ unter 3J-Schnitt. Sum-of-Parts (AWS $1.2T + Ads $560B + Retail $785B) = $2.55T vs. MCap $2.85T – kein significante Premium für die schnellste Wachstumsbeschleunigung seit 15 Quartalen. Op-Marge auf Allzeit-Hoch 13.1%, weitere Expansion auf 15–16% wahrscheinlich.</p>
+          <p>Säule 1 – Margenwende ist strukturell: Operating Income stieg im Q1 2026 auf $23,9 Mrd. bei einer Rekordmarge von 13,1% (von 11,8%), getrieben durch operative Hebelwirkung und den Services-Mix — nicht durch Einmaleffekte. AWS reaccelerierte auf +28% bei 37,7% Segmentmarge.</p>
+          <p>Säule 2 – AWS+Ads als Compounding-Doppel: $364 Mrd. AWS-Backlog, $150 Mrd. Run-Rate, $20 Mrd. Eigenchip-Geschäft; Ads >$70 Mrd. und +24%. Diese hochmargigen Pools verschieben Amazons Ertragsprofil weg vom Handel. Oppenheimer: jedes zusätzliche GW Kapazität ≈ +$3 Mrd. Umsatz.</p>
+          <p>Säule 3 – Bewertung &amp; Optionen: Fwd P/E ~28x bei PEG ~1,35 ist für einen Wide-Moat-Compounder fair und liegt klar unter dem eigenen Schnitt. Leo, Healthcare, Robotik und Zoox sind „kostenlose" Optionen. Net Margin soll Richtung ~15% (2030) steigen. R/R: ~−18% Downside vs. ~+30–40% Upside auf Sicht 12–18M.</p>
         </div>
         <div class="bear-card">
           <h4>🐻 Das Bärische Narrativ</h4>
-          <p><strong>Risiko 1 – FCF-Crash:</strong> FCF von $32B (FY2024) auf $1.2B (TTM Q1'26) eingebrochen. Capex eskaliert auf ~$165–180B/Jahr (=25% des Umsatzes). FCF-Yield praktisch null. Falls Trainium-ROI enttäuscht oder AI-Demand-Zyklik einsetzt, drohen Multi-Hundert-Milliarden in Underutilized-Capacity.</p>
-          <p><strong>Risiko 2 – AWS verliert relativ Marktanteile:</strong> Google Cloud +63% wächst doppelt so schnell wie AWS. Falls AWS-Marktanteil von ~30% auf 25% fällt bis 2027, wäre das ein strukturell negatives Signal. Der "AWS-immer-dominant"-Konsens könnte zerbrechen.</p>
-          <p><strong>Risiko 3 – FTC + Bewertung:</strong> FTC-Antitrust-Klage läuft, potenzielles FBA-Marketplace-Spaltungs-Remedy. P/E 32x ist nicht mehr im historischen Diskount – wenn AWS-Beschleunigung pausiert oder Holiday-Q4 schwächer ausfällt, Multiple-Compression auf 24–28x = $220–245 (–10% bis –20%).</p>
+          <p>Risiko 1 – Cash, nicht Gewinn: FCF brach auf ~$1,2 Mrd. ein, während $200 Mrd. Capex 2026 die Bilanz belasten. Bleibt die KI-Auslastung zurück, drücken Abschreibungen die Marge — und das Headline-EPS ist ohnehin durch $16,8 Mrd. nicht-zahlungswirksame Anthropic-Buchgewinne geschönt.</p>
+          <p>Risiko 2 – AWS verliert das Wachstumsrennen: Azure (+40%) und GCP (+48–63%) wachsen prozentual deutlich schneller. Da AWS 50–70% des operativen Gewinns liefert, würde eine dauerhafte Verlangsamung Richtung 15% die gesamte Bull-These untergraben — der Markt könnte AWS als „mature" re-raten.</p>
+          <p>Risiko 3 – Disruption &amp; Regulatorik: Agentisches Shopping (Shopify/UCP, ChatGPT/Gemini) bedroht Discovery + 3P-Marketplace + Ads; EU-DMA-„Gatekeeper" für AWS (Strafen bis 10% Umsatz), FTC-Antitrust und Zölle bilden eine dauerhafte Belastungsfront. Technisch unter SMA50 = Timing-Risiko.</p>
         </div>
       </div>
-
-      <h3>Eigene Einschätzung</h3>
-      <p>Das bullische Narrativ ist <strong>fundamental überzeugend</strong>. AWS-Beschleunigung in 4 Quartalen von +17% auf +28% bei gleichzeitig 37.9% Op-Marge ist einer der besten Operational-Setups in Big-Tech. Die Multi-Model-AI-Strategie ist <strong>strukturell überlegen</strong> gegenüber MSFT (nur OpenAI) oder GOOGL (nur Gemini) – Amazon profitiert von jedem Frontier-Model-Sieger. Allerdings: Bei $272 ist die Aktie nach +70% YoY-Rally nicht mehr "günstig", und die FCF-Story ist beunruhigend. Risk/Reward bei aktuellem Kurs: ~15% Downside (auf $230–250) vs. ~30% Upside (auf $340–360 in 12–18 Monaten falls AWS-Momentum hält).</p>
-      <p>Falsche-Annahmen-Demut: Ich könnte falsch liegen, wenn (a) AWS-Wachstum in 1–2 Quartalen abrupt unter 25% fällt, (b) FTC strukturelle Marketplace-Maßnahmen erzwingt, (c) Trainium-Adoption stalled und NVIDIA-Abhängigkeit bleibt teuer.</p>
-
+      <h3>Eigene Einschätzung (ausgewogen)</h3>
+      <p>Das bullische Narrativ überzeugt für einen 2–5-Jahres-Horizont mehr — aber das bärische enthält valide, nicht zu ignorierende Punkte. Amazon ist ein Wide-Moat-Compounder, dessen Ertragsprofil sich strukturell zu hochmargigen Services (AWS, Ads) verschiebt; die Bewertung ist fair (nicht billig), und die Risiken (Capex, AWS-Wettbewerb, Agentik, Regulatorik) sind real, aber nicht existenzbedrohend. Die zwei größten ehrlichen Vorbehalte: (1) Der reale FCF muss 2027–28 zurückkehren, sonst war der Capex zu teuer; (2) das Headline-Ergebnis ist durch Anthropic-Buchgewinne geschönt — die Kerngewinnkraft ist niedriger, als die EPS suggerieren (deshalb normalisiertes KGV ~34x statt ~28x).</p>
+      <p>Zur Shopify-These (These 1): gefährlich am Rand, nicht im Kern — Amazons Profitmaschine bleibt AWS+Ads. Zur Wachstums-These (These 2): ~12–14% Umsatz-CAGR über 3 Jahre realistisch, mit überproportionalem Operating-Income-Wachstum. Demut: Ich könnte falsch liegen, falls die KI-Capex-Wette schlechter monetisiert als erwartet oder AWS schneller dezeleriert.</p>
       <h3>Zeithorizont-Einschätzung</h3>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Zeithorizont</th><th>Katalysator</th><th>Risiko</th><th>Empfehlung</th></tr></thead>
+          <thead><tr><th>Horizont</th><th>Katalysatoren / Risiken</th><th>Empfehlung</th></tr></thead>
           <tbody>
-            <tr><td><strong>Kurzfristig (0–6M)</strong></td><td>Q2'26 Earnings (Juli), Prime Day, weitere AI-Deals</td><td>RSI nähert sich Übergekauft, Konsolidierung möglich</td><td>Halten, nachkaufen bei –10% Rückschlag</td></tr>
-            <tr><td><strong>Mittelfristig (6–24M)</strong></td><td>AWS auf $200B+ ARR, FTC-Entscheidung, Trainium-Skalierung</td><td>FCF-Druck, AWS-Marktanteils-Verlust</td><td>Aufbauen bei klaren AWS-Beats</td></tr>
-            <tr><td><strong>Langfristig (2–5J)</strong></td><td>Multi-Model-AI-Dominanz, Ads $100B+, Agentic Commerce</td><td>Strukturelle Disruption durch Cloud-AI-Konkurrenz</td><td>Kernposition aufbauen, Compounder-Halten</td></tr>
+            <tr><td><strong>Kurzfristig (0–6M)</strong></td><td>Q2-Earnings (30.07.), Leo-FCC-Deadline, Technik &lt; SMA50, Zoll-Headlines</td><td><span class="badge badge-yellow">Volatil – tranchiert</span></td></tr>
+            <tr><td><strong>Mittelfristig (6–24M)</strong></td><td>AWS-Margenhebel, FCF-Wende, Ads-Skalierung, DMA-Remedies</td><td><span class="badge badge-orange">Akkumulieren</span></td></tr>
+            <tr><td><strong>Langfristig (2–5J)</strong></td><td>Net Margin Richtung 15%, Leo/Healthcare-Optionen reifen</td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td></tr>
           </tbody>
         </table>
       </div>
-
       <h3>Kernthese</h3>
-      <p>Amazon hat in den letzten 6 Monaten einen außergewöhnlichen AWS-Reaccelerations-Cycle eingeleitet, gestützt durch beispiellose AI-Infrastruktur-Deals (Anthropic + OpenAI). Multi-Model-Neutralität, Trainium-Chip-Aufstieg und Werbe-Hyperscale (>$70B TTM, +24%) machen AMZN zur <strong>besten diversifizierten AI-Optionalität</strong> in Big-Tech. Bewertung ist historisch attraktiv (P/E 32x vs. 5J-Schnitt 47x), aber FCF-Crash erfordert Vertrauen, dass Capex sich auszahlt. Rating: <strong>KAUFEN</strong> für langfristige Investoren, mit Bewusstsein für das FCF-Risiko.</p>
-
+      <p>Amazon bleibt ein Quality-Growth-Kerninvestment: ein Wide-Moat-Konglomerat, das wie ein Händler aussieht, aber zunehmend wie ein Cloud-/Werbekonzern verdient. Bei fairer (nicht günstiger) Bewertung, kurzfristig gedrücktem FCF und technischer Konsolidierung ist die aktuelle Zone eher Akkumulation als Euphorie. Die Anthropic-Earnings-Verzerrung und die AWS-Wettbewerbsdynamik gehören eng beobachtet.</p>
       <div class="rating-box">
-        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
-        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$320–360</div></div>
-        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–4 Jahre</div></div>
-        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–15%</div></div>
-        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+30%</div></div>
-        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:2</div></div>
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN (tranchiert)</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$300–340</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–5 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–18%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+30–40%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">~1:1,8</div></div>
       </div>
-
       <div class="trigger-grid">
         <div class="trigger-card sell">
           <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
           <ul class="trigger-list">
-            <li>Q2 2026: AWS-Wachstum &lt;25% YoY (von 28%) → 25% reduzieren</li>
-            <li>FTC ordert FBA-Marketplace-Split → 30–40% reduzieren</li>
-            <li>Capex 2027 angekündigt >$200B ohne FCF-Pfad → 25% reduzieren</li>
-            <li>Retail Op-Marge fällt unter 7% (NA) → 20% reduzieren</li>
+            <li>AWS-Wachstum fällt unter ~22% bei gleichzeitig &gt;30% bei Azure/GCP → Bull-These bricht, reduzieren</li>
+            <li>FCF bleibt 2027 tief negativ trotz sinkendem Capex → Kapitalallokation hinterfragen</li>
+            <li>EU-DMA erzwingt strukturelle AWS-Eingriffe → Margenpool gefährdet</li>
           </ul>
         </div>
         <div class="trigger-card buy">
           <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
           <ul class="trigger-list">
-            <li>Rückschlag auf $235–250 (–10–15%) → aggressiv nachkaufen</li>
-            <li>Q2 2026: AWS &gt;30% YoY + Op-Marge >14% → aufstocken</li>
-            <li>Weitere Mega-AI-Deals (Meta/xAI Cloud-Migration) → halten/aufstocken</li>
-            <li>FCF-Erholung auf >$30B TTM → Multiple-Re-Rating einpreisen</li>
+            <li>AWS hält ≥27% UND FCF dreht ins Positive → Capex-These bestätigt, nachkaufen</li>
+            <li>Kurs bricht nachhaltig über SMA50 (~$256) mit MACD-Crossover → technische Bestätigung</li>
+            <li>Leo-Deployment im Plan + erste Enterprise/Gov-Verträge → Optionswert realisiert sich</li>
           </ul>
         </div>
       </div>
-
       <div class="investor-grid">
         <div class="investor-yes">
           <h5>✅ Geeignet für</h5>
-          <ul>
-            <li>Quality Growth Investors</li>
-            <li>AI-Infrastruktur-Exposure</li>
-            <li>Langfristige Compounder-Strategien</li>
-            <li>Mega-Cap-Diversifikation</li>
-          </ul>
+          <ul><li>Quality-Growth-Investoren (2–5J)</li><li>Buy-&amp;-Hold / Compounding</li><li>AI-/Cloud-Infrastruktur-These</li></ul>
         </div>
         <div class="investor-no">
           <h5>❌ NICHT geeignet für</h5>
-          <ul>
-            <li>Deep-Value-Investoren</li>
-            <li>Income Investoren (keine Dividende)</li>
-            <li>FCF-Yield-Fokus</li>
-            <li>Kurzfristige Trader nach ATH-Rally</li>
-          </ul>
+          <ul><li>Deep-Value-Investoren (nicht billig)</li><li>Income-Investoren (keine Dividende)</li><li>Kurzfristige Trader (Technik schwach)</li></ul>
         </div>
       </div>
-
+      <h3>Empfohlener Einstieg</h3>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
           <tbody>
-            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Tranchiert warten</span></td><td>Einstieg bei $235–250 attraktiver; FCF-Story noch unsicher</td></tr>
-            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert (33/33/33)</span></td><td>33% jetzt, 33% nach Q2'26 Print, 33% bei Rückschlag</td></tr>
-            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>AWS-Momentum + Multi-AI-Deal-Pipeline rechtfertigt Einstieg</td></tr>
-            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen & Halten</span></td><td>Strukturelles AI-Infrastruktur-Compounding über 5+ Jahre</td></tr>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / Tranchiert</span></td><td>Q2-Earnings (30.07.) &amp; FCF-Signal abwarten</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>50% jetzt (~$240, nahe SMA200), 50% nach AWS-/FCF-Bestätigung</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>R/R ~1:1,8; nahe langfristiger Support-Zone</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>Strukturelle Verschiebung zu AWS/Ads-Margen</td></tr>
           </tbody>
         </table>
       </div>
-
-      <div class="source">Quellen: Synthese aus allen vorherigen Sektionen; eigene Risk/Reward-Kalkulation.</div>
+      <div class="source">Quellen: Synthese Sektionen 1–11; Konsens-Kursziele $281–312 (Simply Wall St, Wells Fargo $305, Forbes $297); ad-hoc-news (20.04.2026)</div>
     </div>
   </div>
 
-  <!-- S13 -->
+  <!-- SEKTION 13 -->
   <div class="section" id="s13">
-    <div class="section-header">
-      <div class="section-number">13</div>
-      <div class="section-title">Outlook – Anstehende Events</div>
-    </div>
+    <div class="section-header"><div class="section-number">13</div><div class="section-title">Outlook – die 3 wichtigsten anstehenden Events</div><div class="section-note">Wenn/Dann-Logik</div></div>
     <div class="section-body">
-
       <div class="outlook-card">
-        <h4>📊 Event 1: Q2 2026 Earnings – Ende Juli 2026 (mit Prime Day)</h4>
-        <p>Guidance: $194–199B Revenue (+16–19%), Op-Income $20–24B. Kritische Metriken: (1) Bleibt AWS-Wachstum >27% YoY? (2) Wie entwickelt sich Capex (auf $50B/Quartal)? (3) Bestätigt Prime Day starke Konsumenten-Nachfrage? (4) Wie skaliert Trainium-Adoption ohne Anthropic-Schlagzeile?</p>
+        <h4>📊 Event 1: Q2-2026-Earnings – voraussichtlich 30. Juli 2026</h4>
+        <p>Der einzige wirklich entscheidende Datenpunkt ist die AWS-Wachstumsrate plus das FCF-Signal — sie validieren oder widerlegen die $200-Mrd.-Capex-Wette. Guidance: Umsatz +16–19%, Operating Income $20–24 Mrd. (breite Spanne = echte Unsicherheit).</p>
         <div class="when-then">
-          <strong>Wenn:</strong> AWS-Wachstum ≥28% YoY + Op-Marge >13% + Prime Day GMV-Wachstum >10% → aggressive Aufstockung, Zielkurs $340–360 in 12 Monaten.<br><br>
-          <strong>Wenn:</strong> AWS-Wachstum &lt;25% YoY ODER Capex auf >$50B/Q (>$200B annualisiert) ohne FCF-Pfad → 25–30% reduzieren, Konsolidierung auf $220–240 erwartet.
+          <strong>Wenn:</strong> AWS-Wachstum ≥27% UND der TTM-FCF dreht erkennbar Richtung positiv → die Capex-These ist on-track, kurzfristig nachkaufen.<br><br>
+          <strong>Wenn:</strong> AWS unter ~22% ODER FCF bleibt tief negativ ohne Besserung → Position reduzieren / Einstieg vertagen, da der Markt AWS als reifend re-raten könnte.
         </div>
       </div>
-
       <div class="outlook-card">
-        <h4>📊 Event 2: AWS re:Invent 2026 Konferenz – Dezember 2026</h4>
-        <p>Amazons wichtigste Cloud-Konferenz; Bühne für Trainium-3, Bedrock-Updates, Agentic-AI-Roadmap. Investoren werden auf konkrete Enterprise-Adoption-Zahlen und Trainium-Performance-Benchmarks vs. NVIDIA achten. Auch: Strategic-Direction für Project Rainier 2 (geplant >1 Mio. Trainium-Chips).</p>
+        <h4>🛰️ Event 2: Amazon Leo / FCC-Satelliten-Deadline – 30. Juli 2026</h4>
+        <p>Amazon muss bis 30.07.2026 die Hälfte seiner ~3.232 Satelliten im Orbit haben (FCC-Lizenzauflage). Parallel läuft der kommerzielle Ramp (Delta Air Lines als Kunde) und die Globalstar-Integration für Direct-to-Device (ab 2028).</p>
         <div class="when-then">
-          <strong>Wenn:</strong> Trainium-3 mit messbarer Performance-/Cost-Differenzierung zu NVIDIA + 5+ neue Enterprise-Mega-Deals angekündigt → Bullish-Setup, Zielkurs $360–400.<br><br>
-          <strong>Wenn:</strong> nur Inkremental-Updates ohne klare NVIDIA-Differenzierung → "Sell-the-News"-Setup, Rückschläge zum Einsteigen nutzen ($250–270).
+          <strong>Wenn:</strong> Deployment im Plan + erste Enterprise-/Gov-Verträge → der Leo-Optionswert ($20–40 Mrd. Markt bis 2030) bestätigt sich, der „Moonshot-Aufschlag" ist gerechtfertigt.<br><br>
+          <strong>Wenn:</strong> Startverzögerungen / Kostenüberschreitungen (Leo-Opex $1–2 Mrd./Jahr) → den Optionsaufschlag aus dem Modell streichen und auf die operative Kernstory fokussieren.
         </div>
       </div>
-
       <div class="outlook-card">
-        <h4>📊 Event 3: FTC vs. Amazon Antitrust-Klage – 2026/2027</h4>
-        <p>FTC-Klage seit Sept 2023, Trial-Vorbereitung läuft. Vorwurf: Marketplace-Monopolisierung, FBA-Tying. Mögliche Outcomes: Settlement mit kosmetischen Maßnahmen, Behavioral Remedies, oder strukturelle Maßnahmen (FBA-Marketplace-Spin-off).</p>
+        <h4>🤖 Event 3: Agentic-Commerce-Adoption &amp; EU-DMA-Remedies – Holiday 2026 / H2 2026</h4>
+        <p>Die Weihnachtssaison 2026 ist der erste echte Stresstest, wie viel Produkt-Discovery zu externen KI-Agenten (ChatGPT/Gemini/Perplexity, UCP/ACP) abwandert — und ob Amazons „Alexa for Shopping" die Discovery on-platform hält. Parallel konkretisieren sich die EU-DMA-Auflagen für AWS.</p>
         <div class="when-then">
-          <strong>Wenn:</strong> Settlement mit Behavioral Remedies oder Case-Dismissal → Relief-Rally +8–12%, Halten/Aufstocken.<br><br>
-          <strong>Wenn:</strong> Trial-Loss + strukturelles Remedy (FBA-Split, Marketplace-Auflage) → kurzfristig –15–25% Crash möglich. Strategisches Halbieren der Position; langfristig könnte ein "saubereres" Retail-Geschäft sogar Sum-of-Parts-Wert freisetzen.
+          <strong>Wenn:</strong> Amazons eigener Agent hält den Discovery-Anteil &amp; die DMA-Remedies bleiben mild → der Moat ist intakt, Shopify-These entschärft, Halten/Nachkaufen.<br><br>
+          <strong>Wenn:</strong> Externe Agenten gewinnen messbaren Share ODER die DMA erzwingt strukturelle AWS-Eingriffe → Re-Rating nach unten, Risiko-Gewicht in Sektion 10 erhöhen.
         </div>
       </div>
-
-      <div class="source">Quellen: Amazon IR Calendar; FTC Court Docket; AWS re:Invent Schedule; Visible Alpha Konsens-Schätzungen.</div>
+      <div class="source">Quellen: Amazon Q1-2026-Guidance; Stansberry/MarketWise Leo (27.01.2026); FCC-Lizenzauflagen; Opascope/Retail Dive Agentic Commerce (Jan.–Apr. 2026); TradingKey DMA (29.06.2026)</div>
     </div>
   </div>
 
-  <div class="disclaimer">
-    ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informationszwecken und stellt keine Anlageberatung dar. Die enthaltenen Informationen wurden aus öffentlich zugänglichen Quellen zusammengetragen und nach bestem Wissen bewertet. Vergangene Wertentwicklungen sind kein verlässlicher Indikator für zukünftige Ergebnisse. Investitionen in Aktien sind mit erheblichen Risiken verbunden, einschließlich des Totalverlusts. Bitte konsultieren Sie vor Investmententscheidungen einen unabhängigen Finanzberater. Stand: 14.05.2026.
-  </div>
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken und stellt keine Anlageberatung, Kauf-/Verkaufsempfehlung oder Finanzberatung dar. Sie wurde von Claude (Anthropic) erstellt; auf den oben prominent dokumentierten Interessenkonflikt (Amazon als Anthropic-Investor/AWS-Kunde) wird ausdrücklich hingewiesen. Alle Kennzahlen beruhen auf öffentlich zugänglichen Quellen (Stand: 30. Juni 2026) und können fehlerhaft oder veraltet sein. Aktienanlagen bergen Verlustrisiken bis zum Totalverlust. Bitte treffen Sie eigene Recherchen und konsultieren Sie ggf. einen lizenzierten Anlageberater. Keine Gewähr für Richtigkeit/Vollständigkeit.</div>
 
 </div>
 </body>
