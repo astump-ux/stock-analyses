@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BNTX – Aktienanalyse Canvas v2.2</title>
+<style>
+:root{
+  --primary:#3b82f6; --primary-dark:#1d4ed8;
+  --bg:#0f0f12; --bg-card:#1a1a1f; --bg-card2:#22222a; --border:#2e2e38;
+  --text:#e8e8ec; --text-muted:#888898; --text-dim:#555566;
+  --green:#22c55e; --red:#ef4444; --yellow:#f59e0b; --blue:#3b82f6; --purple:#8b5cf6; --teal:#14b8a6;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7}
+.header{background:linear-gradient(135deg,#00081a 0%,#001028 40%,#0f0f12 100%);border-bottom:1px solid var(--primary);padding:36px 40px 28px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px}
+.header-left h1{font-size:32px;font-weight:700;color:white;letter-spacing:-0.5px}
+.header-left h1 span{color:var(--primary)}
+.header-left .subtitle{color:var(--text-muted);font-size:14px;margin-top:4px}
+.header-right{text-align:right}
+.price-tag{font-size:38px;font-weight:800;color:var(--primary);line-height:1}
+.price-meta{color:var(--text-muted);font-size:13px;margin-top:4px}
+.price-change{display:inline-block;padding:2px 8px;border-radius:4px;font-size:13px;font-weight:600;margin-top:4px}
+.price-change.up{background:rgba(34,197,94,0.15);color:var(--green)}
+.price-change.down{background:rgba(239,68,68,0.15);color:var(--red)}
+.nav{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:100}
+.nav a{color:var(--text-muted);text-decoration:none;padding:14px 16px;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s}
+.nav a:hover{color:var(--primary);border-bottom-color:var(--primary)}
+.main{max-width:1100px;margin:0 auto;padding:32px 40px 60px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+.kpi-value{font-size:22px;font-weight:700;color:white;margin-top:4px}
+.kpi-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
+.kpi-value.green{color:var(--green)}.kpi-value.red{color:var(--red)}.kpi-value.orange{color:var(--primary)}
+.section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden}
+.section-header{background:var(--bg-card2);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+.section-number{background:var(--primary);color:white;width:28px;height:28px;border-radius:6px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.section-title{font-size:16px;font-weight:700;color:white}
+.section-score{margin-left:auto;font-size:14px;font-weight:700;color:var(--primary)}
+.section-note{font-size:12px;color:var(--text-dim);background:rgba(46,46,56,0.4);border-radius:4px;padding:4px 10px;margin-left:auto}
+.section-body{padding:20px 24px}
+p{margin-bottom:12px;color:var(--text)}p:last-child{margin-bottom:0}
+h3{font-size:14px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;margin:20px 0 8px}h3:first-child{margin-top:0}
+.table-wrap{overflow-x:auto;margin:16px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:var(--bg-card2);color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid rgba(46,46,56,0.5);color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(59,130,246,0.05)}
+.beat{color:var(--green);font-weight:600}.miss{color:var(--red);font-weight:600}.neutral{color:var(--yellow);font-weight:600}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}
+.badge-green{background:rgba(34,197,94,0.15);color:var(--green)}
+.badge-red{background:rgba(239,68,68,0.15);color:var(--red)}
+.badge-yellow{background:rgba(245,158,11,0.15);color:var(--yellow)}
+.badge-blue{background:rgba(59,130,246,0.15);color:var(--blue)}
+.badge-orange{background:rgba(59,130,246,0.15);color:var(--primary)}
+.event-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(46,46,56,0.5);align-items:flex-start}
+.event-item:last-child{border-bottom:none}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0}
+.dot-green{background:var(--green)}.dot-red{background:var(--red)}.dot-yellow{background:var(--yellow)}
+.event-label{font-weight:600;color:white}
+.event-text{font-size:14px;color:var(--text)}
+.risk-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px}
+.risk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px;flex-wrap:wrap}
+.risk-title{font-weight:600;color:white;font-size:14px}
+.score-bar{display:flex;align-items:center;gap:10px}
+.score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#60a5fa)}
+.score-num{font-weight:700;color:var(--primary);font-size:15px;min-width:32px}
+.bull-bear-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:700px){.bull-bear-grid{grid-template-columns:1fr}}
+.bull-card{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:16px}
+.bear-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:16px}
+.bull-card h4{color:var(--green);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:.5px}
+.bear-card h4{color:var(--red);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:.5px}
+.rating-box{background:linear-gradient(135deg,rgba(59,130,246,0.12),rgba(59,130,246,0.04));border:1px solid rgba(59,130,246,0.3);border-radius:12px;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:20px 0}
+.rating-item label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:.5px;display:block;margin-bottom:4px}
+.rating-item .val{font-size:20px;font-weight:800;color:white}
+.rating-item .val.buy{color:var(--green)}.rating-item .val.hold{color:var(--yellow)}.rating-item .val.sell{color:var(--red)}
+.trigger-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+@media(max-width:700px){.trigger-grid{grid-template-columns:1fr}}
+.trigger-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px}
+.trigger-card h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.trigger-card.buy h5{color:var(--green)}.trigger-card.sell h5{color:var(--red)}
+.trigger-list{font-size:13px;color:var(--text);list-style:none;padding:0}
+.trigger-list li{margin-bottom:6px;padding-left:14px;position:relative}
+.trigger-list li::before{content:"→";position:absolute;left:0}
+.investor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+@media(max-width:600px){.investor-grid{grid-template-columns:1fr}}
+.investor-yes{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px}
+.investor-no{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:12px}
+.investor-yes h5{color:var(--green);font-size:12px;text-transform:uppercase;margin-bottom:8px}
+.investor-no h5{color:var(--red);font-size:12px;text-transform:uppercase;margin-bottom:8px}
+.investor-yes li,.investor-no li{font-size:13px;color:var(--text);margin-bottom:4px;list-style:none;padding-left:14px;position:relative}
+.investor-yes li::before{content:"✓";position:absolute;left:0;color:var(--green)}
+.investor-no li::before{content:"✗";position:absolute;left:0;color:var(--red)}
+.geo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0}
+.geo-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.geo-region{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+.geo-pct{font-size:20px;font-weight:700;color:white}
+.geo-note{font-size:12px;color:var(--text-muted)}
+.outlook-card{background:var(--bg-card2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:16px;margin-bottom:14px}
+.outlook-card h4{color:white;font-size:14px;margin-bottom:8px}
+.outlook-card .when-then{font-size:13px;color:var(--text);margin-top:8px}
+.outlook-card .when-then strong{color:var(--primary)}
+.source{font-size:11px;color:var(--text-dim);margin-top:12px;padding-top:10px;border-top:1px solid rgba(46,46,56,0.5)}
+.source a{color:var(--text-dim)}
+.disclaimer{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text-dim);margin-top:32px}
+.alert-box{background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+.pill{display:inline-block;background:rgba(59,130,246,0.12);color:var(--primary);border-radius:4px;padding:1px 7px;font-size:13px;font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>BioNTech SE <span>BNTX</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 01. Juli 2026 · Nasdaq · Sektor: Biotech / Immuno-Onkologie</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-orange">Immuno-Onkologie</span>
+      <span class="badge badge-blue">mRNA-Plattform</span>
+      <span class="badge badge-yellow">COVID-Transition</span>
+      <span class="badge badge-red">Gründer-Abgang</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$90</div>
+    <div class="price-meta">Schlusskurs ~18.06.2026 · Nasdaq</div>
+    <div class="price-change down">▼ nahe 52W-Tief</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">52W: $79.52 – $124.00</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">$90</div><div class="kpi-sub">USD · ~18.06.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Marktkap.</div><div class="kpi-value">~$22,8 Mrd.</div><div class="kpi-sub">252,9 Mio. Aktien</div></div>
+    <div class="kpi-card"><div class="kpi-label">Netto-Cash</div><div class="kpi-value green">~$19,6 Mrd.</div><div class="kpi-sub">≈ $77 / Aktie</div></div>
+    <div class="kpi-card"><div class="kpi-label">Enterprise Value</div><div class="kpi-value orange">~$3–4 Mrd.</div><div class="kpi-sub">Pipeline fast „gratis"</div></div>
+    <div class="kpi-card"><div class="kpi-label">Umsatz FY25</div><div class="kpi-value">€2,87 Mrd.</div><div class="kpi-sub">+4,3% YoY (COVID)</div></div>
+    <div class="kpi-card"><div class="kpi-label">Bruttomarge</div><div class="kpi-value">~82%</div><div class="kpi-sub">TTM</div></div>
+    <div class="kpi-card"><div class="kpi-label">EPS (TTM)</div><div class="kpi-value red">-$2,76</div><div class="kpi-sub">Verlust, kein P/E</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Zahlen</div><div class="kpi-value">04.08.2026</div><div class="kpi-sub">Q2 2026 (est.)</div></div>
+  </div>
+
+  <!-- ============ SEKTION 1 ============ -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6–9 Monate</div>
+    </div>
+    <div class="section-body">
+      <p>BioNTech ist ein in Mainz ansässiges Immuntherapie-Unternehmen, das aktuell einen fundamentalen Umbau durchläuft: weg vom COVID-Impfstoff-Cashcow, hin zu einer Onkologie-Pipeline. Historisch verdient das Unternehmen sein Geld fast ausschließlich mit dem mit Pfizer entwickelten mRNA-COVID-Impfstoff Comirnaty. Für 2025 lag der Umsatz bei rund €2,87 Mrd., praktisch vollständig aus dem saisonalen COVID-Geschäft. Dieses Modell ist strukturell rückläufig – die Umsätze sind seit dem Pandemie-Peak von ~$18–19 Mrd. (2021/22) massiv gefallen.</p>
+      <p>Das zukünftige Geschäftsmodell ist ein klassisches Biopharma-Modell: proprietäre Wirkstoffe (Antikörper, mRNA-Therapien, ADCs, Zelltherapien) selbst entwickeln, zulassen und – teils mit Partnern wie Bristol Myers Squibb (BMS) – kommerzialisieren. Der erklärte Zielzustand des neuen Managements: „Multi-Product-Onkologie-Unternehmen bis 2030". Aktuell erzielt der Onkologie-Bereich noch keinen nennenswerten Umsatz – er ist reine Investitionsphase (F&E ~€2,2–2,5 Mrd. p.a.).</p>
+      <p>Die Revenue-Streams sind heute dreigeteilt: (1) COVID-Impfstoff (EU-Direktvertrieb v.a. Deutschland + US-Anteil aus Pfizer-Kollaboration), (2) Kollaborationserlöse und nicht-erfolgsabhängige Zahlungen aus dem BMS-Deal (garantierte $3,5 Mrd. bis 2028), sowie (3) Pandemie-Bereitschaftsverträge (u.a. Bundesregierung). Erst ab ca. 2028 sollen erste Onkologie-Produktumsätze hinzukommen. Die Kostenstruktur ist capex- und F&E-intensiv, aber durch eine massive Nettoliquidität (~$19,6 Mrd.) abgesichert.</p>
+      <p>Ökonomisch relevant: BioNTech verbrennt derzeit Geld (Q1-2026-Nettoverlust €531,9 Mio.), finanziert dies aber aus der Kriegskasse und den garantierten BMS-Zahlungen. Es ist damit kein „normal" bewertbares Ertragsmodell, sondern ein Optionswert auf die Onkologie-Pipeline mit einem Cash-Sicherheitsnetz.</p>
+      <div class="source">Quellen: BioNTech Q1-2026 Report (05.05.2026); BioNTech FY2025 Ergebnisse (10.03.2026); Yahoo Finance / CNN Markets (Juni 2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 2 ============ -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <p>BioNTechs stärkster Burggraben ist die mRNA-Plattform samt In-house-Manufacturing, Delivery-Formulierungen und einem sehr breiten Patentportfolio (Sahin ist Co-Erfinder von über 500 Patentanmeldungen). Die CureVac-Übernahme (Dez. 2025) hat dieses IP- und Fertigungs-Fundament weiter verbreitert und einen langjährigen mRNA-Patentstreit intern gelöst. Die Comirnaty-Historie ist der Beweis, dass die Plattform in Weltklasse-Geschwindigkeit skalieren kann – ein Vorteil, den kaum ein Wettbewerber außer Moderna hat.</p>
+      <p>Der zweite Vorteil ist finanzieller Natur: Mit ~$19,6 Mrd. Netto-Cash kann BioNTech ein extrem breites, teures Phase-3-Programm parallel finanzieren (bis Jahresende 2026 sollen 15 Onkologie-Phase-3-Studien laufen) – etwas, das sich klassische Clinical-Stage-Biotechs nicht leisten können. Die BMS-Partnerschaft für pumitamig (BNT327) validiert die Wissenschaft zusätzlich: BMS zahlt bis zu $11,1 Mrd. und teilt Kosten/Gewinne 50:50.</p>
+      <p><strong>Kritisch – wo der Burggraben Löcher hat:</strong> Das wichtigste Onkologie-Asset (pumitamig) ist kein originär selbst erfundenes Molekül, sondern über die Biotheus-Übernahme ($800 Mio., 2024) zugekauft. Der Wettbewerbsvorsprung ist also teilweise „gekauft" und nicht durch eigene Grundlagenforschung uneinholbar abgesichert. Vor allem aber steht mit Ivonescimab (Summit/Akeso) ein strukturell gleichartiges PD-(L)1×VEGF-Molekül im selben Rennen, das im US-Zulassungspfad voraus ist. In der Onkologie – anders als bei Comirnaty – ist BioNTech also nicht der klare Technologieführer, sondern einer von mehreren Verfolgern.</p>
+      <p>Switching Costs und Netzwerkeffekte sind im Pharma-Geschäft gering; der Moat basiert auf Patenten, Daten-Vorsprung und Kapital – solide, aber im entscheidenden Onkologie-Feld umkämpft. Daher 7/10 statt höher.</p>
+      <div class="source">Quellen: FierceBiotech „BMS inks $11B BioNTech deal" (02.06.2025); BioPharma Dive (02.06.2025); BioNTech IR / Biotheus-Akquisition; CureVac-Merger SEC 6-K (Dez. 2025)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 3 ============ -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Score: 4/10</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> BioNTech berichtet in <strong>EUR nach IFRS</strong> und ist stark saisonal (COVID-Umsatz konzentriert sich auf Q4). Quartals-YoY-Vergleiche sind daher aussagekräftiger als QoQ. Kennzahlen aus BioNTech-IR, SEC-6-K und Yahoo/CNN (Stand Juni 2026). <strong>Nächster Stichtag: Q2 2026 am 04.08.2026 (est.).</strong></div>
+      <p>Operativ ist das Bild schwach – allerdings weitgehend erwartungsgemäß für ein Übergangsjahr. Der Umsatz sinkt, die Verluste weiten sich durch das hochgefahrene F&E-Budget aus. „Beat/Miss" ist bei BioNTech wenig relevant, weil kaum planbare Produktumsätze anfallen; die Marktreaktion hängt fast ausschließlich an Pipeline-Daten und strategischen News, nicht an der GuV.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>Q1 2026</th><th>Q1 2025</th><th>YoY</th><th>Kommentar</th></tr></thead>
+          <tbody>
+            <tr><td>Umsatz</td><td>€118,1 Mio.</td><td>€182,8 Mio.</td><td class="miss">-35%</td><td>Saisonal schwaches Q1, COVID-Nachfrage rückläufig</td></tr>
+            <tr><td>Operatives Ergebnis</td><td>-€677,5 Mio.</td><td>-€534,1 Mio.</td><td class="miss">schlechter</td><td>Höhere F&E-Ausgaben (€557 Mio.)</td></tr>
+            <tr><td>Nettoverlust</td><td>-€531,9 Mio.</td><td>-€415,8 Mio.</td><td class="miss">weiter</td><td>adj. -€494,6 Mio.</td></tr>
+            <tr><td>Verlust je Aktie</td><td>-€2,10</td><td>-€1,73</td><td class="miss">-21%</td><td>adj. -€1,95; ~14% besser als Konsens</td></tr>
+            <tr><td>Cash-Position</td><td>€16,76 Mrd.</td><td>~€17,2 Mrd.</td><td class="neutral">stabil</td><td>Festungsbilanz</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Für das Gesamtjahr 2025 lag der Umsatz bei €2,87 Mrd. (+4,3% YoY), der Nettoverlust bei ~€1,14 Mrd. (rund 71% größer als 2024) – die Verlustausweitung ist gewollt (Onkologie-Investition), aber real. Q1 2026 fiel „besser als befürchtet" aus (adj. LPS €1,95 vs. Konsens), die Aktie reagierte kaum (-2,2% auf ~$97). <strong>Beat-Ratio operativ: nicht sinnvoll bezifferbar</strong> – die Kursbewegungen der letzten Quartale wurden von Pipeline-News (ASCO, ELCC) und dem Gründer-Abgang dominiert, nicht von Zahlen.</p>
+      <div class="source">Quellen: BioNTech Q1-2026 Financial Results (05.05.2026, SEC Form 6-K); Globe and Mail / StockTitan (05.05.2026); AlphaStreet (06.05.2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 4 ============ -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 5/10</div>
+    </div>
+    <div class="section-body">
+      <p>Hier liegt der Kern der Investmentfrage – und die ehrliche Antwort ist unbequem: <strong>Kurzfristig wächst BioNTech nicht, es schrumpft.</strong> Der COVID-Umsatz fällt strukturell, während die Onkologie noch keine Produktumsätze liefert. Das erzeugt ein „J-Kurven"-Profil: Umsatzdelle jetzt, potenzielle Inflexion erst ab ~2028.</p>
+      <h3>Realistische Umsatz-Wachstumsraten 3 Jahre (Antwort auf die User-Frage)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Jahr</th><th>Umsatz (erwartet)</th><th>Wachstum YoY</th><th>Treiber</th></tr></thead>
+          <tbody>
+            <tr><td>2025 (Ist)</td><td>€2,87 Mrd.</td><td class="neutral">+4%</td><td>COVID + BMS-Anniversary</td></tr>
+            <tr><td>2026e (Guidance)</td><td>€2,0–2,3 Mrd.</td><td class="miss">-20% bis -30%</td><td>COVID-Rückgang EU + US</td></tr>
+            <tr><td>2027e (Schätzung)</td><td>~€2,0–2,5 Mrd.</td><td class="neutral">~flat</td><td>COVID stabilisiert tief + BMS $2 Mrd. + erste Meilensteine</td></tr>
+            <tr><td>2028e (Schätzung)</td><td>~€3–4 Mrd.</td><td class="beat">+30–60%</td><td>Inflexion: pumitamig-Launches SCLC/NSCLC (falls Zulassung)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Fazit zur Wachstumsrate:</strong> Über 2025→2028 ergibt sich ein realistischer Gesamtumsatz-CAGR von grob <span class="pill">0% bis +8%</span> – dominiert vom COVID-Verfall, der die Onkologie-Rampe überdeckt. Der Onkologie-/Nicht-COVID-Umsatz selbst wächst prozentual sehr schnell, aber von einer winzigen Basis. Ein „glatter" 3-Jahres-Wachstumspfad existiert <em>nicht</em>; die Story ist ein binärer Post-2028-Hebel, kein stetiger Compounder. Wer 15–20% jährliches Umsatzwachstum in den nächsten 3 Jahren erwartet, wird enttäuscht – das kommt (wenn) erst danach.</p>
+      <h3>Umsatz nach Quelle (statt Geografie – da Produktumsatz onkologisch noch fehlt)</h3>
+      <div class="geo-grid">
+        <div class="geo-card"><div class="geo-region">COVID-Impfstoff</div><div class="geo-pct">~85%</div><div class="geo-note">EU (DE direkt) + US via Pfizer, rückläufig</div></div>
+        <div class="geo-card"><div class="geo-region">BMS-Kollaboration</div><div class="geo-pct">stabil</div><div class="geo-note">$2 Mrd. nicht-erfolgsabh. bis 2028</div></div>
+        <div class="geo-card"><div class="geo-region">Pandemie-Bereitschaft</div><div class="geo-pct">gering</div><div class="geo-note">Bundesregierung, planbar</div></div>
+        <div class="geo-card"><div class="geo-region">Onkologie-Produkte</div><div class="geo-pct">$0</div><div class="geo-note">Erst ab ~2028 erwartet</div></div>
+      </div>
+      <p>Profitabilität wächst nicht schneller als Umsatz – im Gegenteil: BioNTech ist tief in der Verlustzone und bleibt es bis zu den ersten Onkologie-Launches. Das Wachstum ist also weder „echt" im heutigen Umsatz noch profitabel; es ist ein Versprechen auf 2028+.</p>
+      <div class="source">Quellen: BioNTech FY2026-Guidance (Q1-2026 Report); FiercePharma (10.03.2026); Truist-Schätzung via BioSpace (09.09.2025); eigene Ableitung aus Guidance + Pipeline-Timing</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 5 ============ -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Klassische Gewinn-Multiples (P/E, PEG) sind bei BioNTech <strong>nicht anwendbar</strong> (Verlust). Die Bewertung erfolgt über Netto-Cash-Boden, EV und Sum-of-the-Parts der Pipeline. Kennzahlen aus CNBC/CNN/investing.com (Juni 2026); finviz für US-Werte nicht durchgängig verfügbar.</div>
+      <p>Der zentrale Bewertungspunkt – und das stärkste Bull-Argument – ist die Nähe zum Netto-Cash: Bei ~$90 Kurs und ~$77/Aktie Netto-Cash bezahlt der Markt für die <em>gesamte</em> Onkologie-Pipeline plus das (schrumpfende) COVID-Geschäft nur einen Enterprise Value von grob <span class="pill">$3–4 Mrd.</span> Für ein Unternehmen mit 15 laufenden Phase-3-Onkologie-Studien und einem $11,1-Mrd.-BMS-Deal für pumitamig ist das bemerkenswert wenig. Faktisch bekommt man die Pipeline nahezu geschenkt und den Cash als Sicherheitsnetz.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>BioNTech</th><th>Einordnung</th></tr></thead>
+          <tbody>
+            <tr><td>P/E (TTM / FWD)</td><td>negativ</td><td>Verlustphase – nicht aussagekräftig</td></tr>
+            <tr><td>Marktkap.</td><td>~$22,8 Mrd.</td><td>Large Cap</td></tr>
+            <tr><td>Netto-Cash</td><td>~$19,6 Mrd.</td><td>≈ 86% der Marktkap.</td></tr>
+            <tr><td>Enterprise Value</td><td>~$3–4 Mrd.</td><td>Pipeline fast „gratis"</td></tr>
+            <tr><td>EV / Umsatz</td><td>~1,0–1,3x</td><td>Niedrig für Biotech mit Plattform</td></tr>
+            <tr><td>Bruttomarge</td><td>~82%</td><td>Hochwertig (Impfstoff-Ökonomie)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Analysten sehen das ähnlich: Berenberg nennt den Kurs „deeply undervalued" (Ziel $140, Buy). Ein DCF-basiertes Fair-Value-Modell (WallStreetZen) kommt allerdings deutlich tiefer (~$49) heraus – ein guter Reminder, dass DCFs bei präkommerziellen Pipelines fast beliebig sind. Der Analystenkonsens liegt bei „Buy" mit Kurszielen von grob $122–135 (Einzelziele $75–171). Die Spannweite zeigt: Es ist ein Bewertungs-Fall mit hoher Ergebnisunsicherheit, kein sauber quantifizierbarer Cashflow-Wert.</p>
+      <p><strong>Warum trotzdem 8/10:</strong> Der Netto-Cash-Boden begrenzt das fundamentale Downside stark (Unterstützung bei ~$77–80), während die Pipeline-Optionalität kostenlos „mitgeliefert" wird. Das ist ein asymmetrisches Bewertungsprofil – der Hauptgrund, überhaupt über ein Investment nachzudenken.</p>
+      <div class="source">Quellen: CNBC/CNN Markets BNTX (Juni 2026); investing.com (03.06.2026); Berenberg-Note via TipRanks (12.05.2026); WallStreetZen (April 2026); stockanalysis.com Konsens</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 6 ============ -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <p>Die Bilanzqualität ist herausragend, die laufende Cash-Generierung ist es nicht. Zum 31.03.2026 hielt BioNTech €16,76 Mrd. an Cash, Cash-Äquivalenten und Wertpapieren (~$19,6 Mrd.) – bestehend aus €9,94 Mrd. Cash, €4,70 Mrd. current und €2,13 Mrd. non-current Securities. Die Verschuldung ist minimal (Debt/Equity ~1,6%). Das ist eine der stärksten Bilanzen im gesamten Biotech-Sektor.</p>
+      <p>Gleichzeitig ist der Free Cashflow klar negativ: Bei einem Q1-Nettoverlust von €531,9 Mio. und F&E von €557 Mio./Quartal verbrennt das Unternehmen operativ Geld. Die garantierten BMS-Zahlungen ($2 Mrd. nicht-erfolgsabhängig bis 2028) und die Restumsätze aus COVID dämpfen den Cash-Abbau, aber es entsteht derzeit kein operativer Cashflow, aus dem sich das Geschäft selbst trägt. Reichweite ist dennoch kein Thema – die Kriegskasse trägt viele Jahre.</p>
+      <p>Kapitalallokation: BioNTech fährt ein Kostensparprogramm (Schließung/Verkauf der Standorte Idar-Oberstein, Marburg, Tübingen bis Ende 2027, Singapur bis Q1 2027; bis zu 1.860 Stellen betroffen), das ab 2029 ~€500 Mio. jährliche Einsparungen bringen soll. Parallel läuft ein Aktienrückkauf von bis zu $1 Mrd. über 12 Monate. Das signalisiert Disziplin und Vertrauen in den inneren Wert – ist aber bei einem verlustträchtigen Unternehmen auch ein zweischneidiges Schwert (Cash wird zurückgekauft, statt in noch mehr Pipeline gesteckt).</p>
+      <p>ROE/ROA sind negativ (Verlust), die Bruttomarge mit ~82% aber sehr hoch. Netto: Erstklassige Kapital<em>ausstattung</em>, unterdurchschnittliche Kapital<em>rendite</em> in der aktuellen Phase → 6/10.</p>
+      <div class="source">Quellen: BioNTech Q1-2026 Report (05.05.2026); Nasdaq/BioNTech IR; Reuters via stockanalysis.com (Kostenprogramm, Mai 2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 7 ============ -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Peer-Kennzahlen sind Näherungswerte (Google/Yahoo Finance, SEC-Filings, Stand ~Q1–Q2 2026) und dienen der Einordnung, nicht als exakte Stichtagswerte. Marktkapitalisierungen gerundet.</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Unternehmen</th><th>Fokus</th><th>Marktkap.</th><th>Umsatz FY25</th><th>Bewertung</th><th>Relevanz</th></tr></thead>
+          <tbody>
+            <tr><td><strong>BioNTech (BNTX)</strong></td><td>IO + mRNA</td><td>~$23 Mrd.</td><td>€2,87 Mrd.</td><td>EV ~$3–4 Mrd. (Netto-Cash)</td><td>—</td></tr>
+            <tr><td>Moderna (MRNA)</td><td>mRNA Impf + Onko</td><td>~$20–24 Mrd.</td><td>$1,9 Mrd. (-40%)</td><td>Verlust, Netto-Cash-nah</td><td>Direkter mRNA-Rivale, gleicher Onko-Pivot</td></tr>
+            <tr><td>Summit (SMMT)</td><td>Ivonescimab (PD-1×VEGF)</td><td>~$10–11 Mrd.</td><td>präkommerziell</td><td>Reiner Pipeline-Wert</td><td class="miss">Direkter pumitamig-Konkurrent, US voraus</td></tr>
+            <tr><td>Pfizer (PFE)</td><td>Big Pharma</td><td>~$140–150 Mrd.</td><td>~$62 Mrd.</td><td>P/E ~8, Div. ~7%</td><td>Ex-COVID-Partner, Bewertungs-Benchmark</td></tr>
+            <tr><td>CRISPR Ther. (CRSP)</td><td>Gene Editing</td><td>~$4–5 Mrd.</td><td>gering (Casgevy)</td><td>Verlust, andere Modalität</td><td>Next-Gen-Plattform-Kontrast</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Qualitativ:</strong> Gegenüber Moderna hat BioNTech die stärkere Bilanz und mit pumitamig ein weiter fortgeschrittenes, breit partnergestütztes Onkologie-Asset; Moderna ist im mRNA-Krebsimpfstoff (intismeran, mit Merck) beim individualisierten Ansatz teils voraus. Gegenüber Summit ist BioNTech finanziell und in der Indikationsbreite überlegen (BMS-Muskel, >20 Studien), aber Summit/Akeso ist im konkreten US-Zulassungsrennen für die PD-(L)1×VEGF-Klasse vorn. Pfizer ist die profitable, dividendenstarke „Value"-Referenz – ein völlig anderes Risikoprofil. CRISPR steht für die nächste Modalitäts-Welle (Gen-Editing), die langfristig sowohl Chance als auch Disruptionsrisiko ist.</p>
+      <p>Netto: BioNTech ist im Peer-Set das „Deep-Value-mit-Pipeline-Optionalität"-Profil – bilanziell das sicherste der spekulativen Namen, aber im entscheidenden Onkologie-Wettlauf nicht der klare Anführer. Daher 6/10.</p>
+      <div class="source">Quellen: Google/Yahoo Finance (Juni 2026); Moderna FY2025 8-K; Summit Therapeutics 8-K Q1 2026; SEC-Filings; MacroTrends</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 8 ============ -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">10.03.2026 – Gründer Sahin &amp; Türeci verlassen BioNTech bis Ende 2026 <span class="badge badge-red">Sehr negativ (kurzfr.)</span></div><div class="event-text">CEO und CMO gründen neue mRNA-Firma; Aktie fällt am Tag &gt;20%. Aufsichtsrat sucht Nachfolger. Quelle: BioPharma Dive / FiercePharma, 10.03.2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">30.05.2026 – ASCO: pumitamig-Phase-2-Daten in NSCLC überzeugend <span class="badge badge-green">Positiv</span></div><div class="event-text">Bestätigte ORR 63,6% (non-squamous) bzw. 72,7% (squamous), über alle PD-L1-Level. ROSETTA Lung-02 Phase-3-Teil (vs. Pembrolizumab) rekrutiert. Quelle: BMS/BioNTech PR, 30.05.2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">05.05.2026 – Q1-Zahlen + Kostenprogramm + $1 Mrd. Rückkauf <span class="badge badge-yellow">Gemischt</span></div><div class="event-text">Umsatz -35% YoY, Verlust weiter; Standortschließungen (~1.860 Stellen), Guidance bestätigt. Quelle: BioNTech IR, 05.05.2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">18.12.2025 – CureVac-Übernahme abgeschlossen (86,75% angedient) <span class="badge badge-green">Positiv (strategisch)</span></div><div class="event-text">All-Stock, ~$1,25 Mrd.; stärkt mRNA-IP &amp; Fertigung, löst Patentstreit. Quelle: SEC / Quiver, 18.12.2025</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">März 2026 (ELCC) – gotistobart (CTLA-4) OS-Vorteil in squamous NSCLC <span class="badge badge-green">Positiv</span></div><div class="event-text">Klinisch bedeutsamer Überlebensvorteil; pivotaler Phase-3-Zwischenstand später 2026. Quelle: PharmExec, Mai 2026</div></div></div>
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">29.01.2026 – Ivonescimab (Summit/Akeso): FDA-BLA angenommen, PDUFA 14.11.2026 <span class="badge badge-red">Negativ (Wettbewerb)</span></div><div class="event-text">Direkter PD-1×VEGF-Konkurrent im US-Zulassungspfad vor pumitamig. Quelle: Summit 8-K, 29.01.2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Q2 2026 – HARMONi-3-Interim (Ivonescimab vs. Pembro) ohne Früh-Effektsignal <span class="badge badge-yellow">Neutral / klassenrelevant</span></div><div class="event-text">Finale PFS-Analyse H2 2026; wirft Frage auf, wie stark PD-1×VEGF Keytruda wirklich verdrängt. Quelle: allsci.com, 01.05.2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">2025 – Wettrüsten PD-(L)1×VEGF: Pfizer/3SBio ($1,25 Mrd.), Merck ($588 Mio.) <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Große Pharma drängt in die Klasse – validiert das Feld, erhöht aber den Wettbewerb. Quelle: FierceBiotech, 02.06.2025</div></div></div>
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Mai 2026 – FDA-Panel: COVID-Impfstoff-Empfehlungen 2026/27 restriktiver <span class="badge badge-yellow">Negativ (COVID-Basis)</span></div><div class="event-text">Politischer/regulatorischer Gegenwind für COVID-Impfnachfrage in den USA. Quelle: Reuters via investing.com, Mai 2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Laufend – US-Zoll-/Pharmapolitik &amp; FDA-Führungswechsel <span class="badge badge-yellow">Unsicherheit</span></div><div class="event-text">Regulatorische Unberechenbarkeit (FDA-Personal, Zölle) belastet den Sektor. Quelle: CNBC/TipRanks, 2026</div></div></div>
+      <div class="source">Quellen: siehe Einzelnachweise je Event; BioNTech IR, BMS/Summit SEC-Filings, FierceBiotech/-Pharma, BioPharma Dive (Dez. 2025 – Juni 2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 9 ============ -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 4/10</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Technische Werte approximiert aus Kurshistorie (Yahoo/investing.com, Juni 2026). Keine finviz-Live-Daten in dieser Umgebung; Levels als Orientierung, nicht als exakte Signale.</div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">~$90</div></div>
+        <div class="kpi-card"><div class="kpi-label">Trend</div><div class="kpi-value red">Abwärts</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value">~$92</div><div class="kpi-sub">Kurs darunter/knapp</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value red">~$100+</div><div class="kpi-sub">Kurs darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Tief</div><div class="kpi-value">$79,52</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Hoch</div><div class="kpi-value">$124,00</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI</div><div class="kpi-value neutral">neutral-schwach</div></div>
+      </div>
+      <p>Das Chartbild ist klar angeschlagen. Die Aktie handelt nahe dem 52-Wochen-Tief ($79,52), unter der 200-Tage-Linie und rund -12% unter dem 52W-Hoch. Der Kurs kollabierte am 10.03.2026 (&gt;-20%) auf die Gründer-Abgangs-News und hat sich seitdem im tiefen $80–100-Bereich seitwärts-abwärts eingependelt. Über die letzten 12 Monate liegt die Performance klar negativ (~-19%).</p>
+      <p>Wichtige Levels: <strong>Unterstützung</strong> im Bereich $79–80 (52W-Tief + grob Netto-Cash-Boden) – ein charttechnisch <em>und</em> fundamental doppelt abgestütztes Niveau. <strong>Widerstände</strong> bei ~$100 (200-Tage-Linie, runde Marke) und darüber ~$108–124 (frühere Handelszone / 52W-Hoch). Ein nachhaltiger Ausbruch über $100 würde technisch die Trendwende einleiten, ist aber ohne fundamentalen Katalysator (Pipeline-Daten) unwahrscheinlich.</p>
+      <p>Momentum/Volumen: Kein Kaufsignal, aber die Nähe zum Netto-Cash-Boden begrenzt das technische Abwärtspotenzial. Für kurzfristige Trader unattraktiv (kein Trend), für Value-orientierte Langfrist-Investoren eher eine Akkumulationszone. Score 4/10 – schwacher Chart, aber mit hartem fundamentalem Boden.</p>
+      <div class="source">Quellen: Yahoo Finance Kurshistorie; investing.com (03.06.2026); MacroTrends; CNN Markets (Juni 2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 10 ============ -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 5/10 (invertiert)</div>
+    </div>
+    <div class="section-body">
+      <h3>10a) Strukturelle &amp; zyklische Risiken</h3>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">👤 Key-Person-/Governance-Risiko (Gründer-Abgang)</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div><div class="event-text">Sahin &amp; Türeci verlassen das Unternehmen Ende 2026 und gründen eine <em>konkurrierende</em> mRNA-Firma, die einen Teil der mRNA-Technologie mitnimmt – ausgehandelt teils „mit sich selbst", bevor ein neuer CEO installiert ist. BioNTech erhält nur eine Minderheitsbeteiligung. Wahrscheinlichkeit: eingetreten/sicher. Wissenschaftliche Führungslücke.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚔️ Wettbewerb PD-(L)1×VEGF (Ivonescimab voraus)</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div><div class="event-text">Summit/Akeso ist im US-Zulassungspfad ~12–18 Monate vor pumitamig (PDUFA 14.11.2026). Zusätzlich Merck- und Pfizer/3SBio-Kandidaten. First-Mover-Vorteil in der Klasse droht verloren zu gehen. Wahrscheinlichkeit: hoch.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">📉 COVID-Klippe</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-yellow">Auswirkung: Mittel</span></div></div><div class="event-text">Das einzige nennenswerte Umsatzbein schrumpft strukturell; US-Regulierung (FDA-Panel) verschärft die Nachfrageschwäche. Bis Onkologie trägt (~2028), klafft eine Umsatzlücke. Wahrscheinlichkeit: hoch.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">🎲 Klinisches Binärrisiko (Phase-3-Readouts)</div><div><span class="badge badge-yellow">Mittel-Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div><div class="event-text">Der Wert hängt an pumitamig &amp; Co. Enttäuschende Phase-3-Daten (v.a. vs. Keytruda) würden die Onkologie-These aushöhlen. Bereits erfolgt: Stopp von autogene cevumeran in Urothelkarzinom. Wahrscheinlichkeit einzelner Fehlschläge: real.</div></div>
+      <h3>10b) AI-/Technologie-Disruption</h3>
+      <p>BioNTech ist auf der <em>nutzenden</em> Seite von KI (Computational Drug Discovery, mRNA-Design) – hier eher Chance als Bedrohung. Das echte Disruptionsrisiko ist modalitätsseitig: Sollte Gen-Editing (CRISPR) oder eine überlegene bispezifische/ADC-Plattform die mRNA-/PD-(L)1×VEGF-Ansätze mittelfristig überholen, verlöre die Pipeline an Wert. Bullisch: BioNTechs breite Plattform (mRNA + Antikörper + ADC + CAR-T) diversifiziert dieses Risiko. Bärisch: Breite ohne klaren Klassenführer verwässert Fokus und Kapital.</p>
+      <h3>10c) Chancen</h3>
+      <p>pumitamig als „IO-Backbone" über viele solide Tumoren (NSCLC, SCLC, TNBC, CRC, Magen) mit 50:50-BMS-Ökonomie; ADC-Programm (trastuzumab pamirtecan/T-Pam); gotistobart (CTLA-4); mRNA-Krebsimpfstoffe (autogene cevumeran in Pankreas/CRC, BNT113); CureVac-IP/Fertigung; ~$500 Mio. Kosteneinsparungen ab 2029; Netto-Cash für opportunistische M&amp;A oder Rückkäufe. Ein einziger klarer Phase-3-Erfolg vs. Keytruda könnte den EV vervielfachen.</p>
+      <h3>10d) Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> Gründer nehmen Kern-mRNA-IP mit; wiederholte Programm-Stopps; Umsatz-YoY negativ; Insider-Verkaufsdruck möglich. <strong>Dealbreaker (Ausstieg):</strong> Phase-3-Fehlschlag von pumitamig in NSCLC/SCLC <em>und</em> Unterlegenheit gegen Ivonescimab; Abwanderung weiterer Schlüsselwissenschaftler; Aufgabe des Onkologie-Fokus. Aktuell KEIN existenzbedrohender Dealbreaker eingetreten – der Cash-Boden schützt.</p>
+      <p><strong>Gesamt-Risikoscore 5/10 (invertiert):</strong> erhöhtes Risikoprofil (Gründer, Wettbewerb, Binärität, COVID-Klippe), aber durch die Festungsbilanz nach unten abgefedert.</p>
+      <div class="source">Quellen: value-and-opportunity Analyse (11.03.2026); BioPharma Dive (10.03.2026); Summit 8-K (2026); BioNTech FY2025/Q1-2026; FierceBiotech</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 11 ============ -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring &amp; User-spezifische Analyse</div>
+      <div class="section-score">Ø 5,6/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Visualisierung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td>Geschäftsmodell</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Klare IO/mRNA-Plattform, aber Umsatz noch fast rein COVID</td></tr>
+            <tr><td>Burggraben</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Tech/IP/Cash + BMS-Validierung; Onko-Asset zugekauft, umkämpft</td></tr>
+            <tr><td>Operative Entw. (4Q)</td><td><strong>4/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td><td>Umsatz -35% YoY, Verluste weiten sich (gewollt, aber schwach)</td></tr>
+            <tr><td>Wachstum</td><td><strong>5/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Kurzfristig negativ; echte Inflexion erst ~2028</td></tr>
+            <tr><td>Bewertung</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>Nahe Netto-Cash; Pipeline-Optionalität fast gratis</td></tr>
+            <tr><td>Cashflow / Kapital</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>$19,6 Mrd. Festungsbilanz, aber negativer FCF/Cash-Burn</td></tr>
+            <tr><td>Risiken (invertiert)</td><td><strong>5/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Gründer-Abgang, Wettbewerb, Binärität, COVID-Klippe</td></tr>
+            <tr><td>Technische Analyse</td><td><strong>4/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td><td>Abwärtstrend, nahe 52W-Tief, unter 200-Tage-Linie</td></tr>
+            <tr style="background:rgba(59,130,246,0.08);"><td><strong>⌀ Gesamtscore</strong></td><td><strong>5,6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:56%;background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">5,6</span></div></td><td>Deep-Value mit Pipeline-Optionalität, aber viele Überhänge</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>User-Frage 1: Welche gefährlichen Alternativprodukte/Anbieter?</h3>
+      <p><strong>Primär: Ivonescimab (Summit Therapeutics / Akeso).</strong> Dasselbe PD-(L)1×VEGF-Wirkprinzip wie pumitamig, aber im US-Zulassungspfad voraus (FDA-BLA angenommen, PDUFA 14.11.2026 in EGFRm-NSCLC nach TKI; in China bereits seit Mai 2024 zugelassen). Es droht, BioNTech/BMS den First-Mover-Status der Klasse zu nehmen. Einschränkung zugunsten BioNTech: Die globale HARMONi-Studie zeigte weniger dramatische OS-Vorteile als die China-Daten, und der HARMONi-3-Interim (vs. Pembrolizumab) lieferte Q2 2026 <em>kein</em> frühes Effektsignal – die Klasse ist also noch nicht als klarer Keytruda-Killer bewiesen.</p>
+      <p><strong>Weitere PD-(L)1×VEGF-Anbieter:</strong> Pfizer (3SBio-Deal, $1,25 Mrd. upfront) und Merck ($588 Mio.) drängen in dieselbe Klasse. <strong>Incumbent-Risiko:</strong> Merck-Keytruda (pembrolizumab) selbst – inkl. subkutaner Formulierung zur Franchise-Verlängerung – ist der Standard, den pumitamig <em>und</em> Ivonescimab erst schlagen müssen. <strong>Im mRNA-Krebsimpfstoff:</strong> Moderna/Merck-intismeran konkurriert mit BioNTechs iNeST/autogene cevumeran. Fazit: Die gefährlichste Alternative ist Ivonescimab (zeitlicher Vorsprung), das größere Klassenrisiko ist, dass PD-(L)1×VEGF Keytruda am Ende <em>nicht</em> so klar verdrängt wie erhofft.</p>
+
+      <h3>User-Frage 2: Realistische alte &amp; neue Wachstumsfelder?</h3>
+      <p><strong>Alt (rückläufig):</strong> COVID-Impfstoff (strukturell fallend), Pandemie-Bereitschaftsverträge (planbar, aber klein). Diese tragen die Bilanz, sind aber kein Wachstumsfeld mehr. <strong>Neu (die eigentliche Story):</strong> pumitamig als IO-Backbone über NSCLC, SCLC, TNBC, Kolorektal, Magen (fünf neue Pivotalstudien 2026 initiiert); ADCs (trastuzumab pamirtecan/T-Pam); gotistobart (CTLA-4, OncoC4); mRNA-Krebsimpfstoffe (autogene cevumeran in Pankreas/CRC, BNT113); plus CureVac-mRNA-IP/Fertigung. Realistisch tragen davon in den nächsten 3 Jahren <em>keine</em> nennenswerten Umsätze – Wert entsteht über Zulassungswahrscheinlichkeit und Meilensteine, Produktumsatz erst ab ~2028.</p>
+
+      <h3>User-Frage 3: Wie stark ist das neue Management-Team?</h3>
+      <p>Das ist der heikelste Punkt. <strong>Was verloren geht:</strong> Sahin (CEO) und Türeci (CMO) sind die wissenschaftliche Seele des Unternehmens – schwer ersetzbar. Ihr Abgang Ende 2026 (in eine <em>konkurrierende</em> Firma, mit mitgenommenem mRNA-IP und nur Minderheitsbeteiligung für BioNTech) ist ein echter Governance- und Vertrauensbruch; Leerink stellt offen die Frage, ob BioNTech „ohne die Insight der Gründer" iterieren kann. <strong>Was aufgebaut wird:</strong> CFO Ramón Zapata (ex-Novartis BioMedical Research, starke Finanz-/M&amp;A-/Integrationserfahrung, seit Juli 2025) ist die neue prägende Stimme; dazu CPO Kylie Jimenez (März 2026) und ein von 6 auf 8 erweiterter Aufsichtsrat (u.a. Löw-Friedrich mit klinischer/kommerzieller Expertise, Schaffert). Die CEO-Suche zielt explizit auf „late-stage development &amp; commercial execution".</p>
+      <p><strong>Einschätzung:</strong> Das neue Team ist <em>kommerziell/finanziell</em> passend für die Reifephase (2028er-Launches), aber als Einheit unerprobt und wissenschaftlich klar geschwächt. Netto: Downgrade in der Forschungs-Vision, Upgrade in Finanzdisziplin/Kommerzialisierung – angemessen für ein Unternehmen, das von „Discovery" zu „Execution" wechselt, aber mit erheblicher Ausführungsunsicherheit. Ich bewerte das Management-Team aktuell als <strong>durchschnittlich-mit-Fragezeichen</strong> – kompetent auf der Umsetzungsseite, aber ohne bewiesene Kohäsion und ohne den bisherigen wissenschaftlichen Zugpferd-Vorteil.</p>
+      <div class="source">Quellen: BioPharma Dive/FiercePharma (10.03.2026); Simply Wall St Leadership (2026); value-and-opportunity (11.03.2026); Summit/BMS SEC-Filings; BioNTech IR</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 12 ============ -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-score">HALTEN</div>
+    </div>
+    <div class="section-body">
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 – Asymmetrie durch Netto-Cash:</strong> Bei ~$90 zahlt man ~$77/Aktie in Cash; der EV von nur ~$3–4 Mrd. bepreist eine Pipeline mit 15 Phase-3-Studien und einem $11,1-Mrd.-BMS-Deal quasi bei null. Der Boden bei ~$77–80 begrenzt das fundamentale Downside hart, während die Onkologie-Optionalität gratis mitkommt.</p>
+          <p><strong>Säule 2 – pumitamig als IO-Backbone:</strong> ASCO-2026-Daten (ORR 63–73% in 1L-NSCLC über alle PD-L1-Level; 76% in SCLC) sind stark. BMS trägt 50% der Kosten und zahlt garantiert $3,5 Mrd. bis 2028 – Cash <em>unabhängig</em> vom Studienausgang. Ein Erfolg vs. Keytruda in nur einer Großindikation (NSCLC allein &gt;$20 Mrd. Markt) würde den EV vervielfachen.</p>
+          <p><strong>Säule 3 – Reifephase + Disziplin:</strong> Neuer CFO, ~€500 Mio. Kosteneinsparungen ab 2029, $1 Mrd. Rückkauf, breite Optionalität (ADC, CTLA-4, mRNA-Vakzine, CureVac-IP). Analystenkonsens „Buy", Ziele $122–135 (Berenberg $140, „deeply undervalued").</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 – Gründer weg, Vision weg:</strong> Sahin/Türeci verlassen Ende 2026 in eine konkurrierende mRNA-Firma und nehmen Kern-IP mit. Führungs-/Vertrauenslücke; das Team, das die Onkologie-Vision einlösen soll, ist unerprobt. Der Markt hat darauf mit -20%+ reagiert – zu Recht.</p>
+          <p><strong>Risiko 2 – Wettbewerb schlägt Timing:</strong> Ivonescimab (Summit/Akeso) ist im US-Pfad ~12–18 Monate voraus (PDUFA 11/2026). Falls pumitamig als Zweiter kommt <em>und</em> die Klasse Keytruda nur moderat schlägt (siehe schwächere globale HARMONi-OS-Daten, HARMONi-3-Interim ohne Frühsignal), verpufft die Preissetzungs-/Marktanteils-Fantasie.</p>
+          <p><strong>Risiko 3 – Bewertung kann tiefer:</strong> „Nahe Cash" ist kein Boden, wenn der Cash über Jahre verbrannt wird (Q1-Verlust €532 Mio.). DCF-Modelle kommen bei ~$49 heraus. Umsatz schrumpft 2026 um 20–30%; bis Onkologie trägt (~2028) gibt es keinen operativen Turnaround-Katalysator. „Value-Trap"-Gefahr.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung (ausgewogen)</h3>
+      <p>Beide Narrative haben Substanz, aber sie adressieren unterschiedliche Zeithorizonte. Das bärische Narrativ dominiert die nächsten 12–18 Monate: kein Umsatzwachstum, Führungsvakuum, Wettbewerber voraus, kein sauberer Katalysator zur Profitabilität. Das bullische Narrativ dominiert den 3–5-Jahres-Horizont: Wenn pumitamig in ≥1 Großindikation liefert, ist die heutige Bewertung absurd niedrig, und der Netto-Cash-Boden hat das Warten „bezahlt".</p>
+      <p>Für einen Quality-Growth-Investor mit 2–5-Jahres-Horizont ist BioNTech <em>kein</em> sauberer Compounder (dafür fehlt profitables, stetiges Wachstum), sondern ein <strong>asymmetrischer, cash-abgesicherter Optionsschein auf die PD-(L)1×VEGF-/Onkologie-These</strong>. Das Risk/Reward ist attraktiv – aber nur, wenn man die Binärität und die Governance-Belastung akzeptiert. Ich könnte falsch liegen, wenn (a) die gesamte PD-(L)1×VEGF-Klasse Keytruda enttäuschend wenig schlägt, oder (b) das Team ohne die Gründer die Execution vermasselt. Beides ist real.</p>
+      <p>Deshalb lautet die disziplinierte Empfehlung <strong>HALTEN / für Risikotolerante tranchiert akkumulieren</strong> – kein aggressives Kaufen vor den entscheidenden 2026er-Readouts, aber die Nähe zum Cash-Boden macht Positionsaufbau in Schwäche für Langfristige vertretbar. Risk/Reward: ~-14% Downside (auf ~$78) vs. ~+38% Upside (auf ~$125 Konsens), mit deutlich größerem Tail-Upside bei Pipeline-Erfolg.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Katalysatoren / Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kurz (0–6 M)</strong></td><td>Q2-Zahlen (04.08.), pumitamig-Readouts, Ivonescimab-PDUFA (11/2026), CEO-Suche</td><td><span class="badge badge-yellow">Halten / abwarten</span></td></tr>
+            <tr><td><strong>Mittel (6–24 M)</strong></td><td>Phase-3-Interims (NSCLC/SCLC/TNBC), neuer CEO, Klarheit Keytruda-Vergleich</td><td><span class="badge badge-orange">Tranchiert akkumulieren</span></td></tr>
+            <tr><td><strong>Lang (2–5 J)</strong></td><td>pumitamig-Launches (~2028), Multi-Product-Onkologie, Kostensynergien</td><td><span class="badge badge-green">Kaufen &amp; Halten (spekulativ)</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>BioNTech ist heute im Wesentlichen zum Netto-Cash bewertet – man erhält eine breite, BMS-validierte Onkologie-Pipeline (Kern: pumitamig) nahezu geschenkt, abgesichert durch ~$19,6 Mrd. Cash. Der Preis dafür sind erhebliche Überhänge: schrumpfender COVID-Umsatz, ein im US-Zulassungsrennen vorausliegender Konkurrent (Ivonescimab) und der Abgang der Gründer Ende 2026. Es ist eine Wette auf Zulassungserfolg und Execution des neuen, kommerziell ausgerichteten Teams – asymmetrisch nach oben, aber binär und geduldsintensiv.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$105–125</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–5 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">-14%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+38%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:2,7</div></div>
+      </div>
+
+      <h3>Was falsifiziert die These?</h3>
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>pumitamig-Phase-3 in NSCLC/SCLC verfehlt Endpunkte oder unterliegt klar Ivonescimab → verkaufen</li>
+            <li>Weitere Schlüssel-Wissenschaftler folgen den Gründern → reduzieren</li>
+            <li>Kurs bricht nachhaltig unter ~$77 (Netto-Cash-Boden) bei gleichzeitigem Pipeline-Rückschlag → Ausstieg</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>pumitamig schlägt Pembrolizumab in ≥1 Phase-3 (ROSETTA) statistisch signifikant → nachkaufen</li>
+            <li>Renommierter Onkologie-CEO mit Commercial-Track-Record wird ernannt → aufstocken</li>
+            <li>Positiver Zulassungs-/Launch-Pfad 2028 bestätigt sich (SCLC/NSCLC) → Position ausbauen</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Welcher Anlegertyp passt?</h3>
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul><li>Risikotolerante Quality-Growth-Investoren (2–5 J)</li><li>Contrarian / Deep-Value mit Katalysator-Geduld</li><li>Anleger, die Binärität &amp; Cash-Boden verstehen</li></ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul><li>Income-Investoren (keine Dividende)</li><li>Kurzfristige Trader (kein Trend, kein Katalysator)</li><li>Anleger ohne Toleranz für Verlust-Biotech &amp; Studien-Binärität</li></ul>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten</span></td><td>Abwarten bis CEO-Klarheit + erste Phase-3-Interims</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>Kleine Startposition nahe Cash-Boden, Rest nach Readouts</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Akkumulieren in Schwäche</span></td><td>Asymmetrie bei ~$80–90 attraktiv, Tail-Upside</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten (spekulativ)</span></td><td>Optionswert auf Onkologie-Multi-Product bis 2030</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Synthese aus Sektionen 1–11; Analystenkonsens stockanalysis.com/TipRanks/Benzinga (Q2 2026); BioNTech IR; BMS/Summit SEC-Filings</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 13 ============ -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Die 3 wichtigsten anstehenden Events</div>
+      <div class="section-note">Wenn/Dann-Logik</div>
+    </div>
+    <div class="section-body">
+      <div class="outlook-card">
+        <h4>📊 Event 1: pumitamig ROSETTA-Phase-3-Interims (NSCLC/SCLC) – 2026/27</h4>
+        <p>Die entscheidenden Readouts der Pivotalstudien gegen Pembrolizumab (Lung-02) bzw. in ES-SCLC (Lung-01). Sie bestimmen, ob pumitamig ein Blockbuster-IO-Backbone oder ein „Me-too-hinter-Ivonescimab" wird.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> pumitamig + Chemo schlägt Pembrolizumab + Chemo in ≥1 Studie statistisch signifikant (PFS/OS) → das Onkologie-Kernszenario ist bestätigt, EV-Neubewertung deutlich nach oben, <em>nachkaufen</em>.<br><br>
+          <strong>Wenn:</strong> Endpunkte verfehlt oder nur marginaler Vorteil bei schlechterem Timing als Ivonescimab → These halbiert, <em>Position reduzieren</em> und Cash-Boden als Ausstiegsanker nutzen.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>⚔️ Event 2: Ivonescimab FDA-PDUFA (Summit/Akeso) – 14.11.2026</h4>
+        <p>Die erste US-Zulassungsentscheidung der PD-(L)1×VEGF-Klasse. Sie ist Referenzpunkt für pumitamigs Marktumfeld und für die Frage, wie stark die Klasse Keytruda wirklich verdrängt.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Ivonescimab wird zugelassen und liefert überzeugende reale Verdrängung von Keytruda → validiert die Klasse (positiv für pumitamig-These), aber First-Mover-Nachteil für BioNTech bleibt → <em>halten, Klassen-Bestätigung abwarten</em>.<br><br>
+          <strong>Wenn:</strong> Verzögerung/Ablehnung oder enttäuschende reale Wirksamkeit → Zweifel an der ganzen Klasse; belastet auch pumitamig-Fantasie → <em>vorsichtiger positionieren</em>.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>👤 Event 3: Ernennung des neuen CEO – bis Ende 2026</h4>
+        <p>Der Aufsichtsrat sucht einen Nachfolger mit „late-stage development &amp; commercial execution". Die Personalie signalisiert, ob BioNTech die Reifephase glaubwürdig managen kann.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Ein renommierter Onkologie-/Big-Pharma-Manager mit belegtem Launch-Track-Record übernimmt → Governance-Überhang löst sich, Vertrauens-Re-Rating möglich → <em>aufstocken</em>.<br><br>
+          <strong>Wenn:</strong> Übergangs-/Interimslösung oder schwache Besetzung, während Gründer parallel eine Konkurrenzfirma aufbauen → Führungs-Discount bleibt → <em>Untergewicht halten</em>.
+        </div>
+      </div>
+      <div class="source">Quellen: BioNTech IR / Q1-2026 Call (05.05.2026); Summit 8-K PDUFA (29.01.2026); BioPharma Dive CEO-Suche (10.03.2026)</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken und stellt keine Anlageberatung, kein Angebot und keine Empfehlung zum Kauf oder Verkauf von Wertpapieren dar. Aktienanalysen unterliegen Unsicherheiten; insbesondere klinische Studien (Phase 3), regulatorische Entscheidungen und Wettbewerbsdynamiken sind binär und schwer prognostizierbar. Kurs-, Bilanz- und Konsensdaten sind Näherungswerte mit Stand ~Juni/Juli 2026 (Yahoo Finance, CNN, investing.com, SEC-Filings, Unternehmens-IR) und können veraltet sein. Vergangene Wertentwicklung ist kein Indikator für die Zukunft. Jeder Anleger trifft seine Entscheidungen eigenverantwortlich. Der Autor ist kein Finanzberater. Bitte eigene Recherche (DYOR) und ggf. professionelle Beratung einholen.</div>
+
+</div>
+</body>
+</html>
