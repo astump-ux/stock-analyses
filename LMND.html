@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LMND – Aktienanalyse Canvas v2.2</title>
+<style>
+:root{
+  --primary:#8b5cf6; --primary-dark:#7c3aed;
+  --bg:#0f0f12; --bg-card:#1a1a1f; --bg-card2:#22222a; --border:#2e2e38;
+  --text:#e8e8ec; --text-muted:#888898; --text-dim:#555566;
+  --green:#22c55e; --red:#ef4444; --yellow:#f59e0b; --blue:#3b82f6; --purple:#8b5cf6; --teal:#14b8a6;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+.header{background:linear-gradient(135deg,#0e0018 0%,#1a0028 40%,#0f0f12 100%);border-bottom:1px solid var(--primary);padding:36px 40px 28px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;}
+.header-left h1{font-size:32px;font-weight:700;color:white;letter-spacing:-0.5px;}
+.header-left h1 span{color:var(--primary);}
+.header-left .subtitle{color:var(--text-muted);font-size:14px;margin-top:4px;}
+.header-right{text-align:right;}
+.price-tag{font-size:38px;font-weight:800;color:var(--primary);line-height:1;}
+.price-meta{color:var(--text-muted);font-size:13px;margin-top:4px;}
+.price-change{display:inline-block;padding:2px 8px;border-radius:4px;font-size:13px;font-weight:600;margin-top:4px;}
+.price-change.up{background:rgba(34,197,94,0.15);color:var(--green);}
+.price-change.down{background:rgba(239,68,68,0.15);color:var(--red);}
+.nav{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:100;}
+.nav a{color:var(--text-muted);text-decoration:none;padding:14px 16px;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.2s;}
+.nav a:hover{color:var(--primary);border-bottom-color:var(--primary);}
+.main{max-width:1100px;margin:0 auto;padding:32px 40px 60px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px;}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.kpi-value{font-size:22px;font-weight:700;color:white;margin-top:4px;}
+.kpi-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.kpi-value.green{color:var(--green);}.kpi-value.red{color:var(--red);}.kpi-value.orange{color:var(--primary);}
+.section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden;}
+.section-header{background:var(--bg-card2);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.section-number{background:var(--primary);color:white;width:28px;height:28px;border-radius:6px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-title{font-size:16px;font-weight:700;color:white;}
+.section-score{margin-left:auto;font-size:14px;font-weight:700;color:var(--primary);}
+.section-note{font-size:12px;color:var(--text-dim);background:rgba(46,46,56,0.4);border-radius:4px;padding:4px 10px;margin-left:auto;}
+.section-body{padding:20px 24px;}
+p{margin-bottom:12px;color:var(--text);}p:last-child{margin-bottom:0;}
+h3{font-size:14px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 8px;}h3:first-child{margin-top:0;}
+.table-wrap{overflow-x:auto;margin:16px 0;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--bg-card2);color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:10px 12px;border-bottom:1px solid rgba(46,46,56,0.5);color:var(--text);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(139,92,246,0.05);}
+.beat{color:var(--green);font-weight:600;}.miss{color:var(--red);font-weight:600;}.neutral{color:var(--yellow);font-weight:600;}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}
+.badge-green{background:rgba(34,197,94,0.15);color:var(--green);}
+.badge-red{background:rgba(239,68,68,0.15);color:var(--red);}
+.badge-yellow{background:rgba(245,158,11,0.15);color:var(--yellow);}
+.badge-blue{background:rgba(59,130,246,0.15);color:var(--blue);}
+.badge-orange{background:rgba(139,92,246,0.15);color:var(--primary);}
+.event-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(46,46,56,0.5);align-items:flex-start;}
+.event-item:last-child{border-bottom:none;}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0;}
+.dot-green{background:var(--green);}.dot-red{background:var(--red);}.dot-yellow{background:var(--yellow);}
+.event-label{font-weight:600;color:white;}
+.event-text{font-size:14px;color:var(--text);}
+.risk-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.risk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:6px;}
+.risk-title{font-weight:600;color:white;font-size:14px;}
+.score-bar{display:flex;align-items:center;gap:10px;}
+.score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#a78bfa);}
+.score-num{font-weight:700;color:var(--primary);font-size:15px;min-width:32px;}
+.bull-bear-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:700px){.bull-bear-grid{grid-template-columns:1fr;}}
+.bull-card{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:16px;}
+.bear-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:16px;}
+.bull-card h4{color:var(--green);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.bear-card h4{color:var(--red);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.rating-box{background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(139,92,246,0.04));border:1px solid rgba(139,92,246,0.3);border-radius:12px;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:20px 0;}
+.rating-item label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;display:block;margin-bottom:4px;}
+.rating-item .val{font-size:20px;font-weight:800;color:white;}
+.rating-item .val.buy{color:var(--green);}.rating-item .val.hold{color:var(--yellow);}.rating-item .val.sell{color:var(--red);}
+.trigger-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+@media(max-width:700px){.trigger-grid{grid-template-columns:1fr;}}
+.trigger-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.trigger-card h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.trigger-card.buy h5{color:var(--green);}.trigger-card.sell h5{color:var(--red);}
+.trigger-list{font-size:13px;color:var(--text);list-style:none;padding:0;}
+.trigger-list li{margin-bottom:6px;padding-left:14px;position:relative;}
+.trigger-list li::before{content:"→";position:absolute;left:0;}
+.investor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+@media(max-width:600px){.investor-grid{grid-template-columns:1fr;}}
+.investor-yes{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px;}
+.investor-no{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:12px;}
+.investor-yes h5{color:var(--green);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-no h5{color:var(--red);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-yes li,.investor-no li{font-size:13px;color:var(--text);margin-bottom:4px;list-style:none;padding-left:14px;position:relative;}
+.investor-yes li::before{content:"✓";position:absolute;left:0;color:var(--green);}
+.investor-no li::before{content:"✗";position:absolute;left:0;color:var(--red);}
+.geo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0;}
+.geo-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.geo-region{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.geo-pct{font-size:20px;font-weight:700;color:white;}
+.geo-note{font-size:12px;color:var(--text-muted);}
+.outlook-card{background:var(--bg-card2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:16px;margin-bottom:14px;}
+.outlook-card h4{color:white;font-size:14px;margin-bottom:8px;}
+.outlook-card .when-then{font-size:13px;color:var(--text);margin-top:8px;}
+.outlook-card .when-then strong{color:var(--primary);}
+.source{font-size:11px;color:var(--text-dim);margin-top:12px;padding-top:10px;border-top:1px solid rgba(46,46,56,0.5);}
+.source a{color:var(--text-dim);}
+.disclaimer{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text-dim);margin-top:32px;}
+.alert-box{background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px;}
+.thesis-box{background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.25);border-radius:8px;padding:14px 16px;margin:14px 0;font-size:13px;}
+.thesis-box .th-verdict{font-weight:700;color:var(--blue);text-transform:uppercase;font-size:11px;letter-spacing:0.5px;}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+.pill{display:inline-block;background:rgba(139,92,246,0.12);color:var(--primary);border-radius:4px;padding:1px 7px;font-size:13px;font-weight:600;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Lemonade <span>LMND.NYSE</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 01. Juli 2026 · NYSE · Sektor: Insurtech / P&C-Versicherung</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-orange">AI-native Versicherer</span>
+      <span class="badge badge-blue">Renters · Home · Pet · Car · Life</span>
+      <span class="badge badge-yellow">Public Benefit Corp</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$64,81</div>
+    <div class="price-meta">Schlusskurs 30.06.2026 · NYSE</div>
+    <div class="price-change up">▲ +43,5% (52 Wochen)</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">52W: $35,70 – $99,90</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <!-- KPI OVERVIEW -->
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$64,81</div><div class="kpi-sub">USD · 30.06.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value">~$5,0 Mrd</div><div class="kpi-sub">~76,8 Mio Aktien</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/S (TTM)</div><div class="kpi-value">~5,9x</div><div class="kpi-sub">Umsatz ~$845 Mio</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/B</div><div class="kpi-value red">~9,2x</div><div class="kpi-sub">teuer</div></div>
+    <div class="kpi-card"><div class="kpi-label">Bruttomarge Q1'26</div><div class="kpi-value green">39%</div><div class="kpi-sub">Vj. 26%</div></div>
+    <div class="kpi-card"><div class="kpi-label">ROE</div><div class="kpi-value red">-26%</div><div class="kpi-sub">GAAP-defizitär</div></div>
+    <div class="kpi-card"><div class="kpi-label">Gross Loss Ratio</div><div class="kpi-value green">62%</div><div class="kpi-sub">Q1'26</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value" style="font-size:18px;">04.08.2026</div><div class="kpi-sub">Q2 2026</div></div>
+  </div>
+
+  <div class="alert-box">
+    🎯 <strong>User-Thesen dieser Analyse (Phase 0):</strong> (1) Liefert der AI-First-Ansatz einen <em>strukturellen</em> Underwriting-Vorteil oder konvergiert die Schadenquote zum Branchenschnitt? (2) Ist der Turn zu positivem Adj. EBITDA/FCF nachhaltig – oder wächst LMND sich nur über GEP aus den Verlusten? (3) Kann LMND genug Marktanteil gewinnen, um die Bewertung zu rechtfertigen, oder bleibt es Nischenplayer gegen Progressive & Co.? Die Thesen werden in S2/S6/S7 geprüft und in S12 synthetisiert. Peers: ROOT, HIPO, OSCR, PGR.
+  </div>
+
+  <!-- SEKTION 1 -->
+  <div class="section" id="s1">
+    <div class="section-header"><div class="section-number">1</div><div class="section-title">Geschäftsmodell</div><div class="section-score">Score: 7/10</div></div>
+    <div class="section-body">
+      <p>Lemonade ist ein 2015 gegründeter, digital-nativer Vollversicherer (Public Benefit Corporation) mit Sitz in New York. Das Unternehmen verkauft fünf Produktlinien – Renters (Hausrat/Mieter), Homeowners, Pet, Car und Life – ausschließlich über eine App-First-Oberfläche ohne Filialen und ohne Agenten. Der Kern der Erzählung: KI-Bots wie <span class="pill">Maya</span> (Onboarding/Quoting) und <span class="pill">AI Jim</span> (Schadenregulierung) wickeln Antrag, Bepreisung und einfache Claims in Minuten statt Tagen ab. Zielgruppe sind primär jüngere, erstmalige Versicherungskäufer (unter 35), die klassische Anbieter als umständlich empfinden.</p>
+      <p>Der Umsatz entsteht aus drei Quellen: (a) <strong>Net Earned Premium</strong> – die nach Rückversicherungs-Zession beim Unternehmen verbleibende verdiente Prämie; (b) <strong>Ceding-Commission-Income</strong> aus den Rückversicherungsverträgen; und (c) <strong>Kapitalerträge</strong> auf die Anlage-/Float-Bestände (Cash & Investments ~$1,14 Mrd per Q1 2026). Die wichtigste Steuerungsgröße ist das <strong>In Force Premium (IFP)</strong> – die annualisierte gebuchte Prämie des Bestands –, das per Q1 2026 bei $1,33 Mrd lag. Da ein Teil der Prämie an Rückversicherer zediert wird (Ceding-Rate zuletzt Richtung ~40% sinkend), liegt der ausgewiesene Umsatz systematisch unter dem Prämienvolumen; deshalb sind IFP und Gross Earned Premium (GEP) die aussagekräftigeren Top-Line-Größen.</p>
+      <p>Die Kostenstruktur ist grundsätzlich <strong>asset-light</strong> auf der Betriebsseite (kaum physische Infrastruktur, hohe Automatisierung), aber <strong>kapital-intensiv</strong> auf der Bilanzseite: Als Risikoträger muss Lemonade regulatorisches Surplus (~$278 Mio Q3 2025) vorhalten und CAT-Schäden (Katastrophen) tragen. Die Unit Economics sind das eigentliche Kernstück: Lemonade weist ein LTV/CAC-Verhältnis von <span class="pill">≥3x</span> aus, das trotz einer Verdreifachung des Growth Spends seit Q1 2023 stabil gehalten wurde – ein Beleg für die These, dass die AI-gestützte Zielgruppen- und Kapitalallokation Effizienzvorteile schafft.</p>
+      <p>Ein struktureller Effizienz-Marker: Das IFP je Mitarbeiter hat sich von $625M/1.367 Mitarbeiter (Q1 2023) auf $1.333M/1.291 Mitarbeiter (Q1 2026) mehr als verdoppelt – die Firma wuchs den Bestand, während der Headcount leicht sank. Pet ist mittlerweile die größte Linie und überschritt Anfang Q2 2026 die $500 Mio IFP-Marke; Lemonade ist laut eigener Angabe die meistgesuchte Pet-Insurance-Marke der USA.</p>
+      <div class="source">Quellen: Lemonade Q1 2026 Shareholder Letter / 8-K (SEC, 29.04.2026); Lemonade FY2025 10-K; IMD Case Study (17.01.2026); Causeartist Business Case (28.01.2026).</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 2 -->
+  <div class="section" id="s2">
+    <div class="section-header"><div class="section-number">2</div><div class="section-title">Burggraben & Wettbewerbsvorteile</div><div class="section-score">Score: 5/10</div></div>
+    <div class="section-body">
+      <p><strong>Netzwerkeffekte / Datenflywheel (mittel, umstritten):</strong> Die zentrale Moat-Behauptung ist ein sich selbst verstärkender Kreislauf: schnelleres Wachstum → mehr Daten → schärfere AI-Segmentierung/Bepreisung → bessere Unit Economics → mehr reinvestierbarer Bruttogewinn → mehr Wachstum. Empirisch ist der Trend real: Die TTM-Gross-Loss-Ratio fiel von 88% (Q3 2023) auf 64% (Q4 2025), der Bruttogewinn verfünffachte sich, und die LAE-Ratio (Schadenbearbeitungskosten) sank auf ~6–7% – nach Unternehmensangabe unter dem Niveau vieler größerer Incumbents. Das ist der stärkste harte Beleg für einen echten, kompoundierenden Vorteil.</p>
+      <p><strong>Switching Costs (niedrig):</strong> Versicherung ist ein weitgehend austauschbares, preissensitives Produkt. Die Jahres-Retention (ADR) liegt bei 85% – solide, aber kein Lock-in wie bei Software. Cross-Sell soll die Bindung erhöhen, doch erst ~5% der Kunden halten mehr als eine Police – das ist zugleich Chance (ungehobenes LTV) und Beleg, dass der Bündel-Moat noch dünn ist.</p>
+      <p><strong>Brand Power (stark in Nischen):</strong> Lemonade hat aus dem Nichts eine national bekannte, „kultige" Marke bei jungen Käufern aufgebaut – in einer Branche, die selten viral geht, eine Leistung. In Pet ist die Marke #1 in der Suche. In Auto und Home dagegen ist die Preissetzungsmacht gering, weil dort die kapitalstarken Incumbents dominieren.</p>
+      <div class="thesis-box">
+        <div class="th-verdict">These 1 · AI-Underwriting-Vorteil: strukturell oder Konvergenz?</div>
+        <p style="margin-top:6px;">CEO Schreiber hat mit dem Manifest „Why Incumbents Won't Catch Up" (Q1 2026) drei Tests aufgestellt: <em>Scaling Quotient</em> (Wachstum ÷ Headcount-Wachstum), <em>LAE-Ratio</em> und <em>Structural Precision</em> (Bruttogewinn je Exposure). Auf allen dreien schlägt LMND die Incumbents. <strong>Der valide Gegeneinwand</strong> (u.a. ai-risk.co, Insurance Thought Leadership): Die LAE-Ratio misst die <em>Kosten der Schadenbearbeitung</em>, nicht die <em>Qualität der Risikoauswahl</em>. Eine Architektur, die falsch bepreiste Risiken nur <em>effizienter</em> verarbeitet, wäre „ein effizienterer Weg zur Kapitalvernichtung" – solange die Combined Ratio über 100% liegt. <strong>Zwischenfazit:</strong> Die stetige Loss-Ratio-Kompression (88%→64% TTM über zwei Jahre) ist der Beweis, dass sich auch die <em>Risikoauswahl</em> verbessert, nicht nur die Bearbeitung – das stützt die strukturelle These. Aber: Der Vorteil ist noch <strong>nicht in nachhaltigen Underwriting-Gewinn (Combined &lt; 100%) übersetzt</strong>, und Incumbents holen auf (GEICO/Allstate KI-Claims, Chubb-Commitment Dez. 2025, Admiral kaufte Flock Feb. 2026). Moat: real, aber noch nicht in Dollar bewiesen → <strong>Score 5/10</strong>.</p>
+      </div>
+      <p><strong>Technologischer Vorsprung (früher Mover, schmelzender Vorsprung):</strong> Der 10-Jahres-Vorsprung als AI-native gebaute Firma ist echt – der gesamte Stack (Incentives, Datenarchitektur, Distribution) wurde ohne Legacy-Ballast konzipiert. Doch das VRIO-Kriterium „costly to imitate" erodiert: Incumbents mit tiefen Taschen und jahrzehntelangen Datenbeständen investieren massiv. Der Vorsprung bleibt am ehesten dort verteidigbar, wo Lemonade eigene proprietäre Datensätze aufbaut (z.B. Pet-Health-Claims).</p>
+      <div class="source">Quellen: Schreiber „Why Incumbents Won't Catch Up" (2026); Insurance Thought Leadership (17.03.2026); ai-risk.co (17.03.2026); mlq.ai (08.11.2025); UNL Raikes B-Corp Case Study (2025); Lemonade Q4 2025 & Q1 2026 Shareholder Letters.</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 3 -->
+  <div class="section" id="s3">
+    <div class="section-header"><div class="section-number">3</div><div class="section-title">Letzte 4 Quartale (operative Entwicklung)</div><div class="section-note">Umsatz-Beats: 4/4 · Nächste: Q2 2026 am 04.08.2026</div></div>
+    <div class="section-body">
+      <p>Vier Quartale in Folge mit Beschleunigung: das IFP-Wachstum kletterte von 29% (Q2 2025) auf 32% (Q1 2026) – Teil einer <strong>Serie von zehn aufeinanderfolgenden Quartalen mit sich beschleunigendem Wachstum</strong>. Gleichzeitig verbesserte sich die Bottom Line kontinuierlich. Der Umsatz wuchs zuletzt deutlich schneller als die Prämie (Q1 2026: +71% Umsatz vs. +32% IFP), weil die Rückversicherungs-Umstellung mehr Prämie im Haus behält – ein wichtiger Vorbehalt (siehe These 2 in S6).</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>Q2 2025</th><th>Q3 2025</th><th>Q4 2025</th><th>Q1 2026</th></tr></thead>
+          <tbody>
+            <tr><td>IFP (Mrd $)</td><td>1,083</td><td>1,158</td><td>1,240</td><td><strong>1,333</strong></td></tr>
+            <tr><td>IFP YoY</td><td class="beat">+29%</td><td class="beat">+30%</td><td class="beat">+31%</td><td class="beat">+32%</td></tr>
+            <tr><td>Umsatz (Mio $)</td><td>~165</td><td>194,5</td><td>228</td><td><strong>258</strong></td></tr>
+            <tr><td>Umsatz YoY</td><td class="beat">+35%</td><td class="beat">+42%</td><td class="beat">+53%</td><td class="beat">+71%</td></tr>
+            <tr><td>Gross Loss Ratio</td><td>67%</td><td>62%</td><td class="beat">52%</td><td>62%</td></tr>
+            <tr><td>Bruttogewinn (Mio $)</td><td>~64</td><td>80</td><td>111</td><td>100</td></tr>
+            <tr><td>Adj. EBITDA (Mio $)</td><td>(41)</td><td>(26)</td><td class="beat">(5)</td><td>(17)</td></tr>
+            <tr><td>Nettoverlust (Mio $)</td><td>(44)</td><td>(38)</td><td>(22)</td><td>(36)</td></tr>
+            <tr><td>EPS (verwässert)</td><td>~(0,60)</td><td>~(0,51)</td><td class="beat">~(0,29)</td><td class="beat">(0,47)</td></tr>
+            <tr><td>Adj. Free Cash Flow (Mio $)</td><td class="beat">+25</td><td class="beat">+18</td><td class="beat">+37</td><td class="beat">+17</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Beat/Miss:</strong> Q1 2026 EPS von –$0,47 schlug den Konsens von –$0,57 (+17% Surprise); Q4 2025 übertraf die Erwartungen deutlich (Aktie +17% am Earnings-Tag). Über die vier Quartale hob das Management die Guidance mehrfach an (IFP, GEP, Umsatz). Wichtige Management-Aussagen: „ultimate EBITDA breakeven is locked in for Q4 of next year" (also Q4 2026), und das Ziel, die LAE-Ratio parallel zur nächsten Verdopplung des Geschäfts erneut zu halbieren.</p>
+      <p><strong>Saisonalität beachten:</strong> Q1 ist wetterbedingt (Winter-CAT) typischerweise das schwächste Quartal – Q1 2026 enthielt 5 Punkte CAT in der Loss Ratio. Q4 2025 (52% Gross Loss Ratio) war der bislang beste Wert und zeigt das operative Potenzial ohne CAT-Belastung.</p>
+      <div class="source">Quellen: Lemonade Shareholder Letters Q2–Q4 2025 & Q1 2026 (SEC 8-K); Motley Fool Earnings Transcript (29.04.2026); Reinsurance News (05.11.2025); Insurance Business Mag (06.11.2025); TradingView / Investing.com (30.06.2026). Nächster Stichtag: Q2-2026-Ergebnisse am 04.–05.08.2026.</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 4 -->
+  <div class="section" id="s4">
+    <div class="section-header"><div class="section-number">4</div><div class="section-title">Wachstumseinordnung</div><div class="section-score">Score: 8/10</div></div>
+    <div class="section-body">
+      <p>Das Wachstum ist <strong>real, breit und beschleunigend</strong> – nicht durch M&A oder Accounting inflationiert. Über die letzten Jahre stieg das IFP-Wachstum von ~18% (Q3 2023) auf 32% (Q1 2026), während die Kundenzahl auf 3,14 Mio (+23%) und die Prämie pro Kunde auf $424 (+7%) kletterten. Beide Treiber wirken gleichzeitig: mehr Kunden <em>und</em> höherer Wert je Kunde (durch höherwertige Produkte wie Home/Car und Bündelung).</p>
+      <h3>Wachstumstreiber – zunehmend diversifiziert</h3>
+      <div class="geo-grid">
+        <div class="geo-card"><div class="geo-region">Pet</div><div class="geo-pct">&gt;$500M</div><div class="geo-note">größte Linie, #1 Suchmarke US</div></div>
+        <div class="geo-card"><div class="geo-region">Home (Multi-Peril)</div><div class="geo-pct">Kern</div><div class="geo-note">günstige Loss Ratio, PPD-positiv</div></div>
+        <div class="geo-card"><div class="geo-region">Car</div><div class="geo-pct">Hebel</div><div class="geo-note">Loss Ratio 76% – noch teuer</div></div>
+        <div class="geo-card"><div class="geo-region">Europa</div><div class="geo-pct">Skaliert</div><div class="geo-note">DE/FR/NL/UK, hohes Momentum</div></div>
+      </div>
+      <p><strong>Profitabilitätswachstum &gt; Umsatzwachstum:</strong> Der Bruttogewinn (+159% in Q1 2026) wächst deutlich schneller als der Umsatz (+71%) und dieser wiederum schneller als das IFP (+32%) – klassischer operativer Hebel. Zugleich sind die Betriebskosten <em>ohne</em> Growth Spend praktisch stabil (in Q2 2025 sogar –2% YoY), während die Firma seit Q3 2022 rund 1,2 Mio Kunden hinzugewann und den Headcount um 6% senkte. Das ist der Beweis für Operating Leverage durch Automatisierung.</p>
+      <p><strong>Reifegrad:</strong> Hyper-Growth-Phase, aber von kleiner Basis. Managementziel: 30% IFP-Wachstum auch in FY2026 und langfristig eine Verzehnfachung des IFP auf $10 Mrd. Kritisch: Ein Teil der Wachstumsfinanzierung ist fremdfinanziert (Customer Investment Agreement $179,6 Mio, neue Hannover-Re-Fazilität bis $250 Mio ab 2027) – das Wachstum ist also teilweise „gekauft". Solange LTV/CAC ≥3x bleibt, ist das ökonomisch vertretbar; kippt dieses Verhältnis, wird das Modell teuer.</p>
+      <div class="source">Quellen: Lemonade Q4 2025 & Q1 2026 Shareholder Letters; Trixly AI Case (12.08.2025); coinlaw.io Insurance Statistics (22.05.2026); Lemonade 8-K Hannover-Re-Agreement (22.06.2026).</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 5 -->
+  <div class="section" id="s5">
+    <div class="section-header"><div class="section-number">5</div><div class="section-title">Bewertung & Multiples</div><div class="section-score">Score: 4/10</div></div>
+    <div class="section-body">
+      <p>Lemonade ist auf keiner ergebnisbasierten Kennzahl „günstig". Es gibt kein positives P/E (EPS TTM ~–$2,24; erwarteter Nettoverlust FY2026 ~–$1,72/Aktie). Die Bewertung ruht vollständig auf Umsatz-, Prämien- und Bruttogewinn-Multiples plus der Erwartung des Profitabilitäts-Inflection.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Multiple</th><th>Wert (~)</th><th>Einordnung</th></tr></thead>
+          <tbody>
+            <tr><td>P/S (TTM)</td><td>~5,9x</td><td class="neutral">hoch für einen Versicherer, moderat für „Tech"</td></tr>
+            <tr><td>P/S (FWD, FY26)</td><td>~4,8x</td><td class="neutral">bei ~$1,0 Mrd Umsatzerwartung</td></tr>
+            <tr><td>Market Cap / IFP</td><td>~3,7x</td><td class="neutral">Prämienbasis statt Umsatz</td></tr>
+            <tr><td>Market Cap / Bruttogewinn (FWD)</td><td>~10x</td><td class="neutral">bei +150% GP-Wachstum vertretbar</td></tr>
+            <tr><td>P/B</td><td>~9,2x</td><td class="miss">sehr teuer vs. P&C-Norm (1–2x)</td></tr>
+            <tr><td>P/E</td><td>n/a</td><td class="miss">GAAP-defizitär</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Historischer Kontext:</strong> Die Aktie steht (~$5 Mrd Market Cap) weit unter dem IPO-Hype-Peak von ~$9,8 Mrd (Jan. 2021), aber +43,5% über 12 Monate und weit über dem Tief von ~$36. Sie ist von ihrem jüngsten Hoch nahe $100 spürbar zurückgekommen.</p>
+      <p><strong>Peer-relative Sicht:</strong> Ein P&C-Incumbent wie Progressive handelt zu ~15x Gewinn bei nachgewiesenen Combined Ratios von 82–86%. Lemonade zahlt man für <em>zukünftige</em> Profitabilität. Das ~10x-Multiple auf den 2026er Bruttogewinn bei +150% GP-Wachstum ist die freundlichste Lesart (Bull-Argument, Simply Wall St / Seeking Alpha) – aber es ignoriert, dass Bruttogewinn nicht Nettogewinn ist und die hohe SBC-Verwässerung (~$21 Mio/Quartal) das je-Aktie-Ergebnis belastet. <strong>Fazit:</strong> Priced for execution – jede Wachstumsverlangsamung oder ein CAT-Schock trifft die Aktie überproportional. Score 4/10.</p>
+      <p><em>Analystenkonsens:</em> „Hold" bei ~7–11 Analysten, Ø-Kursziel ~$60–66 (Spanne $33–$92; Morgan Stanley zuletzt $85).</p>
+      <div class="source">Quellen: stockanalysis.com Statistics (30.06.2026); Simply Wall St (28.06.2026); Robinhood/eToro Quote (30.06.2026); Public.com & S&P Global Analystenkonsens (Juni 2026); MarketBeat.</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 6 -->
+  <div class="section" id="s6">
+    <div class="section-header"><div class="section-number">6</div><div class="section-title">Cashflow, Margen & Kapitalqualität</div><div class="section-score">Score: 5/10</div></div>
+    <div class="section-body">
+      <p><strong>Margen-Trend – klar positiv:</strong> Die Bruttomarge stieg von 26% (Q1 2025) auf 39% (Q1 2026), FY2025 lag bei 40% (Vj. 32%). Der Bruttogewinn wuchs FY2025 um 76% auf $293 Mio. Auf Netto-Ebene bleibt die Firma jedoch <strong>GAAP-defizitär</strong>: FY2025 Nettoverlust –$165,5 Mio (Vj. –$202,2 Mio), Adj.-EBITDA-Verlust –$118,1 Mio. ROE –26%, ROIC –9,6%.</p>
+      <div class="thesis-box">
+        <div class="th-verdict">These 2 · Profitabilitäts-Turn nachhaltig – oder nur GEP-Wash-out?</div>
+        <p style="margin-top:6px;"><strong>Pro Nachhaltigkeit:</strong> Adj. FCF ist bereits <em>vier Quartale in Folge positiv</em> (+$17M bis +$37M), OpEx ohne Growth Spend ist stabil, und der Adj.-EBITDA-Verlust schrumpfte von –$47M (Q1'25) auf –$17M (Q1'26). Q4 2025 erreichte fast Adj.-EBITDA-Breakeven (–$5M). Das Management „locked in" Q4 2026 für das erste voll positive Adj.-EBITDA-Quartal und GAAP-Profitabilität für 2027. <strong>Contra / Vorbehalt:</strong> (a) Der starke Umsatzsprung (+71%) ist teils <em>reinsurance-getrieben</em> (weniger Zession → mehr Prämie im Haus), nicht rein organisch – die Combined Ratio bleibt &gt;100%. (b) Adj. FCF profitiert von Wachstumsfinanzierung Dritter (Customer Investment Agreement, Hannover Re) und ist kein Beweis für Underwriting-Gewinn. (c) SBC (~$21M/Quartal, mehr als verdoppelt) hält den GAAP-Verlust hoch und verwässert. <strong>Verdict:</strong> Der Turn ist <em>echt und richtungsstabil</em>, aber noch <em>nicht selbsttragend</em> – er hängt an fortgesetztem Wachstum und externer Finanzierung. Nachhaltig <em>wahrscheinlich</em>, bewiesen erst mit GAAP-Breakeven. Score 5/10.</p>
+      </div>
+      <p><strong>Kapitalqualität & Bilanz:</strong> Cash & Investments ~$1,14 Mrd, davon ~$278 Mio regulatorisches Surplus in den Versicherungstöchtern. Debt/Equity ~0,39, Current Ratio 1,24. Die Firma sagt, sie könne ihre Wachstumsstrategie „ohne zusätzliches Eigenkapital" finanzieren – die zunehmende Nutzung von Fremd-Wachstumsfinanzierung (bis $250 Mio Hannover Re ab 2027, Rate = 3J-T-Bill + 5,8%) verlagert Kosten in die Zukunft und erhöht die Zinslast (Q1'26 Interest Expense $6,2M). Keine Dividende, keine Buybacks (Wachstumsaktie).</p>
+      <div class="source">Quellen: Lemonade FY2025 10-K & Q1 2026 10-Q; StockTitan 10-Q Analyse (30.04.2026); stockanalysis.com; Lemonade 8-K Hannover-Re (22.06.2026).</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 7 -->
+  <div class="section" id="s7">
+    <div class="section-header"><div class="section-number">7</div><div class="section-title">Peer-Vergleich</div><div class="section-score">Score: 6/10</div></div>
+    <div class="section-body">
+      <p>Der Peer-Set spannt drei Archetypen auf: reine Insurtech-Disruptoren (ROOT, HIPO), einen Insurtech-Profitabilitäts-Turnaround aus dem Health-Bereich (OSCR) und den Gold-Standard-Incumbent (PGR). Die Kernbotschaft: <strong>Lemonade wächst am schnellsten, ist aber als einziges der genannten Unternehmen (außer der reinen Health-Story OSCR im Gesamtjahr) noch nicht netto profitabel</strong> – die anderen Insurtechs haben ihre Turnarounds bereits vollzogen.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Unternehmen</th><th>Market Cap</th><th>Wachstum (Q1'26)</th><th>Combined / Loss Ratio</th><th>Profitabilität</th><th>Bewertung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Lemonade (LMND)</strong></td><td>~$5,0 Mrd</td><td class="beat">IFP +32%</td><td>Gross Loss 62% · Combined &gt;100%</td><td class="miss">Adj-EBITDA- & GAAP-Verlust</td><td>P/S ~5,9x</td></tr>
+            <tr><td>Root (ROOT)</td><td>~$0,9 Mrd</td><td class="neutral">GPE +8% / GPW –5%</td><td>Loss-Ziel 60–65% · Combined ~95%</td><td class="beat">Nettogewinn $36M · ROE 47%* </td><td>P/S ~0,8x</td></tr>
+            <tr><td>Hippo (HIPO)</td><td>~Small-Cap</td><td class="beat">GWP +58%</td><td>Combined 99,5% · Net Loss 48%</td><td class="beat">Nettogewinn $7M</td><td>~1x Buch (BVPS $17,23)</td></tr>
+            <tr><td>Oscar Health (OSCR)</td><td>~$7,4 Mrd</td><td class="beat">Umsatz +53% · Members +56%</td><td>Health-MLR (nicht P&C)</td><td class="neutral">Q1 profitabel, FY-Guide gemischt</td><td>~0,4x Umsatz</td></tr>
+            <tr><td>Progressive (PGR)</td><td>~$115 Mrd</td><td class="neutral">NPW +6%</td><td class="beat">Combined 82–86%</td><td class="beat">hochprofitabel</td><td>~15x P/E</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);">*ROE annualisiert für das Quartal.</p>
+      <div class="thesis-box">
+        <div class="th-verdict">These 3 · Marktanteil vs. Nischenplayer gegen Progressive & Co.?</div>
+        <p style="margin-top:6px;">Größenrelation: Progressive schreibt rund <strong>$7 Mrd Nettoprämie pro Monat</strong> und hat ~$115 Mrd Market Cap – Lemonades gesamtes IFP von $1,33 Mrd entspricht weniger als einer <em>Woche</em> Progressive-Volumen. In Auto (Progressives Kern) ist Lemonades Gross Loss Ratio mit 76% noch klar unattraktiver als die 60–65% eines Root oder die 82–86% Combined von Progressive. <strong>Aber:</strong> Der Marktanteils-Case wird nicht in Auto entschieden, sondern in Nischen, in denen Lemonade strukturell führt: <em>Pet</em> (bereits #1-Suchmarke, größte Linie), <em>Renters</em> (junge Erstkäufer) und die demografische Brücke (App-Konversion bei &lt;35-Jährigen, Europa). Bezeichnend: Root <em>verzichtet</em> bewusst auf Wachstum zugunsten von Gewinn (GPW –5%), und Hippo pivotierte zu Partner-Distribution (u.a. ein Distributions-Deal mit Progressive) – beide räumen das Hyper-Growth-Feld. <strong>Verdict:</strong> Lemonade wird <em>kein</em> breiter Progressive-Konkurrent, sondern der wachstumsstärkste <em>Nischen-Konsolidierer</em> mit optionalem Auto-Upside (Tesla-Partnerschaft). Ob das die Bewertung trägt, hängt daran, ob 30% IFP-Wachstum bis zum $10-Mrd-Ziel durchgehalten werden. Realistisch, aber nicht garantiert. Score 6/10.</p>
+      </div>
+      <div class="source">Quellen: Root Q1 2026 Transcript (06.05.2026); Hippo Q1 2026 & Q4 2025 8-K (SEC); Oscar Q1 2026 (stockanalysis.com, Simply Wall St); Progressive Mai-2026-Ergebnisse (QuiverQuant 17.06.2026) & Q1 2026 (Simply Wall St); public.com Market Caps (Juni 2026).</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 8 -->
+  <div class="section" id="s8">
+    <div class="section-header"><div class="section-number">8</div><div class="section-title">Aktuelle News & Events</div><div class="section-note">Quellen ≤ 3 Monate</div></div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">29.04.2026 – Q1 2026 Earnings-Beat <span class="badge badge-green">Positiv</span></div><div class="event-text">Umsatz +71% ($258M), IFP +32%, EPS –$0,47 (Konsens –$0,57). Aktie zunächst hoch, dann Gewinnmitnahmen. Quelle: Motley Fool / Investing.com.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">Q2 2026 – Pet überschreitet $500M IFP <span class="badge badge-green">Positiv</span></div><div class="event-text">Erste Produktlinie über $500M; #1 meistgesuchte Pet-Marke der USA. Quelle: Lemonade Q1 2026 Letter.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">22.06.2026 – Hannover-Re-Wachstumsfinanzierung bis $250M <span class="badge badge-green">Positiv</span></div><div class="event-text">Fremdfinanzierung des Growth Spends 2027–2028 (max. $150M 2027, $250M 2028; Rate 3J-T-Bill +5,8%). Kapitaleffizienter, aber zusätzliche Verpflichtungen. Quelle: SEC 8-K.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Q2 2026 – Reinsurance-Renewal & Renters-Expansion (MS, SC) <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Erneuertes Rückversicherungsprogramm zur Verbesserung der Kapitaleffizienz; Renters neu in Mississippi und South Carolina. Quelle: Business Wire / Yahoo Finance.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">2026 – Autonomous Car (Tesla-FSD) in Colorado <span class="badge badge-green">Positiv</span></div><div class="event-text">Erstes Produkt seiner Art: 50% Rabatt je Meile, die mit Tesla FSD (Supervised) gefahren wird. Optionaler Auto-Katalysator. Quelle: Simply Wall St / Lemonade IR.</div></div></div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">Dez. 2025 / Feb. 2026 – Incumbent-AI-Aufholjagd <span class="badge badge-red">Negativ</span></div><div class="event-text">Chubb-AI-Commitment (Dez. 2025); Admiral kauft AI-Fleet-Insurer Flock (Feb. 2026, £80M) via Venture-Arm. Beleg, dass Incumbents AI-Capability <em>kaufen</em> statt disruptiert zu werden. Quelle: ai-risk.co.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">2026 – Root & Hippo räumen Hyper-Growth-Feld <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Root priorisiert Gewinn (GPW –5%), Hippo pivotiert zu Partner-Distribution (Progressive-Deal). Weniger direkter Wettbewerb um junge Kunden. Quelle: Root/Hippo Q1-2026-Berichte.</div></div></div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">Laufend – CAT-/Klimarisiko <span class="badge badge-red">Negativ</span></div><div class="event-text">Winterstürme (5 Punkte CAT in Q1'26) und die kalifornischen Wildfires (16 Punkte in Q1'25) zeigen die Anfälligkeit der Loss Ratio. Quelle: Lemonade Q1 Letters.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Laufend – Zinsen & Kapitalerträge <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Höhere Zinsen stützen die Kapitalerträge auf den ~$1,14 Mrd Investments, verteuern aber die Fremd-Wachstumsfinanzierung.</div></div></div>
+      <p style="font-size:12px;color:var(--text-dim);margin-top:8px;">Hinweis: Das Bull/Bear-Narrativ wird nicht hier, sondern in S12 (Fazit) mit voller Tiefe ausgearbeitet.</p>
+      <div class="source">Quellen: SEC 8-K Filings; Yahoo Finance / Business Wire; ai-risk.co (17.03.2026); Simply Wall St; Reuters/Investing.com (Q2 2026).</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 9 -->
+  <div class="section" id="s9">
+    <div class="section-header"><div class="section-number">9</div><div class="section-title">Technische Analyse</div><div class="section-score">Score: 6/10</div></div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-bottom:16px;">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$64,81</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value green">~$54,3</div><div class="kpi-sub">Kurs darüber</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value green">~$55,2</div><div class="kpi-sub">Kurs darüber</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Hoch</div><div class="kpi-value">$99,90</div><div class="kpi-sub">–35% darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Tief</div><div class="kpi-value">$35,70</div></div>
+        <div class="kpi-card"><div class="kpi-label">Beta</div><div class="kpi-value red">~1,9</div><div class="kpi-sub">hochvolatil</div></div>
+        <div class="kpi-card"><div class="kpi-label">Short Float</div><div class="kpi-value yellow" style="color:var(--yellow);">~13,6%</div><div class="kpi-sub">Squeeze-Potenzial</div></div>
+      </div>
+      <p><strong>Trend:</strong> Übergeordnet in Erholung. Der Kurs liegt sowohl über der 50- als auch der 200-Tage-Linie (~$54–55) – technisch konstruktiv (Golden-Cross-Konstellation). Nach dem Rücksetzer vom Hoch nahe $100 auf unter $50 hat sich die Aktie auf ~$58–65 zurückgearbeitet.</p>
+      <p><strong>Momentum-Indikatoren:</strong> Die Tages-Signale sind gemischt/neutral (Investing.com: 6 Buy / 6 Sell bei den MAs), kurzfristig teils „Strong Buy" auf Stundenbasis. Kein klares Überkauft-Signal. Unterstützungen liegen im Bereich $54–58 (MA-Cluster) und $50 (psychologisch/Wert-Zone), Widerstand bei ~$70 und dann am Hoch ~$100.</p>
+      <p><strong>Volatilität & Positionierung:</strong> Mit Beta ~1,9 und einem Short Float von ~13,6% ist die Aktie ein „high-beta"-Titel mit Squeeze-Charakter – gute Earnings können überproportionale Rallys auslösen (Q4 2025: +17% am Tag), schlechte entsprechend heftige Abverkäufe. Nächster Katalysator: Q2-Ergebnisse am 04.08.2026.</p>
+      <div class="source">Quellen: Investing.com Technicals (30.06.2026); TradingView NYSE:LMND; stockanalysis.com / finviz Short Interest (Juni 2026); Barchart.</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 10 -->
+  <div class="section" id="s10">
+    <div class="section-header"><div class="section-number">10</div><div class="section-title">Risiken & Chancen</div><div class="section-score">Score: 4/10 (invertiert)</div></div>
+    <div class="section-body">
+      <h3>10a) Strukturelle & zyklische Risiken</h3>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Combined Ratio bleibt &gt;100% – Underwriting-Gewinn unbewiesen</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div><div class="event-text">Nach 10 Jahren kein nachhaltiger Underwriting-Gewinn. Bleibt die Combined Ratio strukturell über 100%, ist das Modell „effiziente Kapitalvernichtung". Wahrscheinlichkeit einer verzögerten Profitabilität: mittel.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">🌪️ Katastrophen-/Klimarisiko</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div><div class="event-text">CAT-Ereignisse treffen die Loss Ratio unmittelbar (Q1'25: +16 Punkte Wildfires; Q1'26: +5 Punkte Winter). Ein großes CAT-Jahr könnte den Q4-2026-Breakeven verschieben. Wahrscheinlichkeit: jährlich real.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">🏦 Wettbewerb durch kapitalstarke Incumbents</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">GEICO/Allstate/Progressive rüsten AI nach; Chubb, Admiral kaufen Capability zu. Erodiert Lemonades Vorsprung, va. in Auto. Wahrscheinlichkeit: hoch, Tempo offen.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">💧 Verwässerung & Finanzierungsabhängigkeit</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">SBC ~$21M/Quartal (verdoppelt) verwässert; Wachstum teils fremdfinanziert (Hannover Re, CIA). Steigende Zinslast. Wahrscheinlichkeit: laufend.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">💸 Bewertungsrisiko</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div><div class="event-text">P/B ~9x, P/S ~6x, kein Gewinn. Jede Wachstumsverlangsamung führt zu heftiger Multiple-Kompression. Beta ~1,9.</div></div>
+
+      <h3>10b) AI-Risiko & technologische Disruption</h3>
+      <p>Lemonade ist der seltene Fall, in dem AI zugleich das <em>Kern-Asset</em> und das <em>größte Risiko</em> ist. <strong>Bullisches Szenario:</strong> Der AI-native Stack kompoundiert – bessere Daten → bessere Risikoauswahl → sinkende Loss Ratios → Vorsprung wächst (Schreibers These, gestützt durch 88%→64% TTM-Loss-Ratio). <strong>Bärisches Szenario:</strong> AI wird zur Commodity; Incumbents mit größeren Datenbeständen und tieferen Taschen holen die Effizienz ein oder kaufen sie zu (Flock, Chubb). Dann bleibt Lemonade ein preisnehmender Nischen-Carrier ohne echten Moat. Die Auto-Linie (Loss Ratio 76%) ist der Lackmustest, ob der Vorteil auch in komplexeren Sparten trägt.</p>
+
+      <h3>10c) Chancen</h3>
+      <p>Cross-Sell-Upside (nur ~5% Multi-Policy-Kunden), Auto-Optionalität über die Tesla-FSD-Partnerschaft, Europa-Skalierung, weitere LAE-Halbierung, und der Sentiment-Hebel eines bestätigten Q4-2026-Breakeven, der die Aktie von „Story" zu „bewiesen" umkategorisieren würde.</p>
+
+      <h3>10d) Red Flags & Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> steigende SBC; wachsende Fremd-Wachstumsfinanzierung; Auto-Loss-Ratio; Buchwert-Rückgang durch kumulierte Verluste. <strong>Dealbreaker (→ nicht investieren):</strong> keine existenzbedrohenden aktuell – Cash ~$1,14 Mrd deckt die Verlustphase. Ein Dealbreaker entstünde erst, falls das LTV/CAC nachhaltig unter ~2,5x fällt <em>und</em> gleichzeitig die Loss-Ratio-Verbesserung stoppt.</p>
+      <div class="source">Quellen: Lemonade 10-K/10-Q; ai-risk.co; Trixly AI Case; mlq.ai; UNL Case Study.</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 11 -->
+  <div class="section" id="s11">
+    <div class="section-header"><div class="section-number">11</div><div class="section-title">Scoring</div><div class="section-score">Ø 5,9/10</div></div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Visualisierung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td>Geschäftsmodell</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Klar, differenziert, asset-light im Betrieb; aber strukturell margenschwache, kapitalintensive Branche.</td></tr>
+            <tr><td>Burggraben</td><td><strong>5/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>AI/Daten-Moat real (Loss-Ratio-Kompression), aber noch nicht in Underwriting-Gewinn übersetzt; Incumbents holen auf.</td></tr>
+            <tr><td>Operative Entwicklung (4Q)</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>10 Quartale beschleunigendes Wachstum, konsistente Beats, Margen- und FCF-Fortschritt.</td></tr>
+            <tr><td>Wachstum</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>+32% IFP, diversifiziert, echter Operating Leverage; Abzug für kleine Basis & Finanzierungsabhängigkeit.</td></tr>
+            <tr><td>Bewertung</td><td><strong>4/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td><td>Kein P/E, P/B ~9x, P/S ~6x. Priced for execution; jede Enttäuschung trifft hart.</td></tr>
+            <tr><td>Cashflow & Kapitalqualität</td><td><strong>5/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Adj. FCF 4x positiv, aber GAAP-defizitär, SBC-schwer, teils extern finanziert – nicht selbsttragend.</td></tr>
+            <tr><td>Risiken (invertiert)</td><td><strong>4/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td><td>Hohes CAT-, Wettbewerbs-, Bewertungs- und Verwässerungsrisiko; Underwriting-Gewinn unbewiesen.</td></tr>
+            <tr><td>Technische Analyse</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Über SMA 50/200, in Erholung, aber weit unter Hoch und sehr volatil (Beta ~1,9).</td></tr>
+            <tr style="background:rgba(139,92,246,0.08);"><td><strong>⌀ Gesamtscore</strong></td><td><strong>5,9/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:59%;background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">5,9</span></div></td><td>Erstklassige Ausführung trifft auf hohe Bewertung und unbewiesene Underwriting-Ökonomie → HALTEN.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);">Änderung vs. v1.0: Erstanalyse – keine Vorwerte. Integrierte User-Thesen (S2/S6/S7) bestätigen den mittleren Burggraben-Score und rechtfertigen keine Score-Anhebung, da keine der Thesen bislang „bewiesen" ist.</p>
+    </div>
+  </div>
+
+  <!-- SEKTION 12 -->
+  <div class="section" id="s12">
+    <div class="section-header"><div class="section-number">12</div><div class="section-title">Fazit – Investment-These</div></div>
+    <div class="section-body">
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 – Der Flywheel funktioniert messbar.</strong> Die TTM-Gross-Loss-Ratio fiel in zwei Jahren von 88% auf 64%, der Bruttogewinn verfünffachte sich, und das IFP-Wachstum <em>beschleunigte</em> zehn Quartale in Folge auf 32%. Das ist kein Marketing – es ist der empirische Beleg, dass mehr Daten zu besserer Risikoauswahl führen. Wenn dieser Kompound weiterläuft, wird aus der „Story" ein bewiesener Moat.</p>
+          <p><strong>Säule 2 – Der Profitabilitäts-Inflection ist greifbar.</strong> Adj. EBITDA verbesserte sich von –$47M auf –$17M YoY, Q4 2025 lag bei nur –$5M, Adj. FCF ist vier Quartale positiv. Management hat Q4 2026 für positives Adj. EBITDA und 2027 für GAAP-Profitabilität „locked in". Der operative Hebel ist real: Kunden +1,2M bei –6% Headcount.</p>
+          <p><strong>Säule 3 – Bewertung mit Optionalität.</strong> ~10x den 2026er Bruttogewinn bei +150% GP-Wachstum ist für einen Kompounder nicht teuer. Dazu Gratis-Optionen: Auto/Tesla-FSD, Europa, Cross-Sell (nur 5% Multi-Policy). Bestätigt sich der Breakeven, ist ein Re-Rating Richtung altes Hoch ($100) plausibel.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 – Nach 10 Jahren kein Underwriting-Gewinn.</strong> Die Combined Ratio liegt weiter über 100%. Die gefeierte LAE-Effizienz misst nur die <em>Bearbeitungskosten</em>, nicht die Qualität der Risiken. Bleibt die Combined &gt;100%, skaliert Lemonade Verluste effizienter – Wachstum verschlimmert dann das Problem, statt es zu lösen.</p>
+          <p><strong>Risiko 2 – Der Umsatz-Sprung ist teils Buchhaltung.</strong> +71% Umsatz vs. +32% IFP entsteht wesentlich durch die Rückversicherungs-Umstellung (weniger Zession), nicht organisch. Adj. FCF hängt an Fremd-Wachstumsfinanzierung (Hannover Re bis $250M, CIA $180M). Fällt LTV/CAC unter ~2,5x, kippt die Ökonomie. SBC ~$21M/Q verwässert dauerhaft.</p>
+          <p><strong>Risiko 3 – Größe & CAT.</strong> Lemonades gesamtes IFP entspricht &lt;1 Woche Progressive-Volumen; in Auto ist die Loss Ratio (76%) noch unattraktiv. Ein großes CAT-Jahr (vgl. Wildfires +16 Punkte) könnte den Breakeven verschieben. Bei P/B ~9x und Beta ~1,9 ist der Titel für Enttäuschungen extrem empfindlich.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung (ausgewogen)</h3>
+      <p>Das bullische Narrativ ist operativ <em>überzeugender</em> – die Loss-Ratio-Kompression über zwei Jahre ist ein harter, schwer wegzudiskutierender Beleg, dass hier mehr passiert als effizientes Claims-Handling. Lemonade ist mit hoher Wahrscheinlichkeit derjenige aus der Insurtech-Klasse, der den Sprung schafft. <em>Aber</em> das bärische Narrativ enthält den entscheidenden, noch offenen Punkt: Der Vorteil ist <strong>bis heute nicht in nachhaltigen Underwriting-Gewinn (Combined &lt; 100%) übersetzt</strong>, und ein Teil der jüngsten Umsatz- und FCF-Stärke ist reinsurance- und finanzierungsgetrieben, nicht rein organisch.</p>
+      <p>Damit steht und fällt die These an <strong>einem</strong> Datenpunkt: dem für Q4 2026 angekündigten Adj.-EBITDA-Breakeven und dem GAAP-Turn 2027. Bis dieser Beweis erbracht ist, ist die aktuelle Bewertung (P/B ~9x, kein Gewinn) fair bis leicht ambitioniert bepreist – die guten Nachrichten sind weitgehend eingepreist, die Risiken (CAT, Wettbewerb) nicht vollständig. Das Risk/Reward auf 12–18 Monate ist annähernd symmetrisch mit leicht negativem Skew: ~+23% Upside (Richtung $80, falls Momentum + Breakeven-Bestätigung) vs. ~–28% Downside (Richtung $47, bei CAT-Schock oder Wachstumsverlangsamung). Auf 2–3 Jahre verschiebt ein bestätigter, selbsttragender Breakeven das Chancen-Risiko klar nach oben (Re-Rating-Potenzial Richtung $100+).</p>
+      <p>Geeignet für Quality-Growth-Investoren mit Toleranz für hohe Volatilität und einem Horizont, der bis über den Q4-2026-Beweis hinausreicht. Transparenz/Demut: <em>Ich könnte falsch liegen, falls</em> die AI-Kompoundierung die Combined Ratio schneller unter 100% drückt als erwartet – dann ist die Aktie auf heutigem Niveau zu billig, nicht zu teuer.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kurzfristig (0–6M)</strong></td><td>Q2-Earnings 04.08., Short-Squeeze-Potenzial</td><td>CAT-Saison, Gewinnmitnahmen, hohe Vola</td><td><span class="badge badge-yellow">Halten / Abwarten</span></td></tr>
+            <tr><td><strong>Mittelfristig (6–24M)</strong></td><td>Q4-2026-Breakeven, Auto/Tesla, Europa</td><td>Breakeven-Verschiebung, Wettbewerb</td><td><span class="badge badge-yellow">Halten, tranchiert aufstocken bei Bestätigung</span></td></tr>
+            <tr><td><strong>Langfristig (2–5J)</strong></td><td>GAAP-Profit 2027, $10-Mrd-IFP-Pfad, Moat-Beweis</td><td>AI-Commoditisierung, strukturell &gt;100% Combined</td><td><span class="badge badge-green">Kaufen &amp; Halten (falls Breakeven hält)</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese (Zusammenfassung)</h3>
+      <p>Lemonade ist die glaubwürdigste AI-native Wette im Versicherungssektor – mit erstklassiger operativer Ausführung (10 Quartale beschleunigendes Wachstum, Loss Ratio 88%→64%, Adj. FCF positiv) und einem greifbaren Profitabilitäts-Inflection in Q4 2026. Der Moat ist real, aber noch nicht in Dollar (Combined &lt; 100%) bewiesen, und die Bewertung (P/B ~9x, kein Gewinn) lässt wenig Spielraum für Enttäuschungen. Deshalb <strong>HALTEN</strong>: keine Nachkauf-Basis auf heutigem Niveau, aber ein hochwertiger Kandidat, den man bei Q4-2026-Bestätigung tranchiert aufbaut – oder bei einem CAT-/Sentiment-getriebenen Rücksetzer Richtung $50 aggressiver kauft.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$58–80</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–3 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–28%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+23%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val" style="color:var(--yellow);">~1:0,8</div></div>
+      </div>
+
+      <h3>Was falsifiziert die These?</h3>
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Q4 2026 verfehlt Adj.-EBITDA-Breakeven ohne CAT-Erklärung → These gebrochen, reduzieren</li>
+            <li>TTM-Gross-Loss-Ratio steigt zwei Quartale in Folge → Underwriting-Verbesserung gestoppt</li>
+            <li>LTV/CAC fällt nachhaltig unter ~2,5x → Wachstumsökonomie kippt</li>
+            <li>IFP-Wachstum fällt unter 20% bei gleichzeitig steigendem Growth Spend</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Combined Ratio erstmals nachhaltig &lt; 100% → Moat in Dollar bewiesen, aggressiv aufstocken</li>
+            <li>Q4 2026 positives Adj. EBITDA bestätigt → Re-Rating, tranchiert nachkaufen</li>
+            <li>Kurs-Rücksetzer Richtung $50 (SMA-/Wert-Zone) ohne Fundamental-Verschlechterung</li>
+            <li>Auto-Loss-Ratio fällt unter 70% → Vorteil trägt auch in komplexer Sparte</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Welcher Anlegertyp passt?</h3>
+      <div class="investor-grid">
+        <div class="investor-yes"><h5>✅ Geeignet für</h5><ul><li>Quality-Growth-Investoren (2–5 J. Horizont)</li><li>Disruption-/Thematik-Investoren (AI-native)</li><li>Anleger mit hoher Volatilitätstoleranz</li></ul></div>
+        <div class="investor-no"><h5>❌ NICHT geeignet für</h5><ul><li>Value-Investoren (kein Gewinn, P/B 9x)</li><li>Income-Investoren (keine Dividende)</li><li>Risikoaverse / kurzfristige Trader ohne Vola-Toleranz</li></ul></div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten</span></td><td>Auf Q4-2026-Breakeven-Bestätigung warten, dann neu bewerten.</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Kleine Startposition</span></td><td>~⅓ jetzt, Rest nach Breakeven-Beweis oder bei Rücksetzer &lt;$55.</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-yellow">Halten / bei $50 kaufen</span></td><td>Auf heutigem Niveau R/R ~1:0,8 – bessere Einstiege bei Vola-Dips abwarten.</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Aufbauen &amp; Halten</span></td><td>Bei Überzeugung vom AI-Moat: über den Zyklus tranchiert positionieren.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Synthese aus S1–S11; Lemonade Shareholder Letters; Analystenkonsens S&P Global (Juni 2026).</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 13 -->
+  <div class="section" id="s13">
+    <div class="section-header"><div class="section-number">13</div><div class="section-title">Outlook – die 3 wichtigsten anstehenden Events</div></div>
+    <div class="section-body">
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q2-2026-Ergebnisse – 04.–05.08.2026</h4>
+        <p>Erster Test nach der starken Q1-Beschleunigung. Entscheidend: Hält das IFP-Wachstum ≥30% und verbessert sich die TTM-Gross-Loss-Ratio weiter Richtung/unter 60%?</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> IFP-Wachstum ≥30% <em>und</em> TTM-Gross-Loss-Ratio ≤62% <em>und</em> Adj.-EBITDA-Verlust &lt;$15M → das Q4-Breakeven-Ziel ist auf Kurs; kleine Startposition rechtfertigt, bei Kursstärke &gt;$70 nicht hinterherlaufen.<br><br>
+          <strong>Wenn:</strong> IFP-Wachstum fällt unter 25% <em>oder</em> Loss Ratio steigt sequenziell ohne CAT-Erklärung → Wachstum-/Underwriting-Warnsignal, Position nicht aufbauen, Reduktion erwägen.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>🎯 Event 2: Q4-2026-Ergebnisse & der „locked-in" Adj.-EBITDA-Breakeven – Feb. 2027</h4>
+        <p>Das zentrale Beweis-Event der gesamten These. Q4 ist saisonal das stärkste Quartal (2025: 52% Loss Ratio, –$5M Adj. EBITDA); hier soll erstmals ein voll positives Adj.-EBITDA-Quartal stehen.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Q4 2026 liefert positives Adj. EBITDA wie angekündigt → These „bewiesen", Re-Rating wahrscheinlich; verbleibende Tranchen kaufen, Kursziel Richtung $90–100 (12–24M) heben.<br><br>
+          <strong>Wenn:</strong> Breakeven wird verfehlt/verschoben <em>ohne</em> klar abgrenzbaren CAT-Grund → Kern-These (selbsttragende Profitabilität) gebrochen → auf VERKAUFEN herabstufen und Position reduzieren.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>🚗 Event 3: Auto-Skalierung & Tesla-FSD-Rollout (Autonomous Car) – laufend 2026/27</h4>
+        <p>Auto ist die Sparte, in der sich entscheidet, ob der AI-Vorteil über einfache Linien (Renters/Pet) hinaus trägt. Die Loss Ratio liegt noch bei 76%; die Tesla-FSD-Partnerschaft ist die differenzierende Option.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Auto-Gross-Loss-Ratio fällt Richtung/unter 70% <em>und</em> der Tesla-FSD-Tarif skaliert über mehrere Staaten → Beleg, dass der Moat auch komplexe Sparten erfasst; erhöht Konviktion, rechtfertigt aggressiveren Aufbau.<br><br>
+          <strong>Wenn:</strong> Auto-Loss-Ratio bleibt strukturell &gt;80% <em>oder</em> das Auto-Wachstum stockt → Lemonade bleibt Nischen-Carrier (Pet/Renters); Bewertungs-Upside begrenzt, striktes HALTEN.
+        </div>
+      </div>
+      <div class="source">Quellen: Lemonade IR / Earnings-Kalender (Q2 2026: 04.–05.08.2026); Q4 2025 & Q1 2026 Shareholder Letters (Breakeven-Guidance Q4 2026); Simply Wall St (Tesla Autonomous Car).</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken und stellt keine Anlageberatung, kein Angebot und keine Aufforderung zum Kauf oder Verkauf von Wertpapieren dar. Alle Kennzahlen basieren auf öffentlich verfügbaren Quellen (Stand: 01.07.2026) und können Fehler enthalten bzw. sich ändern. Aktienkurs $64,81 = Schlusskurs 30.06.2026. Der Autor/Ersteller übernimmt keine Haftung für Anlageentscheidungen. Investieren ist mit Risiken bis zum Totalverlust verbunden. Führen Sie stets eigene Recherchen durch (DYOR).</div>
+</div>
+</body>
+</html>
