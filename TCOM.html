@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCOM – Aktienanalyse Canvas v2.2</title>
+<style>
+:root{
+  --primary:#FF6900; --primary-dark:#cc5400;
+  --bg:#0f0f12; --bg-card:#1a1a1f; --bg-card2:#22222a; --border:#2e2e38;
+  --text:#e8e8ec; --text-muted:#888898; --text-dim:#555566;
+  --green:#22c55e; --red:#ef4444; --yellow:#f59e0b; --blue:#3b82f6; --purple:#8b5cf6; --teal:#14b8a6;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+.header{background:linear-gradient(135deg,#1a0800 0%,#2a1000 40%,#0f0f12 100%);border-bottom:1px solid var(--primary);padding:36px 40px 28px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;}
+.header-left h1{font-size:32px;font-weight:700;color:white;letter-spacing:-0.5px;}
+.header-left h1 span{color:var(--primary);}
+.header-left .subtitle{color:var(--text-muted);font-size:14px;margin-top:4px;}
+.header-right{text-align:right;}
+.price-tag{font-size:38px;font-weight:800;color:var(--primary);line-height:1;}
+.price-meta{color:var(--text-muted);font-size:13px;margin-top:4px;}
+.price-change{display:inline-block;padding:2px 8px;border-radius:4px;font-size:13px;font-weight:600;margin-top:4px;}
+.price-change.up{background:rgba(34,197,94,0.15);color:var(--green);}
+.price-change.down{background:rgba(239,68,68,0.15);color:var(--red);}
+.nav{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:100;}
+.nav a{color:var(--text-muted);text-decoration:none;padding:14px 16px;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.2s;}
+.nav a:hover{color:var(--primary);border-bottom-color:var(--primary);}
+.main{max-width:1100px;margin:0 auto;padding:32px 40px 60px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px;}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.kpi-value{font-size:22px;font-weight:700;color:white;margin-top:4px;}
+.kpi-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.kpi-value.green{color:var(--green);} .kpi-value.red{color:var(--red);} .kpi-value.orange{color:var(--primary);}
+.section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden;}
+.section-header{background:var(--bg-card2);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.section-number{background:var(--primary);color:white;width:28px;height:28px;border-radius:6px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-title{font-size:16px;font-weight:700;color:white;}
+.section-score{margin-left:auto;font-size:14px;font-weight:700;color:var(--primary);}
+.section-note{font-size:12px;color:var(--text-dim);background:rgba(46,46,56,0.4);border-radius:4px;padding:4px 10px;margin-left:auto;}
+.section-body{padding:20px 24px;}
+p{margin-bottom:12px;color:var(--text);}
+p:last-child{margin-bottom:0;}
+h3{font-size:14px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 8px;}
+h3:first-child{margin-top:0;}
+.table-wrap{overflow-x:auto;margin:16px 0;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--bg-card2);color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:10px 12px;border-bottom:1px solid rgba(46,46,56,0.5);color:var(--text);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,105,0,0.04);}
+.beat{color:var(--green);font-weight:600;} .miss{color:var(--red);font-weight:600;} .neutral{color:var(--yellow);font-weight:600;}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}
+.badge-green{background:rgba(34,197,94,0.15);color:var(--green);}
+.badge-red{background:rgba(239,68,68,0.15);color:var(--red);}
+.badge-yellow{background:rgba(245,158,11,0.15);color:var(--yellow);}
+.badge-blue{background:rgba(59,130,246,0.15);color:var(--blue);}
+.badge-orange{background:rgba(255,105,0,0.15);color:var(--primary);}
+.event-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(46,46,56,0.5);align-items:flex-start;}
+.event-item:last-child{border-bottom:none;}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0;}
+.dot-green{background:var(--green);} .dot-red{background:var(--red);} .dot-yellow{background:var(--yellow);}
+.event-label{font-weight:600;color:white;}
+.event-text{font-size:14px;color:var(--text);}
+.risk-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.risk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.risk-title{font-weight:600;color:white;font-size:14px;}
+.score-bar{display:flex;align-items:center;gap:10px;}
+.score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#ff9500);}
+.score-num{font-weight:700;color:var(--primary);font-size:15px;min-width:32px;}
+.bull-bear-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:700px){.bull-bear-grid{grid-template-columns:1fr;}}
+.bull-card{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:16px;}
+.bear-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:16px;}
+.bull-card h4{color:var(--green);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.bear-card h4{color:var(--red);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.rating-box{background:linear-gradient(135deg,rgba(255,105,0,0.12),rgba(255,105,0,0.04));border:1px solid rgba(255,105,0,0.3);border-radius:12px;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:20px 0;}
+.rating-item label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;display:block;margin-bottom:4px;}
+.rating-item .val{font-size:20px;font-weight:800;color:white;}
+.rating-item .val.buy{color:var(--green);} .rating-item .val.hold{color:var(--yellow);} .rating-item .val.sell{color:var(--red);}
+.trigger-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+@media(max-width:700px){.trigger-grid{grid-template-columns:1fr;}}
+.trigger-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.trigger-card h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.trigger-card.buy h5{color:var(--green);} .trigger-card.sell h5{color:var(--red);}
+.trigger-list{font-size:13px;color:var(--text);list-style:none;padding:0;}
+.trigger-list li{margin-bottom:6px;padding-left:14px;position:relative;}
+.trigger-list li::before{content:"→";position:absolute;left:0;}
+.investor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+@media(max-width:600px){.investor-grid{grid-template-columns:1fr;}}
+.investor-yes{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px;}
+.investor-no{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:12px;}
+.investor-yes h5{color:var(--green);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-no h5{color:var(--red);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-yes li,.investor-no li{font-size:13px;color:var(--text);margin-bottom:4px;list-style:none;padding-left:14px;position:relative;}
+.investor-yes li::before{content:"✓";position:absolute;left:0;color:var(--green);}
+.investor-no li::before{content:"✗";position:absolute;left:0;color:var(--red);}
+.geo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0;}
+.geo-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.geo-region{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.geo-pct{font-size:20px;font-weight:700;color:white;}
+.geo-note{font-size:12px;color:var(--text-muted);}
+.outlook-card{background:var(--bg-card2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:16px;margin-bottom:14px;}
+.outlook-card h4{color:white;font-size:14px;margin-bottom:8px;}
+.outlook-card .when-then{font-size:13px;color:var(--text);margin-top:8px;}
+.outlook-card .when-then strong{color:var(--primary);}
+.source{font-size:11px;color:var(--text-dim);margin-top:12px;padding-top:10px;border-top:1px solid rgba(46,46,56,0.5);}
+.source a{color:var(--text-dim);}
+.disclaimer{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text-dim);margin-top:32px;}
+.alert-box{background:rgba(255,105,0,0.08);border:1px solid rgba(255,105,0,0.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px;}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+.pill{display:inline-block;background:rgba(255,105,0,0.12);color:var(--primary);border-radius:4px;padding:1px 7px;font-size:13px;font-weight:600;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Trip.com Group <span>TCOM · 9961.HK</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 01. Juli 2026 · NASDAQ / HKEX · Sektor: Consumer Internet / Online Travel (OTA)</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-orange">China-OTA-Marktführer</span>
+      <span class="badge badge-blue">Outbound &amp; Inbound</span>
+      <span class="badge badge-yellow">SAMR-Antitrust-Überhang</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">~$41</div>
+    <div class="price-meta">Schlusskurs 26.06.2026 · NASDAQ (ADR)</div>
+    <div class="price-change down">▼ –48% vs. 52W-Hoch</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">52W: $38.04 – $78.99</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring &amp; Thesen</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">~$41</div><div class="kpi-sub">USD · 26.06.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value">~$25,8 Mrd.</div><div class="kpi-sub">~629,7 Mio. ADS</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/E (Fwd, norm.)</div><div class="kpi-value orange">~11–12×</div><div class="kpi-sub">GAAP-TTM verzerrt niedrig</div></div>
+    <div class="kpi-card"><div class="kpi-label">EV/EBITDA (Fwd)</div><div class="kpi-value orange">~8×</div><div class="kpi-sub">günstigste OTA-Gruppe</div></div>
+    <div class="kpi-card"><div class="kpi-label">Adj. EBITDA-Marge</div><div class="kpi-value green">~30%</div><div class="kpi-sub">Q1 2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Netto-Cash</div><div class="kpi-value green">~$15 Mrd.</div><div class="kpi-sub">RMB 104 Mrd. · ~57% Mkt-Cap</div></div>
+    <div class="kpi-card"><div class="kpi-label">Umsatz FY2025</div><div class="kpi-value">~$8,9 Mrd.</div><div class="kpi-sub">RMB 62,5 Mrd. · +17%</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value">Q2 2026</div><div class="kpi-sub">vsl. Sept. 2026</div></div>
+  </div>
+
+  <!-- ============ SEKTION 1 ============ -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6–9 Monate</div>
+    </div>
+    <div class="section-body">
+      <p>Trip.com Group ist der mit Abstand größte Online-Reisevermittler (OTA) Chinas und einer der drei größten der Welt. Das Unternehmen betreibt ein Portfolio aus vier Kernmarken: <span class="pill">Ctrip</span> und <span class="pill">Qunar</span> für den chinesischen Heimatmarkt, die internationale Plattform <span class="pill">Trip.com</span> für Auslands- und grenzüberschreitende Reisen sowie das Flug-Metasuch-Portal <span class="pill">Skyscanner</span>. Über diese Plattformen vermittelt Trip.com Hotelübernachtungen, Flug-, Bahn-, Bus- und Fährtickets, Pauschalreisen sowie Firmenreise-Management. Zum Jahresende 2025 waren rund 1,7 Mio. Unterkünfte weltweit sowie Flüge von über 680 Airlines angebunden; über 90% der Transaktionen liefen mobil.</p>
+
+      <p>Das Erlösmodell ist im Kern <strong>provisionsbasiert und Asset-Light</strong>: Trip.com hält kein Hotel- oder Flugzeug-Inventar, sondern verdient Kommissionen auf vermittelte Buchungen. Umsatz wird erst dann realisiert, wenn eine Reservierung unstornierbar wird. 2025 verteilte sich der Umsatz auf vier Ströme: <strong>Unterkunftsvermittlung 42%</strong> (RMB 26,1 Mrd., +21%), <strong>Transport-Ticketing 36%</strong> (RMB 22,5 Mrd., +11%), <strong>Pauschalreisen ~8%</strong> (RMB 4,7 Mrd.) und <strong>Firmenreisen 5%</strong> (RMB 2,8 Mrd.), ergänzt um Werbe- und sonstige Erlöse.</p>
+
+      <p>Die Kundensegmente reichen von B2C-Freizeitreisenden über Firmenkunden (Corporate Travel) bis zu Ökosystem-Partnern (Hotels, Airlines, Reiseveranstalter), die auf der Plattform gelistet und beworben werden. Der Konzern sitzt rechtlich in Singapur, generiert aber den Großteil des Umsatzes in China. Wichtig für das Verständnis der Struktur: Ein Teil der Operationen läuft über <strong>Variable Interest Entities (VIEs)</strong>, die 2025 rund 19% des Nettoumsatzes beisteuerten — eine in China übliche, rechtlich aber ungetestete Konstruktion (siehe Risiken, Sektion 10).</p>
+
+      <p>Die Unit Economics sind attraktiv: Das Asset-Light-Modell erzeugt hohe Bruttomargen und — bei entsprechender operativer Hebelwirkung — Adjusted-EBITDA-Margen von rund 30%. Gleichzeitig ist das Modell marketing-intensiv: 2025 flossen 24% des Umsatzes in Vertrieb/Marketing und weitere 24% in Produktentwicklung (u.a. RMB 15,1 Mrd. / ~$2,2 Mrd. inklusive KI-Tools). Trip.com verdient sein Geld also über Skalierung eines Vermittlungsnetzwerks, dessen Wert mit jedem zusätzlichen Reisenden und jedem zusätzlichen Angebot steigt.</p>
+
+      <div class="source">Quellen: Trip.com Group 20-F FY2025 (SEC, 28.04.2026); Q4/FY2025 Ergebnisbericht (25.02.2026); StockTitan 20-F-Zusammenfassung (2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 2 ============ -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <p><strong>Netzwerkeffekte (stark, im Heimatmarkt):</strong> Trip.com ist eine zweiseitige Plattform — je mehr Reisende, desto attraktiver für Hotels/Airlines, desto größer das Angebot, desto mehr Reisende. In China ist dieser Effekt dominant: Ctrip/Qunar decken einen sehr großen Teil des chinesischen OTA-Marktes ab. Der Nachteil dieser Dominanz ist zugleich das aktuelle Kernrisiko — genau diese Marktmacht ist Gegenstand der SAMR-Antitrust-Untersuchung (siehe Sektionen 8 &amp; 10).</p>
+
+      <p><strong>Switching Costs (mittel):</strong> Für Endkunden sind die Wechselkosten moderat (Meta-Suche und Preisvergleich sind einfach), aber Loyalitätsprogramme, gespeicherte Reisedaten und Bündelung (Flug+Hotel+Aktivität) erhöhen die Klebrigkeit. Für Firmenkunden im Corporate-Travel-Segment sind die Wechselkosten deutlich höher.</p>
+
+      <p><strong>Scale &amp; Supply-Vorteile (hoch):</strong> Mit ~1,7 Mio. angebundenen Unterkünften und Flügen von 680+ Airlines verfügt Trip.com über eine Angebotsbreite und Einkaufsmacht, die neue Wettbewerber kaum replizieren können. Die Größe erlaubt es, Marketing- und Technologie-Fixkosten über ein sehr großes Buchungsvolumen zu verteilen.</p>
+
+      <p><strong>Marke &amp; Technologie:</strong> Ctrip ist in China faktisch synonym mit Online-Reisebuchung. International ist die Marke Trip.com schwächer positioniert, gewinnt aber schnell an Boden. Skyscanner liefert einen strategischen Metasuch-Zugang zum globalen Flugmarkt. Der Technologievorsprung liegt zunehmend in KI-gestützter Reiseplanung (TripGenie, Trip.Planner) — ein zweischneidiges Schwert, da ausgerechnet ein KI-Preis-Anpassungs-Tool im Zentrum der Regulierungskritik steht.</p>
+
+      <p><strong>Schwachstellen (kritisch):</strong> Der Burggraben hat drei Risse. Erstens ist die Dominanz im Heimatmarkt regulatorisch angreifbar geworden — ein erzwungener Umbau des Monetarisierungsmodells (z.B. des automatischen Preis-Matchings) würde den Moat direkt schwächen. Zweitens ist der internationale Moat noch dünn: Dort konkurriert Trip.com mit Booking/Agoda, die tiefere Taschen und etabliertere Marken haben. Drittens droht — wie der gesamten Branche — Disintermediation durch KI-native Reiseassistenten und Google. Der Moat ist real und im Heimatmarkt breit, aber er ist heute weniger unangreifbar als noch vor 18 Monaten.</p>
+
+      <div class="source">Quellen: Trip.com 20-F FY2025 (SEC, 28.04.2026); Morningstar Moat-Kommentar (Juni 2026); Mize OTA-Marktanteilsreport (27.04.2026); ChinaTravelNews (Juni 2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 3 ============ -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Beat-Ratio: Umsatz 4/4 · EPS ~2/4</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Trip.com berichtet in RMB nach US-GAAP und ist als ADR an der NASDAQ notiert. Alle Werte stammen aus den SEC-6-K-Ergebnisberichten und der Unternehmens-IR; USD-Angaben zu Konzernkursen der Berichte. GAAP-Nettoergebnis und -EPS sind durch Fair-Value-Änderungen und Investment-Gewinne teils stark verzerrt — operativ ist Adjusted EBITDA aussagekräftiger.</div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Quartal</th><th>Net Revenue</th><th>YoY</th><th>Adj. EBITDA</th><th>Marge</th><th>Kommentar</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Q2 2025</strong></td><td>RMB 14,8 Mrd. (~$2,07 Mrd.)</td><td class="beat">+~16%</td><td>RMB 4,9 Mrd.</td><td>~33%</td><td>Solide; Outbound &gt;120% des 2019-Niveaus</td></tr>
+            <tr><td><strong>Q3 2025</strong></td><td>RMB 18,3 Mrd. (~$2,6 Mrd.)</td><td class="beat">+16%</td><td>RMB 6,3 Mrd.</td><td>34%</td><td>Saisonstärke; GAAP-Gewinn RMB 19,9 Mrd. durch MakeMyTrip-Verkauf verzerrt</td></tr>
+            <tr><td><strong>Q4 2025</strong></td><td>RMB 15,5 Mrd. (~$2,2 Mrd.)</td><td class="beat">+~16%</td><td>~RMB 3,5 Mrd.</td><td>~23%</td><td>Margendelle: S&amp;M +30% YoY; EPS $0,87 (Beat)</td></tr>
+            <tr><td><strong>Q1 2026</strong></td><td>RMB 16,2 Mrd. (~$2,4 Mrd.)</td><td class="beat">+17%</td><td>RMB 4,8 Mrd.</td><td>30%</td><td>Umsatz-Beat, Non-GAAP-EPS $0,83 leichter Miss; <span class="badge badge-red">Q2-Guidance +3–8%</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Operativ war die Umsatzentwicklung über alle vier Quartale robust: durchgehend rund +16–17% YoY, getragen von zweistelligem Wachstum in allen Kernsegmenten. Die <strong>entscheidende Enttäuschung</strong> kam mit dem Q1-2026-Bericht (24.06.2026): Das Management guidete für Q2 2026 nur noch +3–8% Umsatzwachstum — eine deutliche Verlangsamung. Als Gründe nannte CFO Cindy Wang eine Abkühlung der chinesischen Flugreise-Nachfrage (höhere Ticketpreise verändern das Buchungsverhalten) sowie regulatorisch getriebene Anpassungen bei bahnbezogenen Zusatzprodukten (Value-Added Services), die kurzfristig belasten.</p>
+
+      <p><strong>Ergebnisqualität:</strong> Das GAAP-Nettoergebnis ist unbrauchbar für Trendaussagen — Q3 2025 enthielt einen Einmalgewinn von RMB 19,9 Mrd. aus dem Verkauf der MakeMyTrip-Beteiligung, der über 60% des Jahresgewinns 2025 ausmachte. Bereinigt wuchs der operative Gewinn 2025 nur ~11%. Wichtigste Management-Botschaft: Fokus auf Inbound-Tourismus (Ziel: 200 Mio. Inbound-Reisende in 5 Jahren), KI-Effizienz und internationale Expansion. Marktreaktion: Die Aktie fiel nach Q1 2026 weiter und markierte am 25.06.2026 mit $38,04 ein neues 52-Wochen-Tief.</p>
+
+      <p><em>Nächster Stichtag: Q2-2026-Ergebnisse voraussichtlich September 2026.</em></p>
+
+      <div class="source">Quellen: Trip.com 6-K Q1 2026 (SEC, Juni 2026); Q4/FY2025 6-K (25.02.2026); Q3 2025 IR (17.11.2025); Q2 2025 IR; Benzinga/Investing.com Earnings-Call-Transkript Q1 2026 (Juni 2026); StockTitan (Juni 2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 4 ============ -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <p>Trip.com wächst auf Konzernebene mit ~17% (FY2025), gespeist aus zwei sehr unterschiedlichen Motoren: einem <strong>reifen, aber großen China-Kern</strong> und einem <strong>kleinen, aber hochdynamischen internationalen Geschäft</strong>. Diese Zweiteilung ist der Schlüssel zur Outbound-/International-These (siehe Sektion 11).</p>
+
+      <h3>Geschäftsverteilung &amp; internationale Dynamik</h3>
+      <div class="geo-grid">
+        <div class="geo-card"><div class="geo-region">China-Kern (Ctrip/Qunar)</div><div class="geo-pct">~75%</div><div class="geo-note">Reif, ~10–12% strukturell</div></div>
+        <div class="geo-card"><div class="geo-region">Internationale OTA-Plattform</div><div class="geo-pct">~20%</div><div class="geo-note">Buchungen +~60–65% YoY</div></div>
+        <div class="geo-card"><div class="geo-region">Inbound-Tourismus China</div><div class="geo-pct">+90–100%</div><div class="geo-note">~20 Mio. Reisende 2025</div></div>
+        <div class="geo-card"><div class="geo-region">Outbound (Flug+Hotel)</div><div class="geo-pct">~140%</div><div class="geo-note">des 2019-Vorkrisen-Niveaus</div></div>
+      </div>
+
+      <p><strong>Der strukturelle Rückenwind:</strong> Nur rund 12% der Chinesen besitzen einen Reisepass. Diese niedrige Sättigung ist das zentrale langfristige Wachstumsargument — mit steigenden Einkommen und lockeren Visabestimmungen wächst die outbound-reisende Bevölkerung über Jahre hinweg. Outbound-Buchungen liegen bereits über dem Vorkrisen-Niveau. Gleichzeitig ist Inbound (ausländische Reisende nach China) zum expliziten strategischen Wachstumsmotor erklärt worden, begünstigt durch visafreie Einreiseregelungen.</p>
+
+      <p><strong>Segment- vs. Konzernwachstum:</strong> Unterkunft (+21% FY2025) wächst schneller als Transport (+11%), was den Mix margenseitig günstig verschiebt. Das internationale Geschäft wächst mit ~60% zwar am schnellsten, startet aber von einer kleineren Basis (~20% des Umsatzes) — es ist noch nicht groß genug, um die Verlangsamung im Kern vollständig zu kompensieren. Genau hier liegt die Kernfrage der These: Ob International schnell genug skaliert, um in den nächsten 2–3 Jahren zum dominanten Treiber zu werden.</p>
+
+      <p><strong>Kritische Einordnung:</strong> Das Konzernwachstum ist überwiegend organisch und „echt" (keine M&amp;A-Inflationierung; im Gegenteil, mit dem MakeMyTrip-Verkauf wurde Beteiligung abgebaut). Analysten erwarten für die nächsten drei Jahre ~10% Umsatzwachstum p.a. — solide, aber die Q2-Guidance (+3–8%) zeigt, dass der Pfad nicht linear verläuft und zyklische wie regulatorische Gegenwinde kurzfristig bremsen.</p>
+
+      <div class="source">Quellen: Trip.com Q1 2026 &amp; Q4/FY2025 IR-Berichte; Morningstar (Passport-Penetration ~12%, Juni 2026); Simply Wall St Wachstumsprognose (Juni 2026); MLex (27.02.2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 5 ============ -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> GAAP-TTM-P/E (~7×) ist durch den Einmalgewinn aus dem MakeMyTrip-Verkauf künstlich niedrig. Für die Bewertung sind normalisiertes Forward-P/E (~11–12×) und Forward-EV/EBITDA (~8×) relevanter.</div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>TCOM</th><th>Einordnung</th></tr></thead>
+          <tbody>
+            <tr><td>P/E (Fwd, normalisiert)</td><td>~11–12×</td><td>Deutlich unter US-Hospitality-Schnitt (~20×)</td></tr>
+            <tr><td>EV/EBITDA (Fwd)</td><td>~8×</td><td class="beat">Günstigste der OTA-Gruppe (mit EXPE)</td></tr>
+            <tr><td>P/Sales</td><td>~3,1×</td><td>Moderat für 30%-EBITDA-Marge</td></tr>
+            <tr><td>Netto-Cash / Market Cap</td><td>~57%</td><td class="beat">RMB 104 Mrd. (~$15 Mrd.) Cash/Investments</td></tr>
+            <tr><td>Dividende</td><td>0%</td><td class="neutral">Keine Ausschüttung</td></tr>
+            <tr><td>Analysten-Konsens-Kursziel</td><td>~$77–86</td><td>23/25 Buy — hängt der De-Rating hinterher</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Die Aktie ist nach dem ~48%-Absturz von $78,99 (Jan. 2026) auf ~$41 <strong>fundamental günstig</strong>. Mit ~8× Forward-EV/EBITDA notiert Trip.com auf dem Niveau von Expedia (~7,8×) und weit unter Booking (~12,9×) und Airbnb (~15,1×) — obwohl Trip.com auf der internationalen Plattform schneller wächst als alle drei. Besonders auffällig ist die Bilanz: Rund 57% der Marktkapitalisierung sind durch Netto-Cash und Investments gedeckt. Rechnet man diese heraus, bezahlt man für das operative Geschäft nur einen einstelligen EBITDA-Multiplikator.</p>
+
+      <p><strong>Warum ist es so billig?</strong> Die Bewertung ist kein reines Schnäppchen, sondern ein Preis für Unsicherheit: Der SAMR-Überhang, die Q2-Wachstumsverlangsamung, VIE-/Delisting-Risiken und die generelle China-ADR-Skepsis drücken das Multiple. Selbst bärische Analysten argumentieren, dass ~10× 2027er-Gewinne angesichts der Risiken „gerechtfertigt" seien — was zugleich bedeutet, dass das Abwärtspotenzial vom aktuellen Niveau begrenzt erscheint. Die Diskrepanz zwischen Kurs (~$41) und Konsens-Kursziel (~$77–86) ist historisch groß und spiegelt, dass die Street-Modelle die regulatorische De-Rating noch nicht vollständig verarbeitet haben.</p>
+
+      <div class="source">Quellen: TIKR Peer-EV/EBITDA-Daten (Juni 2026); Morningstar Quote (P/E 12,1× / P/S 3,1×, 25.06.2026); Simply Wall St (Juni 2026); Seeking Alpha (Bewertungskommentar, Juni 2026); MarketBeat/Financhill (Konsens, Juni 2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 6 ============ -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>Wert</th><th>Trend / Kommentar</th></tr></thead>
+          <tbody>
+            <tr><td>Adj. EBITDA-Marge</td><td>~30% (FY2025)</td><td class="neutral">Q4-Delle auf ~23% durch S&amp;M-Spike</td></tr>
+            <tr><td>Cash &amp; Investments</td><td>RMB 104 Mrd. (~$15 Mrd.)</td><td class="beat">Massives Finanzpolster</td></tr>
+            <tr><td>Total Debt</td><td>~$4,5 Mrd.</td><td class="beat">Klar netto-cash-positiv</td></tr>
+            <tr><td>Produktentwicklung</td><td>24% d. Umsatzes</td><td class="neutral">RMB 15,1 Mrd. — hohe KI-Investition</td></tr>
+            <tr><td>Sales &amp; Marketing</td><td>24% d. Umsatzes</td><td class="miss">2025 +25% YoY — belastet Marge</td></tr>
+            <tr><td>Ergebnisqualität</td><td>Gemischt</td><td class="miss">GAAP durch Investment-Gewinne verzerrt</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Die Kapitalqualität ist <strong>bilanziell exzellent, aber ergebnisseitig mit Vorsicht zu genießen</strong>. Die Bilanz ist eine Festung: RMB 104 Mrd. Cash und Investments stehen nur ~$4,5 Mrd. Schulden gegenüber. Dieses Polster gibt dem Unternehmen enorme Flexibilität, eine etwaige SAMR-Strafe zu absorbieren, weiter in KI/International zu investieren und Zyklen auszusitzen — ohne Kapitalmarktabhängigkeit.</p>
+
+      <p>Die operative Marge ist mit ~30% Adjusted EBITDA solide, wurde aber 2025 durch aggressive Marketingausgaben (S&amp;M +25% YoY, um internationale Marktanteile zu sichern) gedämpft — im Q4 2025 fiel die Marge temporär auf ~23%. Das ist kein Alarm-, aber ein Beobachtungssignal: Die operative Hebelwirkung ist da, wird aber bewusst in Wachstum reinvestiert.</p>
+
+      <p><strong>Die rote Flagge bei der Ergebnisqualität:</strong> Das ausgewiesene GAAP-Nettoergebnis 2025 (RMB 33,4 Mrd., +94%) ist zu über 60% ein Einmaleffekt aus dem Verkauf der MakeMyTrip-Beteiligung (RMB 19,9 Mrd.). Wer nur auf die Schlagzeile schaut, überschätzt die operative Ertragskraft massiv. Bereinigt wuchs der operative Gewinn nur ~11%. Für die Analyse heißt das: Non-GAAP-Kennzahlen und Adjusted EBITDA nutzen, GAAP-Gewinnsprünge ignorieren.</p>
+
+      <div class="source">Quellen: Trip.com 6-K Q1 2026 &amp; Q4/FY2025; BigGo Finance (MakeMyTrip-Gewinnanteil, 27.02.2026); Motley Fool (Debt/Cash); StockTitan 20-F (28.04.2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 7 ============ -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Unternehmen</th><th>Umsatz-Wachstum</th><th>Adj. EBITDA-Marge</th><th>EV/EBITDA (Fwd)</th><th>Kurs</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Trip.com (TCOM)</strong></td><td>+17% (Q1'26); Q2-Guide +3–8%</td><td>~30%</td><td class="beat">~8×</td><td>~$41</td></tr>
+            <tr><td>Booking (BKNG)</td><td>+13% FY25 / +16% Q1'26</td><td>~37%</td><td>~12,9×</td><td>~$155*</td></tr>
+            <tr><td>Expedia (EXPE)</td><td>+6–8%</td><td>~20%</td><td>~7,8×</td><td>~$218</td></tr>
+            <tr><td>Airbnb (ABNB)</td><td>+14–16% (Q2'26-Guide)</td><td>≥35%</td><td>~15,1×</td><td>~$133</td></tr>
+            <tr><td>MakeMyTrip (MMYT)</td><td>+10,7% cc; Op.-Profit +30%</td><td>niedriger</td><td>Premium (Wachstum)</td><td>~$43</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);">*BKNG nach 25:1-Split (April 2026); Multiples ~konsistent.</p>
+
+      <h3>Qualitative Einordnung</h3>
+      <p><strong>Trip.com vs. Booking:</strong> Booking ist die Qualitätsreferenz — höhere Marge (~37%), ~90% des Umsatzes international, riesiger Datenschatz und ein AI-Assistent („Penny"), der die eigene Buchungsstrecke vertieft statt sie an KI zu verlieren. Trip.com ist günstiger und wächst international schneller, ist aber margenschwächer und trägt das China-Regulierungsrisiko allein.</p>
+
+      <p><strong>Trip.com vs. Expedia:</strong> Ähnliche Bewertung (~8×), aber Trip.com wächst schneller und hat die bessere strukturelle Wachstumsstory (China-Outbound/Inbound) gegenüber Expedias reiferem US-Geschäft.</p>
+
+      <p><strong>Trip.com vs. Airbnb:</strong> Airbnb genießt ein deutliches Bewertungspremium (~15×) für sein einzigartiges Alternative-Accommodation-Modell und ≥35%-Margen. Trip.com ist breiter aufgestellt (Flug/Bahn/Hotel/Corporate), aber weniger differenziert.</p>
+
+      <p><strong>Trip.com vs. MakeMyTrip:</strong> Pikanter Sonderfall — Trip.com war jahrelang MakeMyTrip-Großaktionär und verkaufte die Beteiligung 2025 mit ~$2,9 Mrd. Gewinn. MMYT ist damit vom Portfolio-Baustein zum reinen indischen EM-Wettbewerber geworden, mit KI-Assistent „Myra" und starkem strukturellem Rückenwind in Indien. Der Verkauf signalisiert: Trip.com fokussiert Kapital auf die eigene China-/Global-Plattform statt auf Minderheitsbeteiligungen.</p>
+
+      <p><strong>Fazit Peer-Vergleich:</strong> Trip.com ist das <em>am schnellsten international wachsende, günstigste</em> Mitglied der Gruppe — aber auch das mit dem höchsten idiosynkratischen Risiko (Regulierung, VIE, Delisting). Es ist ein Value-plus-Growth-Profil mit China-Discount.</p>
+
+      <div class="source">Quellen: TIKR Competitors-Daten (Juni 2026); Booking 8-K FY2025 &amp; Trefis (April 2026); Airbnb 8-K Q1 2026; Expedia (Cloudbeds OTA-Trends, Dez. 2025); MakeMyTrip 6-K FY2026 (SEC); Mize OTA-Marktanteil (April 2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 8 ============ -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate + Schlüsselereignisse</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item"><div class="event-dot dot-red"></div><div>
+        <div class="event-label">14.01.2026 – SAMR-Antitrust-Untersuchung eröffnet <span class="badge badge-red">Sehr negativ</span></div>
+        <div class="event-text">Chinas Marktregulierer SAMR leitet ein Verfahren wegen mutmaßlichen Missbrauchs der Marktdominanz ein. Aktie −17% (−$12,90) an einem Tag, ~$8 Mrd. Marktkapitalisierung vernichtet. Quelle: Trip.com IR / Hagens Berman, Jan. 2026</div>
+      </div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div>
+        <div class="event-label">25.02.2026 – Abrupter Rücktritt der Mitgründer <span class="badge badge-red">Negativ</span></div>
+        <div class="event-text">Mitgründer Min Fan (President) und Qi Ji legen ihre Board-Mandate ohne Erklärung nieder; zwei neue unabhängige Direktorinnen bestellt. Governance-Signal in sensibler Phase. Quelle: Simply Wall St / MLex, Feb. 2026</div>
+      </div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div>
+        <div class="event-label">März 2026 – Behörden rügen „Preis-Matching" <span class="badge badge-yellow">Negativ</span></div>
+        <div class="event-text">Drei Pekinger Behörden zitieren 12 Online-Plattformen; Trip.coms automatischer Preisabgleich wird als Untergrabung der Preisautonomie der Hotels kritisiert. Zudem $1,4 Mio. Strafe wegen unerlaubter grenzüberschreitender Datentransfers. Quelle: ChinaTravelNews, Juni 2026</div>
+      </div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div>
+        <div class="event-label">24.06.2026 – Q1-2026-Ergebnisse &amp; schwache Q2-Guidance <span class="badge badge-yellow">Gemischt</span></div>
+        <div class="event-text">Umsatz +17% (Beat), aber Q2-Guidance nur +3–8%. Aktie fällt weiter, 52W-Tief $38,04 am 25.06. Quelle: Trip.com 6-K / Investing.com, Juni 2026</div>
+      </div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div>
+        <div class="event-label">2025/2026 – Envision-Partnerkonferenz &amp; KI-Offensive <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Neue KI-Tools (TripGenie, Trip.Planner) für personalisierte Reiseplanung; RMB 15,1 Mrd. Produktentwicklung 2025. Inbound-Ziel: 200 Mio. Reisende in 5 Jahren. Quelle: Simply Wall St / Trip.com IR, 2026</div>
+      </div></div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div>
+        <div class="event-label">KI-Disintermediation als Sektor-Thema <span class="badge badge-yellow">Neutral–Negativ</span></div>
+        <div class="event-text">Ganzjährige Sorge 2026, dass KI-Chatbots OTAs umgehen. Gegenbeleg: Booking („Penny"), Airbnb und MakeMyTrip („Myra") nutzen KI zur Vertiefung der eigenen Buchungsstrecke. Quelle: TIKR / Trefis, 2026</div>
+      </div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div>
+        <div class="event-label">Chinas „Golden Week"-Preiskrieg <span class="badge badge-red">Negativ</span></div>
+        <div class="event-text">Aggressiver Preiswettbewerb im chinesischen Reisemarkt drückt Take-Rates und Margen. Quelle: CNBC, Okt. 2025</div>
+      </div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div>
+        <div class="event-label">APAC-Reisemarkt als globaler Wachstumsführer <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">APAC-Auslandsreiseausgaben sollen bis 2029 ~$2,5 Bio. erreichen; internationale Ankünfte +24% (2024). Struktureller Rückenwind für Trip.coms Kernregion. Quelle: Mize, April 2026</div>
+      </div></div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div>
+        <div class="event-label">Chinesischer Konsum schwächelt <span class="badge badge-yellow">Negativ</span></div>
+        <div class="event-text">Höhere Airfares und Konsumzurückhaltung führen zu Optimierung von Reiselänge/Destination — Kern der Q2-Verlangsamung. Quelle: Trip.com Earnings Call Q1 2026</div>
+      </div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div>
+        <div class="event-label">China-ADR-Risiken: VIE, HFCAA, Delisting <span class="badge badge-red">Negativ (Tail-Risk)</span></div>
+        <div class="event-text">Anhaltende geopolitische Unsicherheit und die ungetestete VIE-Struktur (19% des Umsatzes) belasten die Bewertung aller China-ADRs. Quelle: Trip.com 20-F FY2025</div>
+      </div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div>
+        <div class="event-label">Visafreiheit &amp; Inbound-Politik <span class="badge badge-green">Positiv</span></div>
+        <div class="event-text">Ausweitung visafreier Einreise treibt Inbound-Tourismus (+90–100% YoY) — von Peking politisch gewollt und gefördert. Quelle: MLex, Feb. 2026</div>
+      </div></div>
+
+      <div class="source">Quellen: Trip.com IR/6-K (2026); Hagens Berman/PRNewswire (Litigation, März–April 2026); MLex (27.02.2026); ChinaTravelNews (Juni 2026); Simply Wall St (Juni 2026); CNBC (2025); Mize (April 2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 9 ============ -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 3/10</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Exakte Live-Werte der gleitenden Durchschnitte waren zum Stichtag nicht sauber abrufbar; die MA-Niveaus unten sind aus dem Kursverlauf (Absturz von $79 auf $41 im H1 2026) <strong>geschätzt</strong>. Das qualitative Bild — Kurs unter allen fallenden MAs, nahe 52W-Tief — ist eindeutig belegt.</div>
+
+      <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">~$41</div><div class="kpi-sub">26.06.2026</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20 (ca.)</div><div class="kpi-value">~$44</div><div class="kpi-sub">Kurs darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50 (ca.)</div><div class="kpi-value">~$50</div><div class="kpi-sub">Kurs darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200 (ca.)</div><div class="kpi-value">~$60</div><div class="kpi-sub">Kurs weit darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (ca.)</div><div class="kpi-value orange">~35–40</div><div class="kpi-sub">nahe überverkauft</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Hoch</div><div class="kpi-value">$78,99</div><div class="kpi-sub">12.01.2026</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value red">negativ</div><div class="kpi-sub">Abwärtsmomentum</div></div>
+      </div>
+
+      <p><strong>Trend: klar abwärts.</strong> Die Aktie befindet sich seit Jahresbeginn 2026 in einem der schwersten Abwärtstrends ihrer Historie — von $78,99 (12.01.) auf ~$41, ein Rückgang von ~48%. Der Kurs notiert unter allen relevanten gleitenden Durchschnitten (20/50/200), die selbst nach unten gerichtet sind — ein technisch klar bärisches Bild. Am 25.06.2026 wurde mit $38,04 ein frisches 52-Wochen-Tief markiert.</p>
+
+      <p><strong>Support/Resistance:</strong> Erster Support liegt am 52W-Tief bei ~$38; darunter öffnet sich charttechnisch Neuland. Die erste nennenswerte Resistance liegt im Bereich des SMA20/50 (~$44–50), gefolgt vom Gap-/Absturzbereich um $55–60. Ein RSI nahe überverkauft und die Nähe zum Jahrestief erhöhen die Wahrscheinlichkeit technischer Erholungen (Bounces), ändern aber nichts am übergeordneten Abwärtstrend.</p>
+
+      <p><strong>Einordnung für Investoren:</strong> Technisch ist dies ein „fallendes Messer" — der Chart gibt aktuell kein Kaufsignal. Für langfristig orientierte Investoren ist das Timing-Risiko real: Ein fundamentaler Einstieg sollte tranchiert und mit Bewusstsein erfolgen, dass der Boden erst mit einer Stabilisierung über dem SMA20 und einem Klärungssignal beim SAMR-Verfahren bestätigt wird.</p>
+
+      <div class="source">Quellen: CNBC/Morningstar Kursdaten (52W $38,04–$78,99, Juni 2026); TradingView TCOM (Juni 2026); Financhill (MA-Referenzniveaus, Dez. 2025 — inzwischen veraltet, daher geschätzt)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 10 ============ -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 4/10 (invertiert)</div>
+    </div>
+    <div class="section-body">
+      <h3>10a) Strukturelle &amp; zyklische Risiken</h3>
+
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">⚡ SAMR-Antitrust-Verfahren (Kernrisiko)</div>
+        <div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div>
+        <div class="event-text">Missbrauch-der-Marktdominanz-Verfahren; im Fokus steht der automatische Preisabgleich. Mögliche Folgen: erhebliche Geldstrafe UND/ODER erzwungener Umbau des Monetarisierungsmodells (Take-Rate-Kompression). Ausgang und Timing offen. Wahrscheinlichkeit einer materiellen Konsequenz: Mittel–Hoch (~50–65%).</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">⚡ China-Konsum &amp; Zyklik</div>
+        <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div>
+        <div class="event-text">Schwächerer Konsument, höhere Airfares, kürzere/günstigere Reisen — bereits in der Q2-Guidance (+3–8%) sichtbar. Kann Umsatzwachstum temporär in den einstelligen Bereich drücken.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">⚡ VIE-Struktur / Delisting (HFCAA)</div>
+        <div><span class="badge badge-red">Hoch (Tail)</span> <span class="badge badge-orange">Auswirkung: Sehr hoch</span></div></div>
+        <div class="event-text">19% des Umsatzes laufen über rechtlich ungetestete VIE-Verträge. Geopolitische Eskalation könnte Delisting-/Struktur-Risiken aktivieren — niedrige Wahrscheinlichkeit, aber existenzieller Impact auf die ADR-Bewertung.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">⚡ Wettbewerb International (Booking/Agoda)</div>
+        <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div>
+        <div class="event-text">Der internationale Wachstumsmotor trifft auf tief-betaschte, etablierte Wettbewerber. Margendruck durch hohe Marketingausgaben zum Marktanteilsgewinn.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">⚡ Governance / Litigation</div>
+        <div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-blue">Auswirkung: Niedrig–Mittel</span></div></div>
+        <div class="event-text">Abrupte Mitgründer-Rücktritte + US-Sammelklage (Klassezeitraum bis 13.01.2026). Reputations- und Prozesskostenrisiko, aber selten existenziell.</div>
+      </div>
+
+      <h3>10b) KI-Risiko &amp; technologische Disruption</h3>
+      <p><strong>Bärisches Szenario:</strong> KI-native Reiseplaner (ChatGPT/Gemini mit Travel-Features, Google Travel) übernehmen die Inspirations- und Planungsphase und schieben OTAs in die Rolle austauschbarer Buchungs-Backends — Take-Rates und Markenwert erodieren. Für Trip.com kommt die regulatorische Ironie hinzu, dass ausgerechnet ein KI-Preis-Tool das Antitrust-Verfahren mitausgelöst hat.</p>
+      <p><strong>Bullisches Szenario:</strong> OTAs mit proprietären Buchungsdaten und Supply-Beziehungen bauen die besseren KI-Agenten (Booking „Penny", Trip.com „TripGenie", MMYT „Myra") und vertiefen die eigene Buchungsstrecke, statt sie zu verlieren. Konvenienz + Zahlungsabwicklung + Support bleiben ein Graben, den ein reiner Chatbot nicht überspringt. Trip.coms hohe Produktentwicklungsausgaben (24% des Umsatzes) positionieren es eher als Profiteur denn als Opfer.</p>
+
+      <h3>10c) Chancen</h3>
+      <p>Outbound-Runway (nur ~12% Passport-Penetration), Inbound-Boom (+90–100%, politisch gefördert), internationale Plattform (+60%), KI-getriebene Effizienz (niedrigere Servicekosten), sowie ein potenzielles Re-Rating, sobald der SAMR-Überhang geklärt ist. Die Festungsbilanz erlaubt zusätzlich Buybacks/Sonderausschüttungen als Kurskatalysator.</p>
+
+      <h3>10d) Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> GAAP-Gewinn durch Einmaleffekte aufgebläht; abrupte Mitgründer-Rücktritte; S&amp;M-getriebene Margendelle; Q2-Verlangsamung. <strong>Potenzieller Dealbreaker:</strong> Ein SAMR-Urteil, das eine strukturelle Zerschlagung des Preis-/Monetarisierungsmodells erzwingt — oder eine ernsthafte Delisting-/VIE-Eskalation. Beide sind derzeit keine Basisannahme, würden die These aber falsifizieren (siehe Trigger, Sektion 12).</p>
+
+      <div class="source">Quellen: Trip.com 20-F FY2025 (VIE-Disclosure, 28.04.2026); Q1 2026 6-K (SAMR-Risikohinweis); Hagens Berman (Litigation); MLex/ChinaTravelNews (2026); TIKR/Trefis (KI-Debatte, 2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 11 ============ -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring &amp; User-Thesen</div>
+      <div class="section-score">Ø 6,3/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Visualisierung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td>Geschäftsmodell</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>Dominantes Asset-Light-OTA-Netzwerk, diversifiziert</td></tr>
+            <tr><td>Burggraben</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Breit im Kern, aber regulatorisch angreifbar</td></tr>
+            <tr><td>Operative Entwicklung (4Q)</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Umsatz-Beats, aber Q2-Guidance enttäuscht</td></tr>
+            <tr><td>Wachstum</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Struktureller Outbound/Inbound-Runway, kurzfristig gebremst</td></tr>
+            <tr><td>Bewertung</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>~8× EV/EBITDA, ~57% Netto-Cash</td></tr>
+            <tr><td>Cashflow &amp; Kapitalqualität</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Festungsbilanz; GAAP-Ergebnisqualität gemischt</td></tr>
+            <tr><td>Peer-Vergleich</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Schnellstes Int'l-Wachstum, günstigste Bewertung</td></tr>
+            <tr><td>Technische Analyse</td><td>3/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:30%"></div></div><span class="score-num">3</span></div></td><td>Starker Abwärtstrend, nahe 52W-Tief</td></tr>
+            <tr><td>Risiken (invertiert)</td><td>4/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td><td>SAMR + VIE/Delisting + China-Konsum = erhöht</td></tr>
+            <tr style="background:rgba(255,105,0,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td><td><strong>6,3/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:63%;background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">6,3</span></div></td>
+              <td>Günstige Qualitätsfranchise mit ernstem, aber (noch) nicht existenziellem Überhang</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Prüfung der User-Thesen</h3>
+      <p><strong>These 1 — Outbound/International trägt die nächste Wachstumsphase?</strong> Teilweise bestätigt, aber noch nicht als alleiniger Träger. Die Fakten stützen die Richtung: Internationale OTA-Buchungen +~60–65%, Inbound +90–100%, Outbound bei ~140% des 2019-Niveaus, nur ~12% Passport-Penetration. Der Haken: International ist mit ~20% des Umsatzes noch zu klein, um die Verlangsamung im ~75%-China-Kern kurzfristig auszugleichen. <em>Bewertung:</em> Die These ist mittelfristig (2–3 Jahre) valide — International wird zum <strong>marginalen Wachstumstreiber</strong>, aber China bleibt bis auf Weiteres der Umsatzanker. Kein Score-Adjustment, da bereits in Wachstum (7) reflektiert.</p>
+
+      <p><strong>These 2 — KI: Bedrohung oder Profiteur?</strong> Per Saldo eher Profiteur — mit einer regulatorischen Ironie. Die Peer-Evidenz (Booking „Penny", MMYT „Myra") zeigt, dass etablierte OTAs KI zur Vertiefung der eigenen Buchungsstrecke nutzen; proprietäre Daten + Supply + Zahlungsabwicklung bleiben ein Graben. Trip.coms 24%-Produktentwicklungsquote und TripGenie/Trip.Planner sprechen für die Profiteur-Seite. <strong>Aber:</strong> Ausgerechnet ein KI-Preis-Anpassungs-Tool steht im Zentrum des SAMR-Verfahrens — KI ist hier also gleichzeitig Chance und regulatorischer Zündfunke. <em>Bewertung:</em> These bestätigt (Netto-Profiteur), Risiko-Score bleibt bei 4, da das KI-Preis-Tool das Antitrust-Risiko verschärft.</p>
+
+      <p><strong>These 3 — China-Konsum/Regulierung vs. struktureller Nachholeffekt?</strong> Beide Kräfte sind real und ziehen aktuell gegeneinander. Kurzfristig dominiert die Skepsis-Seite: Q2-Verlangsamung, SAMR-Überhang, VIE-/Delisting-Tail-Risk, schwächerer Konsum. Langfristig steht dem der strukturelle Reise-Nachholeffekt (Outbound/Inbound, politisch gefördert) gegenüber. <em>Bewertung:</em> Die These ist der eigentliche Kern des Investment-Cases — sie entscheidet sich am Ausgang des SAMR-Verfahrens. Dieses Spannungsfeld ist im Risiko-Score (4) und im technischen Score (3) bereits abgebildet; es ist der Grund, warum die günstige Bewertung (8) nicht in einen höheren Gesamtscore durchschlägt.</p>
+
+      <div class="source">Quellen: Integration aus Sektionen 2, 4, 6, 7, 10; Trip.com IR (2026); TIKR/Trefis (KI-Peers); MLex (Regulierung)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 12 ============ -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-score">KAUFEN (tranchiert)</div>
+    </div>
+    <div class="section-body">
+
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 — Bewertung als Sicherheitsnetz:</strong> Nach −48% notiert TCOM bei ~8× Forward-EV/EBITDA, mit ~57% der Marktkapitalisierung in Netto-Cash (RMB 104 Mrd.). Rechnet man den Cash heraus, bezahlt man das operative Geschäft für einen einstelligen EBITDA-Multiplikator — bei ~30% Marge und zweistelligem Wachstum. Selbst Bären halten ~10× 2027er-Gewinne für „gerechtfertigt", was das Abwärtspotenzial begrenzt.</p>
+          <p><strong>Säule 2 — struktureller Wachstumsmotor intakt:</strong> Nur ~12% Passport-Penetration, Outbound bei ~140% von 2019, Inbound +90–100%, internationale Plattform +60–65%. Dieser Runway ist mehrjährig und politisch gefördert (Visafreiheit). International wird über 2–3 Jahre zum entscheidenden Treiber.</p>
+          <p><strong>Säule 3 — Festungsbilanz + Optionalität:</strong> $15 Mrd. Cash absorbieren jede realistische SAMR-Strafe, finanzieren KI/International und ermöglichen Buybacks. Die Street sieht 23/25 Buy mit Kurszielen $77–86 — ein Re-Rating, sobald der regulatorische Nebel sich lichtet, wäre erheblich.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 — SAMR trifft das Herz des Modells:</strong> Das Verfahren zielt auf den automatischen Preisabgleich — also auf die Monetarisierungsmechanik selbst. Ein erzwungener Umbau würde Take-Rates und Marge strukturell drücken, nicht nur einmalig. Das ist kein Bilanz-, sondern ein Geschäftsmodell-Risiko.</p>
+          <p><strong>Risiko 2 — Wachstum bricht zyklisch ein:</strong> Die Q2-Guidance (+3–8% statt +17%) zeigt, wie schnell der China-Kern von einem schwachen Konsumenten und hohen Airfares gebremst wird. Fällt das Wachstum nachhaltig unter 10%, ist auch ein ~8×-Multiple nicht mehr „billig".</p>
+          <p><strong>Risiko 3 — Technik + Tail-Risk:</strong> Der Chart ist ein fallendes Messer (unter allen MAs, 52W-Tief). Dazu kommt das VIE-/Delisting-Tail-Risk und eine US-Sammelklage. Für kurzfristige Investoren bedeutet das erhebliches Timing- und Struktur-Risiko.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung</h3>
+      <p>Das bullische Narrativ überzeugt für einen <strong>Quality-Growth-Investor mit 2–5-Jahres-Horizont</strong> mehr — aber nur mit klarem Risikobewusstsein und tranchiert. Die Kernlogik: Man kauft eine dominante, profitable, netto-cash-reiche Franchise mit intaktem strukturellem Wachstum zu einem einstelligen EV/EBITDA, weil ein regulatorischer Überhang den Kurs halbiert hat. Historisch war das bei chinesischen Plattform-Champions (nach Antitrust-Wellen) oft ein attraktiver Einstiegspunkt — vorausgesetzt, das Verfahren endet in einer Strafe statt in einer strukturellen Zerschlagung.</p>
+      <p>Der entscheidende Unsicherheitsfaktor ist genau dieser SAMR-Ausgang — er ist teilweise binär. Deshalb ist die Position bewusst als <strong>tranchierter Einstieg</strong> mit moderater Konviktion zu führen, nicht als „All-in". Risk/Reward: ~−15% Downside (Bruch unter das 52W-Tief bei einem schlechten Regulierungsergebnis, ~$35) vs. ~+55% Upside (Re-Rating Richtung $58–68, wenn der Überhang sich als Geldstrafe auflöst und International weiterläuft). <em>Demut:</em> Ich könnte falsch liegen, falls das SAMR-Verfahren das Preis-/Monetarisierungsmodell strukturell aufbricht oder der China-Konsum länger schwach bleibt als angenommen — dann ist auch die günstige Bewertung eine Value-Falle.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Katalysatoren / Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kurzfristig (0–6 M)</strong></td><td>SAMR-Nachrichten, Q2-Ergebnisse (Sept.), fallendes Messer, mögliche Bounces</td><td><span class="badge badge-yellow">Vorsichtig / abwarten auf Stabilisierung</span></td></tr>
+            <tr><td><strong>Mittelfristig (6–24 M)</strong></td><td>SAMR-Klärung, Int'l-Skalierung, Margen-Erholung, mögliches Re-Rating</td><td><span class="badge badge-green">Tranchiert aufbauen</span></td></tr>
+            <tr><td><strong>Langfristig (2–5 J)</strong></td><td>Outbound/Inbound-Nachholeffekt, KI-Effizienz, globale Plattform</td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>Trip.com ist eine dominante, hochprofitable und netto-cash-reiche Reise-Plattform, deren Kurs sich wegen eines SAMR-Antitrust-Überhangs halbiert hat — auf ~8× EV/EBITDA. Der strukturelle Wachstumsmotor (China-Outbound/Inbound, +60% International) ist intakt, die Bilanz eine Festung, und die Street sieht 80%+ Upside. Das Investment steht und fällt mit dem SAMR-Ausgang: Endet er in einer verkraftbaren Geldstrafe, ist das aktuelle Niveau ein attraktiver Contrarian-Einstieg; erzwingt er einen strukturellen Umbau des Monetarisierungsmodells, droht eine Value-Falle. Für 2–5-Jahres-Quality-Growth-Investoren überwiegt das Chance-Risiko-Verhältnis — tranchiert und risikobewusst.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN (tranchiert)</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$58–68</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–3 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–15%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+55%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:3,5</div></div>
+      </div>
+
+      <h3>Was falsifiziert die These?</h3>
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>SAMR erzwingt strukturellen Umbau des Preis-/Monetarisierungsmodells → verkaufen</li>
+            <li>Umsatzwachstum fällt zwei Quartale in Folge unter ~5% → reduzieren</li>
+            <li>Ernsthafte VIE-/Delisting-Eskalation (HFCAA) → verkaufen</li>
+            <li>Adj. EBITDA-Marge fällt nachhaltig unter ~25% → reduzieren</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>SAMR-Abschluss mit reiner Geldstrafe (ohne Strukturauflagen) → nachkaufen</li>
+            <li>Kurs stabilisiert &amp; schließt über SMA20/50 → Position aufbauen</li>
+            <li>Int'l-Umsatzanteil steigt Richtung 30%+ bei &gt;50% Wachstum → nachkaufen</li>
+            <li>Kapitalrückführung (Buyback/Dividende) angekündigt → aufstocken</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Welcher Anlegertyp passt?</h3>
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul><li>Quality-Growth-Investoren (2–5 J)</li><li>Contrarian / Deep-Value mit Risikotoleranz</li><li>Anleger mit China-ADR-Erfahrung</li></ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul><li>Kurzfristige Trader (fallendes Messer)</li><li>Income-Investoren (keine Dividende)</li><li>Anleger ohne Toleranz für Regulierungs-/VIE-Risiko</li></ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten</span></td><td>Erst SAMR-Klärung + technische Stabilisierung abwarten</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>1. Tranche jetzt, weitere bei Stabilisierung/SAMR-News</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Contrarian-Kauf</span></td><td>R/R ~1:3,5 bei ~8× EV/EBITDA + Festungsbilanz</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>Struktureller China-Outbound/Inbound-Nachholeffekt</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="source">Quellen: Synthese aller Sektionen; TIKR/Morningstar/Simply Wall St (Bewertung &amp; Konsens, Juni 2026); Trip.com IR/6-K (2026); Seeking Alpha (Bull/Bear, Juni 2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 13 ============ -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook – Anstehende Events &amp; Konsequenzen</div>
+      <div class="section-note">Wenn/Dann-Logik</div>
+    </div>
+    <div class="section-body">
+
+      <div class="outlook-card">
+        <h4>📊 Event 1: SAMR-Verfahrensausgang – Timing offen (potenziell 2. HJ 2026 / 2027)</h4>
+        <p>Der Ausgang des Antitrust-Verfahrens ist der mit Abstand wichtigste Kurskatalysator. Er entscheidet, ob der Bewertungsabschlag ein Einstiegsgeschenk oder eine Value-Falle war.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Das Verfahren mit einer reinen Geldstrafe endet, die aus der ~$15-Mrd.-Cash-Position bezahlbar ist und das Preis-/Monetarisierungsmodell im Kern unangetastet lässt → substanzielles Re-Rating wahrscheinlich; <strong>aggressiv nachkaufen</strong>, Zielband $58–68 wird realistisch.<br><br>
+          <strong>Wenn:</strong> SAMR strukturelle Auflagen verhängt, die den automatischen Preisabgleich verbieten und die Take-Rate dauerhaft senken → These falsifiziert; <strong>Position reduzieren/verkaufen</strong>, da das ~8×-Multiple dann berechtigt niedrig ist.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 2: Q2-2026-Ergebnisse – voraussichtlich September 2026</h4>
+        <p>Der erste Härtetest der schwachen +3–8%-Guidance und ein Gradmesser dafür, ob die China-Konsumschwäche zyklisch oder struktureller ist — und ob International die Delle abfedert.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Umsatz am oberen Ende (~+8%) landet UND der internationale Umsatzanteil sichtbar Richtung 30% steigt (bei &gt;50% Int'l-Wachstum) → Bestätigung der Outbound-/International-These; <strong>Tranche aufstocken</strong>.<br><br>
+          <strong>Wenn:</strong> Umsatz die Guidance verfehlt (&lt;3%) oder die Adj.-EBITDA-Marge unter ~25% fällt → zyklische Schwäche vertieft sich; <strong>abwarten / Neupositionierung überdenken</strong>, bevor weiter aufgebaut wird.
+        </div>
+      </div>
+
+      <div class="outlook-card">
+        <h4>📊 Event 3: Technische Stabilisierung &amp; Kapitalallokation – laufend (nächste 1–2 Quartale)</h4>
+        <p>Angesichts des fallenden Messers ist die charttechnische Bodenbildung ein eigenständiges Einstiegssignal. Zusätzlich könnte die Festungsbilanz über Buybacks/Dividende einen Katalysator liefern.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Der Kurs sich über dem 52W-Tief ($38) stabilisiert und über den SMA20/50 (~$44–50) schließt — idealerweise flankiert von einer Buyback-/Dividendenankündigung → technisches Kaufsignal; <strong>Einstieg beschleunigen</strong>.<br><br>
+          <strong>Wenn:</strong> Der Kurs nachhaltig unter $38 bricht ohne fundamentalen Auslöser → weiter <strong>abwarten</strong>; kein Grund, ins fallende Messer zu greifen, bis sich ein Boden bildet.
+        </div>
+      </div>
+
+      <div class="source">Quellen: Trip.com IR-Kalender (Q2 2026 vsl. Sept.); SAMR-Verfahrensstatus (MLex/ChinaTravelNews, 2026); technische Level aus Sektion 9</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken und stellt keine Anlageberatung, Kauf-/Verkaufsempfehlung oder Aufforderung zum Handel dar. Ich bin kein lizenzierter Anlageberater. Aktienanlagen — insbesondere China-ADRs mit VIE-Struktur — bergen erhebliche Risiken bis zum Totalverlust. Alle Kennzahlen basieren auf öffentlich verfügbaren Quellen (Stand: 01. Juli 2026, Kursstand 26.06.2026) und können Fehler enthalten; GAAP-Ergebnisse sind durch Einmaleffekte verzerrt. Bitte treffen Sie eigene Recherchen und konsultieren Sie ggf. einen unabhängigen Finanzberater. Keine Gewähr für Richtigkeit, Vollständigkeit oder Aktualität.</div>
+
+</div>
+</body>
+</html>
