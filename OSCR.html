@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSCR – Aktienanalyse Canvas v2.2</title>
+<style>
+:root{
+  --primary:#8b5cf6; --primary-dark:#6d28d9;
+  --bg:#0f0f12; --bg-card:#1a1a1f; --bg-card2:#22222a; --border:#2e2e38;
+  --text:#e8e8ec; --text-muted:#888898; --text-dim:#555566;
+  --green:#22c55e; --red:#ef4444; --yellow:#f59e0b; --blue:#3b82f6; --purple:#8b5cf6; --teal:#14b8a6;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+.header{background:linear-gradient(135deg,#0e0018 0%,#1a0028 40%,#0f0f12 100%);border-bottom:1px solid var(--primary);padding:36px 40px 28px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;}
+.header-left h1{font-size:32px;font-weight:700;color:white;letter-spacing:-0.5px;}
+.header-left h1 span{color:var(--primary);}
+.header-left .subtitle{color:var(--text-muted);font-size:14px;margin-top:4px;}
+.header-right{text-align:right;}
+.price-tag{font-size:38px;font-weight:800;color:var(--primary);line-height:1;}
+.price-meta{color:var(--text-muted);font-size:13px;margin-top:4px;}
+.price-change{display:inline-block;padding:2px 8px;border-radius:4px;font-size:13px;font-weight:600;margin-top:4px;}
+.price-change.up{background:rgba(34,197,94,0.15);color:var(--green);}
+.price-change.down{background:rgba(239,68,68,0.15);color:var(--red);}
+.nav{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:100;}
+.nav a{color:var(--text-muted);text-decoration:none;padding:14px 16px;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.2s;}
+.nav a:hover{color:var(--primary);border-bottom-color:var(--primary);}
+.main{max-width:1100px;margin:0 auto;padding:32px 40px 60px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px;}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.kpi-value{font-size:22px;font-weight:700;color:white;margin-top:4px;}
+.kpi-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.kpi-value.green{color:var(--green);} .kpi-value.red{color:var(--red);} .kpi-value.orange{color:var(--primary);}
+.section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden;}
+.section-header{background:var(--bg-card2);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.section-number{background:var(--primary);color:white;width:28px;height:28px;border-radius:6px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-title{font-size:16px;font-weight:700;color:white;}
+.section-score{margin-left:auto;font-size:14px;font-weight:700;color:var(--primary);}
+.section-note{font-size:12px;color:var(--text-dim);background:rgba(46,46,56,0.4);border-radius:4px;padding:4px 10px;margin-left:auto;}
+.section-body{padding:20px 24px;}
+p{margin-bottom:12px;color:var(--text);} p:last-child{margin-bottom:0;}
+h3{font-size:14px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 8px;} h3:first-child{margin-top:0;}
+.table-wrap{overflow-x:auto;margin:16px 0;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--bg-card2);color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:10px 12px;border-bottom:1px solid rgba(46,46,56,0.5);color:var(--text);} tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(139,92,246,0.04);}
+.beat{color:var(--green);font-weight:600;} .miss{color:var(--red);font-weight:600;} .neutral{color:var(--yellow);font-weight:600;}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}
+.badge-green{background:rgba(34,197,94,0.15);color:var(--green);} .badge-red{background:rgba(239,68,68,0.15);color:var(--red);}
+.badge-yellow{background:rgba(245,158,11,0.15);color:var(--yellow);} .badge-blue{background:rgba(59,130,246,0.15);color:var(--blue);}
+.badge-orange{background:rgba(139,92,246,0.15);color:var(--primary);}
+.event-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(46,46,56,0.5);align-items:flex-start;} .event-item:last-child{border-bottom:none;}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0;}
+.dot-green{background:var(--green);} .dot-red{background:var(--red);} .dot-yellow{background:var(--yellow);}
+.event-label{font-weight:600;color:white;} .event-text{font-size:14px;color:var(--text);}
+.risk-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.risk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px;flex-wrap:wrap;}
+.risk-title{font-weight:600;color:white;font-size:14px;}
+.score-bar{display:flex;align-items:center;gap:10px;}
+.score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#a78bfa);}
+.score-num{font-weight:700;color:var(--primary);font-size:15px;min-width:32px;}
+.bull-bear-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:700px){.bull-bear-grid{grid-template-columns:1fr;}}
+.bull-card{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:16px;}
+.bear-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:16px;}
+.bull-card h4{color:var(--green);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.bear-card h4{color:var(--red);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.rating-box{background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(139,92,246,0.04));border:1px solid rgba(139,92,246,0.3);border-radius:12px;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:20px 0;}
+.rating-item label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;display:block;margin-bottom:4px;}
+.rating-item .val{font-size:20px;font-weight:800;color:white;}
+.rating-item .val.buy{color:var(--green);} .rating-item .val.hold{color:var(--yellow);} .rating-item .val.sell{color:var(--red);}
+.trigger-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+@media(max-width:700px){.trigger-grid{grid-template-columns:1fr;}}
+.trigger-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.trigger-card h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.trigger-card.buy h5{color:var(--green);} .trigger-card.sell h5{color:var(--red);}
+.trigger-list{font-size:13px;color:var(--text);list-style:none;padding:0;}
+.trigger-list li{margin-bottom:6px;padding-left:14px;position:relative;} .trigger-list li::before{content:"→";position:absolute;left:0;}
+.investor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+@media(max-width:600px){.investor-grid{grid-template-columns:1fr;}}
+.investor-yes{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px;}
+.investor-no{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:12px;}
+.investor-yes h5{color:var(--green);font-size:12px;text-transform:uppercase;margin-bottom:8px;} .investor-no h5{color:var(--red);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-yes li,.investor-no li{font-size:13px;color:var(--text);margin-bottom:4px;list-style:none;padding-left:14px;position:relative;}
+.investor-yes li::before{content:"✓";position:absolute;left:0;color:var(--green);} .investor-no li::before{content:"✗";position:absolute;left:0;color:var(--red);}
+.geo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0;}
+.geo-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.geo-region{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.geo-pct{font-size:20px;font-weight:700;color:white;} .geo-note{font-size:12px;color:var(--text-muted);}
+.outlook-card{background:var(--bg-card2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:16px;margin-bottom:14px;}
+.outlook-card h4{color:white;font-size:14px;margin-bottom:8px;}
+.outlook-card .when-then{font-size:13px;color:var(--text);margin-top:8px;} .outlook-card .when-then strong{color:var(--primary);}
+.source{font-size:11px;color:var(--text-dim);margin-top:12px;padding-top:10px;border-top:1px solid rgba(46,46,56,0.5);} .source a{color:var(--text-dim);}
+.disclaimer{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text-dim);margin-top:32px;}
+.alert-box{background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px;}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+.pill{display:inline-block;background:rgba(139,92,246,0.12);color:var(--primary);border-radius:4px;padding:1px 7px;font-size:13px;font-weight:600;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Oscar Health <span>OSCR.NYSE</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 01. Juli 2026 · NYSE · Sektor: Krankenversicherung / Insurtech</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-orange">Individual/ACA-Marktplatz</span>
+      <span class="badge badge-blue">Tech-Plattform (+Oscar)</span>
+      <span class="badge badge-yellow">Turnaround/Reset 2026</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$28,52</div>
+    <div class="price-meta">Schlusskurs 30.06.2026 · NYSE</div>
+    <div class="price-change up">▲ +80% YTD</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">52W: $10,69 – $30,66</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$28,52</div><div class="kpi-sub">USD · 30.06.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value">~$8,6 Mrd</div><div class="kpi-sub">~300 Mio Aktien</div></div>
+    <div class="kpi-card"><div class="kpi-label">Umsatz 2026E</div><div class="kpi-value">~$18,8 Mrd</div><div class="kpi-sub">Guidance-Mitte</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/S 2026E</div><div class="kpi-value">~0,46x</div><div class="kpi-sub">TTM P/E negativ</div></div>
+    <div class="kpi-card"><div class="kpi-label">Mitglieder</div><div class="kpi-value green">3,17 Mio</div><div class="kpi-sub">+56% YoY (Q1)</div></div>
+    <div class="kpi-card"><div class="kpi-label">MLR Q1 2026</div><div class="kpi-value green">70,5%</div><div class="kpi-sub">saisonal niedrigstes Q</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value">06.08.26</div><div class="kpi-sub">Q2 2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Analysten-Konsens</div><div class="kpi-value" style="color:var(--yellow);">HALTEN</div><div class="kpi-sub">Ø-Ziel ~$21–22</div></div>
+  </div>
+
+  <!-- SEKTION 1 -->
+  <div class="section" id="s1">
+    <div class="section-header"><div class="section-number">1</div><div class="section-title">Geschäftsmodell</div><div class="section-note">Quellen ≤ 6–9 Monate</div></div>
+    <div class="section-body">
+      <p>Oscar Health ist ein technologiegetriebener Krankenversicherer, der sich fast vollständig auf den US-<span class="pill">Individualmarkt</span> konzentriert – also auf Policen, die Privatpersonen und Familien über die von der Affordable Care Act (ACA/„Obamacare") geschaffenen Krankenversicherungs-Marktplätze kaufen. Daneben bietet Oscar Small-Group-Tarife und – zunehmend im Fokus – die Technologieplattform „+Oscar" an, mit der andere Akteure im Gesundheitssystem (Versicherer, Leistungserbringer) Oscars Software für Vertrieb, Engagement und Claims-Steuerung lizenzieren können.</p>
+      <p>Verdient wird primär mit <strong>Prämieneinnahmen</strong>: Mitglieder zahlen (überwiegend staatlich subventionierte) monatliche Beiträge, Oscar trägt dafür deren Krankheitskosten. Der entscheidende Werttreiber ist die <strong>Medical Loss Ratio (MLR)</strong> – der Anteil der Prämien, der für Behandlungen ausgegeben wird. Alles unterhalb der MLR minus Verwaltungskosten (SG&A) bleibt als operative Marge. Zusätzlich verdient Oscar Investmenterträge auf die gehaltene Liquidität sowie – noch klein – Plattform-/Service-Umsätze.</p>
+      <p>Die Kostenstruktur ist grundsätzlich <strong>asset-light</strong>: Oscar betreibt keine Kliniken, sondern kauft medizinische Leistungen ein und steuert sie über eigene Software (u.a. virtuelle Notfallversorgung, Mitglieder-App, Claims-Automatisierung). Der strukturelle Effizienzvorteil zeigt sich in der branchenweit sehr niedrigen SG&A-Quote von zuletzt <strong>15,2%</strong> (Q1 2026) – Management führt Verbesserungen ausdrücklich auf Technologie- und KI-Einsatz zurück.</p>
+      <p>Wichtige Struktur-Änderungen: Die frühere Kooperation „Cigna+Oscar" wurde beendet – Oscars Mitgliederbasis besteht damit heute vollständig aus eigenen Individual- und Small-Group-Policen. Neuer Wachstumsvektor ist <strong>ICHRA</strong> (Individual Coverage Health Reimbursement Arrangement): ein arbeitgeberfinanziertes Modell, bei dem Angestellte selbst Individualpolicen kaufen. CEO ist der frühere Aetna-Chef Mark Bertolini; Mitgründer Josh Kushner (Thrive Capital) ist Vice Chair.</p>
+      <div class="source">Quellen: Oscar Health 8-K &amp; Q1-2026 Earnings Call (06.05.2026); DEF 14A 2026; Benzinga/Motley Fool Transkript (06.05.2026); Unternehmens-IR.</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 2 -->
+  <div class="section" id="s2">
+    <div class="section-header"><div class="section-number">2</div><div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div><div class="section-score">Score: 4/10</div></div>
+    <div class="section-body">
+      <p>Der Burggraben ist <strong>schmal</strong>. Der ACA-Individualmarkt ist strukturell burggraben-arm: Produkte sind stark standardisiert (die „Metall"-Tarife Bronze/Silver/Gold sind reguliert), die Wechselkosten sind für Kunden gering (jährliche Open Enrollment, Preis entscheidet), und die Preissetzung ist durch Mindest-MLR-Vorgaben und staatliche Rate-Filings gedeckelt. Ein Mitglied, das nächstes Jahr eine günstigere Silver-Police findet, wechselt problemlos.</p>
+      <p>Oscars echter Differenzierungsfaktor ist der <strong>Technologie- und Kosten-Vorsprung</strong>: eine moderne, KI-gestützte Plattform senkt Verwaltungskosten (SG&A ~15% vs. ~17–19% in der Vergangenheit und deutlich unter vielen Legacy-Peers) und verbessert Mitglieder-Engagement. Das ist ein realer, messbarer Effizienzvorteil – aber eher ein <em>Prozess-Vorsprung</em> als ein ökonomischer Burggraben, den ein finanzstarker Wettbewerber nicht kopieren könnte.</p>
+      <p>Ansätze für einen tieferen Graben: (1) wachsende <strong>Skalen-/Datenvorteile</strong> – mit 3,17 Mio Mitgliedern hat Oscar deutlich mehr Daten zur Preis- und Risikosteuerung als früher; (2) die Plattform-Ambition (+Oscar/„Campaign Builder"), die perspektivisch höhermargige Software-Umsätze bringen könnte. Beide sind heute aber noch nicht erlösseitig relevant. Bertolini beschrieb das Plattform-Potenzial als „margenstärker als jedes versicherte ACA-Mitglied", räumte aber ein, dass der kurzfristige Finanzbeitrag gering bleibt.</p>
+      <p><strong>Schwachstellen:</strong> Oscar bleibt im Kern ein Einzelmarkt-Underwriter, dessen Schicksal an Regulierung und Marktmorbidität hängt, nicht an einem Software-Netzwerkeffekt. Gegen Skalenriesen wie UnitedHealth oder Centene ist Oscar weiterhin klein. Der Vorsprung ist verteidigbar, aber nicht uneinnehmbar – daher ein unterdurchschnittlicher Score.</p>
+      <div class="source">Quellen: Q1-2026 Earnings Call (06.05.2026); EBC Financial „OSCR MLR reset 2026" (Juni 2026); Simply Wall St (Juni 2026).</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 3 -->
+  <div class="section" id="s3">
+    <div class="section-header"><div class="section-number">3</div><div class="section-title">Letzte 4 Quartale</div><div class="section-score">Beat-Ratio: 2/4</div></div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis Saisonalität:</strong> Die MLR ist bei Oscar strukturell im Q1 am niedrigsten und im Q4 am höchsten. Der starke Q1-2026-Gewinn ist deshalb <strong>nicht</strong> auf das Gesamtjahr hochzurechnen (siehe Sektion 11-These 1). Nächste Zahlen: <strong>Q2 2026 am 06.08.2026</strong>.</p></div>
+      <p>Das Bild der letzten vier Quartale ist eine <strong>Achterbahn</strong>: drei Verlustquartale (Q2–Q4 2025), verursacht durch einen branchenweiten ACA-Morbiditäts- und Kostenschock, gefolgt von einer dramatischen Trendwende im Q1 2026 – getragen von kräftigen Prämienerhöhungen (Repricing) und einer stark gefallenen MLR.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Quartal</th><th>Umsatz</th><th>YoY</th><th>Nettoergebnis</th><th>EPS</th><th>MLR</th><th>Adj. EBITDA</th><th>vs. Konsens</th></tr></thead>
+          <tbody>
+            <tr><td>Q2 2025</td><td>$2,86 Mrd</td><td>+29%</td><td>–$228 Mio</td><td>–$0,89</td><td>91,1%</td><td>~–$110 Mio</td><td><span class="miss">Miss</span></td></tr>
+            <tr><td>Q3 2025</td><td>$2,99 Mrd</td><td>+23%</td><td>–$138 Mio</td><td>~–$0,55</td><td>88,5%</td><td>–$102 Mio</td><td><span class="beat">Beat*</span></td></tr>
+            <tr><td>Q4 2025</td><td>$2,81 Mrd</td><td>+18%</td><td>–$353 Mio</td><td>–$1,24</td><td>95,4%</td><td>–$308 Mio</td><td><span class="miss">Miss</span></td></tr>
+            <tr><td>Q1 2026</td><td>$4,65 Mrd</td><td>+53%</td><td><strong>+$679 Mio</strong></td><td><strong>+$2,07</strong></td><td>70,5%</td><td>+$727 Mio</td><td><span class="beat">Beat (deutlich)</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>*Q3 2025 war ein GAAP-Verlust, fiel aber <em>kleiner</em> aus als befürchtet – die Aktie stieg danach ~10%. Der Q1-2026-Beat war massiv: EPS $2,07 vs. Konsens ~$1,10, bei gleichzeitigem Umsatzsprung von 53%. Die MLR verbesserte sich um 490 Basispunkte auf 70,5%, unterstützt durch $68 Mio günstige Reserve-Entwicklung aus Vorperioden. Der Umsatz verfehlte allerdings die Konsens-Schätzung ($4,65 Mrd vs. ~$4,92 Mrd) – der Beat kam von der Marge, nicht vom Top-Line.</p>
+      <p><strong>Wichtigstes Management-Statement:</strong> Zum Quartalsende ~3,0 Mio zahlende Mitglieder in Q2-Start – „Zahlungsraten konsistent und leicht über Plan, <em>trotz</em> des Auslaufens der erweiterten Prämien-Steuergutschriften". Für die volle Jahres-2026-Guidance wurde bestätigt: Umsatz $18,7–19,0 Mrd, MLR 82,4–83,4%, SG&A 15,8–16,3%, Earnings from Operations $250–450 Mio.</p>
+      <div class="source">Quellen: Oscar 8-K Q1 2026 (SEC, 06.05.2026); StockTitan (Q3/Q4 2025); mlq.ai (Q4 2025, 10.02.2026); ainvest (Q2 2025, 07.08.2025); Motley Fool Transkript (06.05.2026).</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 4 -->
+  <div class="section" id="s4">
+    <div class="section-header"><div class="section-number">4</div><div class="section-title">Wachstumseinordnung</div><div class="section-score">Score: 7/10</div></div>
+    <div class="section-body">
+      <p>Das Umsatzwachstum ist <strong>außergewöhnlich</strong>, aber policy-getrieben. Der Jahresumsatz stieg von $5,9 Mrd (2023) über $9,2 Mrd (2024, +57%) auf $11,7 Mrd (2025, +28%). Für 2026 guidet das Management $18,7–19,0 Mrd – ein Sprung von rund <strong>+60%</strong>. Getragen wird das von Mitgliederwachstum (3,17 Mio, +56% YoY im Q1) und kräftigen Rate-Erhöhungen, die Oscar in Staaten mit ~98% der Mitglieder eingereicht hat, um die höhere Marktmorbidität abzubilden.</p>
+      <p>Kritisch einzuordnen: Ein erheblicher Teil des 2026er Wachstums stammt aus <strong>Preiserhöhungen</strong> (Repricing nach dem Kostenschock) und aus <strong>Marktanteilsgewinnen</strong>, während Wettbewerber sich zurückziehen – nicht primär aus organischer Marktexpansion. Der Individualmarkt schrumpft 2026 sogar netto, weil das Auslaufen der Subventionen Millionen aus dem Markt drängt. Oscar gewinnt also Anteile in einem schrumpfenden Kuchen (siehe Sektion 7: Centenes ACA-Mitglieder fielen 5,6 → 3,6 Mio, während Oscar wuchs).</p>
+      <h3>Geschäftsmix / „Geografie" der Umsätze</h3>
+      <div class="geo-grid">
+        <div class="geo-card"><div class="geo-region">Individual/ACA</div><div class="geo-pct">~95%</div><div class="geo-note">Kern – hohe Policy-Abhängigkeit</div></div>
+        <div class="geo-card"><div class="geo-region">Small Group</div><div class="geo-pct">gering</div><div class="geo-note">Ergänzend</div></div>
+        <div class="geo-card"><div class="geo-region">+Oscar / Plattform</div><div class="geo-pct">&lt;1%</div><div class="geo-note">Optionalität, noch klein</div></div>
+        <div class="geo-card"><div class="geo-region">ICHRA</div><div class="geo-pct">Pilot</div><div class="geo-note">Miss./Ill. testen Ausweitung</div></div>
+      </div>
+      <p><strong>Profitabilitätswachstum:</strong> Hier liegt der Haken. Trotz +60% Umsatz guidet Oscar für 2026 nur $250–450 Mio Earnings from Operations – eine operative Marge von lediglich ~1,5–2,4%. Das Wachstum ist real, aber die <strong>normalisierte Marge bleibt dünn</strong>. Reifegrad: „Growth-at-Scale" auf der Umsatzseite, aber erst am Anfang der Margenreife. Wachstumsscore hoch wegen Top-Line-Dynamik und Anteilsgewinnen – mit klarem Abschlag wegen Qualität und Policy-Abhängigkeit.</p>
+      <div class="source">Quellen: Oscar 8-K FY2024/FY2025; Q1-2026 Guidance (06.05.2026); Becker's Payer / distilinfo (Centene-Vergleich, 28.–29.04.2026); Healthcare Dive (06.02.2026).</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 5 -->
+  <div class="section" id="s5">
+    <div class="section-header"><div class="section-number">5</div><div class="section-title">Bewertung &amp; Multiples</div><div class="section-score">Score: 5/10</div></div>
+    <div class="section-body">
+      <p>Oscar ist auf klassische Gewinnmultiples schwer zu fassen, weil das TTM-Ergebnis (2025: –$443 Mio Verlust) negativ ist – das TTM-P/E ist damit nicht aussagekräftig. Der Markt bewertet die <em>erwartete</em> Normalisierung. Bei ~$8,6 Mrd Marktkapitalisierung ergibt sich:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>OSCR</th><th>Einordnung</th></tr></thead>
+          <tbody>
+            <tr><td>P/S (2026E, ~$18,8 Mrd Umsatz)</td><td>~0,46x</td><td>über CNC/MOH, unter Insurtech-Peers</td></tr>
+            <tr><td>P/E (2026E, ~$1,0–1,3 EPS)</td><td>~22–29x</td><td>optisch teuer (Turnaround-Jahr)</td></tr>
+            <tr><td>P/E (2027E, normalisiert)</td><td>~13–15x</td><td>Barclays-Argument: „unspektakulär" fair</td></tr>
+            <tr><td>EV/EBITDA (2026E)</td><td>~8–13x</td><td>durch ~$4,8 Mrd Cash gedämpft</td></tr>
+            <tr><td>P/Book</td><td>~3–4x</td><td>hoch für einen Versicherer</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Die Kernspannung: Auf 2026er Gewinn ist die Aktie <strong>nicht billig</strong> (~25x), auf normalisierten 2027er Gewinn dagegen <em>moderat</em> (~13–15x) – <strong>sofern</strong> die Margenwende hält. Genau diese Bedingung ist der Streitpunkt. Barclays hob am 10.06.2026 auf „Overweight" mit Kursziel $35 an und verwies auf einen „sichtbaren Pfad zu einer unspektakulären 13–15x-P/E-Bewertung" sowie eine Bewertungslücke zu ACA-Peers.</p>
+      <p><strong>Warnsignal Bewertung:</strong> Die Aktie ist 2026 rund +80% gelaufen und notiert nahe dem 52-Wochen-Hoch ($30,66). Das durchschnittliche Analysten-Kursziel liegt bei nur ~$21–22 – also <em>unter</em> dem aktuellen Kurs. Auch das GuruFocus-„GF Value" von ~$20,80 signalisiert Überbewertung (~31% über Fair Value). Kurz: Der Markt preist bereits viel Turnaround-Erfolg ein, die Aktie ist der Fundamentaldynamik vorausgeeilt.</p>
+      <div class="source">Quellen: stockanalysis.com/OSCR (Statistics, Q2 2026); StreetInsider/Seeking Alpha (Barclays-Upgrade, 10.06.2026); GuruFocus (10.06.2026); intellectia.ai; Investing.com (Konsens-Kursziele).</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 6 -->
+  <div class="section" id="s6">
+    <div class="section-header"><div class="section-number">6</div><div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div><div class="section-score">Score: 6/10</div></div>
+    <div class="section-body">
+      <p>Die Bilanz ist <strong>solide</strong>, die Ertragsqualität <strong>im Aufbau</strong>. Zum 31.03.2026 hielt Oscar $4,83 Mrd an Zahlungsmitteln (inkl. Restricted Cash); die Versicherungstöchter verfügten über ~$1,7 Mrd Kapitalüberschuss, davon $809 Mio Überschusskapital. Der operative Cashflow war im Q1 mit ~$2,6 Mrd sehr hoch – allerdings stark durch Timing-Effekte bei Risk-Adjustment-Zahlungen und Prämien-Vorauszahlungen getrieben (nicht als Jahres-Run-Rate lesbar).</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>Wert / Trend</th><th>Kommentar</th></tr></thead>
+          <tbody>
+            <tr><td>MLR (Q1 2026 / FY-Guide)</td><td>70,5% / 82,4–83,4%</td><td>Q1 saisonal niedrig, FY realistischer</td></tr>
+            <tr><td>SG&A-Quote</td><td>15,2% (Q1)</td><td>branchenführend niedrig (Tech/KI)</td></tr>
+            <tr><td>Adj. EBITDA (FY2026E)</td><td>~$370–570 Mio</td><td>Wende nach –$308 Mio in Q4 2025</td></tr>
+            <tr><td>ROE (TTM)</td><td>~–44%</td><td>historisch negativ, dreht 2026</td></tr>
+            <tr><td>Cash-Position</td><td>~$4,8 Mrd</td><td>hohe Liquidität + Zinserträge</td></tr>
+            <tr><td>Verschuldung</td><td>moderat</td><td>Wandelanleihe 2031 teilw. getauscht (Nov 2025)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Kapitalqualität kritisch:</strong> Oscar hat gerade erst (2024) erstmals in der Firmengeschichte einen Jahresgewinn erzielt, ist 2025 wieder tief in die Verlustzone gerutscht und zeigt 2026 die Wende. Die Ertragskraft ist also noch nicht bewiesen, sondern in Rekonstruktion. Positiv: keine Dividende, kein aggressives Buyback (Kapital bleibt im Geschäft), starke Liquidität als Puffer gegen MLR-Volatilität. Der Score reflektiert die gute Bilanz bei noch unbewiesener, dünner normalisierter Marge.</p>
+      <div class="source">Quellen: Oscar 8-K Q1 2026 &amp; Earnings Call (06.05.2026); StockTitan (Convertible-Exchange, Nov 2025); stockanalysis.com/OSCR Statistics.</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 7 -->
+  <div class="section" id="s7">
+    <div class="section-header"><div class="section-number">7</div><div class="section-title">Peer-Vergleich</div><div class="section-score">Score: 6/10</div></div>
+    <div class="section-body">
+      <p>Die vom Nutzer bestätigte Peer-Gruppe umfasst den direkten ACA-Konkurrenten <strong>Centene</strong>, den lean-Operator <strong>Molina</strong> sowie die beiden Insurtech-Peers <strong>Alignment</strong> und <strong>Clover</strong> (beide im Medicare-Advantage-Segment, aber mit vergleichbarem Tech-/KI-Narrativ).</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Unternehmen</th><th>Market Cap</th><th>Umsatz 2026E</th><th>Wachstum</th><th>MLR/MCR (jüngstes Q)</th><th>Profitabilität</th><th>Bewertung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Oscar (OSCR)</strong></td><td>~$8,6 Mrd</td><td>~$18,8 Mrd</td><td><span class="beat">+60%</span></td><td>70,5% (Q1, saisonal)</td><td>Wende 2026</td><td>P/S ~0,46x</td></tr>
+            <tr><td>Centene (CNC)</td><td>~$32 Mrd</td><td>~$173 Mrd</td><td>~flat/rückläufig</td><td>87,3% (Q1)</td><td>profitabel · adj. EPS &gt;$3,40</td><td>P/E ~18–19x</td></tr>
+            <tr><td>Molina (MOH)</td><td>~$12 Mrd</td><td>~$42 Mrd</td><td>~flat</td><td>92,6% (Q3'25)</td><td>profitabel · 2026 EPS ↓</td><td>P/E ~13–15x</td></tr>
+            <tr><td>Alignment (ALHC)</td><td>~$3,7 Mrd</td><td>~$5,15 Mrd</td><td>+30%</td><td>88,2% MBR (Q1)</td><td>Adj.EBITDA+ · GAAP-Verlust</td><td>P/S ~0,7x</td></tr>
+            <tr><td>Clover (CLOV)</td><td>~$2,8 Mrd</td><td>~$2,87 Mrd</td><td>+49%</td><td>—</td><td>1. GAAP-Profit 2026E</td><td>P/S ~0,95x</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Qualitative Unterschiede</h3>
+      <p><strong>vs. Centene/Molina:</strong> Die Skalenriesen sind diversifiziert (Medicaid + Medicare + Marketplace) und dadurch robuster gegen den ACA-Schock – aber wachstumsschwach und selbst 2025 hart getroffen (Molina verlor auf die 2026-Guidance ~28% an einem Tag). Der auffälligste Kontrast: Centenes ACA-Mitglieder <strong>fielen von 5,6 auf 3,6 Mio</strong>, während Oscar <em>wuchs</em>. Oscar gewinnt also aktiv Marktanteile, wo etablierte Player Kapazität abbauen. Dafür ist Oscar hochkonzentriert und ungeschützt gegen Policy-Risiken, die CNC/MOH über andere Segmente abfedern.</p>
+      <p><strong>vs. Alignment/Clover:</strong> Beide sind ebenfalls tech-/KI-getriebene Herausforderer, aber im Medicare-Advantage-Markt (ältere Bevölkerung, andere Regulierung). Beide wachsen kräftig und erreichen gerade erst GAAP-Profitabilität. Auf P/S ist Oscar (~0,46x) sogar <em>günstiger</em> als ALHC/CLOV, obwohl es früher profitabel wurde – das ist Teil von Barclays' „Bewertungslücke"-Argument. Umgekehrt haben ALHC/CLOV mit dem MA-Markt ein strukturell wachsendes, weniger subventionsabhängiges Segment.</p>
+      <p><strong>Fazit Peer-Vergleich:</strong> Oscar ist der schnellst wachsende, aber am stärksten policy-exponierte Name der Gruppe. Relativ bewertet nicht teuer (P/S), auf normalisierten Gewinn aber weniger klar überlegen. Solider, kein herausragender relativer Vorteil.</p>
+      <div class="source">Quellen: Q1-2026-Berichte OSCR/CNC/MOH/ALHC/CLOV (SEC 8-K, April–Mai 2026); Becker's Payer (28.04.2026); StockTitan (ALHC/CLOV); Healthcare Dive (06.02.2026); Yahoo Finance Kurse (30.06.2026).</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 8 -->
+  <div class="section" id="s8">
+    <div class="section-header"><div class="section-number">8</div><div class="section-title">Aktuelle News &amp; Events</div><div class="section-note">Quellen ≤ 3 Monate</div></div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">06.05.2026 – Q1-2026-Blowout <span class="badge badge-green">Positiv</span></div><div class="event-text">EPS $2,07 vs. Konsens ~$1,10, Umsatz $4,65 Mrd (+53%), MLR 70,5%, Rekord-Mitgliederzahl 3,17 Mio. FY-Guidance bestätigt. Quelle: Oscar 8-K, 06.05.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">10.06.2026 – Barclays Upgrade auf Overweight <span class="badge badge-green">Positiv</span></div><div class="event-text">Analyst Andrew Mok, Kursziel $30 → $35, Argument: „sichtbarer Pfad zu 13–15x P/E", Bewertungslücke zu ACA-Peers. Quelle: StreetInsider/Seeking Alpha.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">Mai 2026 – Wells Fargo Upgrade auf Equal Weight <span class="badge badge-green">Positiv</span></div><div class="event-text">Von Underweight; Kursziel $11 → $20, günstigerer Blick auf die 2026er Exchange-Marktentwicklung. Quelle: Investing.com.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Mai 2026 – Rollenwechsel Mitgründer Mario Schlosser <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Ex-CTO/President Technology wird „Co-Founder &amp; Advisor to CEO", unterstützt weiter KI-/Digital-Health-Initiativen. Schlüsselperson-Signal. Quelle: Investing.com.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Feb 2026 – Q4-2025-Verlust + starke 2026-Guidance <span class="badge badge-yellow">Gemischt</span></div><div class="event-text">Q4 EPS –$1,24, MLR 95,4%, FY2025 Nettoverlust –$443 Mio – aber 2026-EFO-Ausblick $250–450 Mio. Quelle: mlq.ai, 10.02.2026.</div></div></div>
+
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">2025–26 – ACA-Morbiditäts-/Kostenschock <span class="badge badge-red">Negativ (Sektor)</span></div><div class="event-text">Branchenweit erhöhte MLR/MCR; Centene zog 2025-Guidance zurück (Juli 2025), Molina fiel ~28% auf 2026-Ausblick. Bestätigt Oscars 2025-Verlustserie als Marktphänomen. Quelle: SEC-Filings; Healthcare Dive.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">Q1 2026 – Konsolidierung zugunsten Oscar <span class="badge badge-green">Positiv</span></div><div class="event-text">Centenes ACA-Mitglieder 5,6 → 3,6 Mio (–2 Mio), Oscar gewinnt Anteile. Individualmarkt-Marktanteil laut HV ~verdoppelt. Quelle: Becker's Payer, 28.04.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">2026 – Insurtech-Peers mit Profitabilitätswende <span class="badge badge-yellow">Neutral/Positiv</span></div><div class="event-text">ALHC und CLOV mit +30–49% Wachstum und erstmaliger (Adj.-)Profitabilität – verbessert Sektor-Sentiment für tech-getriebene Versicherer. Quelle: StockTitan.</div></div></div>
+
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">31.12.2025 – Erweiterte ACA-Subventionen (ePTC) ausgelaufen <span class="badge badge-red">Strukturelles Risiko</span></div><div class="event-text">House-Verlängerung (3 Jahre) am 08.01.2026 verabschiedet (230–196), Senat blockiert (Stand Mai 2026 keine Einigung). Ø-Prämien +114%, 4–4,8 Mio drohen Versicherungsverlust. Kurzfristig überraschend gut verkraftet. Quelle: KFF, ASTHO, Congress.gov, Managed Healthcare Exec (08.05.2026).</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">2026 – Höhere Zinsen = mehr Investmenterträge <span class="badge badge-green">Leicht positiv</span></div><div class="event-text">Auf ~$4,8 Mrd Cash erzielt Oscar signifikante Investmenteinkünfte – ein natürlicher Ergebnispuffer. Quelle: Oscar 8-K Q1 2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Ab 2027 – Kürzere Open-Enrollment-Fenster <span class="badge badge-yellow">Neutral/Risiko</span></div><div class="event-text">Viele Staaten verkürzen die Einschreibefristen – erhöht Timing-Sensitivität zwischen Subventionspolitik und Enrollment. Quelle: Managed Healthcare Executive, 08.05.2026.</div></div></div>
+      <p style="margin-top:14px;font-size:13px;color:var(--text-dim);">Hinweis: Das Bullish-/Bearish-Narrativ wird nicht hier, sondern in Sektion 12 mit voller Analysetiefe ausgearbeitet.</p>
+      <div class="source">Quellen: siehe Event-Angaben; KFF (30.09.2025/21.01.2026); NBC/NPR (Jan/Feb 2026); NACo (09.01.2026).</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 9 -->
+  <div class="section" id="s9">
+    <div class="section-header"><div class="section-number">9</div><div class="section-title">Technische Analyse</div><div class="section-score">Score: 7/10</div></div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Die exakten Gleitdurchschnitte schwanken täglich; die folgenden Werte sind gerundete Näherungen (Stand ~30.06.2026) aus Investing.com, StockScan und Barchart. Kurs bewegt sich nahe dem 52-Wochen-Hoch.</div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$28,52</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value" style="font-size:18px;">~$27</div><div class="kpi-sub">Kurs darüber</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value" style="font-size:18px;">~$25</div><div class="kpi-sub">steigend, darüber</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value" style="font-size:18px;">~$20</div><div class="kpi-sub">deutlich darüber</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value" style="font-size:18px;">~62</div><div class="kpi-sub">erhöht, nicht extrem</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Hoch</div><div class="kpi-value" style="font-size:18px;">$30,66</div><div class="kpi-sub">Widerstand nahe</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value green" style="font-size:18px;">positiv</div><div class="kpi-sub">Momentum an</div></div>
+      </div>
+      <p><strong>Trend:</strong> Klarer Aufwärtstrend. Die Aktie notiert über allen wichtigen Gleitdurchschnitten (SMA 20/50/200), die ihrerseits steigen und in bullischer Reihenfolge liegen – technisch ein „Strong Buy"-Setup laut Investing.com und StockScan (12 Kaufsignale). Der Kurs steht nahe dem 52-Wochen-Hoch von $30,66 nach einem Anstieg von ~+80% seit Jahresbeginn.</p>
+      <p><strong>Momentum &amp; Levels:</strong> Der RSI liegt im mittleren 60er-Bereich – erhöht, aber noch nicht klar überkauft (&gt;70). Nächster relevanter Widerstand: das 52-Wochen-Hoch $30,66, darüber die Zone Richtung Allzeithoch $36,77 (März 2021). Unterstützungen: die frühere Ausbruchszone um ~$24–25 (SMA 50) und darunter ~$20 (SMA 200). Bei einer Konsolidierung wäre ein Rücksetzer auf $24–25 im Trend „normal".</p>
+      <p><strong>Einordnung:</strong> Technisch stark, aber <em>ausgedehnt</em>. Für Momentum-Trader intakt; für fundamentale Käufer bietet der aktuelle Kurs nahe dem Hoch und über den meisten Kurszielen ein schlechtes Chance-Risiko-Timing. Score hoch für den Trend, mit Vorbehalt wegen Überdehnung.</p>
+      <div class="source">Quellen: Investing.com Technicals; StockScan (RSI ~65); Barchart; TipRanks – alle abgerufen Ende Juni 2026.</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 10 -->
+  <div class="section" id="s10">
+    <div class="section-header"><div class="section-number">10</div><div class="section-title">Risiken &amp; Chancen</div><div class="section-score">Score (inv.): 4/10</div></div>
+    <div class="section-body">
+      <h3>10a) Strukturelle &amp; zyklische Risiken</h3>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Regulatorisch: ACA-Subventions-Cliff</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: sehr hoch</span></div></div><div class="event-text">Das dominante Risiko. ePTC ausgelaufen; ohne Verlängerung droht zur 2027-Open-Enrollment ein Mitgliederschwund und eine Verschlechterung des Risikopools (Adverse Selection: Gesunde steigen aus, Kranke bleiben → MLR steigt). CBO: 3–4 Mio weniger Versicherte 2027. Wahrscheinlichkeit eines negativen Szenarios: mittel-hoch.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Einzelmarkt-Konzentration</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: hoch</span></div></div><div class="event-text">~95% Umsatz aus dem Individual/ACA-Markt. Kein Medicaid-/Medicare-Puffer wie bei CNC/MOH. Ein einzelner Politik- oder Morbiditätsschock trifft Oscar voll.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ MLR-/Morbiditäts-Volatilität</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: hoch</span></div></div><div class="event-text">2025 zeigte, wie schnell die MLR aus dem Ruder läuft (Q4 2025: 95,4%). Steigt die Marktmorbidität schneller als die Risk-Adjustment-Transfers, kippt die Marge sofort ins Negative.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Wettbewerb &amp; Preisdruck</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: mittel</span></div></div><div class="event-text">Niedrige Wechselkosten im ACA-Markt; UnitedHealth, Centene und regionale Blues können aggressiv bepreisen. Marktanteilsgewinne sind reversibel.</div></div>
+
+      <h3>10b) Technologie-/KI-Bezug</h3>
+      <p>Für Oscar ist KI überwiegend eine <strong>Chance</strong>, kein Disruptionsrisiko: KI/Automatisierung senkt die SG&A-Quote (branchenführend ~15%) und verbessert Claims-Steuerung und Mitglieder-Engagement. Bärisches Szenario: Der Tech-Vorsprung ist kein tiefer Burggraben – finanzstarke Wettbewerber ziehen bei Automatisierung nach und egalisieren den Kostenvorteil. Bullisches Szenario: Der Vorsprung skaliert über die +Oscar-Plattform in höhermargige Software-/Service-Umsätze.</p>
+
+      <h3>10c) Chancen</h3>
+      <p>(1) <strong>Marktanteilsgewinne</strong>, während Wettbewerber ACA-Kapazität abbauen; (2) <strong>ICHRA</strong> als neuer, arbeitgebergetriebener Nachfragekanal (Piloten in Mississippi/Illinois); (3) <strong>+Oscar-Plattform</strong> als optionaler, höhermargiger Erlöshebel; (4) <strong>Subventions-Verlängerung</strong> als potenzieller positiver Policy-Katalysator; (5) fortgesetzte <strong>Margen-/SG&A-Hebelung</strong> mit wachsender Skala.</p>
+
+      <h3>10d) Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> extreme Saisonalität, die die Q1-Optik überzeichnet; sehr negativer TTM-ROE; Kurs weit über Konsens-Kurszielen; Rollenwechsel des technischen Mitgründers.<br><strong>Dealbreaker (existenzieller Charakter, aktuell nicht gegeben):</strong> ein dauerhaftes Auslaufen der Subventionen <em>kombiniert</em> mit erneut entgleisender MLR könnte Oscar zurück in strukturelle Verluste zwingen – kein Insolvenzrisiko dank $4,8 Mrd Cash, aber ein These-Bruch.</p>
+      <p><strong>Gesamt-Risikoscore: 4/10</strong> (invertiert: 10 = kein Risiko). Das Geschäftsmodell trägt überdurchschnittlich hohe, teils binäre Policy-Risiken.</p>
+      <div class="source">Quellen: Oscar 8-K/Guidance 2026; CBO/KFF/Urban Institute (2025/26); Q1-2026 Earnings Call; Sektionen 3–8 dieser Analyse.</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 11 -->
+  <div class="section" id="s11">
+    <div class="section-header"><div class="section-number">11</div><div class="section-title">Scoring &amp; User-Thesen</div><div class="section-score">Ø 5,6/10</div></div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Visualisierung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td>Geschäftsmodell</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Tech-Insurer, asset-light, aber ACA-konzentriert</td></tr>
+            <tr><td>Burggraben</td><td>4/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td><td>Prozess-/Kostenvorsprung, kein tiefer Graben</td></tr>
+            <tr><td>Operative Entw. (4Q)</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Starke Q1-Wende, aber 3 Verlustquartale davor</td></tr>
+            <tr><td>Wachstum</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>+60% Umsatz, Anteilsgewinne – aber dünne Marge</td></tr>
+            <tr><td>Bewertung</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Über Konsens-Kurszielen, +80% YTD; 2027 fair</td></tr>
+            <tr><td>Cashflow/Kapital</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Starke Bilanz ($4,8 Mrd), Ertragskraft im Aufbau</td></tr>
+            <tr><td>Risiken (invertiert)</td><td>4/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td><td>Hohes, teils binäres Policy-/MLR-Risiko</td></tr>
+            <tr><td>Technische Analyse</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Starker Trend über allen MAs, aber ausgedehnt</td></tr>
+            <tr style="background:rgba(139,92,246,0.08);"><td><strong>⌀ Gesamtscore</strong></td><td><strong>5,6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:56%;background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">5,6</span></div></td><td>Solide Story mit echter Wende, aber stretched &amp; policy-fragil → HALTEN</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>User-These 1 — Path to Profitability: strukturell oder zyklisch?</h3>
+      <p><strong>Einschätzung: teils strukturell, teils zyklisch – und die Q1-Optik überzeichnet die Wahrheit.</strong> Strukturell verbessert ist die Kostenseite: Die SG&A-Quote (~15%) ist dank Technologie/KI dauerhaft niedriger als bei Legacy-Peers, und mit der Skala (3,17 Mio Mitglieder) greift operativer Hebel. Zyklisch/einmalig ist dagegen ein Großteil der Q1-2026-Brillanz: Die MLR ist im Q1 saisonal am niedrigsten, es half $68 Mio günstige Reserve-Entwicklung, und die Repricing-Wirkung nach dem 2025-Schock ist ein Aufholeffekt, kein Dauerzustand. Der schlagende Beleg: Der <strong>Q1-Nettogewinn von $679 Mio übersteigt die gesamte Jahres-Guidance (EFO $250–450 Mio)</strong> – Oscar erwartet also, den Großteil des Q1-Gewinns in H2 wieder abzugeben (MLR steigt Richtung 95% im Q4). Die <em>normalisierte</em> operative Marge liegt bei nur ~1,5–2,4%. Fazit: Die Wende ist real und strukturell gestützt, aber dünn – wer die Q1-Marge extrapoliert, täuscht sich. (Kein Score-Adjustment; die Skepsis ist bereits in Bewertung/Cashflow eingepreist.)</p>
+
+      <h3>User-These 2 — ACA-Abhängigkeit / Regulierungsrisiko: wie fragil?</h3>
+      <p><strong>Einschätzung: sehr fragil – das ist der Kern der Investmentfrage.</strong> Oscar ist ein Quasi-Pure-Play auf den subventionsgetriebenen ACA-Individualmarkt. Die erweiterten Subventionen (ePTC) sind zum 01.01.2026 ausgelaufen; eine Senats-Verlängerung ist blockiert (Stand Mai 2026). Bemerkenswert: Oscar hat 2026 <em>überraschend gut</em> navigiert – Mitglieder hielten, Zahlungsraten „leicht über Plan trotz Subventions-Sunset". Der eigentliche Test kommt aber erst zur <strong>2027-Open-Enrollment (ab Nov 2026)</strong>: Bleiben die Subventionen weg, drohen Mitgliederschwund und Risikopool-Verschlechterung. Oscar ist hier <em>stärker</em> exponiert als CNC/MOH, die über Medicaid/Medicare abfedern. Diese Fragilität rechtfertigt den niedrigen Risiko- und Burggraben-Score und ist der Hauptgrund gegen ein KAUFEN auf dem aktuellen Niveau.</p>
+
+      <h3>User-These 3 — Insurtech/Tech-Plattform: echter Burggraben oder „nur ein weiterer ACA-Versicherer"?</h3>
+      <p><strong>Einschätzung: eher „besser geführter ACA-Versicherer" als „Software-Firma" – der Tech-Vorsprung ist real, aber (noch) kein Burggraben.</strong> Der Beleg für echten Mehrwert: die branchenführend niedrige SG&A-Quote und die KI-getriebene Effizienz, die Oscar früher als die Insurtech-Peers ALHC/CLOV profitabel werden ließen. Aber: Die +Oscar-Plattform trägt erlösseitig noch &lt;1%, die Wechselkosten im ACA-Markt bleiben niedrig, und Oscars Ergebnis hängt an Morbidität und Politik, nicht an Software-Netzwerkeffekten. Bertolinis Aussage, Plattform-Margen seien „höher als jedes ACA-Mitglied", ist Vision, nicht heutige Realität. Die Plattform ist Optionalität mit Upside – aber die These „echter, breiter Burggraben" ist bislang <em>nicht</em> belegt. Deshalb Burggraben-Score 4/10.</p>
+      <div class="source">Quellen: Q1-2026 Earnings Call &amp; Guidance (06.05.2026); Sektionen 2, 4, 5, 6, 10; KFF/CBO (Subventions-Analysen 2025/26).</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 12 -->
+  <div class="section" id="s12">
+    <div class="section-header"><div class="section-number">12</div><div class="section-title">Fazit – Investment-These</div></div>
+    <div class="section-body">
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 – Bewiesene Wende + Marktanteilsgewinne.</strong> Oscar drehte von –$443 Mio Jahresverlust (2025) zu $679 Mio Q1-Gewinn und wächst gegen den Trend: Mitglieder +56% auf 3,17 Mio, während Centene 2 Mio ACA-Mitglieder verlor. Oscar konsolidiert den Markt, den etablierte Player räumen.</p>
+          <p><strong>Säule 2 – Struktureller Kostenvorsprung.</strong> Die SG&A-Quote von ~15% ist branchenführend und tech-/KI-getrieben. Mit wachsender Skala greift operativer Hebel; die +Oscar-Plattform und ICHRA bieten höhermargige Optionalität on top.</p>
+          <p><strong>Säule 3 – Bewertung mit Luft nach oben.</strong> Auf normalisierten 2027er Gewinn nur ~13–15x P/E (Barclays), auf P/S ~0,46x sogar günstiger als die Insurtech-Peers. Kursziel Barclays $35 (+23%); ein Subventions-Deal wäre ein zusätzlicher Katalysator Richtung Allzeithoch $36,77.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 – Der 2027-Subventions-Cliff.</strong> Fällt die ePTC-Verlängerung im Senat durch, droht zur 2027-Enrollment Mitgliederschwund + Adverse Selection. Verschlechtert sich der Risikopool, kann die MLR – wie in Q4 2025 (95,4%) – zurück Richtung Verlustzone kippen. Oscar ist voll exponiert, ohne Medicaid-/Medicare-Puffer.</p>
+          <p><strong>Risiko 2 – Die Q1-Marge ist eine Illusion.</strong> Der Q1-Gewinn ($679 Mio) übersteigt die volle Jahres-Guidance (EFO $250–450 Mio). Die normalisierte operative Marge liegt bei nur ~1,5–2,4%. Wer die Q1-Zahlen extrapoliert, zahlt für eine Marge, die es so nicht gibt.</p>
+          <p><strong>Risiko 3 – Kurs der Fundamentaldynamik vorausgeeilt.</strong> +80% YTD, Kurs nahe 52W-Hoch und <em>über</em> dem Ø-Analystenziel (~$21–22) und dem GF Value ($20,80). Kein Burggraben, der einen Bewertungsaufschlag dauerhaft trägt.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung (ausgewogen)</h3>
+      <p>Beide Narrative haben Substanz – und genau das führt zu <strong>HALTEN</strong>, nicht zu einer klaren Richtungswette. Bullisch überzeugt, dass die operative Wende real ist, der Kostenvorsprung strukturell und die Anteilsgewinne echt. Bärisch überzeugt, dass die eigentliche Ertragskraft dünn ist (die Q1-Optik trügt), das Geschäft an einer <em>binären</em> politischen Entscheidung hängt und die Aktie bereits viel Optimismus eingepreist hat.</p>
+      <p>Entscheidend: Der Kurs steht bei $28,52 – <em>über</em> dem durchschnittlichen Analystenziel. Das Chance-Risiko-Verhältnis ist bei diesem Einstand ungünstig: Aufwärts ~+23% (bis $35, Barclays-Bull), abwärts ~–33% (bis ~$19, falls Subventions-Cliff + MLR-Normalisierung greifen). Das ist ein R/R von etwa <strong>1:0,7</strong> – man bekommt nicht genug Aufwärtspotenzial für das eingegangene, teils binäre Risiko.</p>
+      <p><strong>Transparenz/Demut:</strong> Ich könnte zu vorsichtig sein, falls (a) der Senat doch eine Subventions-Verlängerung beschließt und (b) die Q2/Q3-MLR die strukturelle Wende bestätigt – dann wäre $35+ berechtigt und HALTEN zu defensiv. Umgekehrt könnte selbst mein Downside zu optimistisch sein, falls der 2027-Risikopool kippt. Geeignet ist die Aktie für risikobereite Growth-Investoren, die die Positionsgröße klein halten und den Q2-Report + die Senats-Entscheidung als Trigger nutzen.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kurz (0–6 M)</strong></td><td>Q2-Earnings (06.08.), Analysten-Upgrades, Momentum</td><td>Überdehnter Kurs, Gewinnmitnahmen, MLR-Enttäuschung</td><td><span class="badge badge-yellow">Halten / nicht chasen</span></td></tr>
+            <tr><td><strong>Mittel (6–24 M)</strong></td><td>Senats-Entscheidung ePTC, 2027-Open-Enrollment, +Oscar/ICHRA</td><td>Subventions-Cliff, Risikopool-Verschlechterung</td><td><span class="badge badge-yellow">Halten, bei Klarheit neu bewerten</span></td></tr>
+            <tr><td><strong>Lang (2–5 J)</strong></td><td>Plattform-Skalierung, strukturelle Margenreife, Marktführung Individual</td><td>Regulatorische Grundsatz-Änderungen am ACA-Markt</td><td><span class="badge badge-orange">Beobachten / tranchiert bei Schwäche</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese (Zusammenfassung)</h3>
+      <p>Oscar Health ist die spannendste Turnaround-Story im ACA-Markt: ein tech-getriebener Herausforderer, der 2026 die operative Wende geschafft, Marktanteile gewonnen und einen echten Kostenvorsprung bewiesen hat. Doch die normalisierte Marge ist dünn, der Burggraben schmal und das Geschäft hängt an einer binären politischen Entscheidung (ACA-Subventionen). Nach +80% Kursanstieg und über den Analystenzielen ist das Chance-Risiko unattraktiv. Die Story ist ein Kauf-<em>Kandidat</em> – aber zu einem besseren Preis und mit mehr Policy-Klarheit. Heute: <strong>HALTEN</strong>.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$24–34</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–3 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–33%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+23%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val" style="color:var(--yellow);">1:0,7</div></div>
+      </div>
+
+      <h3>Was falsifiziert die These?</h3>
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Q2/Q3-2026-MLR steigt über ~85% und/oder FY-Guidance gesenkt → zyklisches Muster bestätigt</li>
+            <li>Subventionen laufen dauerhaft aus UND 2027-Mitgliederzahl fällt zweistellig → These-Bruch</li>
+            <li>Kurs verliert SMA 200 (~$20) auf Schlusskursbasis → Trendbruch</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Senat verlängert ePTC (auch Teil-Deal) vor der 2027-Enrollment → Cliff entschärft</li>
+            <li>Q2 2026: MLR klar &lt;80% + FY-Guidance angehoben → strukturelle Wende bestätigt</li>
+            <li>Rücksetzer in die $22–25-Zone bei intaktem Fundamentaltrend → besseres R/R</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Welcher Anlegertyp passt?</h3>
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul><li>Risikobereite Growth-Investoren (kleine Position)</li><li>Turnaround-/Special-Situations-Anleger</li><li>Anleger mit Toleranz für Policy-/Binär-Risiko</li></ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul><li>Konservative / Income-Investoren (keine Dividende)</li><li>Value-Investoren (über Fair Value)</li><li>Wer stabile, planbare Margen sucht</li></ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-red">Meiden / warten</span></td><td>Zu hohe Volatilität und Policy-Abhängigkeit</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-yellow">Halten / auf Rücksetzer warten</span></td><td>Einstieg erst bei $22–25 oder Subventions-Klarheit</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-orange">Kleine Startposition, Q2 abwarten</span></td><td>Momentum intakt, aber R/R heute ungünstig</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-yellow">Beobachten, tranchiert bei Schwäche</span></td><td>Struktur-Story ok, Preis/Timing entscheidend</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Synthese aus Sektionen 1–11; Barclays (10.06.2026); Konsens-Kursziele (Investing.com/stockanalysis.com); GuruFocus GF Value.</div>
+    </div>
+  </div>
+
+  <!-- SEKTION 13 -->
+  <div class="section" id="s13">
+    <div class="section-header"><div class="section-number">13</div><div class="section-title">Outlook – Die 3 wichtigsten Events</div></div>
+    <div class="section-body">
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q2-2026-Quartalsergebnisse – 06.08.2026</h4>
+        <p>Der erste harte Test, ob die Q1-Marge (MLR 70,5%) tragfähig ist oder ob H2-Saisonalität und Marktmorbidität die MLR nach oben treiben. Entscheidet, ob These 1 (strukturelle Wende) hält.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> die Q2-MLR klar unter ~80% bleibt <em>und</em> die FY-2026-Guidance (EFO $250–450 Mio) angehoben wird → strukturelle Wende bestätigt, Upgrade auf tranchiertes KAUFEN, kleine Position aufbauen.<br><br>
+          <strong>Wenn:</strong> die Q2-MLR über ~85% springt und/oder die Guidance gesenkt wird → das zyklische Muster von 2025 wiederholt sich, Position reduzieren bzw. HALTEN mit Downside-Bias.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>🏛️ Event 2: Senats-Entscheidung zu den ACA-Subventionen (ePTC) – Sommer/Herbst 2026</h4>
+        <p>Die politische Weichenstellung für die 2027-Enrollment. Das House-Gesetz (3-Jahres-Verlängerung) liegt im Senat; ein bipartisaner Kompromiss (2 Jahre, mit Einkommensgrenzen/Mindestbeitrag) wird verhandelt. Der binäre Haupttreiber der These.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> eine (Teil-)Verlängerung <em>vor</em> der 2027-Open-Enrollment beschlossen wird → der Enrollment-Cliff entfällt, Risikopool stabilisiert, klarer Aufwärts-Trigger Richtung $35+ – nachkaufen.<br><br>
+          <strong>Wenn:</strong> die Verhandlungen endgültig scheitern und die Subventionen dauerhaft entfallen → Mitglieder-/Morbiditätsrisiko für 2027 steigt deutlich, Downside-Trigger – Position reduzieren, nicht nachkaufen.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>📅 Event 3: 2027 Open Enrollment – Nov 2026 bis Jan 2027</h4>
+        <p>Die erste echte Datenprobe des Marktes <em>nach</em> dem Subventions-Sunset. Zeigt, ob Oscars Anteilsgewinne und Ausführung auch unter höheren Prämien Bestand haben (These 3, Burggraben/Ausführung).</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Oscar erneut Anteile gewinnt und die Mitgliederzahl trotz höherer Prämien hält oder wächst → Ausführungs-/Burggraben-These bestätigt, Position aufbauen bzw. Rating anheben.<br><br>
+          <strong>Wenn:</strong> die Mitgliederzahl zweistellig fällt und/oder die Risikopool-Qualität sich verschlechtert (Adverse Selection, steigende MLR) → These beschädigt, VERKAUFEN erwägen.
+        </div>
+      </div>
+      <div class="source">Quellen: Oscar IR-Kalender (Q2 am 06.08.2026); Congress.gov/ASTHO/Managed Healthcare Executive (ePTC-Status); CMS/KFF (Enrollment 2027).</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken und stellt keine Anlage-, Steuer- oder Rechtsberatung sowie keine Kauf-/Verkaufsempfehlung dar. Ich bin kein lizenzierter Finanzberater. Alle Kurse, Kennzahlen und Termine (Stand 01.07.2026, Kurse per 30.06.2026) können sich ändern; einige technische Werte sind gerundete Näherungen. Aktienanlagen bergen erhebliche Risiken bis zum Totalverlust. Prüfe alle Angaben eigenständig anhand der genannten Primärquellen und triff deine Entscheidung selbst bzw. mit professioneller Beratung.</div>
+</div>
+</body>
+</html>
