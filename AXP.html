@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AXP – Aktienanalyse Canvas v2.2</title>
+<style>
+:root{
+  --primary:#8b5cf6; --primary-dark:#6d28d9;
+  --bg:#0f0f12; --bg-card:#1a1a1f; --bg-card2:#22222a; --border:#2e2e38;
+  --text:#e8e8ec; --text-muted:#888898; --text-dim:#555566;
+  --green:#22c55e; --red:#ef4444; --yellow:#f59e0b; --blue:#3b82f6; --purple:#8b5cf6; --teal:#14b8a6;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7}
+.header{background:linear-gradient(135deg,#0e0018 0%,#1a0028 40%,#0f0f12 100%);border-bottom:1px solid var(--primary);padding:36px 40px 28px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px}
+.header-left h1{font-size:32px;font-weight:700;color:#fff;letter-spacing:-0.5px}
+.header-left h1 span{color:var(--primary)}
+.header-left .subtitle{color:var(--text-muted);font-size:14px;margin-top:4px}
+.header-right{text-align:right}
+.price-tag{font-size:38px;font-weight:800;color:var(--primary);line-height:1}
+.price-meta{color:var(--text-muted);font-size:13px;margin-top:4px}
+.price-change{display:inline-block;padding:2px 8px;border-radius:4px;font-size:13px;font-weight:600;margin-top:4px}
+.price-change.up{background:rgba(34,197,94,.15);color:var(--green)}
+.price-change.down{background:rgba(239,68,68,.15);color:var(--red)}
+.nav{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:100}
+.nav a{color:var(--text-muted);text-decoration:none;padding:14px 16px;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s}
+.nav a:hover{color:var(--primary);border-bottom-color:var(--primary)}
+.main{max-width:1100px;margin:0 auto;padding:32px 40px 60px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+.kpi-value{font-size:22px;font-weight:700;color:#fff;margin-top:4px}
+.kpi-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
+.kpi-value.green{color:var(--green)}.kpi-value.red{color:var(--red)}.kpi-value.orange{color:var(--primary)}
+.section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden}
+.section-header{background:var(--bg-card2);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+.section-number{background:var(--primary);color:#fff;width:28px;height:28px;border-radius:6px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.section-title{font-size:16px;font-weight:700;color:#fff}
+.section-score{margin-left:auto;font-size:14px;font-weight:700;color:var(--primary)}
+.section-note{font-size:12px;color:var(--text-dim);background:rgba(46,46,56,.4);border-radius:4px;padding:4px 10px;margin-left:auto}
+.section-body{padding:20px 24px}
+p{margin-bottom:12px;color:var(--text)}p:last-child{margin-bottom:0}
+h3{font-size:14px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;margin:20px 0 8px}h3:first-child{margin-top:0}
+.table-wrap{overflow-x:auto;margin:16px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:var(--bg-card2);color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid rgba(46,46,56,.5);color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(139,92,246,.05)}
+.beat{color:var(--green);font-weight:600}.miss{color:var(--red);font-weight:600}.neutral{color:var(--yellow);font-weight:600}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}
+.badge-green{background:rgba(34,197,94,.15);color:var(--green)}
+.badge-red{background:rgba(239,68,68,.15);color:var(--red)}
+.badge-yellow{background:rgba(245,158,11,.15);color:var(--yellow)}
+.badge-blue{background:rgba(59,130,246,.15);color:var(--blue)}
+.badge-orange{background:rgba(139,92,246,.15);color:var(--primary)}
+.event-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(46,46,56,.5);align-items:flex-start}
+.event-item:last-child{border-bottom:none}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0}
+.dot-green{background:var(--green)}.dot-red{background:var(--red)}.dot-yellow{background:var(--yellow)}
+.event-label{font-weight:600;color:#fff}
+.event-text{font-size:14px;color:var(--text)}
+.risk-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px}
+.risk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px;flex-wrap:wrap}
+.risk-title{font-weight:600;color:#fff;font-size:14px}
+.score-bar{display:flex;align-items:center;gap:10px}
+.score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#c4b5fd)}
+.score-num{font-weight:700;color:var(--primary);font-size:15px;min-width:32px}
+.bull-bear-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:700px){.bull-bear-grid{grid-template-columns:1fr}}
+.bull-card{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:16px}
+.bear-card{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:16px}
+.bull-card h4{color:var(--green);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:.5px}
+.bear-card h4{color:var(--red);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:.5px}
+.rating-box{background:linear-gradient(135deg,rgba(139,92,246,.14),rgba(139,92,246,.04));border:1px solid rgba(139,92,246,.3);border-radius:12px;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:20px 0}
+.rating-item label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:.5px;display:block;margin-bottom:4px}
+.rating-item .val{font-size:20px;font-weight:800;color:#fff}
+.rating-item .val.buy{color:var(--green)}.rating-item .val.hold{color:var(--yellow)}.rating-item .val.sell{color:var(--red)}
+.rating-item .val.green{color:var(--green)}
+.trigger-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+@media(max-width:700px){.trigger-grid{grid-template-columns:1fr}}
+.trigger-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px}
+.trigger-card h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.trigger-card.buy h5{color:var(--green)}.trigger-card.sell h5{color:var(--red)}
+.trigger-list{font-size:13px;color:var(--text);list-style:none;padding:0}
+.trigger-list li{margin-bottom:6px;padding-left:14px;position:relative}
+.trigger-list li::before{content:"→";position:absolute;left:0}
+.investor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+@media(max-width:600px){.investor-grid{grid-template-columns:1fr}}
+.investor-yes{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:12px}
+.investor-no{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:12px}
+.investor-yes h5{color:var(--green);font-size:12px;text-transform:uppercase;margin-bottom:8px}
+.investor-no h5{color:var(--red);font-size:12px;text-transform:uppercase;margin-bottom:8px}
+.investor-yes li,.investor-no li{font-size:13px;color:var(--text);margin-bottom:4px;list-style:none;padding-left:14px;position:relative}
+.investor-yes li::before{content:"✓";position:absolute;left:0;color:var(--green)}
+.investor-no li::before{content:"✗";position:absolute;left:0;color:var(--red)}
+.geo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0}
+.geo-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.geo-region{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+.geo-pct{font-size:20px;font-weight:700;color:#fff}
+.geo-note{font-size:12px;color:var(--text-muted)}
+.outlook-card{background:var(--bg-card2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:16px;margin-bottom:14px}
+.outlook-card h4{color:#fff;font-size:14px;margin-bottom:8px}
+.outlook-card .when-then{font-size:13px;color:var(--text);margin-top:8px}
+.outlook-card .when-then strong{color:var(--primary)}
+.source{font-size:11px;color:var(--text-dim);margin-top:12px;padding-top:10px;border-top:1px solid rgba(46,46,56,.5)}
+.source a{color:var(--text-dim)}
+.disclaimer{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text-dim);margin-top:32px}
+.alert-box{background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+.pill{display:inline-block;background:rgba(139,92,246,.12);color:var(--primary);border-radius:4px;padding:1px 7px;font-size:13px;font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>American Express <span>AXP.NYSE</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 01. Juli 2026 · NYSE · Sektor: Financials / Payments</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-orange">Closed-Loop-Netzwerk</span>
+      <span class="badge badge-blue">Premium-Card / Lender</span>
+      <span class="badge badge-green">Quality-Growth</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$340,88</div>
+    <div class="price-meta">Schlusskurs 29.06.2026 · NYSE</div>
+    <div class="price-change up">▲ +15,4% (52W)</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">52W: $288,34 – $387,49</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$340,88</div><div class="kpi-sub">USD · 29.06.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value">~$232 Mrd.</div><div class="kpi-sub">Mega-Cap</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/E (TTM)</div><div class="kpi-value">~21,3x</div><div class="kpi-sub">Fwd ~19x</div></div>
+    <div class="kpi-card"><div class="kpi-label">EPS (TTM)</div><div class="kpi-value">$16,02</div><div class="kpi-sub">FY26e $17,30–17,90</div></div>
+    <div class="kpi-card"><div class="kpi-label">ROE</div><div class="kpi-value green">~34%</div><div class="kpi-sub">Q1/26: 35,2%</div></div>
+    <div class="kpi-card"><div class="kpi-label">Net Write-off</div><div class="kpi-value green">2,0%</div><div class="kpi-sub">best-in-class</div></div>
+    <div class="kpi-card"><div class="kpi-label">Div.-Rendite</div><div class="kpi-value">~1,1%</div><div class="kpi-sub">$3,80/Jahr · Payout ~21%</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value" style="font-size:18px;">24.07.2026</div><div class="kpi-sub">Q2/26 · Konsens EPS ~$4,41</div></div>
+  </div>
+
+  <!-- ===================== S1 ===================== -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <p>American Express verdient auf drei ineinandergreifende Weisen und ist damit ein Hybrid, den es sonst kaum gibt: Anders als Visa und Mastercard (reine Netzwerke) und anders als reine Kartenherausgeber betreibt Amex ein <strong>„Closed-Loop"-Modell</strong> — es ist gleichzeitig Netzwerk, Issuer (Kartenherausgeber) und Lender (Kreditgeber). Amex sieht dadurch jede Transaktion seiner Karteninhaber End-to-End: von der Merchant-Akzeptanz über das Rewards-Programm bis zum Kreditbuch. Das ist der Kern, aus dem sich alle vier User-Thesen speisen.</p>
+      <p>Die <strong>erste und größte Einnahmequelle ist die Discount Revenue</strong> — die Gebühr, die Händler auf das über Amex-Karten abgewickelte Volumen („Billed Business", Q1/26: $428 Mrd.) zahlen. Weil Amex-Karteninhaber überdurchschnittlich viel ausgeben, kann Amex höhere Händlergebühren durchsetzen als V/MA. Die <strong>zweite Säule sind Net Card Fees</strong> — die Jahresgebühren der Premium-Karten (z. B. Platinum, mittlerweile bis $895 Jahresgebühr). Diese Zeile wuchs 2025 um 18% auf einen Rekord von rund $10 Mrd. und ist strukturell wiederkehrend, also weitgehend entkoppelt vom kurzfristigen Konsumzyklus. Die <strong>dritte Säule ist Net Interest Income (NII)</strong> aus dem revolvierenden Kreditbuch — hier trägt Amex, anders als V/MA, echtes Kreditrisiko.</p>
+      <p>Die Kundensegmente sind bewusst premium-lastig: US Consumer Services (USCS), Commercial Services (CS, inkl. KMU- und Corporate-Karten), International Card Services (ICS) und Global Merchant & Network Services (GMNS). Rund 73% der Neukunden in Q1/26 landeten auf gebührenpflichtigen Produkten — Amex verkauft also nicht „billige" Volumenkarten, sondern zahlungspflichtige Mitgliedschaften mit Lifestyle-Ökosystem (Centurion Lounges, Resy, Fine Hotels + Resorts).</p>
+      <p>Die Kostenstruktur ist zweigeteilt: hoher Fixkostenanteil für Technologie (~$5 Mrd./Jahr) und Marketing (~$6,3 Mrd. 2025), plus die variablen „Variable Customer Engagement"-(VCE-)Kosten, also Rewards und Card-Member-Services (Q1/26: 44,7% des Umsatzes). Diese VCE-Quote ist der zentrale Margenhebel und zugleich das Kernrisiko der Gen-Z-These (Sektion 4/10): Je aggressiver die Perks, desto teurer die Kundenbindung. Unit Economics: Amex setzt darauf, dass ein premium-affiner Neukunde über seinen Lebenszyklus (Karte → Kredit → Pay-over-Time → Sparkonto) einen weit höheren Lifetime Value liefert als die anfänglichen Akquisekosten.</p>
+      <div class="source">Quellen: Amex Q1'26 8-K / Earnings Release (23.04.2026, sec.gov); Q4'25 Earnings Call (30.01.2026, fool.com); Fortune Platinum-Refresh (18.09.2025); Company IR (ir.americanexpress.com).</div>
+    </div>
+  </div>
+
+  <!-- ===================== S2 ===================== -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile <span style="font-size:12px;color:var(--text-dim);font-weight:400;">· User-These 1: Premium-Moat</span></div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <p><strong>Marken- und Preissetzungsmacht (stark).</strong> Amex ist eine der wenigen Finanzmarken mit echter Aspirationskraft. Die Tatsache, dass Karteninhaber die Jahresgebühr von $895 (Platinum) akzeptieren und die getreue Bestandskundschaft nach der Gebührenerhöhung eine Retention von ~99% zeigt, ist der beste Beleg für Pricing Power. Berkshire Hathaway hält rund 151 Mio. Aktien (~22%) — ein Vertrauensankor, der die wahrgenommene Markenqualität untermauert.</p>
+      <p><strong>Closed-Loop als Datenmoat (stark, aber angreifbar).</strong> Weil Amex Emittent und Netzwerk zugleich ist, besitzt es einen End-to-End-Datenschatz über das Ausgabeverhalten seiner Kunden. Daraus entsteht der Resy-/Lifestyle-Flywheel: Amex kann Händlern gezielt kaufkräftige Kunden zuführen (Resy-Kunden geben laut Amex ~25% mehr aus) und dafür exklusive Angebote und Reservierungen aushandeln, was wiederum die Karte attraktiver macht. Das ist ein struktureller Vorteil, den ein reiner Issuer wie Synchrony oder ein reines Netzwerk wie Visa so nicht replizieren kann.</p>
+      <p><strong>Spending-Resilienz — der Kern von User-These 1.</strong> Die entscheidende Frage ist, ob der affluente Kundenstamm im Abschwung hält. Die Evidenz ist bislang überzeugend: In Q1/26 lag die Net-Write-off-Rate bei nur 2,0% und die Delinquenz (30+ Tage) seit fünf Quartalen konstant bei 1,3–1,4% — beide <em>unter</em> dem 2019er-Niveau, während der Abstand zu den Peer-Durchschnitten eher <em>wächst</em> als schrumpft. CEO Squeri betont, dass rund die Hälfte der Amex-HYSA-Sparkontobesitzer Gen Z/Millennials sind — die Kundenbasis hat also einen Sparpuffer. Das ist die „Cream of the Crop"-These: Amex bedient nicht den fragilen Subprime-Konsumenten, sondern die kaufkräftige, resiliente Oberschicht.</p>
+      <p><strong>Schwachstellen — kritisch betrachtet.</strong> Der Burggraben ist kein Toll-Booth wie bei V/MA. Amex trägt Kreditrisiko (Leverage: Debt/Equity ~2,2x), muss den Moat über Rewards <em>teuer erkaufen</em> (VCE 44,7% des Umsatzes) und ist verwundbarer gegen einen tiefen Konsum-/Kreditzyklus als die margenstarken Netzwerke. Die Merchant-Akzeptanz ist zwar in den USA nahezu geschlossen, international aber weiterhin dünner als bei V/MA. Und die Premium-Nische wird 2026 erstmals frontal angegriffen (Robinhood, Chase Sapphire Reserve — siehe Sektion 10). Der Moat ist real und breit, aber er ist <em>gepflegt</em>, nicht selbstlaufend.</p>
+      <div class="source">Quellen: TIKR Bull-Case (10.05.2026); eMarketer Q1'26-Analyse (23.04.2026); Yahoo Finance / Berkshire-Stake (30.06.2026); Company IR.</div>
+    </div>
+  </div>
+
+  <!-- ===================== S3 ===================== -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale (Q2/25 – Q1/26)</div>
+      <div class="section-score">Beat-Ratio: 3/4</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">ℹ️ <strong>Stichtag nächste Zahlen:</strong> Q2/26 wird am <strong>24. Juli 2026</strong> berichtet (Konsens-EPS ~$4,41). Die Betrachtung unten umfasst ausschließlich die letzten vier berichteten Quartale.</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Quartal</th><th>Umsatz (net)</th><th>YoY</th><th>EPS</th><th>YoY</th><th>Billed Bus.</th><th>Konsens</th><th>Marktreaktion</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Q2/25</strong> (18.07.25)</td><td>$17,86 Mrd.</td><td>+9%</td><td>$4,08</td><td>+17%*</td><td>$416,3 Mrd. (+7%)</td><td class="beat">Beat ($3,87)</td><td>≈ +2%</td></tr>
+            <tr><td><strong>Q3/25</strong> (17.10.25)</td><td>$18,43 Mrd.</td><td>+11%</td><td>$4,14</td><td>+19%</td><td>+8% FX-adj.</td><td class="beat">Beat ($3,99)</td><td>+4,2%</td></tr>
+            <tr><td><strong>Q4/25</strong> (30.01.26)</td><td>$18,98 Mrd.</td><td>+10%</td><td>$3,53</td><td>+16%</td><td>+8%</td><td class="miss">Miss ($3,54)</td><td>−3,0%</td></tr>
+            <tr><td><strong>Q1/26</strong> (23.04.26)</td><td>$18,91 Mrd.</td><td>+11%</td><td>$4,28</td><td>+18%</td><td>$428,0 Mrd. (+10%)</td><td class="beat">Beat ($4,00)</td><td>−1,1%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><em>*Q2/25 EPS-Wachstum bereinigt um den Accertify-Verkaufsgewinn im Vorjahr.</em></p>
+      <p><strong>Operatives Bild:</strong> Vier Quartale mit zweistelligem Umsatzwachstum und (bis auf Q4) hochprozentigem EPS-Wachstum. Die Card-Member-Spend-Beschleunigung auf +10% in Q1/26 war das stärkste Quartalswachstum seit drei Jahren. Der einzige „Miss" war Q4/25 — und zwar hauchdünn um $0,01 (EPS $3,53 vs. $3,54 erwartet); der Kurs gab dennoch ~3% nach, weil der Markt bei einer Premium-Bewertung Perfektion einpreist. Das ist ein wiederkehrendes Muster (siehe auch die −1,1% nach dem klaren Q1-Beat): AXP ist ein „Buy-the-Dip"-Kandidat nach Earnings, kein „Chase-the-Pop".</p>
+      <p><strong>Wichtigste Management-Statements:</strong> Net Card Fees bleiben die am schnellsten wachsende Zeile (+16% FX-adj. in Q1/26), NII wuchs +12–13%, und die FY2026-Guidance wurde bestätigt (Umsatz +9–10%, EPS $17,30–17,90). Die VCE-Quote soll auf ~44% für das Gesamtjahr landen. Ein Sonderposten: Der ~$975 Mio. Vorsteuergewinn aus dem Verkauf der GBT-Beteiligung ist explizit <em>nicht</em> in der EPS-Guidance enthalten.</p>
+      <div class="source">Quellen: Amex 8-K/Earnings Releases Q2'25–Q1'26 (sec.gov); Investing.com Slides-Zusammenfassungen; Motley Fool Q1'26 Call (23.04.2026); Public.com; StockTitan.</div>
+    </div>
+  </div>
+
+  <!-- ===================== S4 ===================== -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung <span style="font-size:12px;color:var(--text-dim);font-weight:400;">· User-These 2: Gen-Z/Millennial</span></div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <p><strong>Umsatzentwicklung:</strong> FY2024 $65,95 Mrd. → FY2025 $72,2 Mrd. (Rekord, +10%) → FY2026e ~$79 Mrd. (+9–10% Guidance). Das ist „Growth-at-Scale": kein Hyper-Growth, aber sehr konstantes zweistelliges Wachstum für einen $232-Mrd.-Konzern — getragen von mehr Ausgaben, höheren Kartengebühren und wachsenden Kreditsalden, nicht von M&A. Wichtig für die Wachstumsqualität: Das EPS wächst schneller als der Umsatz (Q1/26: EPS +18% vs. Umsatz +11%), weil Aktienrückkäufe die Aktienzahl senken (−7% seit 2022) und operative Hebelwirkung greift.</p>
+      <h3>User-These 2: Trägt die junge Kohorte das Gebührenwachstum nachhaltig?</h3>
+      <p>Die Datenlage ist bemerkenswert klar — und überwiegend bullish. In Q1/26 stammten <strong>66% der globalen Consumer-Neukunden von Millennials und Gen Z</strong>; diese Kohorte macht bereits ~75% der neuen Premium-Karten-Akquisen aus. Das US-Billed-Business von Gen Z stieg <strong>+38% YoY</strong>, das der Millennials +13% — zusammen über ein Drittel aller US-Billings. Der Platinum-Refresh (Mitte 2025) wirkt: Platinum-Spend beschleunigte sich um ~6 Prozentpunkte YoY, Net Card Fees liefen auf +16% und sind bis Q4/26 auf „high-teens" guidet, wenn das Back-Book-Repricing vollständig durchschlägt.</p>
+      <p><strong>Der entscheidende Gegen-Beleg zur Margenrisiko-Sorge:</strong> Die Befürchtung, dass Amex die junge Kohorte über teure Perks „erkauft", wird durch die Kreditqualität <em>widerlegt</em>: Der durchschnittliche FICO-Score der Neukunden nach dem Refresh stieg um 15 Punkte. Amex zieht also nicht riskantere, sondern <em>bonitätsstärkere</em> junge Kunden an. CFO Le Caillec und CEO Squeri betonen den „Lifetime Value"-Gedanken: Wer als 25-Jähriger mit einer gebührenpflichtigen Karte startet, wächst über Pay-over-Time, Personal Loans und Sparkonten in das Amex-Ökosystem hinein. Das Risiko bleibt: Steigen die Perk-Kosten schneller als die Gebühren/Spend, drückt das die Marge — die VCE-Quote (44,7%) ist die zu beobachtende Kennzahl.</p>
+      <h3>Geografische Verteilung</h3>
+      <div class="geo-grid">
+        <div class="geo-card"><div class="geo-region">USA</div><div class="geo-pct">~ ⅔</div><div class="geo-note">Kernmarkt, USCS + CS</div></div>
+        <div class="geo-card"><div class="geo-region">International (ICS)</div><div class="geo-pct">wächst schneller</div><div class="geo-note">stärkstes Segment, ~80% Coverage Top-12-Länder</div></div>
+        <div class="geo-card"><div class="geo-region">Commercial / KMU</div><div class="geo-pct">2. Wachstumsmotor</div><div class="geo-note">größte Produkt-Expansion 2026, Center-Software</div></div>
+      </div>
+      <p><strong>Reifegrad:</strong> Growth-at-Scale mit zwei intakten Sekundärmotoren (International + Commercial). Das Wachstum ist „echt" (organisch, spend- und gebührengetrieben), nicht durch Bilanztricks oder Übernahmen inflationiert.</p>
+      <div class="source">Quellen: eMarketer (23.04.2026); TIKR (10.05.2026); cardrates.com (21.10.2025); Payments Dive; Accio Trend-Report; Company IR FY24/FY25.</div>
+    </div>
+  </div>
+
+  <!-- ===================== S5 ===================== -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples <span style="font-size:12px;color:var(--text-dim);font-weight:400;">· User-These 5: Bewertungsfrage</span></div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>AXP aktuell</th><th>Historie / Kontext</th><th>Einordnung</th></tr></thead>
+          <tbody>
+            <tr><td>P/E (TTM)</td><td>~21,3x</td><td>10-J-Ø ~19,9x; 5-J-Ø ~20,1x</td><td class="neutral">Leicht über Schnitt</td></tr>
+            <tr><td>P/E (Forward, FY26e)</td><td>~19,4x</td><td>Guidance-Mitte EPS $17,60</td><td class="neutral">Fair</td></tr>
+            <tr><td>PEG (grob)</td><td>~1,4x</td><td>EPS-Wachstum ~13–15%</td><td class="neutral">Nicht billig, nicht teuer</td></tr>
+            <tr><td>P/B</td><td>~6,0x</td><td>Q1/26: 6,09x (von 7,57x in Q4/25)</td><td class="neutral">Hoch, aber ROE-gestützt</td></tr>
+            <tr><td>Div.-Rendite</td><td>~1,1%</td><td>$3,80/Jahr, Payout ~21%</td><td class="badge-green">Viel Rückkauf-Spielraum</td></tr>
+            <tr><td>DCF-Fair-Value (Simply Wall St)</td><td>~$405</td><td>vs. Kurs $341</td><td class="beat">>15% unter FV</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>User-These 5 — ist AXP fair bewertet?</strong> Die Antwort hängt vom Vergleichsanker ab, und genau hier liegt die Nuance. Gegen die <em>reinen Netzwerke</em> (Visa ~29x, Mastercard ~29x P/E) wirkt AXP mit ~21x <strong>deutlich günstiger</strong> — was gerechtfertigt ist, weil Amex Kreditrisiko und niedrigere Marge trägt. Gegen die <em>reinen Lender/Issuer</em> (Synchrony ~8x, JPMorgan ~16x, Capital One ~13–14x) wirkt AXP <strong>teuer</strong> — was ebenfalls gerechtfertigt ist, weil Amex qualitativ hochwertigeres, wiederkehrendes Gebührenwachstum und best-in-class Kreditqualität liefert. AXP sitzt bewertungstechnisch also genau dort, wo sein Hybridmodell es hingehört: <strong>zwischen Toll-Booth und Bank</strong>.</p>
+      <p>Der „Consumer-Finance-Branchenschnitt" von ~8,8x P/E (Simply Wall St) ist als Anker <em>irreführend</em>, weil er AXP mit Subprime-Lendern in einen Topf wirft. Sinnvoller ist der eigene historische Rahmen: Bei ~21x TTM handelt AXP rund am oberen Ende seiner 5-/10-Jahres-Spanne, aber nicht in Extrem-Territorium. Fazit: <strong>fair bis leicht ambitioniert</strong> — die Aktie ist kein Schnäppchen mehr, aber angesichts 13–15% EPS-Wachstum, ~34% ROE und der Fee-Beschleunigung auch nicht überteuert. Das Analystenkonsensziel liegt bei ~$373 (Moderate Buy).</p>
+      <div class="source">Quellen: MacroTrends P/E (19.06.2026); fullratio.com; financecharts.com; Simply Wall St Valuation; stockanalysis.com; Yahoo Finance Key Stats (Stand ~Q1/26–Juni 2026).</div>
+    </div>
+  </div>
+
+  <!-- ===================== S6 ===================== -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität <span style="font-size:12px;color:var(--text-dim);font-weight:400;">· User-These 3: Kreditrisiko</span></div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>Wert</th><th>Kommentar</th></tr></thead>
+          <tbody>
+            <tr><td>ROE</td><td class="beat">~34% (FY), 35,2% Q1/26</td><td>Weit über 10-J-Median (~27%)</td></tr>
+            <tr><td>ROIC</td><td>~11,5%</td><td>Solide für einen Lender</td></tr>
+            <tr><td>Net Margin</td><td>~16%</td><td>Strukturell unter V/MA (Kreditkosten + Rewards)</td></tr>
+            <tr><td>Op. Cashflow / FCF (TTM)</td><td>~$17,5 / ~$14,3 Mrd.</td><td>FCF für Lender nur bedingt aussagekräftig*</td></tr>
+            <tr><td>CET1-Quote</td><td>10,5%</td><td>Solide, im Zielband</td></tr>
+            <tr><td>Reserve-Quote</td><td>2,8%</td><td>Leicht rückläufig (von 2,9%)</td></tr>
+            <tr><td>Rückkäufe / Dividende 2025</td><td>$5,3 Mrd. / +80% Div. seit 2022</td><td>Aktienzahl −7% seit 2022</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><em>*Hinweis: Bei einem Kreditgeber verzerrt das Wachstum des Kreditbuchs die klassische FCF-Kennzahl. Aussagekräftiger sind ROE/ROTCE, CET1 und die Kreditkennzahlen.</em></p>
+      <h3>User-These 3: Wie verletzlich ist das Kreditbuch im Ausfallzyklus?</h3>
+      <p>Das ist der strukturelle Unterschied zu Visa/Mastercard: <strong>Amex trägt echtes Kreditrisiko.</strong> In einem scharfen Konsum-/Kreditzyklus würden die Provisions (Q1/26: $1,25 Mrd., +9%) und Write-offs steigen und das EPS überproportional treffen — V/MA hätten dieses Problem nicht. Das ist die legitime Bär-Sorge.</p>
+      <p><strong>Aber die Verwundbarkeit ist deutlich geringer als beim durchschnittlichen Kartenherausgeber</strong>, und die harten Zahlen belegen das eindrücklich im Peer-Vergleich der Net-Charge-off-Raten (annualisiert, zuletzt berichtet):</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Emittent</th><th>Net Charge-off-Rate</th><th>Delinquenz (30+)</th></tr></thead>
+          <tbody>
+            <tr><td><strong>American Express</strong></td><td class="beat">~2,0%</td><td class="beat">1,3–1,4%</td></tr>
+            <tr><td>JPMorgan (Card Services, FY26e)</td><td class="neutral">~3,4%</td><td>—</td></tr>
+            <tr><td>Synchrony</td><td class="miss">~5,4%</td><td class="miss">4,5%</td></tr>
+            <tr><td>Capital One (Card)</td><td class="miss">deutlich höher (Subprime-Mix)</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Amex' Write-off-Rate liegt bei rund einem Drittel bis einem Zehntel der reinen Konsumkredit-Peers und <em>unter</em> dem eigenen 2019er-Niveau. Der Grund ist die Kundenqualität: Der affluente, spend-zentrierte Karteninhaber revolviert weniger und fällt seltener aus. Solange Amex diese Kundenselektion (steigende FICO-Scores der Neukunden) hält, bleibt das Kreditbuch die <em>am wenigsten</em> zyklische Komponente unter den Lendern — nicht risikofrei, aber best-in-class abgefedert. Kapitalqualität und -rückführung (CET1 10,5%, $5,3 Mrd. Rückkäufe, Dividende +16% auf $0,95) sind robust.</p>
+      <div class="source">Quellen: Amex Q1'26 Release; JPM Q1'26 Slides (14.04.2026); Synchrony 8-K Q1'26 (sec.gov); Capital One Monthly Credit Metrics (April 2026); TIKR.</div>
+    </div>
+  </div>
+
+  <!-- ===================== S7 ===================== -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 8/10</div>
+    </div>
+    <div class="section-body">
+      <div class="alert-box">ℹ️ <strong>Discover (DFS) ist nicht mehr eigenständig:</strong> Capital One hat die $35,3-Mrd.-Übernahme am <strong>18.05.2025</strong> abgeschlossen und DFS delisted. Der klassische Closed-Loop-Vergleich läuft daher jetzt über <strong>Capital One (COF)</strong>, das mit dem Discover-Netzwerk selbst eine Closed-Loop-Fähigkeit erlangt hat (~$660 Mrd. Assets, ~22% US-Kartensaldo-Markt).</p></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Unternehmen</th><th>Typ</th><th>Market Cap*</th><th>P/E (TTM)</th><th>Rev.-Wachstum</th><th>Net Margin</th><th>Kreditrisiko</th></tr></thead>
+          <tbody>
+            <tr><td><strong>American Express</strong></td><td>Netzwerk + Issuer + Lender</td><td>~$232 Mrd.</td><td>~21x</td><td>+10–11%</td><td>~16%</td><td class="beat">NCO 2,0% (best-in-class)</td></tr>
+            <tr><td>Visa (V)</td><td>Reines Netzwerk</td><td>~$630 Mrd.</td><td>~29x</td><td>+11%</td><td class="beat">~52%</td><td>keines</td></tr>
+            <tr><td>Mastercard (MA)</td><td>Reines Netzwerk</td><td>~$500 Mrd.</td><td>~29x</td><td>+12–16%</td><td class="beat">~46%</td><td>keines</td></tr>
+            <tr><td>Capital One (COF)</td><td>Issuer + Lender + (Discover-Netz)</td><td>~$180 Mrd.</td><td>~13–14x</td><td>Discover-getrieben</td><td>—</td><td class="miss">höher (Subprime-Mix)</td></tr>
+            <tr><td>Synchrony (SYF)</td><td>Reiner Card-Lender</td><td>~$25 Mrd.</td><td>~8x</td><td>Mid-single-digit</td><td>~36%</td><td class="miss">NCO ~5,4%</td></tr>
+            <tr><td>JPMorgan (JPM)</td><td>Universalbank (Chase Card)</td><td>~$900 Mrd.</td><td>~16x</td><td>+10%</td><td>—</td><td class="neutral">Card-NCO ~3,4%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><em>*Market Caps gerundet/approximativ (Stand ~Juni 2026); Ratios aus jeweils zuletzt berichteten Zahlen.</em></p>
+      <p><strong>Qualitative Einordnung:</strong> Amex ist in dieser Gruppe der einzige echte Hybrid. Gegenüber <strong>V/MA</strong> ist es margenschwächer und trägt Kreditrisiko — dafür günstiger bewertet und mit einer eigenen Kundenbeziehung (Netzwerke „sehen" den Endkunden nicht). Gegenüber den <strong>Lendern (COF/SYF/JPM-Card)</strong> ist Amex qualitativ überlegen: höhere Kundenbonität, wiederkehrende Gebührenerlöse und eine Kreditqualität, die im Zyklus deutlich stabiler ist. Der wichtigste strategische Shift: Mit der Capital-One/Discover-Fusion und der geplanten Brex-Übernahme ($5,15 Mrd., Jan. 2026) entsteht bei COF ein vertikal integrierter Herausforderer — die Konkurrenz um Premium- und Commercial-Kunden verschärft sich (siehe Sektion 10).</p>
+      <div class="source">Quellen: Visa/Mastercard 8-K Q1'26 (sec.gov); Yahoo/companiesmarketcap P/E; JPM/SYF/COF Filings; FinancialContent Capital-One/Discover (03.04.2026); StockTitan COF-Brex.</div>
+    </div>
+  </div>
+
+  <!-- ===================== S8 ===================== -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">23.04.2026 – Q1/26-Ergebnisse <span class="badge badge-green">Positiv</span></div><div class="event-text">Umsatz +11% ($18,9 Mrd.), EPS +18% ($4,28, Beat), Spend-Wachstum beschleunigt auf +10% (höchstes in 3 Jahren). FY26-Guidance bestätigt. Quelle: Amex IR/8-K.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">24.06.2026 – Dividendenerhöhung +16% <span class="badge badge-green">Positiv</span></div><div class="event-text">Quartalsdividende auf $0,95 angehoben (Ex-Tag 02.07.2026); Div. +80% seit 2022. Quelle: CNN Markets/TipRanks.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">29.06.2026 – Piper Sandler startet mit „Overweight" <span class="badge badge-green">Positiv</span></div><div class="event-text">Weitere Kursziel-Anhebungen: BTIG auf $324, ein weiteres Haus auf $375. Konsens „Moderate Buy", Ø-Ziel ~$373. Quelle: TipRanks/eToro.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Q2/26 – GBT-Beteiligungsverkauf <span class="badge badge-yellow">Neutral</span></div><div class="event-text">~$975 Mio. Vorsteuergewinn aus Verkauf der Global-Business-Travel-Beteiligung — bewusst NICHT in der EPS-Guidance; einmalig. Quelle: TIKR.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">Q2/26 – Apple-Pay-Punkteeinlösung <span class="badge badge-green">Positiv</span></div><div class="event-text">Amex erlaubt jetzt Membership-Rewards-Einlösung via Apple Pay — Ökosystem-Ausbau. Quelle: TipRanks.</div></div></div>
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">März 2026 – Robinhood $695 Platinum Card <span class="badge badge-red">Wettbewerb</span></div><div class="event-text">Robinhood greift mit einer Premium-Karte gezielt Amex' Kundenbasis an. Quelle: TIKR (10.05.2026).</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Jan. 2026 – Capital One kauft Brex ($5,15 Mrd.) <span class="badge badge-yellow">Wettbewerb</span></div><div class="event-text">COF stärkt Commercial-/SME-Spend-Plattform gegen Amex' KMU-Kernfranchise. Quelle: StockTitan COF 10-K.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Mai 2025 – Capital One/Discover-Closed-Loop <span class="badge badge-yellow">Wettbewerb</span></div><div class="event-text">Neuer vertikal integrierter Netzwerk-Herausforderer (~22% US-Kartensaldo-Markt). Quelle: FinancialContent.</div></div></div>
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Juni 2026 – Geopolitik / Öl <span class="badge badge-yellow">Neutral-Negativ</span></div><div class="event-text">US-/Iran-Spannungen und Hormus-Thematik erhöhen die Makro-Unsicherheit; T&E-Spend (Reisen) ist konjunktursensibel. Quelle: Investing.com/Barrons (Ende Juni 2026).</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">2026 – Zins-/Konsumumfeld <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Konsumausgaben bislang resilient; ein Zinsrückgang würde NII bremsen, aber Refinanzierung verbilligen. AI-Arbeitsmarkt-Sorgen im Blick. Quelle: div. Broker.</div></div></div>
+      <div class="source">Quellen: CNN Markets AXP; TipRanks; eToro; TIKR; StockTitan; Investing.com — jeweils Q2 2026.</div>
+    </div>
+  </div>
+
+  <!-- ===================== S9 ===================== -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value" style="font-size:18px;">$340,88</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value green" style="font-size:18px;">~$305–317</div><div class="kpi-sub">darüber</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value green" style="font-size:18px;">~$297–334</div><div class="kpi-sub">darüber</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value" style="font-size:18px;">~66–70</div><div class="kpi-sub">erhöht</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value green" style="font-size:18px;">positiv</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value" style="font-size:18px;">$387,49</div><div class="kpi-sub">~12% entfernt</div></div>
+        <div class="kpi-card"><div class="kpi-label">ATH (Close)</div><div class="kpi-value" style="font-size:18px;">$382,83</div><div class="kpi-sub">11.12.2025</div></div>
+      </div>
+      <p><strong>Trend:</strong> Aufwärts / Erholung. Die Aktie fiel im Frühjahr 2026 bis in den Bereich ~$303–310 zurück und hat sich bis Ende Juni auf ~$341 erholt — damit notiert sie wieder <em>über</em> ihren 50- und 200-Tage-Linien, was ein konstruktives Signal ist. Die kurzfristigen Broker-Ratings (Investing.com, TradingView) stehen mehrheitlich auf „Buy/Strong Buy".</p>
+      <p><strong>Momentum &amp; Levels:</strong> Der RSI (~66–70) ist erhöht und nähert sich der überkauften Zone — die schnelle Erholung hat die Aktie kurzfristig etwas „heißgelaufen". Widerstand liegt am 52W-/Allzeithoch-Cluster $383–387; ein Ausbruch darüber wäre bullish. Unterstützung: die 200-Tage-Linie (~$334) und darunter die Frühjahrstiefs (~$303–310) sowie das 52W-Tief ($288). Fazit: Positives, aber kurzfristig gestrecktes Bild — für einen Neueinstieg spricht ein Warten auf einen Rücksetzer Richtung 200-Tage-Linie mehr als das Nachjagen am oberen Bandrand.</p>
+      <div class="source">Quellen: Investing.com Technical (Juni 2026); TradingView NYSE:AXP; ChartMill; MacroTrends (Close 29.06.2026); CoinCodex (29.06.2026).</div>
+    </div>
+  </div>
+
+  <!-- ===================== S10 ===================== -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen <span style="font-size:12px;color:var(--text-dim);font-weight:400;">· User-These 4: Fintech/BNPL/KI</span></div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <h3>10a) Strukturelle &amp; zyklische Risiken</h3>
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">⚡ Kreditzyklus / Loan-Loss-Anstieg</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div>
+        <div class="event-text">Amex trägt Kreditrisiko; ein scharfer Abschwung träfe Provisions/EPS überproportional. Abgefedert durch best-in-class Kundenqualität (NCO 2,0%). Wahrscheinlichkeit eines <em>materiellen</em> Anstiegs 2026: eher niedrig-mittel.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">⚡ Rewards-/VCE-Kosteninflation</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div>
+        <div class="event-text">Der Premium-Wettlauf zwingt zu immer teureren Perks. Steigt die VCE-Quote (44,7%) nachhaltig über die Gebühren-/Spend-Erträge, leidet die Marge. Kernkennzahl zum Beobachten.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">⚡ Intensiverer Premium-Wettbewerb</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div>
+        <div class="event-text">Robinhood ($695-Karte), Chase Sapphire Reserve-Refresh und Capital One (Discover-Netz + Brex) greifen Premium- und Commercial-Kunden an. Retention bislang ~99%, aber der Wettbewerb um Neukunden verteuert sich.</div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-header"><div class="risk-title">⚡ Bewertungs-/Timing-Risiko</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div>
+        <div class="event-text">Bei ~21x TTM preist der Markt Perfektion ein — schon ein $0,01-Miss (Q4/25) kostete ~3%. Kurzfristig gestrecktes Chartbild (RSI ~70).</div>
+      </div>
+      <h3>10b) User-These 4: Fintech / BNPL / KI — Disruption vs. Chance</h3>
+      <p><strong>Die Bär-Sicht (Disruption):</strong> BNPL-Anbieter (Affirm, Klarna) und Neobroker/Fintechs greifen mit niedrigeren Gebühren am unteren und mittleren Rand an; Robinhoods $695-Platinum-Karte zielt erstmals frontal auf Amex' Premium-Nische. KI könnte zudem den White-Collar-Arbeitsmarkt treffen — und damit indirekt die Einkommensbasis genau jener jungen, affluenten Kohorte, auf die Amex setzt.</p>
+      <p><strong>Die Bull-Sicht (Chance) — und warum sie überwiegt:</strong> Amex' Moat liegt nicht im Preis, sondern im <em>Ökosystem</em> (Lounges, Resy, Fine Hotels, Status) — genau dort, wo margenarme Fintechs schwer mithalten. Squeri argumentiert, die Amex-Basis sei gerade wegen ihres Spar- und Bonitätsprofils <em>resilienter</em> gegen KI-Arbeitsmarkt-Störungen (halbe HYSA-Basis = Gen Z/Millennials mit Rücklagen). Amex nutzt KI zudem offensiv: <strong>Hypercard-KI-Automatisierung</strong> in der Commercial-Suite, <strong>Center-Ausgabenmanagement-Software</strong> für den Mittelstand und die <strong>Coinbase-One-Karte</strong> (Krypto-Rewards) zeigen, dass Amex Fintech-Mechaniken adaptiert statt sie nur abzuwehren. Netto: mehr Chance als existenzielle Bedrohung — aber der Premium-Preisdruck ist real und dauerhaft zu beobachten.</p>
+      <h3>10c) Chancen</h3>
+      <p>Fee-Beschleunigung auf „high-teens" bis Q4/26 (Platinum-Repricing), Commercial-Expansion (größte Produktoffensive der Firmengeschichte 2026), internationales Wachstum als schnellster Bereich, sowie weiterhin hoher Rückkauf-Spielraum (Payout nur ~21%).</p>
+      <h3>10d) Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> VCE-Quote-Anstieg über ~45%, Delinquenz-Trend über 1,5%, Spend-Verlangsamung unter +6%. <strong>Dealbreaker:</strong> Keine existenzbedrohenden Risiken erkennbar — solides CET1 (10,5%), keine Bilanz-Red-Flags, kein regulatorischer Frontalangriff auf das Geschäftsmodell.</p>
+      <p><em>Gesamt-Risikoscore: 7/10 (invertiert — 10 = kein Risiko). Moderates, gut abgefedertes Risikoprofil; Hauptrisiken sind zyklischer und wettbewerblicher Natur, nicht struktureller.</em></p>
+      <div class="source">Quellen: TIKR Bull-Case (10.05.2026); eMarketer (23.04.2026); StockTitan COF-Brex; Amex Q1'26 Call; div. Broker (Juni 2026).</div>
+    </div>
+  </div>
+
+  <!-- ===================== S11 ===================== -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring &amp; User-Thesen-Synthese</div>
+      <div class="section-score">Ø 7,3/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Visualisierung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td>Geschäftsmodell</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>Einzigartiger Closed-Loop-Hybrid, drei Ertragssäulen</td></tr>
+            <tr><td>Burggraben</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>Premium-Marke + Daten-Flywheel; kein reiner Toll-Booth</td></tr>
+            <tr><td>Operative Entwicklung (4Q)</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>3/4 Beat, konstant zweistelliges Wachstum</td></tr>
+            <tr><td>Wachstum</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>Gen-Z-getrieben, Fee-Beschleunigung, EPS > Umsatz</td></tr>
+            <tr><td>Bewertung</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Fair bis leicht ambitioniert (~21x), kein Schnäppchen</td></tr>
+            <tr><td>Cashflow &amp; Kapitalqualität</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>ROE ~34%, CET1 10,5%, aber Lender-Leverage</td></tr>
+            <tr><td>Risiken (invertiert)</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Zyklisch/wettbewerblich, gut abgefedert</td></tr>
+            <tr><td>Technische Analyse</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Über MAs, aber RSI gestreckt, nahe ATH-Widerstand</td></tr>
+            <tr style="background:rgba(139,92,246,.08);">
+              <td><strong>⌀ Gesamtscore</strong></td><td><strong>7,3/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:73%;background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">7,3</span></div></td>
+              <td>Hochwertige Quality-Growth-Story, fair bewertet</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Check der vier User-Thesen (nach voller Analyse)</h3>
+      <p><strong>1) Premium-Moat &amp; Spending-Resilienz →</strong> <span class="badge badge-green">Bestätigt</span> NCO 2,0%, Delinquenz 1,3% (unter 2019), Retention ~99%. Der affluente Stamm hält bislang robust; Peer-Abstand wächst. Moat real, aber gepflegt (VCE-Kosten).</p>
+      <p><strong>2) Gen-Z/Millennial-Wachstum vs. Rewards-Kosten →</strong> <span class="badge badge-green">Überwiegend bestätigt</span> 66% der Neukunden jung, Gen-Z-Spend +38%, FICO der Neukunden +15 Punkte. Das Gebührenwachstum ist nachhaltig <em>und</em> bonitätsstark — Margenrisiko real, aber bisher gut gemanagt.</p>
+      <p><strong>3) Kreditrisiko / Loan-Loss-Zyklus →</strong> <span class="badge badge-yellow">Differenziert</span> Ja, Amex trägt echtes Kreditrisiko (anders als V/MA) — aber die Verwundbarkeit ist die geringste unter allen Lendern (NCO 2,0% vs. SYF 5,4%, JPM-Card 3,4%). Das Hauptrisiko in einem tiefen Zyklus, aber best-in-class abgefedert.</p>
+      <p><strong>4) Fintech/BNPL/KI Disruption vs. Chance →</strong> <span class="badge badge-green">Chance überwiegt</span> Ökosystem-Moat schützt vor Preiswettbewerb; Amex adaptiert KI (Hypercard, Center, Coinbase). Robinhood/CapOne-Brex sind ernstzunehmend, aber (noch) keine strukturelle Bedrohung.</p>
+      <p><em>Keine Score-Anpassung nötig: Die User-Thesen bestätigen die aus Sektion 1–10 abgeleiteten Scores, statt sie zu revidieren. Die Analyse ist in sich konsistent.</em></p>
+      <div class="source">Quellen: Synthese aus Sektionen 1–10.</div>
+    </div>
+  </div>
+
+  <!-- ===================== S12 ===================== -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-score">KAUFEN (tranchiert)</div>
+    </div>
+    <div class="section-body">
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 – Der strukturelle Fee-Motor.</strong> Net Card Fees wuchsen 2025 um 18% auf ~$10 Mrd. und laufen mit +16% weiter, guidet auf „high-teens" bis Q4/26, wenn das Platinum-Back-Book-Repricing durchschlägt. Diese Zeile ist wiederkehrend und weitgehend vom Konsumzyklus entkoppelt — ein „Abo-Modell" innerhalb einer Kreditkartenfirma.</p>
+          <p><strong>Säule 2 – Die junge, resiliente Kohorte.</strong> 66% der Neukunden sind Gen Z/Millennials, deren Spend explodiert (Gen Z +38% YoY), während ihr FICO-Score <em>steigt</em>. Amex kauft sich in den lukrativsten Demografie-Trend der nächsten Dekade ein — mit steigender, nicht sinkender Kreditqualität und ~99% Retention nach Gebührenerhöhung.</p>
+          <p><strong>Säule 3 – Qualität zum fairen Preis.</strong> ~34% ROE, best-in-class NCO 2,0%, EPS +18% — zu ~21x TTM / ~19x forward. Das ist gegenüber V/MA (~29x) klar günstiger und wird durch DCF-Fair-Values um ~$405 gestützt. Bei 13–15% EPS-Wachstum ist die PEG (~1,4) vertretbar.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 – Kreditrisiko im Zyklus.</strong> Anders als V/MA trägt Amex Loan-Losses. Kippt der Konsum, steigen Provisions und die EPS-Hebelwirkung dreht ins Negative. NCO 2,0% ist ein Zyklustief — von hier kann es nur schlechter werden, und der Markt preist keine Verschlechterung ein.</p>
+          <p><strong>Risiko 2 – Der teure Premium-Wettlauf.</strong> Die VCE-Quote (44,7%) ist der Preis des Moats. Robinhood ($695-Karte), Chase Sapphire und Capital One (Discover + Brex) verschärfen den Wettbewerb; steigen die Rewards-Kosten schneller als die Gebühren, erodiert die Marge trotz Umsatzwachstum.</p>
+          <p><strong>Risiko 3 – Bewertung &amp; Timing.</strong> Bei ~21x preist der Markt Perfektion — ein $0,01-Miss kostete zuletzt ~3%. Der Chart ist kurzfristig gestreckt (RSI ~70, nahe ATH-Widerstand $383). Wer am oberen Bandrand kauft, hat ein ungünstiges Einstiegs-Timing.</p>
+        </div>
+      </div>
+      <h3>Eigene Einschätzung (ausgewogen)</h3>
+      <p>Das <strong>bullische Narrativ überzeugt strukturell mehr</strong>, das bärische liefert die validen <em>Timing-</em> und <em>Zyklus-</em>Einwände. Amex ist eine der qualitativ hochwertigsten Franchises im Finanzsektor: ein einzigartiger Closed-Loop-Hybrid mit echtem Fee-Abo-Charakter, der besten Kreditqualität unter allen Lendern und dem strukturell attraktivsten Demografie-Trend (junge Affluente) auf seiner Seite. Die vier User-Thesen wurden von den Daten überwiegend bestätigt.</p>
+      <p><strong>Aber:</strong> Die Aktie ist nach der Erholung auf ~$341 <em>fair</em>, nicht billig, und sitzt am oberen Ende ihrer Bewertungsspanne bei kurzfristig gestrecktem Chart. Das Risk/Reward auf 12–18 Monate ist damit eher ausgewogen (~1:1,3), auf 2–5 Jahre — dem Horizont dieser Analyse — jedoch klar positiv, weil mittteens-EPS-Wachstum plus Rückkäufe den Wert kontinuierlich kompoundieren. <strong>Ich könnte falsch liegen, wenn</strong> ein schärferer Konsum-/Kreditzyklus 2026/27 die NCO-Rate von ihrem Zyklustief nach oben treibt — das wäre der Punkt, an dem die Premium-Bewertung und das Kreditrisiko gleichzeitig gegen die Aktie arbeiten.</p>
+      <p>Fazit: <strong>KAUFEN für den 2–5-Jahres-Quality-Growth-Anleger, aber tranchiert</strong> — nicht am oberen Bandrand nachjagen, sondern Rücksetzer Richtung 200-Tage-Linie (~$334) bzw. Frühjahrstiefs (~$303–310) für den Aufbau nutzen. Risk/Reward: −15% Downside vs. +12–19% Upside (12–18M), positiver auf mehrjährige Sicht.</p>
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kurzfristig (0–6M)</strong></td><td>Q2/26-Earnings (24.07.), Fee-Beschleunigung</td><td>RSI gestreckt, ATH-Widerstand, Makro/Geopolitik</td><td class="neutral">Halten / auf Rücksetzer warten</td></tr>
+            <tr><td><strong>Mittelfristig (6–24M)</strong></td><td>Platinum-Repricing (high-teens Fees), Commercial-Offensive</td><td>Kreditzyklus, Wettbewerbskosten</td><td class="beat">Tranchiert kaufen</td></tr>
+            <tr><td><strong>Langfristig (2–5J)</strong></td><td>Gen-Z-Lifetime-Value, internationale Expansion, Rückkäufe</td><td>Tiefe Rezession, KI-Arbeitsmarkt</td><td class="beat">Kaufen &amp; Halten</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Kernthese</h3>
+      <p>American Express ist ein Compounder mit „Abo-Charakter": ein Premium-Ökosystem, das die kaufkräftigste und (überraschend) kreditstärkste junge Kundengeneration einfängt und über wiederkehrende Gebühren monetarisiert — abgesichert durch die beste Kreditqualität unter allen Kartenlendern. Man investiert in eine strukturelle Qualitäts-Story zu einem fairen (nicht günstigen) Preis. Der beste Weg hinein führt über Schwäche, nicht über Stärke.</p>
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN (tranchiert)</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$375–405</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–5 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–15%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+12–19%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:1,3</div></div>
+      </div>
+      <h3>Was falsifiziert die These?</h3>
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Net-Write-off-Rate steigt nachhaltig über ~3,0% → Kreditzyklus dreht, reduzieren</li>
+            <li>Delinquenz (30+) über 1,6% für 2+ Quartale → Frühwarnsignal</li>
+            <li>VCE-Quote nachhaltig über ~46% bei stagnierendem Fee-Wachstum → Margen-Erosion</li>
+            <li>Spend-Wachstum fällt unter +5% → Premium-Resilienz-These bricht</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Rücksetzer auf 200-Tage-Linie (~$334) oder $303–310 bei intakten Kreditdaten → Tranche aufbauen</li>
+            <li>Net Card Fees erreichen „high-teens" wie guidet → Fee-Motor bestätigt, nachkaufen</li>
+            <li>NCO bleibt ≤ 2,2% durch eine Konjunkturdelle → Moat-Beweis, Position ausbauen</li>
+            <li>Ausbruch über ATH $383 mit Volumen → Momentum-Bestätigung</li>
+          </ul>
+        </div>
+      </div>
+      <h3>Welcher Anlegertyp passt?</h3>
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul><li>Quality-Growth-Investoren (2–5J)</li><li>Compounder-/Buy-and-Hold-Anleger</li><li>Anleger, die Premium-Qualität über Deep-Value stellen</li></ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul><li>Deep-Value-Investoren (nicht billig)</li><li>Income-Investoren (nur ~1,1% Rendite)</li><li>Kurzfrist-Trader ohne Zyklus-Toleranz</li></ul>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / Tranchiert</span></td><td>Rücksetzer Richtung 200-Tage-Linie abwarten</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>~⅓ jetzt, Rest auf Schwäche / nach Q2-Zahlen</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-yellow">Selektiv</span></td><td>R/R kurzfristig nur ~1:1,3 — auf Dip warten lohnt</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>Struktureller Compounder mit Fee-Abo-Charakter</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Synthese Sektionen 1–11; Analystenkonsens „Moderate Buy" Ø-Ziel ~$373 (eToro/TipRanks, Juni 2026); Simply Wall St DCF ~$405.</div>
+    </div>
+  </div>
+
+  <!-- ===================== S13 ===================== -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook</div>
+      <div class="section-note">3 Events · Wenn/Dann</div>
+    </div>
+    <div class="section-body">
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q2/26-Quartalsergebnisse – 24. Juli 2026</h4>
+        <p>Erster Test, ob die Fee-Beschleunigung und das Spend-Momentum halten. Konsens-EPS ~$4,41. Entscheidend: Net-Card-Fee-Wachstum Richtung „high-teens" und die VCE-Quote (~44% Ziel).</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Net Card Fees ≥ +17% FX-adj. UND NCO ≤ 2,2% UND Spend ≥ +8% → Fee-Motor + Resilienz bestätigt, Guidance-Anhebung wahrscheinlich → auf Stärke halten, auf Schwäche tranchiert nachkaufen.<br><br>
+          <strong>Wenn:</strong> Spend-Wachstum unter +6% ODER VCE-Quote über 46% → Verlangsamungs-/Margensignal → Position nicht aufstocken, erst Q3 abwarten.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>📊 Event 2: Kreditkennzahlen im Jahresverlauf 2026/27 – laufend (monatlich/quartalsweise)</h4>
+        <p>Der Lackmustest für User-These 3. NCO steht bei 2,0% (Zyklustief); die Frage ist, ob sie bei einer Konjunkturdelle kontrolliert bleibt.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> NCO bleibt trotz makroökonomischer Eintrübung ≤ 2,3% und Delinquenz ≤ 1,5% → definitiver Beleg des Premium-Kredit-Moats → Position ausbauen, da der Markt dann die Zyklusresilienz höher bewerten dürfte.<br><br>
+          <strong>Wenn:</strong> NCO steigt über ~3,0% oder Delinquenz über 1,6% für zwei Quartale → Kreditzyklus dreht → Anteile reduzieren, da Premium-Bewertung + Kreditrisiko gleichzeitig belasten.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>📊 Event 3: Wettbewerbsdynamik im Premium-Segment – H2 2026</h4>
+        <p>Robinhood-$695-Karte, Chase-Sapphire-Refresh und Capital-One/Brex-Integration greifen Amex' Premium- und Commercial-Franchise an. Beobachtungsgröße: Retention und Neukunden-Mix (Anteil gebührenpflichtiger Produkte, zuletzt 73%).</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Retention bleibt ~99% UND Anteil Fee-Produkte an Neukunden ≥ 70% → Moat hält dem Angriff stand → These intakt, Kernposition halten/ausbauen.<br><br>
+          <strong>Wenn:</strong> Sichtbarer Retention-Rückgang oder fallender Fee-Produkt-Mix → erste Moat-Erosion → Gewichtung überdenken, Wettbewerber (V/MA als „risikoärmere" Alternative) prüfen.
+        </div>
+      </div>
+      <div class="source">Quellen: TradingView Earnings-Kalender (Q2/26: 24.07.2026); Amex IR; TIKR Wettbewerbsanalyse (10.05.2026).</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken und stellt keine Anlageberatung, kein Angebot und keine Empfehlung zum Kauf oder Verkauf von Wertpapieren dar. Alle Kennzahlen basieren auf öffentlich verfügbaren Quellen (Stand: 01.07.2026, Schlusskurs 29.06.2026) und können Fehler enthalten oder überholt sein. Kurse, Kreditkennzahlen und Multiples ändern sich laufend. Investitionen in Aktien sind mit Risiken bis zum Totalverlust verbunden. Der Autor ist kein lizenzierter Anlageberater. Bitte treffen Sie eigene Recherchen und ziehen Sie ggf. professionellen Rat hinzu.</div>
+
+</div>
+</body>
+</html>
