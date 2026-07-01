@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADYEN – Aktienanalyse Canvas v2.2</title>
+<style>
+:root{
+  --primary:#8b5cf6; --primary-dark:#7c3aed;
+  --bg:#0f0f12; --bg-card:#1a1a1f; --bg-card2:#22222a; --border:#2e2e38;
+  --text:#e8e8ec; --text-muted:#888898; --text-dim:#555566;
+  --green:#22c55e; --red:#ef4444; --yellow:#f59e0b; --blue:#3b82f6; --purple:#8b5cf6; --teal:#14b8a6;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7}
+.header{background:linear-gradient(135deg,#0e0018 0%,#1a0028 40%,#0f0f12 100%);border-bottom:1px solid var(--primary);padding:36px 40px 28px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px}
+.header-left h1{font-size:32px;font-weight:700;color:#fff;letter-spacing:-0.5px}
+.header-left h1 span{color:var(--primary)}
+.header-left .subtitle{color:var(--text-muted);font-size:14px;margin-top:4px}
+.header-right{text-align:right}
+.price-tag{font-size:38px;font-weight:800;color:var(--primary);line-height:1}
+.price-meta{color:var(--text-muted);font-size:13px;margin-top:4px}
+.price-change{display:inline-block;padding:2px 8px;border-radius:4px;font-size:13px;font-weight:600;margin-top:4px}
+.price-change.up{background:rgba(34,197,94,0.15);color:var(--green)}
+.price-change.down{background:rgba(239,68,68,0.15);color:var(--red)}
+.nav{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:100}
+.nav a{color:var(--text-muted);text-decoration:none;padding:14px 16px;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s}
+.nav a:hover{color:var(--primary);border-bottom-color:var(--primary)}
+.main{max-width:1100px;margin:0 auto;padding:32px 40px 60px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+.kpi-value{font-size:22px;font-weight:700;color:#fff;margin-top:4px}
+.kpi-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
+.kpi-value.green{color:var(--green)}.kpi-value.red{color:var(--red)}.kpi-value.orange{color:var(--primary)}
+.section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden}
+.section-header{background:var(--bg-card2);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+.section-number{background:var(--primary);color:#fff;width:28px;height:28px;border-radius:6px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.section-title{font-size:16px;font-weight:700;color:#fff}
+.section-score{margin-left:auto;font-size:14px;font-weight:700;color:var(--primary)}
+.section-note{font-size:12px;color:var(--text-dim);background:rgba(46,46,56,0.4);border-radius:4px;padding:4px 10px;margin-left:auto}
+.section-body{padding:20px 24px}
+p{margin-bottom:12px;color:var(--text)}p:last-child{margin-bottom:0}
+h3{font-size:14px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;margin:20px 0 8px}h3:first-child{margin-top:0}
+.table-wrap{overflow-x:auto;margin:16px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:var(--bg-card2);color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid rgba(46,46,56,0.5);color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(139,92,246,0.06)}
+.beat{color:var(--green);font-weight:600}.miss{color:var(--red);font-weight:600}.neutral{color:var(--yellow);font-weight:600}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}
+.badge-green{background:rgba(34,197,94,0.15);color:var(--green)}
+.badge-red{background:rgba(239,68,68,0.15);color:var(--red)}
+.badge-yellow{background:rgba(245,158,11,0.15);color:var(--yellow)}
+.badge-blue{background:rgba(59,130,246,0.15);color:var(--blue)}
+.badge-orange{background:rgba(139,92,246,0.15);color:var(--primary)}
+.event-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(46,46,56,0.5);align-items:flex-start}
+.event-item:last-child{border-bottom:none}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0}
+.dot-green{background:var(--green)}.dot-red{background:var(--red)}.dot-yellow{background:var(--yellow)}
+.event-label{font-weight:600;color:#fff}
+.event-text{font-size:14px;color:var(--text)}
+.risk-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px}
+.risk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px;flex-wrap:wrap}
+.risk-title{font-weight:600;color:#fff;font-size:14px}
+.score-bar{display:flex;align-items:center;gap:10px}
+.score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#a78bfa)}
+.score-num{font-weight:700;color:var(--primary);font-size:15px;min-width:32px}
+.bull-bear-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:700px){.bull-bear-grid{grid-template-columns:1fr}}
+.bull-card{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:16px}
+.bear-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:16px}
+.bull-card h4{color:var(--green);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:.5px}
+.bear-card h4{color:var(--red);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:.5px}
+.rating-box{background:linear-gradient(135deg,rgba(139,92,246,0.14),rgba(139,92,246,0.04));border:1px solid rgba(139,92,246,0.3);border-radius:12px;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:20px 0}
+.rating-item label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:.5px;display:block;margin-bottom:4px}
+.rating-item .val{font-size:20px;font-weight:800;color:#fff}
+.rating-item .val.buy{color:var(--green)}.rating-item .val.hold{color:var(--yellow)}.rating-item .val.sell{color:var(--red)}
+.rating-item .val.green{color:var(--green)}
+.trigger-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+@media(max-width:700px){.trigger-grid{grid-template-columns:1fr}}
+.trigger-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px}
+.trigger-card h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.trigger-card.buy h5{color:var(--green)}.trigger-card.sell h5{color:var(--red)}
+.trigger-list{font-size:13px;color:var(--text);list-style:none;padding:0}
+.trigger-list li{margin-bottom:6px;padding-left:14px;position:relative}
+.trigger-list li::before{content:"→";position:absolute;left:0}
+.investor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+@media(max-width:600px){.investor-grid{grid-template-columns:1fr}}
+.investor-yes{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px}
+.investor-no{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:12px}
+.investor-yes h5{color:var(--green);font-size:12px;text-transform:uppercase;margin-bottom:8px}
+.investor-no h5{color:var(--red);font-size:12px;text-transform:uppercase;margin-bottom:8px}
+.investor-yes li,.investor-no li{font-size:13px;color:var(--text);margin-bottom:4px;list-style:none;padding-left:14px;position:relative}
+.investor-yes li::before{content:"✓";position:absolute;left:0;color:var(--green)}
+.investor-no li::before{content:"✗";position:absolute;left:0;color:var(--red)}
+.geo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0}
+.geo-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.geo-region{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+.geo-pct{font-size:20px;font-weight:700;color:#fff}
+.geo-note{font-size:12px;color:var(--text-muted)}
+.outlook-card{background:var(--bg-card2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:16px;margin-bottom:14px}
+.outlook-card h4{color:#fff;font-size:14px;margin-bottom:8px}
+.outlook-card .when-then{font-size:13px;color:var(--text);margin-top:8px}
+.outlook-card .when-then strong{color:var(--primary)}
+.source{font-size:11px;color:var(--text-dim);margin-top:12px;padding-top:10px;border-top:1px solid rgba(46,46,56,0.5)}
+.source a{color:var(--text-dim)}
+.disclaimer{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text-dim);margin-top:32px}
+.alert-box{background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px}
+.coi-box{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:8px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:var(--text)}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+.pill{display:inline-block;background:rgba(139,92,246,0.12);color:var(--primary);border-radius:4px;padding:1px 7px;font-size:13px;font-weight:600}
+.thesis-check{background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.25);border-radius:8px;padding:12px 14px;margin:14px 0;font-size:13px}
+.thesis-check b{color:var(--blue)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Adyen N.V. <span>ADYEN.AS</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 01. Juli 2026 · Euronext Amsterdam · Sektor: Fintech / Payment-Infrastruktur</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-orange">Enterprise Payments</span>
+      <span class="badge badge-blue">Unified Commerce</span>
+      <span class="badge badge-green">Netto-Cash · A-</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">€ 820</div>
+    <div class="price-meta">Schlusskurs 30.06.2026 · Euronext Amsterdam</div>
+    <div class="price-change down">▼ −48% (12M)</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">52W: €772 – €1.698</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <div class="coi-box">
+    ⚠️ <strong>Interessenkonflikt-Hinweis:</strong> Diese Analyse wurde von Claude (Anthropic) erstellt. Kern-These 1 dieser Analyse vergleicht Adyen direkt mit <strong>Stripe</strong>. Stripe unterhält eine geschäftliche Beziehung zu Anthropic (Stripe wickelt u. a. über die 2026 übernommene Metronome-Plattform Billing/Payment-Prozesse für KI-Firmen wie Anthropic ab). Diese Nähe zum Wettbewerber wird offengelegt; die Bewertung erfolgt nach bestem Wissen neutral und faktenbasiert.
+  </div>
+
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">€820</div><div class="kpi-sub">EUR · 30.06.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value">~€26 Mrd</div><div class="kpi-sub">31,55 Mio Aktien</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/E (fwd)</div><div class="kpi-value orange">~22x</div><div class="kpi-sub">TTM ~24x</div></div>
+    <div class="kpi-card"><div class="kpi-label">EV/EBITDA</div><div class="kpi-value orange">~13x</div><div class="kpi-sub">EUR-Basis, TTM</div></div>
+    <div class="kpi-card"><div class="kpi-label">EBITDA-Marge</div><div class="kpi-value green">53%</div><div class="kpi-sub">FY25 · H2: 55%</div></div>
+    <div class="kpi-card"><div class="kpi-label">Take Rate</div><div class="kpi-value green">17,1 bps</div><div class="kpi-sub">H2 25 · All-time-High</div></div>
+    <div class="kpi-card"><div class="kpi-label">Netto-Cash</div><div class="kpi-value">~€10,6 Mrd</div><div class="kpi-sub">D/E 0,05</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Zahlen</div><div class="kpi-value" style="font-size:18px;">13.08.2026</div><div class="kpi-sub">H1 2026</div></div>
+  </div>
+
+  <!-- S1 -->
+  <div class="section" id="s1">
+    <div class="section-header"><div class="section-number">1</div><div class="section-title">Geschäftsmodell</div><div class="section-score">Score: 9/10</div></div>
+    <div class="section-body">
+      <p>Adyen ist ein niederländischer Payment-Prozessor, der die gesamte Zahlungskette – Gateway, Risikomanagement, Processing, Acquiring, Issuing und Settlement – auf einer einzigen, selbst entwickelten Plattform bündelt. Das Alleinstellungsmerkmal ist diese <span class="pill">Single-Platform-Architektur</span>: Statt zugekaufter, zusammengeflickter Systeme (wie bei vielen Legacy-Acquirern) betreibt Adyen einen einheitlichen Technologie-Stack, der Online-, In-App- und stationäre Zahlungen („Unified Commerce") über einen Vertrag und eine Integration abwickelt.</p>
+      <p>Die Kunden sind fast ausschließlich große, globale Enterprise-Händler und Plattformen: Uber, Spotify, Netflix, Microsoft, McDonald's, Booking.com, eBay und Etsy zählen dazu. Adyen verdient primär transaktional – ein Prozessing-/Acquiring-Entgelt auf jedes abgewickelte Volumen plus fixe Processing-Fees je Transaktion. 2025 flossen €1,39 Billionen an Volumen über die Plattform, aus denen €2,36 Mrd. Nettoumsatz entstanden (die „Take Rate" – Nettoumsatz je Volumeneinheit). Neben dem Kern-Payment wachsen Zusatzdienste: Adyen for Platforms (Embedded Payments für Marktplätze), Issuing (Kartenausgabe für Plattformen), Capital (Händlerfinanzierung) und Business Accounts / Cash Management.</p>
+      <p>Die Kostenstruktur ist asset-light und hochprofitabel. Da Adyen die Infrastruktur selbst baut und direkt an Kartennetzwerke sowie lokale Zahlungssysteme angebunden ist, skaliert jeder zusätzliche Umsatz-Euro mit hoher operativer Hebelwirkung – die EBITDA-Marge liegt bei 53% (FY25) bzw. 55% im zweiten Halbjahr. CapEx bleibt diszipliniert bei rund 5% des Nettoumsatzes (v. a. Rechenzentren). Das Unit-Economics-Muster ist „Land and Expand": Adyen gewinnt einen Enterprise-Kunden, wird zunächst Zweit-Prozessor und übernimmt dann sukzessive einen wachsenden „Wallet Share" der Zahlungsvolumina.</p>
+      <p>Neu 2025/26 ist die Verschiebung von reiner Payment-Abwicklung hin zu einer breiteren Finanz-Infrastruktur: Mit „Intelligent Money Movement" vereint Adyen Money-in, Money-Management und Money-out in einer Umgebung; Issuing-Volumina wuchsen 2025 um das Achtfache. Das erweitert den adressierbaren Markt deutlich über das klassische Acquiring hinaus.</p>
+      <div class="source">Quellen: Adyen H2 2025 Financial Results & Shareholder Letter (12.02.2026); Adyen Annual Report 2025 (März 2026); Adyen Q1 2026 Business Update (06.05.2026).</div>
+    </div>
+  </div>
+
+  <!-- S2 -->
+  <div class="section" id="s2">
+    <div class="section-header"><div class="section-number">2</div><div class="section-title">Burggraben & Wettbewerbsvorteile</div><div class="section-score">Score: 7/10</div></div>
+    <div class="section-body">
+      <p>Adyens Burggraben ruht auf vier Säulen. Erstens <strong>Switching Costs</strong>: Ein Enterprise-Händler, der seine globale Payment-Infrastruktur auf Adyen migriert hat, wechselt selten – die Enterprise-Churn liegt laut Branchen-Interviews unter 1%. Zweitens <strong>Skalen- und Datenvorteil</strong>: Über die einheitliche Plattform fließen Billionen an Transaktionen, aus denen Adyen Autorisierungsraten optimiert. Der neue Layer „Dynamic Identification" erkannte am Black-Friday-/Cyber-Monday-Peak rund 95% der Shopper kanalübergreifend wieder. Drittens <strong>direkte Acquiring-Lizenzen</strong> und Netzwerkanbindungen in über 30 Ländern, die Zwischenhändler ausschalten und bei hohem Volumen 0,3–0,5 Prozentpunkte günstiger sind als Flat-Rate-Anbieter. Viertens die <strong>Architektur selbst</strong>: ein Stack, der Online und Stationär wirklich vereint – der Kern der „Unified Commerce"-Positionierung.</p>
+      <p>Der Beleg für Preissetzungsmacht ist die <strong>Take Rate von 17,1 Basispunkten in H2 2025 – ein Allzeithoch</strong> (H2 2024: 16,2 bps), getrieben durch einen günstigeren Kundenmix. Steigende Take Rates bei gleichzeitig wachsendem Volumen sind das stärkste Signal, dass der Burggraben trägt und nicht durch Preiskampf erodiert.</p>
+      <p>Kritisch bleibt: Der Graben verbreitert sich nicht mehr im gleichen Tempo. Stripe wächst schneller (34% Volumenwachstum 2025 vs. Adyen ~21% Nettoumsatz konstant-währung) und dringt aggressiv ins Enterprise-Segment vor (Microsoft, Nvidia als Neukunden, 50% der Fortune 100 in irgendeiner Form). Zudem etabliert sich <strong>Payment-Orchestrierung / Multi-PSP</strong> als Norm: Große Händler routen Transaktionen zunehmend zwischen mehreren Anbietern statt sich an einen einzigen Prozessor zu binden. Genau dieses „Single-Platform-Lock-in", das Adyens Moat ausmacht, wird dadurch angreifbarer.</p>
+      <div class="thesis-check"><b>These-Check 1 (Stripe / Enterprise-Marktanteil):</b> Adyen hält seine Enterprise-/Omnichannel-Nische mit &lt;1% Churn, überlegener Autorisierungs-Optimierung und 53% EBITDA-Marge (Stripe wurde erst 2024 profitabel). Aber: Adyen <em>gewinnt keinen relativen Anteil hinzu</em> – Stripe wächst absolut schneller und die Orchestrierungs-Welle schwächt die Bindungswirkung. Verdikt: Moat intakt, aber nicht mehr verbreiternd. Kein Marktanteilsverlust im Kern, aber auch kein Vorsprungsausbau. <span class="badge badge-yellow">Neutral bis leicht negativ</span></div>
+      <div class="source">Quellen: Adyen H2 2025 Shareholder Letter (Feb. 2026); In Practise „Adyen vs Stripe US Market Competition" (26.03.2026); ClearFunction / Chargeflow Stripe-vs-Adyen 2026 (Mai 2026); MatrixBCG Stripe Competitive Landscape (11.03.2026).</div>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="section" id="s3">
+    <div class="section-header"><div class="section-number">3</div><div class="section-title">Letzte 4 Berichtsperioden</div><div class="section-score">Beat-Ratio: gemischt</div></div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Adyen berichtet <strong>halbjährlich</strong> volle Finanzkennzahlen (H1/H2) und veröffentlicht zu Q1/Q3 nur <strong>Business Updates mit Nettoumsatz</strong> (keine EBITDA-/EPS-Angaben). Kennzahlen stammen aus Adyen-IR, TradingView und stockanalysis.com – nicht von finviz.com (dort nur die ADR ADYEY). Nächste volle Zahlen (H1 2026): 13.08.2026.</p></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Periode</th><th>Nettoumsatz</th><th>YoY (rep. / kW)</th><th>EBITDA / Marge</th><th>Beat/Miss</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Q1 2026</strong> (Mär '26)</td><td>€620,8 Mio</td><td>+16% / +20%</td><td>n. v. (Update)</td><td class="neutral">In line</td></tr>
+            <tr><td><strong>H2 2025</strong> (Jul–Dez '25)</td><td>€1.270,7 Mio</td><td>+17% / +21%</td><td>€702,1 Mio / 55%</td><td class="neutral">EPS Beat, Umsatz Miss</td></tr>
+            <tr><td><strong>Q3 2025</strong> (Sep '25)</td><td>€598,4 Mio</td><td>+20% / +23%</td><td>n. v. (Update)</td><td class="beat">Beat</td></tr>
+            <tr><td><strong>H1 2025</strong> (Jan–Jun '25)</td><td>€1.093,5 Mio</td><td>+21% (kW)</td><td>€543,6 Mio / ~50%</td><td class="beat">Beat</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Der Trend ist zwiespältig. Operativ läuft es rund: EBITDA in H2 +23%, Marge auf 55% (H2), Take Rate auf Rekordniveau, das EPS von €18,40 schlug die Erwartung von €17,94 (+2,6%). Gleichzeitig fiel der <strong>reported</strong> Umsatz mit +17% (H2) hinter die konstant-währung +21% zurück – eine 4-Punkte-Lücke durch die Dollar-Schwäche. Der Q4-Nettoumsatz wuchs reported nur +15% (kW +19%).</p>
+      <p>Die Marktreaktion war brutal: Nach den H2-2025-Zahlen (10./11.02.2026) brach die Aktie in einer Sitzung um ~18–22% ein und vernichtete rund €7 Mrd. Marktkapitalisierung – nicht wegen der Ist-Zahlen, sondern wegen der auf 20–22% (kW) gesenkten 2026-Guidance und der auf ~53% „eingefrorenen" Margen-Prognose (statt erwarteter Expansion Richtung 55%). Q1 2026 lieferte dann solide, aber unspektakuläre +16% reported – die FX-Bremse wirkt fort.</p>
+      <div class="source">Quellen: Adyen Q1 2026 Business Update (06.05.2026); Adyen H2 2025 Results (12.02.2026); Adyen Q3 2025 Business Update (29.10.2025); TradingView / stockanalysis.com (Abruf 01.07.2026).</div>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="section" id="s4">
+    <div class="section-header"><div class="section-number">4</div><div class="section-title">Wachstumseinordnung</div><div class="section-score">Score: 7/10</div></div>
+    <div class="section-body">
+      <p>Adyen wächst strukturell mit ~20–21% Nettoumsatz (konstant-währung) – deutlich langsamer als die 40%+ der Hyper-Growth-Jahre, aber weiterhin überdurchschnittlich für die Unternehmensgröße. Der Reifegrad ist „Growth-at-Scale". Der Nettoumsatz stieg 2023–2025 kontinuierlich (2025: €2,36 Mrd, +18% reported / +21% kW). Wichtig: Das Wachstum ist organisch, nicht durch M&A oder Bilanztricks aufgebläht.</p>
+      <p>Nach Segment ist die Streuung gesund: <strong>Platforms +49%</strong> (kW) und <strong>Unified Commerce +33%</strong> (kW) in H2 2025 sind die Zugpferde, während das reife Digital-Segment mit ~10% wächst. Neue Treiber: Issuing-Volumina ×8, Expansion in Japan und Indien, sowie ein bewusster US-/LatAm-Fokus. Das Profitabilitätswachstum überholt das Umsatzwachstum (EBITDA +26% vs. Umsatz +18% reported) – echte operative Hebelwirkung.</p>
+      <h3>Geografische Verteilung (Nettoumsatz)</h3>
+      <div class="geo-grid">
+        <div class="geo-card"><div class="geo-region">EMEA</div><div class="geo-pct">57,4%</div><div class="geo-note">Heimatbasis, reif</div></div>
+        <div class="geo-card"><div class="geo-region">Nordamerika</div><div class="geo-pct">26,9%</div><div class="geo-note">Wachstumsfokus, hart umkämpft</div></div>
+        <div class="geo-card"><div class="geo-region">APAC</div><div class="geo-pct">10,0%</div><div class="geo-note">Japan/Indien-Expansion</div></div>
+        <div class="geo-card"><div class="geo-region">LatAm</div><div class="geo-pct">5,7%</div><div class="geo-note">Kleinste, schnell wachsende Region</div></div>
+      </div>
+      <p>Kritische Einordnung: Die Abhängigkeit von EMEA ist hoch, während das strategisch wichtigste Wachstumsfeld – Nordamerika – zugleich der Markt mit dem härtesten Wettbewerb (Stripe, Fiserv/Clover, PayPal) und zuletzt Führungswechseln (Abgang des NA-Präsidenten Davi Strazza Nov. 2025) ist. Die 2026-Guidance-Senkung nährt die Sorge, dass die Volumen-Priorisierung der Kunden kurzfristig schwerer planbar wird.</p>
+      <div class="thesis-check"><b>These-Check 2 (Take Rate & Margen nach Investitionsphase 2023–2025):</b> Klar bestätigt auf der Struktur-Ebene: Take Rate 17,1 bps = Allzeithoch, EBITDA-Marge H2 auf 55%, FCF-Konversion 86%. Die Investitionsphase zahlt sich in operativer Hebelwirkung aus. <em>Aber</em>: Für 2026 pausiert die Margen-Expansion bewusst (~53%, 550–650 Neueinstellungen v. a. USA), erst bis 2028 &gt;55% angepeilt. Die These „Margen drehen nach der Investitionsphase nach oben" stimmt mittelfristig, wird aber 2026 durch eine erneute Investitionsrunde verzögert. <span class="badge badge-green">Überwiegend bestätigt</span></div>
+      <div class="source">Quellen: Adyen H2 2025 Results & Shareholder Letter (Feb. 2026); MarketScreener Adyen Segment-Split (Mai 2026); Payments Dive „Adyen CFO heads for exit" (28.05.2026).</div>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="section" id="s5">
+    <div class="section-header"><div class="section-number">5</div><div class="section-title">Bewertung & Multiples</div><div class="section-score">Score: 8/10</div></div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> Da ADYEN an der Euronext Amsterdam notiert, sind keine finviz.com-Daten für die Stammaktie verfügbar. Kennzahlen stammen von stockanalysis.com, valueinvesting.io, GuruFocus und multiples.vc (Stand 25.–29.06.2026).</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>Adyen (aktuell)</th><th>5-J-Kontext</th><th>Einordnung</th></tr></thead>
+          <tbody>
+            <tr><td>P/E (TTM)</td><td>~24–25x</td><td>früher 40–60x+</td><td class="beat">Nahe Mehrjahres-Tief</td></tr>
+            <tr><td>P/E (Forward)</td><td>~22x</td><td>—</td><td class="beat">Günstig für 20%-Grower</td></tr>
+            <tr><td>EV/EBITDA (TTM)</td><td>~13x</td><td>historisch deutlich höher</td><td class="beat">Komprimiert</td></tr>
+            <tr><td>EV/Sales</td><td>~6–7x</td><td>—</td><td class="neutral">Netto-Cash entlastet</td></tr>
+            <tr><td>PEG</td><td>~1,1–1,4</td><td>—</td><td class="neutral">Fair für Qualität</td></tr>
+            <tr><td>Netto-Cash</td><td>~€10,6 Mrd</td><td>D/E 0,05</td><td class="beat">Praktisch schuldenfrei</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Die zentrale Bewertungsgeschichte ist die <strong>Multiple-Kompression</strong>: Adyen handelte in den Boomjahren zu 40–60x+ Gewinn; heute liegt das TTM-P/E bei ~24–25x und das Forward-P/E bei ~22x. Für ein Unternehmen mit ~20% strukturellem Wachstum, 53% EBITDA-Marge, 86% FCF-Konversion und einem Netto-Cash-Polster von €10,6 Mrd ist das historisch günstig. GuruFocus stuft die Aktie mit einem GF-Value deutlich über dem aktuellen Kurs als „significantly undervalued" ein.</p>
+      <p>Der Peer-Kontrast schärft das Bild: Stripe wurde im Februar 2026 in einem Mitarbeiter-Tender mit ~$159 Mrd bewertet – bei vergleichbarem Volumen, aber niedrigerer Marge und als Privatunternehmen ohne Liquidität. Adyen kommt börsennotiert auf ~€26 Mrd Marktkapitalisierung (~€16 Mrd EV nach Cash). Skeptisch bleibt anzumerken: 22x Forward ist <em>relativ</em> günstig, <em>absolut</em> aber kein „Value"-Multiple; fällt das Wachstum FX-bedingt reported auf 16–18% und die Konsens-EPS-Revisionen laufen erst an (Bloomberg-Konsens FY26 ~€2,89 Mrd Umsatz impliziert noch ~22% reported – potenziell zu hoch), droht weiterer Bewertungsdruck.</p>
+      <div class="source">Quellen: stockanalysis.com ADYEN/ADYEY Statistics (Abruf 01.07.2026); valueinvesting.io EV/EBITDA (25.06.2026); GuruFocus ADYYF Forward P/E (23.06.2026); multiples.vc (29.06.2026); ClearFunction Stripe-Bewertung (Mai 2026).</div>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="section" id="s6">
+    <div class="section-header"><div class="section-number">6</div><div class="section-title">Cashflow, Margen & Kapitalqualität</div><div class="section-score">Score: 9/10</div></div>
+    <div class="section-body">
+      <p>Die Ertragsqualität ist eine der besten im gesamten Payment-Sektor. Der Free Cash Flow lag in H2 2025 bei €606,8 Mio (+22% YoY) mit einer <strong>FCF-Konversion von 86%</strong> (EBITDA → FCF) – die „Earnings" sind also echt und cash-gedeckt, nicht durch Working-Capital- oder Accounting-Effekte aufgeblasen. CapEx bleibt diszipliniert bei 5% des Nettoumsatzes.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>Wert</th><th>Kommentar</th></tr></thead>
+          <tbody>
+            <tr><td>EBITDA-Marge (FY25)</td><td>53% (H2: 55%)</td><td>von 50% in 2024 gesteigert</td></tr>
+            <tr><td>Netto-Marge</td><td>~42–45%</td><td>bank-ähnliche Profitabilität</td></tr>
+            <tr><td>FCF-Konversion</td><td>86%</td><td>sehr hohe Cash-Qualität</td></tr>
+            <tr><td>ROE</td><td>~22%</td><td>solide Eigenkapitalrendite</td></tr>
+            <tr><td>ROIC</td><td>~14%</td><td>gut, wird durch Cash-Berg gedämpft</td></tr>
+            <tr><td>Verschuldung</td><td>Netto-Cash €10,6 Mrd</td><td>D/E 0,05 · A-Rating (A-)</td></tr>
+            <tr><td>Dividende / Buyback</td><td>keine</td><td>reinvestiert vollständig ins Wachstum</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Adyen zahlt keine Dividende und kauft keine Aktien zurück – das gesamte Kapital fließt in Wachstum, Infrastruktur und Team. Für Income-Investoren ist die Aktie daher ungeeignet. Die Bilanz ist eine Festung: praktisch schuldenfrei, €10,6 Mrd Netto-Cash, A--Rating. Diese Kapitalstärke ist der wichtigste Puffer gegen die operativen Risiken (siehe Sektion 10) – Adyen kann eine mehrjährige Investitionsphase und Wettbewerbsdruck problemlos durchstehen.</p>
+      <div class="source">Quellen: Adyen H2 2025 Financial Results (12.02.2026); stockanalysis.com ADYEN Statistics (ROE/ROIC, Abruf 01.07.2026); Adyen Shareholder Letter H2 2025.</div>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="section" id="s7">
+    <div class="section-header"><div class="section-number">7</div><div class="section-title">Peer-Vergleich</div><div class="section-score">Score: 8/10</div></div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Unternehmen</th><th>Umsatzwachstum</th><th>EBITDA-Marge</th><th>P/E (ca.)</th><th>Market Cap</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Adyen</strong> (ADYEN)</td><td class="beat">+21% (kW)</td><td class="beat">53%</td><td>~24x / fwd 22x</td><td>~€26 Mrd</td></tr>
+            <tr><td>Stripe (privat)</td><td class="beat">+34% (Volumen)</td><td>niedrig (frisch profitabel)</td><td>n. v.</td><td>~$159 Mrd (Tender)</td></tr>
+            <tr><td>PayPal (PYPL)</td><td class="miss">+5–7%</td><td>~19% (op.)</td><td>~8,5x</td><td>~$40 Mrd</td></tr>
+            <tr><td>Block (XYZ)</td><td class="neutral">~mittel</td><td>adj. EBITDA ↑</td><td>~15–18x (adj.)</td><td>~$40 Mrd</td></tr>
+            <tr><td>Fiserv (FI)</td><td class="miss">niedrig</td><td>solide</td><td>~10x / fwd 7x</td><td>~$25 Mrd</td></tr>
+            <tr><td>Shift4 (FOUR)</td><td class="beat">+25% (Umsatz)</td><td>~50% (adj.)</td><td>moderat</td><td>~$3–4 Mrd</td></tr>
+            <tr><td>Worldline (WLN.PA)</td><td class="miss">flach/negativ</td><td>gedrückt</td><td>distressed</td><td>~€3 Mrd</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Quantitativ ist Adyen der Klassenbeste in der Kombination aus Wachstum <em>und</em> Marge. Nur Stripe wächst schneller – aber als Privatunternehmen ohne Margen-Transparenz und mit einer Bewertung, die (auf Volumenbasis) über der von Adyen liegt. Shift4 wächst zweistellig, erkauft das Wachstum aber teuer über Akquisitionen (Global Blue ~$2,5 Mrd; Bambora NA von Worldline) und trägt entsprechendes Integrations- und Bilanzrisiko.</p>
+      <p>Die Legacy-Seite ist strategisch geschwächt: <strong>Fiserv</strong> (−66% auf Jahressicht) und <strong>Worldline</strong> (von einst €100+ auf ~€10) zeigen, wie brutal der Markt Payment-Anbieter ohne strukturelles Wachstum abstraft. <strong>PayPal</strong> ist mit P/E ~8,5x optisch billig, kämpft aber mit stagnierendem Branded-Checkout und rückläufigem EPS 2026 – ein Value-Play, kein Growth-Play. Qualitativ ist Adyens Differenzierung die einheitliche Architektur und Autorisierungs-Optimierung; die Schwäche ist, dass genau dieser Vorteil im Multi-PSP-/Orchestrierungs-Zeitalter relativer wird.</p>
+      <div class="source">Quellen: stockanalysis.com (FI/PYPL Statistics); PayPal 8-K FY25/Q1 26 (SEC); Block 8-K Q1 2026 (SEC); Investing.com „Shift4 Explosive Growth" (29.04.2026); AAII Fiserv-vs-PayPal (12.05.2026); ClearFunction Stripe-Daten (Mai 2026).</div>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="section" id="s8">
+    <div class="section-header"><div class="section-number">8</div><div class="section-title">Aktuelle News & Events</div><div class="section-note">Quellen ≤ 3 Monate</div></div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">27.05.2026 – CFO Ethan Tandowsky tritt zurück <span class="badge badge-red">Negativ</span></div><div class="event-text">Überraschender Rücktritt zum 31.08.2026 („Chance außerhalb Fintech", pre-IPO-Firma). Aktie fiel ~2,3%. Nach dem Abgang des NA-Präsidenten (Nov. 2025) das zweite Führungs-Exit in der Wachstumsregion. Guidance laut Cantor/ING bestätigt. Quelle: Payments Dive / MarketScreener, 28.05.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">06.05.2026 – Q1 2026 Update + Talon.One-Übernahme <span class="badge badge-green">Positiv</span></div><div class="event-text">Nettoumsatz €620,8 Mio (+16% / +20% kW). Vereinbarte Übernahme von Talon.One (Real-time Pricing/Promotions im Transaktionsfluss); „Intelligent Money Movement" gelauncht. Quelle: Adyen IR, 06.05.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">10.–11.02.2026 – H2/FY-2025-Zahlen, Kurssturz ~18–22% <span class="badge badge-red">Negativ (Kursreaktion)</span></div><div class="event-text">Operativ stark (Marge 55%, Take Rate 17,1 bps), aber 2026-Guidance auf 20–22% (kW) gesenkt und Margen-„Pause" → ~€7 Mrd Marktkap. vernichtet. Quelle: Adyen IR / Nikhs Substack, Feb. 2026.</div></div></div>
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">2026 – Agentic-Commerce-Wettrüsten <span class="badge badge-yellow">Neutral / strukturell</span></div><div class="event-text">Stripe präsentierte 288 Launches (Sessions 2026), Agentic Commerce Protocol mit OpenAI (Instant Checkout in ChatGPT). Adyen konterte mit „Adyen Agentic" (Agentic Feed/Cart/Payments) und trat der x402-Foundation bei. Quelle: Chargeflow/ClearFunction, Mai 2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">2026 – Konsolidierung & Orchestrierung <span class="badge badge-yellow">Gemischt</span></div><div class="event-text">Shift4 kauft Global Blue; Multi-PSP-Orchestrierung wird Norm bei Großhändlern – schwächt Single-Provider-Bindung. Quelle: Investing.com / LinkedIn Fintech-Analysen, März–Mai 2026.</div></div></div>
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">2026 – USD-Schwäche belastet reported Wachstum <span class="badge badge-red">Negativ</span></div><div class="event-text">Dollar-Schwäche drückt die 4-Punkte-Lücke zwischen konstant-währung (+21%) und reported (+17%) Umsatz; ein Großteil der Guidance-Enttäuschung ist FX-getrieben. Quelle: Nikhs Substack „4Q25", 15.02.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">2026 – Regulatorik (PSD3, Tarife) <span class="badge badge-yellow">Neutral</span></div><div class="event-text">US-Tarifänderungen zwangen Händler zu regionalen Pivots (Adyen half beim Markteintritt); PSD3-Compliance-Kosten branchenweit. Quelle: Adyen Annual Report 2025.</div></div></div>
+      <div class="source">Quellen: Adyen Investor Relations (Feb.–Mai 2026); Payments Dive (28.05.2026); MarketScreener (28.05.2026); Chargeflow / ClearFunction Stripe-vs-Adyen (Mai 2026); Nikhs Substack (Feb. 2026).</div>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="section" id="s9">
+    <div class="section-header"><div class="section-number">9</div><div class="section-title">Technische Analyse</div><div class="section-score">Score: 4/10</div></div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value" style="font-size:18px;">€820</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value red" style="font-size:18px;">~€920</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value red" style="font-size:18px;">~€980</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value" style="font-size:18px;">~45</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value" style="font-size:18px;">€1.698</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Low</div><div class="kpi-value" style="font-size:18px;">€772</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value red" style="font-size:18px;">Schwach</div></div>
+      </div>
+      <p>Das Chartbild ist klar angeschlagen. Der Kurs notiert deutlich <strong>unter SMA 50 und SMA 200</strong> in einem intakten fallenden Trendkanal; ChartMill vergab zuletzt ein technisches Rating von 1/10, und die Aktie handelt nahe dem 52-Wochen-Tief (€772). Auf 12-Monats-Sicht steht ein Minus von ~48%, vom Allzeithoch (€2.835, Nov. 2021) sogar ~−71%. Der RSI liegt mit ~45 im neutralen Bereich, teils oversold auf Wochenbasis.</p>
+      <p>Es gibt erste Stabilisierungssignale: Nach einem Pivot-Tief am 11.06.2026 erholte sich der Kurs zweistellig, das Volumen stieg mit dem Preis (positives Zeichen), und der kurzfristige gleitende Durchschnitt gab ein Kaufsignal – während der langfristige weiter „Verkaufen" zeigt. Support liegt bei ~€772–845, Widerstand bei ~€920 (SMA-50-Zone) und ~€975. Fazit: technisch ein fallendes Messer mit ersten Bodenbildungs-Anzeichen – für Momentum-Trader unattraktiv, für antizyklische Langfrist-Akkumulierer eine Zone zum tranchierten Einstieg.</p>
+      <div class="source">Quellen: ChartMill ADYEN.AS TA (05.06.2026); Investing.com ADYEN Technical (Abruf); StockInvest.us ADYEN.AS (16.06.2026); Investtech Euronext Amsterdam (2026); TradingView (01.07.2026).</div>
+    </div>
+  </div>
+
+  <!-- S10 -->
+  <div class="section" id="s10">
+    <div class="section-header"><div class="section-number">10</div><div class="section-title">Risiken & Chancen</div><div class="section-score">Score: 6/10 (invertiert)</div></div>
+    <div class="section-body">
+      <h3>10a) Strukturelle & zyklische Risiken</h3>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Wettbewerb & Orchestrierung (Stripe/Checkout.com)</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel-Hoch</span></div></div><div class="event-text">Stripe wächst schneller und dringt ins Enterprise vor; Multi-PSP-Orchestrierung erodiert die Single-Platform-Bindung. Wahrscheinlichkeit anhaltenden Drucks: hoch. Finanzielle Wirkung: Take-Rate-/Wachstumsdruck über Jahre, nicht abrupt.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ FX / reported Wachstumsverlangsamung</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">USD-Schwäche drückt reported Wachstum auf 16–18%; wenn Analysten die FX-Effekte einpreisen, drohen EPS-Revisionen (Konsens Richtung ~€36,50) und weiterer Kursdruck. Wahrscheinlichkeit: hoch, aber temporär.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Führungswechsel (CFO + NA-Präsident)</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">CFO-Abgang (31.08.2026) plus NA-Führungslücke ausgerechnet im Schlüssel-Wachstumsmarkt USA. Kein Strategie-Bruch signalisiert, aber Ausführungs- und Vertrauensrisiko in einer sensiblen Phase.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Bewertungsrisiko</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">22x Forward ist relativ günstig, aber kein Value-Multiple. Fällt das Wachstum unter ~15%, droht ein De-Rating Richtung Legacy-Prozessor-Niveau (18x → ~€775, laut Bear-Modellen).</div></div>
+      <h3>10b) KI-Risiko & technologische Disruption</h3>
+      <p>Agentic Commerce ist das zentrale Disruptionsthema und doppelschneidig. <strong>Bärisches Szenario:</strong> Wenn KI-Agenten (z. B. ChatGPT Instant Checkout) den Kaufakt an sich ziehen, könnte die PSP-Schicht kommoditisiert oder die Händler-Beziehung disintermediiert werden. Stripe hat mit dem Agentic Commerce Protocol (co-entwickelt mit OpenAI) im ChatGPT-Kanal einen frühen Vorsprung – genau dort, wo Adyen (noch) schwächer verankert ist. <strong>Bullisches Szenario:</strong> Adyen positioniert sich als vertrauenswürdige Infrastruktur-Schicht: „Adyen Agentic" (modulare APIs), „Dynamic Identification" zur Identitäts-/Agent-Verifikation, Adyen Uplift (KI-Autorisierungsoptimierung, +6% Auth-Rate im Pilot) und Mitgliedschaft in der x402-Foundation sowie Partnerschaften mit OpenAI, Google, Cloudflare, Visa und Mastercard. Management betont: Agentic-Transaktionen sind heute noch „immateriell".</p>
+      <div class="thesis-check"><b>These-Check 3 (KI-Disruptionsrisiko):</b> Real, aber nicht akut. Adyen ist glaubwürdiger Mitspieler, kein passives Opfer – die einheitliche Datenplattform ist für Agent-Verifikation sogar ein Aktivum. Das eigentliche Risiko ist relativ: Verliert Adyen das Rennen um den agentischen Checkout-Standard gegen Stripe/OpenAI, schwächt das langfristig die Position im am schnellsten wachsenden neuen Kanal. Kurzfristig (2026) kein Ergebnis-Effekt. <span class="badge badge-yellow">Beobachten – strukturelles Risiko, kein Dealbreaker</span></div>
+      <h3>10c) Chancen</h3>
+      <p>Issuing (×8 Volumen), Financial Products / Intelligent Money Movement, US-/Japan-/Indien-Expansion, Talon.One-Integration (Pricing im Transaktionsfluss) und die Margen-Rampe Richtung &gt;55% bis 2028 bieten deutliches Upside. Als Leader im Forrester Wave™ Merchant Payment Providers (Höchstnoten in 14 Kategorien) bleibt die Produktposition stark.</p>
+      <h3>10d) Red Flags & Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> Zweites Führungs-Exit in der US-Region; wiederholte Guidance-Anpassung binnen Monaten; Margen-Pause 2026. <strong>Dealbreaker:</strong> Keine erkennbar – Netto-Cash €10,6 Mrd, &lt;1% Enterprise-Churn, 53% Marge und A--Rating schließen ein existenzielles Risiko praktisch aus.</p>
+      <div class="source">Quellen: Adyen Q1 2026 Update & Shareholder Letter; Payments Dive (28.05.2026); Nikhs Substack Bear-Case (Feb. 2026); Chargeflow/ClearFunction Agentic-Commerce (Mai 2026); Adyen Annual Report 2025.</div>
+    </div>
+  </div>
+
+  <!-- S11 -->
+  <div class="section" id="s11">
+    <div class="section-header"><div class="section-number">11</div><div class="section-title">Scoring</div><div class="section-score">Ø 7,1/10</div></div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Visualisierung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td>Geschäftsmodell</td><td><strong>9/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>Single-Platform, asset-light, 53% Marge</td></tr>
+            <tr><td>Burggraben</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Stark (&lt;1% Churn), aber Orchestrierung erodiert Bindung</td></tr>
+            <tr><td>Operative Entwicklung (4 Perioden)</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Operativ Beat, reported durch FX gebremst</td></tr>
+            <tr><td>Wachstum</td><td><strong>7/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>~20% kW durabel, aber verlangsamend</td></tr>
+            <tr><td>Bewertung</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>P/E ~22x fwd, nahe Mehrjahres-Tief</td></tr>
+            <tr><td>Cashflow & Kapitalqualität</td><td><strong>9/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>86% FCF-Konversion, €10,6 Mrd Netto-Cash</td></tr>
+            <tr><td>Risiken (invertiert)</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Wettbewerb, FX, Führungswechsel – aber nicht existenziell</td></tr>
+            <tr><td>Technische Analyse</td><td><strong>4/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:40%"></div></div><span class="score-num">4</span></div></td><td>Abwärtstrend, unter allen MAs, erste Bodensignale</td></tr>
+            <tr style="background:rgba(139,92,246,0.08);"><td><strong>⌀ Gesamtscore</strong></td><td><strong>7,1/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:71%;background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">7,1</span></div></td><td>Hohe Qualität + günstige Bewertung, gedämpft durch Chart & Wettbewerb</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;color:var(--text-muted);">Peer-Vergleich (Sektion 7) mit 8/10 bewertet, fließt aber nicht in den Ø-Kompositscore der 8 Kernkategorien ein.</p>
+    </div>
+  </div>
+
+  <!-- S12 -->
+  <div class="section" id="s12">
+    <div class="section-header"><div class="section-number">12</div><div class="section-title">Fazit – Investment-These</div><div class="section-score">KAUFEN</div></div>
+    <div class="section-body">
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p>Säule 1 – Struktureller Qualitäts-Compounder: Take Rate auf Allzeithoch (17,1 bps), EBITDA-Marge H2 auf 55%, FCF-Konversion 86%, ROE ~22%, €10,6 Mrd Netto-Cash. Die Investitionsphase 2023–2025 schlägt in echte operative Hebelwirkung um (EBITDA +26% vs. Umsatz +18%). Das ist Preissetzungsmacht in Reinform.</p>
+          <p>Säule 2 – Wachstumstreiber intakt: Platforms +49%, Unified Commerce +33%, Issuing ×8, plus US-/Japan-/Indien-Expansion und Talon.One. ~20% kW-Wachstum sind für die Größe außergewöhnlich; Enterprise-Churn &lt;1% zementiert die Basis.</p>
+          <p>Säule 3 – Bewertung: ~22x Forward und ~13x EV/EBITDA nahe Mehrjahres-Tief für einen 20%-Grower mit Bank-Margen. GF-Value signalisiert deutliche Unterbewertung; Analysten-Ziele reichen bis €1.900. Bei FY26-EPS ~€36,50 und 27–30x ergäbe sich ein Kursziel von €1.000–1.100.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p>Risiko 1 – Wettbewerb & Orchestrierung: Stripe wächst absolut schneller (+34% Volumen) und drängt ins Enterprise; Multi-PSP-Routing schwächt Adyens Single-Platform-Moat. Fällt reported Wachstum auf 10–12%, droht ein De-Rating Richtung 18x → ~€775 (−5%).</p>
+          <p>Risiko 2 – FX & Guidance-Vertrauen: Die 4-Punkte-Lücke (kW 21% vs. reported 17%) ist Dollar-getrieben; EPS-Konsens muss noch ~10% nach unten. Zweimalige Guidance-Anpassung binnen Monaten plus CFO-Abgang (31.08.) und NA-Führungslücke nagen am Vertrauen.</p>
+          <p>Risiko 3 – KI/Technik & Chart: Verliert Adyen das agentische Checkout-Rennen gegen Stripe/OpenAI, schwächt das den wichtigsten neuen Kanal. Technisch ein fallendes Messer unter allen MAs – Timing-Risiko ist real.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung (ausgewogen)</h3>
+      <p>Das bullische Narrativ überzeugt mehr, aber das bärische enthält valide Punkte. Der Kern: Der Markt bewertet Adyen aktuell auf das <em>Tal-Jahr</em> 2026 (FX-Bremse am stärksten, Margen bewusst eingefroren, US-Kohorte im Aufbau). Die strukturellen Qualitätsmerkmale – Take Rate, Margen-Rampe Richtung &gt;55% bis 2028, Netto-Cash, &lt;1% Churn – kompoundieren jedoch unabhängig davon, ob die Aktie bei €820 oder €1.500 steht.</p>
+      <p>Die realen Risiken (Stripe-Momentum, Orchestrierung, KI-Kanal, Führungswechsel) sind ernst, aber nicht existenzbedrohend – die Bilanzfestung erlaubt es Adyen, eine mehrjährige Investitions- und Wettbewerbsphase durchzustehen. Das Risk/Reward auf 2–5 Jahre kippt zugunsten der Long-Seite: geschätzt −13% Downside (Support ~€715) gegen +25–40% Upside (Ziel €1.000–1.150). Transparenz zur Demut: Ich könnte falsch liegen, falls die Orchestrierungs-Welle Adyens Take Rate schneller erodiert als erwartet oder Stripe den agentischen Checkout-Standard dominiert – dann wäre das heutige „günstig" eine Value-Falle.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Horizont</th><th>Katalysatoren / Risiken</th><th>Empfehlung</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Kurzfristig (0–6 M)</strong></td><td>H1-Zahlen 13.08., CFO-Nachfolge, FX-EPS-Revisionen, schwacher Chart</td><td><span class="badge badge-yellow">Volatil – tranchiert</span></td></tr>
+          <tr><td><strong>Mittelfristig (6–24 M)</strong></td><td>Margen-Rampe, US-Traktion, Agentic-Positionierung, Multiple-Recovery</td><td><span class="badge badge-green">Akkumulieren</span></td></tr>
+          <tr><td><strong>Langfristig (2–5 J)</strong></td><td>&gt;55% Marge, Financial Products, struktureller Payment-Shift</td><td><span class="badge badge-green">Kaufen & Halten</span></td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Kernthese</h3>
+      <p>Adyen ist ein struktureller Qualitäts-Compounder im Payment-Sektor, dessen Kurs durch FX-Optik, eine (temporäre) Margen-Pause und Vertrauens-Dellen (CFO-Abgang, Guidance-Zickzack) auf ein Mehrjahres-Bewertungstief gedrückt wurde – während operative Kennzahlen (Take Rate, Marge, FCF) auf Rekordniveau liegen. Für geduldige Quality-Growth-Investoren mit 2–5-Jahres-Horizont ist das eine attraktive Einstiegszone, sofern man die Wettbewerbs- und KI-Kanalrisiken aktiv beobachtet und tranchiert einsteigt.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">€1.000–1.150</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–5 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">−13%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+31%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:2,4</div></div>
+      </div>
+
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Take Rate fällt unter 16,5 bps → Preissetzungsmacht in Frage</li>
+            <li>Reported Wachstum verlangsamt auf &lt;15% ohne FX-Erholung</li>
+            <li>Stripe/Checkout.com gewinnen sichtbar UC-Deals von Adyen</li>
+            <li>H1 2026 (13.08.) verfehlt zusätzlich zur FX-Optik</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>EBITDA-Marge erreicht 54%+ in H1 2027 trotz Hiring → Leverage intakt</li>
+            <li>US-Nettoumsatz beschleunigt / neuer starker CFO</li>
+            <li>Take Rate hält &gt;17 bps → Moat bestätigt</li>
+            <li>Financial Products werden erstmals materiell ausgewiesen</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul><li>Quality-Growth-Investoren (2–5 J)</li><li>Contrarian / antizyklisch</li><li>Anleger, die Volatilität aushalten</li></ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul><li>Income-Investoren (keine Dividende)</li><li>Momentum-/Kurzfrist-Trader</li><li>Anleger mit Sub-12-Monats-Horizont</li></ul>
+        </div>
+      </div>
+
+      <div class="table-wrap"><table>
+        <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / Tranchiert</span></td><td>Bodenbildung & CFO-Nachfolge abwarten</td></tr>
+          <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>50% jetzt, 50% nach H1-Zahlen (13.08.)</td></tr>
+          <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>R/R 1:2,4 nahe Mehrjahres-Tief</td></tr>
+          <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen & Halten</span></td><td>Struktureller Payment-/Financial-Products-Shift</td></tr>
+        </tbody>
+      </table></div>
+      <div class="source">Quellen: Synthese aus Sektionen 1–11; Adyen IR (Feb.–Mai 2026); Nikhs Substack Bull/Bear-Modelle (Feb. 2026); GuruFocus / stockanalysis.com Bewertung (Juni 2026).</div>
+    </div>
+  </div>
+
+  <!-- S13 -->
+  <div class="section" id="s13">
+    <div class="section-header"><div class="section-number">13</div><div class="section-title">Outlook – Die 3 wichtigsten anstehenden Events</div><div class="section-note">Wenn/Dann</div></div>
+    <div class="section-body">
+      <div class="outlook-card">
+        <h4>📊 Event 1: H1-2026-Ergebnisse – 13. August 2026</h4>
+        <p>Erste volle Zahlen seit dem Guidance-Reset und der zweiten großen Prüfung, ob ~20% (kW) hält und die Margen wie versprochen „broadly in line" mit 2025 (~53%) landen.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> kW-Nettoumsatzwachstum ≥20% UND Take Rate hält &gt;17 bps UND EBITDA-Marge ≥53% → These bestätigt, tranchiert nachkaufen; der Guidance-Schock war eine FX-Optik-Übertreibung.<br><br>
+          <strong>Wenn:</strong> kW-Wachstum fällt unter 18% ODER Take Rate sinkt Richtung 16 bps → Position reduzieren; Hinweis auf echte (nicht nur FX-bedingte) Verlangsamung und beginnende Moat-Erosion.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>📊 Event 2: CFO-Nachfolge & US-Führung – H2 2026</h4>
+        <p>Die Besetzung des CFO-Postens (Tandowsky geht 31.08.) und die Stabilisierung der Nordamerika-Führung sind Vertrauens- und Ausführungssignale im wichtigsten Wachstumsmarkt.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Interner/erfahrener CFO ernannt und US-Nettoumsatz beschleunigt sichtbar → Führungsrisiko entschärft, Re-Rating-Potenzial; Einstieg bestätigen.<br><br>
+          <strong>Wenn:</strong> Verzögerte/externe Notbesetzung ODER weitere US-Abgänge → erhöhtes Ausführungsrisiko, Neugewichtung/Reduktion erwägen.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>📊 Event 3: Agentic-Commerce-Standardisierung – 2026/27</h4>
+        <p>Der Wettlauf um den Standard für agentische Zahlungen (Stripe/OpenAI ACP vs. Adyen x402 / Dynamic Identification) entscheidet über die Positionierung im schnellsten neuen Kanal.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Adyen meldet materielle agentische Transaktionsvolumina ODER große Merchant-Wins über x402/Dynamic Identification → strukturelles Upside, KI-These dreht von Risiko zu Chance.<br><br>
+          <strong>Wenn:</strong> ChatGPT-/ACP-Checkout skaliert dominant und Adyen bleibt „immateriell" → langfristiges Kanalrisiko, Bewertungsaufschlag für Wachstum schrumpft; enger überwachen.
+        </div>
+      </div>
+      <div class="source">Quellen: Adyen IR-Kalender (H1 2026: 13.08.2026); Adyen CFO-Mitteilung (27.05.2026); Adyen Q1 2026 Update / x402-Foundation; ClearFunction/Chargeflow Agentic-Commerce (Mai 2026).</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Informations- und Bildungszwecken und stellt keine Anlageberatung, Kauf-/Verkaufsempfehlung oder Finanzanalyse im aufsichtsrechtlichen Sinne dar. Alle Angaben ohne Gewähr; Kennzahlen und Kurse (Stand: 01.07.2026, Kurs ~€820) können sich jederzeit ändern. Vergangene Wertentwicklung ist kein Indikator für zukünftige Ergebnisse. Der Autor ist kein lizenzierter Anlageberater. Bitte treffen Sie Anlageentscheidungen auf Basis eigener Recherche und ggf. professioneller Beratung. Interessenkonflikt-Hinweis siehe oben (Stripe/Anthropic-Beziehung).</div>
+</div>
+</body>
+</html>
