@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOST – Aktienanalyse Canvas v2.2</title>
+<style>
+:root{
+  --primary:#FF6900; --primary-dark:#cc5400; --bg:#0f0f12; --bg-card:#1a1a1f; --bg-card2:#22222a;
+  --border:#2e2e38; --text:#e8e8ec; --text-muted:#888898; --text-dim:#555566;
+  --green:#22c55e; --red:#ef4444; --yellow:#f59e0b; --blue:#3b82f6; --purple:#8b5cf6; --teal:#14b8a6;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+.header{background:linear-gradient(135deg,#1a0800 0%,#2a1000 40%,#0f0f12 100%);border-bottom:1px solid var(--primary);padding:36px 40px 28px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;}
+.header-left h1{font-size:32px;font-weight:700;color:white;letter-spacing:-0.5px;}
+.header-left h1 span{color:var(--primary);}
+.header-left .subtitle{color:var(--text-muted);font-size:14px;margin-top:4px;}
+.header-right{text-align:right;}
+.price-tag{font-size:38px;font-weight:800;color:var(--primary);line-height:1;}
+.price-meta{color:var(--text-muted);font-size:13px;margin-top:4px;}
+.price-change{display:inline-block;padding:2px 8px;border-radius:4px;font-size:13px;font-weight:600;margin-top:4px;}
+.price-change.up{background:rgba(34,197,94,0.15);color:var(--green);}
+.price-change.down{background:rgba(239,68,68,0.15);color:var(--red);}
+.nav{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:100;}
+.nav a{color:var(--text-muted);text-decoration:none;padding:14px 16px;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.2s;}
+.nav a:hover{color:var(--primary);border-bottom-color:var(--primary);}
+.main{max-width:1100px;margin:0 auto;padding:32px 40px 60px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px;}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.kpi-value{font-size:22px;font-weight:700;color:white;margin-top:4px;}
+.kpi-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.kpi-value.green{color:var(--green);}.kpi-value.red{color:var(--red);}.kpi-value.orange{color:var(--primary);}
+.section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden;}
+.section-header{background:var(--bg-card2);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.section-number{background:var(--primary);color:white;width:28px;height:28px;border-radius:6px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-title{font-size:16px;font-weight:700;color:white;}
+.section-score{margin-left:auto;font-size:14px;font-weight:700;color:var(--primary);}
+.section-note{font-size:12px;color:var(--text-dim);background:rgba(46,46,56,0.4);border-radius:4px;padding:4px 10px;margin-left:auto;}
+.section-body{padding:20px 24px;}
+p{margin-bottom:12px;color:var(--text);}p:last-child{margin-bottom:0;}
+h3{font-size:14px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 8px;}
+h3:first-child{margin-top:0;}
+.table-wrap{overflow-x:auto;margin:16px 0;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--bg-card2);color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:10px 12px;border-bottom:1px solid rgba(46,46,56,0.5);color:var(--text);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,105,0,0.04);}
+.beat{color:var(--green);font-weight:600;}.miss{color:var(--red);font-weight:600;}.neutral{color:var(--yellow);font-weight:600;}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}
+.badge-green{background:rgba(34,197,94,0.15);color:var(--green);}
+.badge-red{background:rgba(239,68,68,0.15);color:var(--red);}
+.badge-yellow{background:rgba(245,158,11,0.15);color:var(--yellow);}
+.badge-blue{background:rgba(59,130,246,0.15);color:var(--blue);}
+.badge-orange{background:rgba(255,105,0,0.15);color:var(--primary);}
+.event-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(46,46,56,0.5);align-items:flex-start;}
+.event-item:last-child{border-bottom:none;}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0;}
+.dot-green{background:var(--green);}.dot-red{background:var(--red);}.dot-yellow{background:var(--yellow);}
+.event-label{font-weight:600;color:white;}
+.event-text{font-size:14px;color:var(--text);}
+.risk-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.risk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px;flex-wrap:wrap;}
+.risk-title{font-weight:600;color:white;font-size:14px;}
+.score-bar{display:flex;align-items:center;gap:10px;}
+.score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#ff9500);}
+.score-num{font-weight:700;color:var(--primary);font-size:15px;min-width:32px;}
+.bull-bear-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:700px){.bull-bear-grid{grid-template-columns:1fr;}}
+.bull-card{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:16px;}
+.bear-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:16px;}
+.bull-card h4{color:var(--green);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.bear-card h4{color:var(--red);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;}
+.rating-box{background:linear-gradient(135deg,rgba(255,105,0,0.12),rgba(255,105,0,0.04));border:1px solid rgba(255,105,0,0.3);border-radius:12px;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:20px 0;}
+.rating-item label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;display:block;margin-bottom:4px;}
+.rating-item .val{font-size:20px;font-weight:800;color:white;}
+.rating-item .val.buy{color:var(--green);}.rating-item .val.hold{color:var(--yellow);}.rating-item .val.sell{color:var(--red);}
+.trigger-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+@media(max-width:700px){.trigger-grid{grid-template-columns:1fr;}}
+.trigger-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.trigger-card h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.trigger-card.buy h5{color:var(--green);}.trigger-card.sell h5{color:var(--red);}
+.trigger-list{font-size:13px;color:var(--text);list-style:none;padding:0;}
+.trigger-list li{margin-bottom:6px;padding-left:14px;position:relative;}
+.trigger-list li::before{content:"→";position:absolute;left:0;}
+.investor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+@media(max-width:600px){.investor-grid{grid-template-columns:1fr;}}
+.investor-yes{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:12px;}
+.investor-no{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:12px;}
+.investor-yes h5{color:var(--green);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-no h5{color:var(--red);font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+.investor-yes li,.investor-no li{font-size:13px;color:var(--text);margin-bottom:4px;list-style:none;padding-left:14px;position:relative;}
+.investor-yes li::before{content:"✓";position:absolute;left:0;color:var(--green);}
+.investor-no li::before{content:"✗";position:absolute;left:0;color:var(--red);}
+.geo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0;}
+.geo-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.geo-region{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.geo-pct{font-size:20px;font-weight:700;color:white;}
+.geo-note{font-size:12px;color:var(--text-muted);}
+.outlook-card{background:var(--bg-card2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:16px;margin-bottom:14px;}
+.outlook-card h4{color:white;font-size:14px;margin-bottom:8px;}
+.outlook-card .when-then{font-size:13px;color:var(--text);margin-top:8px;}
+.outlook-card .when-then strong{color:var(--primary);}
+.source{font-size:11px;color:var(--text-dim);margin-top:12px;padding-top:10px;border-top:1px solid rgba(46,46,56,0.5);}
+.source a{color:var(--text-dim);}
+.disclaimer{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text-dim);margin-top:32px;}
+.alert-box{background:rgba(255,105,0,0.08);border:1px solid rgba(255,105,0,0.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px;}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+.pill{display:inline-block;background:rgba(255,105,0,0.12);color:var(--primary);border-radius:4px;padding:1px 7px;font-size:13px;font-weight:600;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Toast <span>TOST.NYSE</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 01. Juli 2026 · NYSE · Sektor: Fintech / Restaurant-Technologie</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-orange">Restaurant-SaaS</span>
+      <span class="badge badge-blue">Payments / Fintech</span>
+      <span class="badge badge-green">Quality Growth</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$24,66</div>
+    <div class="price-meta">Schlusskurs 30.06.2026 · NYSE</div>
+    <div class="price-change down">▼ –38% (52 Wochen)</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">52W: $22,26 – $49,66</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value red">$24,66</div><div class="kpi-sub">USD · 30.06.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Market Cap</div><div class="kpi-value">~$14,3 Mrd</div><div class="kpi-sub">EV ~$12,6 Mrd</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/E (FWD)</div><div class="kpi-value">~19x</div><div class="kpi-sub">TTM ~37x</div></div>
+    <div class="kpi-card"><div class="kpi-label">EV/EBITDA (FY26e)</div><div class="kpi-value">~15x</div><div class="kpi-sub">TTM ~31x</div></div>
+    <div class="kpi-card"><div class="kpi-label">ARR</div><div class="kpi-value orange">$2,2 Mrd</div><div class="kpi-sub">+26% YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">Adj. EBITDA-Marge</div><div class="kpi-value green">34%</div><div class="kpi-sub">% des recurring GP</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value" style="font-size:18px;">~04.–11.08.</div><div class="kpi-sub">Q2 2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Konsens</div><div class="kpi-value green" style="font-size:18px;">KAUFEN</div><div class="kpi-sub">Ø-Ziel ~$34</div></div>
+  </div>
+
+  <!-- ============ S1 GESCHÄFTSMODELL ============ -->
+  <div class="section" id="s1">
+    <div class="section-header"><div class="section-number">1</div><div class="section-title">Geschäftsmodell</div><div class="section-note">Quellen ≤ 6–9 Monate</div></div>
+    <div class="section-body">
+      <p>Toast ist ein cloudbasiertes „All-in-One"-Betriebssystem für Gastronomiebetriebe. Das Herzstück ist ein branchenspezifisches Point-of-Sale-System (Toast POS) aus eigener Hardware (Terminals, Handhelds, Kitchen-Display-Systeme, Kiosk, Drive-Thru) und darauf aufsetzender SaaS-Software für Bestellannahme, Online-Ordering, Lieferung, Personalplanung, Payroll, Buchhaltung und Gäste-Marketing. Toast bedient primär unabhängige und mittelgroße US-Restaurants (SMB), skaliert aber zunehmend in Enterprise-Ketten, Food-&-Beverage-Retail und international (Irland, UK, Kanada, Indien).</p>
+      <p>Die Erlöse ruhen auf drei Säulen. Erstens <strong>Subscription/SaaS</strong> – wiederkehrende Software-Gebühren pro Standort, die mit steigender Modul-Anzahl (ARPU) wachsen und inzwischen SaaS-Bruttomargen über 80% erreichen. Zweitens <strong>Financial Technology Solutions</strong> – die integrierte Zahlungsabwicklung, die den größten Umsatzanteil stellt: Toast verdient eine Take-Rate auf das über die Plattform laufende Gross Payment Volume (GPV). Drittens <strong>Hardware</strong> – bewusst nahezu zum Selbstkostenpreis verkauft, als Türöffner für die margenstarken Software- und Payment-Ströme.</p>
+      <p>Ökonomisch ist das Modell ein Hybrid: die SaaS-Ebene ist asset-light und hochmargig, die Payments-Ebene skaliert mit dem Restaurantumsatz der Kunden, während die Hardware kapitalintensiver und margenschwach ist. Das zentrale Steuerungsmaß ist ARR (Annualized Recurring Run-Rate), das Subscription- und Payment-Run-Rate bündelt. Die eigentliche Monetarisierungslogik lautet: mehr Standorte × höheres GPV je Standort × steigende Gesamt-Take-Rate (SaaS + Fintech) = wiederkehrender Bruttogewinn.</p>
+      <p>Der jüngste strategische Vektor ist Künstliche Intelligenz: mit „Toast IQ" (seit Oktober 2025) bettet Toast KI in Menü-Optimierung, Personal- und Nachfrageprognose, Marketing und Kundensupport ein – zugleich als Produkt-Upsell und als Hebel für die eigene Kostenbasis. Zusätzliche Verticals wie Toast Drive-Thru (April 2026, inkl. KI-Voice-Ordering) erweitern den adressierbaren Markt über das klassische Full-Service-Restaurant hinaus.</p>
+      <div class="source">Quellen: Toast 8-K / Q1-2026-Earnings (SEC, 07.05.2026); Toast IR &amp; Blog „AI in Restaurants" (12.11.2025); businesswire „Toast Drive-Thru" (14.04.2026); Yahoo Finance Unternehmensprofil (30.06.2026).</div>
+    </div>
+  </div>
+
+  <!-- ============ S2 BURGGRABEN ============ -->
+  <div class="section" id="s2">
+    <div class="section-header"><div class="section-number">2</div><div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div><div class="section-score">Score: 7/10</div></div>
+    <div class="section-body">
+      <p><strong>Switching Costs (hoch).</strong> Toast ist das operative System-of-Record eines Restaurants – POS, Zahlungen, Personal, Buchhaltung und Daten laufen darüber. Ein Wechsel bedeutet Hardware-Tausch, Personal-Neuschulung und Betriebsunterbrechung im laufenden Geschäft. Das erzeugt sehr klebrige Kunden und ist der stärkste Teil des Burggrabens. Die Gesamt-Take-Rate über SaaS und Fintech überschritt in Q1 2026 erstmals 1% des GPV – ein Beleg für steigende Share-of-Wallet je Standort.</p>
+      <p><strong>Scale &amp; Daten.</strong> Mit ~171.000 Standorten und ~15% Anteil am US-Restaurant-Zahlungsvolumen ist Toast der klare Kategorieführer im US-SMB-Restaurantsegment. Diese Skala speist einen Datenvorsprung (Transaktions-, Menü- und Gästedaten), der wiederum die KI-Produkte (Toast IQ) trainiert und deren Nutzen erhöht – ein sich selbst verstärkender Kreislauf, sofern die KI-Features tatsächlich messbaren Mehrwert liefern (laut Management +8% Umsatz je Betrieb, 40% der Support-Fälle automatisiert).</p>
+      <p><strong>Netzwerkeffekte (moderat).</strong> Ein wachsendes Partner-/Integrations-Ökosystem und Marktplatz-Effekte (z.B. Toast-eigene Zahlungs- und Kapitalprodukte) erhöhen den Nutzen, sind aber schwächer als bei zweiseitigen Plattformen. Die Marke hat im Kern-SMB-Segment Preissetzungsmacht und einen Vertrieb mit hoher Feldpräsenz.</p>
+      <p><strong>Schwachstellen (kritisch).</strong> Der Graben ist real, aber nicht uneinnehmbar. Im Enterprise-Segment konkurrieren etablierte Anbieter (Oracle MICROS, NCR Voyix), im SMB drängen Square/Block und Lightspeed mit gebündelten Software-plus-Payment-Deals. Die Payment-Take-Rate ist prinzipiell dem Wettbewerbsdruck ausgesetzt, und die neue vertikale Bedrohung durch DoorDash (eigener POS-/Tech-Stack) zielt direkt auf Toasts Kernkundschaft. Der Burggraben schützt Bestandskunden stark, das Neukundengeschäft und die Preissetzung aber nur teilweise – daher 7/10 statt höher.</p>
+      <div class="source">Quellen: Toast Q1-2026-Earnings-Call-Transkript (Motley Fool, 07.05.2026); ts2.tech „Toast signals faster 2026 sign-ups" (04.03.2026); stockopine TOST-Valuation-Update (TAM/Marktanteil, 26.08.2025).</div>
+    </div>
+  </div>
+
+  <!-- ============ S3 QUARTALE ============ -->
+  <div class="section" id="s3">
+    <div class="section-header"><div class="section-number">3</div><div class="section-title">Letzte 4 Quartale</div><div class="section-score">Operativ 3–4/4 Beat · EPS gemischt</div></div>
+    <div class="section-body">
+      <p>Nächster Stichtag: <strong>Q2 2026, voraussichtlich Anfang August 2026 (ca. 04.–11.08.)</strong>. Über die vier zurückliegenden Quartale zeigt Toast bemerkenswert konsistente operative Beats bei Umsatz, Bruttogewinn und Adjusted EBITDA – die Aktie reagierte dennoch zweimal negativ, weil einmal die GAAP-EPS enttäuschte (Q3 2025) und einmal die Q2-Marginguidance zu vorsichtig ausfiel (nach Q1 2026).</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Metrik</th><th>Q2 2025</th><th>Q3 2025</th><th>Q4 2025</th><th>Q1 2026</th></tr></thead>
+        <tbody>
+          <tr><td>Umsatz</td><td>~$1,53 Mrd</td><td>$1,63 Mrd</td><td>~$1,68 Mrd</td><td>$1,63 Mrd</td></tr>
+          <tr><td>Umsatz YoY</td><td>~+25%</td><td>~+25%</td><td>+24%</td><td>+22%</td></tr>
+          <tr><td>ARR (YoY)</td><td>$1,9 Mrd (+31%)</td><td>$2,0 Mrd (+30%)</td><td>$2,0 Mrd (+26%)</td><td>$2,2 Mrd (+26%)</td></tr>
+          <tr><td>Net Income (GAAP)</td><td>$80 Mio</td><td>$105 Mio</td><td>$101 Mio</td><td>$126 Mio</td></tr>
+          <tr><td>Adj. EBITDA</td><td>$161 Mio</td><td>$176 Mio</td><td>$163 Mio</td><td>$179 Mio</td></tr>
+          <tr><td>GAAP Op.-Marge</td><td>~15%</td><td>~15%</td><td>~15%</td><td><span class="beat">21%</span></td></tr>
+          <tr><td>Diluted EPS (GAAP)</td><td>~$0,14</td><td>$0,16</td><td>$0,17</td><td>$0,20</td></tr>
+          <tr><td>Net Location Adds</td><td class="beat">8.500</td><td>7.500</td><td>~8.000</td><td>7.000</td></tr>
+          <tr><td>Total Locations</td><td>148.000</td><td>156.000</td><td>~164.000</td><td>171.000</td></tr>
+          <tr><td>GPV</td><td>~$47 Mrd</td><td>$52 Mrd</td><td>~$47 Mrd</td><td>$51,3 Mrd</td></tr>
+          <tr><td>Free Cash Flow</td><td>$208 Mio</td><td>$153 Mio</td><td>~$150 Mio</td><td>$115 Mio</td></tr>
+          <tr><td>Beat/Miss</td><td><span class="beat">Beat &amp; Raise</span></td><td><span class="neutral">Rev Beat / EPS Miss</span></td><td><span class="beat">In-line/Beat</span></td><td><span class="neutral">Beat / Guide schwach</span></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p><strong>Wichtigste Management-Aussagen &amp; Marktreaktion.</strong> Q2 2025: Rekord-Standort-Adds (8.500) und mehrfache EBITDA-Guidance-Anhebung; strategische Amex-Partnerschaft. Q3 2025: ARR überschritt $2 Mrd (+30%), aber GAAP-EPS $0,16 verfehlte den Konsens ($0,24) – Aktie <span class="miss">–2,4%</span> nachbörslich. Q4/FY2025: Rekord von 30.000 Netto-Standorten im Jahr, FY-Umsatz $6,15 Mrd (+24%), Nettogewinn $342 Mio; $500-Mio-Aufstockung des Rückkaufprogramms. Q1 2026: GAAP-Op.-Marge erstmals über 20% (21%), Non-GAAP-EPS $0,28–0,29 leicht über Konsens – dennoch fiel die Aktie <span class="miss">~10–15%</span>, weil die Q2-EBITDA-Guidance ($185–195 Mio) unter den Erwartungen lag. Kernproblem: die Guidance-Kadenz signalisiert eine sequenzielle Margen-Normalisierung, was den Markt trotz starker operativer Zahlen verunsichert.</p>
+      <p>Take-Rate-Detail Q1 2026: Fintech-Netto-Take-Rate 61 Bp, Payments-Take-Rate 51 Bp (<span class="beat">+2 Bp YoY</span>), Toast Capital steuerte $51 Mio Bruttogewinn (10 Bp) bei – die Monetarisierung steigt trotz eines GPV-je-Standort-Rückgangs von –1% YoY (schwächere Restaurant-Nachfrage).</p>
+      <div class="source">Quellen: Toast 8-K Q2/Q3/Q4 2025 &amp; Q1 2026 (SEC EDGAR); Motley Fool / Globe and Mail Earnings-Call-Transkripte (07.05.2026); Investing.com Q3-2025-Call (04.11.2025); stocktitan / quartr Q1-2026-Zusammenfassungen (07.–08.05.2026).</div>
+    </div>
+  </div>
+
+  <!-- ============ S4 WACHSTUM ============ -->
+  <div class="section" id="s4">
+    <div class="section-header"><div class="section-number">4</div><div class="section-title">Wachstumseinordnung</div><div class="section-score">Score: 8/10</div></div>
+    <div class="section-body">
+      <p>Toast wächst weiterhin im hohen 20er-Prozentbereich auf der Bruttogewinn-Ebene (recurring gross profit +27% in Q1 2026, FY2025 +33%), bei einem Umsatz-CAGR von ~49% über fünf Jahre (2019: $665 Mio → 2025: $6,15 Mrd). Die Wachstumsqualität ist hoch, weil sie <em>organisch</em> und margenbegleitet ist: Adjusted EBITDA und operatives Ergebnis wachsen schneller als der Umsatz – ein Zeichen echter operativer Hebelwirkung, nicht durch M&amp;A oder Accounting aufgeblähtes Wachstum.</p>
+      <h3>Wachstumstreiber</h3>
+      <p>Erstens <strong>Standort-Expansion</strong>: Rekord von 30.000 Netto-Adds in 2025, mit Guidance für noch mehr in 2026. Zweitens <strong>ARPU/Take-Rate</strong>: mehr Module je Standort und steigende Fintech-Monetarisierung (Gesamt-Take-Rate >1% des GPV, erstmals). Drittens <strong>TAM-Erweiterung</strong>: Das Management beziffert den globalen adressierbaren Markt auf ~1,4 Mio Standorte (~60% mehr als beim IPO), getrieben durch Enterprise, internationale Märkte, Food-&-Beverage-Retail und neue Verticals wie Drive-Thru (~140.000 US-Lanes). Enterprise, International und Retail überschritten bereits gemeinsam 10.000 Live-Standorte.</p>
+      <h3>Geografische / segmentale Verteilung</h3>
+      <div class="geo-grid">
+        <div class="geo-card"><div class="geo-region">USA Kern-Restaurant</div><div class="geo-pct">~85–90%</div><div class="geo-note">Reifende Basis, ~15% Payment-Anteil</div></div>
+        <div class="geo-card"><div class="geo-region">International</div><div class="geo-pct">wachsend</div><div class="geo-note">Irland, UK, Kanada, Indien</div></div>
+        <div class="geo-card"><div class="geo-region">Enterprise + Retail</div><div class="geo-pct">&gt;10.000 Std.</div><div class="geo-note">Neue, schnellste TAM-Treiber</div></div>
+        <div class="geo-card"><div class="geo-region">Drive-Thru (QSR)</div><div class="geo-pct">neu 2026</div><div class="geo-note">140k US-Lanes adressierbar</div></div>
+      </div>
+      <h3>Reifegrad &amp; kritische Einordnung</h3>
+      <p>Toast befindet sich in der Phase „Growth-at-Scale": Das Kern-US-SMB-Geschäft reift (ARR-Wachstum von 31% in Q2 2025 auf 26% in Q1 2026 verlangsamt), während neue Verticals die Deceleration abfedern. Der einzige echte Warnpunkt ist <strong>GPV je Standort –1% YoY</strong> – ein Zeichen schwächerer Konsumausgaben in Restaurants, das die Fintech-Umsätze bremst, wenn es sich verstetigt. Solange Toast weiter Rekord-Standorte gewinnt und die Take-Rate ausweitet, bleibt das Wachstum nachhaltig; die Sensitivität gegenüber der Restaurant-Konjunktur ist aber real. Daher 8/10 (nicht höher wegen Deceleration + GPV/Standort-Schwäche).</p>
+      <div class="source">Quellen: Toast Q1-2026-Earnings (SEC, 07.05.2026); stockopine (TAM 1,4 Mio, 26.08.2025); options.cafe TOST-Analyse (Umsatz-CAGR, 15.03.2026); businesswire Drive-Thru (14.04.2026).</div>
+    </div>
+  </div>
+
+  <!-- ============ S5 BEWERTUNG ============ -->
+  <div class="section" id="s5">
+    <div class="section-header"><div class="section-number">5</div><div class="section-title">Bewertung &amp; Multiples</div><div class="section-score">Score: 7/10</div></div>
+    <div class="section-body">
+      <p>Nach einem Kursrückgang von ~38% in zwölf Monaten (nahe 52-Wochen-Tief $22,26) hat sich die Bewertung deutlich entspannt. Auf Forward-Basis wirkt Toast für ein 22–26%-Wachstum mit 34%-Inkrementalmargen eher günstig; auf absoluten TTM-Gewinn- und Cashflow-Multiples ist es weiterhin kein „Value"-Titel.</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Kennzahl</th><th>TOST (aktuell)</th><th>5J-Kontext / Einordnung</th></tr></thead>
+        <tbody>
+          <tr><td>P/E (TTM)</td><td>~36–39x</td><td>Deutlich unter historischem Niveau (Q1'25 noch ~120x)</td></tr>
+          <tr><td>P/E (Forward)</td><td><span class="beat">~19x</span></td><td>Attraktiv für das erwartete EPS-Wachstum</td></tr>
+          <tr><td>PEG</td><td>~0,2–0,6</td><td>Wachstum relativ zum KGV günstig eingepreist</td></tr>
+          <tr><td>EV/EBITDA (TTM)</td><td>~31x</td><td>Optisch hoch (junge Profitabilität)</td></tr>
+          <tr><td>EV/EBITDA (FY26e)</td><td><span class="beat">~15x</span></td><td>Auf FY26-Adj.-EBITDA ($790–810 Mio) moderat</td></tr>
+          <tr><td>P/Sales</td><td>~2,2x</td><td>Niedrig für ein 20%+-SaaS-Fintech-Modell</td></tr>
+          <tr><td>EV/FCF</td><td>~20–25x</td><td>Fair angesichts wachsender FCF-Konversion</td></tr>
+          <tr><td>ROE / ROIC</td><td>22,5% / sehr hoch</td><td>ROIC durch geringe Eigenkapitalbasis verzerrt</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p><strong>Peer- &amp; Intrinsic-Kontext.</strong> Relativ zur Vergleichsgruppe handelt Toast mit einem P/E-Aufschlag (34,7x vs. Peer-Ø ~25,8x laut Simply Wall St), was durch die überlegene Kombination aus Wachstum <em>und</em> Profitabilität unter den Restaurant-reinen Namen gerechtfertigt ist. Externe Fair-Value-Schätzungen liegen über dem aktuellen Kurs: DCF-Werte $32,95 (Macroaxis) bis $34,67 (Simply Wall St), GuruFocus „GF Value" $39,37, Analysten-Ø-Ziel ~$34 (Spanne $28–45). Zugleich mahnt ein Multiples-Modell (AlphaSpread ~$25,5 Base Case) zur Vorsicht – der Titel ist also je nach Methode fair bis moderat unterbewertet, kein tiefes Schnäppchen.</p>
+      <p>Kritisch: Das Forward-Multiple ist nur dann günstig, wenn Wachstum und Margenexpansion halten. Verlangsamt sich das ARR-Wachstum unter ~20% oder drückt die Restaurant-Konjunktur das GPV, kann das Multiple weiter komprimieren. Daher 7/10.</p>
+      <div class="source">Quellen: stockanalysis.com/statistics (P/E, EV/EBITDA, ROE, 30.06.2026); Yahoo Finance Key Statistics; Simply Wall St Valuation; GuruFocus GF Value (20.05.2026); Macroaxis / AlphaSpread DCF (Juni 2026). Hinweis: TOST notiert an der NYSE – finviz-Daten verfügbar; Multiples je Quelle leicht abweichend.</div>
+    </div>
+  </div>
+
+  <!-- ============ S6 CASHFLOW ============ -->
+  <div class="section" id="s6">
+    <div class="section-header"><div class="section-number">6</div><div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div><div class="section-score">Score: 8/10</div></div>
+    <div class="section-body">
+      <p>Die Qualität der Gewinne ist hoch: Toast ist seit FY2024 GAAP-profitabel und hat den Nettogewinn 2025 auf $342 Mio gesteigert. Der Free Cash Flow ist positiv und wächst (TTM-FCF ~$500–560 Mio), mit einer FCF-Konversion nahe 100% des Adjusted EBITDA in mehreren Quartalen (Q3 2025: $153 Mio FCF bei $176 Mio Adj. EBITDA). Das bestätigt, dass die berichteten Gewinne „echt" sind und nicht durch Working-Capital- oder Accounting-Effekte geschönt.</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Kennzahl</th><th>Wert</th><th>Kommentar</th></tr></thead>
+        <tbody>
+          <tr><td>FCF (TTM)</td><td>~$500–560 Mio</td><td>Wachsend, ~100% EBITDA-Konversion</td></tr>
+          <tr><td>SaaS-Bruttomarge</td><td><span class="beat">81%</span></td><td>Erstmals &gt;80% (Q1 2026)</td></tr>
+          <tr><td>Adj.-EBITDA-Marge</td><td>34%</td><td>% des recurring gross profit</td></tr>
+          <tr><td>GAAP-Op.-Marge</td><td>21%</td><td>Erstmals &gt;20% (Q1 2026)</td></tr>
+          <tr><td>Cash + Wertpapiere</td><td>$1,77 Mrd</td><td>Festungsbilanz</td></tr>
+          <tr><td>Finanzschulden</td><td>~$40 Mio</td><td>Netto-Cash-Position, D/E ~0,01</td></tr>
+          <tr><td>Buybacks</td><td>$378 Mio YTD</td><td>14 Mio Aktien (bis 06.05.2026)</td></tr>
+          <tr><td>SBC</td><td>~14% des rec. GP</td><td>Rückläufig (−3 Pp YoY), aber noch relevant</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>Die Kapitalallokation ist diszipliniert: fast schuldenfrei, $1,77 Mrd Liquidität, ein aufgestocktes Rückkaufprogramm ($500-Mio-Erhöhung + laufende Käufe) und keine Dividende. Toast Capital (Kreditvergabe an Restaurants) ist kapitalleichter als klassisches Balance-Sheet-Lending und trug $51 Mio Bruttogewinn bei – die Ausfälle bleiben laut Management „within risk guardrails". Einziger Wermutstropfen: die kapitalintensive Hardware (Selbstkostenverkauf) und die noch spürbare, wenn auch fallende Stock-Based Compensation. Insgesamt sehr solide Kapitalqualität – 8/10.</p>
+      <div class="source">Quellen: Toast 8-K/10-Q Q1 2026 (SEC, 07.05.2026); Motley Fool Q1-2026-Call (SaaS-Marge 81%, SBC); stockanalysis.com/statistics (Bilanz, 30.06.2026); Q3-2025-Release (FCF-Konversion).</div>
+    </div>
+  </div>
+
+  <!-- ============ S7 PEERS ============ -->
+  <div class="section" id="s7">
+    <div class="section-header"><div class="section-number">7</div><div class="section-title">Peer-Vergleich</div><div class="section-score">Score: 8/10</div></div>
+    <div class="section-body">
+      <div class="alert-box">⚠️ <strong>Hinweis:</strong> <strong>Olo (OLO)</strong> wurde im September 2025 von Thoma Bravo für ~$2,0 Mrd ($10,25/Aktie) übernommen und von der NYSE delisted – daher kein Live-Multiple mehr, aber weiterhin relevanter Wettbewerber (Online-Ordering, 750+ Marken). Kennzahlen der übrigen Peers Stand ~Q1 2026.</div>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Unternehmen</th><th>Umsatz-/GP-Wachstum</th><th>Profitabilität</th><th>P/E (Fwd)</th><th>EV/EBITDA</th><th>Fokus</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Toast (TOST)</strong></td><td>Umsatz +22% · rec. GP +27%</td><td>Adj. EBITDA-M. 34% · GAAP profitabel</td><td>~19x</td><td>~15x (FY26e)</td><td>Restaurant-SaaS + Payments (rein)</td></tr>
+          <tr><td>Block (XYZ)</td><td>Umsatz +5% · GP +27%</td><td>Adj. Op.-Marge 25% · GAAP-Verlust (Restrukturierung)</td><td>~18x</td><td>—</td><td>Square-POS + Cash App (diversifiziert)</td></tr>
+          <tr><td>Shift4 (FOUR)</td><td>GRLNF +49% · Adj. EBITDA +39%</td><td>hoch, aber hoch verschuldet (D/E 2,6)</td><td><span class="beat">~8x</span></td><td>~9x</td><td>Payments Hospitality + global M&amp;A</td></tr>
+          <tr><td>PAR Technology</td><td>Umsatz +19% · ARR +16%</td><td>Adj. EBITDA $9 Mio · noch Nettoverlust</td><td>n.m.</td><td>hoch</td><td>Enterprise-Restaurant-POS + Daten</td></tr>
+          <tr><td>Lightspeed (LSPD)</td><td>Umsatz +14%</td><td>Adj. EBITDA $72 Mio · Nettoverlust</td><td>Discount</td><td>niedrig</td><td>Retail + Hospitality (breit)</td></tr>
+          <tr><td>Olo (privat)</td><td>—</td><td>—</td><td>—</td><td>—</td><td>Online-Ordering (Thoma-Bravo, delisted)</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p><strong>Qualitative Einordnung.</strong> Unter den Restaurant-reinen Namen hat Toast die beste Kombination aus Wachstum, Skala und Profitabilität – und ist der einzige, der schon GAAP-profitabel <em>und</em> zweistellig wachsend <em>und</em> FCF-positiv ist (PAR und Lightspeed schreiben noch Verluste, Olo ist privat). Gegenüber <strong>Block</strong> ist Toast fokussierter und im Restaurant deutlich tiefer integriert, während Block über Cash App diversifiziert und größer ist (Umsatz $24 Mrd), aber im Kern-Restaurant-POS (Square) langsamer wächst. <strong>Shift4</strong> ist optisch am billigsten (Fwd-P/E ~8x, EV/EBITDA ~9x), aber wachstumsseitig stark M&amp;A- und reisegetrieben und hoch verschuldet – ein anderes Risikoprofil.</p>
+      <p>Bemerkenswert für die Bewertung: Die jüngsten Take-Private-Deals im Sektor (Olo bei ~$2 Mrd, ~65% Prämie) signalisieren, dass strategische/PE-Käufer den „inneren Wert" dieser Plattformen über den öffentlichen Marktbewertungen sehen – ein latenter Bewertungsanker auch für PAR (Aktivisten-Druck via 13D) und indirekt für Toast. Toasts Prämie gegenüber dem Peer-Ø ist durch Qualität gerechtfertigt – 8/10.</p>
+      <div class="source">Quellen: stockanalysis.com (FOUR/XYZ Statistics, 30.06.2026); Block/Shift4/PAR/Lightspeed 8-K &amp; 6-K Q1-2026 (SEC); Thoma-Bravo/Olo-Übernahme (PRNewswire, 12.09.2025); PAR 13D (SEC, 04.03.2026); Miller Value Funds FOUR (27.04.2026).</div>
+    </div>
+  </div>
+
+  <!-- ============ S8 NEWS ============ -->
+  <div class="section" id="s8">
+    <div class="section-header"><div class="section-number">8</div><div class="section-title">Aktuelle News &amp; Events</div><div class="section-note">Quellen ≤ 3 Monate</div></div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">01.07.2026 – Aufnahme in den S&amp;P MidCap 400 <span class="badge badge-green">Positiv</span></div><div class="event-text">TOST ersetzt TopBuild im Index (GICS: Financials); Index-Fonds müssen kaufen → technischer Rückenwind. Quelle: Benzinga, ~24.06.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">07.05.2026 – Q1 2026: Op.-Marge erstmals &gt;20% <span class="badge badge-green">Positiv (Fund.)</span></div><div class="event-text">ARR $2,2 Mrd (+26%), 171.000 Standorte, Rückkäufe – FY-Guidance angehoben. Quelle: SEC 8-K, 07.05.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">07.05.2026 – Kursrutsch ~10–15% auf Q2-Guidance <span class="badge badge-yellow">Neutral/Negativ</span></div><div class="event-text">Q2-EBITDA-Guidance ($185–195 Mio) unter Erwartung → Margen-Normalisierungssorge. Quelle: Simply Wall St, Mai 2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">14.04.2026 – Launch Toast Drive-Thru (Enterprise QSR) <span class="badge badge-green">Positiv</span></div><div class="event-text">POS-native Software + KI-Voice-Ordering (Partner Incept AI); adressiert ~140.000 US-Drive-Thru-Lanes. Quelle: businesswire, 14.04.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">Q1/Q2 2026 – Enterprise-Wins (u.a. Hungry Howie's ~500 Std.) <span class="badge badge-green">Positiv</span></div><div class="event-text">Ausrollung der Enterprise-Suite über kompletten Footprint. Quelle: stockanalysis.com News, 2026.</div></div></div>
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">2025/26 – DoorDash baut eigenen POS-/Tech-Stack aus <span class="badge badge-red">Negativ</span></div><div class="event-text">Vertikale Bedrohung im Kern-SMB-Segment; Rothschild/Redburn-Downgrade auf „Neutral" mit Verweis auf DoorDashs US-Rollout. Quelle: stockanalysis.com; Simply Wall St, Juni 2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">2026 – KI-Produktwelle (Toast IQ, PAR Intelligence, Square-KI) <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Gesamter Sektor setzt auf KI-Agenten; Return-on-Invest noch nicht sichtbar. Quelle: Restaurant Business, 29.06.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">Sept. 2025 – Olo geht privat (Thoma Bravo, $2 Mrd) <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Konsolidierung im Restaurant-Tech; ein börsennotierter Peer weniger. Quelle: PRNewswire, 12.09.2025.</div></div></div>
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item"><div class="event-dot dot-red"></div><div><div class="event-label">2026 – Schwacher Restaurant-Konsum <span class="badge badge-red">Negativ</span></div><div class="event-text">GPV je Standort –1% YoY; Restaurant-Tech-Aktien breit underperformt (Wall Street verlangt Profite). Quelle: Restaurant Business, 29.06.2026.</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">2026 – Zins-/Konsumumfeld, Hardware-Kosten (Memory-Chips) <span class="badge badge-yellow">Neutral</span></div><div class="event-text">Höhere Chip-Kosten belasten Hardware-Marge; Konjunktur-Sensitivität der SMB-Kunden. Quelle: ts2.tech, 04.03.2026.</div></div></div>
+      <div class="source">Quellen: Benzinga (S&amp;P MidCap 400); SEC 8-K Q1 2026; businesswire; Simply Wall St; Restaurant Business (29.06.2026); PRNewswire (Olo). Hinweis: Das Bull-/Bear-Narrativ wird in Sektion 12 ausgearbeitet.</div>
+    </div>
+  </div>
+
+  <!-- ============ S9 TECHNISCH ============ -->
+  <div class="section" id="s9">
+    <div class="section-header"><div class="section-number">9</div><div class="section-title">Technische Analyse</div><div class="section-score">Score: 5/10</div></div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value" style="font-size:18px;">$24,66</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value green" style="font-size:18px;">$24,93</div><div class="kpi-sub">nahe/darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value red" style="font-size:18px;">$25,98</div><div class="kpi-sub">darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value red" style="font-size:18px;">$31,59</div><div class="kpi-sub">~20% darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value" style="font-size:18px;">~48</div><div class="kpi-sub">neutral</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-High</div><div class="kpi-value" style="font-size:18px;">$49,66</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value red" style="font-size:18px;">negativ</div><div class="kpi-sub">Verkauf</div></div>
+      </div>
+      <p><strong>Trend: abwärts/seitwärts.</strong> Der Kurs liegt unter dem 50- und 200-Tage-Durchschnitt; im Oktober 2025 bildete sich ein <span class="miss">Death Cross</span> (SMA 50 unter SMA 200), das den langfristigen Abwärtsdruck bestätigt. Der 20er liegt unter dem 50er (bärische Stapelung). Die Aktie steht rund 20% unter dem 200er und ~50% unter dem 52-Wochen-Hoch – ein klassischer De-Rating-Chart.</p>
+      <p><strong>Momentum: neutral, nicht überverkauft.</strong> RSI ~48 signalisiert weder Überkauf noch Kapitulation; bemerkenswert: Der RSI erreichte während des ~44%-Rückgangs nie den überverkauften Bereich, was eher auf anhaltende Distribution als auf eine Bodenbildung hindeutet. Der Beta liegt bei ~1,8–1,9 – der Titel verstärkt Marktbewegungen.</p>
+      <p><strong>Levels.</strong> Support: $24,00-Zone und das 52-Wochen-Tief bei $22,26; darunter droht Beschleunigung Richtung ~$20. Widerstand: $26 (SMA 50), dann die $30–31-Zone (SMA 200 / gescheiterte Relief-Rallye) und die schwere $38–40-Zone. Ein Rückeroberung des 50ers ($26) und dann des $30-Bereichs wäre die erste echte Trendwende-Bestätigung. <strong>Positiver Sonderfaktor:</strong> Die S&amp;P-MidCap-400-Aufnahme (01.07.2026) kann kurzfristig Index-Nachfrage erzeugen. Netto technisch schwach, aber nahe Support mit neutralem Momentum → 5/10.</p>
+      <div class="source">Quellen: Benzinga (SMA 20/50/200, Death Cross, ~24.06.2026); Investing.com / TipRanks TOST-Technicals (RSI/MACD, Juni 2026); options.cafe (Distribution/Beta, 15.03.2026); TradingView (Widerstandszonen).</div>
+    </div>
+  </div>
+
+  <!-- ============ S10 RISIKEN ============ -->
+  <div class="section" id="s10">
+    <div class="section-header"><div class="section-number">10</div><div class="section-title">Risiken &amp; Chancen</div><div class="section-score">Score: 6/10 (invertiert)</div></div>
+    <div class="section-body">
+      <h3>10a) Strukturelle &amp; zyklische Risiken</h3>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Wettbewerb / DoorDash-POS-Eintritt</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div><div class="event-text">DoorDash baut einen eigenen POS-/Tech-Stack auf und zielt auf Toasts Kern-SMB. Zusätzlich Square/Block, Lightspeed sowie Oracle/NCR im Enterprise. Mehrere Analysten senkten Kursziele bzw. stuften wegen DoorDash herab. Bei Erfolg könnten Neukunden-Wachstum und Take-Rate leiden. Wahrscheinlichkeit: mittel, Zeithorizont mehrjährig.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Restaurant-Konjunktur / Konsum</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">GPV je Standort –1% YoY. Bei schwächerem Restaurant-Konsum sinkt das Zahlungsvolumen, während Hardware-Kosten bleiben. Fintech-Umsatz ist direkt an das Gäste-Ausgabeverhalten gekoppelt.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Take-Rate-Erosion / Preisdruck</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">Payments ist prinzipiell kommoditisierbar. Bislang stieg die Take-Rate (+2 Bp YoY) – noch keine Erosion, aber ein Dauerkampf um die Marge, sobald Wettbewerber aggressiv bepreisen.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚡ Margen-/Guidance-Enttäuschung</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">Der Markt reagiert empfindlich auf jede Guidance-Vorsicht (Q2-2026-EBITDA-Guide löste ~10–15% Kursverlust aus). Hardware-Chipkosten und Wachstumsinvestitionen belasten die kurzfristige Marge.</div></div>
+      <h3>10b) KI-Risiko &amp; technologische Disruption</h3>
+      <p><strong>Bärisches Szenario:</strong> KI-native/agentische Bestellwege (Voice-Agenten, DoorDashs vertikaler Stack, „agentic commerce") könnten die Front-End-/Bestell-Ebene disintermediieren und POS-Software teilweise kommoditisieren. Wenn KI-Voice-Ordering zu einer horizontalen Schicht wird, erodiert Toasts UI-Vorteil.</p>
+      <p><strong>Bullishes Szenario (überwiegt):</strong> Toast besitzt das System-of-Record (POS + Payments + Daten) – die am schwersten zu disruptierende Ebene. Es bettet KI in den eigenen Stack ein (Toast IQ hebt Umsatz je Betrieb um ~8%, automatisiert 40% der Support-Fälle; Drive-Thru-Voice; „Toast IQ Grow"-Agent) und schafft neue Monetarisierung – inkl. potenzieller <em>usage-based AI-Pricing-Modelle</em>, die noch nicht in Schätzungen stecken. Der Datenvorsprung macht KI eher zum Graben-Verstärker als zur Bedrohung. Netto: KI ist für Toast mehr Chance als Risiko – die zu beobachtende Ausnahme ist DoorDashs vertikale Integration.</p>
+      <h3>10c) Chancen</h3>
+      <p>TAM-Erweiterung (1,4 Mio Standorte: Enterprise, International, Retail, Drive-Thru), Take-Rate-/ARPU-Ausweitung, KI-Upsell mit möglicher nutzungsbasierter Monetarisierung, Toast Capital als margenstarke Fintech-Erweiterung, operative Hebelwirkung (Op.-Marge erstmals >20%) sowie potenzielle strategische/PE-Neubewertung des Sektors (vgl. Olo-Take-Private).</p>
+      <h3>10d) Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten):</strong> anhaltender GPV/Standort-Rückgang; abflachende Netto-Standort-Adds; Take-Rate-Kompression; ~$4,1 Mio Insider-Verkäufe in drei Monaten (moderat). <strong>Dealbreaker:</strong> Keine akut existenzbedrohenden Risiken erkennbar – die Bilanz ist eine Festung. Gesamt-Risikoscore 6/10 (invertiert: reale, aber beherrschbare Risiken, angeführt vom DoorDash-Wettbewerb).</p>
+      <div class="source">Quellen: Simply Wall St (DoorDash-Risiko, KI-Metriken, Insider-Verkäufe, Juni 2026); Restaurant Business (29.06.2026); Toast Q1-2026-Call; businesswire Drive-Thru.</div>
+    </div>
+  </div>
+
+  <!-- ============ S11 SCORING ============ -->
+  <div class="section" id="s11">
+    <div class="section-header"><div class="section-number">11</div><div class="section-title">Scoring &amp; User-spezifische Analysen</div><div class="section-score">Ø 7,1/10</div></div>
+    <div class="section-body">
+      <h3>User-spezifische Thesen (Phase 0)</h3>
+      <p><strong>These 1 – Wachstumsnachhaltigkeit (Location-Adds, Enterprise/International).</strong> Bestätigt, mit Vorbehalt: Rekord-30.000-Adds in 2025, Guidance für noch mehr in 2026, TAM-Erweiterung auf Drive-Thru/Retail/International (>10.000 neue Standorte). Aber: ARR-Wachstum verlangsamt von 31% auf 26%, GPV/Standort –1%. Wachstum bleibt nachhaltig, solange Standort-Adds + Take-Rate die Kern-Deceleration abfedern → stützt wa=8.</p>
+      <p><strong>These 2 – Fintech-/Take-Rate-These (Monetarisierung, Toast Capital, Marge).</strong> Robust: Gesamt-Take-Rate erstmals >1% des GPV, Fintech-Take-Rate 61 Bp, Payments-Take-Rate +2 Bp YoY, Toast Capital $51 Mio Bruttogewinn. Margen-Runway über neue Produkte, gezieltes Pricing und potenzielles usage-based AI-Pricing. Einschränkung: GPV/Standort-Schwäche begrenzt die Fintech-Umsatzdynamik → stützt cf=8, bg=7.</p>
+      <p><strong>These 3 – Wettbewerb / Take-Rate-Erosion (DoorDash, Square, Fiserv, Lightspeed).</strong> Teilweise bestätigt als <em>Risiko</em>, aber noch nicht in Zahlen sichtbar: Die Take-Rate stieg zuletzt (+2 Bp), also <em>keine</em> Erosion bislang. DoorDashs POS-Eintritt ist die glaubwürdigste zukünftige Bedrohung und der Hauptgrund, warum ri=6 bleibt.</p>
+      <p><strong>These 4 – KI-Disruptionsrisiko.</strong> Analyse (S10b): KI ist für Toast netto Chance, da es das System-of-Record besitzt und KI in den eigenen Stack monetarisiert; einzige echte Disruptions-Achse ist DoorDashs vertikale KI-Integration. Kein Score-Downgrade, aber als Beobachtungspunkt im Outlook verankert.</p>
+      <p style="color:var(--text-muted);font-size:13px;">Fazit der User-Analysen: Die Thesen <em>bestätigen</em> das fundamentale Bild und führen zu keiner Score-Anpassung; sie schärfen jedoch die Gewichtung des Wettbewerbsrisikos (DoorDash) als zentralen Watchpoint.</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Kategorie</th><th>Score</th><th>Visualisierung</th><th>Begründung (Kurzform)</th><th>Δ vs. v1.0</th></tr></thead>
+        <tbody>
+          <tr><td>Geschäftsmodell</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>All-in-One-Plattform, wiederkehrend + Fintech; Hardware-Drag</td><td>Erstanalyse</td></tr>
+          <tr><td>Burggraben</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>Hohe Switching Costs + Skala/Daten; Neukunden angreifbar</td><td>Erstanalyse</td></tr>
+          <tr><td>Operative Entwicklung (4Q)</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>Konsistente Beats, Op.-Marge >20%; EPS-Miss Q3</td><td>Erstanalyse</td></tr>
+          <tr><td>Wachstum</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>+22–26%, Rekord-Adds, TAM-Ausbau; Deceleration</td><td>Erstanalyse</td></tr>
+          <tr><td>Bewertung</td><td>7/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:70%"></div></div><span class="score-num">7</span></div></td><td>De-rated, Fwd-P/E ~19x, PEG <0,6; nicht absolut billig</td><td>Erstanalyse</td></tr>
+          <tr><td>Cashflow &amp; Kapitalqualität</td><td>8/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>FCF+ wachsend, Festungsbilanz, Buybacks; SBC ~14%</td><td>Erstanalyse</td></tr>
+          <tr><td>Risiken (invertiert)</td><td>6/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>DoorDash, Konsum-Zyklik, Wettbewerb; keine Dealbreaker</td><td>Erstanalyse</td></tr>
+          <tr><td>Technische Analyse</td><td>5/10</td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Unter 50/200-SMA, Death Cross; nahe Support, RSI neutral</td><td>Erstanalyse</td></tr>
+          <tr style="background:rgba(255,105,0,0.08);"><td><strong>⌀ Gesamtscore</strong></td><td><strong>7,1/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:71%;background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">7,1</span></div></td><td>Qualitäts-Wachstum zu de-ratetem Kurs; Wettbewerb als Overhang</td><td>Erstanalyse</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="source">Quellen: Aggregation der Sektionen 1–10. Scores nach Canvas-v2.2-Methodik; Risiken invertiert (10 = kein Risiko).</div>
+    </div>
+  </div>
+
+  <!-- ============ S12 FAZIT ============ -->
+  <div class="section" id="s12">
+    <div class="section-header"><div class="section-number">12</div><div class="section-title">Fazit – Investment-These</div><div class="section-score">KAUFEN</div></div>
+    <div class="section-body">
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 – Profitabilitätswende ist strukturell.</strong> Die GAAP-Op.-Marge überschritt in Q1 2026 erstmals 20% (21%), Adjusted EBITDA stieg auf $179 Mio (+35% YoY), der Nettogewinn hat sich auf $126 Mio mehr als verdoppelt. Das ist operative Hebelwirkung, kein Einmaleffekt – SaaS-Bruttomarge >80%, FCF-Konversion nahe 100%.</p>
+          <p><strong>Säule 2 – Wachstum bleibt hochwertig und breit.</strong> ARR +26% auf $2,2 Mrd, Rekord-Standort-Adds, Gesamt-Take-Rate erstmals >1% des GPV. Neue Verticals (Drive-Thru ~140k Lanes, Retail, International) plus KI (Toast IQ: +8% Umsatz je Betrieb) verlängern die Wachstumsbahn – TAM 1,4 Mio Standorte bei erst ~15% US-Payment-Anteil.</p>
+          <p><strong>Säule 3 – Bewertung ist nach dem De-Rating attraktiv.</strong> Fwd-P/E ~19x, EV/FY26e-EBITDA ~15x, PEG ~0,2–0,6 bei 22–26%-Wachstum. DCF-/GF-Fair-Values liegen bei $33–39 vs. $24,66 Kurs. Festungsbilanz ($1,77 Mrd Cash, quasi schuldenfrei) + laufende Rückkäufe stützen den Boden.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 – DoorDash-Vertikalisierung.</strong> DoorDash baut einen eigenen POS-/Tech-Stack und zielt auf Toasts Kern-SMB. Falls DoorDash Marktanteile im Neukundengeschäft gewinnt, verlangsamen sich Standort-Adds und der Take-Rate-Spielraum schrumpft – mehrere Analysten haben deshalb bereits herabgestuft/Kursziele gesenkt.</p>
+          <p><strong>Risiko 2 – Konsum-Zyklik trifft das Fintech-Herz.</strong> GPV je Standort –1% YoY. Verstetigt sich schwächerer Restaurant-Konsum, sinkt das Zahlungsvolumen, während Hardware-/Chipkosten bleiben – die Fintech-Umsätze und damit der größte Umsatzblock geraten unter Druck.</p>
+          <p><strong>Risiko 3 – Margen-Guidance &amp; Technik.</strong> Der Markt bestraft jede Guidance-Vorsicht hart (–10–15% nach Q1-2026-Ausblick). Charttechnisch ist der Titel angeschlagen: unter 50er/200er-SMA, Death Cross, RSI nie überverkauft (Distribution). Ein P/E von ~19x fwd ist nicht billig, falls das Wachstum unter 20% fällt.</p>
+        </div>
+      </div>
+      <h3>Eigene Einschätzung (ausgewogen)</h3>
+      <p>Das bullische Narrativ überzeugt mehr, aber die bärischen Punkte sind valide und nicht wegzuwischen. Toast ist unter den Restaurant-reinen Namen der Qualitätsführer: der einzige Anbieter, der gleichzeitig zweistellig wächst, GAAP-profitabel ist und wachsenden Free Cash Flow generiert – abgesichert durch eine Festungsbilanz. Die Profitabilitätswende ist strukturell (operative Hebelwirkung, nicht zyklisch), und nach dem ~38%-Kursrückgang ist die Bewertung von „teuer" auf „fair bis moderat unterbewertet" gefallen.</p>
+      <p>Der zentrale Streitpunkt ist nicht die aktuelle Ausführung – die ist stark – sondern die <em>Zukunft der Wettbewerbsposition</em>: DoorDashs Eintritt und die Frage, ob Toast die Take-Rate gegen wachsenden Druck verteidigen kann. Wichtig: Bislang zeigt sich <em>keine</em> Take-Rate-Erosion (im Gegenteil, +2 Bp), und der System-of-Record-Graben schützt die Bestandsbasis stark. Die KI-Disruptionssorge (These 4) sehe ich für Toast überwiegend als Chance, da der Datenvorsprung KI eher zum Graben-Verstärker macht.</p>
+      <p>Risk/Reward: ~<strong>–19% Downside</strong> (Support-/52W-Tief-Zone ~$20) vs. ~<strong>+42% Upside</strong> (Zielkurs-Mitte ~$35), also rund 1:2,2 – asymmetrisch zugunsten der Long-Seite, aber wegen der bärischen Technik und des DoorDash-Overhangs ist <em>tranchiertes Einsteigen</em> statt „all-in" die klügere Umsetzung. Ich könnte falsch liegen, falls DoorDash schneller/aggressiver Marktanteile nimmt als erwartet oder der Restaurant-Konsum kippt – dann wäre das aktuelle Multiple zu hoch. Geeignet für Quality-Growth-Investoren mit 2–4-Jahres-Horizont.</p>
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Kurzfristig (0–6M)</strong></td><td>S&amp;P-MidCap-400-Index-Nachfrage; Q2-Earnings (Aug.); Support bei $24/$22</td><td>Guidance-Vorsicht; bärische Technik; Distribution</td><td><span class="badge badge-yellow">Tranchiert / Support abwarten</span></td></tr>
+          <tr><td><strong>Mittelfristig (6–24M)</strong></td><td>Take-Rate-Ausweitung; Drive-Thru/Enterprise-Skalierung; KI-Monetarisierung</td><td>DoorDash-Rollout; GPV/Standort; Margen-Normalisierung</td><td><span class="badge badge-green">Akkumulieren</span></td></tr>
+          <tr><td><strong>Langfristig (2–4J)</strong></td><td>TAM 1,4 Mio Std.; internationale Expansion; usage-based AI-Pricing</td><td>Wettbewerbs-Intensität; Sättigung US-Kern</td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <h3>Kernthese</h3>
+      <p>Toast ist der profitable Kategorieführer im US-Restaurant-Betriebssystem mit einem seltenen Dreiklang aus 20%+-Wachstum, echter Margenexpansion und Festungsbilanz – jetzt zu einem um ~38% de-rateten Kurs und Forward-Multiples, die für die Qualität günstig erscheinen. Der Bull Case ruht auf struktureller Profitabilität, breitem TAM-Wachstum und KI-Monetarisierung; der Bear Case auf DoorDashs POS-Eintritt und Konsum-Zyklik. Da bislang keine Take-Rate-Erosion sichtbar ist und der Switching-Cost-Graben die Basis schützt, überwiegt für den 2–4-Jahres-Anleger die Chance – umgesetzt über tranchierte Käufe wegen der schwachen Technik.</p>
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val buy">✓ KAUFEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$32–38</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–4 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–19%</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+42%</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:2,2</div></div>
+      </div>
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Nachweisliche Take-Rate-Erosion (Fintech-Take-Rate fällt mehrere Quartale) → reduzieren</li>
+            <li>Netto-Standort-Adds fallen sequenziell deutlich unter Vorjahr (DoorDash gewinnt) → reduzieren</li>
+            <li>Kurs bricht nachhaltig unter $22 (52W-Tief) auf hohem Volumen → Stop/Teilverkauf</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>GPV je Standort dreht wieder positiv → nachkaufen</li>
+            <li>Rückeroberung SMA 50 ($26) und dann $30 auf Volumen → aufstocken</li>
+            <li>Q2/Q3-2026: Adj.-EBITDA über Guidance-Oberkante + Guidance-Anhebung → aufstocken</li>
+          </ul>
+        </div>
+      </div>
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul><li>Quality-Growth-Investoren (2–4 J)</li><li>Contrarian / Buy-the-Dip</li><li>Fintech-/SaaS-Thematiker</li></ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul><li>Deep-Value-Investoren</li><li>Income-Investoren (keine Dividende)</li><li>Kurzfristige Momentum-Trader</li></ul>
+        </div>
+      </div>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten / Tranchiert</span></td><td>Erst Stabilisierung über SMA 50 ($26) abwarten</td></tr>
+          <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert einsteigen</span></td><td>⅓ jetzt (~$24–26), ⅓ bei $22–24-Retest, ⅓ bei $26-Reclaim</td></tr>
+          <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-green">Jetzt kaufen</span></td><td>R/R ~1:2,2 bei De-Rating; Stop unter $22</td></tr>
+          <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Kaufen &amp; Halten</span></td><td>Struktureller Kategorieführer, TAM-Runway, FCF-Compounding</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="source">Quellen: Synthese Sektionen 1–11; Analysten-Kursziele (stockanalysis.com / Google Finance, Juni 2026); DCF/GF-Value (Macroaxis, Simply Wall St, GuruFocus).</div>
+    </div>
+  </div>
+
+  <!-- ============ S13 OUTLOOK ============ -->
+  <div class="section" id="s13">
+    <div class="section-header"><div class="section-number">13</div><div class="section-title">Outlook – Anstehende Events &amp; Wenn/Dann</div><div class="section-note">3 Schlüssel-Events</div></div>
+    <div class="section-body">
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q2-2026-Quartalsergebnisse – voraussichtlich Anfang August 2026 (ca. 04.–11.08.)</h4>
+        <p>Der wichtigste kurzfristige Katalysator. Entscheidend sind (a) ob die Netto-Standort-Adds das Vorjahres-Tempo halten (Test der DoorDash-Wettbewerbsthese) und (b) ob Adjusted EBITDA die eigene Guidance ($185–195 Mio) trifft/übertrifft.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Netto-Adds ≥ ~8.000 <em>und</em> Adj. EBITDA ≥ Guidance-Oberkante ($195 Mio) <em>und</em> GPV/Standort ≥ 0% YoY → Wettbewerbs- und Konsum-Sorge deutlich entkräftet; kurzfristig nachkaufen.<br><br>
+          <strong>Wenn:</strong> Netto-Adds sequenziell klar rückläufig <em>oder</em> GPV/Standort verschlechtert sich auf ≤ –3% YoY → DoorDash-/Konsum-These gewinnt; Position reduzieren und $22-Support beobachten.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>📈 Event 2: Take-Rate- &amp; KI-Monetarisierung – laufend, Datenpunkte je Quartal 2026</h4>
+        <p>Der Kern der Fintech-/Take-Rate-These. Zu beobachten: Entwicklung der Fintech-Take-Rate (aktuell 61 Bp), Toast-Capital-Bruttogewinn (aktuell $51 Mio) und erste Anzeichen von usage-based AI-Pricing (Toast IQ), das noch nicht in Schätzungen steckt.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Gesamt-Take-Rate steigt weiter über 1% des GPV <em>und</em> Management kündigt konkrete KI-Monetarisierung/Preismodelle an → strukturelles Margen-Upside, das Konsens-Schätzungen anhebt; aufstocken.<br><br>
+          <strong>Wenn:</strong> Fintech-Take-Rate fällt zwei Quartale in Folge (Preisdruck durch Wettbewerb) → beginnende Take-Rate-Erosion; Bewertungsprämie hinterfragen, reduzieren.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>⚔️ Event 3: DoorDash-POS-Rollout &amp; Wettbewerbsdynamik – Verlauf 2026/2027</h4>
+        <p>Das entscheidende mehrjährige Strukturthema (These 3 &amp; 4). DoorDashs eigener POS-/Tech-Stack zielt direkt auf Toasts SMB-Kernkundschaft; parallel skalieren Square/Block und Lightspeed KI-Bundles.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> DoorDash gewinnt sichtbar SMB-Marktanteile (Toast-Standort-Adds verlangsamen sich strukturell, Analysten senken weiter) → These der Marktführerschaft geschwächt; Rating auf HALTEN überdenken, Position reduzieren.<br><br>
+          <strong>Wenn:</strong> Toast hält Standort-Adds und Take-Rate trotz DoorDash <em>und</em> KI-Produkte (Toast IQ, Drive-Thru) treiben ARPU → Graben bestätigt; Kern-Long-Position halten/aufstocken Richtung Zielkurs $32–38.
+        </div>
+      </div>
+      <div class="source">Quellen: Toast IR Earnings-Kalender (Q2 2026); Toast Q1-2026-Call (Take-Rate, KI-Pricing); Simply Wall St / Restaurant Business (DoorDash-Wettbewerb, Juni 2026).</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich Informations- und Bildungszwecken und stellt keine Anlageberatung, kein Angebot und keine Aufforderung zum Kauf oder Verkauf von Wertpapieren dar. Alle Angaben ohne Gewähr; Kurse und Kennzahlen (Stand 30.06./01.07.2026) können je nach Datenquelle abweichen und sich jederzeit ändern. Aktien unterliegen Kursrisiken bis zum Totalverlust. Der Verfasser übernimmt keine Haftung für Anlageentscheidungen. Bitte eigene Recherche (DYOR) und ggf. professionelle Beratung einholen.</div>
+
+</div>
+</body>
+</html>
