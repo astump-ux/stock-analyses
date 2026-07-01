@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AXON – Aktienanalyse Canvas v2.2</title>
+<style>
+:root{
+  --primary:#FF6900; --primary-dark:#cc5400;
+  --bg:#0f0f12; --bg-card:#1a1a1f; --bg-card2:#22222a; --border:#2e2e38;
+  --text:#e8e8ec; --text-muted:#888898; --text-dim:#555566;
+  --green:#22c55e; --red:#ef4444; --yellow:#f59e0b; --blue:#3b82f6; --purple:#8b5cf6; --teal:#14b8a6;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7}
+.header{background:linear-gradient(135deg,#1a0800 0%,#2a1000 40%,#0f0f12 100%);border-bottom:1px solid var(--primary);padding:36px 40px 28px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px}
+.header-left h1{font-size:32px;font-weight:700;color:#fff;letter-spacing:-0.5px}
+.header-left h1 span{color:var(--primary)}
+.header-left .subtitle{color:var(--text-muted);font-size:14px;margin-top:4px}
+.header-right{text-align:right}
+.price-tag{font-size:38px;font-weight:800;color:var(--primary);line-height:1}
+.price-meta{color:var(--text-muted);font-size:13px;margin-top:4px}
+.price-change{display:inline-block;padding:2px 8px;border-radius:4px;font-size:13px;font-weight:600;margin-top:4px}
+.price-change.up{background:rgba(34,197,94,0.15);color:var(--green)}
+.price-change.down{background:rgba(239,68,68,0.15);color:var(--red)}
+.nav{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:100}
+.nav a{color:var(--text-muted);text-decoration:none;padding:14px 16px;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s}
+.nav a:hover{color:var(--primary);border-bottom-color:var(--primary)}
+.main{max-width:1100px;margin:0 auto;padding:32px 40px 60px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.kpi-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+.kpi-value{font-size:22px;font-weight:700;color:#fff;margin-top:4px}
+.kpi-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
+.kpi-value.green{color:var(--green)}.kpi-value.red{color:var(--red)}.kpi-value.orange{color:var(--primary)}
+.section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden}
+.section-header{background:var(--bg-card2);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+.section-number{background:var(--primary);color:#fff;width:28px;height:28px;border-radius:6px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.section-title{font-size:16px;font-weight:700;color:#fff}
+.section-score{margin-left:auto;font-size:14px;font-weight:700;color:var(--primary)}
+.section-note{font-size:12px;color:var(--text-dim);background:rgba(46,46,56,.4);border-radius:4px;padding:4px 10px;margin-left:auto}
+.section-body{padding:20px 24px}
+p{margin-bottom:12px;color:var(--text)}p:last-child{margin-bottom:0}
+h3{font-size:14px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;margin:20px 0 8px}
+h3:first-child{margin-top:0}
+.table-wrap{overflow-x:auto;margin:16px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:var(--bg-card2);color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid rgba(46,46,56,.5);color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,105,0,.04)}
+.beat{color:var(--green);font-weight:600}.miss{color:var(--red);font-weight:600}.neutral{color:var(--yellow);font-weight:600}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}
+.badge-green{background:rgba(34,197,94,.15);color:var(--green)}
+.badge-red{background:rgba(239,68,68,.15);color:var(--red)}
+.badge-yellow{background:rgba(245,158,11,.15);color:var(--yellow)}
+.badge-blue{background:rgba(59,130,246,.15);color:var(--blue)}
+.badge-orange{background:rgba(255,105,0,.15);color:var(--primary)}
+.event-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(46,46,56,.5);align-items:flex-start}
+.event-item:last-child{border-bottom:none}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0}
+.dot-green{background:var(--green)}.dot-red{background:var(--red)}.dot-yellow{background:var(--yellow)}
+.event-label{font-weight:600;color:#fff}
+.event-text{font-size:14px;color:var(--text)}
+.risk-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px}
+.risk-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.risk-title{font-weight:600;color:#fff;font-size:14px}
+.score-bar{display:flex;align-items:center;gap:10px}
+.score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#ff9500)}
+.score-num{font-weight:700;color:var(--primary);font-size:15px;min-width:32px}
+.bull-bear-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:700px){.bull-bear-grid{grid-template-columns:1fr}}
+.bull-card{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:16px}
+.bear-card{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:16px}
+.bull-card h4{color:var(--green);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:.5px}
+.bear-card h4{color:var(--red);margin-bottom:10px;font-size:14px;text-transform:uppercase;letter-spacing:.5px}
+.rating-box{background:linear-gradient(135deg,rgba(255,105,0,.12),rgba(255,105,0,.04));border:1px solid rgba(255,105,0,.3);border-radius:12px;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:20px 0}
+.rating-item label{font-size:11px;text-transform:uppercase;color:var(--text-muted);letter-spacing:.5px;display:block;margin-bottom:4px}
+.rating-item .val{font-size:20px;font-weight:800;color:#fff}
+.rating-item .val.buy{color:var(--green)}.rating-item .val.hold{color:var(--yellow)}.rating-item .val.sell{color:var(--red)}
+.rating-item .val.green{color:var(--green)}
+.trigger-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+@media(max-width:700px){.trigger-grid{grid-template-columns:1fr}}
+.trigger-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px}
+.trigger-card h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.trigger-card.buy h5{color:var(--green)}.trigger-card.sell h5{color:var(--red)}
+.trigger-list{font-size:13px;color:var(--text);list-style:none;padding:0}
+.trigger-list li{margin-bottom:6px;padding-left:14px;position:relative}
+.trigger-list li::before{content:"→";position:absolute;left:0}
+.investor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+@media(max-width:600px){.investor-grid{grid-template-columns:1fr}}
+.investor-yes{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:12px}
+.investor-no{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:12px}
+.investor-yes h5{color:var(--green);font-size:12px;text-transform:uppercase;margin-bottom:8px}
+.investor-no h5{color:var(--red);font-size:12px;text-transform:uppercase;margin-bottom:8px}
+.investor-yes li,.investor-no li{font-size:13px;color:var(--text);margin-bottom:4px;list-style:none;padding-left:14px;position:relative}
+.investor-yes li::before{content:"✓";position:absolute;left:0;color:var(--green)}
+.investor-no li::before{content:"✗";position:absolute;left:0;color:var(--red)}
+.geo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0}
+.geo-card{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.geo-region{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+.geo-pct{font-size:20px;font-weight:700;color:#fff}
+.geo-note{font-size:12px;color:var(--text-muted)}
+.outlook-card{background:var(--bg-card2);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:16px;margin-bottom:14px}
+.outlook-card h4{color:#fff;font-size:14px;margin-bottom:8px}
+.outlook-card .when-then{font-size:13px;color:var(--text);margin-top:8px}
+.outlook-card .when-then strong{color:var(--primary)}
+.source{font-size:11px;color:var(--text-dim);margin-top:12px;padding-top:10px;border-top:1px solid rgba(46,46,56,.5)}
+.source a{color:var(--text-dim)}
+.disclaimer{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text-dim);margin-top:32px}
+.alert-box{background:rgba(255,105,0,.08);border:1px solid rgba(255,105,0,.2);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:13px}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+.pill{display:inline-block;background:rgba(255,105,0,.12);color:var(--primary);border-radius:4px;padding:1px 7px;font-size:13px;font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Axon Enterprise <span>AXON.US</span></h1>
+    <div class="subtitle">Aktienanalyse Canvas v2.2 · Stand: 30. Juni 2026 · NASDAQ · Sektor: Public-Safety-Tech / Software</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-orange">Software &amp; Services (SaaS)</span>
+      <span class="badge badge-blue">Connected Devices (TASER / Body-Cam)</span>
+      <span class="badge badge-yellow">AI &amp; Counter-Drone</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="price-tag">$560,61</div>
+    <div class="price-meta">Schlusskurs 30.06.2026 · NASDAQ</div>
+    <div class="price-change up">▲ +24 % (5 Handelstage)</div>
+    <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">52W: $339,01 – $885,92</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#s1">1. Geschäftsmodell</a>
+  <a href="#s2">2. Burggraben</a>
+  <a href="#s3">3. Quartale</a>
+  <a href="#s4">4. Wachstum</a>
+  <a href="#s5">5. Bewertung</a>
+  <a href="#s6">6. Cashflow</a>
+  <a href="#s7">7. Peers</a>
+  <a href="#s8">8. News</a>
+  <a href="#s9">9. Technisch</a>
+  <a href="#s10">10. Risiken</a>
+  <a href="#s11">11. Scoring</a>
+  <a href="#s12">12. Fazit</a>
+  <a href="#s13">13. Outlook</a>
+</nav>
+
+<div class="main">
+
+  <div class="kpi-grid" style="margin-top:24px;">
+    <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange">$560,61</div><div class="kpi-sub">USD · 30.06.2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Marktkap.</div><div class="kpi-value">~$45 Mrd.</div><div class="kpi-sub">~80,6 Mio. Aktien</div></div>
+    <div class="kpi-card"><div class="kpi-label">Fwd P/E</div><div class="kpi-value red">~70x</div><div class="kpi-sub">non-GAAP 2026e</div></div>
+    <div class="kpi-card"><div class="kpi-label">P/S (fwd)</div><div class="kpi-value red">~12x</div><div class="kpi-sub">auf ~$3,65 Mrd. 2026e</div></div>
+    <div class="kpi-card"><div class="kpi-label">ARR</div><div class="kpi-value green">$1,5 Mrd.</div><div class="kpi-sub">+35 % YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">Umsatz-Wachstum</div><div class="kpi-value green">+34 %</div><div class="kpi-sub">Q1 2026 YoY</div></div>
+    <div class="kpi-card"><div class="kpi-label">Adj. EBITDA-Marge</div><div class="kpi-value">~25 %</div><div class="kpi-sub">Guidance 25,5 % '26</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nächste Earnings</div><div class="kpi-value" style="font-size:18px;">~03.–11.08.</div><div class="kpi-sub">Q2 2026 (voraus.)</div></div>
+  </div>
+
+  <!-- ============ SEKTION 1 ============ -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Geschäftsmodell</div>
+      <div class="section-note">Quellen ≤ 6–9 Monate</div>
+    </div>
+    <div class="section-body">
+      <p>Axon Enterprise ist aus dem TASER-Hersteller (bis 2017 „TASER International") zu einer integrierten Public-Safety-Plattform gewachsen. Das Unternehmen verkauft an Polizei, Behörden, Militär, Justiz/Strafvollzug und zunehmend an Unternehmen ein Ökosystem aus Hardware (Elektroimpulsgeräte TASER 10, Body-Cams, In-Car-Kameras, Drohnen- und Counter-Drone-Technik) und cloudbasierter Software (Beweismittel-Verwaltung Axon Evidence/Evidence.com, Draft One, Axon Records, Axon Assistant, Fusus, Axon 911). Das Ziel ist ein geschlossener Workflow „von der Erfassung bis zur Anklage", in dem Hardware Daten erzeugt, die dann über kostenpflichtige Software gespeichert, analysiert und geteilt werden.</p>
+      <p>Berichtet wird in zwei Segmenten. <strong>Software &amp; Services</strong> ($355 Mio. in Q1 2026, +35 % YoY) ist das margenstarke SaaS-Herz: hier sitzen die wiederkehrenden Abo-Erlöse (Evidence-Storage, Premium-Software-Pakete, „Officer Safety Plans"). <strong>Connected Devices</strong> ($453 Mio., +33 %) umfasst die Hardware – TASER, „Personal Sensors" (Body-Cams) sowie „Platform Solutions" (u. a. die zugekaufte Counter-Drone-Sparte Dedrone). Die Hardware ist bewusst als Türöffner konzipiert: sie ist oft in mehrjährige Bundles eingebettet, die den Kunden auf lange Sicht an die Software binden.</p>
+      <p>Kern der Erlösmechanik ist das Bundle- und Abo-Modell. Behörden schließen typischerweise 5-Jahres-Verträge ab, in denen Hardware, Software, Cloud-Speicher, Trainings und Geräte-Refresh zusammengefasst sind. Das erzeugt hohe Planbarkeit: die <strong>Annual Recurring Revenue (ARR) erreichte $1,5 Mrd. (+35 % YoY)</strong>, und die Net Revenue Retention lag bei <strong>125 %</strong> – Bestandskunden geben also Jahr für Jahr rund ein Viertel mehr aus, primär durch Zukauf neuer Software-Module. Die künftig vertraglich gesicherten Buchungen (future contracted bookings) summieren sich auf über $14 Mrd. und geben mehrjährige Umsatzsichtbarkeit.</p>
+      <p>Die Kostenstruktur ist ein Hybrid: Die Software-Seite ist asset-light und hochmarginal, die Hardware-Seite kapital- und lieferkettenintensiv (Fertigung, Vorräte, Halbleiter-/Memory-Komponenten). Die Bruttomarge insgesamt lag zuletzt bei rund 59 %, gedrückt durch den wachsenden Hardware- und Drohnen-Anteil, während reine Software-Umsätze deutlich höhere Margen tragen. Die zentrale Investment-Frage – und Thesenpunkt 1 des Users – ist genau dieser Mix: Verschiebt sich das Modell strukturell genug in Richtung Software, um die „Taser-Hardware"-Wahrnehmung abzulösen? Aktuell steuert S&amp;S rund 44 % des Umsatzes bei, mit klar höherer Wachstumsrate als die Hardware.</p>
+      <div class="source">Quellen: Axon 8-K/Shareholder Letter Q1 2026 (06.05.2026); Axon IR Q4-2025-Report (24.02.2026); SEC EDGAR; stockanalysis.com (Juni 2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 2 ============ -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Burggraben &amp; Wettbewerbsvorteile</div>
+      <div class="section-score">Score: 9/10</div>
+    </div>
+    <div class="section-body">
+      <p>Der Burggraben ist einer der stärksten im gesamten Software-/Defense-Universum – und Thesenpunkt 3 des Users (Ökosystem-Lock-in) lässt sich nach Durchsicht der Zahlen klar bestätigen. Der wichtigste Vorteil sind die <strong>Switching Costs</strong>: Sobald eine Polizeibehörde ihre gesamte Beweismittelkette in Axon Evidence führt, ist ein Anbieterwechsel operativ, juristisch und politisch extrem teuer. Digitale Beweise müssen manipulationssicher, revisionssicher und vor Gericht verwertbar archiviert werden – ein Wechsel würde Migration, Neuzertifizierung und Umschulung tausender Beamter bedeuten. Die Net Revenue Retention von 125 % ist der quantitative Beweis dieses Lock-ins.</p>
+      <p>Zweitens wirkt ein <strong>Netzwerk- und Standard-Effekt</strong>: Je mehr Behörden im Axon-Ökosystem sind, desto einfacher wird der interbehördliche Datenaustausch (Staatsanwaltschaften, Nachbarreviere, Bundesbehörden), was neue Kunden anzieht. Drittens ein <strong>Vertrauens- und Compliance-Vorsprung</strong>: Das Management betont, dass ein Jahrzehnt an akkreditierter, regierungskonformer Datensicherheit (CJIS, FedRAMP-Niveau) einen Graben zieht, den AI-native Angreifer nicht über Nacht überspringen können. Genau dieser Punkt ist entscheidend für Thesenpunkt 2 (AI): Der eigentliche Moat liegt nicht im AI-Modell selbst, sondern im Zugang zu sensiblen, akkreditierten Behördendaten, auf denen die AI-Features aufsetzen.</p>
+      <p>Viertens <strong>Skalen- und Vertriebsvorteile</strong>: Axon hat in den USA eine dominante Marktposition bei Body-Cams und Elektroimpulsgeräten und eine etablierte, referenzstarke Vertriebsmaschine für einen notorisch schwer zugänglichen Behördenmarkt. Die Marke „TASER" ist zudem quasi-generisch – ein seltener Fall von Preissetzungsmacht in einem Hardware-Markt.</p>
+      <p>Die kritischen Schwachstellen: (1) Der Moat ist im <em>Kerngeschäft</em> stark, aber in neuen Feldern (Counter-Drone, Enterprise-Security, Real-Time-Ops) trifft Axon auf etablierte, teils besser kapitalisierte Wettbewerber (Motorola Solutions, Palantir, spezialisierte Drohnen-Firmen). (2) Ein Teil des Moats ist regulatorisch/politisch – dieselbe Nähe zu Behörden, die schützt, macht das Unternehmen anfällig für politische Stimmungswechsel und Ethik-Debatten (siehe Sektion 10). (3) Die AI-Feature-Führung ist real, aber nicht uneinholbar; Wettbewerber mit Behördenzugang (Motorola) können nachziehen.</p>
+      <div class="source">Quellen: Axon Q1-2026-Earnings-Call-Summary (07.05.2026); Axon Shareholder Letter Q1 2026; Simply Wall St / Seeking Alpha (Juni 2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 3 ============ -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Letzte 4 Quartale</div>
+      <div class="section-score">Beat-Ratio: 4/4</div>
+    </div>
+    <div class="section-body">
+      <p>Axon hat in Q1 2026 das <strong>neunte Quartal in Folge mit über 30 % Umsatzwachstum</strong> geliefert und alle vier betrachteten Quartale Umsatz- und/oder EPS-Erwartungen geschlagen. Auffällig: Die GAAP-Nettoergebnisse schwanken stark (von Nettoverlust bis $169 Mio.), weil sie durch aktienbasierte Vergütung (SBC) und Mark-to-Market-Bewertung strategischer Beteiligungen verzerrt werden. Aussagekräftiger sind Umsatz, ARR und Adjusted EBITDA.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>Q2 2025</th><th>Q3 2025</th><th>Q4 2025</th><th>Q1 2026</th></tr></thead>
+          <tbody>
+            <tr><td>Umsatz</td><td>$669 Mio.</td><td>$711 Mio.</td><td>$797 Mio.</td><td><strong>$807 Mio.</strong></td></tr>
+            <tr><td>Umsatz YoY</td><td class="beat">+33 %</td><td class="beat">+31 %</td><td class="beat">+39 %</td><td class="beat">+34 %</td></tr>
+            <tr><td>Software &amp; Services</td><td>$292 Mio.<br>+39 %</td><td>$305 Mio.<br>+41 %</td><td>$343 Mio.<br>+40 %</td><td>$355 Mio.<br>+35 %</td></tr>
+            <tr><td>ARR (Ende Q)</td><td>$1,2 Mrd.</td><td>$1,3 Mrd.</td><td>$1,35 Mrd.</td><td><strong>$1,5 Mrd.</strong></td></tr>
+            <tr><td>Adj. EBITDA</td><td>$172 Mio.</td><td>$177 Mio.</td><td>$206 Mio.</td><td>$202 Mio.</td></tr>
+            <tr><td>Adj. EBITDA-Marge</td><td>25,7 %</td><td>24,9 %</td><td>~25,5 %</td><td>~25 %</td></tr>
+            <tr><td>non-GAAP EPS</td><td>–</td><td>–</td><td class="beat">$2,15 (Est. $1,67)</td><td class="beat">$1,61 (Est. ~$1,28)</td></tr>
+            <tr><td>GAAP-Nettoergebnis</td><td>$36 Mio.</td><td class="miss">-$2 Mio.</td><td>$3 Mio.</td><td>$169 Mio.*</td></tr>
+            <tr><td>Beat / Miss</td><td class="beat">Beat</td><td class="beat">Beat</td><td class="beat">Beat</td><td class="beat">Beat</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>*Das hohe GAAP-Ergebnis in Q1 2026 ist maßgeblich durch nicht-operative Bewertungsgewinne getrieben, nicht durch die Kernprofitabilität. Wichtiger sind die operativen Rekorde: <strong>AI-Produktumsatz +700 % YoY</strong>, Counter-Drone-Umsatz +300 % (Buchungen +500 %), Platform Solutions $111 Mio. (+95 %), International-Umsatz mehr als verdoppelt auf 20 % des Gesamtumsatzes. Die künftig vertraglich gesicherten Buchungen erreichten $14,3 Mrd. (+44 %). Das Management hat nach Q1 die Jahresprognose von 27–30 % auf <strong>30–32 % Umsatzwachstum</strong> angehoben.</p>
+      <p><strong>Marktreaktion:</strong> Nach dem Q1-Bericht (06.05.2026) sprang die Aktie nachbörslich rund +12 %. Nach dem Q4-Bericht (24.02.2026, EPS-Beat +34 %) folgte zunächst eine Rally, dann ein scharfer Rücksetzer im April bis nahe $339. <span class="pill">Nächster Stichtag: Q2-2026-Earnings voraussichtlich Anfang bis Mitte August 2026</span></p>
+      <div class="source">Quellen: Axon 8-K Q2/Q3/Q4 2025 &amp; Q1 2026 (SEC EDGAR); Investing.com Earnings-Transcript (13.05.2026); TIKR (April/Mai 2026); finviz.com (Juni 2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 4 ============ -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Wachstumseinordnung</div>
+      <div class="section-score">Score: 9/10</div>
+    </div>
+    <div class="section-body">
+      <p>Das Wachstum ist außergewöhnlich konsistent und breit abgestützt. Der Umsatz stieg von rund $1,19 Mrd. (2022) über $1,56 Mrd. (2023), $2,08 Mrd. (2024) auf <strong>$2,78 Mrd. (2025, +33 %)</strong> – das vierte Jahr in Folge über 30 %. Für 2026 leitet die Guidance (30–32 %) rund $3,6–3,7 Mrd. ab. Entscheidend für die Qualität: Das Wachstum ist überwiegend organisch und durch wiederkehrende Umsätze getragen, nicht durch Bilanztricks aufgebläht. Die ARR wuchs mit +35 % sogar schneller als der Gesamtumsatz – ein Beleg, dass sich der Mix Richtung Software verschiebt (Thesenpunkt 1).</p>
+      <h3>Segment- &amp; Treiber-Wachstum (Q1 2026 YoY)</h3>
+      <div class="geo-grid">
+        <div class="geo-card"><div class="geo-region">Software &amp; Services</div><div class="geo-pct">+35 %</div><div class="geo-note">ARR $1,5 Mrd., NRR 125 %</div></div>
+        <div class="geo-card"><div class="geo-region">AI-Produkte</div><div class="geo-pct">+700 %</div><div class="geo-note">Draft One, Axon Assistant</div></div>
+        <div class="geo-card"><div class="geo-region">Counter-Drone</div><div class="geo-pct">+300 %</div><div class="geo-note">Buchungen +500 %</div></div>
+        <div class="geo-card"><div class="geo-region">Platform Solutions</div><div class="geo-pct">+95 %</div><div class="geo-note">$111 Mio., inkl. Dedrone</div></div>
+        <div class="geo-card"><div class="geo-region">Connected Devices</div><div class="geo-pct">+33 %</div><div class="geo-note">TASER +19 %, Sensors +23 %</div></div>
+      </div>
+      <h3>Geografische Verteilung</h3>
+      <p>Die geografische Diversifikation entwickelt sich zum eigenen Wachstumshebel und stützt Thesenpunkt 4 (TAM-Erweiterung). Der internationale Umsatzanteil hat sich auf <strong>20 % des Gesamtumsatzes</strong> mehr als verdoppelt, getrieben von starkem EMEA-Wachstum. Das Management beschreibt eine „Leapfrog"-Dynamik: kleinere Nationen adoptieren die komplette Axon-Cloud national auf einen Schlag, statt Legacy-Technik schrittweise abzulösen.</p>
+      <div class="geo-grid">
+        <div class="geo-card"><div class="geo-region">USA</div><div class="geo-pct">~80 %</div><div class="geo-note">Kernmarkt, reifer, aber weiter wachsend</div></div>
+        <div class="geo-card"><div class="geo-region">International (EMEA/APAC)</div><div class="geo-pct">~20 %</div><div class="geo-note">Umsatz &gt;verdoppelt YoY</div></div>
+      </div>
+      <h3>Reifegrad &amp; TAM</h3>
+      <p>Axon ist ein „Growth-at-Scale"-Fall: Trotz ~$3 Mrd. Umsatz wächst das Unternehmen wie ein Hyper-Growth-Player, weil es kontinuierlich neue TAM-Schichten erschließt – Enterprise/Private-Security (Axon Body Mini, ein $40-Mio.-Deal mit einem großen Telekom-Konzern), US-Federal, Justiz/Strafvollzug, Real-Time-Operations (Axon 911 nach Zukäufen Carbyne/Prepared) und Drohnen/Counter-Drone. Die Profitabilität wächst dabei annähernd im Gleichschritt (Rule-of-40-Wert über 55). Das einzige, was einem 10/10 im Weg steht, ist die Abhängigkeit von Behördenbudgets und die Frage, ob die extrem hohen Wachstumsraten der neuen Sparten (AI +700 %) von niedriger Basis nachhaltig skalieren.</p>
+      <div class="source">Quellen: Axon Shareholder Letter Q1 2026; Axon Q1-2026-Earnings-Call (07.05.2026); stockanalysis.com Revenue-History; Quartr Q1-2026-Summary</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 5 ============ -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Bewertung &amp; Multiples</div>
+      <div class="section-score">Score: 3/10</div>
+    </div>
+    <div class="section-body">
+      <p>Die Bewertung ist die klare Achillesferse und der Hauptgrund für ein zurückhaltendes Rating. Bei $560,61 und ~$45 Mrd. Marktkapitalisierung ist AXON auf nahezu jeder Kennzahl teuer bepreist – die Aktie diskontiert bereits jahrelanges 30 %+-Wachstum und Margenausweitung. Zusätzlich ist der Kurs in den letzten fünf Handelstagen rund +24 % gelaufen (siehe Sektion 8), was den Einstiegspunkt zusätzlich verschlechtert.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Multiple</th><th>AXON aktuell</th><th>Einordnung</th></tr></thead>
+          <tbody>
+            <tr><td>P/E (TTM, GAAP)</td><td>&gt;150x (bis ~350x je Quelle)</td><td class="miss">durch SBC &amp; Mark-to-Market verzerrt, wenig aussagekräftig</td></tr>
+            <tr><td>P/E (fwd, non-GAAP)</td><td>~65–75x</td><td class="miss">sehr hoch, Premium zum Sektor</td></tr>
+            <tr><td>P/S (fwd)</td><td>~12x</td><td class="miss">hoch, aber für 30 %+-SaaS nicht extrem</td></tr>
+            <tr><td>EV/EBITDA (adj., fwd)</td><td>~45–50x</td><td class="miss">Premium-Bewertung</td></tr>
+            <tr><td>PEG</td><td>~2,3</td><td class="neutral">Wachstum rechtfertigt Multiple nur teilweise</td></tr>
+            <tr><td>P/B</td><td>~14,7x</td><td class="miss">weit über 5-Jahres-Schnitt</td></tr>
+            <tr><td>FCF-Yield</td><td>~1 %</td><td class="miss">niedrig; FCF-Konversion schwach</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Historischer Kontext:</strong> AXON handelte in den letzten Jahren fast durchgehend auf extrem hohen Multiples – der 5-Jahres-Schnitt des Forward-P/E liegt laut mehreren Datenanbietern bei rund 80x. Gemessen daran ist die Aktie nach dem Kursrückgang von den Höchstständen (52W-Hoch $885,92) „nur" fair statt euphorisch bepreist. Das ist aber ein zweischneidiges Argument: Ein Multiple, das nur relativ zur eigenen, historisch überzogenen Bewertung „fair" ist, bietet wenig Sicherheitsmarge, falls sich das Wachstum verlangsamt oder die Zinsen/Risikoprämien steigen.</p>
+      <p><strong>Peer-Einordnung (Bewertung):</strong> AXON ist teurer als das langsamer wachsende Motorola Solutions (fwd P/E ~27x, P/S ~6x), aber deutlich günstiger als Palantir (P/S 40x+) und auf ARR-Basis vergleichbar mit Samsara. Analysten-Kursziele streuen extrem weit: von ~$521 (Simply-Wall-St-Fair-Value, nach Abwärtsrevision wegen Multiple-Kompression) über ~$662 (Konsens-Schnitt) bis $708–742 (bullische Häuser). Die enorme Streuung selbst ist ein Bewertungs-Warnsignal: Der Markt ist sich über den fairen Wert grundlegend uneins.</p>
+      <div class="source">Quellen: stockanalysis.com Statistics; GuruFocus (19.05.2026); Intellectia/Public.com P/E-Daten; Simply Wall St (Juni 2026); finviz.com. Alle Kennzahlen gerundet, Stand ~30.06.2026.</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 6 ============ -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Cashflow, Margen &amp; Kapitalqualität</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <p>Hier zeigt sich die Kehrseite eines exzellenten Wachstumsmodells: Die reine Cash-Qualität ist gut, aber nicht herausragend, und die aktienbasierte Vergütung ist ein erheblicher Wermutstropfen. Für 2026 guidet Axon einen operativen Cashflow von über $600 Mio. und einen <strong>Free Cashflow von ~$450 Mio.</strong> – bei ~$3,65 Mrd. Umsatz entspricht das nur rund 12 % FCF-Marge. Der Grund: schwere Vorrats-Vorfinanzierung (bewusster Aufbau von Memory-/Halbleiter-Beständen zur Absicherung gegen geopolitische Lieferketten-Risiken) und hohe Reinvestitionen. Das Management erwartet eine deutliche FCF-Verbesserung in der zweiten Jahreshälfte.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>Wert</th><th>Kommentar</th></tr></thead>
+          <tbody>
+            <tr><td>FCF 2026e</td><td>~$450 Mio.</td><td class="neutral">~12 % FCF-Marge; Vorrats-Vorfinanzierung belastet H1</td></tr>
+            <tr><td>Operativer CF 2026e</td><td>&gt;$600 Mio.</td><td class="beat">solide</td></tr>
+            <tr><td>Adj. EBITDA-Marge</td><td>~25,5 %</td><td class="beat">stabil; Ziel 2028: 28 %</td></tr>
+            <tr><td>Bruttomarge</td><td>~59 %</td><td class="neutral">-150 Bp YoY, Hardware-/Drohnen-Mix drückt</td></tr>
+            <tr><td>GAAP-Nettomarge (FY25)</td><td>4,5 %</td><td class="miss">niedrig; SBC &amp; Bewertungseffekte</td></tr>
+            <tr><td>Aktienbasierte Vergütung 2026e</td><td>$590–620 Mio.</td><td class="miss">sehr hoch (~16 % des Umsatzes) → Verwässerung</td></tr>
+            <tr><td>ROE</td><td>~6,8 %</td><td class="miss">gedrückt durch niedrige GAAP-Gewinne</td></tr>
+            <tr><td>Cash / Debt-Equity</td><td>~$1,73 Mrd. / ~0,52</td><td class="beat">gesunde Bilanz, moderate Verschuldung</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Die <strong>größte Kapitalqualitäts-Sorge ist die SBC</strong>: Mit $590–620 Mio. für 2026 ist die aktienbasierte Vergütung enorm (grob 16 % des Umsatzes). Ein Teil ist an langfristige, nicht linear mit dem Umsatz skalierende Performance-Ziele geknüpft (Rick Smiths bekanntes Mega-Vergütungspaket), aber sie verwässert Aktionäre real und ist der Hauptgrund, warum GAAP-Gewinn und Adjusted-Kennzahlen so weit auseinanderklaffen. Wer AXON auf „Adjusted"-Basis bewertet, sollte sich bewusst sein, dass die Verwässerung ökonomisch real ist. Positiv: Die Aktienzahl steigt „nur" ~3–4 % p. a., die Bilanz ist solide (Nettoliquidität), und die Verschuldung ist gut tragbar. Der Score von 6/10 spiegelt die Spannung zwischen gesunder Bilanz und stabilem Adj. EBITDA einerseits und schwacher FCF-Konversion plus hoher Verwässerung andererseits.</p>
+      <div class="source">Quellen: Axon Shareholder Letter Q1 2026 &amp; Q4 2025; Axon Q1-2026-Earnings-Call (07.05.2026); stockanalysis.com Statistics (Juni 2026); tickeron.com (Juni 2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 7 ============ -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Peer-Vergleich</div>
+      <div class="section-score">Score: 7/10</div>
+    </div>
+    <div class="section-body">
+      <p>Die vom User gewählten Peers decken drei Winkel ab: den direkten Public-Safety-Wettbewerber (Motorola Solutions), den Gov-AI-Software-Highflyer (Palantir) und das strukturell ähnliche Hardware+SaaS-Modell (Samsara). AXON positioniert sich dazwischen: schneller und margenstärker als MSI, günstiger und profitabler-berechenbar als PLTR, und mit ähnlichem ARR-Profil wie IOT, aber breiterem Ökosystem.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kennzahl</th><th>AXON</th><th>MSI</th><th>PLTR</th><th>IOT</th></tr></thead>
+          <tbody>
+            <tr><td>Umsatz-Wachstum (letztes Q)</td><td class="beat">+34 %</td><td>+7 %</td><td class="beat">+85 %</td><td>+31 %</td></tr>
+            <tr><td>Recurring / ARR</td><td>$1,5 Mrd. (+35 %)</td><td>zweistellig, Backlog $15,7 Mrd.</td><td>RDV stark, TCV +61 %</td><td>$1,99 Mrd. (+30 %)</td></tr>
+            <tr><td>Bruttomarge</td><td>~59 %</td><td>~52 %</td><td class="beat">~84 %</td><td>~75 %</td></tr>
+            <tr><td>Op-/Adj.-Marge</td><td>~25 % adj. EBITDA</td><td>~30 % op.</td><td class="beat">~60 % adj. op.</td><td>~19 % non-GAAP op.</td></tr>
+            <tr><td>Fwd P/E</td><td>~70x</td><td class="beat">~27x</td><td class="miss">~150x+</td><td class="miss">sehr hoch</td></tr>
+            <tr><td>P/S (fwd)</td><td>~12x</td><td class="beat">~6x</td><td class="miss">~40x+</td><td>~10x</td></tr>
+            <tr><td>Marktkap.</td><td>~$45 Mrd.</td><td>~$76 Mrd.</td><td>~$300 Mrd.</td><td>~$20 Mrd.</td></tr>
+            <tr><td>Rule of 40</td><td class="beat">~59</td><td>~37</td><td class="beat">145</td><td>~50</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Qualitative Einordnung</h3>
+      <p><strong>vs. Motorola Solutions (MSI):</strong> Der direkteste Konkurrent im Public-Safety-Markt (Command Center, Video Security, Landmobilfunk). MSI ist deutlich größer, profitabler auf GAAP-Basis und mit ~$16,9 non-GAAP-EPS und ~27x Fwd-P/E halb so teuer bewertet – aber wächst nur mit ~7–8 %. Für AXON spricht das überlegene Wachstum und der Cloud-/AI-Vorsprung; für MSI die Bewertungssicherheit, der Rekord-Backlog ($15,7 Mrd.) und die etablierte Mission-Critical-Kommunikation. MSI ist der gefährlichste Wettbewerber, weil es als einziger ebenfalls tiefen, akkreditierten Behördenzugang hat.</p>
+      <p><strong>vs. Palantir (PLTR):</strong> Der Bewertungs-Extrempunkt. PLTR wächst mit +85 % noch schneller und ist mit ~60 % adj. Op-Marge und Rule-of-40 von 145 hyperprofitabel – aber mit P/S 40x+ und ~$300 Mrd. Marktkap. auch spektakulär teuer. PLTR ist eher Kooperations- als Frontal-Wettbewerber (Datenanalyse-Plattform), könnte aber im Real-Time-Ops-/AI-Segment kollidieren. Relativ zu PLTR wirkt AXON fast moderat bewertet.</p>
+      <p><strong>vs. Samsara (IOT):</strong> Das strukturell ähnlichste Modell – IoT-Hardware plus Connected-Operations-SaaS mit physischen Switching-Costs. IOT ist mit $1,99 Mrd. ARR (+30 %) auf ähnlichem Recurring-Niveau, aber margenschwächer (non-GAAP-Op-Marge 19 %) und auf einen anderen Endmarkt (Flotten/Industrie) fokussiert. AXON hat den stärkeren Moat (regulatorisch geschützter Behördenmarkt), IOT den größeren horizontalen TAM. Beide leiden unter „SaaS-Apocalypse"-Multiple-Kompression 2026.</p>
+      <div class="source">Quellen: SEC 8-K MSI/PLTR/IOT Q1 2026; Simply Wall St (Juni 2026); stockanalysis.com; macrotrends.net. Peer-Kennzahlen gerundet, Stand ~30.06.2026.</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 8 ============ -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Aktuelle News &amp; Events</div>
+      <div class="section-note">Quellen ≤ 3 Monate</div>
+    </div>
+    <div class="section-body">
+      <h3>Ebene 1: Unternehmen</h3>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">29.06.2026 – Trump-Aktienkauf &amp; ICE-$220-Mio.-TASER-Contract <span class="badge badge-yellow">Ambivalent</span></div><div class="event-text">Berichten zufolge kaufte Präsident Trump am 10.02. AXON-Aktien im Wert von $1–5 Mio.; zwei Wochen später schrieb ICE einen möglichen 5-Jahres-TASER-Auftrag über $220 Mio. aus. Kurstreiber (~+24 % in der Woche), aber Governance-/Ethik-Flag. Quelle: TipRanks/CNBC, 29.06.2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">06.05.2026 – Q1-2026-Zahlen: Beat &amp; Guidance-Anhebung <span class="badge badge-green">Positiv</span></div><div class="event-text">Umsatz $807 Mio. (+34 %), AI +700 %, ARR $1,5 Mrd.; Jahresprognose auf 30–32 % angehoben. Aktie nachbörslich +12 %. Quelle: Axon IR / Investing.com, 06.–13.05.2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">24.02.2026 – Q4/FY-2025 &amp; neue 2028-Ziele <span class="badge badge-green">Positiv</span></div><div class="event-text">Q4-Umsatz $797 Mio. (+39 %), Buchungen 2025 $7,4 Mrd. (+46 %). Neue Langfrist-Ziele: $6 Mrd. Umsatz und 28 % Adj.-EBITDA-Marge bis 2028. Quelle: Axon 8-K, 24.02.2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">Q1/Q2 2026 – M&amp;A &amp; Produkte: Axon 911, Body Mini, Echodyne <span class="badge badge-green">Positiv</span></div><div class="event-text">Integration der Zukäufe Carbyne &amp; Prepared in „Axon 911" (Notruf-Software); Axon Body Mini (Enterprise, Auslieferung Mitte 2026); Radar-Partnerschaft mit Echodyne für Counter-UAS. Quelle: Axon Newsroom / StockAnalysis, 2026</div></div></div>
+      <h3>Ebene 2: Branche</h3>
+      <div class="event-item"><div class="event-dot dot-green"></div><div><div class="event-label">28.05.2026 – US-Staat will in Drohnen-Industrie investieren <span class="badge badge-green">Positiv</span></div><div class="event-text">Berichte über staatliche US-Investitionen in die Drohnen-Branche treiben „Drone Stocks"; Rückenwind für Axons Dedrone/Counter-Drone-Sparte. Quelle: CNBC, 28.05.2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">2026 – Wettbewerbsdruck Motorola Solutions <span class="badge badge-yellow">Neutral/Negativ</span></div><div class="event-text">MSI meldete Q1-2026 S&amp;S-Wachstum +18 % und Rekord-Backlog $15,7 Mrd. – der wichtigste Wettbewerber zieht bei Cloud/Software nach. Quelle: MSI 8-K / Simply Wall St, Mai 2026</div></div></div>
+      <h3>Ebene 3: Makro</h3>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">2026 – Halbleiter-/Memory-Kosten &amp; Lieferkette <span class="badge badge-yellow">Negativ</span></div><div class="event-text">Steigende Memory-Preise und Tarif-/Lieferketten-Risiken zwingen Axon zu teurer Vorrats-Vorfinanzierung; belastet kurzfristig FCF und Bruttomarge. Quelle: Axon Q1-Call, Mai 2026</div></div></div>
+      <div class="event-item"><div class="event-dot dot-yellow"></div><div><div class="event-label">2026 – Behördenbudgets &amp; politisches Umfeld <span class="badge badge-yellow">Gemischt</span></div><div class="event-text">Öffentliche Sicherheitsbudgets sind aktuell robust (Rückenwind), aber Axon bleibt von Fiskal- und Regulierungszyklen sowie der politischen Debatte um Überwachungstechnik abhängig. Quelle: diverse, Q2 2026</div></div></div>
+      <div class="source">Quellen: CNBC, TipRanks, Axon IR-Newsroom, PR Newswire, Simply Wall St (März–Juni 2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 9 ============ -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Technische Analyse</div>
+      <div class="section-score">Score: 6/10</div>
+    </div>
+    <div class="section-body">
+      <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));">
+        <div class="kpi-card"><div class="kpi-label">Kurs</div><div class="kpi-value orange" style="font-size:18px;">$560,61</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 20</div><div class="kpi-value" style="font-size:18px;">~$462</div><div class="kpi-sub">darüber ✓</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 50</div><div class="kpi-value" style="font-size:18px;">~$426–476</div><div class="kpi-sub">darüber ✓</div></div>
+        <div class="kpi-card"><div class="kpi-label">SMA 200</div><div class="kpi-value" style="font-size:18px;">~$509–535</div><div class="kpi-sub">knapp darüber ✓</div></div>
+        <div class="kpi-card"><div class="kpi-label">RSI (14)</div><div class="kpi-value red" style="font-size:18px;">73–83</div><div class="kpi-sub">überkauft</div></div>
+        <div class="kpi-card"><div class="kpi-label">52W-Hoch</div><div class="kpi-value" style="font-size:18px;">$885,92</div><div class="kpi-sub">-37 % darunter</div></div>
+        <div class="kpi-card"><div class="kpi-label">MACD</div><div class="kpi-value green" style="font-size:18px;">positiv</div><div class="kpi-sub">bullish</div></div>
+      </div>
+      <p><strong>Trend:</strong> Kurzfristig klar aufwärts. Der Kurs notiert über allen wichtigen gleitenden Durchschnitten (SMA 20/50/200) und hat sich vom April-Tief bei $339 um rund +65 % erholt. Am 01.06.2026 kreuzte die 10-Tage- bullish über die 50-Tage-Linie. Mehrere Dienste stufen AXON technisch als „Strong Buy" (gleitende Durchschnitte) bzw. „Buy" (Oszillatoren) ein.</p>
+      <p><strong>Warnsignal Überkauftheit:</strong> Der RSI liegt je nach Quelle bei 73 bis 83 – deutlich im überkauften Bereich. Der Kurs ist zudem über das obere Bollinger-Band ausgebrochen und über fünf Handelstage rund +24 % gelaufen (getrieben von der ICE-Contract-News). Das ist ein klassisches Setup für eine kurzfristige Konsolidierung: Der Trend ist gesund, aber die Aktie ist „ausgestreckt" und bietet gerade keinen guten Einstieg.</p>
+      <p><strong>Support/Resistance:</strong> Wichtiger Widerstand liegt bei ~$580 (dort hat die Aktie zuvor gedreht); ein Bruch darüber wäre bullish. Unterstützung findet sich im Bereich ~$433–462 (jüngste Basis) sowie am SMA 200 (~$510–535). Das Monats-Range war mit $402–562 sehr breit – Ausdruck hoher Volatilität (Beta ~1,4). Der Score von 6/10 reflektiert: intakter Aufwärtstrend (positiv), aber überkauft und am Widerstand (Timing-Risiko).</p>
+      <div class="source">Quellen: Financhill, StockRSI, TipRanks, Investing.com, ChartMill, Investtech, TradingView (29.–30.06.2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 10 ============ -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div class="section-title">Risiken &amp; Chancen</div>
+      <div class="section-score">Score: 5/10 (invertiert)</div>
+    </div>
+    <div class="section-body">
+      <h3>10a) Strukturelle &amp; zyklische Risiken</h3>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">💰 Bewertungsrisiko</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div><div class="event-text">Fwd-P/E ~70x, P/S ~12x. Bei jeder Wachstumsverlangsamung oder Multiple-Kompression droht überproportionaler Kursverlust. Größtes Einzelrisiko. Wahrscheinlichkeit einer zwischenzeitlichen De-Rating-Phase: mittel–hoch.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">⚖️ Regulierung, Ethik &amp; Datenschutz</div><div><span class="badge badge-red">Hoch</span> <span class="badge badge-orange">Auswirkung: Hoch</span></div></div><div class="event-text">Das Management räumt selbst ein, dass Datenschutz/Datenhandling der Bereich mit den größten negativen Folgen bei einem Fehltritt ist – gerade bei AI-getriebener Überwachung. Die politische Debatte um Polizei-/Überwachungstechnik und die aktuelle Trump/ICE-Governance-Optik können jederzeit umschlagen. Wahrscheinlichkeit: mittel.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">🏛️ Abhängigkeit von Behördenbudgets</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel-Hoch</span></div></div><div class="event-text">Der Großteil des Umsatzes hängt an öffentlichen Haushalten. Fiskalische Sparzwänge oder politische Prioritätenwechsel könnten Mehrjahresverträge verzögern. Wahrscheinlichkeit: mittel.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">🥊 Wettbewerb in neuen Feldern</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">Motorola Solutions (Backlog $15,7 Mrd., S&amp;S +18 %) zieht bei Cloud/Software nach; in Counter-Drone und Enterprise gibt es spezialisierte Angreifer. Kernmarkt ist geschützt, Randmärkte nicht. Wahrscheinlichkeit: mittel.</div></div>
+      <div class="risk-item"><div class="risk-header"><div class="risk-title">📉 Verwässerung durch SBC</div><div><span class="badge badge-yellow">Mittel</span> <span class="badge badge-orange">Auswirkung: Mittel</span></div></div><div class="event-text">$590–620 Mio. SBC 2026 (~16 % vom Umsatz) verwässern Aktionäre real und verzerren GAAP-Gewinne. Wahrscheinlichkeit: sicher (laufend).</div></div>
+      <h3>10b) AI-Risiko &amp; technologische Disruption</h3>
+      <p>Direkt zu Thesenpunkt 2: AI ist für Axon <em>überwiegend Chance, aber mit realem Zwei-Seiten-Risiko</em>. <strong>Bullisches Szenario:</strong> Axon ist selbst der AI-Disruptor. Draft One (KI-Berichtserstellung aus Body-Cam-Audio), Axon Assistant und Real-Time-Operations sitzen auf proprietären, akkreditierten Behördendaten – ein Datenzugang, den AI-native Startups nicht replizieren können. Der AI-Umsatz +700 % zeigt frühe Zugkraft. <strong>Bärisches Szenario:</strong> Ein AI-nativer Angreifer oder ein Big-Tech-Player (mit eigenen Modellen und günstigerem „commodity cognition") könnte die Software-Schicht angreifen und Axons Premium-Preise unter Druck setzen; zudem könnte generative AI die Eintrittsbarriere für Berichts-/Analyse-Software senken. Per Saldo überwiegt aktuell die Chance, weil der Moat im Datenzugang und nicht im Modell liegt – aber die Wachsamkeit ist berechtigt.</p>
+      <h3>10c) Chancen</h3>
+      <p>TAM-Erweiterung (Thesenpunkt 4) ist die größte Chance: Enterprise/Private-Security (Body Mini), International (Leapfrog-Adoption, aktuell 20 % vom Umsatz), US-Federal, Justiz/Strafvollzug, Drohnen/Counter-Drone und Real-Time-Ops (Axon 911). Jeder dieser Märkte ist groß genug, um die Wachstumsrampe über Jahre zu verlängern. Zusätzlich: operative Hebelwirkung Richtung 28 % Adj.-EBITDA-Marge (2028-Ziel) und M&amp;A-Upside.</p>
+      <h3>10d) Red Flags &amp; Dealbreaker</h3>
+      <p><strong>Red Flags (beobachten, kein Ausstiegsgrund):</strong> extreme Bewertung, hohe SBC, schwache GAAP-FCF-Konversion, Governance-Optik rund um Vorstands-Vergütung und die Trump/ICE-Berichterstattung, RSI-Überkauftheit. <strong>Dealbreaker (aktuell keiner):</strong> Es gibt kein existenzbedrohendes Risiko. Das Geschäftsmodell ist gesund und cash-generierend; die Risiken sind primär Bewertungs- und Reputationsrisiken, keine Solvenz- oder Nachfrage-Kollaps-Risiken.</p>
+      <div class="source">Quellen: Axon Q1-2026-Earnings-Call &amp; Shareholder Letter; TIKR (Risiko-Kommentar CFO Bagley); CNBC/TipRanks (Governance); tickeron.com (Verschuldung/Marge), Juni 2026</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 11 ============ -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div class="section-title">Scoring</div>
+      <div class="section-score">Ø 6,9/10</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategorie</th><th>Score</th><th>Visualisierung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td>Geschäftsmodell</td><td><strong>9/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>Ökosystem-Flywheel Hardware→SaaS, ARR $1,5 Mrd., NRR 125 %</td></tr>
+            <tr><td>Burggraben</td><td><strong>9/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>Hohe Switching-Costs, akkreditierter Behördenzugang, Netzwerkeffekt</td></tr>
+            <tr><td>Operative Entwicklung (4Q)</td><td><strong>8/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:80%"></div></div><span class="score-num">8</span></div></td><td>9 Quartale &gt;30 %, 4/4 Beats; GAAP-Gewinne aber volatil</td></tr>
+            <tr><td>Wachstum</td><td><strong>9/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><span class="score-num">9</span></div></td><td>+34 % Umsatz, AI +700 %, Buchungen +44 %, International verdoppelt</td></tr>
+            <tr><td>Bewertung</td><td><strong>3/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:30%"></div></div><span class="score-num">3</span></div></td><td>Fwd-P/E ~70x, P/S ~12x, EV/EBITDA ~48x – für Perfektion bepreist</td></tr>
+            <tr><td>Cashflow &amp; Kapitalqualität</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Solide Bilanz, aber ~12 % FCF-Marge &amp; hohe SBC ($590–620 Mio.)</td></tr>
+            <tr><td>Risiken (invertiert)</td><td><strong>5/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:50%"></div></div><span class="score-num">5</span></div></td><td>Bewertungs-, Regulierungs-/Ethik- &amp; SBC-Risiko; kein Dealbreaker</td></tr>
+            <tr><td>Technische Analyse</td><td><strong>6/10</strong></td><td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:60%"></div></div><span class="score-num">6</span></div></td><td>Starker Uptrend, aber RSI 73–83 überkauft, am Widerstand</td></tr>
+            <tr style="background:rgba(255,105,0,0.08);">
+              <td><strong>⌀ Gesamtscore</strong></td><td><strong>6,9/10</strong></td>
+              <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:69%;background:linear-gradient(90deg,var(--primary),#ffd700);"></div></div><span class="score-num" style="color:var(--primary);">6,9</span></div></td>
+              <td>Erstklassiges Unternehmen (Modell/Moat/Wachstum ~9), aber Bewertung (3) und Timing (6) drücken den Gesamtwert deutlich</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:12px;"><strong>Interpretation:</strong> Die Diskrepanz ist der Kern der These – Qualität und Wachstum sind Top-Dezil, aber die Bewertung ist das Gegenteil. Ein 6,9 bei diesem Profil heißt: großartige Firma, mittelmäßiger Preis. Die vier User-Thesen (SaaS-Transition, AI, Moat, TAM) sind fundamental allesamt <span class="badge badge-green">bestätigt</span> – die Investment-Frage ist rein eine des Einstiegskurses.</p>
+      <div class="source">Quellen: Eigene Aggregation aus Sektionen 1–10; Datenbasis Stand 30.06.2026</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 12 ============ -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div class="section-title">Fazit – Investment-These</div>
+      <div class="section-note">Gesamtsynthese</div>
+    </div>
+    <div class="section-body">
+      <div class="bull-bear-grid">
+        <div class="bull-card">
+          <h4>🐂 Das Bullische Narrativ</h4>
+          <p><strong>Säule 1 – Die SaaS-Transition ist strukturell, nicht kosmetisch.</strong> Die ARR erreichte $1,5 Mrd. (+35 %) und wächst schneller als der Gesamtumsatz; Software &amp; Services stellt ~44 % des Umsatzes bei 125 % Net Revenue Retention. Das „Taser-Image" ist überholt – Axon ist heute primär ein Behörden-SaaS mit Hardware-Anker. Das trägt die These weg von der Hardware klar und quantifizierbar.</p>
+          <p><strong>Säule 2 – AI ist ein echter Wachstumsmotor, kein Buzzword.</strong> AI-Produktumsatz +700 % YoY, getragen von Draft One und Axon Assistant auf proprietären, akkreditierten Behördendaten. Der Moat liegt im Datenzugang, nicht im Modell – deshalb ist Axon eher AI-Profiteur als AI-Opfer. Counter-Drone (+300 %) und Real-Time-Ops (Axon 911) öffnen zusätzliche TAM-Schichten.</p>
+          <p><strong>Säule 3 – Sichtbarkeit &amp; Bewertung relativ.</strong> $14,3 Mrd. vertraglich gesicherte Buchungen (+44 %) und 30–32 %-Guidance geben mehrjährige Umsatz-Visibilität; die 2028-Ziele ($6 Mrd. Umsatz, 28 % Adj.-EBITDA-Marge) sind ambitioniert, aber angesichts des Track-Records glaubwürdig. Gemessen am eigenen 5-Jahres-Multiple (~80x) ist die Aktie nach dem -37 %-Rückgang vom Hoch relativ günstiger.</p>
+        </div>
+        <div class="bear-card">
+          <h4>🐻 Das Bärische Narrativ</h4>
+          <p><strong>Risiko 1 – Die Bewertung lässt keine Fehler zu.</strong> Bei Fwd-P/E ~70x und P/S ~12x ist Perfektion eingepreist. Fällt das Wachstum von ~34 % auf z. B. &lt;25 %, oder steigen Risikoprämien, kann eine Multiple-Kompression den Kurs um 30–40 % drücken – wie das April-Tief bei $339 (-62 % vom Hoch) bereits demonstriert hat. „Relativ günstig zur eigenen Blase" ist keine Sicherheitsmarge.</p>
+          <p><strong>Risiko 2 – Kapitalqualität &amp; Verwässerung.</strong> Die FCF-Konversion ist mit ~12 % FCF-Marge schwach, und $590–620 Mio. SBC (~16 % vom Umsatz) verwässern real. Die riesige Lücke zwischen GAAP-Gewinn (4,5 % Nettomarge) und Adjusted-Kennzahlen bedeutet: Wer auf „Adjusted" bewertet, unterschätzt die ökonomischen Kosten.</p>
+          <p><strong>Risiko 3 – Regulierung, Ethik &amp; Timing.</strong> Das Management nennt Datenschutz selbst als größte Gefahr; die AI-Überwachungs-Debatte und die Governance-Optik der Trump/ICE-Berichterstattung sind reale Reputationsrisiken. Technisch ist die Aktie mit RSI 73–83 überkauft und gerade +24 % in einer Woche gelaufen – ein denkbar schlechter Einstiegspunkt.</p>
+        </div>
+      </div>
+
+      <h3>Eigene Einschätzung (ausgewogen)</h3>
+      <p>Das bullische Narrativ ist fundamental überzeugender – aber das bärische gewinnt beim <em>Preis und Timing</em>. Nach Durchsicht aller Daten sind die vier User-Thesen allesamt bestätigt: Die SaaS-Transition trägt (ARR +35 %, S&amp;S 44 %), AI ist Netto-Chance (Moat im Datenzugang), das Lock-in ist real (NRR 125 %), und der TAM erweitert sich glaubhaft (International 20 %, Enterprise, Drohnen). Das ist ein Quality-Growth-Unternehmen erster Güte.</p>
+      <p>Der Haken ist ausschließlich der Preis. Bei $560,61 – nach einer +65 %-Erholung vom April-Tief und +24 % allein in der Vorwoche, getrieben von einer Governance-behafteten News – ist das Risk/Reward kurzfristig unattraktiv: grob -21 % Downside (zur Basis ~$443) gegen +11 % bis +25 % Upside (Zielband $620–700). Für einen 2–4-Jahres-Horizont rechtfertigt die Qualität einen Aufbau, aber nicht zu diesem Kurs auf einmal. Ich könnte falsch liegen, wenn (a) das AI-Segment die Wachstumsrampe so stark verlängert, dass 30 %+ noch Jahre anhält und das Multiple gar nicht komprimiert, oder (b) sinkende Zinsen High-Multiple-Growth generell re-raten. Beides ist möglich – aber darauf zu diesem Preis zu setzen, wäre keine Sicherheitsmarge, sondern eine Wette.</p>
+
+      <h3>Zeithorizont-Einschätzung</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Horizont</th><th>Katalysatoren</th><th>Risiken</th><th>Empfehlung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kurz (0–6 M)</strong></td><td>Q2-Zahlen (Aug), ICE-/Federal-Aufträge, Drohnen-Politik</td><td>Überkauft (RSI 73–83), Bewertung, Gewinnmitnahmen</td><td><span class="badge badge-yellow">Warten / nicht nachjagen</span></td></tr>
+            <tr><td><strong>Mittel (6–24 M)</strong></td><td>AI-Umsatz-Skalierung, International, Enterprise (Body Mini)</td><td>Multiple-Kompression, Wettbewerb MSI</td><td><span class="badge badge-orange">Tranchiert bei Schwäche</span></td></tr>
+            <tr><td><strong>Lang (2–4 J)</strong></td><td>2028-Ziele ($6 Mrd., 28 % Marge), Moat-Ausbau</td><td>Regulierung/Ethik, Disruption der Software-Schicht</td><td><span class="badge badge-green">Kaufen &amp; Halten (auf Rücksetzer aufbauen)</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Kernthese</h3>
+      <p>Axon ist ein herausragendes Compounding-Unternehmen mit tiefem Burggraben, echtem SaaS-/AI-Momentum und langer TAM-Rampe – aber die Aktie ist bei $560,61 für Perfektion bepreist und technisch überkauft. Die Qualität rechtfertigt eine Position im Depot eines Quality-Growth-Investors, der Preis rechtfertigt jedoch Geduld statt sofortigem Vollengagement. Deshalb <strong>HALTEN</strong> mit klarer Präferenz, auf Rücksetzern in den Bereich ~$440–480 tranchiert aufzubauen.</p>
+
+      <div class="rating-box">
+        <div class="rating-item"><label>Rating</label><div class="val hold">= HALTEN</div></div>
+        <div class="rating-item"><label>Zielkurs (12–18M)</label><div class="val">$620–700</div></div>
+        <div class="rating-item"><label>Zeithorizont</label><div class="val">2–4 Jahre</div></div>
+        <div class="rating-item"><label>Downside</label><div class="val" style="color:var(--red);">–21 %</div></div>
+        <div class="rating-item"><label>Upside</label><div class="val" style="color:var(--green);">+25 %</div></div>
+        <div class="rating-item"><label>Risk/Reward</label><div class="val green">1:1,2</div></div>
+      </div>
+
+      <h3>Was falsifiziert die These?</h3>
+      <div class="trigger-grid">
+        <div class="trigger-card sell">
+          <h5>🔴 Bearish Trigger → Verkaufen / Reduzieren</h5>
+          <ul class="trigger-list">
+            <li>Umsatzwachstum fällt bei Q2/Q3 unter ~25 % ODER ARR-Wachstum unter 30 % → SaaS-These schwächt sich ab, reduzieren</li>
+            <li>Net Revenue Retention fällt deutlich unter 120 % → Lock-in bröckelt</li>
+            <li>Konkreter Regulierungs-/Datenschutz-Schock (AI-Überwachung) → Position reduzieren</li>
+            <li>Kurs verliert den SMA 200 (~$510) nachhaltig nach unten → technischer Trendbruch</li>
+          </ul>
+        </div>
+        <div class="trigger-card buy">
+          <h5>🟢 Bullish Trigger → Nachkaufen / Einsteigen</h5>
+          <ul class="trigger-list">
+            <li>Rücksetzer in den Bereich $440–480 bei intaktem 30 %+-Wachstum → tranchiert aufbauen</li>
+            <li>AI-Umsatz erreicht signifikante absolute Größe (z. B. &gt;10 % des Umsatzes) → Moat-These bestätigt, nachkaufen</li>
+            <li>International übersteigt 25 % des Umsatzes → TAM-These beschleunigt</li>
+            <li>Neue Großaufträge (Federal/ICE, EMEA-national) mit klarer Marge → Position aufbauen</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Welcher Anlegertyp passt?</h3>
+      <div class="investor-grid">
+        <div class="investor-yes">
+          <h5>✅ Geeignet für</h5>
+          <ul>
+            <li>Quality-Growth-Investoren (2–5 J. Horizont)</li>
+            <li>Anleger, die bereit sind, auf Rücksetzer zu warten/tranchieren</li>
+            <li>Thematische Investoren (Public-Safety, AI, Defense-Tech)</li>
+          </ul>
+        </div>
+        <div class="investor-no">
+          <h5>❌ NICHT geeignet für</h5>
+          <ul>
+            <li>Value-Investoren (extrem hohe Multiples)</li>
+            <li>Income-Investoren (keine Dividende)</li>
+            <li>Kurzfristige Trader, die jetzt zum überkauften Kurs kaufen</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Empfohlener Einstieg</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Investorentyp</th><th>Empfehlung</th><th>Begründung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Konservativ</strong></td><td><span class="badge badge-yellow">Warten</span></td><td>Auf Konsolidierung Richtung $440–480 und Abbau der RSI-Überkauftheit warten</td></tr>
+            <tr><td><strong>Moderat</strong></td><td><span class="badge badge-orange">Tranchiert</span></td><td>Kleine Anfangsposition, Rest gestaffelt bei Schwäche / nach Q2-Zahlen</td></tr>
+            <tr><td><strong>Aggressiv</strong></td><td><span class="badge badge-yellow">Nicht nachjagen</span></td><td>Trotz Momentum: +24 %-Woche &amp; RSI 73–83 sprechen gegen einen Kauf zum jetzigen Kurs</td></tr>
+            <tr><td><strong>Langfristig</strong></td><td><span class="badge badge-green">Aufbauen auf Rücksetzer</span></td><td>Strukturelles SaaS-/AI-/TAM-Thema rechtfertigt langfristiges Halten &amp; Nachkaufen</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source">Quellen: Synthese Sektionen 1–11; Analysten-Kursziele Simply Wall St / stockanalysis.com / TIKR / Public.com (Juni 2026)</div>
+    </div>
+  </div>
+
+  <!-- ============ SEKTION 13 ============ -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div class="section-title">Outlook</div>
+      <div class="section-note">3 Schlüssel-Events</div>
+    </div>
+    <div class="section-body">
+      <div class="outlook-card">
+        <h4>📊 Event 1: Q2-2026-Quartalsergebnisse – voraussichtlich Anfang bis Mitte August 2026</h4>
+        <p>Der wichtigste Nahtest der SaaS-/AI-These. Entscheidend sind ARR-Wachstum, S&amp;S-Wachstum, die absolute Größe des AI-Umsatzes und die FCF-Entwicklung in H2.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Umsatzwachstum ≥30 % <em>und</em> ARR-Wachstum ≥33 % <em>und</em> das AI-Segment zeigt weiter dreistelliges Wachstum bei steigender absoluter Basis → SaaS-/AI-These voll bestätigt; auf jedem Rücksetzer Richtung $480 tranchiert aufbauen.<br><br>
+          <strong>Wenn:</strong> Umsatzwachstum fällt unter ~25 % <em>oder</em> ARR-Wachstum unter 30 % <em>oder</em> NRR bricht deutlich unter 120 % → Kernthese schwächt sich ab; Position reduzieren, bis sich das Bild klärt.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>🛡️ Event 2: Federal-/ICE-Aufträge &amp; US-Drohnen-Politik – H2 2026</h4>
+        <p>Der ausgeschriebene ICE-TASER-Auftrag ($220 Mio.) und mögliche staatliche US-Drohnen-Investitionen sind konkrete TAM-Katalysatoren – aber mit Governance-/Reputations-Kehrseite.</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Axon gewinnt substanzielle Federal-/ICE-Volumina <em>und</em> die Counter-Drone-Sparte profitiert von staatlichen Drohnen-Programmen → TAM-These (Punkt 4) beschleunigt; bullisch für mittelfristiges Rating.<br><br>
+          <strong>Wenn:</strong> Die politisch-ethische Debatte um Überwachungstechnik/Governance eskaliert (Boykott-Aufrufe, Kunden-Abwanderung, regulatorische Restriktionen) → Reputations- und Bewertungsrisiko; defensiver werden, Trigger in Sektion 12 beachten.
+        </div>
+      </div>
+      <div class="outlook-card">
+        <h4>📉 Event 3: Bewertungs-/Multiple-Regime &amp; technische Auflösung – laufend</h4>
+        <p>Bei Fwd-P/E ~70x hängt der Kurs kurzfristig stark am allgemeinen Risikoappetit für High-Multiple-Growth. Die Aktie ist überkauft (RSI 73–83) und am Widerstand (~$580).</p>
+        <div class="when-then">
+          <strong>Wenn:</strong> Der Kurs bricht nachhaltig über $580 bei fallendem RSI (gesunde Konsolidierung, dann Ausbruch) <em>und</em> das Zinsumfeld stützt Growth → technischer Bruch nach oben, moderate Aufstockung vertretbar.<br><br>
+          <strong>Wenn:</strong> Der Kurs verliert den SMA 200 (~$510) nachhaltig <em>oder</em> es kommt zu einer breiten Multiple-Kompression bei Growth-Titeln → auf $440–480 (Basis) warten; dort bietet sich das bessere Risk/Reward für den langfristigen Aufbau.
+        </div>
+      </div>
+      <div class="source">Quellen: TradingView Earnings-Kalender; Axon IR; CNBC/TipRanks (ICE/Drohnen); technische Levels aus Sektion 9 (Juni 2026)</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich Informations- und Bildungszwecken und stellt keine Anlageberatung, kein Angebot und keine Aufforderung zum Kauf oder Verkauf von Wertpapieren dar. Alle Kurs- und Fundamentaldaten sind gerundet und beziehen sich auf den Stand ~30.06.2026; sie können fehlerbehaftet oder veraltet sein. AXON ist hochvolatil und richtet sich an Anleger, die Totalverlustrisiken tragen können. Bitte eigene Recherche (DYOR) durchführen und ggf. einen lizenzierten Berater konsultieren.</div>
+
+</div>
+</body>
+</html>
